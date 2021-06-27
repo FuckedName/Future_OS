@@ -404,6 +404,16 @@
       NULL|MdeModulePkg/Library/BootManagerUiLib/BootManagerUiLib.inf
       NULL|MdeModulePkg/Library/BootMaintenanceManagerUiLib/BootMaintenanceManagerUiLib.inf
   }
+
+
+  MdeModulePkg/Application/UiAppSelf/UiAppSelf.inf {
+   <LibraryClasses>
+      NULL|MdeModulePkg/Library/DeviceManagerUiLib/DeviceManagerUiLib.inf
+      NULL|MdeModulePkg/Library/BootManagerUiLib/BootManagerUiLib.inf
+      NULL|MdeModulePkg/Library/BootMaintenanceManagerUiLib/BootMaintenanceManagerUiLib.inf
+  }
+
+
   MdeModulePkg/Application/BootManagerMenuApp/BootManagerMenuApp.inf
 
   MdeModulePkg/Universal/DevicePathDxe/DevicePathDxe.inf

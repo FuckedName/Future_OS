@@ -345,6 +345,15 @@
       NULL|MdeModulePkg/Library/BootManagerUiLib/BootManagerUiLib.inf
       NULL|MdeModulePkg/Library/BootMaintenanceManagerUiLib/BootMaintenanceManagerUiLib.inf
   }
+  
+  MdeModulePkg/Application/UiAppSelf/UiAppSelf.inf{
+     <LibraryClasses>
+     NULL|MdeModulePkg/Library/DeviceManagerUiLib/DeviceManagerUiLib.inf
+     NULL|MdeModulePkg/Library/BootManagerUiLib/BootManagerUiLib.inf
+     NULL|MdeModulePkg/Library/BootMaintenanceManagerUiLib/BootMaintenanceManagerUiLib.inf
+  }
+
+
   MdeModulePkg/Universal/DriverHealthManagerDxe/DriverHealthManagerDxe.inf
   MdeModulePkg/Universal/BootManagerPolicyDxe/BootManagerPolicyDxe.inf
   MdeModulePkg/Universal/CapsulePei/CapsulePei.inf
