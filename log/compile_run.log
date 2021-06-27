@@ -1,0 +1,1483 @@
+root@x-virtual-machine:/home/x/UEFI/edk22# EmulatorPkg/build.sh -a IA32
+Initializing workspace
+/home/x/UEFI/edk22/BaseTools
+Loading previous configuration from /home/x/UEFI/edk22/Conf/BuildEnv.sh
+Using EDK2 in-source Basetools
+WORKSPACE: /home/x/UEFI/edk22
+EDK_TOOLS_PATH: /home/x/UEFI/edk22/BaseTools
+CONF_PATH: /home/x/UEFI/edk22/Conf
+using prebuilt tools
+Build environment: Linux-5.8.0-59-generic-x86_64-with-glibc2.32
+Build start time: 16:58:04, Jun.27 2021
+
+WORKSPACE        = /home/x/UEFI/edk22
+EDK_TOOLS_PATH   = /home/x/UEFI/edk22/BaseTools
+CONF_PATH        = /home/x/UEFI/edk22/Conf
+PYTHON_COMMAND   = /usr/bin/python3.8
+
+
+Processing meta-data .
+Architecture(s)  = IA32
+Build target     = DEBUG
+Toolchain        = GCC5
+
+Active Platform          = /home/x/UEFI/edk22/EmulatorPkg/EmulatorPkg.dsc
+...... done!
+Building ... /home/x/UEFI/edk22/MdePkg/Library/UefiDriverEntryPoint/UefiDriverEntryPoint.inf [IA32]
+Building ... /home/x/UEFI/edk22/MdePkg/Library/UefiLib/UefiLib.inf [IA32]
+make: 对“tbuild”无需做任何事。
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/MdePkg/Library/UefiRuntimeServicesTableLib/UefiRuntimeServicesTableLib.inf [IA32]
+Building ... /home/x/UEFI/edk22/MdePkg/Library/UefiBootServicesTableLib/UefiBootServicesTableLib.inf [IA32]
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/MdePkg/Library/UefiDevicePathLib/UefiDevicePathLib.inf [IA32]
+Building ... /home/x/UEFI/edk22/MdePkg/Library/UefiMemoryAllocationLib/UefiMemoryAllocationLib.inf [IA32]
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/MdePkg/Library/BaseMemoryLib/BaseMemoryLib.inf [IA32]
+make: 对“tbuild”无需做任何事。
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/MdePkg/Library/BaseLib/BaseLib.inf [IA32]
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/MdeModulePkg/Library/PeiDxeDebugLibReportStatusCode/PeiDxeDebugLibReportStatusCode.inf [IA32]
+Building ... /home/x/UEFI/edk22/MdePkg/Library/DxePcdLib/DxePcdLib.inf [IA32]
+make: 对“tbuild”无需做任何事。
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/MdeModulePkg/Library/DxeReportStatusCodeLib/DxeReportStatusCodeLib.inf [IA32]
+Building ... /home/x/UEFI/edk22/MdePkg/Library/BaseDebugPrintErrorLevelLib/BaseDebugPrintErrorLevelLib.inf [IA32]
+make: 对“tbuild”无需做任何事。
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/MdePkg/Library/RegisterFilterLibNull/RegisterFilterLibNull.inf [IA32]
+Building ... /home/x/UEFI/edk22/MdePkg/Library/BasePrintLib/BasePrintLib.inf [IA32]
+make: 对“tbuild”无需做任何事。
+make: 对“tbuild”无需做任何事。
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/MdeModulePkg/Library/DxeCapsuleLibNull/DxeCapsuleLibNull.inf [IA32]
+Building ... /home/x/UEFI/edk22/EmulatorPkg/Library/PeiEmuSerialPortLib/PeiEmuSerialPortLib.inf [IA32]
+make: 对“tbuild”无需做任何事。
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/MdePkg/Library/PeiExtractGuidedSectionLib/PeiExtractGuidedSectionLib.inf [IA32]
+Building ... /home/x/UEFI/edk22/EmulatorPkg/Library/SecPeiServicesLib/SecPeiServicesLib.inf [IA32]
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/EmulatorPkg/Library/ThunkProtocolList/ThunkProtocolList.inf [IA32]
+Building ... /home/x/UEFI/edk22/EmulatorPkg/Library/ThunkPpiList/ThunkPpiList.inf [IA32]
+make: 对“tbuild”无需做任何事。
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/EmulatorPkg/Library/SecPpiListLib/SecPpiListLib.inf [IA32]
+Building ... /home/x/UEFI/edk22/MdePkg/Library/BasePeCoffExtraActionLibNull/BasePeCoffExtraActionLibNull.inf [IA32]
+make: 对“tbuild”无需做任何事。
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/MdePkg/Library/UefiScsiLib/UefiScsiLib.inf [IA32]
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/EmulatorPkg/Library/SmbiosLib/SmbiosLib.inf [IA32]
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/NetworkPkg/Library/DxeUdpIoLib/DxeUdpIoLib.inf [IA32]
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/MdeModulePkg/Library/VarCheckUefiLib/VarCheckUefiLib.inf [IA32]
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/MdeModulePkg/Library/VariablePolicyHelperLib/VariablePolicyHelperLib.inf [IA32]
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/MdeModulePkg/Library/VariablePolicyLib/VariablePolicyLibRuntimeDxe.inf [IA32]
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/MdeModulePkg/Library/AuthVariableLibNull/AuthVariableLibNull.inf [IA32]
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/MdeModulePkg/Library/TpmMeasurementLibNull/TpmMeasurementLibNull.inf [IA32]
+Building ... /home/x/UEFI/edk22/MdeModulePkg/Library/VarCheckLib/VarCheckLib.inf [IA32]
+make: 对“tbuild”无需做任何事。
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/MdePkg/Library/BaseSafeIntLib/BaseSafeIntLib.inf [IA32]
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/MdeModulePkg/Library/CustomizedDisplayLib/CustomizedDisplayLib.inf [IA32]
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/EmulatorPkg/Library/PlatformBmLib/PlatformBmLib.inf [IA32]
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/MdeModulePkg/Library/BootLogoLib/BootLogoLib.inf [IA32]
+Building ... /home/x/UEFI/edk22/MdeModulePkg/Library/DxeSecurityManagementLib/DxeSecurityManagementLib.inf [IA32]
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/EmulatorPkg/Library/KeyMapLibNull/KeyMapLibNull.inf [IA32]
+make: 对“tbuild”无需做任何事。
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/MdePkg/Library/PeiCoreEntryPoint/PeiCoreEntryPoint.inf [IA32]
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/EmulatorPkg/Library/PeiEmuPeCoffGetEntryPointLib/PeiEmuPeCoffGetEntryPointLib.inf [IA32]
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/EmulatorPkg/Library/PeiEmuPeCoffExtraActionLib/PeiEmuPeCoffExtraActionLib.inf [IA32]
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/MdeModulePkg/Library/LzmaCustomDecompressLib/LzmaCustomDecompressLib.inf [IA32]
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/MdeModulePkg/Library/DxeCrc32GuidedSectionExtractLib/DxeCrc32GuidedSectionExtractLib.inf [IA32]
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/MdeModulePkg/Library/CpuExceptionHandlerLibNull/CpuExceptionHandlerLibNull.inf [IA32]
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/MdeModulePkg/Library/DebugAgentLibNull/DebugAgentLibNull.inf [IA32]
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/MdePkg/Library/BaseUefiDecompressLib/BaseUefiDecompressLib.inf [IA32]
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/MdePkg/Library/DxeExtractGuidedSectionLib/DxeExtractGuidedSectionLib.inf [IA32]
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/MdeModulePkg/Library/DxeCoreMemoryAllocationLib/DxeCoreMemoryAllocationLib.inf [IA32]
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/MdePkg/Library/DxeCoreHobLib/DxeCoreHobLib.inf [IA32]
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/MdePkg/Library/DxeCoreEntryPoint/DxeCoreEntryPoint.inf [IA32]
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/MdePkg/Library/BaseDebugLibSerialPort/BaseDebugLibSerialPort.inf [IA32]
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/EmulatorPkg/Library/DxeEmuStdErrSerialPortLib/DxeEmuStdErrSerialPortLib.inf [IA32]
+Building ... /home/x/UEFI/edk22/MdePkg/Library/BasePcdLibNull/BasePcdLibNull.inf [IA32]
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/MdePkg/Library/BaseCacheMaintenanceLib/BaseCacheMaintenanceLib.inf [IA32]
+make: 对“tbuild”无需做任何事。
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/MdePkg/Library/BasePeCoffLib/BasePeCoffLib.inf [IA32]
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/EmulatorPkg/Library/DxeEmuPeCoffExtraActionLib/DxeEmuPeCoffExtraActionLib.inf [IA32]
+make: 对“tbuild”无需做任何事。
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/MdePkg/Library/BaseSynchronizationLib/BaseSynchronizationLib.inf [IA32]
+Building ... /home/x/UEFI/edk22/EmulatorPkg/Library/DxeTimerLib/DxeTimerLib.inf [IA32]
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/MdePkg/Library/PeimEntryPoint/PeimEntryPoint.inf [IA32]
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/EmulatorPkg/Library/PeiServicesTablePointerLibMagicPage/PeiServicesTablePointerLibMagicPage.inf [IA32]
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/MdePkg/Library/PeiServicesLib/PeiServicesLib.inf [IA32]
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/MdePkg/Library/PeiPcdLib/PeiPcdLib.inf [IA32]
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/MdeModulePkg/Library/PeiReportStatusCodeLib/PeiReportStatusCodeLib.inf [IA32]
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/MdeModulePkg/Library/OemHookStatusCodeLibNull/OemHookStatusCodeLibNull.inf [IA32]
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/MdePkg/Library/PeiMemoryAllocationLib/PeiMemoryAllocationLib.inf [IA32]
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/MdePkg/Library/PeiHobLib/PeiHobLib.inf [IA32]
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/EmulatorPkg/Library/DxeEmuSerialPortLib/DxeEmuSerialPortLib.inf [IA32]
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/MdePkg/Library/BaseDebugLibNull/BaseDebugLibNull.inf [IA32]
+Building ... /home/x/UEFI/edk22/EmulatorPkg/Library/DxeEmuLib/DxeEmuLib.inf [IA32]
+make: 对“tbuild”无需做任何事。
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/MdeModulePkg/Library/BootMaintenanceManagerUiLib/BootMaintenanceManagerUiLib.inf [IA32]
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/MdeModulePkg/Library/BootManagerUiLib/BootManagerUiLib.inf [IA32]
+Building ... /home/x/UEFI/edk22/MdeModulePkg/Library/DeviceManagerUiLib/DeviceManagerUiLib.inf [IA32]
+make: 对“tbuild”无需做任何事。
+make: 对“tbuild”无需做任何事。
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/MdeModulePkg/Library/FileExplorerLib/FileExplorerLib.inf [IA32]
+Building ... /home/x/UEFI/edk22/MdeModulePkg/Library/BaseSortLib/BaseSortLib.inf [IA32]
+make: 对“tbuild”无需做任何事。
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/MdePkg/Library/UefiRuntimeLib/UefiRuntimeLib.inf [IA32]
+Building ... /home/x/UEFI/edk22/ShellPkg/Library/UefiShellNetwork1CommandsLib/UefiShellNetwork1CommandsLib.inf [IA32]
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/ShellPkg/Library/UefiShellInstall1CommandsLib/UefiShellInstall1CommandsLib.inf [IA32]
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/ShellPkg/Library/UefiShellDebug1CommandsLib/UefiShellDebug1CommandsLib.inf [IA32]
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/ShellPkg/Library/UefiShellDriver1CommandsLib/UefiShellDriver1CommandsLib.inf [IA32]
+Building ... /home/x/UEFI/edk22/ShellPkg/Library/UefiShellLevel3CommandsLib/UefiShellLevel3CommandsLib.inf [IA32]
+make: 对“tbuild”无需做任何事。
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/ShellPkg/Library/UefiShellLevel1CommandsLib/UefiShellLevel1CommandsLib.inf [IA32]
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/ShellPkg/Library/UefiShellLevel2CommandsLib/UefiShellLevel2CommandsLib.inf [IA32]
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/MdePkg/Library/UefiApplicationEntryPoint/UefiApplicationEntryPoint.inf [IA32]
+make: 对“tbuild”无需做任何事。
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/ShellPkg/Library/UefiShellBcfgCommandLib/UefiShellBcfgCommandLib.inf [IA32]
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/MdePkg/Library/BaseIoLibIntrinsic/BaseIoLibIntrinsic.inf [IA32]
+Building ... /home/x/UEFI/edk22/ShellPkg/Library/UefiShellCommandLib/UefiShellCommandLib.inf [IA32]
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/MdeModulePkg/Library/UefiBootManagerLib/UefiBootManagerLib.inf [IA32]
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/ShellPkg/Library/UefiHandleParsingLib/UefiHandleParsingLib.inf [IA32]
+Building ... /home/x/UEFI/edk22/ShellPkg/Library/UefiShellLib/UefiShellLib.inf [IA32]
+make: 对“tbuild”无需做任何事。
+make: 对“tbuild”无需做任何事。
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/MdePkg/Library/BaseOrderedCollectionRedBlackTreeLib/BaseOrderedCollectionRedBlackTreeLib.inf [IA32]
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/MdePkg/Library/DxeHobLib/DxeHobLib.inf [IA32]
+Building ... /home/x/UEFI/edk22/MdePkg/Library/BasePerformanceLibNull/BasePerformanceLibNull.inf [IA32]
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/MdePkg/Library/DxeServicesTableLib/DxeServicesTableLib.inf [IA32]
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/MdePkg/Library/DxeServicesLib/DxeServicesLib.inf [IA32]
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/MdePkg/Library/BasePeCoffGetEntryPointLib/BasePeCoffGetEntryPointLib.inf [IA32]
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/MdePkg/Library/UefiFileHandleLib/UefiFileHandleLib.inf [IA32]
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/MdeModulePkg/Library/UefiHiiLib/UefiHiiLib.inf [IA32]
+Building ... /home/x/UEFI/edk22/MdeModulePkg/Library/UefiSortLib/UefiSortLib.inf [IA32]
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/MdeModulePkg/Library/UefiHiiServicesLib/UefiHiiServicesLib.inf [IA32]
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/NetworkPkg/Library/DxeIpIoLib/DxeIpIoLib.inf [IA32]
+make: 对“tbuild”无需做任何事。
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/NetworkPkg/Library/DxeNetLib/DxeNetLib.inf [IA32]
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/NetworkPkg/Library/DxeDpcLib/DxeDpcLib.inf [IA32]
+make: 对“tbuild”无需做任何事。
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/NetworkPkg/VlanConfigDxe/VlanConfigDxe.inf [IA32]
+Building ... /home/x/UEFI/edk22/MdeModulePkg/Universal/StatusCodeHandler/RuntimeDxe/StatusCodeHandlerRuntimeDxe.inf [IA32]
+Building ... /home/x/UEFI/edk22/EmulatorPkg/ResetRuntimeDxe/Reset.inf [IA32]
+Trim --Vfr-Uni-Offset -o /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/FV/Ffs/E4F61863-FE2C-4b56-A8F4-08519BC439DFVlanConfigDxe/VlanConfigDxe.offset --ModuleName=VlanConfigDxe --DebugDir=/home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/NetworkPkg/VlanConfigDxe/VlanConfigDxe/DEBUG
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/EmulatorPkg/AutoScanPei/AutoScanPei.inf [IA32]
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/MdeModulePkg/Universal/Console/GraphicsConsoleDxe/GraphicsConsoleDxe.inf [IA32]
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/EmulatorPkg/ThunkPpiToProtocolPei/ThunkPpiToProtocolPei.inf [IA32]
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/MdeModulePkg/Universal/PCD/Pei/Pcd.inf [IA32]
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/MdeModulePkg/Universal/ReportStatusCodeRouter/Pei/ReportStatusCodeRouterPei.inf [IA32]
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/EmulatorPkg/FlashMapPei/FlashMapPei.inf [IA32]
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/EmulatorPkg/Sec/Sec.inf [IA32]
+make: 对“tbuild”无需做任何事。
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/MdeModulePkg/Universal/PrintDxe/PrintDxe.inf [IA32]
+test -e /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/FV/Ffs/E4F61863-FE2C-4b56-A8F4-08519BC439DFVlanConfigDxe/VlanConfigDxe.offset && GenSec -s EFI_SECTION_RAW -o /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/FV/Ffs/E4F61863-FE2C-4b56-A8F4-08519BC439DFVlanConfigDxe/VlanConfigDxeOffset.raw /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/FV/Ffs/E4F61863-FE2C-4b56-A8F4-08519BC439DFVlanConfigDxe/VlanConfigDxe.offset
+make: [GNUmakefile:391：/home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/FV/Ffs/E4F61863-FE2C-4b56-A8F4-08519BC439DFVlanConfigDxe/VlanConfigDxeOffset.raw] 错误 1 (已忽略）
+GenFfs -t EFI_FV_FILETYPE_DRIVER -g E4F61863-FE2C-4b56-A8F4-08519BC439DF -o /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/FV/Ffs/E4F61863-FE2C-4b56-A8F4-08519BC439DFVlanConfigDxe/E4F61863-FE2C-4b56-A8F4-08519BC439DF.ffs -oi /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/FV/Ffs/E4F61863-FE2C-4b56-A8F4-08519BC439DFVlanConfigDxe/VlanConfigDxeOffset.raw -oi /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/FV/Ffs/E4F61863-FE2C-4b56-A8F4-08519BC439DFVlanConfigDxe/E4F61863-FE2C-4b56-A8F4-08519BC439DFSEC2.com
+Building ... /home/x/UEFI/edk22/MdeModulePkg/Universal/CapsuleRuntimeDxe/CapsuleRuntimeDxe.inf [IA32]
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/MdeModulePkg/Bus/Scsi/ScsiDiskDxe/ScsiDiskDxe.inf [IA32]
+Building ... /home/x/UEFI/edk22/EmulatorPkg/CpuRuntimeDxe/Cpu.inf [IA32]
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/MdeModulePkg/Universal/StatusCodeHandler/Pei/StatusCodeHandlerPei.inf [IA32]
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/MdeModulePkg/Core/DxeIplPeim/DxeIpl.inf [IA32]
+make: 对“tbuild”无需做任何事。
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/MdeModulePkg/Universal/Console/TerminalDxe/TerminalDxe.inf [IA32]
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/MdeModulePkg/Universal/DriverSampleDxe/DriverSampleDxe.inf [IA32]
+Building ... /home/x/UEFI/edk22/EmulatorPkg/Unix/Host/Host.inf [IA32]
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/MdeModulePkg/Application/Hello/Hello.inf [IA32]
+Trim --Vfr-Uni-Offset -o /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/FV/Ffs/FE3542FE-C1D3-4EF8-657C-8048606FF671DriverSample/DriverSample.offset --ModuleName=DriverSample --DebugDir=/home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/MdeModulePkg/Universal/DriverSampleDxe/DriverSampleDxe/DEBUG
+"/usr/bin/gcc" -MMD -MF /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/MdeModulePkg/Application/Hello/Hello/OUTPUT/AutoGen.obj.deps -g -Os -fshort-wchar -fno-builtin -fno-strict-aliasing -Wall -Werror -Wno-array-bounds -include AutoGen.h -fno-common -ffunction-sections -fdata-sections -DSTRING_ARRAY_NAME=HelloStrings -m32 -march=i586 -malign-double -fno-stack-protector -D EFI32 -fno-asynchronous-unwind-tables -Wno-address -fno-pic -fno-pie -flto -Os -D DISABLE_NEW_DEPRECATED_INTERFACES -c -o /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/MdeModulePkg/Application/Hello/Hello/OUTPUT/./AutoGen.obj -I/home/x/UEFI/edk22/MdeModulePkg/Application/Hello -I/home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/MdeModulePkg/Application/Hello/Hello/DEBUG -I/home/x/UEFI/edk22/MdePkg -I/home/x/UEFI/edk22/MdePkg/Include -I/home/x/UEFI/edk22/MdePkg/Test/UnitTest/Include -I/home/x/UEFI/edk22/MdePkg/Include/Ia32 -I/home/x/UEFI/edk22/MdeModulePkg -I/home/x/UEFI/edk22/MdeModulePkg/Include -I/home/x/UEFI/edk22/MdeModulePkg/Library/BrotliCustomDecompressLib/brotli/c/include /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/MdeModulePkg/Application/Hello/Hello/DEBUG/AutoGen.c
+"/usr/bin/gcc" -o /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/Host -m32 -L/usr/X11R6/lib -Wl,--start-group,@/home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/EmulatorPkg/Unix/Host/Host/OUTPUT/static_library_files.lst,--end-group -lpthread -ldl -lXext -lX11
+test -e /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/FV/Ffs/FE3542FE-C1D3-4EF8-657C-8048606FF671DriverSample/DriverSample.offset && GenSec -s EFI_SECTION_RAW -o /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/FV/Ffs/FE3542FE-C1D3-4EF8-657C-8048606FF671DriverSample/DriverSampleOffset.raw /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/FV/Ffs/FE3542FE-C1D3-4EF8-657C-8048606FF671DriverSample/DriverSample.offset
+make: [GNUmakefile:388：/home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/FV/Ffs/FE3542FE-C1D3-4EF8-657C-8048606FF671DriverSample/DriverSampleOffset.raw] 错误 1 (已忽略）
+GenFfs -t EFI_FV_FILETYPE_DRIVER -g FE3542FE-C1D3-4EF8-657C-8048606FF671 -o /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/FV/Ffs/FE3542FE-C1D3-4EF8-657C-8048606FF671DriverSample/FE3542FE-C1D3-4EF8-657C-8048606FF671.ffs -oi /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/FV/Ffs/FE3542FE-C1D3-4EF8-657C-8048606FF671DriverSample/FE3542FE-C1D3-4EF8-657C-8048606FF671SEC1.1.dpx -oi /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/FV/Ffs/FE3542FE-C1D3-4EF8-657C-8048606FF671DriverSample/DriverSampleOffset.raw -oi /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/FV/Ffs/FE3542FE-C1D3-4EF8-657C-8048606FF671DriverSample/FE3542FE-C1D3-4EF8-657C-8048606FF671SEC2.com
+Building ... /home/x/UEFI/edk22/MdeModulePkg/Bus/Scsi/ScsiBusDxe/ScsiBusDxe.inf [IA32]
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/EmulatorPkg/TimerDxe/Timer.inf [IA32]
+"/usr/bin/gcc" -MMD -MF /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/MdeModulePkg/Application/Hello/Hello/OUTPUT/Hello.obj.deps -g -Os -fshort-wchar -fno-builtin -fno-strict-aliasing -Wall -Werror -Wno-array-bounds -include AutoGen.h -fno-common -ffunction-sections -fdata-sections -DSTRING_ARRAY_NAME=HelloStrings -m32 -march=i586 -malign-double -fno-stack-protector -D EFI32 -fno-asynchronous-unwind-tables -Wno-address -fno-pic -fno-pie -flto -Os -D DISABLE_NEW_DEPRECATED_INTERFACES -c -o /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/MdeModulePkg/Application/Hello/Hello/OUTPUT/./Hello.obj -I/home/x/UEFI/edk22/MdeModulePkg/Application/Hello -I/home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/MdeModulePkg/Application/Hello/Hello/DEBUG -I/home/x/UEFI/edk22/MdePkg -I/home/x/UEFI/edk22/MdePkg/Include -I/home/x/UEFI/edk22/MdePkg/Test/UnitTest/Include -I/home/x/UEFI/edk22/MdePkg/Include/Ia32 -I/home/x/UEFI/edk22/MdeModulePkg -I/home/x/UEFI/edk22/MdeModulePkg/Include -I/home/x/UEFI/edk22/MdeModulePkg/Library/BrotliCustomDecompressLib/brotli/c/include /home/x/UEFI/edk22/MdeModulePkg/Application/Hello/Hello.c
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/EmulatorPkg/FirmwareVolumePei/FirmwareVolumePei.inf [IA32]
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/MdeModulePkg/Universal/SetupBrowserDxe/SetupBrowserDxe.inf [IA32]
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/EmulatorPkg/EmuBlockIoDxe/EmuBlockIoDxe.inf [IA32]
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/MdeModulePkg/Universal/Console/ConSplitterDxe/ConSplitterDxe.inf [IA32]
+rm -f /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/MdeModulePkg/Application/Hello/Hello/OUTPUT/Hello.lib
+"/usr/bin/gcc-ar" cr /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/MdeModulePkg/Application/Hello/Hello/OUTPUT/Hello.lib  @/home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/MdeModulePkg/Application/Hello/Hello/OUTPUT/object_files.lst
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/MdeModulePkg/Universal/SmbiosDxe/SmbiosDxe.inf [IA32]
+"GenFw" -o /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/MdeModulePkg/Application/Hello/Hello/OUTPUT/Hellohii.rc -g 6987936E-ED34-44db-AE97-1FA5E4ED2116 --hiibinpackage /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/MdeModulePkg/Application/Hello/Hello/OUTPUT/HelloStrDefs.hpk
+"/usr/bin/objcopy" -I binary -O elf32-i386 -B i386 --rename-section .data=.hii /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/MdeModulePkg/Application/Hello/Hello/OUTPUT/Hellohii.rc /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/MdeModulePkg/Application/Hello/Hello/OUTPUT/Hellohii.lib
+"/usr/bin/gcc" -o /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/MdeModulePkg/Application/Hello/Hello/DEBUG/Hello.dll -nostdlib -Wl,-n,-q,--gc-sections -z common-page-size=0x40 -Wl,--entry,_ModuleEntryPoint -u _ModuleEntryPoint -Wl,-Map,/home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/MdeModulePkg/Application/Hello/Hello/DEBUG/Hello.map,--whole-archive -flto -Os -Wl,-m,elf_i386,--oformat=elf32-i386 -Wl,--start-group,@/home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/MdeModulePkg/Application/Hello/Hello/OUTPUT/static_library_files.lst,--end-group -g -Os -fshort-wchar -fno-builtin -fno-strict-aliasing -Wall -Werror -Wno-array-bounds -include AutoGen.h -fno-common -ffunction-sections -fdata-sections -DSTRING_ARRAY_NAME=HelloStrings -m32 -march=i586 -malign-double -fno-stack-protector -D EFI32 -fno-asynchronous-unwind-tables -Wno-address -fno-pic -fno-pie -flto -Os -D DISABLE_NEW_DEPRECATED_INTERFACES -Wl,--defsym=PECOFF_HEADER_SIZE=0x220 -Wl,--script=/home/x/UEFI/edk22/BaseTools/Scripts/GccBase.lds -Wno-error -no-pie
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/MdeModulePkg/Universal/FaultTolerantWriteDxe/FaultTolerantWriteDxe.inf [IA32]
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/EmulatorPkg/EmuThunkDxe/EmuThunk.inf [IA32]
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/NetworkPkg/DpcDxe/DpcDxe.inf [IA32]
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/EmulatorPkg/PlatformSmbiosDxe/PlatformSmbiosDxe.inf [IA32]
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/FatPkg/EnhancedFatDxe/Fat.inf [IA32]
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/MdeModulePkg/Logo/LogoDxe.inf [IA32]
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/MdeModulePkg/Application/HelloWorld/HelloWorld.inf [IA32]
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/MdeModulePkg/Application/BootManagerMenuApp/BootManagerMenuApp.inf [IA32]
+Trim --Vfr-Uni-Offset -o /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/FV/Ffs/EEC25BDC-67F2-4D95-B1D5-F81B2039D11DBootManagerMenuApp/BootManagerMenuApp.offset --ModuleName=BootManagerMenuApp --DebugDir=/home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/MdeModulePkg/Application/BootManagerMenuApp/BootManagerMenuApp/DEBUG
+test -e /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/FV/Ffs/EEC25BDC-67F2-4D95-B1D5-F81B2039D11DBootManagerMenuApp/BootManagerMenuApp.offset && GenSec -s EFI_SECTION_RAW -o /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/FV/Ffs/EEC25BDC-67F2-4D95-B1D5-F81B2039D11DBootManagerMenuApp/BootManagerMenuAppOffset.raw /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/FV/Ffs/EEC25BDC-67F2-4D95-B1D5-F81B2039D11DBootManagerMenuApp/BootManagerMenuApp.offset
+make: [GNUmakefile:388：/home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/FV/Ffs/EEC25BDC-67F2-4D95-B1D5-F81B2039D11DBootManagerMenuApp/BootManagerMenuAppOffset.raw] 错误 1 (已忽略）
+GenFfs -t EFI_FV_FILETYPE_APPLICATION -g EEC25BDC-67F2-4D95-B1D5-F81B2039D11D -o /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/FV/Ffs/EEC25BDC-67F2-4D95-B1D5-F81B2039D11DBootManagerMenuApp/EEC25BDC-67F2-4D95-B1D5-F81B2039D11D.ffs -oi /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/FV/Ffs/EEC25BDC-67F2-4D95-B1D5-F81B2039D11DBootManagerMenuApp/EEC25BDC-67F2-4D95-B1D5-F81B2039D11DSEC1.com -oi /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/FV/Ffs/EEC25BDC-67F2-4D95-B1D5-F81B2039D11DBootManagerMenuApp/BootManagerMenuAppOffset.raw
+Building ... /home/x/UEFI/edk22/MdeModulePkg/Universal/Variable/RuntimeDxe/VariableRuntimeDxe.inf [IA32]
+/usr/bin/ld: /tmp/Host.rIDkaR.ltrans0.ltrans.o: warning: relocation in read-only section `.rodata'
+/usr/bin/ld: warning: creating DT_TEXTREL in a PIE
+Building ... /home/x/UEFI/edk22/MdeModulePkg/Universal/EbcDxe/EbcDxe.inf [IA32]
+make: 对“tbuild”无需做任何事。
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/MdeModulePkg/Universal/PCD/Dxe/Pcd.inf [IA32]
+Building ... /home/x/UEFI/edk22/MdeModulePkg/Universal/FaultTolerantWritePei/FaultTolerantWritePei.inf [IA32]
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/MdeModulePkg/Universal/DisplayEngineDxe/DisplayEngineDxe.inf [IA32]
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/EmulatorPkg/EmuSnpDxe/EmuSnpDxe.inf [IA32]
+Trim --Vfr-Uni-Offset -o /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/FV/Ffs/E660EA85-058E-4b55-A54B-F02F83A24707DisplayEngine/DisplayEngine.offset --ModuleName=DisplayEngine --DebugDir=/home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/MdeModulePkg/Universal/DisplayEngineDxe/DisplayEngineDxe/DEBUG
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/MdeModulePkg/Universal/BdsDxe/BdsDxe.inf [IA32]
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/MdeModulePkg/Universal/Variable/Pei/VariablePei.inf [IA32]
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/MdeModulePkg/Universal/LoadFileOnFv2/LoadFileOnFv2.inf [IA32]
+"/usr/bin/objcopy"  /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/MdeModulePkg/Application/Hello/Hello/DEBUG/Hello.dll
+cp -f /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/MdeModulePkg/Application/Hello/Hello/DEBUG/Hello.dll /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/MdeModulePkg/Application/Hello/Hello/DEBUG/Hello.debug
+/usr/bin/objcopy --strip-unneeded -R .eh_frame /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/MdeModulePkg/Application/Hello/Hello/DEBUG/Hello.dll
+/usr/bin/objcopy --add-gnu-debuglink=/home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/MdeModulePkg/Application/Hello/Hello/DEBUG/Hello.debug /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/MdeModulePkg/Application/Hello/Hello/DEBUG/Hello.dll
+cp -f /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/MdeModulePkg/Application/Hello/Hello/DEBUG/Hello.debug /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/Hello.debug
+"GenFw" -e UEFI_APPLICATION -o /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/MdeModulePkg/Application/Hello/Hello/OUTPUT/Hello.efi /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/MdeModulePkg/Application/Hello/Hello/DEBUG/Hello.dll
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/MdeModulePkg/Universal/SecurityStubDxe/SecurityStubDxe.inf [IA32]
+cp -f /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/MdeModulePkg/Application/Hello/Hello/OUTPUT/Hello.efi /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/MdeModulePkg/Application/Hello/Hello/DEBUG
+cp -f /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/MdeModulePkg/Application/Hello/Hello/OUTPUT/Hello.efi /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/Hello.efi
+cp -f /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/MdeModulePkg/Application/Hello/Hello/DEBUG/*.map /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/MdeModulePkg/Application/Hello/Hello/OUTPUT
+make: 对“tbuild”无需做任何事。
+test -e /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/FV/Ffs/E660EA85-058E-4b55-A54B-F02F83A24707DisplayEngine/DisplayEngine.offset && GenSec -s EFI_SECTION_RAW -o /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/FV/Ffs/E660EA85-058E-4b55-A54B-F02F83A24707DisplayEngine/DisplayEngineOffset.raw /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/FV/Ffs/E660EA85-058E-4b55-A54B-F02F83A24707DisplayEngine/DisplayEngine.offset
+make: [GNUmakefile:387：/home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/FV/Ffs/E660EA85-058E-4b55-A54B-F02F83A24707DisplayEngine/DisplayEngineOffset.raw] 错误 1 (已忽略）
+GenFfs -t EFI_FV_FILETYPE_DRIVER -g E660EA85-058E-4b55-A54B-F02F83A24707 -o /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/FV/Ffs/E660EA85-058E-4b55-A54B-F02F83A24707DisplayEngine/E660EA85-058E-4b55-A54B-F02F83A24707.ffs -oi /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/FV/Ffs/E660EA85-058E-4b55-A54B-F02F83A24707DisplayEngine/E660EA85-058E-4b55-A54B-F02F83A24707SEC1.1.dpx -oi /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/FV/Ffs/E660EA85-058E-4b55-A54B-F02F83A24707DisplayEngine/DisplayEngineOffset.raw -oi /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/FV/Ffs/E660EA85-058E-4b55-A54B-F02F83A24707DisplayEngine/E660EA85-058E-4b55-A54B-F02F83A24707SEC2.com
+Building ... /home/x/UEFI/edk22/EmulatorPkg/EmuGopDxe/EmuGopDxe.inf [IA32]
+Building ... /home/x/UEFI/edk22/MdeModulePkg/Universal/Disk/UnicodeCollation/EnglishDxe/EnglishDxe.inf [IA32]
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/MdeModulePkg/Core/Pei/PeiMain.inf [IA32]
+Building ... /home/x/UEFI/edk22/MdeModulePkg/Core/Dxe/DxeMain.inf [IA32]
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/MdeModulePkg/Universal/Console/ConPlatformDxe/ConPlatformDxe.inf [IA32]
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/EmulatorPkg/EmuBusDriverDxe/EmuBusDriverDxe.inf [IA32]
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/MdeModulePkg/Core/RuntimeDxe/RuntimeDxe.inf [IA32]
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/MdeModulePkg/Universal/WatchdogTimerDxe/WatchdogTimer.inf [IA32]
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/MdeModulePkg/Universal/Disk/DiskIoDxe/DiskIoDxe.inf [IA32]
+make: 对“tbuild”无需做任何事。
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/MdeModulePkg/Universal/HiiDatabaseDxe/HiiDatabaseDxe.inf [IA32]
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/ShellPkg/DynamicCommand/TftpDynamicCommand/TftpDynamicCommand.inf [IA32]
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/MdeModulePkg/Universal/Metronome/Metronome.inf [IA32]
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/MdeModulePkg/Bus/Pci/PciBusDxe/PciBusDxe.inf [IA32]
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/MdeModulePkg/Universal/ReportStatusCodeRouter/RuntimeDxe/ReportStatusCodeRouterRuntimeDxe.inf [IA32]
+Building ... /home/x/UEFI/edk22/EmulatorPkg/BootModePei/BootModePei.inf [IA32]
+make: 对“tbuild”无需做任何事。
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/MdeModulePkg/Universal/SerialDxe/SerialDxe.inf [IA32]
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/MdeModulePkg/Universal/MonotonicCounterRuntimeDxe/MonotonicCounterRuntimeDxe.inf [IA32]
+Building ... /home/x/UEFI/edk22/EmulatorPkg/RealTimeClockRuntimeDxe/RealTimeClock.inf [IA32]
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/MdeModulePkg/Universal/MemoryTest/NullMemoryTestDxe/NullMemoryTestDxe.inf [IA32]
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/MdeModulePkg/Application/UiApp/UiApp.inf [IA32]
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/EmulatorPkg/FvbServicesRuntimeDxe/FvbServicesRuntimeDxe.inf [IA32]
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/MdeModulePkg/Universal/DevicePathDxe/DevicePathDxe.inf [IA32]
+make: 对“tbuild”无需做任何事。
+make: 对“tbuild”无需做任何事。
+Trim --Vfr-Uni-Offset -o /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/FV/Ffs/462CAA21-7614-4503-836E-8AB6F4662331UiApp/UiApp.offset --ModuleName=UiApp --DebugDir=/home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/MdeModulePkg/Application/UiApp/UiApp/DEBUG
+Building ... /home/x/UEFI/edk22/ShellPkg/Application/Shell/Shell.inf [IA32]
+Building ... /home/x/UEFI/edk22/EmulatorPkg/EmuSimpleFileSystemDxe/EmuSimpleFileSystemDxe.inf [IA32]
+make: 对“tbuild”无需做任何事。
+Trim --Vfr-Uni-Offset -o /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/FV/Ffs/7C04A583-9E3E-4f1c-AD65-E05268D0B4D1Shell/Shell.offset --ModuleName=Shell --DebugDir=/home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/ShellPkg/Application/Shell/Shell/DEBUG
+Building ... /home/x/UEFI/edk22/MdeModulePkg/Universal/Disk/PartitionDxe/PartitionDxe.inf [IA32]
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/NetworkPkg/Udp4Dxe/Udp4Dxe.inf [IA32]
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/NetworkPkg/ArpDxe/ArpDxe.inf [IA32]
+test -e /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/FV/Ffs/462CAA21-7614-4503-836E-8AB6F4662331UiApp/UiApp.offset && GenSec -s EFI_SECTION_RAW -o /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/FV/Ffs/462CAA21-7614-4503-836E-8AB6F4662331UiApp/UiAppOffset.raw /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/FV/Ffs/462CAA21-7614-4503-836E-8AB6F4662331UiApp/UiApp.offset
+make: [GNUmakefile:419：/home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/FV/Ffs/462CAA21-7614-4503-836E-8AB6F4662331UiApp/UiAppOffset.raw] 错误 1 (已忽略）
+GenFfs -t EFI_FV_FILETYPE_APPLICATION -g 462CAA21-7614-4503-836E-8AB6F4662331 -o /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/FV/Ffs/462CAA21-7614-4503-836E-8AB6F4662331UiApp/462CAA21-7614-4503-836E-8AB6F4662331.ffs -oi /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/FV/Ffs/462CAA21-7614-4503-836E-8AB6F4662331UiApp/462CAA21-7614-4503-836E-8AB6F4662331SEC1.1.pe32 -oi /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/FV/Ffs/462CAA21-7614-4503-836E-8AB6F4662331UiApp/UiAppOffset.raw -oi /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/FV/Ffs/462CAA21-7614-4503-836E-8AB6F4662331UiApp/462CAA21-7614-4503-836E-8AB6F4662331SEC2.ui -oi /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/FV/Ffs/462CAA21-7614-4503-836E-8AB6F4662331UiApp/462CAA21-7614-4503-836E-8AB6F4662331SEC3.ver
+Building ... /home/x/UEFI/edk22/NetworkPkg/Mtftp4Dxe/Mtftp4Dxe.inf [IA32]
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/NetworkPkg/MnpDxe/MnpDxe.inf [IA32]
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/NetworkPkg/Dhcp4Dxe/Dhcp4Dxe.inf [IA32]
+make: 对“tbuild”无需做任何事。
+test -e /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/FV/Ffs/7C04A583-9E3E-4f1c-AD65-E05268D0B4D1Shell/Shell.offset && GenSec -s EFI_SECTION_RAW -o /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/FV/Ffs/7C04A583-9E3E-4f1c-AD65-E05268D0B4D1Shell/ShellOffset.raw /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/FV/Ffs/7C04A583-9E3E-4f1c-AD65-E05268D0B4D1Shell/Shell.offset
+make: [GNUmakefile:467：/home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/FV/Ffs/7C04A583-9E3E-4f1c-AD65-E05268D0B4D1Shell/ShellOffset.raw] 错误 1 (已忽略）
+GenFfs -t EFI_FV_FILETYPE_APPLICATION -g 7C04A583-9E3E-4f1c-AD65-E05268D0B4D1 -o /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/FV/Ffs/7C04A583-9E3E-4f1c-AD65-E05268D0B4D1Shell/7C04A583-9E3E-4f1c-AD65-E05268D0B4D1.ffs -oi /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/FV/Ffs/7C04A583-9E3E-4f1c-AD65-E05268D0B4D1Shell/7C04A583-9E3E-4f1c-AD65-E05268D0B4D1SEC1.com -oi /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/FV/Ffs/7C04A583-9E3E-4f1c-AD65-E05268D0B4D1Shell/ShellOffset.raw
+Building ... /home/x/UEFI/edk22/NetworkPkg/Ip4Dxe/Ip4Dxe.inf [IA32]
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/UEFI/edk22/NetworkPkg/UefiPxeBcDxe/UefiPxeBcDxe.inf [IA32]
+Building ... /home/x/UEFI/edk22/NetworkPkg/TcpDxe/TcpDxe.inf [IA32]
+Trim --Vfr-Uni-Offset -o /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/FV/Ffs/9FB1A1F3-3B71-4324-B39A-745CBB015FFFIp4Dxe/Ip4Dxe.offset --ModuleName=Ip4Dxe --DebugDir=/home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/NetworkPkg/Ip4Dxe/Ip4Dxe/DEBUG
+make: 对“tbuild”无需做任何事。
+make: 对“tbuild”无需做任何事。
+test -e /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/FV/Ffs/9FB1A1F3-3B71-4324-B39A-745CBB015FFFIp4Dxe/Ip4Dxe.offset && GenSec -s EFI_SECTION_RAW -o /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/FV/Ffs/9FB1A1F3-3B71-4324-B39A-745CBB015FFFIp4Dxe/Ip4DxeOffset.raw /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/FV/Ffs/9FB1A1F3-3B71-4324-B39A-745CBB015FFFIp4Dxe/Ip4Dxe.offset
+make: [GNUmakefile:463：/home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/FV/Ffs/9FB1A1F3-3B71-4324-B39A-745CBB015FFFIp4Dxe/Ip4DxeOffset.raw] 错误 1 (已忽略）
+GenFfs -t EFI_FV_FILETYPE_DRIVER -g 9FB1A1F3-3B71-4324-B39A-745CBB015FFF -o /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/FV/Ffs/9FB1A1F3-3B71-4324-B39A-745CBB015FFFIp4Dxe/9FB1A1F3-3B71-4324-B39A-745CBB015FFF.ffs -oi /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/FV/Ffs/9FB1A1F3-3B71-4324-B39A-745CBB015FFFIp4Dxe/Ip4DxeOffset.raw -oi /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/FV/Ffs/9FB1A1F3-3B71-4324-B39A-745CBB015FFFIp4Dxe/9FB1A1F3-3B71-4324-B39A-745CBB015FFFSEC2.com
+
+Fd File Name:FV_RECOVERY (/home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/FV/FV_RECOVERY.fd)
+
+Generate Region at Offset 0x0
+   Region Size = 0x580000
+   Region Name = FV
+
+Generating FVRECOVERY FV
+###
+Generate Region at Offset 0x580000
+   Region Size = 0xC000
+   Region Name = DATA
+
+Generate Region at Offset 0x58C000
+   Region Size = 0x2000
+   Region Name = None
+
+Generate Region at Offset 0x58E000
+   Region Size = 0x2000
+   Region Name = DATA
+
+Generate Region at Offset 0x590000
+   Region Size = 0x10000
+   Region Name = None
+
+GUID cross reference file can be found at /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/FV/Guid.xref
+
+FV Space Information
+FVRECOVERY [27%Full] 5767168 (0x580000) total, 1562168 (0x17d638) used, 4205000 (0x4029c8) free
+
+- Done -
+Build end time: 16:58:19, Jun.27 2021
+Build total time: 00:00:15
+
+root@x-virtual-machine:/home/x/UEFI/edk22# find -name Hello.efi
+./Build/EmulatorIA32/DEBUG_GCC5/IA32/Hello.efi
+./Build/EmulatorIA32/DEBUG_GCC5/IA32/MdeModulePkg/Application/Hello/Hello/DEBUG/Hello.efi
+./Build/EmulatorIA32/DEBUG_GCC5/IA32/MdeModulePkg/Application/Hello/Hello/OUTPUT/Hello.efi
+root@x-virtual-machine:/home/x/UEFI/edk22# 
+root@x-virtual-machine:/home/x/UEFI/edk22# 
+root@x-virtual-machine:/home/x/UEFI/edk22# EmulatorPkg/build.sh -a IA32 run
+Initializing workspace
+/home/x/UEFI/edk22/BaseTools
+Loading previous configuration from /home/x/UEFI/edk22/Conf/BuildEnv.sh
+Using EDK2 in-source Basetools
+WORKSPACE: /home/x/UEFI/edk22
+EDK_TOOLS_PATH: /home/x/UEFI/edk22/BaseTools
+CONF_PATH: /home/x/UEFI/edk22/Conf
+using prebuilt tools
+Reading symbols from /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/Host...
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+EDK II UNIX Host Emulation Environment from http://www.tianocore.org/edk2/
+  BootMode 0x00
+  OS Emulator passing in 128 KB of temp RAM at 0x40000000 to SEC
+  FD loaded from ../FV/FV_RECOVERY.fd at 0x02000000 contains SEC Core
+
+0x02000400 Loading /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/EmulatorPkg/Sec/Sec/DEBUG/EmuSec.dll with entry point 0x020012f4
+SEC Has Started
+0x02002380 Loading /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/MdeModulePkg/Core/Pei/PeiMain/DEBUG/PeiCore.dll with entry point 0x02009912
+0x02010580 Loading /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/MdeModulePkg/Universal/ReportStatusCodeRouter/Pei/ReportStatusCodeRouterPei/DEBUG/ReportStatusCodeRouterPei.dll with entry point 0x0201105d
+0x02011c80 Loading /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/MdeModulePkg/Universal/StatusCodeHandler/Pei/StatusCodeHandlerPei/DEBUG/StatusCodeHandlerPei.dll with entry point 0x02013254
+PROGRESS CODE: V03020003 I0
+Loading PEIM 9B3ADA4F-AE56-4C24-8DEA-F03B7558AE50
+0x0200cb40 Loading /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/MdeModulePkg/Universal/PCD/Pei/Pcd/DEBUG/PcdPeim.dll with entry point 0x0200f017
+Loading PEIM at 0x0000200C900 EntryPoint=0x0000200F017 PcdPeim.efi
+PROGRESS CODE: V03020002 I0
+Install PPI: 06E81C58-4AD7-44BC-8390-F10265F72480
+Install PPI: 01F34D25-4DE2-23AD-3FF3-36353FF323F1
+Install PPI: 4D8B155B-C059-4C8F-8926-06FD4331DB8A
+Install PPI: A60C6B59-E459-425D-9C69-0BCC9CB27D81
+Register PPI Notify: 605EA650-C65C-42E1-BA80-91A52AB618C6
+PROGRESS CODE: V03020003 I0
+Loading PEIM 64196C76-58E3-0B4D-9484-B54F7C4349CA
+0x02014580 Loading /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/EmulatorPkg/BootModePei/BootModePei/DEBUG/BootModePei.dll with entry point 0x02014cce
+Loading PEIM at 0x00002014340 EntryPoint=0x00002014CCE BootModePei.efi
+PROGRESS CODE: V03020002 I0
+Emu Boot Mode PEIM Loaded
+Install PPI: 7408D748-FC8C-4EE6-9288-C4BEC092A410
+PROGRESS CODE: V03020003 I0
+Loading PEIM 2D6F6BCC-9681-8E42-8579-B57DCD0060F0
+0x02015700 Loading /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/EmulatorPkg/AutoScanPei/AutoScanPei/DEBUG/AutoScanPei.dll with entry point 0x02015f71
+Loading PEIM at 0x000020154C0 EntryPoint=0x00002015F71 AutoScanPei.efi
+PROGRESS CODE: V03020002 I0
+Emu Autoscan PEIM Loaded
+PeiInstallPeiMemory MemoryBegin 0x41000000, MemoryLength 0x4000000
+PROGRESS CODE: V03020003 I0
+Temp Stack : BaseAddress=0x40000000 Length=0x10000
+Temp Heap  : BaseAddress=0x40010000 Length=0x10000
+Total temporary memory:    131072 bytes.
+  temporary memory stack ever used:       12188 bytes.
+  temporary memory heap used for HobList: 2448 bytes.
+  temporary memory heap occupied by memory pages: 0 bytes.
+Old Stack size 65536, New stack size 131072
+Stack Hob: BaseAddress=0x41000000 Length=0x20000
+Heap Offset = 0x1010000 Stack Offset = 0x1010000
+Loading PEIM 52C05B14-0B98-496C-BC3B-04B50211D680
+0x44ff5240 Loading /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/MdeModulePkg/Core/Pei/PeiMain/DEBUG/PeiCore.dll with entry point 0x44ffc7d2
+Loading PEIM at 0x00044FF5000 EntryPoint=0x00044FFC7D2 PeiCore.efi
+Reinstall PPI: 8C8CE578-8A3D-4F1C-9935-896185C32DD3
+Reinstall PPI: 5473C07A-3DCB-4DCA-BD6F-1E9689E7349A
+Reinstall PPI: B9E0ABFE-5979-4914-977F-6DEE78C278A6
+Install PPI: F894643D-C449-42D1-8EA8-85BDD8C65BDE
+Loading PEIM 6DB075DE-449E-2644-96D0-CC5A1B4C3B2A
+0x44ff3240 Loading /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/EmulatorPkg/FirmwareVolumePei/FirmwareVolumePei/DEBUG/FirmwareVolumePei.dll with entry point 0x44ff3b78
+Loading PEIM at 0x00044FF3000 EntryPoint=0x00044FF3B78 FirmwareVolumePei.efi
+PROGRESS CODE: V03020002 I0
+Unix Firmware Volume PEIM Loaded
+PROGRESS CODE: V03020003 I0
+Loading PEIM C9FAF091-57F8-A64C-A07A-445B124F0D93
+0x44ff1240 Loading /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/EmulatorPkg/FlashMapPei/FlashMapPei/DEBUG/FlashMapPei.dll with entry point 0x44ff1a0e
+Loading PEIM at 0x00044FF1000 EntryPoint=0x00044FF1A0E FlashMapPei.efi
+PROGRESS CODE: V03020002 I0
+EmulatorPkg Flash Map PEIM Loaded
+PROGRESS CODE: V03020003 I0
+Loading PEIM C32A66D5-D8B7-2640-B768-082C8F083C37
+0x44fef240 Loading /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/EmulatorPkg/ThunkPpiToProtocolPei/ThunkPpiToProtocolPei/DEBUG/ThunkPpiToProtocolPei.dll with entry point 0x44fef9d8
+Loading PEIM at 0x00044FEF000 EntryPoint=0x00044FEF9D8 ThunkPpiToProtocolPei.efi
+PROGRESS CODE: V03020002 I0
+Emu Thunk PEIM Loaded
+PROGRESS CODE: V03020003 I0
+Loading PEIM AAC33064-9ED0-4B89-A5AD-3EA767960B22
+0x44fed240 Loading /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/MdeModulePkg/Universal/FaultTolerantWritePei/FaultTolerantWritePei/DEBUG/FaultTolerantWritePei.dll with entry point 0x44fedc34
+Loading PEIM at 0x00044FED000 EntryPoint=0x00044FEDC34 FaultTolerantWritePei.efi
+PROGRESS CODE: V03020002 I0
+Install PPI: 1D3E9CB8-43AF-490B-830A-3516AA532047
+PROGRESS CODE: V03020003 I0
+Loading PEIM 34C8C28F-B61C-45A2-8F2E-89E46BECC63B
+0x44fea240 Loading /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/MdeModulePkg/Universal/Variable/Pei/VariablePei/DEBUG/PeiVariable.dll with entry point 0x44feb9bc
+Loading PEIM at 0x00044FEA000 EntryPoint=0x00044FEB9BC PeiVariable.efi
+PROGRESS CODE: V03020002 I0
+Install PPI: 2AB86EF5-ECB5-4134-B556-3854CA1FE1B4
+PROGRESS CODE: V03020003 I0
+Loading PEIM 86D70125-BAA3-4296-A62F-602BEBBB9081
+0x44fe5240 Loading /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/MdeModulePkg/Core/DxeIplPeim/DxeIpl/DEBUG/DxeIpl.dll with entry point 0x44fe808f
+Loading PEIM at 0x00044FE5000 EntryPoint=0x00044FE808F DxeIpl.efi
+PROGRESS CODE: V03020002 I0
+PROGRESS CODE: V03020003 I0
+Install PPI: 1A36E4E7-FAB6-476A-8E75-695A0576FDD7
+Install PPI: 0AE8CE5D-E448-4437-A8D7-EBF5F194F731
+DXE IPL Entry
+Loading PEIM D6A2CB7F-6A18-4E2F-B43B-9920A733700A
+0x44fa1240 Loading /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/MdeModulePkg/Core/Dxe/DxeMain/DEBUG/DxeCore.dll with entry point 0x44fb0592
+Loading PEIM at 0x00044FA1000 EntryPoint=0x00044FB0592 DxeCore.efi
+PROGRESS CODE: V03021001 I0
+Loading DXE CORE at 0x00044FA1000 EntryPoint=0x00044FB0592
+Install PPI: 605EA650-C65C-42E1-BA80-91A52AB618C6
+Notify: PPI Guid: 605EA650-C65C-42E1-BA80-91A52AB618C6, Peim notify entry point: 200DC2F
+HandOffToDxeCore() Stack Base: 0x44F81000, Stack Size: 0x20000
+DxeMain: MemoryBaseAddress=0x41022000 MemoryLength=0x3F5F000
+0x44fa1240 Loading /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/MdeModulePkg/Core/Dxe/DxeMain/DEBUG/DxeCore.dll with entry point 0x44fb0592
+HOBLIST address in DXE = 0x44F7C010
+Memory Allocation 0x00000004 0x44F81000 - 0x44FA0FFF
+Memory Allocation 0x00000003 0x44FF5000 - 0x44FFFFFF
+Memory Allocation 0x00000003 0x44FF3000 - 0x44FF4FFF
+Memory Allocation 0x00000003 0x44FF1000 - 0x44FF2FFF
+Memory Allocation 0x00000003 0x44FEF000 - 0x44FF0FFF
+Memory Allocation 0x00000003 0x44FED000 - 0x44FEEFFF
+Memory Allocation 0x00000003 0x44FEA000 - 0x44FECFFF
+Memory Allocation 0x00000003 0x44FE5000 - 0x44FE9FFF
+Memory Allocation 0x00000004 0x44FE1000 - 0x44FE4FFF
+Memory Allocation 0x00000004 0x44FC1000 - 0x44FE0FFF
+Memory Allocation 0x00000003 0x44FA1000 - 0x44FC0FFF
+Memory Allocation 0x00000003 0x44FA1000 - 0x44FC0FFF
+Memory Allocation 0x00000004 0x44F81000 - 0x44FA0FFF
+Memory Allocation 0x00000004 0x41000000 - 0x4101FFFF
+FV Hob            0x2000000 - 0x257FFFF
+FV Hob            0x2580000 - 0x259FFFF
+InstallProtocolInterface: D8117CFE-94A6-11D4-9A3A-0090273FC14D 44FBE71C
+InstallProtocolInterface: 8F644FA9-E850-4DB1-9CE2-0B44698E8DA4 44F7701C
+InstallProtocolInterface: 09576E91-6D3F-11D2-8E39-00A0C969723B 44F77F10
+InstallProtocolInterface: 8F644FA9-E850-4DB1-9CE2-0B44698E8DA4 44F7799C
+InstallProtocolInterface: 09576E91-6D3F-11D2-8E39-00A0C969723B 44F77890
+InstallProtocolInterface: 220E73B6-6BDB-4413-8405-B974B108619A 44F7721C
+InstallProtocolInterface: EE4E5898-3914-4259-9D6E-DC7BD79403CF 44FBE2D4
+InstallProtocolInterface: FC1BCDB0-7D31-49AA-936A-A4600D9DD083 44FBE2D4
+Loading driver 80CF7257-87AB-47F9-A3FE-D50B76D89541
+InstallProtocolInterface: 5B1B31A1-9562-11D2-8E3F-00A0C969723B 44CEE028
+0x44ce9240 Loading /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/MdeModulePkg/Universal/PCD/Dxe/Pcd/DEBUG/PcdDxe.dll with entry point 0x44cebd90
+Loading driver at 0x00044CE9000 EntryPoint=0x00044CEBD90 PcdDxe.efi
+InstallProtocolInterface: BC62157E-3E33-4FEC-9920-2D3B36D750DF 44CEEF10
+ProtectUefiImageCommon - 0x44CEE028
+  - 0x0000000044CE9000 - 0x0000000000004940
+InstallProtocolInterface: 11B34006-D85B-4D0A-A290-D5A571310EF7 44CED360
+InstallProtocolInterface: 13A3F0F6-264A-3EF0-F2E0-DEC512342F34 44CED300
+InstallProtocolInterface: 5BE40F57-FA68-4610-BBBF-E9C5FCDAD365 44CED2E4
+InstallProtocolInterface: FD0F4478-0EFD-461D-BA2D-E58C45FD5F5E 44CED2CC
+Loading driver C8339973-A563-4561-B858-D8476F9DEFC4
+InstallProtocolInterface: 5B1B31A1-9562-11D2-8E3F-00A0C969723B 44CF1B28
+0x44ce5240 Loading /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/MdeModulePkg/Universal/Metronome/Metronome/DEBUG/Metronome.dll with entry point 0x44ce5d8f
+Loading driver at 0x00044CE5000 EntryPoint=0x00044CE5D8F Metronome.efi
+InstallProtocolInterface: BC62157E-3E33-4FEC-9920-2D3B36D750DF 44CF1D90
+ProtectUefiImageCommon - 0x44CF1B28
+  - 0x0000000044CE5000 - 0x00000000000019C0
+InstallProtocolInterface: 26BACCB2-6F42-11D4-BCE7-0080C73C8881 44CE6750
+Loading driver D93CE3D8-A7EB-4730-8C8E-CC466A9ECC3C
+InstallProtocolInterface: 5B1B31A1-9562-11D2-8E3F-00A0C969723B 44CF11A8
+0x44cd9240 Loading /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/MdeModulePkg/Universal/ReportStatusCodeRouter/RuntimeDxe/ReportStatusCodeRouterRuntimeDxe/DEBUG/ReportStatusCodeRouterRuntimeDxe.dll with entry point 0x44cda62f
+Loading driver at 0x00044CD9000 EntryPoint=0x00044CDA62F ReportStatusCodeRouterRuntimeDxe.efi
+InstallProtocolInterface: BC62157E-3E33-4FEC-9920-2D3B36D750DF 44CF1410
+ProtectUefiImageCommon - 0x44CF11A8
+  - 0x0000000044CD9000 - 0x00000000000027C0
+InstallProtocolInterface: 86212936-0E76-41C8-A03A-2AF2FC1C39E2 44CDB414
+InstallProtocolInterface: D2B2B828-0826-48A7-B3DF-983C006024F0 44CDB400
+Loading driver F3552032-8985-11DB-8429-0040D02B1835
+InstallProtocolInterface: 5B1B31A1-9562-11D2-8E3F-00A0C969723B 44CDE128
+0x44cd3240 Loading /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/EmulatorPkg/RealTimeClockRuntimeDxe/RealTimeClock/DEBUG/RealTimeClock.dll with entry point 0x44cd3c72
+Loading driver at 0x00044CD3000 EntryPoint=0x00044CD3C72 RealTimeClock.efi
+InstallProtocolInterface: BC62157E-3E33-4FEC-9920-2D3B36D750DF 44CDE910
+ProtectUefiImageCommon - 0x44CDE128
+  - 0x0000000044CD3000 - 0x0000000000001600
+InstallProtocolInterface: 27CFAC87-46CC-11D4-9A38-0090273FC14D 0
+Loading driver 50A18017-37AD-8743-BCF2-DF1A8FF12FAB
+InstallProtocolInterface: 5B1B31A1-9562-11D2-8E3F-00A0C969723B 44CD0B28
+0x44ccc240 Loading /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/EmulatorPkg/ResetRuntimeDxe/Reset/DEBUG/EmuReset.dll with entry point 0x44cccbc8
+Loading driver at 0x00044CCC000 EntryPoint=0x00044CCCBC8 EmuReset.efi
+InstallProtocolInterface: BC62157E-3E33-4FEC-9920-2D3B36D750DF 44CD0D10
+ProtectUefiImageCommon - 0x44CD0B28
+  - 0x0000000044CCC000 - 0x0000000000001540
+InstallProtocolInterface: 27CFAC88-46CC-11D4-9A38-0090273FC14D 0
+Loading driver B601F8C4-43B7-4784-95B1-F4226CB40CEE
+InstallProtocolInterface: 5B1B31A1-9562-11D2-8E3F-00A0C969723B 44CD0128
+0x44cc0240 Loading /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/MdeModulePkg/Core/RuntimeDxe/RuntimeDxe/DEBUG/RuntimeDxe.dll with entry point 0x44cc11e4
+Loading driver at 0x00044CC0000 EntryPoint=0x00044CC11E4 RuntimeDxe.efi
+InstallProtocolInterface: BC62157E-3E33-4FEC-9920-2D3B36D750DF 44CD0610
+ProtectUefiImageCommon - 0x44CD0128
+  - 0x0000000044CC0000 - 0x0000000000002240
+InstallProtocolInterface: B7DFB4E1-052F-449F-87BE-9818FC91B733 44CC2000
+Loading driver A01E498C-96E8-2A4C-95F4-85248F989753
+InstallProtocolInterface: 5B1B31A1-9562-11D2-8E3F-00A0C969723B 44CCEBA8
+0x44cb7240 Loading /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/EmulatorPkg/FvbServicesRuntimeDxe/FvbServicesRuntimeDxe/DEBUG/FwBlockService.dll with entry point 0x44cb8536
+Loading driver at 0x00044CB7000 EntryPoint=0x00044CB8536 FwBlockService.efi
+InstallProtocolInterface: BC62157E-3E33-4FEC-9920-2D3B36D750DF 44CCEA10
+ProtectUefiImageCommon - 0x44CCEBA8
+  - 0x0000000044CB7000 - 0x00000000000028C0
+InstallProtocolInterface: 8F644FA9-E850-4DB1-9CE2-0B44698E8DA4 44CCFE34
+InstallProtocolInterface: 09576E91-6D3F-11D2-8E39-00A0C969723B 44CCFE14
+InstallProtocolInterface: 220E73B6-6BDB-4413-8405-B974B108619A 44CCE19C
+FvImage on FvHandle 44CCE710 and 44F77A10 has the same FvNameGuid 6D99E806-3D38-42C2-A095-5F4300BFD7DC.
+Loading driver F80697E9-7FD6-4665-8646-88E33EF71DFC
+InstallProtocolInterface: 5B1B31A1-9562-11D2-8E3F-00A0C969723B 44CBA228
+0x44c9a240 Loading /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/MdeModulePkg/Universal/SecurityStubDxe/SecurityStubDxe/DEBUG/SecurityStubDxe.dll with entry point 0x44c9db0e
+Loading driver at 0x00044C9A000 EntryPoint=0x00044C9DB0E SecurityStubDxe.efi
+InstallProtocolInterface: BC62157E-3E33-4FEC-9920-2D3B36D750DF 44CBA510
+ProtectUefiImageCommon - 0x44CBA228
+  - 0x0000000044C9A000 - 0x00000000000067C0
+InstallProtocolInterface: 94AB2F58-1438-4EF1-9152-18941A3A0E68 44CA0108
+InstallProtocolInterface: A46423E3-4617-49F1-B9FF-D1BFA9115839 44CA0104
+InstallProtocolInterface: 15853D7C-3DDF-43E0-A1CB-EBF85B8F872C 44CA00F0
+Loading driver 13AC6DD0-73D0-11D4-B06B-00AA00BD6DE7
+InstallProtocolInterface: 5B1B31A1-9562-11D2-8E3F-00A0C969723B 44C99628
+0x44c87240 Loading /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/MdeModulePkg/Universal/EbcDxe/EbcDxe/DEBUG/EbcDxe.dll with entry point 0x44c8b431
+Loading driver at 0x00044C87000 EntryPoint=0x00044C8B431 EbcDxe.efi
+InstallProtocolInterface: BC62157E-3E33-4FEC-9920-2D3B36D750DF 44C99590
+ProtectUefiImageCommon - 0x44C99628
+  - 0x0000000044C87000 - 0x0000000000005B80
+InstallProtocolInterface: 13AC6DD1-73D0-11D4-B06B-00AA00BD6DE7 44C99390
+InstallProtocolInterface: 96F46153-97A7-4793-ACC1-FA19BF78EA97 44C8C720
+InstallProtocolInterface: 2755590C-6F3C-42FA-9EA4-A3BA543CDA25 44CA1E10
+InstallProtocolInterface: AAEACCFD-F27B-4C17-B610-75CA1F2DFB52 44CA1D10
+Loading driver 96B5C032-DF4C-4B6E-8232-438DCF448D0E
+InstallProtocolInterface: 5B1B31A1-9562-11D2-8E3F-00A0C969723B 44CA1128
+0x44c85240 Loading /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/MdeModulePkg/Universal/MemoryTest/NullMemoryTestDxe/NullMemoryTestDxe/DEBUG/NullMemoryTestDxe.dll with entry point 0x44c85cfa
+Loading driver at 0x00044C85000 EntryPoint=0x00044C85CFA NullMemoryTestDxe.efi
+InstallProtocolInterface: BC62157E-3E33-4FEC-9920-2D3B36D750DF 44CA1290
+ProtectUefiImageCommon - 0x44CA1128
+  - 0x0000000044C85000 - 0x0000000000001800
+InstallProtocolInterface: 309DE7F1-7F5E-4ACE-B49C-531BE5AA95EF 44C865C0
+Loading driver 2F62A818-4A72-CD40-90B9-FF00DAABEE7B
+InstallProtocolInterface: 5B1B31A1-9562-11D2-8E3F-00A0C969723B 44C84BA8
+0x44c7e240 Loading /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/EmulatorPkg/EmuThunkDxe/EmuThunk/DEBUG/EmuThunk.dll with entry point 0x44c7eb47
+Loading driver at 0x00044C7E000 EntryPoint=0x00044C7EB47 EmuThunk.efi
+InstallProtocolInterface: BC62157E-3E33-4FEC-9920-2D3B36D750DF 44C84E90
+ProtectUefiImageCommon - 0x44C84BA8
+  - 0x0000000044C7E000 - 0x0000000000001440
+InstallProtocolInterface: 5CF32E0B-8EDF-2E44-9CDA-93205E99EC1C 56568020
+InstallProtocolInterface: 09576E91-6D3F-11D2-8E39-00A0C969723B 44C7F270
+Loading driver CBD2E4D5-7068-4FF5-B462-9822B4AD8D60
+InstallProtocolInterface: 5B1B31A1-9562-11D2-8E3F-00A0C969723B 44C841A8
+0x44c4e240 Loading /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/MdeModulePkg/Universal/Variable/RuntimeDxe/VariableRuntimeDxe/DEBUG/VariableRuntimeDxe.dll with entry point 0x44c54e4a
+Loading driver at 0x00044C4E000 EntryPoint=0x00044C54E4A VariableRuntimeDxe.efi
+InstallProtocolInterface: BC62157E-3E33-4FEC-9920-2D3B36D750DF 44C84490
+ProtectUefiImageCommon - 0x44C841A8
+  - 0x0000000044C4E000 - 0x000000000000B600
+InstallProtocolInterface: CD3D0A05-9E24-437C-A891-1EE053DB7638 44C5898C
+InstallProtocolInterface: AF23B340-97B4-4685-8D4F-A3F28169B21D 44C58970
+InstallProtocolInterface: 1E5668E2-8481-11D4-BCF1-0080C73C8881 0
+InstallProtocolInterface: 81D1675C-86F6-48DF-BD95-9A6E4F0925C3 44C58920
+Loading driver 9A5163E7-5C29-453F-825C-837A46A81E15
+InstallProtocolInterface: 5B1B31A1-9562-11D2-8E3F-00A0C969723B 44C63EA8
+0x44c62240 Loading /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/MdeModulePkg/Universal/SerialDxe/SerialDxe/DEBUG/SerialDxe.dll with entry point 0x44c6256c
+Loading driver at 0x00044C62000 EntryPoint=0x00044C6256C SerialDxe.efi
+InstallProtocolInterface: BC62157E-3E33-4FEC-9920-2D3B36D750DF 44C63D90
+ProtectUefiImageCommon - 0x44C63EA8
+  - 0x0000000044C62000 - 0x0000000000000940
+InstallProtocolInterface: BB25CF6F-F1D4-11D2-9A0C-0090273FC1FD 44C626E0
+InstallProtocolInterface: 09576E91-6D3F-11D2-8E39-00A0C969723B 44C62760
+Loading driver 9B680FCE-AD6B-4F3A-B60B-F59899003443
+InstallProtocolInterface: 5B1B31A1-9562-11D2-8E3F-00A0C969723B 44C65AA8
+0x44c01240 Loading /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/MdeModulePkg/Universal/DevicePathDxe/DevicePathDxe/DEBUG/DevicePathDxe.dll with entry point 0x44c0822f
+Loading driver at 0x00044C01000 EntryPoint=0x00044C0822F DevicePathDxe.efi
+InstallProtocolInterface: BC62157E-3E33-4FEC-9920-2D3B36D750DF 44C65C90
+ProtectUefiImageCommon - 0x44C65AA8
+  - 0x0000000044C01000 - 0x000000000000A800
+InstallProtocolInterface: 0379BE4E-D706-437D-B037-EDB82FB772A4 44C0A520
+InstallProtocolInterface: 8B843E20-8132-4852-90CC-551A4E4A7F1C 44C0A508
+InstallProtocolInterface: 05C99A21-C70F-4AD2-8A5F-35DF3343F51E 44C0A500
+Loading driver F9D88642-0737-49BC-81B5-6889CD57D9EA
+InstallProtocolInterface: 5B1B31A1-9562-11D2-8E3F-00A0C969723B 44C637A8
+0x44c0f240 Loading /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/MdeModulePkg/Universal/SmbiosDxe/SmbiosDxe/DEBUG/SmbiosDxe.dll with entry point 0x44c1102a
+Loading driver at 0x00044C0F000 EntryPoint=0x00044C1102A SmbiosDxe.efi
+InstallProtocolInterface: BC62157E-3E33-4FEC-9920-2D3B36D750DF 44C63590
+ProtectUefiImageCommon - 0x44C637A8
+  - 0x0000000044C0F000 - 0x0000000000003100
+InstallProtocolInterface: 03583FF6-CB36-4940-947E-B9B39F4AFAF7 44C11E08
+Loading driver 348C4D62-BFBD-4882-9ECE-C80BB1C4783B
+InstallProtocolInterface: 5B1B31A1-9562-11D2-8E3F-00A0C969723B 44C16B28
+0x44794240 Loading /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/MdeModulePkg/Universal/HiiDatabaseDxe/HiiDatabaseDxe/DEBUG/HiiDatabase.dll with entry point 0x447a83f3
+Loading driver at 0x00044794000 EntryPoint=0x000447A83F3 HiiDatabase.efi
+InstallProtocolInterface: BC62157E-3E33-4FEC-9920-2D3B36D750DF 44C16D10
+ProtectUefiImageCommon - 0x44C16B28
+  - 0x0000000044794000 - 0x000000000001A200
+InstallProtocolInterface: E9CA4775-8657-47FC-97E7-7ED65A084324 447ACFB4
+InstallProtocolInterface: 0FD96974-23AA-4CDC-B9CB-98D17750322A 447ACFF0
+InstallProtocolInterface: EF9FC172-A1B2-4693-B327-6D32FC416042 447AD004
+InstallProtocolInterface: 587E72D7-CC50-4F79-8209-CA291FC1A10F 447AD030
+InstallProtocolInterface: 0A8BADD5-03B8-4D19-B128-7B8F0EDAA596 447AD048
+InstallProtocolInterface: 31A6406A-6BDF-4E46-B2A2-EBAA89C40920 447ACFC4
+InstallProtocolInterface: 1A1241E6-8F19-41A9-BC0E-E8EF39E06546 447ACFD8
+Loading driver 79E4A61C-ED73-4312-94FE-E3E7563362A9
+InstallProtocolInterface: 5B1B31A1-9562-11D2-8E3F-00A0C969723B 44C15BA8
+0x447ba240 Loading /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/MdeModulePkg/Universal/PrintDxe/PrintDxe/DEBUG/PrintDxe.dll with entry point 0x447bbde8
+Loading driver at 0x000447BA000 EntryPoint=0x000447BBDE8 PrintDxe.efi
+InstallProtocolInterface: BC62157E-3E33-4FEC-9920-2D3B36D750DF 44C15E90
+ProtectUefiImageCommon - 0x44C15BA8
+  - 0x00000000447BA000 - 0x0000000000003100
+InstallProtocolInterface: F05976EF-83F1-4F3D-8619-F7595D41E538 447BCA40
+InstallProtocolInterface: 0CC252D2-C106-4661-B5BD-3147A4F81F92 447BCA00
+Loading driver BD712601-082F-4C59-8677-2C8A3C297948
+InstallProtocolInterface: 5B1B31A1-9562-11D2-8E3F-00A0C969723B 44C151A8
+0x447b4240 Loading /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/MdeModulePkg/Universal/LoadFileOnFv2/LoadFileOnFv2/DEBUG/LoadFileOnFv2.dll with entry point 0x447b56d2
+Loading driver at 0x000447B4000 EntryPoint=0x000447B56D2 LoadFileOnFv2.efi
+InstallProtocolInterface: BC62157E-3E33-4FEC-9920-2D3B36D750DF 44C15410
+ProtectUefiImageCommon - 0x44C151A8
+  - 0x00000000447B4000 - 0x0000000000002400
+InstallProtocolInterface: 09576E91-6D3F-11D2-8E39-00A0C969723B 44C14A90
+InstallProtocolInterface: 56EC3091-954C-11D2-8E3F-00A0C969723B 44C14D94
+InstallProtocolInterface: 09576E91-6D3F-11D2-8E39-00A0C969723B 44C14410
+InstallProtocolInterface: 56EC3091-954C-11D2-8E3F-00A0C969723B 44C14494
+InstallProtocolInterface: 09576E91-6D3F-11D2-8E39-00A0C969723B 44C13090
+InstallProtocolInterface: 56EC3091-954C-11D2-8E3F-00A0C969723B 44C13C14
+Loading driver A210F973-229D-4F4D-AA37-9895E6C9EABA
+InstallProtocolInterface: 5B1B31A1-9562-11D2-8E3F-00A0C969723B 447BE128
+0x442f0240 Loading /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/NetworkPkg/DpcDxe/DpcDxe/DEBUG/DpcDxe.dll with entry point 0x442f0d54
+Loading driver at 0x000442F0000 EntryPoint=0x000442F0D54 DpcDxe.efi
+InstallProtocolInterface: BC62157E-3E33-4FEC-9920-2D3B36D750DF 447BE290
+ProtectUefiImageCommon - 0x447BE128
+  - 0x00000000442F0000 - 0x0000000000001700
+InstallProtocolInterface: 480F8AE9-0C46-4AA9-BC89-DB9FBA619806 442F13F0
+Loading driver 6C2004EF-4E0E-4BE4-B14C-340EB4AA5891
+InstallProtocolInterface: 5B1B31A1-9562-11D2-8E3F-00A0C969723B 447B7BA8
+0x442e7240 Loading /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/MdeModulePkg/Universal/StatusCodeHandler/RuntimeDxe/StatusCodeHandlerRuntimeDxe/DEBUG/StatusCodeHandlerRuntimeDxe.dll with entry point 0x442e831c
+Loading driver at 0x000442E7000 EntryPoint=0x000442E831C StatusCodeHandlerRuntimeDxe.efi
+InstallProtocolInterface: BC62157E-3E33-4FEC-9920-2D3B36D750DF 447B7090
+ProtectUefiImageCommon - 0x447B7BA8
+  - 0x00000000442E7000 - 0x0000000000002440
+PROGRESS CODE: V03040003 I0
+Loading driver F3794B60-8985-11DB-8E53-0040D02B1835
+InstallProtocolInterface: 5B1B31A1-9562-11D2-8E3F-00A0C969723B 447B71A8
+0x442d6240 Loading /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/EmulatorPkg/CpuRuntimeDxe/Cpu/DEBUG/Cpu.dll with entry point 0x442d7d5a
+Loading driver at 0x000442D6000 EntryPoint=0x000442D7D5A Cpu.efi
+InstallProtocolInterface: BC62157E-3E33-4FEC-9920-2D3B36D750DF 447B7510
+ProtectUefiImageCommon - 0x447B71A8
+  - 0x00000000442D6000 - 0x0000000000003680
+PROGRESS CODE: V03040002 I0
+[New Thread 0xf7bceac0 (LWP 162967)]
+InstallProtocolInterface: 3FDDA605-A76E-4F46-AD29-12F4531B3D08 442D9194
+SmbiosAdd: Smbios type 4 with size 0x76 is added to 32-bit table
+SmbiosAdd: Smbios type 4 with size 0x76 is added to 64-bit table
+SmbiosCreateTable: Initialize 32-bit entry point structure
+SmbiosCreateTable() re-allocate SMBIOS 32-bit table
+SmbiosCreateTable: Initialize 64-bit entry point structure
+SmbiosCreate64BitTable() re-allocate SMBIOS 64-bit table
+InstallProtocolInterface: 26BACCB1-6F42-11D4-BCE7-0080C73C8881 442D9128
+InstallProtocolInterface: AD61F191-AE5F-4C0E-B9FA-E869D288C64F 442D9150
+MemoryProtectionCpuArchProtocolNotify:
+PROGRESS CODE: V03040003 I0
+Loading driver FE5CEA76-4F72-49E8-986F-2CD899DFFE5D
+InstallProtocolInterface: 5B1B31A1-9562-11D2-8E3F-00A0C969723B 442EC2A8
+0x442c2240 Loading /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/MdeModulePkg/Universal/FaultTolerantWriteDxe/FaultTolerantWriteDxe/DEBUG/FaultTolerantWriteDxe.dll with entry point 0x442c5123
+Loading driver at 0x000442C2000 EntryPoint=0x000442C5123 FaultTolerantWriteDxe.efi
+InstallProtocolInterface: BC62157E-3E33-4FEC-9920-2D3B36D750DF 442EC610
+ProtectUefiImageCommon - 0x442EC2A8
+  - 0x00000000442C2000 - 0x0000000000004580
+PROGRESS CODE: V03040002 I0
+Ftw: FtwWorkSpaceLba - 0x0, WorkBlockSize  - 0x10000, FtwWorkSpaceBase - 0xE000
+Ftw: FtwSpareLba     - 0x1, SpareBlockSize - 0x10000
+Ftw: NumberOfWorkBlock - 0x1, FtwWorkBlockLba - 0x0
+Ftw: WorkSpaceLbaInSpare - 0x0, WorkSpaceBaseInSpare - 0xE000
+Ftw: Remaining work space size - 1FE0
+InstallProtocolInterface: 3EBD9E82-2C78-4DE6-9786-8D4BFCB7C881 442C9018
+RecordSecureBootPolicyVarData GetVariable SecureBoot Status 8000000E
+InstallProtocolInterface: 6441F818-6362-4E44-B570-7DBA31DD2453 0
+PROGRESS CODE: V03040003 I0
+Loading driver 67FA951E-4FA2-9F4E-A658-4DBD954AC22E
+InstallProtocolInterface: 5B1B31A1-9562-11D2-8E3F-00A0C969723B 442DBCA8
+0x442b6240 Loading /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/EmulatorPkg/PlatformSmbiosDxe/PlatformSmbiosDxe/DEBUG/PlatformSmbiosDxe.dll with entry point 0x442b6f5e
+Loading driver at 0x000442B6000 EntryPoint=0x000442B6F5E PlatformSmbiosDxe.efi
+InstallProtocolInterface: BC62157E-3E33-4FEC-9920-2D3B36D750DF 442DBB10
+ProtectUefiImageCommon - 0x442DBCA8
+  - 0x00000000442B6000 - 0x00000000000021C0
+PROGRESS CODE: V03040002 I0
+SmbiosAdd: Smbios type 0 with size 0x4F is added to 32-bit table
+SmbiosAdd: Smbios type 0 with size 0x4F is added to 64-bit table
+SmbiosAdd: Smbios type 1 with size 0x6B is added to 32-bit table
+SmbiosAdd: Smbios type 1 with size 0x6B is added to 64-bit table
+SmbiosAdd: Smbios type 2 with size 0x79 is added to 32-bit table
+SmbiosAdd: Smbios type 2 with size 0x79 is added to 64-bit table
+SmbiosAdd: Smbios type 3 with size 0x73 is added to 32-bit table
+SmbiosAdd: Smbios type 3 with size 0x73 is added to 64-bit table
+SmbiosAdd: Smbios type 8 with size 0x1B is added to 32-bit table
+SmbiosAdd: Smbios type 8 with size 0x1B is added to 64-bit table
+SmbiosAdd: Smbios type 8 with size 0x17 is added to 32-bit table
+SmbiosAdd: Smbios type 8 with size 0x17 is added to 64-bit table
+SmbiosAdd: Smbios type 8 with size 0x13 is added to 32-bit table
+SmbiosAdd: Smbios type 8 with size 0x13 is added to 64-bit table
+SmbiosAdd: Smbios type 8 with size 0xF is added to 32-bit table
+SmbiosAdd: Smbios type 8 with size 0xF is added to 64-bit table
+SmbiosAdd: Smbios type 8 with size 0xF is added to 32-bit table
+SmbiosAdd: Smbios type 8 with size 0xF is added to 64-bit table
+SmbiosAdd: Smbios type 8 with size 0xF is added to 32-bit table
+SmbiosAdd: Smbios type 8 with size 0xF is added to 64-bit table
+SmbiosAdd: Smbios type 8 with size 0xF is added to 32-bit table
+SmbiosAdd: Smbios type 8 with size 0xF is added to 64-bit table
+SmbiosAdd: Smbios type 8 with size 0x18 is added to 32-bit table
+SmbiosAdd: Smbios type 8 with size 0x18 is added to 64-bit table
+SmbiosAdd: Smbios type 8 with size 0x19 is added to 32-bit table
+SmbiosAdd: Smbios type 8 with size 0x19 is added to 64-bit table
+SmbiosAdd: Smbios type 9 with size 0x21 is added to 32-bit table
+SmbiosAdd: Smbios type 9 with size 0x21 is added to 64-bit table
+SmbiosAdd: Smbios type 11 with size 0x42 is added to 32-bit table
+SmbiosAdd: Smbios type 11 with size 0x42 is added to 64-bit table
+SmbiosAdd: Smbios type 12 with size 0x51 is added to 32-bit table
+SmbiosAdd: Smbios type 12 with size 0x51 is added to 64-bit table
+SmbiosAdd: Smbios type 16 with size 0x19 is added to 32-bit table
+SmbiosAdd: Smbios type 16 with size 0x19 is added to 64-bit table
+SmbiosAdd: Smbios type 17 with size 0x7A is added to 32-bit table
+SmbiosAdd: Smbios type 17 with size 0x7A is added to 64-bit table
+SmbiosAdd: Smbios type 32 with size 0xF is added to 32-bit table
+SmbiosAdd: Smbios type 32 with size 0xF is added to 64-bit table
+SmbiosAdd: Smbios type 32 with size 0xD is added to 32-bit table
+SmbiosAdd: Smbios type 32 with size 0xD is added to 64-bit table
+SmbiosAdd: Smbios type 19 with size 0x21 is added to 32-bit table
+SmbiosAdd: Smbios type 19 with size 0x21 is added to 64-bit table
+SmbiosAdd: Smbios type 19 with size 0x21 is added to 32-bit table
+SmbiosAdd: Smbios type 19 with size 0x21 is added to 64-bit table
+PROGRESS CODE: V03040003 I0
+Loading driver EBF342FE-B1D3-4EF8-957C-8048606FF671
+InstallProtocolInterface: 5B1B31A1-9562-11D2-8E3F-00A0C969723B 442C80A8
+0x4425a240 Loading /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/MdeModulePkg/Universal/SetupBrowserDxe/SetupBrowserDxe/DEBUG/SetupBrowser.dll with entry point 0x44267e6f
+Loading driver at 0x0004425A000 EntryPoint=0x00044267E6F SetupBrowser.efi
+InstallProtocolInterface: BC62157E-3E33-4FEC-9920-2D3B36D750DF 442C8A90
+ProtectUefiImageCommon - 0x442C80A8
+  - 0x000000004425A000 - 0x0000000000016680
+PROGRESS CODE: V03040002 I0
+InstallProtocolInterface: B9D4C360-BCFB-4F9B-9298-53C136982258 4426F1E8
+InstallProtocolInterface: A770C357-B693-4E6D-A6CF-D21C728E550B 4426F200
+InstallProtocolInterface: 1F73B18D-4630-43C1-A1DE-6F80855D7DA4 4426F1F0
+PROGRESS CODE: V03040003 I0
+Loading driver F74D20EE-37E7-48FC-97F7-9B1047749C69
+InstallProtocolInterface: 5B1B31A1-9562-11D2-8E3F-00A0C969723B 442C7BA8
+0x44274240 Loading /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/MdeModulePkg/Logo/LogoDxe/DEBUG/LogoDxe.dll with entry point 0x44274a81
+Loading driver at 0x00044274000 EntryPoint=0x00044274A81 LogoDxe.efi
+InstallProtocolInterface: BC62157E-3E33-4FEC-9920-2D3B36D750DF 442C7A10
+InstallProtocolInterface: 6A1EE763-D47A-43B4-AABE-EF1DE2AB56FC 44275270
+ProtectUefiImageCommon - 0x442C7BA8
+  - 0x0000000044274000 - 0x0000000000004240
+PROGRESS CODE: V03040002 I0
+InstallProtocolInterface: 53CD299F-2BC1-40C0-8C07-23F64FDB30E0 442750F0
+PROGRESS CODE: V03040003 I0
+Loading driver A487A478-51EF-48AA-8794-7BEE2A0562F1
+InstallProtocolInterface: 5B1B31A1-9562-11D2-8E3F-00A0C969723B 4427DC28
+0x4422e240 Loading /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/ShellPkg/DynamicCommand/TftpDynamicCommand/TftpDynamicCommand/DEBUG/tftpDynamicCommand.dll with entry point 0x44233fe5
+Loading driver at 0x0004422E000 EntryPoint=0x00044233FE5 tftpDynamicCommand.efi
+InstallProtocolInterface: BC62157E-3E33-4FEC-9920-2D3B36D750DF 4427DA90
+InstallProtocolInterface: 6A1EE763-D47A-43B4-AABE-EF1DE2AB56FC 44236170
+ProtectUefiImageCommon - 0x4427DC28
+  - 0x000000004422E000 - 0x000000000000A280
+PROGRESS CODE: V03040002 I0
+InstallProtocolInterface: 3C7200E9-005F-4EA4-87DE-A3DFAC8A27C3 44235EE0
+PROGRESS CODE: V03040003 I0
+Loading driver 87E1BB14-4D5C-7C4E-A90E-E1415687D062
+InstallProtocolInterface: 5B1B31A1-9562-11D2-8E3F-00A0C969723B 44271028
+0x44240240 Loading /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/EmulatorPkg/TimerDxe/Timer/DEBUG/EmuTimer.dll with entry point 0x44240ca4
+Loading driver at 0x00044240000 EntryPoint=0x00044240CA4 EmuTimer.efi
+InstallProtocolInterface: BC62157E-3E33-4FEC-9920-2D3B36D750DF 44271F90
+ProtectUefiImageCommon - 0x44271028
+  - 0x0000000044240000 - 0x0000000000001780
+PROGRESS CODE: V03040002 I0
+InstallProtocolInterface: 26BACCB3-6F42-11D4-BCE7-0080C73C8881 44241540
+PROGRESS CODE: V03040003 I0
+Loading driver AD608272-D07F-4964-801E-7BD3B7888652
+InstallProtocolInterface: 5B1B31A1-9562-11D2-8E3F-00A0C969723B 44271328
+0x4423a240 Loading /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/MdeModulePkg/Universal/MonotonicCounterRuntimeDxe/MonotonicCounterRuntimeDxe/DEBUG/MonotonicCounterRuntimeDxe.dll with entry point 0x4423ab7f
+Loading driver at 0x0004423A000 EntryPoint=0x0004423AB7F MonotonicCounterRuntimeDxe.efi
+InstallProtocolInterface: BC62157E-3E33-4FEC-9920-2D3B36D750DF 44271510
+ProtectUefiImageCommon - 0x44271328
+  - 0x000000004423A000 - 0x0000000000001780
+PROGRESS CODE: V03040002 I0
+InstallProtocolInterface: 1DA97072-BDDC-4B30-99F1-72A0B56FFF2A 0
+PROGRESS CODE: V03040003 I0
+Loading driver 42857F0A-13F2-4B21-8A23-53D3F714B840
+InstallProtocolInterface: 5B1B31A1-9562-11D2-8E3F-00A0C969723B 4423D7A8
+0x44226240 Loading /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/MdeModulePkg/Universal/CapsuleRuntimeDxe/CapsuleRuntimeDxe/DEBUG/CapsuleRuntimeDxe.dll with entry point 0x44226d41
+Loading driver at 0x00044226000 EntryPoint=0x00044226D41 CapsuleRuntimeDxe.efi
+InstallProtocolInterface: BC62157E-3E33-4FEC-9920-2D3B36D750DF 4423D110
+ProtectUefiImageCommon - 0x4423D7A8
+  - 0x0000000044226000 - 0x0000000000001800
+PROGRESS CODE: V03040002 I0
+InstallProtocolInterface: 5053697E-2CBC-4819-90D9-0580DEEE5754 0
+PROGRESS CODE: V03040003 I0
+Loading driver E660EA85-058E-4B55-A54B-F02F83A24707
+InstallProtocolInterface: 5B1B31A1-9562-11D2-8E3F-00A0C969723B 44229028
+0x441da240 Loading /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/MdeModulePkg/Universal/DisplayEngineDxe/DisplayEngineDxe/DEBUG/DisplayEngine.dll with entry point 0x441e7029
+Loading driver at 0x000441DA000 EntryPoint=0x000441E7029 DisplayEngine.efi
+InstallProtocolInterface: BC62157E-3E33-4FEC-9920-2D3B36D750DF 44229C90
+ProtectUefiImageCommon - 0x44229028
+  - 0x00000000441DA000 - 0x0000000000012A80
+PROGRESS CODE: V03040002 I0
+InstallProtocolInterface: 9BBE29E9-FDA1-41EC-AD52-452213742D2E 441EA2C8
+InstallProtocolInterface: 4311EDC0-6054-46D4-9E40-893EA952FCCC 441EA2D8
+PROGRESS CODE: V03040003 I0
+Loading driver 6D33944A-EC75-4855-A54D-809C75241F6C
+InstallProtocolInterface: 5B1B31A1-9562-11D2-8E3F-00A0C969723B 441FD7A8
+0x44186240 Loading /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/MdeModulePkg/Universal/BdsDxe/BdsDxe/DEBUG/BdsDxe.dll with entry point 0x4419255a
+Loading driver at 0x00044186000 EntryPoint=0x0004419255A BdsDxe.efi
+InstallProtocolInterface: BC62157E-3E33-4FEC-9920-2D3B36D750DF 441FDA90
+ProtectUefiImageCommon - 0x441FD7A8
+  - 0x0000000044186000 - 0x0000000000014200
+PROGRESS CODE: V03040002 I0
+InstallProtocolInterface: 665E3FF6-46CC-11D4-9A38-0090273FC14D 44199208
+PROGRESS CODE: V03040003 I0
+Loading driver F099D67F-71AE-4C36-B2A3-DCEB0EB2B7D8
+InstallProtocolInterface: 5B1B31A1-9562-11D2-8E3F-00A0C969723B 441F4028
+0x441f2240 Loading /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/MdeModulePkg/Universal/WatchdogTimerDxe/WatchdogTimer/DEBUG/WatchdogTimer.dll with entry point 0x441f2b19
+Loading driver at 0x000441F2000 EntryPoint=0x000441F2B19 WatchdogTimer.efi
+InstallProtocolInterface: BC62157E-3E33-4FEC-9920-2D3B36D750DF 441F4F90
+ProtectUefiImageCommon - 0x441F4028
+  - 0x00000000441F2000 - 0x00000000000013C0
+PROGRESS CODE: V03040002 I0
+InstallProtocolInterface: 665E3FF5-46CC-11D4-9A38-0090273FC14D 441F31E0
+PROGRESS CODE: V03040003 I0
+Loading driver 51CCF399-4FDF-4E55-A45B-E123F84D456A
+InstallProtocolInterface: 5B1B31A1-9562-11D2-8E3F-00A0C969723B 441F48A8
+0x441ac240 Loading /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/MdeModulePkg/Universal/Console/ConPlatformDxe/ConPlatformDxe/DEBUG/ConPlatformDxe.dll with entry point 0x441ae02c
+Loading driver at 0x000441AC000 EntryPoint=0x000441AE02C ConPlatformDxe.efi
+InstallProtocolInterface: BC62157E-3E33-4FEC-9920-2D3B36D750DF 441F4210
+ProtectUefiImageCommon - 0x441F48A8
+  - 0x00000000441AC000 - 0x0000000000003300
+PROGRESS CODE: V03040002 I0
+InstallProtocolInterface: 18A031AB-B443-4D1A-A5C0-0C09261E9F71 441AEEF4
+InstallProtocolInterface: 107A772C-D5E1-11D4-9A46-0090273FC14D 441AEFCC
+InstallProtocolInterface: 6A7A5CFF-E8D9-4F70-BADA-75AB3025CE14 441AEEE8
+InstallProtocolInterface: 18A031AB-B443-4D1A-A5C0-0C09261E9F71 441AEED0
+InstallProtocolInterface: 107A772C-D5E1-11D4-9A46-0090273FC14D 441AEFCC
+InstallProtocolInterface: 6A7A5CFF-E8D9-4F70-BADA-75AB3025CE14 441AEEE8
+PROGRESS CODE: V03040003 I0
+Loading driver 408EDCEC-CF6D-477C-A5A8-B4844E3DE281
+InstallProtocolInterface: 5B1B31A1-9562-11D2-8E3F-00A0C969723B 441F6BA8
+0x4419e240 Loading /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/MdeModulePkg/Universal/Console/ConSplitterDxe/ConSplitterDxe/DEBUG/ConSplitterDxe.dll with entry point 0x441a27eb
+Loading driver at 0x0004419E000 EntryPoint=0x000441A27EB ConSplitterDxe.efi
+InstallProtocolInterface: BC62157E-3E33-4FEC-9920-2D3B36D750DF 441F6D90
+ProtectUefiImageCommon - 0x441F6BA8
+  - 0x000000004419E000 - 0x0000000000006480
+PROGRESS CODE: V03040002 I0
+InstallProtocolInterface: 18A031AB-B443-4D1A-A5C0-0C09261E9F71 441A3E40
+InstallProtocolInterface: 107A772C-D5E1-11D4-9A46-0090273FC14D 441A3E98
+InstallProtocolInterface: 6A7A5CFF-E8D9-4F70-BADA-75AB3025CE14 441A3A30
+InstallProtocolInterface: 18A031AB-B443-4D1A-A5C0-0C09261E9F71 441A3E08
+InstallProtocolInterface: 107A772C-D5E1-11D4-9A46-0090273FC14D 441A3E8C
+InstallProtocolInterface: 6A7A5CFF-E8D9-4F70-BADA-75AB3025CE14 441A3A24
+InstallProtocolInterface: 18A031AB-B443-4D1A-A5C0-0C09261E9F71 441A3DD0
+InstallProtocolInterface: 107A772C-D5E1-11D4-9A46-0090273FC14D 441A3E80
+InstallProtocolInterface: 6A7A5CFF-E8D9-4F70-BADA-75AB3025CE14 441A3A18
+InstallProtocolInterface: 18A031AB-B443-4D1A-A5C0-0C09261E9F71 441A3D98
+InstallProtocolInterface: 107A772C-D5E1-11D4-9A46-0090273FC14D 441A3E74
+InstallProtocolInterface: 6A7A5CFF-E8D9-4F70-BADA-75AB3025CE14 441A3A0C
+InstallProtocolInterface: 18A031AB-B443-4D1A-A5C0-0C09261E9F71 441A3D60
+InstallProtocolInterface: 107A772C-D5E1-11D4-9A46-0090273FC14D 441A3E68
+InstallProtocolInterface: 6A7A5CFF-E8D9-4F70-BADA-75AB3025CE14 441A3A00
+InstallProtocolInterface: 387477C1-69C7-11D2-8E39-00A0C969723B 441A3C4C
+InstallProtocolInterface: DD9E7534-7762-4698-8C14-F58517A625AA 441A3C64
+InstallProtocolInterface: 31878C87-0B75-11D5-9A4F-0090273FC14D 441A3C9C
+InstallProtocolInterface: 8D59D32B-C655-4AE9-9B15-F25904992A43 441A3CDC
+InstallProtocolInterface: 387477C2-69C7-11D2-8E39-00A0C969723B 441A3B8C
+InstallProtocolInterface: 387477C2-69C7-11D2-8E39-00A0C969723B 441A3AEC
+PROGRESS CODE: V03040003 I0
+Loading driver CCCB0C28-4B24-11D5-9A5A-0090273FC14D
+InstallProtocolInterface: 5B1B31A1-9562-11D2-8E3F-00A0C969723B 441F0BA8
+0x44181240 Loading /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/MdeModulePkg/Universal/Console/GraphicsConsoleDxe/GraphicsConsoleDxe/DEBUG/GraphicsConsoleDxe.dll with entry point 0x4418356f
+Loading driver at 0x00044181000 EntryPoint=0x0004418356F GraphicsConsoleDxe.efi
+InstallProtocolInterface: BC62157E-3E33-4FEC-9920-2D3B36D750DF 441F0D90
+ProtectUefiImageCommon - 0x441F0BA8
+  - 0x0000000044181000 - 0x0000000000004CC0
+PROGRESS CODE: V03040002 I0
+InstallProtocolInterface: 18A031AB-B443-4D1A-A5C0-0C09261E9F71 4418429C
+InstallProtocolInterface: 107A772C-D5E1-11D4-9A46-0090273FC14D 44185954
+InstallProtocolInterface: 6A7A5CFF-E8D9-4F70-BADA-75AB3025CE14 44184290
+PROGRESS CODE: V03040003 I0
+Loading driver 9E863906-A40F-4875-977F-5B93FF237FC6
+InstallProtocolInterface: 5B1B31A1-9562-11D2-8E3F-00A0C969723B 441F01A8
+0x44173240 Loading /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/MdeModulePkg/Universal/Console/TerminalDxe/TerminalDxe/DEBUG/TerminalDxe.dll with entry point 0x44177bc3
+Loading driver at 0x00044173000 EntryPoint=0x00044177BC3 TerminalDxe.efi
+InstallProtocolInterface: BC62157E-3E33-4FEC-9920-2D3B36D750DF 441F0410
+ProtectUefiImageCommon - 0x441F01A8
+  - 0x0000000044173000 - 0x0000000000006880
+PROGRESS CODE: V03040002 I0
+InstallProtocolInterface: 18A031AB-B443-4D1A-A5C0-0C09261E9F71 4417922C
+InstallProtocolInterface: 107A772C-D5E1-11D4-9A46-0090273FC14D 44179254
+InstallProtocolInterface: 6A7A5CFF-E8D9-4F70-BADA-75AB3025CE14 441790B0
+PROGRESS CODE: V03040003 I0
+Loading driver 6B38F7B4-AD98-40E9-9093-ACA2B5A253C4
+InstallProtocolInterface: 5B1B31A1-9562-11D2-8E3F-00A0C969723B 441EFBA8
+0x4416f240 Loading /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/MdeModulePkg/Universal/Disk/DiskIoDxe/DiskIoDxe/DEBUG/DiskIoDxe.dll with entry point 0x4417167e
+Loading driver at 0x0004416F000 EntryPoint=0x0004417167E DiskIoDxe.efi
+InstallProtocolInterface: BC62157E-3E33-4FEC-9920-2D3B36D750DF 441EFA10
+ProtectUefiImageCommon - 0x441EFBA8
+  - 0x000000004416F000 - 0x0000000000003940
+PROGRESS CODE: V03040002 I0
+InstallProtocolInterface: 18A031AB-B443-4D1A-A5C0-0C09261E9F71 4417252C
+InstallProtocolInterface: 107A772C-D5E1-11D4-9A46-0090273FC14D 44172610
+InstallProtocolInterface: 6A7A5CFF-E8D9-4F70-BADA-75AB3025CE14 44172520
+PROGRESS CODE: V03040003 I0
+Loading driver 1FA1F39E-FEFF-4AAE-BD7B-38A070A3B609
+InstallProtocolInterface: 5B1B31A1-9562-11D2-8E3F-00A0C969723B 441EF5A8
+0x44169240 Loading /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/MdeModulePkg/Universal/Disk/PartitionDxe/PartitionDxe/DEBUG/PartitionDxe.dll with entry point 0x4416d59b
+Loading driver at 0x00044169000 EntryPoint=0x0004416D59B PartitionDxe.efi
+InstallProtocolInterface: BC62157E-3E33-4FEC-9920-2D3B36D750DF 441EF510
+ProtectUefiImageCommon - 0x441EF5A8
+  - 0x0000000044169000 - 0x0000000000005BC0
+PROGRESS CODE: V03040002 I0
+InstallProtocolInterface: 18A031AB-B443-4D1A-A5C0-0C09261E9F71 4416E72C
+InstallProtocolInterface: 107A772C-D5E1-11D4-9A46-0090273FC14D 4416E7FC
+InstallProtocolInterface: 6A7A5CFF-E8D9-4F70-BADA-75AB3025CE14 4416E720
+PROGRESS CODE: V03040003 I0
+Loading driver CD3BAFB6-50FB-4FE8-8E4E-AB74D2C1A600
+InstallProtocolInterface: 5B1B31A1-9562-11D2-8E3F-00A0C969723B 441EEB28
+0x441a6240 Loading /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/MdeModulePkg/Universal/Disk/UnicodeCollation/EnglishDxe/EnglishDxe/DEBUG/EnglishDxe.dll with entry point 0x441a6d0e
+Loading driver at 0x000441A6000 EntryPoint=0x000441A6D0E EnglishDxe.efi
+InstallProtocolInterface: BC62157E-3E33-4FEC-9920-2D3B36D750DF 441EED10
+ProtectUefiImageCommon - 0x441EEB28
+  - 0x00000000441A6000 - 0x0000000000001880
+PROGRESS CODE: V03040002 I0
+InstallProtocolInterface: 1D85CD7F-F43D-11D2-9A0C-0090273FC14D 441A735C
+InstallProtocolInterface: A4C751FC-23AE-4C3E-92E9-4964CF63F349 441A7330
+PROGRESS CODE: V03040003 I0
+Loading driver 93B80004-9FB3-11D4-9A3A-0090273FC14D
+InstallProtocolInterface: 5B1B31A1-9562-11D2-8E3F-00A0C969723B 441EE128
+0x44145240 Loading /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/MdeModulePkg/Bus/Pci/PciBusDxe/PciBusDxe/DEBUG/PciBusDxe.dll with entry point 0x44151f12
+Loading driver at 0x00044145000 EntryPoint=0x00044151F12 PciBusDxe.efi
+InstallProtocolInterface: BC62157E-3E33-4FEC-9920-2D3B36D750DF 441EE290
+ProtectUefiImageCommon - 0x441EE128
+  - 0x0000000044145000 - 0x0000000000011840
+PROGRESS CODE: V03040002 I0
+InstallProtocolInterface: 18A031AB-B443-4D1A-A5C0-0C09261E9F71 44155B78
+InstallProtocolInterface: 107A772C-D5E1-11D4-9A46-0090273FC14D 44155AB0
+InstallProtocolInterface: 6A7A5CFF-E8D9-4F70-BADA-75AB3025CE14 44155C84
+InstallProtocolInterface: 19CB87AB-2CB9-4665-8360-DDCF6054F79D 44155C70
+PROGRESS CODE: V03040003 I0
+Loading driver 0167CCC4-D0F7-4F21-A3EF-9E64B7CDCE8B
+InstallProtocolInterface: 5B1B31A1-9562-11D2-8E3F-00A0C969723B 441EDBA8
+0x44165240 Loading /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/MdeModulePkg/Bus/Scsi/ScsiBusDxe/ScsiBusDxe/DEBUG/ScsiBus.dll with entry point 0x44167506
+Loading driver at 0x00044165000 EntryPoint=0x00044167506 ScsiBus.efi
+InstallProtocolInterface: BC62157E-3E33-4FEC-9920-2D3B36D750DF 441EDE10
+ProtectUefiImageCommon - 0x441EDBA8
+  - 0x0000000044165000 - 0x00000000000032C0
+PROGRESS CODE: V03040002 I0
+InstallProtocolInterface: 18A031AB-B443-4D1A-A5C0-0C09261E9F71 44167F5C
+InstallProtocolInterface: 107A772C-D5E1-11D4-9A46-0090273FC14D 44167FE4
+InstallProtocolInterface: 6A7A5CFF-E8D9-4F70-BADA-75AB3025CE14 44167F50
+PROGRESS CODE: V03040003 I0
+Loading driver 0A66E322-3740-4CCE-AD62-BD172CECCA35
+InstallProtocolInterface: 5B1B31A1-9562-11D2-8E3F-00A0C969723B 441ED828
+0x4413c240 Loading /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/MdeModulePkg/Bus/Scsi/ScsiDiskDxe/ScsiDiskDxe/DEBUG/ScsiDisk.dll with entry point 0x44142b04
+Loading driver at 0x0004413C000 EntryPoint=0x00044142B04 ScsiDisk.efi
+InstallProtocolInterface: BC62157E-3E33-4FEC-9920-2D3B36D750DF 441ED610
+ProtectUefiImageCommon - 0x441ED828
+  - 0x000000004413C000 - 0x00000000000081C0
+PROGRESS CODE: V03040002 I0
+InstallProtocolInterface: 18A031AB-B443-4D1A-A5C0-0C09261E9F71 44143C7C
+InstallProtocolInterface: 107A772C-D5E1-11D4-9A46-0090273FC14D 44143CA4
+InstallProtocolInterface: 6A7A5CFF-E8D9-4F70-BADA-75AB3025CE14 44143C10
+PROGRESS CODE: V03040003 I0
+Loading driver 9842073D-95D9-9F49-BD3F-2E29525125DF
+InstallProtocolInterface: 5B1B31A1-9562-11D2-8E3F-00A0C969723B 441AB028
+0x4417e240 Loading /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/EmulatorPkg/EmuBusDriverDxe/EmuBusDriverDxe/DEBUG/EmuBusDriver.dll with entry point 0x4417fcd3
+Loading driver at 0x0004417E000 EntryPoint=0x0004417FCD3 EmuBusDriver.efi
+InstallProtocolInterface: BC62157E-3E33-4FEC-9920-2D3B36D750DF 441ABF10
+ProtectUefiImageCommon - 0x441AB028
+  - 0x000000004417E000 - 0x00000000000029C0
+PROGRESS CODE: V03040002 I0
+InstallProtocolInterface: 18A031AB-B443-4D1A-A5C0-0C09261E9F71 44180710
+InstallProtocolInterface: 107A772C-D5E1-11D4-9A46-0090273FC14D 44180738
+PROGRESS CODE: V03040003 I0
+Loading driver BCC87E0D-86D6-4D4D-8040-2D983D368BD1
+InstallProtocolInterface: 5B1B31A1-9562-11D2-8E3F-00A0C969723B 441AB1A8
+0x44161240 Loading /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/EmulatorPkg/EmuGopDxe/EmuGopDxe/DEBUG/EmuGopDxe.dll with entry point 0x4416341a
+Loading driver at 0x00044161000 EntryPoint=0x0004416341A EmuGopDxe.efi
+InstallProtocolInterface: BC62157E-3E33-4FEC-9920-2D3B36D750DF 441ABA90
+ProtectUefiImageCommon - 0x441AB1A8
+  - 0x0000000044161000 - 0x0000000000003400
+PROGRESS CODE: V03040002 I0
+InstallProtocolInterface: 18A031AB-B443-4D1A-A5C0-0C09261E9F71 4416407C
+InstallProtocolInterface: 107A772C-D5E1-11D4-9A46-0090273FC14D 441640A4
+InstallProtocolInterface: 6A7A5CFF-E8D9-4F70-BADA-75AB3025CE14 44164040
+PROGRESS CODE: V03040003 I0
+Loading driver 35B72237-3926-CF4A-A7F3-1449F9E0E4BD
+InstallProtocolInterface: 5B1B31A1-9562-11D2-8E3F-00A0C969723B 441AB428
+0x4417b240 Loading /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/EmulatorPkg/EmuSimpleFileSystemDxe/EmuSimpleFileSystemDxe/DEBUG/EmuSimpleFileSystem.dll with entry point 0x4417cc53
+Loading driver at 0x0004417B000 EntryPoint=0x0004417CC53 EmuSimpleFileSystem.efi
+InstallProtocolInterface: BC62157E-3E33-4FEC-9920-2D3B36D750DF 441AB710
+ProtectUefiImageCommon - 0x441AB428
+  - 0x000000004417B000 - 0x0000000000002900
+PROGRESS CODE: V03040002 I0
+InstallProtocolInterface: 18A031AB-B443-4D1A-A5C0-0C09261E9F71 4417D61C
+InstallProtocolInterface: 107A772C-D5E1-11D4-9A46-0090273FC14D 4417D644
+InstallProtocolInterface: 6A7A5CFF-E8D9-4F70-BADA-75AB3025CE14 4417D5F0
+PROGRESS CODE: V03040003 I0
+Loading driver C6760651-A38D-5F4F-AEAF-F6661549DF75
+InstallProtocolInterface: 5B1B31A1-9562-11D2-8E3F-00A0C969723B 441AAC28
+0x4415e240 Loading /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/EmulatorPkg/EmuBlockIoDxe/EmuBlockIoDxe/DEBUG/EmuBlockIo.dll with entry point 0x4415f9fe
+Loading driver at 0x0004415E000 EntryPoint=0x0004415F9FE EmuBlockIo.efi
+InstallProtocolInterface: BC62157E-3E33-4FEC-9920-2D3B36D750DF 441AAA90
+ProtectUefiImageCommon - 0x441AAC28
+  - 0x000000004415E000 - 0x0000000000002700
+PROGRESS CODE: V03040002 I0
+InstallProtocolInterface: 18A031AB-B443-4D1A-A5C0-0C09261E9F71 44160430
+InstallProtocolInterface: 107A772C-D5E1-11D4-9A46-0090273FC14D 44160414
+InstallProtocolInterface: 6A7A5CFF-E8D9-4F70-BADA-75AB3025CE14 441603E8
+InstallProtocolInterface: 0784924F-E296-11D4-9A49-0090273FC14D 44160458
+InstallProtocolInterface: 4D330321-025F-4AAC-90D8-5ED900173B63 441603C0
+PROGRESS CODE: V03040003 I0
+Loading driver 22597239-6107-DF44-AD3F-5F053E92222E
+InstallProtocolInterface: 5B1B31A1-9562-11D2-8E3F-00A0C969723B 441AA228
+0x4415b240 Loading /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/EmulatorPkg/EmuSnpDxe/EmuSnpDxe/DEBUG/EmuSnpDxe.dll with entry point 0x4415ce21
+Loading driver at 0x0004415B000 EntryPoint=0x0004415CE21 EmuSnpDxe.efi
+InstallProtocolInterface: BC62157E-3E33-4FEC-9920-2D3B36D750DF 441AA510
+ProtectUefiImageCommon - 0x441AA228
+  - 0x000000004415B000 - 0x0000000000002E00
+PROGRESS CODE: V03040002 I0
+InstallProtocolInterface: 18A031AB-B443-4D1A-A5C0-0C09261E9F71 4415D7E0
+InstallProtocolInterface: 107A772C-D5E1-11D4-9A46-0090273FC14D 4415DB68
+InstallProtocolInterface: 6A7A5CFF-E8D9-4F70-BADA-75AB3025CE14 4415D818
+PROGRESS CODE: V03040003 I0
+Loading driver E4F61863-FE2C-4B56-A8F4-08519BC439DF
+InstallProtocolInterface: 5B1B31A1-9562-11D2-8E3F-00A0C969723B 441A5C28
+0x4412e240 Loading /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/NetworkPkg/VlanConfigDxe/VlanConfigDxe/DEBUG/VlanConfigDxe.dll with entry point 0x44132525
+Loading driver at 0x0004412E000 EntryPoint=0x00044132525 VlanConfigDxe.efi
+InstallProtocolInterface: BC62157E-3E33-4FEC-9920-2D3B36D750DF 441A5A90
+ProtectUefiImageCommon - 0x441A5C28
+  - 0x000000004412E000 - 0x0000000000006C00
+PROGRESS CODE: V03040002 I0
+InstallProtocolInterface: 18A031AB-B443-4D1A-A5C0-0C09261E9F71 44133F7C
+InstallProtocolInterface: 107A772C-D5E1-11D4-9A46-0090273FC14D 441346DC
+InstallProtocolInterface: 6A7A5CFF-E8D9-4F70-BADA-75AB3025CE14 44133F70
+PROGRESS CODE: V03040003 I0
+Loading driver 025BBFC7-E6A9-4B8B-82AD-6815A1AEAF4A
+InstallProtocolInterface: 5B1B31A1-9562-11D2-8E3F-00A0C969723B 441A55A8
+0x44118240 Loading /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/NetworkPkg/MnpDxe/MnpDxe/DEBUG/MnpDxe.dll with entry point 0x4411ef23
+Loading driver at 0x00044118000 EntryPoint=0x0004411EF23 MnpDxe.efi
+InstallProtocolInterface: BC62157E-3E33-4FEC-9920-2D3B36D750DF 441A5210
+ProtectUefiImageCommon - 0x441A55A8
+  - 0x0000000044118000 - 0x000000000000A040
+PROGRESS CODE: V03040002 I0
+InstallProtocolInterface: 18A031AB-B443-4D1A-A5C0-0C09261E9F71 441218EC
+InstallProtocolInterface: 107A772C-D5E1-11D4-9A46-0090273FC14D 44121920
+InstallProtocolInterface: 6A7A5CFF-E8D9-4F70-BADA-75AB3025CE14 44121904
+PROGRESS CODE: V03040003 I0
+Loading driver 529D3F93-E8E9-4E73-B1E1-BDF6A9D50113
+InstallProtocolInterface: 5B1B31A1-9562-11D2-8E3F-00A0C969723B 4419DB28
+0x44129240 Loading /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/NetworkPkg/ArpDxe/ArpDxe/DEBUG/ArpDxe.dll with entry point 0x4412c5ca
+Loading driver at 0x00044129000 EntryPoint=0x0004412C5CA ArpDxe.efi
+InstallProtocolInterface: BC62157E-3E33-4FEC-9920-2D3B36D750DF 4419DD90
+ProtectUefiImageCommon - 0x4419DB28
+  - 0x0000000044129000 - 0x0000000000004CC0
+PROGRESS CODE: V03040002 I0
+InstallProtocolInterface: 18A031AB-B443-4D1A-A5C0-0C09261E9F71 4412D878
+InstallProtocolInterface: 107A772C-D5E1-11D4-9A46-0090273FC14D 4412D8F0
+InstallProtocolInterface: 6A7A5CFF-E8D9-4F70-BADA-75AB3025CE14 4412D800
+PROGRESS CODE: V03040003 I0
+Loading driver 94734718-0BBC-47FB-96A5-EE7A5AE6A2AD
+InstallProtocolInterface: 5B1B31A1-9562-11D2-8E3F-00A0C969723B 4419D128
+0x44106240 Loading /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/NetworkPkg/Dhcp4Dxe/Dhcp4Dxe/DEBUG/Dhcp4Dxe.dll with entry point 0x4410c4ca
+Loading driver at 0x00044106000 EntryPoint=0x0004410C4CA Dhcp4Dxe.efi
+InstallProtocolInterface: BC62157E-3E33-4FEC-9920-2D3B36D750DF 4419D910
+ProtectUefiImageCommon - 0x4419D128
+  - 0x0000000044106000 - 0x00000000000088C0
+PROGRESS CODE: V03040002 I0
+InstallProtocolInterface: 18A031AB-B443-4D1A-A5C0-0C09261E9F71 4410E2A4
+InstallProtocolInterface: 107A772C-D5E1-11D4-9A46-0090273FC14D 4410E310
+InstallProtocolInterface: 6A7A5CFF-E8D9-4F70-BADA-75AB3025CE14 4410E2E4
+PROGRESS CODE: V03040003 I0
+Loading driver 9FB1A1F3-3B71-4324-B39A-745CBB015FFF
+InstallProtocolInterface: 5B1B31A1-9562-11D2-8E3F-00A0C969723B 4419C028
+0x440e2240 Loading /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/NetworkPkg/Ip4Dxe/Ip4Dxe/DEBUG/Ip4Dxe.dll with entry point 0x440ef8b6
+Loading driver at 0x000440E2000 EntryPoint=0x000440EF8B6 Ip4Dxe.efi
+InstallProtocolInterface: BC62157E-3E33-4FEC-9920-2D3B36D750DF 4419CF90
+ProtectUefiImageCommon - 0x4419C028
+  - 0x00000000440E2000 - 0x0000000000011E40
+PROGRESS CODE: V03040002 I0
+InstallProtocolInterface: 18A031AB-B443-4D1A-A5C0-0C09261E9F71 440F3280
+InstallProtocolInterface: 107A772C-D5E1-11D4-9A46-0090273FC14D 440F320C
+InstallProtocolInterface: 6A7A5CFF-E8D9-4F70-BADA-75AB3025CE14 440F31F0
+PROGRESS CODE: V03040003 I0
+Loading driver 6D6963AB-906D-4A65-A7CA-BD40E5D6AF2B
+InstallProtocolInterface: 5B1B31A1-9562-11D2-8E3F-00A0C969723B 4419C228
+0x440fd240 Loading /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/NetworkPkg/Udp4Dxe/Udp4Dxe/DEBUG/Udp4Dxe.dll with entry point 0x441030f6
+Loading driver at 0x000440FD000 EntryPoint=0x000441030F6 Udp4Dxe.efi
+InstallProtocolInterface: BC62157E-3E33-4FEC-9920-2D3B36D750DF 4419CA10
+ProtectUefiImageCommon - 0x4419C228
+  - 0x00000000440FD000 - 0x0000000000008680
+PROGRESS CODE: V03040002 I0
+InstallProtocolInterface: 18A031AB-B443-4D1A-A5C0-0C09261E9F71 44104FE0
+InstallProtocolInterface: 107A772C-D5E1-11D4-9A46-0090273FC14D 4410505C
+InstallProtocolInterface: 6A7A5CFF-E8D9-4F70-BADA-75AB3025CE14 44105020
+PROGRESS CODE: V03040003 I0
+Loading driver DC3641B8-2FA8-4ED3-BC1F-F9962A03454B
+InstallProtocolInterface: 5B1B31A1-9562-11D2-8E3F-00A0C969723B 4419B028
+0x440f4240 Loading /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/NetworkPkg/Mtftp4Dxe/Mtftp4Dxe/DEBUG/Mtftp4Dxe.dll with entry point 0x440fa7c7
+Loading driver at 0x000440F4000 EntryPoint=0x000440FA7C7 Mtftp4Dxe.efi
+InstallProtocolInterface: BC62157E-3E33-4FEC-9920-2D3B36D750DF 4419BF90
+ProtectUefiImageCommon - 0x4419B028
+  - 0x00000000440F4000 - 0x0000000000008B40
+PROGRESS CODE: V03040002 I0
+InstallProtocolInterface: 18A031AB-B443-4D1A-A5C0-0C09261E9F71 440FC514
+InstallProtocolInterface: 107A772C-D5E1-11D4-9A46-0090273FC14D 440FC558
+InstallProtocolInterface: 6A7A5CFF-E8D9-4F70-BADA-75AB3025CE14 440FC52C
+PROGRESS CODE: V03040003 I0
+Loading driver 1A7E4468-2F55-4A56-903C-01265EB7622B
+InstallProtocolInterface: 5B1B31A1-9562-11D2-8E3F-00A0C969723B 4419B8A8
+0x440c0240 Loading /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/NetworkPkg/TcpDxe/TcpDxe/DEBUG/TcpDxe.dll with entry point 0x440c9f97
+Loading driver at 0x000440C0000 EntryPoint=0x000440C9F97 TcpDxe.efi
+InstallProtocolInterface: BC62157E-3E33-4FEC-9920-2D3B36D750DF 4419BA90
+ProtectUefiImageCommon - 0x4419B8A8
+  - 0x00000000440C0000 - 0x0000000000010E00
+PROGRESS CODE: V03040002 I0
+InstallProtocolInterface: 18A031AB-B443-4D1A-A5C0-0C09261E9F71 440D01B8
+InstallProtocolInterface: 107A772C-D5E1-11D4-9A46-0090273FC14D 440D016C
+InstallProtocolInterface: 6A7A5CFF-E8D9-4F70-BADA-75AB3025CE14 440D0150
+InstallProtocolInterface: 18A031AB-B443-4D1A-A5C0-0C09261E9F71 440D01A0
+InstallProtocolInterface: 107A772C-D5E1-11D4-9A46-0090273FC14D 440D016C
+InstallProtocolInterface: 6A7A5CFF-E8D9-4F70-BADA-75AB3025CE14 440D0150
+PROGRESS CODE: V03040003 I0
+Loading driver B95E9FDA-26DE-48D2-8807-1F9107AC5E3A
+InstallProtocolInterface: 5B1B31A1-9562-11D2-8E3F-00A0C969723B 4417AC28
+0x440b0240 Loading /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/NetworkPkg/UefiPxeBcDxe/UefiPxeBcDxe/DEBUG/UefiPxeBcDxe.dll with entry point 0x440ba497
+Loading driver at 0x000440B0000 EntryPoint=0x000440BA497 UefiPxeBcDxe.efi
+InstallProtocolInterface: BC62157E-3E33-4FEC-9920-2D3B36D750DF 4417AE10
+ProtectUefiImageCommon - 0x4417AC28
+  - 0x00000000440B0000 - 0x000000000000F7C0
+PROGRESS CODE: V03040002 I0
+InstallProtocolInterface: 18A031AB-B443-4D1A-A5C0-0C09261E9F71 440BEE70
+InstallProtocolInterface: 107A772C-D5E1-11D4-9A46-0090273FC14D 440BEDF0
+InstallProtocolInterface: 6A7A5CFF-E8D9-4F70-BADA-75AB3025CE14 440BEE64
+InstallProtocolInterface: 18A031AB-B443-4D1A-A5C0-0C09261E9F71 440BEE4C
+InstallProtocolInterface: 107A772C-D5E1-11D4-9A46-0090273FC14D 440BEDF0
+InstallProtocolInterface: 6A7A5CFF-E8D9-4F70-BADA-75AB3025CE14 440BEE64
+PROGRESS CODE: V03040003 I0
+Loading driver 961578FE-B6B7-44C3-AF35-6BC705CD2B1F
+InstallProtocolInterface: 5B1B31A1-9562-11D2-8E3F-00A0C969723B 4417A2A8
+0x440d9240 Loading /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/FatPkg/EnhancedFatDxe/Fat/DEBUG/Fat.dll with entry point 0x440df824
+Loading driver at 0x000440D9000 EntryPoint=0x000440DF824 Fat.efi
+InstallProtocolInterface: BC62157E-3E33-4FEC-9920-2D3B36D750DF 4417A410
+ProtectUefiImageCommon - 0x4417A2A8
+  - 0x00000000440D9000 - 0x0000000000008400
+PROGRESS CODE: V03040002 I0
+InstallProtocolInterface: 18A031AB-B443-4D1A-A5C0-0C09261E9F71 440E0EA0
+InstallProtocolInterface: 107A772C-D5E1-11D4-9A46-0090273FC14D 440E0EC8
+InstallProtocolInterface: 6A7A5CFF-E8D9-4F70-BADA-75AB3025CE14 440E0D30
+PROGRESS CODE: V03040003 I0
+Loading driver FE3542FE-C1D3-4EF8-657C-8048606FF671
+InstallProtocolInterface: 5B1B31A1-9562-11D2-8E3F-00A0C969723B 4415ABA8
+0x44058240 Loading /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/MdeModulePkg/Universal/DriverSampleDxe/DriverSampleDxe/DEBUG/DriverSample.dll with entry point 0x440603d5
+Loading driver at 0x00044058000 EntryPoint=0x000440603D5 DriverSample.efi
+InstallProtocolInterface: BC62157E-3E33-4FEC-9920-2D3B36D750DF 4415A810
+ProtectUefiImageCommon - 0x4415ABA8
+  - 0x0000000044058000 - 0x0000000000015440
+PROGRESS CODE: V03040002 I0
+InstallProtocolInterface: 09576E91-6D3F-11D2-8E39-00A0C969723B 4406C8AC
+InstallProtocolInterface: 330D4706-F2A0-4E4F-A369-B66FA8D54385 4415AA3C
+InstallProtocolInterface: 09576E91-6D3F-11D2-8E39-00A0C969723B 4406C884
+InstallProtocolInterface: 330D4706-F2A0-4E4F-A369-B66FA8D54385 4415AA3C
+PROGRESS CODE: V03040003 I0
+PROGRESS CODE: V03041001 I0
+[Bds] Entry...
+[BdsDxe] Locate Variable Lock protocol - Success
+Variable Driver Auto Update Lang, Lang:eng, PlatformLang:en Status: Success
+PROGRESS CODE: V03051005 I0
+[Variable]END_OF_DXE is signaled
+Initialize variable error flag (FF)
+InstallProtocolInterface: 9842073D-95D9-9F49-BD3F-2E29525125DF 4413B010
+InstallProtocolInterface: 09576E91-6D3F-11D2-8E39-00A0C969723B 44159410
+InstallProtocolInterface: 453368F6-7C85-434A-A98A-72D1B7FFA926 4413B49C
+InstallProtocolInterface: 9042A9DE-23DC-4A38-96FB-7ADED080516A 4413811C
+InstallProtocolInterface: 387477C1-69C7-11D2-8E39-00A0C969723B 4413812C
+InstallProtocolInterface: 31878C87-0B75-11D5-9A4F-0090273FC14D 44138138
+InstallProtocolInterface: DD9E7534-7762-4698-8C14-F58517A625AA 44138590
+GraphicsConsole video resolution 800 x 600
+Graphics - Mode 0, Column = 80, Row = 25
+Graphics - Mode 1, Column = 0, Row = 0
+Graphics - Mode 2, Column = 100, Row = 31
+Graphics Console Started, Mode: -1
+InstallProtocolInterface: 387477C2-69C7-11D2-8E39-00A0C969723B 44137E1C
+InstallProtocolInterface: D3B36F2C-D551-11D4-9A46-0090273FC14D 0
+InstallProtocolInterface: 9042A9DE-23DC-4A38-96FB-7ADED080516A 441A3BE8
+InstallProtocolInterface: 982C298B-F4FA-41CB-B838-77AA688FB839 441A3BCC
+InstallProtocolInterface: D3B36F2B-D551-11D4-9A46-0090273FC14D 0
+Enter memory test.
+Perform memory test (ESC to skip).
+134217728 bytes of system memory tested OK
+[Bds]RegisterKeyNotify: 0000/000D 80000000/00 Success
+[Bds]RegisterKeyNotify: 000C/0000 80000000/00 Success
+[Bds]RegisterKeyNotify: 0011/0000 80000000/00 Success
+InstallProtocolInterface: 09576E91-6D3F-11D2-8E39-00A0C969723B 48FFFE90
+InstallProtocolInterface: 453368F6-7C85-434A-A98A-72D1B7FFA926 4413669C
+InstallProtocolInterface: 09576E91-6D3F-11D2-8E39-00A0C969723B 48FFFB10
+InstallProtocolInterface: 453368F6-7C85-434A-A98A-72D1B7FFA926 48FFFA1C
+InstallProtocolInterface: 09576E91-6D3F-11D2-8E39-00A0C969723B 48FFF610
+InstallProtocolInterface: 453368F6-7C85-434A-A98A-72D1B7FFA926 48FFF71C
+InstallProtocolInterface: 09576E91-6D3F-11D2-8E39-00A0C969723B 48FFEB90
+InstallProtocolInterface: 453368F6-7C85-434A-A98A-72D1B7FFA926 48FFEE1C
+InstallProtocolInterface: 964E5B22-6459-11D2-8E39-00A0C969723B 48FFE818
+EmuOpenBlock: Could not open disk.dmg: No such file or directory
+InstallProtocolInterface: A19832B9-AC25-11D3-9A2D-0090273FC14D 48FFD028
+InstallProtocolInterface: 09576E91-6D3F-11D2-8E39-00A0C969723B 48FFDF10
+InstallProtocolInterface: 9E23D768-D2F3-4366-9FC3-3A7ABA864374 48FFD91C
+InstallProtocolInterface: F36FF770-A7E1-42CF-9ED2-56F0F271F44C 48EFDF24
+InstallProtocolInterface: 09576E91-6D3F-11D2-8E39-00A0C969723B 48EFC910
+InstallProtocolInterface: 330D4706-F2A0-4E4F-A369-B66FA8D54385 48EFC114
+InstallProtocolInterface: E4F61863-FE2C-4B56-A8F4-08519BC439DF 48EFC110
+InstallProtocolInterface: 7AB33A91-ACE5-4326-B572-E7EE33D39F16 48EFC724
+MnpStart: MnpStartSnp failed, Unsupported.
+MnpConfigReceiveFilters: Snp->ReceiveFilters failed, Unsupported.
+Terminal - Mode 0, Column = 80, Row = 25
+Terminal - Mode 1, Column = 80, Row = 50
+Terminal - Mode 2, Column = 100, Row = 31
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+PROGRESS CODE: V01040001 I0
+InstallProtocolInterface: 387477C1-69C7-11D2-8E39-00A0C969723B 48EFB4A4
+InstallProtocolInterface: DD9E7534-7762-4698-8C14-F58517A625AA 48EFB52C
+InstallProtocolInterface: 387477C2-69C7-11D2-8E39-00A0C969723B 48EFB4B0
+InstallProtocolInterface: 09576E91-6D3F-11D2-8E39-00A0C969723B 48EFC510
+[Bds]OsIndication: 0000000000000000
+[Bds]=============Begin Load Options Dumping ...=============
+  Driver Options:
+  SysPrep Options:
+  Boot Options:
+    Boot0004: UEFI Shell 		 0x0001
+    Boot0001: UEFI BootManagerMenuApp 		 0x0100
+    Boot0002: UEFI Non-Block Boot Device 		 0x0001
+    Boot0003: UEFI BootManagerMenuApp 		 0x0001
+    Boot0000: UEFI Enter Setup 		 0x0109
+  PlatformRecovery Options:
+    PlatformRecovery0000: Default PlatformRecovery 		 0x0001
+[Bds]=============End Load Options Dumping=============
+[Bds]BdsWait ...Zzzzzzzzzzzz...
+[Bds]BdsWait(10)..Zzzz...
+[Bds]BdsWait(9)..Zzzz...
+[Bds]BdsWait(8)..Zzzz...
+[Bds]BdsWait(7)..Zzzz...
+[Bds]BdsWait(6)..Zzzz...
+[Bds]BmHotkeyCallback: 0000:000D
+[Bds]Continue key pressed!
+[Bds]Exit the waiting!
+PROGRESS CODE: V03051007 I0
+[Bds]Stop Hotkey Service!
+[Bds]UnregisterKeyNotify: 0000/000D Success
+[Bds]UnregisterKeyNotify: 000C/0000 Success
+[Bds]UnregisterKeyNotify: 0011/0000 Success
+PROGRESS CODE: V03051001 I0
+[Bds]Booting UEFI Shell
+[Bds] Expand Fv(6D99E806-3D38-42C2-A095-5F4300BFD7DC)/FvFile(7C04A583-9E3E-4F1C-AD65-E05268D0B4D1)/Shell -> Fv(6D99E806-3D38-42C2-A095-5F4300BFD7DC)/FvFile(7C04A583-9E3E-4F1C-AD65-E05268D0B4D1)/Shell
+PROGRESS CODE: V03058000 I0
+InstallProtocolInterface: 5B1B31A1-9562-11D2-8E3F-00A0C969723B 48EF81A8
+0x48d25240 Loading /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/ShellPkg/Application/Shell/Shell/DEBUG/Shell.dll with entry point 0x48d482c0
+Loading driver at 0x00048D25000 EntryPoint=0x00048D482C0 Shell.efi
+InstallProtocolInterface: BC62157E-3E33-4FEC-9920-2D3B36D750DF 48EF8E10
+ProtectUefiImageCommon - 0x48EF81A8
+  - 0x0000000048D25000 - 0x00000000000D8880
+PROGRESS CODE: V03058001 I0
+InstallProtocolInterface: 387477C2-69C7-11D2-8E39-00A0C969723B 48EF3294
+InstallProtocolInterface: 752F3136-4E16-4FDC-A22A-E5F46812F4CA 48EEEE90
+InstallProtocolInterface: 6302D008-7F9B-4F30-87AC-60C9FEF5DA4E 48D97220
+[Security] 3rd party image[0] can be loaded after EndOfDxe: VenHw(5CF32E0B-8EDF-2E44-9CDA-93205E99EC1C,00000000)/VenHw(964E5B22-6459-11D2-8E39-00A0C969723B,00000000)/\Hello.efi.
+InstallProtocolInterface: 5B1B31A1-9562-11D2-8E3F-00A0C969723B 48EC63A8
+0x48eac240 Loading /home/x/UEFI/edk22/Build/EmulatorIA32/DEBUG_GCC5/IA32/MdeModulePkg/Application/Hello/Hello/DEBUG/Hello.dll with entry point 0x48ead7ba
+Loading driver at 0x00048EAC000 EntryPoint=0x00048EAD7BA Hello.efi
+InstallProtocolInterface: BC62157E-3E33-4FEC-9920-2D3B36D750DF 48EC6190
+InstallProtocolInterface: 6A1EE763-D47A-43B4-AABE-EF1DE2AB56FC 48EAE6F0
+ProtectUefiImageCommon - 0x48EC63A8
+  - 0x0000000048EAC000 - 0x00000000000028C0
+InstallProtocolInterface: 752F3136-4E16-4FDC-A22A-E5F46812F4CA 44FA0AC0
+XIO:  fatal IO error 4 (Interrupted system call) on X server ":0"
+      after 266 requests (266 known processed) with 0 events remaining.
+[Thread 0xf7bceac0 (LWP 162967) exited]
+[Inferior 1 (process 162963) exited with code 01]
+root@x-virtual-machine:/home/x/UEFI/edk22# cd ..
+
