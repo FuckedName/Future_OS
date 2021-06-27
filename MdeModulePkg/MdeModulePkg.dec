@@ -754,6 +754,9 @@
   # @Prompt Enable HelloWorld print.
   gEfiMdeModulePkgTokenSpaceGuid.PcdHelloWorldPrintEnable|TRUE|BOOLEAN|0x0001200a
 
+
+  gEfiMdeModulePkgTokenSpaceGuid.PcdHelloPrintEnable|TRUE|BOOLEAN|0x0001213d
+
   ## Indicates if FULL FTW protocol services (total six APIs) will be produced.<BR><BR>
   #   TRUE  - Produces FULL FTW protocol services (total six APIs).<BR>
   #   FALSE - Only FTW Write service is available.<BR>
@@ -1656,10 +1659,16 @@
   # @Prompt HellowWorld print times.
   gEfiMdeModulePkgTokenSpaceGuid.PcdHelloWorldPrintTimes|1|UINT32|0x40000005
 
+
+  gEfiMdeModulePkgTokenSpaceGuid.PcdHelloPrintTimes|1|UINT32|0x40000115
+
   ## This PCD defines the HelloWorld print string.
   #  This PCD is a sample to explain String typed PCD usage.
   # @Prompt HelloWorld print string.
   gEfiMdeModulePkgTokenSpaceGuid.PcdHelloWorldPrintString|L"UEFI Hello World!\n"|VOID*|0x40000004
+  
+
+  gEfiMdeModulePkgTokenSpaceGuid.PcdHelloPrintString|L"UEFI Hello!\n"|VOID*|0x40000114
 
   ## Indicates the maximum size of the capsule image with a reset flag that the platform can support.
   #  The default max size is 100MB (0x6400000) for more than one large capsule images.
