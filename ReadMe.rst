@@ -1,3 +1,10 @@
+command:/home/x/UEFI/edk22# EmulatorPkg/build.sh -a IA32
+command:/home/x/UEFI/edk22# EmulatorPkg/build.sh -a IA32 run
+
+
+Hello.efi(enter)
+
+
 ==============
 EDK II Project
 ==============
