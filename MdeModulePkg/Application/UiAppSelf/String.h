@@ -46,7 +46,7 @@ GetStringById (
 
 **/
 VOID
-InitializeStringSupport (
+InitializeStringSupport2 (
   VOID
   );
 
@@ -64,7 +64,7 @@ UninitializeStringSupport (
 
 **/
 EFI_HII_HANDLE
-ExportFonts (
+ExportFonts2(
   VOID
   );
 

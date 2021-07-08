@@ -255,7 +255,7 @@ FONT_PACK_BIN mFontBin = {
 
 **/
 VOID
-InitializeStringSupport (
+InitializeStringSupport2 (
   VOID
   )
 {
@@ -303,7 +303,7 @@ GetStringById (
 
 **/
 EFI_HII_HANDLE
-ExportFonts (
+ExportFonts2 (
   VOID
   )
 {
