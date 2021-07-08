@@ -211,7 +211,7 @@ FrontPageCallback(
  *
  **/
 VOID
-UpdateFrontPageForm(
+UpdateFrontPageForm2(
     VOID
     )
 {
@@ -252,7 +252,7 @@ UpdateFrontPageForm(
      * Updata Front Page form
      *
      */
-    UiCustomizeFrontPage(
+    UiCustomizeFrontPage2(
         gFrontPagePrivate.HiiHandle,
         StartOpCodeHandle
         );
@@ -279,7 +279,7 @@ UpdateFrontPageForm(
  *
  **/
 EFI_STATUS
-InitializeFrontPage(
+InitializeFrontPage2(
     VOID
     )
 {
@@ -330,14 +330,14 @@ InitializeFrontPage(
      * Updata Front Page banner strings
      *
      */
-    UpdateFrontPageBannerStrings();
+    UpdateFrontPageBannerStrings2();
 
     /*
      *
      * Update front page menus.
      *
      */
-    UpdateFrontPageForm();
+    UpdateFrontPageForm2();
 
     return(Status);
 }
@@ -561,7 +561,7 @@ GetOptionalStringByIndex(
  *
  **/
 VOID
-UpdateFrontPageBannerStrings(
+UpdateFrontPageBannerStrings2(
     VOID
     )
 {
@@ -1137,8 +1137,8 @@ InitializeUserInterface(
     UiSetConsoleMode2( TRUE );
 	
     UiEntry2( FALSE );
-    UiSetConsoleMode2( FALSE );
-	/*
+    /*UiSetConsoleMode2( FALSE );
+	
 
     UninitializeStringSupport();
     HiiRemovePackages( HiiHandle );
@@ -1162,11 +1162,13 @@ UiEntry2(
 {
     EFI_STATUS        Status;
     EFI_BOOT_LOGO_PROTOCOL    *BootLogo;
-	
-	Print(L"UiEntry2:line %d, function: %s\r\n", __LINE__, __FUNCTION__);
 
-	return ;
-    /*
+	//CHAR16    s[12] = L"String";
+	
+	Print(L"UiEntry2:line %d, function: %s", __LINE__, __FILE__);
+
+	/*return ;
+    
      *
      * Enter Setup page.
      *
@@ -1205,7 +1207,7 @@ UiEntry2(
         BootLogo->SetBootLogo( BootLogo, NULL, 0, 0, 0, 0 );
     }
 
-    InitializeFrontPage();
+    InitializeFrontPage2();
 
     CallFrontPage();
 

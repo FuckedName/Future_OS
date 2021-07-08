@@ -273,7 +273,7 @@ UiSupportLibCallbackHandler(
  *
  **/
 VOID
-UiCreateLanguageMenu(
+UiCreateLanguageMenu2(
     IN EFI_HII_HANDLE HiiHandle,
     IN VOID                                                *StartOpCodeHandle
     )
@@ -442,7 +442,7 @@ UiCreateLanguageMenu(
  *
  **/
 VOID
-UiCreateContinueMenu(
+UiCreateContinueMenu2(
     IN EFI_HII_HANDLE HiiHandle,
     IN VOID                                                *StartOpCodeHandle
     )
@@ -466,7 +466,7 @@ UiCreateContinueMenu(
  *
  **/
 VOID
-UiCreateEmptyLine(
+UiCreateEmptyLine2(
     IN EFI_HII_HANDLE HiiHandle,
     IN VOID                                                *StartOpCodeHandle
     )
@@ -483,7 +483,7 @@ UiCreateEmptyLine(
  *
  **/
 VOID
-UiCreateResetMenu(
+UiCreateResetMenu2(
     IN EFI_HII_HANDLE HiiHandle,
     IN VOID                                                *StartOpCodeHandle
     )
@@ -618,7 +618,7 @@ RequiredDriver(
  *
  **/
 EFI_STATUS
-UiListThirdPartyDrivers(
+UiListThirdPartyDrivers2(
     IN EFI_HII_HANDLE HiiHandle,
     IN EFI_GUID                                        *ClassGuid,
     IN DRIVER_SPECIAL_HANDLER SpecialHandlerFn,
@@ -732,7 +732,7 @@ UiListThirdPartyDrivers(
 
         if ( gHiiDriverList[Index].EmptyLineAfter )
         {
-            UiCreateEmptyLine( HiiHandle, StartOpCodeHandle );
+            UiCreateEmptyLine2( HiiHandle, StartOpCodeHandle );
         }
 
         Index++;

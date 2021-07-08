@@ -46,7 +46,7 @@ UiCustomizeFrontPageBanner (
 
 **/
 VOID
-UiCustomizeFrontPage (
+UiCustomizeFrontPage2 (
   IN EFI_HII_HANDLE  HiiHandle,
   IN VOID            *StartOpCodeHandle
   );

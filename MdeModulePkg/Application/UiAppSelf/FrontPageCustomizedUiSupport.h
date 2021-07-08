@@ -17,7 +17,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
 VOID
-UiCreateContinueMenu (
+UiCreateContinueMenu2 (
   IN EFI_HII_HANDLE              HiiHandle,
   IN VOID                        *StartOpCodeHandle
   );
@@ -30,7 +30,7 @@ UiCreateContinueMenu (
 
 **/
 VOID
-UiCreateEmptyLine (
+UiCreateEmptyLine2 (
   IN EFI_HII_HANDLE              HiiHandle,
   IN VOID                        *StartOpCodeHandle
   );
@@ -43,10 +43,11 @@ UiCreateEmptyLine (
 
 **/
 VOID
-UiCreateLanguageMenu (
+UiCreateLanguageMenu2 (
   IN EFI_HII_HANDLE              HiiHandle,
   IN VOID                        *StartOpCodeHandle
   );
+
 
 /**
   Create Reset menu.
@@ -56,7 +57,7 @@ UiCreateLanguageMenu (
 
 **/
 VOID
-UiCreateResetMenu (
+UiCreateResetMenu2 (
   IN EFI_HII_HANDLE              HiiHandle,
   IN VOID                        *StartOpCodeHandle
   );
@@ -92,7 +93,7 @@ BOOLEAN
 
 **/
 EFI_STATUS
-UiListThirdPartyDrivers (
+UiListThirdPartyDrivers2 (
   IN EFI_HII_HANDLE              HiiHandle,
   IN EFI_GUID                    *ClassGuid,
   IN DRIVER_SPECIAL_HANDLER      SpecialHandlerFn,

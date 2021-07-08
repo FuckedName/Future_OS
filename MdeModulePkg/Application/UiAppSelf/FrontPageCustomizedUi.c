@@ -25,7 +25,7 @@ extern FRONT_PAGE_CALLBACK_DATA gFrontPagePrivate;
  *
  **/
 VOID
-UiCustomizeFrontPage(
+UiCustomizeFrontPage2(
     IN EFI_HII_HANDLE HiiHandle,
     IN VOID                        *StartOpCodeHandle
     )
@@ -35,42 +35,42 @@ UiCustomizeFrontPage(
      * Create "Select Language" menu with Oneof opcode.
      *
      */
-    UiCreateLanguageMenu( HiiHandle, StartOpCodeHandle );
+    UiCreateLanguageMenu2( HiiHandle, StartOpCodeHandle );
 
     /*
      *
      * Create empty line.
      *
      */
-    UiCreateEmptyLine( HiiHandle, StartOpCodeHandle );
+    UiCreateEmptyLine2( HiiHandle, StartOpCodeHandle );
 
     /*
      *
      * Find third party drivers which need to be shown in the front page.
      *
      */
-    UiListThirdPartyDrivers( HiiHandle, &gEfiIfrFrontPageGuid, NULL, StartOpCodeHandle );
+    UiListThirdPartyDrivers2( HiiHandle, &gEfiIfrFrontPageGuid, NULL, StartOpCodeHandle );
 
     /*
      *
      * Create empty line.
      *
      */
-    UiCreateEmptyLine( HiiHandle, StartOpCodeHandle );
+    UiCreateEmptyLine2( HiiHandle, StartOpCodeHandle );
 
     /*
      *
      * Create "Continue" menu.
      *
      */
-    UiCreateContinueMenu( HiiHandle, StartOpCodeHandle );
+    UiCreateContinueMenu2( HiiHandle, StartOpCodeHandle );
 
     /*
      *
      * Create reset menu.
      *
      */
-    UiCreateResetMenu( HiiHandle, StartOpCodeHandle );
+    UiCreateResetMenu2( HiiHandle, StartOpCodeHandle );
 }
 
 

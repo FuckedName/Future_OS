@@ -179,6 +179,12 @@ InitializeFrontPage(
     );
 
 
+VOID
+UpdateFrontPageBannerStrings2(
+    VOID
+    );
+
+
 /**
  * Acquire the string associated with the ProducerGuid and return it.
  *
