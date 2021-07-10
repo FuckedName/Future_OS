@@ -866,6 +866,67 @@ UiSetConsoleMode (
   return EFI_SUCCESS;
 }
 
+
+
+
+EFI_STATUS DrawPoint(IN EFI_GRAPHICS_OUTPUT_PROTOCOL  *GraphicsOutput,
+    IN UINTN x,
+    IN UINTN y,
+    IN UINTN Width,
+    IN EFI_GRAPHICS_OUTPUT_BLT_PIXEL PixelColor)
+{
+    EFI_STATUS Status;
+
+    Status = GraphicsOutput->Blt(
+                GraphicsOutput,
+                &PixelColor,
+                EfiBltVideoFill,
+                0, 0,
+                x, y,
+                Width, Width,
+                0
+                );        
+                
+    return Status;
+}
+
+INT32 abs(INT32 v)
+{
+	if (v < 0)
+		return -v;
+
+	return v;
+}
+
+EFI_STATUS DrawLine(IN EFI_GRAPHICS_OUTPUT_PROTOCOL  *GraphicsOutput,
+        IN UINTN x0, UINTN y0, UINTN x1, UINTN y1, 
+        IN UINTN BorderWidth,
+        IN EFI_GRAPHICS_OUTPUT_BLT_PIXEL BorderColor)
+{
+
+    INT32 dx  = abs((int)(x1 - x0));
+    INT32 sx  = x0 < x1 ? 1 : -1;
+    INT32 dy  = abs((int)(y1-y0)), sy = y0 < y1 ? 1 : -1;
+    INT32 err = ( dx > dy ? dx : -dy) / 2, e2;
+    
+    for(;;)
+    {    
+        DrawPoint(GraphicsOutput, x0, y0, BorderWidth, BorderColor);
+    
+        if (x0==x1 && y0==y1) break;
+    
+        e2 = err;
+    
+        if (e2 > -dx) { err -= dy; x0 += sx; }
+        if (e2 <  dy) { err += dx; y0 += sy; }
+    }
+    return EFI_SUCCESS;
+}
+
+
+
+
+
 /**
   The user Entry Point for Application. The user code starts with this function
   as the real entry point for the image goes into a library that calls this
@@ -891,6 +952,9 @@ InitializeUserInterface (
   EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL    *SimpleTextOut;
   UINTN                              BootTextColumn;
   UINTN                              BootTextRow;
+  UINTN ScreenWidth, ScreenHeight;
+  
+  EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
 
   if (!mModeInitialized) {
     //
@@ -954,6 +1018,37 @@ InitializeUserInterface (
   HiiHandle = ExportFonts ();
   ASSERT (HiiHandle != NULL);
 
+  Status = gBS->LocateProtocol(&gEfiGraphicsOutputProtocolGuid, NULL, (VOID **) &GraphicsOutput);
+        
+  if (EFI_ERROR (Status)) {
+        return EFI_UNSUPPORTED;
+  }
+  
+  ScreenWidth  = GraphicsOutput->Mode->Info->HorizontalResolution;
+  ScreenHeight = GraphicsOutput->Mode->Info->VerticalResolution;
+  
+  
+  Color.Red  = 0xFF;
+  Color.Green = 0xFF;
+  Color.Blue	= 0xFF;
+
+  Print(L"ScreenWidth:%d, ScreenHeight:%d\n\n", ScreenWidth, ScreenHeight);
+  
+  Status = GraphicsOutput->Blt(GraphicsOutput,
+					&Color,
+					EfiBltVideoFill,
+					0, 0,
+					0, 0,
+					ScreenWidth, ScreenHeight,
+					0);
+
+  Color.Red  = 0xFF;
+  Color.Green = 0x00;
+  Color.Blue	= 0xFF;
+
+  DrawLine(GraphicsOutput, 0, 0, 100, 100, 2, Color);
+
+/*
   InitializeStringSupport ();
 
   UiSetConsoleMode (TRUE);
@@ -962,7 +1057,7 @@ InitializeUserInterface (
 
   UninitializeStringSupport ();
   HiiRemovePackages (HiiHandle);
-
+*/
   return EFI_SUCCESS;
 }
 
