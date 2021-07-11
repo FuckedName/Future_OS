@@ -242,12 +242,48 @@ EFI_STATUS DrawAsciiChar(IN EFI_GRAPHICS_OUTPUT_PROTOCOL  *GraphicsOutput,
     return EFI_SUCCESS;
 }
 
+
+// Draw 8 X 16 point
+EFI_STATUS Draw8_16(IN EFI_GRAPHICS_OUTPUT_PROTOCOL  *GraphicsOutput,UINT8 d,
+        IN UINTN x0, UINTN y0,
+        UINT8 width,
+        IN EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color)
+{
+    if ((d & 0x80) != 0) 
+      DrawPoint(GraphicsOutput, x0 + 0, y0, 1, Color); 
+    
+    if ((d & 0x40) != 0) 
+      DrawPoint(GraphicsOutput, x0 + 1, y0, 1, Color); 
+    
+    if ((d & 0x20) != 0) 
+      DrawPoint(GraphicsOutput, x0 + 2, y0, 1, Color); 
+   
+    if ((d & 0x10) != 0) 
+      DrawPoint(GraphicsOutput, x0 + 3, y0, 1, Color); 
+    
+    if ((d & 0x08) != 0) 
+      DrawPoint(GraphicsOutput, x0 + 4, y0, 1, Color); 
+   
+    if ((d & 0x04) != 0) 
+      DrawPoint(GraphicsOutput, x0 + 5, y0, 1, Color); 
+    
+    if ((d & 0x02) != 0) 
+      DrawPoint(GraphicsOutput, x0 + 6, y0, 1, Color); 
+    
+    if ((d & 0x01) != 0) 
+      DrawPoint(GraphicsOutput, x0 + 7, y0, 1, Color); 
+
+    return EFI_SUCCESS;
+}
+
+
 EFI_STATUS DrawChineseChar(IN EFI_GRAPHICS_OUTPUT_PROTOCOL  *GraphicsOutput,
         IN UINTN x0, UINTN y0,UINT8 c,
         IN EFI_GRAPHICS_OUTPUT_BLT_PIXEL BorderColor)
 {
     INT8 i;
-    UINT8 d;
+
+    /* wo */
     const UINT8 s[][32] =
 	{   
 	    {0x04,0x80,0x0E,0xA0,0x78,0x90,0x08,0x90,0x08,0x84,0xFF,0xFE,0x08,0x80,0x08,0x90,
@@ -256,58 +292,8 @@ EFI_STATUS DrawChineseChar(IN EFI_GRAPHICS_OUTPUT_PROTOCOL  *GraphicsOutput,
     	    
 	for(i = 0; i < 32; i += 2)
 	{
-		d = s[0][i];
-		
-		if ((d & 0x80) != 0) 
-		{ DrawPoint(GraphicsOutput, x0 + 0, y0 + i/2, 1, BorderColor); }
-		
-		if ((d & 0x40) != 0) 
-		{ DrawPoint(GraphicsOutput, x0 + 1, y0 + i/2, 1, BorderColor); }
-		
-		if ((d & 0x20) != 0) 
-		{ DrawPoint(GraphicsOutput, x0 + 2, y0 + i/2, 1, BorderColor); }
-		
-		if ((d & 0x10) != 0) 
-		{ DrawPoint(GraphicsOutput, x0 + 3, y0 + i/2, 1, BorderColor); }
-		
-		if ((d & 0x08) != 0) 
-		{ DrawPoint(GraphicsOutput, x0 + 4, y0 + i/2, 1, BorderColor); }
-		
-		if ((d & 0x04) != 0) 
-		{ DrawPoint(GraphicsOutput, x0 + 5, y0 + i/2, 1, BorderColor); }
-		
-		if ((d & 0x02) != 0) 
-		{ DrawPoint(GraphicsOutput, x0 + 6, y0 + i/2, 1, BorderColor); }
-		
-		if ((d & 0x01) != 0) 
-		{ DrawPoint(GraphicsOutput, x0 + 7, y0 + i/2, 1, BorderColor); }
-
-		d = s[0][i + 1];
-		
-		if ((d & 0x80) != 0) 
-		{ DrawPoint(GraphicsOutput, x0 + 0 + 8, y0 + i/2, 1, BorderColor); }
-		
-		if ((d & 0x40) != 0) 
-		{ DrawPoint(GraphicsOutput, x0 + 1 + 8, y0 + i/2, 1, BorderColor); }
-		
-		if ((d & 0x20) != 0) 
-		{ DrawPoint(GraphicsOutput, x0 + 2 + 8, y0 + i/2, 1, BorderColor); }
-		
-		if ((d & 0x10) != 0) 
-		{ DrawPoint(GraphicsOutput, x0 + 3 + 8, y0 + i/2, 1, BorderColor); }
-		
-		if ((d & 0x08) != 0) 
-		{ DrawPoint(GraphicsOutput, x0 + 4 + 8, y0 + i/2, 1, BorderColor); }
-		
-		if ((d & 0x04) != 0) 
-		{ DrawPoint(GraphicsOutput, x0 + 5 + 8, y0 + i/2, 1, BorderColor); }
-		
-		if ((d & 0x02) != 0) 
-		{ DrawPoint(GraphicsOutput, x0 + 6 + 8, y0 + i/2, 1, BorderColor); }
-		
-		if ((d & 0x01) != 0) 
-		{ DrawPoint(GraphicsOutput, x0 + 7 + 8, y0 + i/2, 1, BorderColor); }
-		
+        Draw8_16(GraphicsOutput, s[0][i],     x0,     y0 + i / 2, 1, BorderColor);		        
+		Draw8_16(GraphicsOutput, s[0][i + 1], x0 + 8, y0 + i / 2, 1, BorderColor);		
 	}
 	
     return EFI_SUCCESS;
@@ -486,7 +472,7 @@ InitializeUserInterface (
 		Print(L"\n");
 	}
 
-	}
+   }
 
    return EFI_SUCCESS;
 }
