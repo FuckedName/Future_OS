@@ -34,10 +34,7 @@ EFI_STATUS DrawPoint(IN EFI_GRAPHICS_OUTPUT_PROTOCOL  *GraphicsOutput,
 
 INT32 abs(INT32 v)
 {
-	if (v < 0)
-		return -v;
-
-	return v;
+	return (v < 0) ? -v : v;
 }
 
 EFI_STATUS DrawLine(IN EFI_GRAPHICS_OUTPUT_PROTOCOL  *GraphicsOutput,
@@ -437,6 +434,7 @@ InitializeUserInterface (
   Color.Blue	= 0xFF;
 
   DrawLine(GraphicsOutput, 0, 0, 100, 100, 2, Color);
+  DrawLine(GraphicsOutput, 100, 0, 0, 100, 1, Color);
   
   Color.Red  = 0x00;
   Color.Green = 0x00;
