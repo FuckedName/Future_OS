@@ -533,6 +533,27 @@ EFI_STATUS KeyboardInit (EFI_GRAPHICS_OUTPUT_PROTOCOL   *GraphicsOutput)
 }
 
 
+// fill into rectangle
+void RectangleFillIntoBuffer(UINT8 *pBuffer,
+        IN UINTN x0, UINTN y0, UINTN x1, UINTN y1, 
+        IN UINTN BorderWidth,
+        IN EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color)
+{    
+	UINT32 i = 0;
+	UINT32 j = 0;
+    for (j = y0; j < y0 + y1; j++) 
+    {
+        for (i = x0; i < x0 + x1; i++) 
+        {
+            pBuffer[(j * ScreenWidth + i) * 4]     =  Color.Blue; //Blue   
+            pBuffer[(j * ScreenWidth + i) * 4 + 1] =  Color.Green; //Green 
+            pBuffer[(j * ScreenWidth + i) * 4 + 2] =  Color.Red; //Red  
+            pBuffer[(j * ScreenWidth + i) * 4 + 3] =  Color.Reserved;
+        }
+    }
+
+}
+
 EFI_STATUS ScreenInit(EFI_GRAPHICS_OUTPUT_PROTOCOL   *GraphicsOutput)
 {
     UINT8 *ScreenBuff = NULL;
@@ -547,24 +568,34 @@ EFI_STATUS ScreenInit(EFI_GRAPHICS_OUTPUT_PROTOCOL   *GraphicsOutput)
     {
         for (i = 0; i < ScreenWidth; i++) 
         {
-            ScreenBuff[(j * 100 + i) * 4]     =  0; //Blue   
-            ScreenBuff[(j * 100 + i) * 4 + 1] =  0; //Green 
-            ScreenBuff[(j * 100 + i) * 4 + 2] =  0; //Red  
-            ScreenBuff[(j * 100 + i) * 4 + 3] =  0;
-        }
-    }
-    
-    for (j = 0; j < 100; j++) 
-    {
-        for (i = 0; i < 100; i++) 
-        {
-            ScreenBuff[(j * ScreenWidth + i) * 4]     =  j * 2; //Blue   
+            ScreenBuff[(j * ScreenWidth + i) * 4]     =  0; //Blue   
             ScreenBuff[(j * ScreenWidth + i) * 4 + 1] =  0; //Green 
             ScreenBuff[(j * ScreenWidth + i) * 4 + 2] =  0; //Red  
             ScreenBuff[(j * ScreenWidth + i) * 4 + 3] =  0;
         }
     }
+    
+    Color.Red   = 0xFF;
+    Color.Green = 0xFF;
+    Color.Blue	= 0xFF;
+    RectangleFillIntoBuffer(ScreenBuff, 0, 100, 100, 100, 1, Color);
+    
+    Color.Red   = 0x00;
+    Color.Green = 0x00;
+    Color.Blue	= 0xFF;
+    RectangleFillIntoBuffer(ScreenBuff, 0, 200, 100, 100, 1, Color);
 
+    
+    Color.Red   = 0x00;
+    Color.Green = 0xFF;
+    Color.Blue	= 0x00;
+    RectangleFillIntoBuffer(ScreenBuff, 0, 300, 100, 100, 1, Color);
+    
+    
+    Color.Red   = 0xFF;
+    Color.Green = 0x00;
+    Color.Blue	= 0x00;
+    RectangleFillIntoBuffer(ScreenBuff, 0, 400, 100, 100, 1, Color);
     
     Color.Red  = 0xFF;
     Color.Green = 0x00;
