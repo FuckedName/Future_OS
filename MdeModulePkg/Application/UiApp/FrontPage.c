@@ -380,7 +380,8 @@ InitializeUserInterface (
   EFI_GRAPHICS_OUTPUT_PROTOCOL       *GraphicsOutput;
   
   EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
-
+  UINT8* RGB32;
+  UINT32 j = 0;
 
 	UINT16 scanCode=0;
 
@@ -446,7 +447,28 @@ InitializeUserInterface (
     DrawAsciiChar(GraphicsOutput, 20 + (i - 40) * 10, 20, i, Color);
 
   DrawChineseChar(GraphicsOutput, 20, 20 + 16, i, Color);
-    
+
+  RGB32 = (UINT8 *)AllocatePool(100 * 100 * 4); 
+  
+  for (j = 0; j < 100; j++) 
+  {
+      for (i = 0; i < 100; i++) 
+      {
+          RGB32[(j * 100 + i) * 4]     = (j * 100 + i) * 3 + 2; //Blue   
+          RGB32[(j * 100 + i) * 4 + 1] = (j * 100 + i) * 3 + 1; //Green 
+          RGB32[(j * 100 + i) * 4 + 2] = (j * 100 + i) * 3; //Red  
+          RGB32[(j * 100 + i) * 4 + 3] = 0;
+      }
+  }
+  
+  GraphicsOutput->Blt(
+              GraphicsOutput, 
+              (EFI_GRAPHICS_OUTPUT_BLT_PIXEL *) RGB32,
+              EfiBltBufferToVideo,
+              0, 0, 
+              0, 400, 
+              100, 100, 0);     
+
   gST->ConOut->OutputString(gST->ConOut,L"please input:\n\r");
   count = 0;
   while(scanCode!=0x17)	//ESC
