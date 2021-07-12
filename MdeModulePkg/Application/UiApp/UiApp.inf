@@ -61,6 +61,7 @@
 
 [Protocols]
   gEfiSmbiosProtocolGuid                        ## CONSUMES
+  gEfiSimplePointerProtocolGuid
   gEfiHiiConfigAccessProtocolGuid               ## CONSUMES
 
 [FeaturePcd]

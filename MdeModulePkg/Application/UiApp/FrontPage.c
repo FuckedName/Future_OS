@@ -10,9 +10,14 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #include "FrontPage.h"
 #include "FrontPageCustomizedUi.h"
 
+#include <Protocol/SimplePointer.h>
+#include <Protocol/AbsolutePointer.h>
+
+
 UINTN ScreenWidth, ScreenHeight;  
 
 EFI_GRAPHICS_OUTPUT_PROTOCOL       *GraphicsOutput;
+EFI_SIMPLE_POINTER_PROTOCOL        *gMouse;
 
 const UINT8 s[][16] =
 {   
@@ -511,7 +516,7 @@ EFI_STATUS KeyboardInit (EFI_GRAPHICS_OUTPUT_PROTOCOL   *GraphicsOutput)
 
     while(scanCode!=0x17)	//ESC
     {
-        Status = GetKeyEx(&scanCode,&uniChar,&shiftState,&toggleState);
+        Status = GetKeyEx(&scanCode, &uniChar, &shiftState, &toggleState);
         if (EFI_ERROR (Status)) 
         {
         	Print(L"Call GetKeyEx() Error!\n");
@@ -558,7 +563,7 @@ void RectangleFillIntoBuffer(UINT8 *pBuffer,
 
 UINT8 Counter = 0;
 
-VOID TimeoutSelf(
+VOID EFIAPI TimeoutSelf(
 	IN EFI_EVENT Event,
 	IN VOID           *Context
 	)
@@ -576,6 +581,43 @@ VOID TimeoutSelf(
 	return;
 }
 
+
+EFI_STATUS MouseInit()
+{
+	EFI_STATUS                         Status;
+	EFI_HANDLE                         *PointerHandleBuffer = NULL;
+	UINTN                              HandleIndex = 0;
+	UINTN                              HandleCount = 0;
+	//get the handles which supports
+	Status = gBS->LocateHandleBuffer(
+		ByProtocol,
+		&gEfiSimplePointerProtocolGuid,
+		NULL,
+		&HandleCount,
+		&PointerHandleBuffer
+		);
+		
+	if (EFI_ERROR(Status))	return Status;		//unsupport
+	
+	for (HandleIndex = 0; HandleIndex < HandleCount; HandleIndex++)
+	{
+		Status = gBS->HandleProtocol(
+			PointerHandleBuffer[HandleIndex],
+			&gEfiSimplePointerProtocolGuid,
+			(VOID**)&gMouse);
+			
+		if (EFI_ERROR(Status))	
+		    continue;
+		
+		else
+		{
+			return EFI_SUCCESS;
+		}
+	}
+	
+    return EFI_SUCCESS;
+
+}
 
 EFI_STATUS TimerInit()
 {
@@ -734,7 +776,53 @@ EFI_STATUS ScreenInit(EFI_GRAPHICS_OUTPUT_PROTOCOL   *GraphicsOutput)
     return EFI_SUCCESS;
 }
 
+//Name: ListMouseMessage
+//Input: gMouse
+//Output: 
+//Descriptor:
+void ListMouseMessage(void)
+{
+	EFI_STATUS Status;
+	UINTN Index;
+	EFI_SIMPLE_POINTER_STATE State;
+	INTN i;
+	
+	//SwitchGraphicsMode(TRUE);
+	//InSYGraphicsMode();
+	//SetBKG(&(gColorTable[3]));
+	
+    Print(L"ResolutionX: %08d", gMouse->Mode->ResolutionX);
+    
+	for(i = 0;i < 10000; i++)
+	{
+		
+		Status = gMouse->GetState(gMouse, &State);
+        if (Status == EFI_DEVICE_ERROR)
+            return ;
+		
+		//x:
+		Print(L"RelativeMovementX: %08d\n", State.RelativeMovementX);
+		
+		gBS->WaitForEvent( 1, &gMouse->WaitForInput, &Index );
+	}
+	
+	//WaitKey();
+	//OutSYGraphicsMode();
+	//SwitchGraphicsMode(FALSE);
+	
+}
 
+EFI_STATUS DisplayMouseMode(void)
+{
+	Print(L"Print Current Mode of Mouse:\n");
+	Print(L"::ResolutionX=0x%x\n",gMouse->Mode->ResolutionX);
+	Print(L"::ResolutionY=%d\n",gMouse->Mode->ResolutionY);
+	Print(L"::ResolutionZ=%d\n",gMouse->Mode->ResolutionZ);
+	Print(L"::LeftButton=%d\n",gMouse->Mode->LeftButton);
+	Print(L"::RightButton=%d\n",gMouse->Mode->RightButton);
+	
+	return EFI_SUCCESS;
+}
 
 /**
   The user Entry Point for Application. The user code starts with this function
@@ -780,15 +868,25 @@ InitializeUserInterface (
 
     Print(L"ScreenWidth:%d, ScreenHeight:%d\n\n", ScreenWidth, ScreenHeight);
     
-    ScreenInit(GraphicsOutput);
+    //ScreenInit(GraphicsOutput);
     
-        /*
-
     KeyboardInit(GraphicsOutput);
-    */
+    /**/
     
-    TimerInit();
+    //TimerInit();
     
+	Status = MouseInit();
+	if (EFI_ERROR (Status)) 
+	{
+		Print(L"Call LocateMouse, Can't find device!\n");
+	}
+	else
+	{
+		Print(L"Call LocateMouse, Find device!\n");
+		DisplayMouseMode();
+	}
+	ListMouseMessage();    
+	
     return EFI_SUCCESS;
 }
 
