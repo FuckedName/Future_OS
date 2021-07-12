@@ -559,6 +559,8 @@ EFI_STATUS ScreenInit(EFI_GRAPHICS_OUTPUT_PROTOCOL   *GraphicsOutput)
     UINT8 *ScreenBuff = NULL;
 	UINT32 i = 0;
 	UINT32 j = 0;
+	UINT32 x = ScreenWidth;
+	UINT32 y = ScreenHeight;
 	
     EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
   
@@ -574,7 +576,39 @@ EFI_STATUS ScreenInit(EFI_GRAPHICS_OUTPUT_PROTOCOL   *GraphicsOutput)
             ScreenBuff[(j * ScreenWidth + i) * 4 + 3] =  0;
         }
     }
+
+    Color.Red   = 0x00;
+    Color.Green = 0x84;
+    Color.Blue	= 0x84;
+    RectangleFillIntoBuffer(ScreenBuff, 0,     0,      x -  1, y - 29, 1, Color);
     
+    Color.Red   = 0xC6;
+    Color.Green = 0xC6;
+    Color.Blue	= 0xC6;
+    RectangleFillIntoBuffer(ScreenBuff, 0,     y - 28, x -  1, y - 28, 1, Color);
+    RectangleFillIntoBuffer(ScreenBuff, 0,     y - 26, x -  1, y -  1, 1, Color);
+    
+    Color.Red   = 0x00;
+    Color.Green = 0x00;
+    Color.Blue	= 0x00;
+    RectangleFillIntoBuffer(ScreenBuff, 2,     y -  3, 59,     y -  3, 1, Color);
+    RectangleFillIntoBuffer(ScreenBuff, 60,    y - 24, 60,     y -  3, 1, Color);
+
+    Color.Red   = 0x84;
+    Color.Green = 0x84;
+    Color.Blue	= 0x84;
+    RectangleFillIntoBuffer(ScreenBuff, 3,     y -  4, 59,     y -  4, 1, Color);
+    RectangleFillIntoBuffer(ScreenBuff, 59,     y - 23, 59,     y -  5, 1, Color);
+    RectangleFillIntoBuffer(ScreenBuff, x - 47, y - 24, x -  4, y - 24, 1, Color);
+    RectangleFillIntoBuffer(ScreenBuff, x - 47, y - 23, x - 47, y -  4, 1, Color);
+    
+	
+    Color.Red   = 0xFF;
+    Color.Green = 0xFF;
+    Color.Blue	= 0xFF;
+    RectangleFillIntoBuffer(ScreenBuff, 0,     y - 27, x -  1, y - 27, 1, Color);
+    RectangleFillIntoBuffer(ScreenBuff, 3,     y - 24, 59,     y - 24, 1, Color);
+        
     Color.Red   = 0xFF;
     Color.Green = 0xFF;
     Color.Blue	= 0xFF;
