@@ -12,6 +12,8 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 UINTN ScreenWidth, ScreenHeight;  
 
+EFI_GRAPHICS_OUTPUT_PROTOCOL       *GraphicsOutput;
+
 const UINT8 s[][16] =
 {   
     {0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00},       //0x00
@@ -554,6 +556,76 @@ void RectangleFillIntoBuffer(UINT8 *pBuffer,
 
 }
 
+UINT8 Counter = 0;
+
+VOID TimeoutSelf(
+	IN EFI_EVENT Event,
+	IN VOID           *Context
+	)
+{
+
+    EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
+
+	++Counter;
+	Color.Blue = 0xFF;
+	Color.Red = 0xFF;
+	Color.Green = 0xFF;
+	Color.Reserved = 0x66;
+	DrawAsciiChar(GraphicsOutput, 20 + Counter * 10, 60, Counter + 60, Color);
+
+	return;
+}
+
+
+EFI_STATUS TimerInit()
+{
+    EFI_STATUS	Status;
+	EFI_HANDLE	TimerOne	= NULL;
+	BOOLEAN		ExitMark	= FALSE;
+	static const UINTN SecondsToNanoSeconds = 10000000;
+
+	Status = gBS->CreateEvent(
+		EVT_NOTIFY_SIGNAL | EVT_TIMER,
+		TPL_CALLBACK,
+		TimeoutSelf,
+		NULL,
+		&TimerOne
+		);
+
+	if ( EFI_ERROR( Status ) )
+	{
+		Print( L"Create Event Error! \r\n" );
+		return(1);
+	}
+
+	Status = gBS->SetTimer(
+		TimerOne,
+		TimerPeriodic,
+		MultU64x32( SecondsToNanoSeconds, 1 )
+		);
+
+	if ( EFI_ERROR( Status ) )
+	{
+		Print( L"Set Timer Error! \r\n" );
+		return(2);
+	}
+
+	while ( !ExitMark )
+	{
+		/* if (mEfiShellEnvironment2 -> GetExecutionBreak()) {ExitMark=TRUE;} */
+
+
+		if ( Counter > 5 )
+		{
+			ExitMark = TRUE;
+		}
+	}
+	gBS->SetTimer( TimerOne, TimerCancel, 0 );
+	gBS->CloseEvent( TimerOne );
+
+	return EFI_SUCCESS;
+}
+
 EFI_STATUS ScreenInit(EFI_GRAPHICS_OUTPUT_PROTOCOL   *GraphicsOutput)
 {
     UINT8 *ScreenBuff = NULL;
@@ -662,6 +734,8 @@ EFI_STATUS ScreenInit(EFI_GRAPHICS_OUTPUT_PROTOCOL   *GraphicsOutput)
     return EFI_SUCCESS;
 }
 
+
+
 /**
   The user Entry Point for Application. The user code starts with this function
   as the real entry point for the image goes into a library that calls this
@@ -683,7 +757,6 @@ InitializeUserInterface (
 {
     EFI_HII_HANDLE                     HiiHandle;
     EFI_STATUS                         Status;
-    EFI_GRAPHICS_OUTPUT_PROTOCOL       *GraphicsOutput;
     
     gBS->SetWatchdogTimer (0x0000, 0x0000, 0x0000, NULL);
     gST->ConOut->ClearScreen (gST->ConOut);
@@ -706,11 +779,16 @@ InitializeUserInterface (
     ScreenHeight = GraphicsOutput->Mode->Info->VerticalResolution;
 
     Print(L"ScreenWidth:%d, ScreenHeight:%d\n\n", ScreenWidth, ScreenHeight);
-
+    
     ScreenInit(GraphicsOutput);
+    
+        /*
 
     KeyboardInit(GraphicsOutput);
-
+    */
+    
+    TimerInit();
+    
     return EFI_SUCCESS;
 }
 
