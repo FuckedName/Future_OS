@@ -396,12 +396,11 @@ EFI_STATUS DrawAsciiCharUseBuffer(IN EFI_GRAPHICS_OUTPUT_PROTOCOL  *GraphicsOutp
 
 EFI_STATUS DrawAsciiCharString(IN EFI_GRAPHICS_OUTPUT_PROTOCOL  *GraphicsOutput,
         IN UINTN x0, UINTN y0,UINT8 *c,
-        IN EFI_GRAPHICS_OUTPUT_BLT_PIXEL BorderColor)
+        IN EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color)
 {    
-    EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
     UINT8 i;
     for (i = 60; i < 100; i++)
-        DrawAsciiCharUseBuffer(GraphicsOutput, 20 + (i - 40) * 10, 20, i, Color);
+        DrawAsciiCharUseBuffer(GraphicsOutput, 20 + (i - 40) * 8, 100, i, Color);
 
     return EFI_SUCCESS;
 }
@@ -770,10 +769,43 @@ Process2 (
 	    DrawAsciiCharUseBuffer(GraphicsOutput, 20 + process2_i * 8, 60, process2_i + 60, Color);
 
 }
+
+static int process3_i = 2;
+STATIC
+VOID
+EFIAPI
+Process3 (
+  IN EFI_EVENT Event,
+  IN VOID      *Context
+  )
+{
+    EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
+
+	++process3_i;
+
+	Color.Blue = 0xFF;
+	Color.Red = 0xFF;
+	Color.Green = 0xFF;
+	Color.Reserved = 0x66;
+	
+	//for (;;i++)
+	DrawAsciiCharUseBuffer(GraphicsOutput, 20 + process3_i * 8, 80, process3_i + 60, Color);
+
+}
+
  
 EFI_STATUS MultiProcessInit ()
 {
     EFI_GUID gMultiProcessGuid  = { 0x0579257E, 0x1843, 0x45FB, { 0x83, 0x9D, 0x6B, 0x79, 0x09, 0x38, 0x29, 0xA9 } };
+
+    gBS->CreateEventEx(
+                      EVT_NOTIFY_SIGNAL,
+                      TPL_NOTIFY,
+                      Process3,
+                      NULL,
+                      &gMultiProcessGuid,
+                      &mProgress1Event
+                      );
 
     gBS->CreateEventEx(
                       EVT_NOTIFY_SIGNAL,
@@ -790,8 +822,9 @@ EFI_STATUS MultiProcessInit ()
                       Process2,
                       NULL,
                       &gMultiProcessGuid,
-                      &mProgress2Event
+                      &mProgress1Event
                       );
+                      
 
     return EFI_SUCCESS;
 }
@@ -931,8 +964,8 @@ EFI_STATUS ScreenInit(EFI_GRAPHICS_OUTPUT_PROTOCOL   *GraphicsOutput)
 
     //Display ASCII Char
     //count = 60;
-    for (i = 40; i < 65 + 60; i++)
-        DrawAsciiCharIntoBuffer(ScreenBuff, 20 + (i - 40) * 10, 20, i, Color);
+    //for (i = 40; i < 65 + 60; i++)
+    //    DrawAsciiCharIntoBuffer(ScreenBuff, 20 + (i - 40) * 8, 20, i, Color);
 
     DrawChineseCharIntoBuffer(ScreenBuff, 20, 20 + 16, i, Color);
 
@@ -971,6 +1004,7 @@ InitializeUserInterface (
     EFI_HII_HANDLE                     HiiHandle;
     EFI_STATUS                         Status;
     
+    EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
     //gBS->SetWatchdogTimer (0x0000, 0x0000, 0x0000, NULL);
     //gST->ConOut->ClearScreen (gST->ConOut);
 
@@ -995,8 +1029,13 @@ InitializeUserInterface (
     ScreenInit(GraphicsOutput);
     
     //KeyboardInit(GraphicsOutput);
-    
-    
+
+	Color.Blue = 0xFF;
+	Color.Red = 0xFF;
+	Color.Green = 0xFF;
+	Color.Reserved = 0x66;
+	
+    DrawAsciiCharString(GraphicsOutput, 20 + process1_i * 8, 100, NULL, Color);
     MultiProcessInit();
     TimerCreate();
     /*
