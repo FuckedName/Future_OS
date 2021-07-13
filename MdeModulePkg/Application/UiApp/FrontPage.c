@@ -686,11 +686,11 @@ Process1 (
 
     EFI_KEY_TOGGLE_STATE toggleState;
     EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
-	UINT8 *ScreenBuff = NULL;
-	UINT32 i = 0;
-	UINT32 j = 0;
+	//UINT8 *ScreenBuff = NULL;
+	//UINT32 i = 0;
+	//UINT32 j = 0;
 
-    ScreenBuff = (UINT8 *)AllocatePool(ScreenWidth * ScreenHeight * 4); 
+    //ScreenBuff = (UINT8 *)AllocatePool(ScreenWidth * ScreenHeight * 4); 
 
 	++process1_i;
 	Color.Blue = 0xFF;
@@ -715,7 +715,7 @@ Process1 (
     	//Print(L"\n");
 	    DrawAsciiCharUseBuffer(GraphicsOutput, 20 + process1_i * 8, 40, uniChar, Color);
     	//Print(L"  UnicodeChar=%04x", uniChar);
-        
+        /*
         for (j = 0; j < ScreenHeight - 100; j++) 
         {
             for (i = 0; i < ScreenWidth; i++) 
@@ -725,10 +725,10 @@ Process1 (
                 ScreenBuff[(j * ScreenWidth + i) * 4 + 2] =  uniChar; //Red  
                 ScreenBuff[(j * ScreenWidth + i) * 4 + 3] =  0;
             }
-        }
+        }*/
 
     }
-    
+    /*
     GraphicsOutput->Blt(
                 GraphicsOutput, 
                 (EFI_GRAPHICS_OUTPUT_BLT_PIXEL *) ScreenBuff,
@@ -736,7 +736,7 @@ Process1 (
                 0, 0, 
                 0, 0, 
                 ScreenWidth, ScreenHeight, 0);   
-
+*/
 }
 
  static int process2_i = 1;
@@ -750,7 +750,7 @@ Process2 (
 {
     EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
 
-	++process2_i;
+	//++process2_i;
 
 	Color.Blue = 0xFF;
 	Color.Red = 0xFF;
@@ -780,8 +780,53 @@ Process2 (
 	//Print(L"X: %08x Y: %08x Z: %08x L: %d R:%d\n", State.RelativeMovementX, State.RelativeMovementY, State.RelativeMovementZ,
 	//                           State.LeftButton, State.RightButton);
 	DrawAsciiCharUseBuffer(GraphicsOutput, 20 + process2_i * 8, 60, gMouse->Mode->ResolutionX, Color);
-	DEBUG ((EFI_D_INFO, "X: %08x Y: %08x Z: %08x L: %d R:%d\n", State.RelativeMovementX, State.RelativeMovementY, State.RelativeMovementZ,
-	                           State.LeftButton, State.RightButton));
+
+    INT32 MovementX;
+    //INT32 MovementY;
+
+    
+    //X
+	if (State.RelativeMovementX >= 0xFFFF)
+	{
+	    MovementX = State.RelativeMovementX / 0xFFFF;
+
+	    DEBUG ((EFI_D_INFO, "X <-: %08x ", MovementX));
+	    DrawAsciiCharUseBuffer(GraphicsOutput, 20 + process2_i * 8, 60, 'L', Color);
+    }
+    else
+    {
+	    DrawAsciiCharUseBuffer(GraphicsOutput, 20 + process2_i * 8, 60, 'R', Color);
+    }
+
+
+    //Y
+	if (State.RelativeMovementY >= 0xFFFF)
+	{
+	    //MovementY = State.RelativeMovementY / 0xFFFF;
+
+	    DrawAsciiCharUseBuffer(GraphicsOutput, 20 + process2_i * 8 + 8, 60, 'U', Color);
+
+    }
+    else
+    {
+        DEBUG ((EFI_D_INFO, "Y Move down: %08x ", State.RelativeMovementY));
+	    DrawAsciiCharUseBuffer(GraphicsOutput, 20 + process2_i * 8 + 8, 60, 'D', Color);
+    }
+
+    //Button
+    if (State.LeftButton == 0x01)
+    {
+        DEBUG ((EFI_D_INFO, "Left button clicked"));
+	    DrawAsciiCharUseBuffer(GraphicsOutput, 20 + process2_i * 8 + 16, 60, 'E', Color);
+    }
+    
+    if (State.RightButton == 0x01)
+    {
+	    DrawAsciiCharUseBuffer(GraphicsOutput, 20 + process2_i * 8 + 16, 60, 'R', Color);
+    }
+    
+    DEBUG ((EFI_D_INFO, "\n"));
+    
 	gBS->WaitForEvent( 1, &gMouse->WaitForInput, &Index );
 	//}	    
 
