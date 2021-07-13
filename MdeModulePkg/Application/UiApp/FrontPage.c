@@ -622,26 +622,7 @@ EFI_STATUS DisplayMouseMode(void)
 //Descriptor:
 void ListMouseMessage(void)
 {
-	EFI_STATUS Status;
-	UINTN Index;
-	EFI_SIMPLE_POINTER_STATE State;
-	INTN i;
 	
-    Print(L"ResolutionX: %08d", gMouse->Mode->ResolutionX);
-    
-	for(i = 0;i < 10000; i++)
-	{
-		
-		Status = gMouse->GetState(gMouse, &State);
-        if (Status == EFI_DEVICE_ERROR)
-            return ;
-		
-		//x:
-		Print(L"X: %08x Y: %08x Z: %08x L: %d R:%d\n", State.RelativeMovementX, State.RelativeMovementY, State.RelativeMovementZ,
-		                           State.LeftButton, State.RightButton);
-		
-		gBS->WaitForEvent( 1, &gMouse->WaitForInput, &Index );
-	}
 		
 }
 
@@ -677,7 +658,7 @@ EFI_STATUS MouseInit()
 		{
 		    Print(L"Call LocateMouse, Find device!\n");
     		DisplayMouseMode();
-    		ListMouseMessage(); 
+    		//ListMouseMessage(); 
 			return EFI_SUCCESS;
 		}
 	}	
@@ -688,7 +669,7 @@ EFI_STATUS MouseInit()
 
 
 //static int process1_i = 0;
-
+// for keyboard input event
 STATIC
 VOID
 EFIAPI
@@ -777,7 +758,32 @@ Process2 (
 	Color.Reserved = 0x66;
 	
 	//for (;;i++)
-	    DrawAsciiCharUseBuffer(GraphicsOutput, 20 + process2_i * 8, 60, process2_i + 60, Color);
+	    //DrawAsciiCharUseBuffer(GraphicsOutput, 20 + process2_i * 8, 60, process2_i + 60, Color);
+
+    EFI_STATUS Status;
+	UINTN Index;
+	EFI_SIMPLE_POINTER_STATE State;
+	//INTN i;
+	
+    //Print(L"ResolutionX: %08d", gMouse->Mode->ResolutionX);
+    
+	//for(i = 0;i < 10000; i++)
+	//{
+		
+	Status = gMouse->GetState(gMouse, &State);
+    if (Status == EFI_DEVICE_ERROR)
+    {
+        return ;
+    }
+	
+	//x:
+	//Print(L"X: %08x Y: %08x Z: %08x L: %d R:%d\n", State.RelativeMovementX, State.RelativeMovementY, State.RelativeMovementZ,
+	//                           State.LeftButton, State.RightButton);
+	DrawAsciiCharUseBuffer(GraphicsOutput, 20 + process2_i * 8, 60, gMouse->Mode->ResolutionX, Color);
+	DEBUG ((EFI_D_INFO, "X: %08x Y: %08x Z: %08x L: %d R:%d\n", State.RelativeMovementX, State.RelativeMovementY, State.RelativeMovementZ,
+	                           State.LeftButton, State.RightButton));
+	gBS->WaitForEvent( 1, &gMouse->WaitForInput, &Index );
+	//}	    
 
 }
 
@@ -1046,14 +1052,16 @@ Main (
 	//Color.Reserved = 0x66;
 	
     //DrawAsciiCharString(GraphicsOutput, 20 + 8, 100, NULL, Color);
-    MultiProcessInit();
-    TimerCreate();
     
 	Status = MouseInit();    
 	if (EFI_ERROR (Status)) 
     {
         return EFI_UNSUPPORTED;
     }
+    
+    MultiProcessInit();
+    TimerCreate();
+    
 	
     return EFI_SUCCESS;
 }
