@@ -626,43 +626,22 @@ void RectangleFillIntoBuffer(UINT8 *pBuffer,
 
 static UINT8 Counter = 0;
 
+EFI_EVENT mCHHEvent;
+EFI_EVENT mCHHEvent2;
+
 VOID EFIAPI TimeoutSelf(
 	IN EFI_EVENT Event,
 	IN VOID           *Context
 	)
 {
+    
+    DEBUG ((EFI_D_INFO, "Charles SignalEvent mCHHEvent  ...\n"));
+    gBS->SignalEvent (mCHHEvent);
 
-    EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
-
-	++Counter;
-	Color.Blue = 0xFF;
-	Color.Red = 0xFF;
-	Color.Green = 0xFF;
-	Color.Reserved = 0x66;
-	DrawAsciiCharUseBuffer(GraphicsOutput, 20 + Counter * 10, 60, Counter + 60, Color);
-	//DrawAsciiChar(GraphicsOutput, 20 + Counter * 10, 40, Counter + 60, Color);
-
+    DEBUG ((EFI_D_INFO, "Charles SignalEvent mCHHEvent2  ...\n"));
+    gBS->SignalEvent (mCHHEvent2);
 	return;
 }
-
-VOID EFIAPI TimeoutSelf2(
-	IN EFI_EVENT Event,
-	IN VOID           *Context
-	)
-{
-
-    EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
-
-	++Counter;
-	Color.Blue = 0xFF;
-	Color.Red = 0xFF;
-	Color.Green = 0xFF;
-	Color.Reserved = 0x66;
-	DrawAsciiChar(GraphicsOutput, 20 + Counter * 10, 80, Counter + 60, Color);
-
-	return;
-}
-
 
 EFI_STATUS DisplayMouseMode(void)
 {
@@ -746,12 +725,86 @@ EFI_STATUS MouseInit()
 
 }
 
+
+STATIC
+VOID
+EFIAPI
+CHHEventTest (
+  IN EFI_EVENT Event,
+  IN VOID      *Context
+  )
+{
+    EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
+
+	++Counter;
+	Color.Blue = 0xFF;
+	Color.Red = 0xFF;
+	Color.Green = 0xFF;
+	Color.Reserved = 0x66;
+	
+	DrawAsciiCharUseBuffer(GraphicsOutput, 20 + Counter * 10, 40, Counter + 60, Color);
+
+}
+ 
+STATIC
+VOID
+EFIAPI
+CHHEventTest2 (
+  IN EFI_EVENT Event,
+  IN VOID      *Context
+  )
+{
+    EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
+
+	++Counter;
+	Color.Blue = 0xFF;
+	Color.Red = 0xFF;
+	Color.Green = 0xFF;
+	Color.Reserved = 0x66;
+	
+	DrawAsciiCharUseBuffer(GraphicsOutput, 20 + Counter * 10, 60, Counter + 60, Color);
+
+}
+ 
+EFI_STATUS PlatformInit (
+  )
+{
+  EFI_GUID gCHHEventExtestGuid  = { 0x0579257E, 0x1843, 0x45FB, { 0x83, 0x9D, 0x6B, 0x79, 0x09, 0x38, 0x29, 0xA9 } };
+  UINT8 i;
+  
+  gBS->CreateEventEx (
+                  EVT_NOTIFY_SIGNAL,
+                  TPL_NOTIFY,
+                  CHHEventTest,
+                  NULL,
+                  &gCHHEventExtestGuid,
+                  &mCHHEvent
+                  );
+                  
+  gBS->CreateEventEx (
+                  EVT_NOTIFY_SIGNAL,
+                  TPL_NOTIFY,
+                  CHHEventTest2,
+                  NULL,
+                  &gCHHEventExtestGuid,
+                  &mCHHEvent2
+                  );
+
+  for (i = 0; i < 10; i++)
+  {
+  }
+  
+  return EFI_SUCCESS;
+}
+// https://blog.csdn.net/longsonssss/article/details/80221513
+
+
 EFI_STATUS TimerInit()
 {
     EFI_STATUS	Status;
 	EFI_HANDLE	TimerOne	= NULL;
 	//BOOLEAN		ExitMark	= FALSE;
-	static const UINTN SecondsToNanoSeconds = 1000000;
+	static const UINTN SecondsToNanoSeconds = 5000000;
 
 	Status = gBS->CreateEvent(
                            		EVT_NOTIFY_SIGNAL | EVT_TIMER,
@@ -779,62 +832,15 @@ EFI_STATUS TimerInit()
 		return(2);
 	}
 
-	while (1 )
+	while (1)
 	{		
 	}
-	/*
+	
 	gBS->SetTimer( TimerOne, TimerCancel, 0 );
-	gBS->CloseEvent( TimerOne );
-    */
+	gBS->CloseEvent( TimerOne );    
 
 	return EFI_SUCCESS;
 }
-
-
-EFI_STATUS TimerInit2()
-{
-    EFI_STATUS	Status;
-	EFI_HANDLE	TimerOne	= NULL;
-	//BOOLEAN		ExitMark	= FALSE;
-	static const UINTN SecondsToNanoSeconds = 10000000;
-
-	Status = gBS->CreateEvent(
-                           		EVT_NOTIFY_SIGNAL | EVT_TIMER,
-                           		TPL_CALLBACK,
-                           		TimeoutSelf2,
-                           		NULL,
-                           		&TimerOne
-                           		);
-
-	if ( EFI_ERROR( Status ) )
-	{
-		Print( L"Create Event Error! \r\n" );
-		return(1);
-	}
-
-	Status = gBS->SetTimer(
-		TimerOne,
-		TimerPeriodic,
-		MultU64x32( SecondsToNanoSeconds, 1)
-		);
-
-	if ( EFI_ERROR( Status ) )
-	{
-		Print( L"Set Timer Error! \r\n" );
-		return(2);
-	}
-	while (1 )
-	{		
-	}
-	/*
-	gBS->SetTimer( TimerOne, TimerCancel, 0 );
-	gBS->CloseEvent( TimerOne );
-    */
-
-
-	return EFI_SUCCESS;
-}
-
 
 EFI_STATUS ScreenInit(EFI_GRAPHICS_OUTPUT_PROTOCOL   *GraphicsOutput)
 {
@@ -992,8 +998,8 @@ InitializeUserInterface (
     //KeyboardInit(GraphicsOutput);
     
     
+    PlatformInit();
     TimerInit();
-    TimerInit2();
     /*
 	Status = MouseInit();    
 	if (EFI_ERROR (Status)) 
