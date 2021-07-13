@@ -624,10 +624,10 @@ void RectangleFillIntoBuffer(UINT8 *pBuffer,
 
 }
 
-static UINT8 Counter = 0;
+//static UINT8 Counter = 0;
 
-EFI_EVENT mCHHEvent;
-EFI_EVENT mCHHEvent2;
+EFI_EVENT mProgress1Event;
+EFI_EVENT mProgress2Event;
 
 VOID EFIAPI TimeoutSelf(
 	IN EFI_EVENT Event,
@@ -635,11 +635,11 @@ VOID EFIAPI TimeoutSelf(
 	)
 {
     
-    DEBUG ((EFI_D_INFO, "Charles SignalEvent mCHHEvent  ...\n"));
-    gBS->SignalEvent (mCHHEvent);
+    DEBUG ((EFI_D_INFO, "Charles SignalEvent mProgress1Event  ...\n"));
+    gBS->SignalEvent (mProgress1Event);
 
-    DEBUG ((EFI_D_INFO, "Charles SignalEvent mCHHEvent2  ...\n"));
-    gBS->SignalEvent (mCHHEvent2);
+    //DEBUG ((EFI_D_INFO, "Charles SignalEvent mProgress2Event  ...\n"));
+    //gBS->SignalEvent (mProgress2Event);
 	return;
 }
 
@@ -726,80 +726,79 @@ EFI_STATUS MouseInit()
 }
 
 
+static int process1_i = 0;
+
 STATIC
 VOID
 EFIAPI
-CHHEventTest (
+Process1 (
   IN EFI_EVENT Event,
   IN VOID      *Context
   )
 {
     EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
 
-	++Counter;
+	++process1_i;
 	Color.Blue = 0xFF;
 	Color.Red = 0xFF;
 	Color.Green = 0xFF;
 	Color.Reserved = 0x66;
-	
-	DrawAsciiCharUseBuffer(GraphicsOutput, 20 + Counter * 10, 40, Counter + 60, Color);
+	//for (;;i++)
+    	DrawAsciiCharUseBuffer(GraphicsOutput, 20 + process1_i * 8, 40, process1_i + 60, Color);
 
 }
- 
+
+ static int process2_i = 1;
 STATIC
 VOID
 EFIAPI
-CHHEventTest2 (
+Process2 (
   IN EFI_EVENT Event,
   IN VOID      *Context
   )
 {
     EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
 
-	++Counter;
+	++process2_i;
+
 	Color.Blue = 0xFF;
 	Color.Red = 0xFF;
 	Color.Green = 0xFF;
 	Color.Reserved = 0x66;
 	
-	DrawAsciiCharUseBuffer(GraphicsOutput, 20 + Counter * 10, 60, Counter + 60, Color);
+	//for (;;i++)
+	    DrawAsciiCharUseBuffer(GraphicsOutput, 20 + process2_i * 8, 60, process2_i + 60, Color);
 
 }
  
-EFI_STATUS PlatformInit (
-  )
+EFI_STATUS MultiProcessInit ()
 {
-  EFI_GUID gCHHEventExtestGuid  = { 0x0579257E, 0x1843, 0x45FB, { 0x83, 0x9D, 0x6B, 0x79, 0x09, 0x38, 0x29, 0xA9 } };
-  UINT8 i;
-  
-  gBS->CreateEventEx (
-                  EVT_NOTIFY_SIGNAL,
-                  TPL_NOTIFY,
-                  CHHEventTest,
-                  NULL,
-                  &gCHHEventExtestGuid,
-                  &mCHHEvent
-                  );
+    EFI_GUID gMultiProcessGuid  = { 0x0579257E, 0x1843, 0x45FB, { 0x83, 0x9D, 0x6B, 0x79, 0x09, 0x38, 0x29, 0xA9 } };
+
+    gBS->CreateEventEx(
+                      EVT_NOTIFY_SIGNAL,
+                      TPL_NOTIFY,
+                      Process1,
+                      NULL,
+                      &gMultiProcessGuid,
+                      &mProgress1Event
+                      );
                   
-  gBS->CreateEventEx (
-                  EVT_NOTIFY_SIGNAL,
-                  TPL_NOTIFY,
-                  CHHEventTest2,
-                  NULL,
-                  &gCHHEventExtestGuid,
-                  &mCHHEvent2
-                  );
+    gBS->CreateEventEx(
+                      EVT_NOTIFY_SIGNAL,
+                      TPL_NOTIFY,
+                      Process2,
+                      NULL,
+                      &gMultiProcessGuid,
+                      &mProgress2Event
+                      );
 
-  for (i = 0; i < 10; i++)
-  {
-  }
-  
-  return EFI_SUCCESS;
+    return EFI_SUCCESS;
 }
 // https://blog.csdn.net/longsonssss/article/details/80221513
 
 
-EFI_STATUS TimerInit()
+EFI_STATUS TimerCreate()
 {
     EFI_STATUS	Status;
 	EFI_HANDLE	TimerOne	= NULL;
@@ -998,8 +997,8 @@ InitializeUserInterface (
     //KeyboardInit(GraphicsOutput);
     
     
-    PlatformInit();
-    TimerInit();
+    MultiProcessInit();
+    TimerCreate();
     /*
 	Status = MouseInit();    
 	if (EFI_ERROR (Status)) 
