@@ -163,12 +163,21 @@ const UINT8 sChinese[][32] =
 	 0x0A,0x90,0x0C,0x60,0x18,0x40,0x68,0xA0,0x09,0x20,0x0A,0x14,0x28,0x14,0x10,0x0C}      
 };
 
-void CopyColorIntoBuffer(UINT8 *pBuffer,EFI_GRAPHICS_OUTPUT_BLT_PIXEL color, UINT16 x0, UINT16 y0)
+void CopyColorIntoBuffer(UINT8 *pBuffer, EFI_GRAPHICS_OUTPUT_BLT_PIXEL color, UINT16 x0, UINT16 y0)
 {
     pBuffer[y0 * ScreenWidth * 4 + x0 * 4]     = color.Blue;
     pBuffer[y0 * ScreenWidth * 4 + x0 * 4 + 1] = color.Green;
     pBuffer[y0 * ScreenWidth * 4 + x0 * 4 + 2] = color.Red;
     pBuffer[y0 * ScreenWidth * 4 + x0 * 4 + 3] = color.Reserved;
+
+}
+
+void CopyColorIntoBuffer2(UINT8 *pBuffer, EFI_GRAPHICS_OUTPUT_BLT_PIXEL color, UINT16 x0, UINT16 y0)
+{
+    pBuffer[y0 * 8 * 4 + x0 * 4]     = color.Blue;
+    pBuffer[y0 * 8 * 4 + x0 * 4 + 1] = color.Green;
+    pBuffer[y0 * 8 * 4 + x0 * 4 + 2] = color.Red;
+    pBuffer[y0 * 8 * 4 + x0 * 4 + 3] = color.Reserved;
 
 }
 
@@ -330,6 +339,60 @@ EFI_STATUS DrawAsciiChar(IN EFI_GRAPHICS_OUTPUT_PROTOCOL  *GraphicsOutput,
     return EFI_SUCCESS;
 }
 
+EFI_STATUS DrawAsciiCharUseBuffer(IN EFI_GRAPHICS_OUTPUT_PROTOCOL  *GraphicsOutput,
+        IN UINTN x0, UINTN y0,UINT8 c,
+        IN EFI_GRAPHICS_OUTPUT_BLT_PIXEL BorderColor)
+{
+    INT16 i;
+    UINT8 d;
+    UINT8 pBuffer[16 * 8 * 4];
+
+    for(i = 0; i < 16 * 8 * 4; i++)
+	{
+	    pBuffer[i] = 0x00;
+	}
+    
+	for(i = 0; i < 16; i++)
+	{
+		d = s[c][i];
+		
+		if ((d & 0x80) != 0) 
+		    CopyColorIntoBuffer2(pBuffer, BorderColor, 0, i); 
+		
+		if ((d & 0x40) != 0) 
+            CopyColorIntoBuffer2(pBuffer, BorderColor, 1, i);
+		
+		if ((d & 0x20) != 0) 
+		    CopyColorIntoBuffer2(pBuffer, BorderColor, 2, i);
+		
+		if ((d & 0x10) != 0) 
+		    CopyColorIntoBuffer2(pBuffer, BorderColor, 3, i);
+		
+		if ((d & 0x08) != 0) 
+		    CopyColorIntoBuffer2(pBuffer, BorderColor, 4, i);
+		
+		if ((d & 0x04) != 0) 
+		    CopyColorIntoBuffer2(pBuffer, BorderColor, 5, i);
+		
+		if ((d & 0x02) != 0) 
+		    CopyColorIntoBuffer2(pBuffer, BorderColor, 6, i);
+		
+		if ((d & 0x01) != 0) 
+		    CopyColorIntoBuffer2(pBuffer, BorderColor, 7, i);
+		
+	}
+	
+    GraphicsOutput->Blt(GraphicsOutput, 
+                        (EFI_GRAPHICS_OUTPUT_BLT_PIXEL *) pBuffer,
+                        EfiBltBufferToVideo,
+                        0, 0, 
+                        x0, y0, 
+                        8, 16, 
+                        0);   
+                
+    return EFI_SUCCESS;
+}
+
 
 EFI_STATUS DrawAsciiCharString(IN EFI_GRAPHICS_OUTPUT_PROTOCOL  *GraphicsOutput,
         IN UINTN x0, UINTN y0,UINT8 *c,
@@ -338,7 +401,7 @@ EFI_STATUS DrawAsciiCharString(IN EFI_GRAPHICS_OUTPUT_PROTOCOL  *GraphicsOutput,
     EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
     UINT8 i;
     for (i = 60; i < 100; i++)
-        DrawAsciiChar(GraphicsOutput, 20 + (i - 40) * 10, 20, i, Color);
+        DrawAsciiCharUseBuffer(GraphicsOutput, 20 + (i - 40) * 10, 20, i, Color);
 
     return EFI_SUCCESS;
 }
@@ -561,7 +624,7 @@ void RectangleFillIntoBuffer(UINT8 *pBuffer,
 
 }
 
-UINT8 Counter = 0;
+static UINT8 Counter = 0;
 
 VOID EFIAPI TimeoutSelf(
 	IN EFI_EVENT Event,
@@ -576,7 +639,26 @@ VOID EFIAPI TimeoutSelf(
 	Color.Red = 0xFF;
 	Color.Green = 0xFF;
 	Color.Reserved = 0x66;
-	DrawAsciiChar(GraphicsOutput, 20 + Counter * 10, 60, Counter + 60, Color);
+	DrawAsciiCharUseBuffer(GraphicsOutput, 20 + Counter * 10, 60, Counter + 60, Color);
+	//DrawAsciiChar(GraphicsOutput, 20 + Counter * 10, 40, Counter + 60, Color);
+
+	return;
+}
+
+VOID EFIAPI TimeoutSelf2(
+	IN EFI_EVENT Event,
+	IN VOID           *Context
+	)
+{
+
+    EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
+
+	++Counter;
+	Color.Blue = 0xFF;
+	Color.Red = 0xFF;
+	Color.Green = 0xFF;
+	Color.Reserved = 0x66;
+	DrawAsciiChar(GraphicsOutput, 20 + Counter * 10, 80, Counter + 60, Color);
 
 	return;
 }
@@ -668,16 +750,16 @@ EFI_STATUS TimerInit()
 {
     EFI_STATUS	Status;
 	EFI_HANDLE	TimerOne	= NULL;
-	BOOLEAN		ExitMark	= FALSE;
-	static const UINTN SecondsToNanoSeconds = 10000000;
+	//BOOLEAN		ExitMark	= FALSE;
+	static const UINTN SecondsToNanoSeconds = 1000000;
 
 	Status = gBS->CreateEvent(
-		EVT_NOTIFY_SIGNAL | EVT_TIMER,
-		TPL_CALLBACK,
-		TimeoutSelf,
-		NULL,
-		&TimerOne
-		);
+                           		EVT_NOTIFY_SIGNAL | EVT_TIMER,
+                           		TPL_CALLBACK,
+                           		TimeoutSelf,
+                           		NULL,
+                           		&TimerOne
+                           		);
 
 	if ( EFI_ERROR( Status ) )
 	{
@@ -688,7 +770,7 @@ EFI_STATUS TimerInit()
 	Status = gBS->SetTimer(
 		TimerOne,
 		TimerPeriodic,
-		MultU64x32( SecondsToNanoSeconds, 1 )
+		MultU64x32( SecondsToNanoSeconds, 1)
 		);
 
 	if ( EFI_ERROR( Status ) )
@@ -697,21 +779,62 @@ EFI_STATUS TimerInit()
 		return(2);
 	}
 
-	while ( !ExitMark )
-	{
-		/* if (mEfiShellEnvironment2 -> GetExecutionBreak()) {ExitMark=TRUE;} */
-
-
-		if ( Counter > 5 )
-		{
-			ExitMark = TRUE;
-		}
+	while (1 )
+	{		
 	}
+	/*
 	gBS->SetTimer( TimerOne, TimerCancel, 0 );
 	gBS->CloseEvent( TimerOne );
+    */
 
 	return EFI_SUCCESS;
 }
+
+
+EFI_STATUS TimerInit2()
+{
+    EFI_STATUS	Status;
+	EFI_HANDLE	TimerOne	= NULL;
+	//BOOLEAN		ExitMark	= FALSE;
+	static const UINTN SecondsToNanoSeconds = 10000000;
+
+	Status = gBS->CreateEvent(
+                           		EVT_NOTIFY_SIGNAL | EVT_TIMER,
+                           		TPL_CALLBACK,
+                           		TimeoutSelf2,
+                           		NULL,
+                           		&TimerOne
+                           		);
+
+	if ( EFI_ERROR( Status ) )
+	{
+		Print( L"Create Event Error! \r\n" );
+		return(1);
+	}
+
+	Status = gBS->SetTimer(
+		TimerOne,
+		TimerPeriodic,
+		MultU64x32( SecondsToNanoSeconds, 1)
+		);
+
+	if ( EFI_ERROR( Status ) )
+	{
+		Print( L"Set Timer Error! \r\n" );
+		return(2);
+	}
+	while (1 )
+	{		
+	}
+	/*
+	gBS->SetTimer( TimerOne, TimerCancel, 0 );
+	gBS->CloseEvent( TimerOne );
+    */
+
+
+	return EFI_SUCCESS;
+}
+
 
 EFI_STATUS ScreenInit(EFI_GRAPHICS_OUTPUT_PROTOCOL   *GraphicsOutput)
 {
@@ -864,19 +987,20 @@ InitializeUserInterface (
 
     Print(L"ScreenWidth:%d, ScreenHeight:%d\n\n", ScreenWidth, ScreenHeight);
     
-    //ScreenInit(GraphicsOutput);
+    ScreenInit(GraphicsOutput);
     
-    KeyboardInit(GraphicsOutput);
-    /**/
+    //KeyboardInit(GraphicsOutput);
     
-    //TimerInit();
     
+    TimerInit();
+    TimerInit2();
+    /*
 	Status = MouseInit();    
 	if (EFI_ERROR (Status)) 
     {
         return EFI_UNSUPPORTED;
     }
-	
+	*/
     return EFI_SUCCESS;
 }
 
