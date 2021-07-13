@@ -19,7 +19,7 @@ UINTN ScreenWidth, ScreenHeight;
 EFI_GRAPHICS_OUTPUT_PROTOCOL       *GraphicsOutput;
 EFI_SIMPLE_POINTER_PROTOCOL        *gMouse;
 
-const UINT8 s[][16] =
+const UINT8 sASCII[][16] =
 {   
     {0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00},       //0x00
     {0x00,0x00,0x7E,0x81,0xA5,0x81,0x81,0xBD,0x99,0x81,0x81,0x7E,0x00,0x00,0x00,0x00},       //0x01
@@ -267,7 +267,7 @@ EFI_STATUS DrawAsciiCharIntoBuffer(UINT8 *pBuffer,
     
 	for(i = 0; i < 16; i++)
 	{
-		d = s[c][i];
+		d = sASCII[c][i];
 		
 		if ((d & 0x80) != 0) 
 		    CopyColorIntoBuffer(pBuffer, BorderColor, x0 + 0, y0 + i); 
@@ -308,7 +308,7 @@ EFI_STATUS DrawAsciiChar(IN EFI_GRAPHICS_OUTPUT_PROTOCOL  *GraphicsOutput,
     
 	for(i = 0; i < 16; i++)
 	{
-		d = s[c][i];
+		d = sASCII[c][i];
 		
 		if ((d & 0x80) != 0) 
 		{ DrawPoint(GraphicsOutput, x0 + 0, y0 + i, 1, BorderColor); }
@@ -340,7 +340,7 @@ EFI_STATUS DrawAsciiChar(IN EFI_GRAPHICS_OUTPUT_PROTOCOL  *GraphicsOutput,
 }
 
 EFI_STATUS DrawAsciiCharUseBuffer(IN EFI_GRAPHICS_OUTPUT_PROTOCOL  *GraphicsOutput,
-        IN UINTN x0, UINTN y0,UINT8 c,
+        IN UINTN x0, UINTN y0, UINT8 c,
         IN EFI_GRAPHICS_OUTPUT_BLT_PIXEL BorderColor)
 {
     INT16 i;
@@ -354,7 +354,7 @@ EFI_STATUS DrawAsciiCharUseBuffer(IN EFI_GRAPHICS_OUTPUT_PROTOCOL  *GraphicsOutp
     
 	for(i = 0; i < 16; i++)
 	{
-		d = s[c][i];
+		d = sASCII[c][i];
 		
 		if ((d & 0x80) != 0) 
 		    CopyColorIntoBuffer2(pBuffer, BorderColor, 0, i); 
@@ -564,44 +564,6 @@ EFI_STATUS GetKeyEx(UINT16 *ScanCode, UINT16 *UniChar, UINT32 *ShiftState, EFI_K
 }
 
 
-
-EFI_STATUS KeyboardInit (EFI_GRAPHICS_OUTPUT_PROTOCOL   *GraphicsOutput)
-{
-
-    UINT16 scanCode = 0;
-    UINT16 uniChar = 0;
-    UINT32 shiftState;
-    UINT32 count = 0;
-    EFI_STATUS Status;
-
-    EFI_KEY_TOGGLE_STATE toggleState;
-
-    while(scanCode != 0x17)	//ESC
-    {
-        Status = GetKeyEx(&scanCode, &uniChar, &shiftState, &toggleState);
-        if (EFI_ERROR (Status)) 
-        {
-        	Print(L"Call GetKeyEx() Error!\n");
-
-        	break;
-        }
-        else
-        {
-
-        	Print(L"NO.%08d\n", count);
-        	++count;
-        	Print(L"  ScanCode=%04x", scanCode);
-        	Print(L"  UnicodeChar=%04x", uniChar);
-        	Print(L"  ShiftState=%08x", shiftState);
-        	Print(L"  ToggleState=%02x", toggleState);
-        	Print(L"\n");
-        }
-    }
-
-    return EFI_SUCCESS;
-}
-
-
 // fill into rectangle
 void RectangleFillIntoBuffer(UINT8 *pBuffer,
         IN UINTN x0, UINTN y0, UINTN x1, UINTN y1, 
@@ -725,7 +687,7 @@ EFI_STATUS MouseInit()
 }
 
 
-static int process1_i = 0;
+//static int process1_i = 0;
 
 STATIC
 VOID
@@ -735,15 +697,64 @@ Process1 (
   IN VOID      *Context
   )
 {
+    UINT16 scanCode = 0;
+    UINT16 uniChar = 0;
+    UINT32 shiftState, process1_i = 0;
+    UINT32 count = 0;
+    EFI_STATUS Status;
+
+    EFI_KEY_TOGGLE_STATE toggleState;
     EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
+	UINT8 *ScreenBuff = NULL;
+	UINT32 i = 0;
+	UINT32 j = 0;
+
+    ScreenBuff = (UINT8 *)AllocatePool(ScreenWidth * ScreenHeight * 4); 
 
 	++process1_i;
 	Color.Blue = 0xFF;
 	Color.Red = 0xFF;
 	Color.Green = 0xFF;
 	Color.Reserved = 0x66;
-	//for (;;i++)
-    	DrawAsciiCharUseBuffer(GraphicsOutput, 20 + process1_i * 8, 40, process1_i + 60, Color);
+	
+	Status = GetKeyEx(&scanCode, &uniChar, &shiftState, &toggleState);
+    if (EFI_ERROR (Status)) 
+    {
+    	//Print(L"Call GetKeyEx() Error!\n");
+    }
+    else
+    {
+
+    	//Print(L"NO.%08d\n", count);
+    	++count;
+        ++process1_i;
+    	//Print(L"  ScanCode=%04x", scanCode);
+    	//Print(L"  ShiftState=%08x", shiftState);
+    	//Print(L"  ToggleState=%02x", toggleState);
+    	//Print(L"\n");
+	    DrawAsciiCharUseBuffer(GraphicsOutput, 20 + process1_i * 8, 40, uniChar, Color);
+    	//Print(L"  UnicodeChar=%04x", uniChar);
+        
+        for (j = 0; j < ScreenHeight - 100; j++) 
+        {
+            for (i = 0; i < ScreenWidth; i++) 
+            {
+                ScreenBuff[(j * ScreenWidth + i) * 4]     =  0; //Blue   
+                ScreenBuff[(j * ScreenWidth + i) * 4 + 1] =  0; //Green 
+                ScreenBuff[(j * ScreenWidth + i) * 4 + 2] =  uniChar; //Red  
+                ScreenBuff[(j * ScreenWidth + i) * 4 + 3] =  0;
+            }
+        }
+
+    }
+    
+    GraphicsOutput->Blt(
+                GraphicsOutput, 
+                (EFI_GRAPHICS_OUTPUT_BLT_PIXEL *) ScreenBuff,
+                EfiBltBufferToVideo,
+                0, 0, 
+                0, 0, 
+                ScreenWidth, ScreenHeight, 0);   
 
 }
 
@@ -879,8 +890,8 @@ EFI_STATUS ScreenInit(EFI_GRAPHICS_OUTPUT_PROTOCOL   *GraphicsOutput)
     UINT8 *ScreenBuff = NULL;
 	UINT32 i = 0;
 	UINT32 j = 0;
-	UINT32 x = ScreenWidth;
-	UINT32 y = ScreenHeight;
+	//UINT32 x = ScreenWidth;
+	//UINT32 y = ScreenHeight;
 	//UINT8 p[100];
 	
     EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
@@ -897,7 +908,7 @@ EFI_STATUS ScreenInit(EFI_GRAPHICS_OUTPUT_PROTOCOL   *GraphicsOutput)
             ScreenBuff[(j * ScreenWidth + i) * 4 + 3] =  0;
         }
     }
-
+    /*
     Color.Red   = 0x00;
     Color.Green = 0x84;
     Color.Blue	= 0x84;
@@ -962,7 +973,7 @@ EFI_STATUS ScreenInit(EFI_GRAPHICS_OUTPUT_PROTOCOL   *GraphicsOutput)
     Color.Red  = 0xFF;
     Color.Green = 0xFF;
     Color.Blue	= 0xFF;
-
+*/
     //Display ASCII Char
     //count = 60;
     //for (i = 40; i < 65 + 60; i++)
@@ -1037,13 +1048,13 @@ Main (
     //DrawAsciiCharString(GraphicsOutput, 20 + 8, 100, NULL, Color);
     MultiProcessInit();
     TimerCreate();
-    /*
+    
 	Status = MouseInit();    
 	if (EFI_ERROR (Status)) 
     {
         return EFI_UNSUPPORTED;
     }
-	*/
+	
     return EFI_SUCCESS;
 }
 
