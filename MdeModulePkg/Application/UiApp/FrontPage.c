@@ -506,15 +506,15 @@ EFI_STATUS GetKeyEx(UINT16 *ScanCode, UINT16 *UniChar, UINT32 *ShiftState, EFI_K
 EFI_STATUS KeyboardInit (EFI_GRAPHICS_OUTPUT_PROTOCOL   *GraphicsOutput)
 {
 
-    UINT16 scanCode=0;
-    UINT16 uniChar=0;
+    UINT16 scanCode = 0;
+    UINT16 uniChar = 0;
     UINT32 shiftState;
-    UINT32 count=0;
+    UINT32 count = 0;
     EFI_STATUS Status;
 
     EFI_KEY_TOGGLE_STATE toggleState;
 
-    while(scanCode!=0x17)	//ESC
+    while(scanCode != 0x17)	//ESC
     {
         Status = GetKeyEx(&scanCode, &uniChar, &shiftState, &toggleState);
         if (EFI_ERROR (Status)) 
@@ -526,12 +526,12 @@ EFI_STATUS KeyboardInit (EFI_GRAPHICS_OUTPUT_PROTOCOL   *GraphicsOutput)
         else
         {
 
-        	Print(L"NO.%08d\n",count);
+        	Print(L"NO.%08d\n", count);
         	++count;
-        	Print(L"  ScanCode=%04x",scanCode);
-        	Print(L"  UnicodeChar=%04x",uniChar);
-        	Print(L"  ShiftState=%08x",shiftState);
-        	Print(L"  ToggleState=%02x",toggleState);
+        	Print(L"  ScanCode=%04x", scanCode);
+        	Print(L"  UnicodeChar=%04x", uniChar);
+        	Print(L"  ShiftState=%08x", shiftState);
+        	Print(L"  ToggleState=%02x", toggleState);
         	Print(L"\n");
         }
     }
@@ -582,6 +582,48 @@ VOID EFIAPI TimeoutSelf(
 }
 
 
+EFI_STATUS DisplayMouseMode(void)
+{
+	Print(L"Print Current Mode of Mouse:\n");
+	Print(L"::ResolutionX=0x%x\n",gMouse->Mode->ResolutionX);
+	Print(L"::ResolutionY=%d\n",gMouse->Mode->ResolutionY);
+	Print(L"::ResolutionZ=%d\n",gMouse->Mode->ResolutionZ);
+	Print(L"::LeftButton=%d\n",gMouse->Mode->LeftButton);
+	Print(L"::RightButton=%d\n",gMouse->Mode->RightButton);
+	
+	return EFI_SUCCESS;
+}
+
+//Name: ListMouseMessage
+//Input: gMouse
+//Output: 
+//Descriptor:
+void ListMouseMessage(void)
+{
+	EFI_STATUS Status;
+	UINTN Index;
+	EFI_SIMPLE_POINTER_STATE State;
+	INTN i;
+	
+    Print(L"ResolutionX: %08d", gMouse->Mode->ResolutionX);
+    
+	for(i = 0;i < 10000; i++)
+	{
+		
+		Status = gMouse->GetState(gMouse, &State);
+        if (Status == EFI_DEVICE_ERROR)
+            return ;
+		
+		//x:
+		Print(L"X: %08x Y: %08x Z: %08x L: %d R:%d\n", State.RelativeMovementX, State.RelativeMovementY, State.RelativeMovementZ,
+		                           State.LeftButton, State.RightButton);
+		
+		gBS->WaitForEvent( 1, &gMouse->WaitForInput, &Index );
+	}
+		
+}
+
+
 EFI_STATUS MouseInit()
 {
 	EFI_STATUS                         Status;
@@ -590,12 +632,12 @@ EFI_STATUS MouseInit()
 	UINTN                              HandleCount = 0;
 	//get the handles which supports
 	Status = gBS->LocateHandleBuffer(
-		ByProtocol,
-		&gEfiSimplePointerProtocolGuid,
-		NULL,
-		&HandleCount,
-		&PointerHandleBuffer
-		);
+                             		ByProtocol,
+                             		&gEfiSimplePointerProtocolGuid,
+                             		NULL,
+                             		&HandleCount,
+                             		&PointerHandleBuffer
+                             		);
 		
 	if (EFI_ERROR(Status))	return Status;		//unsupport
 	
@@ -611,9 +653,12 @@ EFI_STATUS MouseInit()
 		
 		else
 		{
+		    Print(L"Call LocateMouse, Find device!\n");
+    		DisplayMouseMode();
+    		ListMouseMessage(); 
 			return EFI_SUCCESS;
 		}
-	}
+	}	
 	
     return EFI_SUCCESS;
 
@@ -776,54 +821,6 @@ EFI_STATUS ScreenInit(EFI_GRAPHICS_OUTPUT_PROTOCOL   *GraphicsOutput)
     return EFI_SUCCESS;
 }
 
-//Name: ListMouseMessage
-//Input: gMouse
-//Output: 
-//Descriptor:
-void ListMouseMessage(void)
-{
-	EFI_STATUS Status;
-	UINTN Index;
-	EFI_SIMPLE_POINTER_STATE State;
-	INTN i;
-	
-	//SwitchGraphicsMode(TRUE);
-	//InSYGraphicsMode();
-	//SetBKG(&(gColorTable[3]));
-	
-    Print(L"ResolutionX: %08d", gMouse->Mode->ResolutionX);
-    
-	for(i = 0;i < 10000; i++)
-	{
-		
-		Status = gMouse->GetState(gMouse, &State);
-        if (Status == EFI_DEVICE_ERROR)
-            return ;
-		
-		//x:
-		Print(L"RelativeMovementX: %08d\n", State.RelativeMovementX);
-		
-		gBS->WaitForEvent( 1, &gMouse->WaitForInput, &Index );
-	}
-	
-	//WaitKey();
-	//OutSYGraphicsMode();
-	//SwitchGraphicsMode(FALSE);
-	
-}
-
-EFI_STATUS DisplayMouseMode(void)
-{
-	Print(L"Print Current Mode of Mouse:\n");
-	Print(L"::ResolutionX=0x%x\n",gMouse->Mode->ResolutionX);
-	Print(L"::ResolutionY=%d\n",gMouse->Mode->ResolutionY);
-	Print(L"::ResolutionZ=%d\n",gMouse->Mode->ResolutionZ);
-	Print(L"::LeftButton=%d\n",gMouse->Mode->LeftButton);
-	Print(L"::RightButton=%d\n",gMouse->Mode->RightButton);
-	
-	return EFI_SUCCESS;
-}
-
 /**
   The user Entry Point for Application. The user code starts with this function
   as the real entry point for the image goes into a library that calls this
@@ -846,8 +843,8 @@ InitializeUserInterface (
     EFI_HII_HANDLE                     HiiHandle;
     EFI_STATUS                         Status;
     
-    gBS->SetWatchdogTimer (0x0000, 0x0000, 0x0000, NULL);
-    gST->ConOut->ClearScreen (gST->ConOut);
+    //gBS->SetWatchdogTimer (0x0000, 0x0000, 0x0000, NULL);
+    //gST->ConOut->ClearScreen (gST->ConOut);
 
     //
     // Install customized fonts needed by Front Page
@@ -856,8 +853,7 @@ InitializeUserInterface (
     ASSERT (HiiHandle != NULL);
 
 
-    Status = gBS->LocateProtocol(&gEfiGraphicsOutputProtocolGuid, NULL, (VOID **) &GraphicsOutput);
-        
+    Status = gBS->LocateProtocol(&gEfiGraphicsOutputProtocolGuid, NULL, (VOID **) &GraphicsOutput);        
     if (EFI_ERROR (Status)) 
     	{
         return EFI_UNSUPPORTED;
@@ -875,17 +871,11 @@ InitializeUserInterface (
     
     //TimerInit();
     
-	Status = MouseInit();
+	Status = MouseInit();    
 	if (EFI_ERROR (Status)) 
-	{
-		Print(L"Call LocateMouse, Can't find device!\n");
-	}
-	else
-	{
-		Print(L"Call LocateMouse, Find device!\n");
-		DisplayMouseMode();
-	}
-	ListMouseMessage();    
+    {
+        return EFI_UNSUPPORTED;
+    }
 	
     return EFI_SUCCESS;
 }
