@@ -262,7 +262,7 @@ InitializeStringSupport (
   gStringPackHandle = HiiAddPackages (
                          &mUiStringPackGuid,
                          gImageHandle,
-                         UiAppStrings,
+                         UStrings,
                          NULL
                          );
   ASSERT (gStringPackHandle != NULL);
