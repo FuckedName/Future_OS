@@ -419,9 +419,9 @@ EFI_STATUS DrawAsciiCharString(IN EFI_GRAPHICS_OUTPUT_PROTOCOL  *GraphicsOutput,
 
 static int process2_i = 1;
 
-VOID PrintMarker1 (
+VOID PrintMarker1 (UINT16 x, UINT16 y,
   IN  CONST CHAR8   *Format,
-  IN  VA_LIST       VaListMarker
+  IN  VA_LIST       VaList
   )
 {
     CHAR8    AsciiBuffer[0x100];
@@ -433,37 +433,38 @@ VOID PrintMarker1 (
     //ScreenBuff = (UINT8 *)AllocatePool(ScreenWidth * ScreenHeight * 4); 
 
 	Color.Blue = 0xFF;
-	Color.Red = 0x00;
+	Color.Red = 0xFF;
 	Color.Green = 0xFF;
 	Color.Reserved = 0x66;
 
     ASSERT (Format != NULL);
 
-    AsciiVSPrint (AsciiBuffer, sizeof (AsciiBuffer), Format, VaListMarker);
+    AsciiVSPrint (AsciiBuffer, sizeof (AsciiBuffer), Format, VaList);
 
     for (i = 0; i < 39; i++)
-        DrawAsciiCharUseBuffer(GraphicsOutput, 20 + i * 8, 70, AsciiBuffer[i], Color);
+        DrawAsciiCharUseBuffer(GraphicsOutput, x + i * 8, y, AsciiBuffer[i], Color);
 
     //DrawAsciiCharString(GraphicsOutput, 20 + process2_i * 8, 60, AsciiBuffer, Color);
 }
 
 
 VOID EFIAPI DebugVPrint1 (
+    UINT16 x, UINT16 y,
   IN  CONST CHAR8   *Format,
-  IN  VA_LIST       VaListMarker
+  IN  VA_LIST       VaList
   )
 {
-  PrintMarker1 (Format, VaListMarker);
+  PrintMarker1 (x, y, Format, VaList);
 }
 
 
-VOID EFIAPI DebugPrint1 (IN  CONST CHAR8  *Format,  ...)
+VOID EFIAPI DebugPrint1 (UINT16 x, UINT16 y, IN  CONST CHAR8  *Format,  ...)
 {
-  VA_LIST         Marker;
+  VA_LIST         VaList;
 
-  VA_START (Marker, Format);
-  DebugVPrint1 (Format, Marker);
-  VA_END (Marker);
+  VA_START (VaList, Format);
+  DebugVPrint1 (x, y, Format, VaList);
+  VA_END (VaList);
 }
 
 
@@ -892,6 +893,8 @@ Process1 (
 
  
 
+
+// for mouse move & click
 STATIC
 VOID
 EFIAPI
@@ -948,7 +951,7 @@ Process2 (
     }
     
     DEBUG ((EFI_D_INFO, "X Move: %08x, Y Move: %08x ", State.RelativeMovementX, State.RelativeMovementY));
-    DebugPrint1("X Move: %08x, Y Move: %08x ", State.RelativeMovementX, State.RelativeMovementY);
+    DebugPrint1(30, 70, "X Move: %08x, Y Move: %08x ", State.RelativeMovementX, State.RelativeMovementY);
 	DrawAsciiCharUseBuffer(GraphicsOutput, iMouseX, iMouseY, 0, Color);
 
     //Y
@@ -1001,6 +1004,8 @@ Process2 (
 
 }
 
+
+// display system date & time
 static int process3_i = 2;
 STATIC
 VOID
@@ -1011,6 +1016,7 @@ Process3 (
   )
 {
     EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
+    EFI_TIME et;
 
 	++process3_i;
 
@@ -1018,6 +1024,10 @@ Process3 (
 	Color.Red = 0xFF;
 	Color.Green = 0xFF;
 	Color.Reserved = 0x66;
+
+	gRT->GetTime(&et, NULL);
+
+	DebugPrint1(ScreenWidth - 29 * 8, ScreenHeight - 19,"%04d-%02d-%02d %02d-%02d-%02d", et.Year, et.Month, et.Day, et.Hour, et.Minute, et.Second);
 	
 	//for (;;i++)
 	DrawAsciiCharUseBuffer(GraphicsOutput, 20 + process3_i * 8, 80, process3_i + 60, Color);
@@ -1122,9 +1132,9 @@ EFI_STATUS ScreenInit(EFI_GRAPHICS_OUTPUT_PROTOCOL   *GraphicsOutput)
     {
         for (i = 0; i < ScreenWidth; i++) 
         {
-            ScreenBuff[(j * ScreenWidth + i) * 4]     =  0; //Blue   
-            ScreenBuff[(j * ScreenWidth + i) * 4 + 1] =  0; //Green 
-            ScreenBuff[(j * ScreenWidth + i) * 4 + 2] =  0; //Red  
+            ScreenBuff[(j * ScreenWidth + i) * 4]     =  0xC6; //Blue   
+            ScreenBuff[(j * ScreenWidth + i) * 4 + 1] =  0xC6; //Green 
+            ScreenBuff[(j * ScreenWidth + i) * 4 + 2] =  0xC6; //Red  
             ScreenBuff[(j * ScreenWidth + i) * 4 + 3] =  0;
         }
     }
