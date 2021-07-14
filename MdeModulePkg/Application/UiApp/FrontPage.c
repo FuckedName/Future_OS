@@ -892,6 +892,35 @@ Process1 (
 }
 
  
+ VOID HandleMouseRightClick(int iMouseX, int iMouseY)
+ {
+     INT16 i;    
+     UINT8 *pBuffer = NULL;
+          
+     pBuffer = (UINT8 *)AllocatePool(32 * 32 * 4); 
+
+     if (pBuffer == NULL)
+     {
+        return;
+     }
+ 
+     for (i= 0; i < 32 * 32; i++)
+     {
+         pBuffer[i * 4] = 0x00;
+         pBuffer[i * 4 + 1] = 0x5f;
+         pBuffer[i * 4 + 2] = 0x5f;
+     }
+            
+     GraphicsOutput->Blt(GraphicsOutput, 
+                         (EFI_GRAPHICS_OUTPUT_BLT_PIXEL *) pBuffer,
+                         EfiBltBufferToVideo,
+                         0, 0, 
+                         iMouseX, iMouseY, 
+                         32, 32, 0);  
+     FreePool(pBuffer);
+     return ;
+ 
+ }
 
 
 // for mouse move & click
@@ -973,18 +1002,6 @@ Process2 (
     
     iMouseY = iMouseY + y_move;
 
-    //Button
-    if (State.LeftButton == 0x01)
-    {
-        DEBUG ((EFI_D_INFO, "Left button clicked"));
-	    DrawAsciiCharUseBuffer(GraphicsOutput, 20 + process2_i * 8 + 16, 60, 'E', Color);
-    }
-    
-    if (State.RightButton == 0x01)
-    {
-        DEBUG ((EFI_D_INFO, "Right button clicked"));
-	    DrawAsciiCharUseBuffer(GraphicsOutput, 20 + process2_i * 8 + 16, 60, 'R', Color);
-    }
 
     if (iMouseX < 0)
         iMouseX = 0;
@@ -997,6 +1014,25 @@ Process2 (
 
     if (iMouseY > ScreenHeight)
         iMouseY = ScreenHeight;
+
+    //Button
+    if (State.LeftButton == 0x01)
+    {
+        DEBUG ((EFI_D_INFO, "Left button clicked"));
+
+        
+	    HandleMouseRightClick(iMouseX, iMouseY);
+	    DrawAsciiCharUseBuffer(GraphicsOutput, 20 + process2_i * 8 + 16, 60, 'E', Color);
+	    
+    }
+    
+    if (State.RightButton == 0x01)
+    {
+        DEBUG ((EFI_D_INFO, "Right button clicked"));
+	    DrawAsciiCharUseBuffer(GraphicsOutput, 20 + process2_i * 8 + 16, 60, 'R', Color);
+
+	    HandleMouseRightClick(iMouseX, iMouseY);
+    }
 
     
     DEBUG ((EFI_D_INFO, "\n"));
@@ -1224,6 +1260,8 @@ EFI_STATUS ScreenInit(EFI_GRAPHICS_OUTPUT_PROTOCOL   *GraphicsOutput)
                 0, 0, 
                 ScreenWidth, ScreenHeight, 0);   
 
+    FreePool(ScreenBuff);
+    
     return EFI_SUCCESS;
 }
 
