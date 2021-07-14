@@ -14,7 +14,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #include <Protocol/AbsolutePointer.h>
 
 
-UINTN ScreenWidth, ScreenHeight;  
+static UINTN ScreenWidth, ScreenHeight;  
 
 EFI_GRAPHICS_OUTPUT_PROTOCOL       *GraphicsOutput;
 EFI_SIMPLE_POINTER_PROTOCOL        *gMouse;
@@ -181,7 +181,18 @@ void CopyColorIntoBuffer2(UINT8 *pBuffer, EFI_GRAPHICS_OUTPUT_BLT_PIXEL color, U
 
 }
 
-	    
+
+void CopyColorIntoBuffer3(UINT8 *pBuffer, EFI_GRAPHICS_OUTPUT_BLT_PIXEL color, UINT16 x0, UINT16 y0)
+{
+    pBuffer[y0 * 16 * 4 + x0 * 4]     = color.Blue;
+    pBuffer[y0 * 16 * 4 + x0 * 4 + 1] = color.Green;
+    pBuffer[y0 * 16 * 4 + x0 * 4 + 2] = color.Red;
+    pBuffer[y0 * 16 * 4 + x0 * 4 + 3] = color.Reserved;
+
+}
+
+
+
 EFI_STATUS DrawPoint(IN EFI_GRAPHICS_OUTPUT_PROTOCOL  *GraphicsOutput,
     IN UINTN x,
     IN UINTN y,
@@ -395,15 +406,66 @@ EFI_STATUS DrawAsciiCharUseBuffer(IN EFI_GRAPHICS_OUTPUT_PROTOCOL  *GraphicsOutp
 
 
 EFI_STATUS DrawAsciiCharString(IN EFI_GRAPHICS_OUTPUT_PROTOCOL  *GraphicsOutput,
-        IN UINTN x0, UINTN y0,UINT8 *c,
+        IN UINTN x0, UINTN y0,CHAR8 *c,
         IN EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color)
 {    
     UINT8 i;
     for (i = 0; i < 20; i++)
-        DrawAsciiCharUseBuffer(GraphicsOutput, 20 + (i - 40) * 8, 120, c[i], Color);
+        DrawAsciiCharUseBuffer(GraphicsOutput, 20 + (i - 40) * 8, 110, c[i], Color);
 
     return EFI_SUCCESS;
 }
+
+
+static int process2_i = 1;
+
+VOID PrintMarker1 (
+  IN  CONST CHAR8   *Format,
+  IN  VA_LIST       VaListMarker
+  )
+{
+    CHAR8    AsciiBuffer[0x100];
+      EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
+	//UINT8 *ScreenBuff = NULL;
+	UINT32 i = 0;
+	//UINT32 j = 0;
+
+    //ScreenBuff = (UINT8 *)AllocatePool(ScreenWidth * ScreenHeight * 4); 
+
+	Color.Blue = 0xFF;
+	Color.Red = 0x00;
+	Color.Green = 0xFF;
+	Color.Reserved = 0x66;
+
+    ASSERT (Format != NULL);
+
+    AsciiVSPrint (AsciiBuffer, sizeof (AsciiBuffer), Format, VaListMarker);
+
+    for (i = 0; i < 39; i++)
+        DrawAsciiCharUseBuffer(GraphicsOutput, 20 + i * 8, 70, AsciiBuffer[i], Color);
+
+    //DrawAsciiCharString(GraphicsOutput, 20 + process2_i * 8, 60, AsciiBuffer, Color);
+}
+
+
+VOID EFIAPI DebugVPrint1 (
+  IN  CONST CHAR8   *Format,
+  IN  VA_LIST       VaListMarker
+  )
+{
+  PrintMarker1 (Format, VaListMarker);
+}
+
+
+VOID EFIAPI DebugPrint1 (IN  CONST CHAR8  *Format,  ...)
+{
+  VA_LIST         Marker;
+
+  VA_START (Marker, Format);
+  DebugVPrint1 (Format, Marker);
+  VA_END (Marker);
+}
+
 
 
 // Draw 8 X 16 point
@@ -473,6 +535,75 @@ EFI_STATUS Draw8_16IntoBuffer(UINT8 *pBuffer,UINT8 d,
     return EFI_SUCCESS;
 }
 
+// Draw 8 X 16 point
+EFI_STATUS Draw8_16IntoBufferWithWidth(UINT8 *pBuffer,UINT8 d,
+        IN UINTN x0, UINTN y0,
+        UINT8 width,
+        IN EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color, UINT8 fontWidth)
+{
+    if ((d & 0x80) != 0) 
+        CopyColorIntoBuffer3(pBuffer, Color, x0 + 0, y0 ); 
+    
+    if ((d & 0x40) != 0) 
+        CopyColorIntoBuffer3(pBuffer, Color, x0 + 1, y0 );
+    
+    if ((d & 0x20) != 0) 
+        CopyColorIntoBuffer3(pBuffer, Color, x0 + 2, y0 );
+    
+    if ((d & 0x10) != 0) 
+        CopyColorIntoBuffer3(pBuffer, Color, x0 + 3, y0 );
+    
+    if ((d & 0x08) != 0) 
+        CopyColorIntoBuffer3(pBuffer, Color, x0 + 4, y0 );
+    
+    if ((d & 0x04) != 0) 
+        CopyColorIntoBuffer3(pBuffer, Color, x0 + 5, y0 );
+    
+    if ((d & 0x02) != 0) 
+        CopyColorIntoBuffer3(pBuffer, Color, x0 + 6, y0 );
+    
+    if ((d & 0x01) != 0) 
+        CopyColorIntoBuffer3(pBuffer, Color, x0 + 7, y0 );
+
+
+    return EFI_SUCCESS;
+}
+
+
+// Draw 8 X 16 point
+EFI_STATUS Draw16_16IntoBuffer(UINT8 *pBuffer,UINT8 d,
+        IN UINTN x0, UINTN y0,
+        UINT8 width,
+        IN EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color)
+{
+    if ((d & 0x80) != 0) 
+        CopyColorIntoBuffer(pBuffer, Color, x0 + 0, y0 ); 
+    
+    if ((d & 0x40) != 0) 
+        CopyColorIntoBuffer(pBuffer, Color, x0 + 1, y0 );
+    
+    if ((d & 0x20) != 0) 
+        CopyColorIntoBuffer(pBuffer, Color, x0 + 2, y0 );
+    
+    if ((d & 0x10) != 0) 
+        CopyColorIntoBuffer(pBuffer, Color, x0 + 3, y0 );
+    
+    if ((d & 0x08) != 0) 
+        CopyColorIntoBuffer(pBuffer, Color, x0 + 4, y0 );
+    
+    if ((d & 0x04) != 0) 
+        CopyColorIntoBuffer(pBuffer, Color, x0 + 5, y0 );
+    
+    if ((d & 0x02) != 0) 
+        CopyColorIntoBuffer(pBuffer, Color, x0 + 6, y0 );
+    
+    if ((d & 0x01) != 0) 
+        CopyColorIntoBuffer(pBuffer, Color, x0 + 7, y0 );
+
+
+    return EFI_SUCCESS;
+}
+
 
 EFI_STATUS DrawChineseCharIntoBuffer(UINT8 *pBuffer,
         IN UINTN x0, UINTN y0,UINT8 c,
@@ -505,6 +636,26 @@ EFI_STATUS DrawChineseChar(IN EFI_GRAPHICS_OUTPUT_PROTOCOL  *GraphicsOutput,
     return EFI_SUCCESS;
 }
 
+EFI_STATUS DrawChineseCharUseBuffer(IN EFI_GRAPHICS_OUTPUT_PROTOCOL  *GraphicsOutput,
+        IN UINTN x0, UINTN y0,UINT8 c,
+        IN EFI_GRAPHICS_OUTPUT_BLT_PIXEL BorderColor)
+{
+    INT8 i;    
+    UINT8 pBuffer[16 * 16 * 4];
+
+    for (i= 0; i < 16 * 16 * 4; i++)
+    {
+        pBuffer[i] = 0x00;
+    }
+    	                        
+    for(i = 0; i < 32; i += 2)
+    {
+        Draw8_16IntoBufferWithWidth(pBuffer, sChinese[0][i],     x0,     y0 + i / 2, 1, BorderColor, 16);                
+        Draw8_16IntoBufferWithWidth(pBuffer, sChinese[0][i + 1], x0 + 8, y0 + i / 2, 1, BorderColor, 16);        
+    }
+	
+    return EFI_SUCCESS;
+}
 
 //Name:  GetKeyEx
 //Input:
@@ -739,7 +890,8 @@ Process1 (
 */
 }
 
- static int process2_i = 1;
+ 
+
 STATIC
 VOID
 EFIAPI
@@ -759,6 +911,9 @@ Process2 (
 	
 	//for (;;i++)
 	    //DrawAsciiCharUseBuffer(GraphicsOutput, 20 + process2_i * 8, 60, process2_i + 60, Color);
+    
+    static int iMouseX = 500 / 2;
+    static int iMouseY = 600/ 2;
 
     EFI_STATUS Status;
 	UINTN Index;
@@ -779,38 +934,36 @@ Process2 (
 	//x:
 	//Print(L"X: %08x Y: %08x Z: %08x L: %d R:%d\n", State.RelativeMovementX, State.RelativeMovementY, State.RelativeMovementZ,
 	//                           State.LeftButton, State.RightButton);
-	DrawAsciiCharUseBuffer(GraphicsOutput, 20 + process2_i * 8, 60, gMouse->Mode->ResolutionX, Color);
-
-    INT32 MovementX;
-    //INT32 MovementY;
-
+	//DrawAsciiCharUseBuffer(GraphicsOutput, 20 + process2_i * 8, 60, gMouse->Mode->ResolutionX, Color);
     
     //X
-	if (State.RelativeMovementX >= 0xFFFF)
+	if (State.RelativeMovementX > 0xFFFF)
 	{
-	    MovementX = State.RelativeMovementX / 0xFFFF;
-
-	    DEBUG ((EFI_D_INFO, "X <-: %08x ", MovementX));
-	    DrawAsciiCharUseBuffer(GraphicsOutput, 20 + process2_i * 8, 60, 'L', Color);
+        iMouseX = iMouseX + 3 * abs(State.RelativeMovementX % 20);	    
     }
-    else
+    else if(State.RelativeMovementX < 0xFFFF)
     {
 	    DrawAsciiCharUseBuffer(GraphicsOutput, 20 + process2_i * 8, 60, 'R', Color);
+        iMouseX = iMouseX - 3 * abs(State.RelativeMovementX % 20);
     }
-
+    
+    DEBUG ((EFI_D_INFO, "X Move: %08x, Y Move: %08x ", State.RelativeMovementX, State.RelativeMovementY));
+    DebugPrint1("X Move: %08x, Y Move: %08x ", State.RelativeMovementX, State.RelativeMovementY);
+	DrawAsciiCharUseBuffer(GraphicsOutput, iMouseX, iMouseY, 0, Color);
 
     //Y
-	if (State.RelativeMovementY >= 0xFFFF)
+	if (State.RelativeMovementY > 0xFFFF)
 	{
-	    //MovementY = State.RelativeMovementY / 0xFFFF;
+	    //int move = State.RelativeMovementY % 20;
 
 	    DrawAsciiCharUseBuffer(GraphicsOutput, 20 + process2_i * 8 + 8, 60, 'U', Color);
-
+        iMouseY = iMouseY + 3 * abs(State.RelativeMovementY % 20);
     }
-    else
+    else if(State.RelativeMovementY < 0xFFFF)
     {
-        DEBUG ((EFI_D_INFO, "Y Move down: %08x ", State.RelativeMovementY));
 	    DrawAsciiCharUseBuffer(GraphicsOutput, 20 + process2_i * 8 + 8, 60, 'D', Color);
+	    
+        iMouseY = iMouseY - 3 * abs(State.RelativeMovementY % 20);
     }
 
     //Button
@@ -822,10 +975,26 @@ Process2 (
     
     if (State.RightButton == 0x01)
     {
+        DEBUG ((EFI_D_INFO, "Right button clicked"));
 	    DrawAsciiCharUseBuffer(GraphicsOutput, 20 + process2_i * 8 + 16, 60, 'R', Color);
     }
+
+    if (iMouseX < 0)
+        iMouseX = 0;
+        
+    if (iMouseX > ScreenWidth)
+        iMouseX = ScreenWidth;
+
+    if (iMouseY < 0)
+        iMouseY = 0;
+
+    if (iMouseY > ScreenHeight)
+        iMouseY = ScreenHeight;
+
     
     DEBUG ((EFI_D_INFO, "\n"));
+	DrawAsciiCharUseBuffer(GraphicsOutput, iMouseX, iMouseY, 'X', Color);
+	
     
 	gBS->WaitForEvent( 1, &gMouse->WaitForInput, &Index );
 	//}	    
@@ -898,7 +1067,7 @@ EFI_STATUS TimerCreate()
     EFI_STATUS	Status;
 	EFI_HANDLE	TimerOne	= NULL;
 	//BOOLEAN		ExitMark	= FALSE;
-	static const UINTN SecondsToNanoSeconds = 5000000;
+	static const UINTN SecondsToNanoSeconds = 2000000;
 
 	Status = gBS->CreateEvent(
                            		EVT_NOTIFY_SIGNAL | EVT_TIMER,
