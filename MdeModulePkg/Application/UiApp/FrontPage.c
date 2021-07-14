@@ -441,7 +441,7 @@ VOID PrintMarker1 (UINT16 x, UINT16 y,
 
     AsciiVSPrint (AsciiBuffer, sizeof (AsciiBuffer), Format, VaList);
 
-    for (i = 0; i < 39; i++)
+    for (i = 0; i < sizeof(AsciiBuffer) /sizeof(CHAR8); i++)
         DrawAsciiCharUseBuffer(GraphicsOutput, x + i * 8, y, AsciiBuffer[i], Color);
 
     //DrawAsciiCharString(GraphicsOutput, 20 + process2_i * 8, 60, AsciiBuffer, Color);
@@ -724,9 +724,9 @@ void RectangleFillIntoBuffer(UINT8 *pBuffer,
 {    
 	UINT32 i = 0;
 	UINT32 j = 0;
-    for (j = y0; j < y0 + y1; j++) 
+    for (j = y0; j < y1; j++) 
     {
-        for (i = x0; i < x0 + x1; i++) 
+        for (i = x0; i < x1; i++) 
         {
             pBuffer[(j * ScreenWidth + i) * 4]     =  Color.Blue; //Blue   
             pBuffer[(j * ScreenWidth + i) * 4 + 1] =  Color.Green; //Green 
@@ -1160,8 +1160,8 @@ EFI_STATUS ScreenInit(EFI_GRAPHICS_OUTPUT_PROTOCOL   *GraphicsOutput)
     UINT8 *ScreenBuff = NULL;
 	UINT32 i = 0;
 	UINT32 j = 0;
-	//UINT32 x = ScreenWidth;
-	//UINT32 y = ScreenHeight;
+	UINT32 x = ScreenWidth;
+	UINT32 y = ScreenHeight;
 	//UINT8 p[100];
 	
     EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
@@ -1179,7 +1179,7 @@ EFI_STATUS ScreenInit(EFI_GRAPHICS_OUTPUT_PROTOCOL   *GraphicsOutput)
         }
     }
     
-      /*
+      
     Color.Red   = 0xC6;
     Color.Green = 0xC6;
     Color.Blue	= 0xC6;
@@ -1240,7 +1240,7 @@ EFI_STATUS ScreenInit(EFI_GRAPHICS_OUTPUT_PROTOCOL   *GraphicsOutput)
     DrawLineIntoBuffer(ScreenBuff, 0, 0, 100, 100, 2, Color);
     DrawLineIntoBuffer(ScreenBuff, 100, 0, 0, 100, 1, Color);
 
-*/
+/**/
     //Display ASCII Char
     //count = 60;
     //for (i = 40; i < 65 + 60; i++)
