@@ -938,36 +938,40 @@ Process2 (
 	//Print(L"X: %08x Y: %08x Z: %08x L: %d R:%d\n", State.RelativeMovementX, State.RelativeMovementY, State.RelativeMovementZ,
 	//                           State.LeftButton, State.RightButton);
 	//DrawAsciiCharUseBuffer(GraphicsOutput, 20 + process2_i * 8, 60, gMouse->Mode->ResolutionX, Color);
-    
+    CHAR8 x_move = 0;
+    CHAR8 y_move = 0;
     //X
-	if (State.RelativeMovementX > 0xFFFF)
+	if (State.RelativeMovementX < 0)
 	{
-        iMouseX = iMouseX + 3 * abs(State.RelativeMovementX % 20);	    
+	    int temp = State.RelativeMovementX >> 16;
+	    x_move = (0xFFFF - temp) & 0xff;  
+	    x_move = - x_move;
     }
-    else if(State.RelativeMovementX < 0xFFFF)
+    else if(State.RelativeMovementX > 0)
     {
-	    DrawAsciiCharUseBuffer(GraphicsOutput, 20 + process2_i * 8, 60, 'R', Color);
-        iMouseX = iMouseX - 3 * abs(State.RelativeMovementX % 20);
+        x_move = (State.RelativeMovementX >> 16) & 0xff;
     }
+    iMouseX = iMouseX + x_move;
     
-    DEBUG ((EFI_D_INFO, "X Move: %08x, Y Move: %08x ", State.RelativeMovementX, State.RelativeMovementY));
-    DebugPrint1(30, 70, "X Move: %08x, Y Move: %08x ", State.RelativeMovementX, State.RelativeMovementY);
+    // cover old mouse cursor
 	DrawAsciiCharUseBuffer(GraphicsOutput, iMouseX, iMouseY, 0, Color);
 
     //Y
-	if (State.RelativeMovementY > 0xFFFF)
-	{
-	    //int move = State.RelativeMovementY % 20;
-
-	    DrawAsciiCharUseBuffer(GraphicsOutput, 20 + process2_i * 8 + 8, 60, 'U', Color);
-        iMouseY = iMouseY + 3 * abs(State.RelativeMovementY % 20);
+	if (State.RelativeMovementY < 0)
+	{	    
+	    int temp = State.RelativeMovementY >> 16;
+	    y_move = (0xFFFF - temp) & 0xff;  
+	    y_move = - y_move;
     }
-    else if(State.RelativeMovementY < 0xFFFF)
+    else if(State.RelativeMovementY > 0)
     {
-	    DrawAsciiCharUseBuffer(GraphicsOutput, 20 + process2_i * 8 + 8, 60, 'D', Color);
-	    
-        iMouseY = iMouseY - 3 * abs(State.RelativeMovementY % 20);
+	    y_move = (State.RelativeMovementY >> 16) & 0xff;
     }
+
+    DEBUG ((EFI_D_INFO, "X: %X, Y: %X ", x_move, y_move));
+    DebugPrint1(30, 70, "X: %X, Y: %X ", x_move, y_move );
+    
+    iMouseY = iMouseY + y_move;
 
     //Button
     if (State.LeftButton == 0x01)
@@ -1015,22 +1019,22 @@ Process3 (
   IN VOID      *Context
   )
 {
-    EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
+    //EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
     EFI_TIME et;
 
 	++process3_i;
 
-	Color.Blue = 0xFF;
-	Color.Red = 0xFF;
-	Color.Green = 0xFF;
-	Color.Reserved = 0x66;
+	//Color.Blue = 0xFF;
+	//Color.Red = 0xFF;
+	//Color.Green = 0xFF;
+	//Color.Reserved = 0x66;
 
 	gRT->GetTime(&et, NULL);
 
-	DebugPrint1(ScreenWidth - 29 * 8, ScreenHeight - 19,"%04d-%02d-%02d %02d-%02d-%02d", et.Year, et.Month, et.Day, et.Hour, et.Minute, et.Second);
+	DebugPrint1(ScreenWidth - 20 * 8, ScreenHeight - 19,"%04d-%02d-%02d %02d:%02d:%02d", et.Year, et.Month, et.Day, et.Hour, et.Minute, et.Second);
 	
 	//for (;;i++)
-	DrawAsciiCharUseBuffer(GraphicsOutput, 20 + process3_i * 8, 80, process3_i + 60, Color);
+	//DrawAsciiCharUseBuffer(GraphicsOutput, 20 + process3_i * 8, 80, process3_i + 60, Color);
 
 }
 
@@ -1138,18 +1142,19 @@ EFI_STATUS ScreenInit(EFI_GRAPHICS_OUTPUT_PROTOCOL   *GraphicsOutput)
             ScreenBuff[(j * ScreenWidth + i) * 4 + 3] =  0;
         }
     }
-    /*
-    Color.Red   = 0x00;
-    Color.Green = 0x84;
-    Color.Blue	= 0x84;
-    RectangleFillIntoBuffer(ScreenBuff, 0,     0,      x -  1, y - 29, 1, Color);
     
+      /*
     Color.Red   = 0xC6;
     Color.Green = 0xC6;
     Color.Blue	= 0xC6;
     RectangleFillIntoBuffer(ScreenBuff, 0,     y - 28, x -  1, y - 28, 1, Color);
     RectangleFillIntoBuffer(ScreenBuff, 0,     y - 26, x -  1, y -  1, 1, Color);
-    
+  
+    Color.Red   = 0x00;
+    Color.Green = 0x84;
+    Color.Blue	= 0x84;
+    RectangleFillIntoBuffer(ScreenBuff, 0,     0,      x -  1, y - 29, 1, Color);
+	
     Color.Red   = 0x00;
     Color.Green = 0x00;
     Color.Blue	= 0x00;
@@ -1164,7 +1169,6 @@ EFI_STATUS ScreenInit(EFI_GRAPHICS_OUTPUT_PROTOCOL   *GraphicsOutput)
     RectangleFillIntoBuffer(ScreenBuff, x - 47, y - 24, x -  4, y - 24, 1, Color);
     RectangleFillIntoBuffer(ScreenBuff, x - 47, y - 23, x - 47, y -  4, 1, Color);
     
-	
     Color.Red   = 0xFF;
     Color.Green = 0xFF;
     Color.Blue	= 0xFF;
@@ -1200,14 +1204,15 @@ EFI_STATUS ScreenInit(EFI_GRAPHICS_OUTPUT_PROTOCOL   *GraphicsOutput)
     DrawLineIntoBuffer(ScreenBuff, 0, 0, 100, 100, 2, Color);
     DrawLineIntoBuffer(ScreenBuff, 100, 0, 0, 100, 1, Color);
 
-    Color.Red  = 0xFF;
-    Color.Green = 0xFF;
-    Color.Blue	= 0xFF;
 */
     //Display ASCII Char
     //count = 60;
     //for (i = 40; i < 65 + 60; i++)
     //    DrawAsciiCharIntoBuffer(ScreenBuff, 20 + (i - 40) * 8, 20, i, Color);
+
+    Color.Red  = 0xFF;
+    Color.Green = 0xFF;
+    Color.Blue	= 0xFF;
 
     DrawChineseCharIntoBuffer(ScreenBuff, 20, 20 + 16, i, Color);
         
