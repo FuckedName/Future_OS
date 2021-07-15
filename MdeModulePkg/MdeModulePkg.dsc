@@ -213,7 +213,6 @@
 
 [Components]
   MdeModulePkg/Application/HelloWorld/HelloWorld.inf
-  MdeModulePkg/Application/Hello/Hello.inf
   MdeModulePkg/Application/DumpDynPcd/DumpDynPcd.inf
   MdeModulePkg/Application/MemoryProfileInfo/MemoryProfileInfo.inf
 
@@ -339,21 +338,14 @@
 
   MdeModulePkg/Universal/BdsDxe/BdsDxe.inf
   MdeModulePkg/Application/BootManagerMenuApp/BootManagerMenuApp.inf
+  MdeModulePkg/Application/Hello/Hello.inf
   MdeModulePkg/Application/UiApp/UiApp.inf{
     <LibraryClasses>
       NULL|MdeModulePkg/Library/DeviceManagerUiLib/DeviceManagerUiLib.inf
       NULL|MdeModulePkg/Library/BootManagerUiLib/BootManagerUiLib.inf
       NULL|MdeModulePkg/Library/BootMaintenanceManagerUiLib/BootMaintenanceManagerUiLib.inf
   }
-  
-  MdeModulePkg/Application/UiAppSelf/UiAppSelf.inf{
-     <LibraryClasses>
-     NULL|MdeModulePkg/Library/DeviceManagerUiLib/DeviceManagerUiLib.inf
-     NULL|MdeModulePkg/Library/BootManagerUiLib/BootManagerUiLib.inf
-     NULL|MdeModulePkg/Library/BootMaintenanceManagerUiLib/BootMaintenanceManagerUiLib.inf
-  }
-
-
+  MdeModulePkg/Application/DisplayGIF/DisplayGIF.inf
   MdeModulePkg/Universal/DriverHealthManagerDxe/DriverHealthManagerDxe.inf
   MdeModulePkg/Universal/BootManagerPolicyDxe/BootManagerPolicyDxe.inf
   MdeModulePkg/Universal/CapsulePei/CapsulePei.inf

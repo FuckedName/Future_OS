@@ -398,24 +398,16 @@
   MdeModulePkg/Logo/LogoDxe.inf
 !endif
   MdeModulePkg/Universal/LoadFileOnFv2/LoadFileOnFv2.inf
+  MdeModulePkg/Application/Hello/Hello.inf 
   MdeModulePkg/Application/UiApp/UiApp.inf {
    <LibraryClasses>
       NULL|MdeModulePkg/Library/DeviceManagerUiLib/DeviceManagerUiLib.inf
       NULL|MdeModulePkg/Library/BootManagerUiLib/BootManagerUiLib.inf
       NULL|MdeModulePkg/Library/BootMaintenanceManagerUiLib/BootMaintenanceManagerUiLib.inf
   }
-
-
-  MdeModulePkg/Application/UiAppSelf/UiAppSelf.inf {
-   <LibraryClasses>
-      NULL|MdeModulePkg/Library/DeviceManagerUiLib/DeviceManagerUiLib.inf
-      NULL|MdeModulePkg/Library/BootManagerUiLib/BootManagerUiLib.inf
-      NULL|MdeModulePkg/Library/BootMaintenanceManagerUiLib/BootMaintenanceManagerUiLib.inf
-  }
-
-
   MdeModulePkg/Application/BootManagerMenuApp/BootManagerMenuApp.inf
 
+#  MdeModulePkg/Application/DisplayGIF/DisplayGIF.inf 
   MdeModulePkg/Universal/DevicePathDxe/DevicePathDxe.inf
   #{
   #  <LibraryClasses>
@@ -436,7 +428,6 @@
   EmulatorPkg/EmuSnpDxe/EmuSnpDxe.inf
 
   MdeModulePkg/Application/HelloWorld/HelloWorld.inf
-  MdeModulePkg/Application/Hello/Hello.inf
 
   MdeModulePkg/Universal/SmbiosDxe/SmbiosDxe.inf
   MdeModulePkg/Universal/HiiDatabaseDxe/HiiDatabaseDxe.inf
