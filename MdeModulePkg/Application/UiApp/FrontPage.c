@@ -458,6 +458,8 @@ VOID EFIAPI DebugVPrint1 (
 }
 
 
+
+/* Display a string */
 VOID EFIAPI DebugPrint1 (UINT16 x, UINT16 y, IN  CONST CHAR8  *Format,  ...)
 {
   VA_LIST         VaList;
@@ -1074,6 +1076,12 @@ Process3 (
 
 }
 
+
+VOID DiskInit()
+{
+    CHAR8 *pBuffer;
+    DebugPrint1(30, 70, "X: %X, Y: %X ", x_move, y_move );
+}
  
 EFI_STATUS MultiProcessInit ()
 {
@@ -1250,6 +1258,9 @@ EFI_STATUS ScreenInit(EFI_GRAPHICS_OUTPUT_PROTOCOL   *GraphicsOutput)
     Color.Green = 0xFF;
     Color.Blue	= 0xFF;
 
+
+    // Display "wo"
+    
     DrawChineseCharIntoBuffer(ScreenBuff, 20, 20 + 16, i, Color);
         
     GraphicsOutput->Blt(
