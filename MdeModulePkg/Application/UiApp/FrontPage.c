@@ -12,12 +12,19 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 #include <Protocol/SimplePointer.h>
 #include <Protocol/AbsolutePointer.h>
+#include <Protocol/Shell.h>
+#include <Protocol/ShellParameters.h>
+#include <Library/ShellLib.h>
 
 
 static UINTN ScreenWidth, ScreenHeight;  
 
 EFI_GRAPHICS_OUTPUT_PROTOCOL       *GraphicsOutput;
 EFI_SIMPLE_POINTER_PROTOCOL        *gMouse;
+
+extern EFI_SIMPLE_FILE_SYSTEM_PROTOCOL *gSimpleFileSystem; 
+
+
 
 const UINT8 sASCII[][16] =
 {   
@@ -160,8 +167,88 @@ const UINT8 sASCII[][16] =
 const UINT8 sChinese[][32] =
 {   
     {0x04,0x80,0x0E,0xA0,0x78,0x90,0x08,0x90,0x08,0x84,0xFF,0xFE,0x08,0x80,0x08,0x90,
-	 0x0A,0x90,0x0C,0x60,0x18,0x40,0x68,0xA0,0x09,0x20,0x0A,0x14,0x28,0x14,0x10,0x0C}      
+	 0x0A,0x90,0x0C,0x60,0x18,0x40,0x68,0xA0,0x09,0x20,0x0A,0x14,0x28,0x14,0x10,0x0C},
+    {0x00,0x02,0xBC,0x20,0x20,0x20,0xBF,0x24,0x24,0xA4,0x24,0x24,0xA4,0x44,0x44,0x84,
+     0x08,0x04,0x3F,0x00,0x11,0x0A,0x7F,0x04,0x04,0x3F,0x04,0x15,0x24,0x44,0x14,0x08},
+    {0x20,0x20,0xFC,0x24,0xFF,0x24,0xFC,0x20,0xFC,0x20,0x20,0xFE,0x20,0x20,0xFF,0x00,
+     0x00,0x00,0x7D,0x04,0x0B,0x08,0x11,0x3C,0x05,0x04,0x24,0x1B,0x08,0x16,0x21,0x40},
+    {0x00,0x80,0x80,0xFF,0x08,0x08,0x10,0x10,0x20,0x40,0x80,0x40,0x20,0x10,0x0C,0x03,
+     0x01,0x00,0x00,0x7F,0x08,0x08,0x04,0x04,0x02,0x01,0x00,0x01,0x02,0x04,0x18,0x60},
+    {0x10,0x10,0x90,0x90,0xFE,0x10,0x10,0x10,0x10,0xFF,0x10,0x10,0x10,0x10,0x10,0x10,
+     0x04,0x04,0x04,0x08,0x08,0x19,0x19,0x2A,0x48,0x0B,0x08,0x08,0x08,0x08,0x08,0x08},     
 };
+
+
+/*
+//Name: OpenFile
+//Input: fileHandle,fileName,OpenMode
+//Output: if success,file's handle is *fileHandle 
+//Descriptor: OpenMode:EFI_FILE_MODE_READ,EFI_FILE_MODE_WRITE,EFI_FILE_MODE_CREATE
+// 
+EFI_STATUS FileOpen(EFI_FILE_PROTOCOL **fileHandle,CHAR16 * fileName,UINT64 OpenMode)
+{
+  EFI_STATUS  Status = 0;
+  Status = gFileRoot ->Open(
+            gFileRoot,     
+            fileHandle,
+            (CHAR16*)fileName, 
+            OpenMode,
+            0  
+            );
+  
+  return Status;
+}
+//Name: ReadFile
+//Input: fileHandle,bufSize,buffer
+//Output:read data to the buffer and the length of data is bufSize
+//Descriptor:
+EFI_STATUS FileRead(EFI_FILE_PROTOCOL *fileHandle,UINTN *bufSize,VOID *buffer)
+{
+  EFI_STATUS Status = 0;
+ 
+  Status = fileHandle->Read(fileHandle, bufSize, buffer);
+
+  return Status;
+}
+
+//Name: WriteFile
+//Input: fileHandle,bufSize,buffer
+//Output:write data to the file,data in buffer and the length of data is bufSize
+//Descriptor:
+EFI_STATUS FileWrite(EFI_FILE_PROTOCOL *fileHandle,UINTN *bufSize,VOID *buffer)
+{
+  EFI_STATUS Status = 0;
+
+  Status = fileHandle->Write(fileHandle, bufSize, buffer);
+
+  return Status;
+}
+//Name: SetFilePosition
+//Input: fileHandle,position
+//Output: 
+//Descriptor: if position is 0xffffffffffffffff,the current position will be set to the end of file.
+EFI_STATUS FileSetPosition(EFI_FILE_PROTOCOL *fileHandle,UINT64 position)
+{
+  EFI_STATUS Status = 0;
+  
+  Status = fileHandle->SetPosition(fileHandle, position);
+
+  return Status;
+}
+//Name: GetFilePosition
+//Input: fileHandle,position
+//Output: store in the var position
+//Descriptor: if position is 0xffffffffffffffff,the current position will be set to the end of file.
+EFI_STATUS FileGetPosition(EFI_FILE_PROTOCOL *fileHandle,UINT64 *position)
+{
+  EFI_STATUS Status = 0;
+  
+  Status = fileHandle->GetPosition(fileHandle, position);
+
+  return Status;
+}
+
+*/
 
 void CopyColorIntoBuffer(UINT8 *pBuffer, EFI_GRAPHICS_OUTPUT_BLT_PIXEL color, UINT16 x0, UINT16 y0)
 {
@@ -182,15 +269,12 @@ void CopyColorIntoBuffer2(UINT8 *pBuffer, EFI_GRAPHICS_OUTPUT_BLT_PIXEL color, U
 }
 
 
-void CopyColorIntoBuffer3(UINT8 *pBuffer, EFI_GRAPHICS_OUTPUT_BLT_PIXEL color, UINT16 x0, UINT16 y0)
+void CopyColorIntoBuffer3(UINT8 *pBuffer, EFI_GRAPHICS_OUTPUT_BLT_PIXEL color, UINT16 x0, UINT16 y0, UINT8 fontWidth)
 {
-    pBuffer[y0 * 16 * 4 + x0 * 4]     = color.Blue;
-    pBuffer[y0 * 16 * 4 + x0 * 4 + 1] = color.Green;
-    pBuffer[y0 * 16 * 4 + x0 * 4 + 2] = color.Red;
-    pBuffer[y0 * 16 * 4 + x0 * 4 + 3] = color.Reserved;
-
+    pBuffer[y0 * fontWidth * 4 + x0 * 4]     = color.Blue;
+    pBuffer[y0 * fontWidth * 4 + x0 * 4 + 1] = color.Green;
+    pBuffer[y0 * fontWidth * 4 + x0 * 4 + 2] = color.Red;
 }
-
 
 
 EFI_STATUS DrawPoint(IN EFI_GRAPHICS_OUTPUT_PROTOCOL  *GraphicsOutput,
@@ -545,28 +629,28 @@ EFI_STATUS Draw8_16IntoBufferWithWidth(UINT8 *pBuffer,UINT8 d,
         IN EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color, UINT8 fontWidth)
 {
     if ((d & 0x80) != 0) 
-        CopyColorIntoBuffer3(pBuffer, Color, x0 + 0, y0 ); 
+        CopyColorIntoBuffer3(pBuffer, Color, x0 + 0, y0, fontWidth); 
     
     if ((d & 0x40) != 0) 
-        CopyColorIntoBuffer3(pBuffer, Color, x0 + 1, y0 );
+        CopyColorIntoBuffer3(pBuffer, Color, x0 + 1, y0, fontWidth );
     
     if ((d & 0x20) != 0) 
-        CopyColorIntoBuffer3(pBuffer, Color, x0 + 2, y0 );
+        CopyColorIntoBuffer3(pBuffer, Color, x0 + 2, y0, fontWidth );
     
     if ((d & 0x10) != 0) 
-        CopyColorIntoBuffer3(pBuffer, Color, x0 + 3, y0 );
+        CopyColorIntoBuffer3(pBuffer, Color, x0 + 3, y0, fontWidth );
     
     if ((d & 0x08) != 0) 
-        CopyColorIntoBuffer3(pBuffer, Color, x0 + 4, y0 );
+        CopyColorIntoBuffer3(pBuffer, Color, x0 + 4, y0, fontWidth );
     
     if ((d & 0x04) != 0) 
-        CopyColorIntoBuffer3(pBuffer, Color, x0 + 5, y0 );
+        CopyColorIntoBuffer3(pBuffer, Color, x0 + 5, y0, fontWidth );
     
     if ((d & 0x02) != 0) 
-        CopyColorIntoBuffer3(pBuffer, Color, x0 + 6, y0 );
+        CopyColorIntoBuffer3(pBuffer, Color, x0 + 6, y0, fontWidth );
     
     if ((d & 0x01) != 0) 
-        CopyColorIntoBuffer3(pBuffer, Color, x0 + 7, y0 );
+        CopyColorIntoBuffer3(pBuffer, Color, x0 + 7, y0, fontWidth );
 
 
     return EFI_SUCCESS;
@@ -623,7 +707,7 @@ EFI_STATUS DrawChineseCharIntoBuffer(UINT8 *pBuffer,
     return EFI_SUCCESS;
 }
 
-
+// Use 16 times DrawPoint, not recommend
 EFI_STATUS DrawChineseChar(IN EFI_GRAPHICS_OUTPUT_PROTOCOL  *GraphicsOutput,
         IN UINTN x0, UINTN y0,UINT8 c,
         IN EFI_GRAPHICS_OUTPUT_BLT_PIXEL BorderColor)
@@ -639,22 +723,27 @@ EFI_STATUS DrawChineseChar(IN EFI_GRAPHICS_OUTPUT_PROTOCOL  *GraphicsOutput,
     return EFI_SUCCESS;
 }
 
-EFI_STATUS DrawChineseCharUseBuffer(IN EFI_GRAPHICS_OUTPUT_PROTOCOL  *GraphicsOutput,
-        IN UINTN x0, UINTN y0,UINT8 c,
-        IN EFI_GRAPHICS_OUTPUT_BLT_PIXEL BorderColor)
+EFI_STATUS DrawChineseCharUseBuffer(UINT8 *pBuffer,
+        IN UINTN x0, UINTN y0,UINT8 *c, UINT8 count,
+        IN EFI_GRAPHICS_OUTPUT_BLT_PIXEL FontColor, UINT16 AreaWidth)
 {
-    INT8 i;    
-    UINT8 pBuffer[16 * 16 * 4];
+    INT16 i,j;    
+    int k = y0;
+    //UINT8 pBuffer[16 * 16 * 4];
 
-    for (i= 0; i < 16 * 16 * 4; i++)
+    for (i = 0; i < 16 * 16 * 4; i++)
     {
         pBuffer[i] = 0x00;
     }
-    	                        
-    for(i = 0; i < 32; i += 2)
+
+    for (j = 0; j < count; j++)
     {
-        Draw8_16IntoBufferWithWidth(pBuffer, sChinese[0][i],     x0,     y0 + i / 2, 1, BorderColor, 16);                
-        Draw8_16IntoBufferWithWidth(pBuffer, sChinese[0][i + 1], x0 + 8, y0 + i / 2, 1, BorderColor, 16);        
+        for(i = 0; i < 32; i += 2)
+        {
+            Draw8_16IntoBufferWithWidth(pBuffer, sChinese[j][i],     x0,     y0 + i / 2, 1, FontColor, AreaWidth);                
+            Draw8_16IntoBufferWithWidth(pBuffer, sChinese[j][i + 1], x0 + 8, y0 + i / 2, 1, FontColor, AreaWidth);        
+        }
+        x0 += 16;
     }
 	
     return EFI_SUCCESS;
@@ -893,32 +982,42 @@ Process1 (
 */
 }
 
- 
+
+ // iMouseX: left top
+ // iMouseY: left top
  VOID HandleMouseRightClick(int iMouseX, int iMouseY)
  {
      INT16 i;    
      UINT8 *pBuffer = NULL;
+     UINT16 width = 100;
+     UINT16 height = 300;
+     EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
           
-     pBuffer = (UINT8 *)AllocatePool(32 * 32 * 4); 
-
+     pBuffer = (UINT8 *)AllocatePool(width * height * 4); 
      if (pBuffer == NULL)
      {
         return;
      }
  
-     for (i= 0; i < 32 * 32; i++)
+     for (i = 0; i < width * height; i++)
      {
-         pBuffer[i * 4] = 0x00;
-         pBuffer[i * 4 + 1] = 0x5f;
-         pBuffer[i * 4 + 2] = 0x5f;
+         pBuffer[i * 4] = 160;
+         pBuffer[i * 4 + 1] = 160;
+         pBuffer[i * 4 + 2] = 160;
      }
+
+     Color.Blue = 0xFF;
+     Color.Red  = 0xFF;
+     Color.Green= 0xFF;
+
+     DrawChineseCharUseBuffer(pBuffer, 10, 10, sChinese[1], 4, Color, width);
             
      GraphicsOutput->Blt(GraphicsOutput, 
                          (EFI_GRAPHICS_OUTPUT_BLT_PIXEL *) pBuffer,
                          EfiBltBufferToVideo,
                          0, 0, 
                          iMouseX, iMouseY, 
-                         32, 32, 0);  
+                         width, height, 0);  
      FreePool(pBuffer);
      return ;
  
@@ -1077,10 +1176,136 @@ Process3 (
 }
 
 
-VOID DiskInit()
+EFI_STATUS BZero (
+  OUT     CHAR16                    *Destination,
+  IN      UINTN                     Length
+  )
+ {
+	UINT32 i ;
+	CHAR8 * ptr = (CHAR8 * )Destination;
+	for (i = 0; i < 2*Length ; i ++){
+		ptr [i] = 0;
+	}
+	return EFI_SUCCESS;
+ }
+ 
+//extern EFI_SHELL_PROTOCOL  *gEfiShellProtocol;
+
+
+
+EFI_STATUS DiskInit()
 {
-    CHAR8 *pBuffer;
-    DebugPrint1(30, 70, "X: %X, Y: %X ", x_move, y_move );
+    //CHAR8 *pBuffer;
+    //DebugPrint1(30, 70, "X: %X, Y: %X ",  );
+
+    CHAR16  OldLogFileName[] = L"test.txt";
+    CHAR16  *LineBuff = NULL;
+    CHAR16  NewFileName[128] = {0};
+    CHAR16 ArrayBuffer[]  = L"ArrayBuffer";
+    EFI_STATUS Status ;
+    SHELL_FILE_HANDLE FileHandle;
+    EFI_SHELL_PROTOCOL  *gEfiShellProtocol;
+    UINTN Index = 0;
+    UINTN WbufSize = 0;
+    UINTN FileSize = 0;
+    UINTN i = 0;
+    UINTN StartIndex = 0;
+    CHAR8 *Ptr = NULL;
+    EFI_HANDLE         gImageHandle = NULL;
+    
+    //
+    // Search for the shell protocol
+    //
+    Status = gBS->LocateProtocol(&gEfiShellProtocolGuid,
+                                NULL,
+                                (VOID **)&gEfiShellProtocol
+                                );
+    if (EFI_ERROR (Status)) 
+    {
+        gEfiShellProtocol = NULL;
+        DEBUG ((EFI_D_INFO, "gBS->LocateProtocol error\n"));
+        return (-1);
+    }    
+
+
+    //Print(L"The Old file name is %s!\n",OldLogFileName);
+    
+    /*
+
+    Status = gEfiShellProtocol->OpenFileByName((CONST CHAR16*)OldLogFileName, &FileHandle, EFI_FILE_MODE_READ); 
+    if (EFI_ERROR(Status))
+    {
+        DEBUG ((EFI_D_INFO, "Please Input Valid Filename!\n"));
+        //return (-1);
+    }
+   
+    StrnCpyS(NewFileName, 128, OldLogFileName, StrLen(OldLogFileName) - 4);
+    StrCatS(NewFileName, 128, L"_New.txt");
+    DEBUG ((EFI_D_INFO, "New FileName is %s\n", NewFileName));
+
+    gEfiShellProtocol->DeleteFileByName(NewFileName);
+
+
+    Status = gEfiShellProtocol->GetFileSize(FileHandle, &FileSize);
+    if (EFI_ERROR (Status)) 
+    {
+        DEBUG ((EFI_D_INFO, "Get File Size error\n" ));
+        
+        gEfiShellProtocol->CloseFile (FileHandle);
+        
+        //return Status;
+    }
+    DEBUG ((EFI_D_INFO, "File FileSize is %d!\n",FileSize));
+
+    if (FileSize < 0)
+    {
+        DEBUG ((EFI_D_INFO, "File cotent is empty!\n"));
+        return (-1);
+    }
+
+    FileSize += 1;
+
+
+    Status = gBS -> AllocatePool (EfiReservedMemoryType, FileSize , &ArrayBuffer);
+    Status = gBS -> AllocatePool (EfiReservedMemoryType, FileSize , &LineBuff);
+
+    BZero(ArrayBuffer,FileSize);
+    BZero(LineBuff,FileSize);
+    
+    Status = gEfiShellProtocol->ReadFile(FileHandle, &FileSize ,ArrayBuffer); 
+
+    if (EFI_ERROR(Status))
+    {
+        DEBUG ((EFI_D_INFO, "Read Filename Error!\n"));
+        return (-1);
+    }  
+    
+    
+    Status = gEfiShellProtocol->CreateFile("test.txt", 0, &FileHandle); 
+    if (EFI_ERROR(Status))
+    {
+        DEBUG ((EFI_D_INFO, "CreateFile  Fail!\n"));
+        return (-1);
+    }
+
+    WbufSize = 5;
+    Status = gEfiShellProtocol->WriteFile(FileHandle, &WbufSize, ArrayBuffer);
+    if (EFI_ERROR(Status))
+    {
+        DEBUG ((EFI_D_INFO, "WriteFile Fail!: \n"));
+        return (-1);
+    }
+
+    Status = gEfiShellProtocol->CloseFile(FileHandle);
+    if (EFI_ERROR(Status))
+    {
+        DEBUG ((EFI_D_INFO, "CloseFile Fail!:\n"));
+        return (-1);
+    }*/
+/**/
+    // https://blog.csdn.net/xiaopangzi313/article/details/106583922
+
+    return EFI_SUCCESS;
 }
  
 EFI_STATUS MultiProcessInit ()
@@ -1320,17 +1545,9 @@ Main (
 
     Print(L"ScreenWidth:%d, ScreenHeight:%d\n\n", ScreenWidth, ScreenHeight);
     
+    DiskInit();
     ScreenInit(GraphicsOutput);
-    
-    //KeyboardInit(GraphicsOutput);
-
-	//Color.Blue = 0xFF;
-	//Color.Red = 0xFF;
-	//Color.Green = 0xFF;
-	//Color.Reserved = 0x66;
-	
-    //DrawAsciiCharString(GraphicsOutput, 20 + 8, 100, NULL, Color);
-    
+        
 	Status = MouseInit();    
 	if (EFI_ERROR (Status)) 
     {
@@ -1339,7 +1556,6 @@ Main (
     
     MultiProcessInit();
     TimerCreate();
-    
 	
     return EFI_SUCCESS;
 }
