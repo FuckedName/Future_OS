@@ -61,6 +61,19 @@
   PrintLib
   #UefiShellDriver1CommandsLib
   #HandleParsingLib
+  MemoryAllocationLib
+  BaseLib
+  BaseMemoryLib
+  DebugLib
+  #ShellCommandLib
+  ShellLib
+  UefiLib
+  UefiRuntimeServicesTableLib
+  UefiBootServicesTableLib
+  SortLib
+  PrintLib
+  PeCoffGetEntryPointLib
+
 
 [Protocols]
   gEfiUnicodeCollation2ProtocolGuid                       # ALWAYS_CONSUMED
@@ -77,6 +90,12 @@
   gEfiSimplePointerProtocolGuid
   gEfiSimpleTextInputExProtocolGuid
   gEfiShellProtocolGuid
+  gEfiDriverHealthProtocolGuid                    ## UNDEFINED
+  gEfiDriverFamilyOverrideProtocolGuid            ## UNDEFINED
+  gEfiHiiConfigAccessProtocolGuid                 ## SOMETIMES_CONSUMES
+  gEfiHiiDatabaseProtocolGuid                     ## CONSUMES
+  gEfiDiskIo2ProtocolGuid
+
 
 
 [FeaturePcd]
