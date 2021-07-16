@@ -175,15 +175,16 @@ const UINT8 sChinese[][32] =
     {0x00,0x80,0x80,0xFF,0x08,0x08,0x10,0x10,0x20,0x40,0x80,0x40,0x20,0x10,0x0C,0x03,
      0x01,0x00,0x00,0x7F,0x08,0x08,0x04,0x04,0x02,0x01,0x00,0x01,0x02,0x04,0x18,0x60},
     {0x10,0x10,0x90,0x90,0xFE,0x10,0x10,0x10,0x10,0xFF,0x10,0x10,0x10,0x10,0x10,0x10,
-     0x04,0x04,0x04,0x08,0x08,0x19,0x19,0x2A,0x48,0x0B,0x08,0x08,0x08,0x08,0x08,0x08},     
+     0x04,0x04,0x04,0x08,0x08,0x19,0x19,0x2A,0x48,0x0B,0x08,0x08,0x08,0x08,0x08,0x08}, 
+    {0x01,0x41,0x21,0x37,0x21,0x01,0x01,0xF7,0x11,0x11,0x12,0x12,0x14,0x28,0x47,0x00,
+    0x10,0x10,0x10,0xFC,0x10,0x10,0x10,0xFE,0x10,0x10,0x10,0x10,0x10,0x00,0xFE,0x00},
 };
 
-void CopyColorIntoBuffer(UINT8 *pBuffer, EFI_GRAPHICS_OUTPUT_BLT_PIXEL color, UINT16 x0, UINT16 y0)
+void CopyColorIntoBuffer(UINT8 *pBuffer, EFI_GRAPHICS_OUTPUT_BLT_PIXEL color, UINT16 x0, UINT16 y0, UINT16 AreaWidth)
 {
-    pBuffer[y0 * ScreenWidth * 4 + x0 * 4]     = color.Blue;
-    pBuffer[y0 * ScreenWidth * 4 + x0 * 4 + 1] = color.Green;
-    pBuffer[y0 * ScreenWidth * 4 + x0 * 4 + 2] = color.Red;
-    pBuffer[y0 * ScreenWidth * 4 + x0 * 4 + 3] = color.Reserved;
+    pBuffer[y0 * AreaWidth * 4 + x0 * 4]     = color.Blue;
+    pBuffer[y0 * AreaWidth * 4 + x0 * 4 + 1] = color.Green;
+    pBuffer[y0 * AreaWidth * 4 + x0 * 4 + 2] = color.Red;
 
 }
 
@@ -192,10 +193,7 @@ void CopyColorIntoBuffer2(UINT8 *pBuffer, EFI_GRAPHICS_OUTPUT_BLT_PIXEL color, U
     pBuffer[y0 * 8 * 4 + x0 * 4]     = color.Blue;
     pBuffer[y0 * 8 * 4 + x0 * 4 + 1] = color.Green;
     pBuffer[y0 * 8 * 4 + x0 * 4 + 2] = color.Red;
-    pBuffer[y0 * 8 * 4 + x0 * 4 + 3] = color.Reserved;
-
 }
-
 
 void CopyColorIntoBuffer3(UINT8 *pBuffer, EFI_GRAPHICS_OUTPUT_BLT_PIXEL color, UINT16 x0, UINT16 y0, UINT8 fontWidth)
 {
@@ -212,7 +210,7 @@ INT32 abs(INT32 v)
 EFI_STATUS DrawLineIntoBuffer(UINT8 *pBuffer,
         IN UINTN x0, UINTN y0, UINTN x1, UINTN y1, 
         IN UINTN BorderWidth,
-        IN EFI_GRAPHICS_OUTPUT_BLT_PIXEL BorderColor)
+        IN EFI_GRAPHICS_OUTPUT_BLT_PIXEL BorderColor, UINT16 AreaWidth)
 {
 
     INT32 dx  = abs((int)(x1 - x0));
@@ -222,7 +220,7 @@ EFI_STATUS DrawLineIntoBuffer(UINT8 *pBuffer,
     
     for(;;)
     {    
-        CopyColorIntoBuffer(pBuffer, BorderColor, x0, y0);
+        CopyColorIntoBuffer(pBuffer, BorderColor, x0, y0, AreaWidth);
         
         if (x0==x1 && y0==y1) break;
     
@@ -236,7 +234,7 @@ EFI_STATUS DrawLineIntoBuffer(UINT8 *pBuffer,
 
 EFI_STATUS DrawAsciiCharIntoBuffer(UINT8 *pBuffer,
         IN UINTN x0, UINTN y0,UINT8 c,
-        IN EFI_GRAPHICS_OUTPUT_BLT_PIXEL BorderColor)
+        IN EFI_GRAPHICS_OUTPUT_BLT_PIXEL BorderColor, UINT16 AreaWidth)
 {
     INT8 i;
     UINT8 d;
@@ -246,28 +244,28 @@ EFI_STATUS DrawAsciiCharIntoBuffer(UINT8 *pBuffer,
 		d = sASCII[c][i];
 		
 		if ((d & 0x80) != 0) 
-		    CopyColorIntoBuffer(pBuffer, BorderColor, x0 + 0, y0 + i); 
+		    CopyColorIntoBuffer(pBuffer, BorderColor, x0 + 0, y0 + i, AreaWidth); 
 		
 		if ((d & 0x40) != 0) 
-            CopyColorIntoBuffer(pBuffer, BorderColor, x0 + 1, y0 + i);
+            CopyColorIntoBuffer(pBuffer, BorderColor, x0 + 1, y0 + i, AreaWidth);
 		
 		if ((d & 0x20) != 0) 
-		    CopyColorIntoBuffer(pBuffer, BorderColor, x0 + 2, y0 + i);
+		    CopyColorIntoBuffer(pBuffer, BorderColor, x0 + 2, y0 + i, AreaWidth);
 		
 		if ((d & 0x10) != 0) 
-		    CopyColorIntoBuffer(pBuffer, BorderColor, x0 + 3, y0 + i);
+		    CopyColorIntoBuffer(pBuffer, BorderColor, x0 + 3, y0 + i, AreaWidth);
 		
 		if ((d & 0x08) != 0) 
-		    CopyColorIntoBuffer(pBuffer, BorderColor, x0 + 4, y0 + i);
+		    CopyColorIntoBuffer(pBuffer, BorderColor, x0 + 4, y0 + i, AreaWidth);
 		
 		if ((d & 0x04) != 0) 
-		    CopyColorIntoBuffer(pBuffer, BorderColor, x0 + 5, y0 + i);
+		    CopyColorIntoBuffer(pBuffer, BorderColor, x0 + 5, y0 + i, AreaWidth);
 		
 		if ((d & 0x02) != 0) 
-		    CopyColorIntoBuffer(pBuffer, BorderColor, x0 + 6, y0 + i);
+		    CopyColorIntoBuffer(pBuffer, BorderColor, x0 + 6, y0 + i, AreaWidth);
 		
 		if ((d & 0x01) != 0) 
-		    CopyColorIntoBuffer(pBuffer, BorderColor, x0 + 7, y0 + i);
+		    CopyColorIntoBuffer(pBuffer, BorderColor, x0 + 7, y0 + i, AreaWidth);
 		
 	}
 	
@@ -367,31 +365,31 @@ VOID EFIAPI DebugPrint1 (UINT16 x, UINT16 y, IN  CONST CHAR8  *Format, ...)
 EFI_STATUS Draw8_16IntoBuffer(UINT8 *pBuffer,UINT8 d,
         IN UINTN x0, UINTN y0,
         UINT8 width,
-        IN EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color)
+        IN EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color, UINT8 AreaWidth)
 {
     if ((d & 0x80) != 0) 
-        CopyColorIntoBuffer(pBuffer, Color, x0 + 0, y0 ); 
+        CopyColorIntoBuffer(pBuffer, Color, x0 + 0, y0, AreaWidth ); 
     
     if ((d & 0x40) != 0) 
-        CopyColorIntoBuffer(pBuffer, Color, x0 + 1, y0 );
+        CopyColorIntoBuffer(pBuffer, Color, x0 + 1, y0, AreaWidth );
     
     if ((d & 0x20) != 0) 
-        CopyColorIntoBuffer(pBuffer, Color, x0 + 2, y0 );
+        CopyColorIntoBuffer(pBuffer, Color, x0 + 2, y0, AreaWidth );
     
     if ((d & 0x10) != 0) 
-        CopyColorIntoBuffer(pBuffer, Color, x0 + 3, y0 );
+        CopyColorIntoBuffer(pBuffer, Color, x0 + 3, y0, AreaWidth );
     
     if ((d & 0x08) != 0) 
-        CopyColorIntoBuffer(pBuffer, Color, x0 + 4, y0 );
+        CopyColorIntoBuffer(pBuffer, Color, x0 + 4, y0, AreaWidth );
     
     if ((d & 0x04) != 0) 
-        CopyColorIntoBuffer(pBuffer, Color, x0 + 5, y0 );
+        CopyColorIntoBuffer(pBuffer, Color, x0 + 5, y0, AreaWidth );
     
     if ((d & 0x02) != 0) 
-        CopyColorIntoBuffer(pBuffer, Color, x0 + 6, y0 );
+        CopyColorIntoBuffer(pBuffer, Color, x0 + 6, y0, AreaWidth );
     
     if ((d & 0x01) != 0) 
-        CopyColorIntoBuffer(pBuffer, Color, x0 + 7, y0 );
+        CopyColorIntoBuffer(pBuffer, Color, x0 + 7, y0, AreaWidth );
 
 
     return EFI_SUCCESS;
@@ -436,31 +434,31 @@ EFI_STATUS Draw8_16IntoBufferWithWidth(UINT8 *pBuffer,UINT8 d,
 EFI_STATUS Draw16_16IntoBuffer(UINT8 *pBuffer,UINT8 d,
         IN UINTN x0, UINTN y0,
         UINT8 width,
-        IN EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color)
+        IN EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color, UINT16 AreaWidth)
 {
     if ((d & 0x80) != 0) 
-        CopyColorIntoBuffer(pBuffer, Color, x0 + 0, y0 ); 
+        CopyColorIntoBuffer(pBuffer, Color, x0 + 0, y0, AreaWidth); 
     
     if ((d & 0x40) != 0) 
-        CopyColorIntoBuffer(pBuffer, Color, x0 + 1, y0 );
+        CopyColorIntoBuffer(pBuffer, Color, x0 + 1, y0 , AreaWidth);
     
     if ((d & 0x20) != 0) 
-        CopyColorIntoBuffer(pBuffer, Color, x0 + 2, y0 );
+        CopyColorIntoBuffer(pBuffer, Color, x0 + 2, y0 , AreaWidth);
     
     if ((d & 0x10) != 0) 
-        CopyColorIntoBuffer(pBuffer, Color, x0 + 3, y0 );
+        CopyColorIntoBuffer(pBuffer, Color, x0 + 3, y0 , AreaWidth);
     
     if ((d & 0x08) != 0) 
-        CopyColorIntoBuffer(pBuffer, Color, x0 + 4, y0 );
+        CopyColorIntoBuffer(pBuffer, Color, x0 + 4, y0 , AreaWidth);
     
     if ((d & 0x04) != 0) 
-        CopyColorIntoBuffer(pBuffer, Color, x0 + 5, y0 );
+        CopyColorIntoBuffer(pBuffer, Color, x0 + 5, y0 , AreaWidth);
     
     if ((d & 0x02) != 0) 
-        CopyColorIntoBuffer(pBuffer, Color, x0 + 6, y0 );
+        CopyColorIntoBuffer(pBuffer, Color, x0 + 6, y0 , AreaWidth);
     
     if ((d & 0x01) != 0) 
-        CopyColorIntoBuffer(pBuffer, Color, x0 + 7, y0 );
+        CopyColorIntoBuffer(pBuffer, Color, x0 + 7, y0 , AreaWidth);
 
 
     return EFI_SUCCESS;
@@ -469,14 +467,14 @@ EFI_STATUS Draw16_16IntoBuffer(UINT8 *pBuffer,UINT8 d,
 
 EFI_STATUS DrawChineseCharIntoBuffer(UINT8 *pBuffer,
         IN UINTN x0, UINTN y0,UINT8 c,
-        IN EFI_GRAPHICS_OUTPUT_BLT_PIXEL BorderColor)
+        IN EFI_GRAPHICS_OUTPUT_BLT_PIXEL BorderColor , UINT16 AreaWidth)
 {
     INT8 i;    
     	    
 	for(i = 0; i < 32; i += 2)
 	{
-        Draw8_16IntoBuffer(pBuffer, sChinese[0][i],     x0,     y0 + i / 2, 1, BorderColor);		        
-		Draw8_16IntoBuffer(pBuffer, sChinese[0][i + 1], x0 + 8, y0 + i / 2, 1, BorderColor);		
+        Draw8_16IntoBuffer(pBuffer, sChinese[0][i],     x0,     y0 + i / 2, 1, BorderColor, AreaWidth);		        
+		Draw8_16IntoBuffer(pBuffer, sChinese[0][i + 1], x0 + 8, y0 + i / 2, 1, BorderColor, AreaWidth);		
 	}
 	
     return EFI_SUCCESS;
@@ -574,14 +572,13 @@ void RectangleFillIntoBuffer(UINT8 *pBuffer,
 {    
 	UINT32 i = 0;
 	UINT32 j = 0;
-    for (j = y0; j < y1; j++) 
+    for (j = y0; j <= y1; j++) 
     {
-        for (i = x0; i < x1; i++) 
+        for (i = x0; i <= x1; i++) 
         {
             pBuffer[(j * ScreenWidth + i) * 4]     =  Color.Blue; //Blue   
             pBuffer[(j * ScreenWidth + i) * 4 + 1] =  Color.Green; //Green 
             pBuffer[(j * ScreenWidth + i) * 4 + 2] =  Color.Red; //Red  
-            pBuffer[(j * ScreenWidth + i) * 4 + 3] =  Color.Reserved;
         }
     }
 
@@ -699,7 +696,7 @@ HandleKeyboardEvent (
      Color.Red  = 0xFF;
      Color.Green= 0xFF;
 
-     DrawChineseCharUseBuffer(pBuffer, 10, 10, sChinese[1], 4, Color, width);
+     DrawChineseCharUseBuffer(pBuffer, 10, 10, sChinese[1], 5, Color, width);
             
      GraphicsOutput->Blt(GraphicsOutput, 
                          (EFI_GRAPHICS_OUTPUT_BLT_PIXEL *) pBuffer,
@@ -714,6 +711,8 @@ HandleKeyboardEvent (
 
 
 UINT8 *DeskBuffer = NULL;
+
+UINT8 *MouseBuffer;
 
 // for mouse move & click
 STATIC
@@ -732,7 +731,7 @@ HandleMouseEvent (
 	Color.Reserved = 0x66;
 	
     static int iMouseX = 500 / 2;
-    static int iMouseY = 600/ 2;
+    static int iMouseY = 600 / 2;
 
     EFI_STATUS Status;
 	UINTN Index;
@@ -757,7 +756,6 @@ HandleMouseEvent (
     {
         x_move = (State.RelativeMovementX >> 16) & 0xff;
     }
-    iMouseX = iMouseX + x_move;
     
     // cover old mouse cursor
 	DrawAsciiCharUseBuffer(GraphicsOutput, iMouseX, iMouseY, 0, Color);
@@ -777,8 +775,8 @@ HandleMouseEvent (
     DEBUG ((EFI_D_INFO, "X: %X, Y: %X ", x_move, y_move));
     DebugPrint1(30, 70, "X: %X, Y: %X ", x_move, y_move );
     
+    iMouseX = iMouseX + x_move;
     iMouseY = iMouseY + y_move;
-
 
     if (iMouseX < 0)
         iMouseX = 0;
@@ -813,15 +811,19 @@ HandleMouseEvent (
     
     DEBUG ((EFI_D_INFO, "\n"));
     
-    GraphicsOutput->Blt(
-            GraphicsOutput, 
-            (EFI_GRAPHICS_OUTPUT_BLT_PIXEL *) DeskBuffer,
-            EfiBltBufferToVideo,
-            0, 0, 
-            0, 0, 
-            ScreenWidth, ScreenHeight, 0);   
-            
-	DrawAsciiCharUseBuffer(GraphicsOutput, iMouseX, iMouseY, 'X', Color);
+    GraphicsOutput->Blt(GraphicsOutput, 
+			            (EFI_GRAPHICS_OUTPUT_BLT_PIXEL *) DeskBuffer,
+			            EfiBltBufferToVideo,
+			            0, 0, 
+			            0, 0, 
+			            ScreenWidth, ScreenHeight, 0);   
+            	
+    GraphicsOutput->Blt(GraphicsOutput, 
+			            (EFI_GRAPHICS_OUTPUT_BLT_PIXEL *) MouseBuffer,
+			            EfiBltBufferToVideo,
+			            0, 0, 
+			            iMouseX, iMouseY, 
+			            16, 16, 0);  
 	    
 	gBS->WaitForEvent( 1, &gMouse->WaitForInput, &Index );
 }
@@ -845,8 +847,21 @@ DisplaySystemDateTime (
 
 EFI_STATUS MultiProcessInit ()
 {
-    UINT8 i;
-    EFI_GUID gMultiProcessGuid  = { 0x0579257E, 0x1843, 0x45FB, { 0x83, 0x9D, 0x6B, 0x79, 0x09, 0x38, 0x29, 0xA9 } };
+    UINT16 i;
+    EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
+	EFI_GUID gMultiProcessGuid  = { 0x0579257E, 0x1843, 0x45FB, { 0x83, 0x9D, 0x6B, 0x79, 0x09, 0x38, 0x29, 0xA9 } };
+    MouseBuffer = (UINT8 *)AllocateZeroPool(16 * 16 * 4);
+
+	Color.Blue  = 0xff;
+	Color.Red   = 0xff;
+	Color.Green = 0xff;
+
+	for (i = 0; i < 16 * 16 * 4; i++)
+	{
+		MouseBuffer[i] = 0xff;
+	}
+	
+    //DrawChineseCharIntoBuffer(MouseBuffer, 0, 0, 0, Color, 16);
     
     EFI_EVENT_NOTIFY       TaskProcesses[] = {DisplaySystemDateTime, HandleKeyboardEvent, HandleMouseEvent};
 
@@ -883,7 +898,7 @@ EFI_STATUS SystemTimeIntervalInit()
 
 	if ( EFI_ERROR( Status ) )
 	{
-		DEBUG(( EFI_D_INFO, L"Create Event Error! \r\n" ));
+		DEBUG(( EFI_D_INFO, "Create Event Error! \r\n" ));
 		return(1);
 	}
 
@@ -895,7 +910,7 @@ EFI_STATUS SystemTimeIntervalInit()
 
 	if ( EFI_ERROR( Status ) )
 	{
-		DEBUG(( EFI_D_INFO, L"Set Timer Error! \r\n" ));
+		DEBUG(( EFI_D_INFO, "Set Timer Error! \r\n" ));
 		return(2);
 	}
 
@@ -921,29 +936,42 @@ EFI_STATUS ScreenInit(EFI_GRAPHICS_OUTPUT_PROTOCOL   *GraphicsOutput)
     EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
   
     DeskBuffer = (UINT8 *)AllocatePool(ScreenWidth * ScreenHeight * 4); 
-    
-    for (j = 0; j < ScreenHeight; j++) 
-    {
-        for (i = 0; i < ScreenWidth; i++) 
-        {
-            DeskBuffer[(j * ScreenWidth + i) * 4]     =  0xC6; //Blue   
-            DeskBuffer[(j * ScreenWidth + i) * 4 + 1] =  0xC6; //Green 
-            DeskBuffer[(j * ScreenWidth + i) * 4 + 2] =  0xC6; //Red  
-            DeskBuffer[(j * ScreenWidth + i) * 4 + 3] =  0;
-        }
-    }
-          
-    Color.Red   = 0xC6;
-    Color.Green = 0xC6;
-    Color.Blue	= 0xC6;
-    RectangleFillIntoBuffer(DeskBuffer, 0,     y - 28, x -  1, y - 28, 1, Color);
-    RectangleFillIntoBuffer(DeskBuffer, 0,     y - 26, x -  1, y -  1, 1, Color);
-  
+              
     Color.Red   = 0x00;
     Color.Green = 0x84;
     Color.Blue	= 0x84;
     RectangleFillIntoBuffer(DeskBuffer, 0,     0,      x -  1, y - 29, 1, Color);
-	
+    
+    Color.Red   = 0xC6;
+    Color.Green = 0xC6;
+    Color.Blue	= 0xC6;
+    RectangleFillIntoBuffer(DeskBuffer, 0,     y - 28, x -  1, y - 28, 1, Color);
+
+    Color.Red   = 0xFF;
+    Color.Green = 0xFF;
+    Color.Blue	= 0xFF;
+    RectangleFillIntoBuffer(DeskBuffer, 0,     y - 27, x -  1, y - 27, 1, Color);
+    
+    Color.Red   = 0xC6;
+    Color.Green = 0xC6;
+    Color.Blue	= 0xC6;
+    RectangleFillIntoBuffer(DeskBuffer, 0,     y - 26, x -  1, y -  1, 1, Color);
+
+
+  	
+    Color.Red   = 0xFF;
+    Color.Green = 0xFF;
+    Color.Blue	= 0xFF;
+    RectangleFillIntoBuffer(DeskBuffer, 3,     y - 24, 59,     y - 24, 1, Color);
+    RectangleFillIntoBuffer(DeskBuffer, 2,     y - 24, 59,     y - 4, 1, Color);
+
+    Color.Red   = 0x84;
+    Color.Green = 0x84;
+    Color.Blue	= 0x84;
+    RectangleFillIntoBuffer(DeskBuffer, 3,     y -  4, 59,     y -  4, 1, Color);
+    RectangleFillIntoBuffer(DeskBuffer, 59,     y - 23, 59,     y -  5, 1, Color);
+
+    
     Color.Red   = 0x00;
     Color.Green = 0x00;
     Color.Blue	= 0x00;
@@ -953,45 +981,43 @@ EFI_STATUS ScreenInit(EFI_GRAPHICS_OUTPUT_PROTOCOL   *GraphicsOutput)
     Color.Red   = 0x84;
     Color.Green = 0x84;
     Color.Blue	= 0x84;
-    RectangleFillIntoBuffer(DeskBuffer, 3,     y -  4, 59,     y -  4, 1, Color);
-    RectangleFillIntoBuffer(DeskBuffer, 59,     y - 23, 59,     y -  5, 1, Color);
     RectangleFillIntoBuffer(DeskBuffer, x - 47, y - 24, x -  4, y - 24, 1, Color);
     RectangleFillIntoBuffer(DeskBuffer, x - 47, y - 23, x - 47, y -  4, 1, Color);
     
     Color.Red   = 0xFF;
     Color.Green = 0xFF;
     Color.Blue	= 0xFF;
-    RectangleFillIntoBuffer(DeskBuffer, 0,     y - 27, x -  1, y - 27, 1, Color);
-    RectangleFillIntoBuffer(DeskBuffer, 3,     y - 24, 59,     y - 24, 1, Color);
+    RectangleFillIntoBuffer(DeskBuffer, x - 47,    y - 3, x - 4,     y - 3, 1, Color);
+    RectangleFillIntoBuffer(DeskBuffer, x - 3,     y - 24, x - 3,     y - 3, 1, Color);
         
     Color.Red   = 0xFF;
     Color.Green = 0xFF;
     Color.Blue	= 0xFF;
-    RectangleFillIntoBuffer(DeskBuffer, 0, 100, 100, 100, 1, Color);
+    RectangleFillIntoBuffer(DeskBuffer, 0, 100, 100, 200, 1, Color);
     
     Color.Red   = 0x00;
     Color.Green = 0x00;
     Color.Blue	= 0xFF;
-    RectangleFillIntoBuffer(DeskBuffer, 0, 200, 100, 100, 1, Color);
+    RectangleFillIntoBuffer(DeskBuffer, 0, 200, 100, 400, 1, Color);
 
     
     Color.Red   = 0x00;
     Color.Green = 0xFF;
     Color.Blue	= 0x00;
-    RectangleFillIntoBuffer(DeskBuffer, 0, 300, 100, 100, 1, Color);
+    RectangleFillIntoBuffer(DeskBuffer, 0, 300, 100, 400, 1, Color);
     
     
     Color.Red   = 0xFF;
     Color.Green = 0x00;
     Color.Blue	= 0x00;
-    RectangleFillIntoBuffer(DeskBuffer, 0, 400, 100, 100, 1, Color);
+    RectangleFillIntoBuffer(DeskBuffer, 0, 400, 100, 500, 1, Color);
     
     Color.Red  = 0xFF;
     Color.Green = 0x00;
     Color.Blue	= 0xFF;
 
-    DrawLineIntoBuffer(DeskBuffer, 0, 0, 100, 100, 2, Color);
-    DrawLineIntoBuffer(DeskBuffer, 100, 0, 0, 100, 1, Color);
+    DrawLineIntoBuffer(DeskBuffer, 0, 0, 100, 100, 2, Color, ScreenWidth);
+    DrawLineIntoBuffer(DeskBuffer, 100, 0, 0, 100, 1, Color, ScreenWidth);
 
 /**/
     //Display ASCII Char
@@ -1004,7 +1030,7 @@ EFI_STATUS ScreenInit(EFI_GRAPHICS_OUTPUT_PROTOCOL   *GraphicsOutput)
     Color.Blue	= 0xFF;
 
     // Display "wo"    
-    DrawChineseCharIntoBuffer(DeskBuffer, 20, 20 + 16, i, Color);
+    //DrawChineseCharIntoBuffer(DeskBuffer, 20, 20 + 16, i, Color, ScreenWidth);
         
     GraphicsOutput->Blt(
                 GraphicsOutput, 
@@ -1045,7 +1071,7 @@ Main (
     ScreenWidth  = GraphicsOutput->Mode->Info->HorizontalResolution;
     ScreenHeight = GraphicsOutput->Mode->Info->VerticalResolution;
 
-    DEBUG(( EFI_D_INFO, L"ScreenWidth:%d, ScreenHeight:%d\n\n", ScreenWidth, ScreenHeight));
+    DEBUG(( EFI_D_INFO, "ScreenWidth:%d, ScreenHeight:%d\n\n", ScreenWidth, ScreenHeight));
     
     ScreenInit(GraphicsOutput);
         
