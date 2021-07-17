@@ -8,9 +8,14 @@ ToDo:
 
 1. ReadFileFromPath;
 2. Fix trigger event with mouse and keyboard
-3. NetWork
-4. File System
-6. progcess
+3. NetWork connect baidu.com
+4. File System Simple Management
+5. progcess
+6. My Computer window(disk partition) 
+7. Setting window(select file, delete file, modify file)
+8. Memory Simple Management
+9. Multi Windows, button click event.
+10. Application.
 **/
 
 #include "FrontPage.h"
@@ -964,7 +969,7 @@ VOID ChineseCharArrayInit()
     UINT16 x, y;
     x = 10;
     y = 20;
-    for (UINT16 j = 0 ; j < 32 ; j++)
+    for (UINT16 j = 0 ; j < 40 ; j++)
 	{
 		for (UINT16 i = 0 ; i < 37 ; i++)
 	    {	    
