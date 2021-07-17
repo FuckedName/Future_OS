@@ -130,8 +130,8 @@ ToDo:
 static UINTN ScreenWidth, ScreenHeight;  
 
 UINT8 *pMyComputerBuffer;
-UINT16 MyComputerWidth = 400;
-UINT16 MyComputerHeight = 400;
+UINT16 MyComputerWidth = 700;
+UINT16 MyComputerHeight = 600;
 
 const UINT8 *sChineseChar;
 
@@ -564,7 +564,7 @@ EFI_STATUS DrawChineseCharIntoBuffer(UINT8 *pBuffer,
 }
 
 EFI_STATUS DrawChineseCharIntoBuffer2(UINT8 *pBuffer,
-        IN UINTN x0, UINTN y0,UINT8 offset,
+        IN UINTN x0, UINTN y0, UINT32 offset,
         IN EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color , UINT16 AreaWidth)
 {
     INT8 i;
@@ -762,7 +762,7 @@ EFI_STATUS MouseInit()
 
 
 
-EFI_STATUS FileReadSelf(CHAR16 *FileName, UINT16 size, UINT8 *pBuffer)
+EFI_STATUS FileReadSelf(CHAR16 *FileName, UINT32 size, UINT8 *pBuffer)
 {    
     //CHAR16  FileName[128] = L"test2.txt";
     EFI_STATUS Status ;
@@ -790,6 +790,51 @@ EFI_STATUS FileReadSelf(CHAR16 *FileName, UINT16 size, UINT8 *pBuffer)
     }
 
     DEBUG ((EFI_D_INFO, "Read File: %s successfully!\n ", FileName));
+
+    return EFI_SUCCESS;
+
+}
+
+
+EFI_STATUS FileReadSelf2(CHAR16 *FileName, UINT32 size, UINT8 *pBuffer)
+{    
+    //CHAR16  FileName[128] = L"test2.txt";
+    EFI_STATUS Status ;
+    SHELL_FILE_HANDLE FileHandle;
+    EFI_SHELL_PROTOCOL  *gEfiShellProtocol;
+
+	DEBUG ((EFI_D_INFO, "FileReadSelf Handle File: %s start:\n ", FileName));
+	
+    Status = OpenShellProtocol(&gEfiShellProtocol);
+    
+    Status = gEfiShellProtocol->OpenFileByName(FileName, &FileHandle, EFI_FILE_MODE_READ); 
+    if (EFI_ERROR(Status))
+    {
+        DEBUG ((EFI_D_INFO, "OpenFileByName: %s Failed!\n ", FileName));
+        
+        return (-1);
+    }
+/*
+	UINT64 position = 0;
+    Status = gEfiShellProtocol->SetFilePosition(FileHandle, &position);    
+    if (EFI_ERROR(Status))
+    {
+        DEBUG ((EFI_D_INFO, "SetFilePosition Failed: %x!\n ", Status));
+        
+        return (-1);
+    }
+  */      
+    Status = gEfiShellProtocol->ReadFile(FileHandle, &size, pBuffer);    
+    if (EFI_ERROR(Status))
+    {
+        DEBUG ((EFI_D_INFO, "ReadFile Failed: %x!\n ", Status));
+        
+        return (-1);
+    }
+	UINT64 Position;
+    gEfiShellProtocol->GetFilePosition(FileHandle, &Position);
+
+    DEBUG ((EFI_D_INFO, "Read File: %s successfully, Postion: %d!\n ", FileName, Position));
 
     return EFI_SUCCESS;
 
@@ -893,7 +938,7 @@ VOID MyComputerWindow(UINT16 StartX, UINT16 StartY)
 
 VOID ChineseCharArrayInit()
 {
-	UINT32 size = 267616;
+	UINT32 size = 32 * 96 * 87;
     //UINT8 *sChineseChar;
     
 	sChineseChar = (UINT8 *)AllocateZeroPool(size);
@@ -904,7 +949,7 @@ VOID ChineseCharArrayInit()
         return (-1);
     }
     
-	if (FileReadSelf(L"HZK16", size, sChineseChar) == -1)
+	if (FileReadSelf2(L"HZK16", size, sChineseChar) == -1)
 	{
 		FreePool(sChineseChar);
 		DEBUG ((EFI_D_INFO, "Read HZK16 failed\n "));
@@ -919,17 +964,16 @@ VOID ChineseCharArrayInit()
     UINT16 x, y;
     x = 10;
     y = 20;
-    for (UINT16 i = 0 ; i < 94 * 2 ; i++)
-    {
-		if (i % 10 == 0)
-		{
-			x = 10;
-			y += 16;
-		}	
-    
-    	DrawChineseCharIntoBuffer2(pMyComputerBuffer, x + i * 18, y, i, Color, MyComputerWidth);
-    	DEBUG ((EFI_D_INFO, "ChineseCharArrayInit: %x \n ", sChineseChar[1504 * 32 + i]));
-    }
+    for (UINT16 j = 0 ; j < 32 ; j++)
+	{
+		for (UINT16 i = 0 ; i < 37 ; i++)
+	    {	    
+	    	DrawChineseCharIntoBuffer2(pMyComputerBuffer, x + i * 16, y, j * 94 + i, Color, MyComputerWidth);
+	    	//DEBUG ((EFI_D_INFO, "ChineseCharArrayInit: %x \n ", sChineseChar[1504 * 32 + i]));
+	    }
+		x = 10;
+		y += 16;
+	 }
 	
 }
 
@@ -1114,7 +1158,7 @@ HandleMouseEvent (
 			            (EFI_GRAPHICS_OUTPUT_BLT_PIXEL *) pMyComputerBuffer,
 			            EfiBltBufferToVideo,
 			            0, 0,
-			            200, 50,
+			            100, 0,
 			            MyComputerWidth, MyComputerHeight, 
 			            0);		            
 	            
