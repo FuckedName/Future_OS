@@ -37,8 +37,8 @@
 [Packages]
   MdePkg/MdePkg.dec
   MdeModulePkg/MdeModulePkg.dec
-  #StdLib/StdLib.dec
-
+  ShellPkg/ShellPkg.dec
+  
 [LibraryClasses]
   DevicePathLib
   BaseLib
@@ -55,18 +55,68 @@
   PcdLib
   UefiHiiServicesLib
   UefiBootManagerLib
-  #LibC
-  #LibStdio
+  UefiApplicationEntryPoint
+  UefiLib
+  PcdLib
+  BaseLib
+  UefiLib
+  UefiApplicationEntryPoint
+  PcdLib
+  DebugLib
+  UefiBootServicesTableLib
+  UefiRuntimeServicesTableLib
+  BaseMemoryLib
+  MemoryAllocationLib
+  SortLib
+  PrintLib
+  MemoryAllocationLib
+  BaseLib
+  BaseMemoryLib
+  DebugLib
+  ShellLib
+  UefiLib
+  UefiRuntimeServicesTableLib
+  UefiBootServicesTableLib
+  SortLib
+  PrintLib
+  PeCoffGetEntryPointLib
 
 [Guids]
   gEfiIfrTianoGuid                              ## CONSUMES ## GUID (Extended IFR Guid Opcode)
   gEfiIfrFrontPageGuid                          ## CONSUMES ## GUID
+  gShellVariableGuid                                      ## SOMETIMES_CONSUMES ## GUID
+  gShellAliasGuid                                         ## SOMETIMES_CONSUMES ## GUID
+
 
 [Protocols]
   gEfiSmbiosProtocolGuid                        ## CONSUMES
   gEfiSimplePointerProtocolGuid
   gEfiHiiConfigAccessProtocolGuid               ## CONSUMES
-
+  gEfiGraphicsOutputProtocolGuid
+  gEfiSimpleFileSystemProtocolGuid
+  gEfiDevicePathProtocolGuid
+  gEfiShellProtocolGuid
+  gEfiShellParametersProtocolGuid                         ## PRODUCES
+  gEfiUnicodeCollation2ProtocolGuid                       # ALWAYS_CONSUMED
+  gEfiDevicePathProtocolGuid                              # ALWAYS_CONSUMED
+  gEfiLoadedImageProtocolGuid                             # ALWAYS_CONSUMED
+  gEfiSimpleFileSystemProtocolGuid                        # ALWAYS_CONSUMED
+  gEfiDevicePathToTextProtocolGuid                        # ALWAYS_CONSUMED
+  gEfiPlatformDriverOverrideProtocolGuid
+  gEfiBlockIoProtocolGuid                                 ## TO_START
+  gEfiDriverBindingProtocolGuid
+  gEfiComponentNameProtocolGuid    
+  gEfiDiskIoProtocolGuid
+  gEfiPciIoProtocolGuid
+  gEfiSimplePointerProtocolGuid
+  gEfiSimpleTextInputExProtocolGuid
+  gEfiShellProtocolGuid
+  gEfiDriverHealthProtocolGuid                    ## UNDEFINED
+  gEfiDriverFamilyOverrideProtocolGuid            ## UNDEFINED
+  gEfiHiiConfigAccessProtocolGuid                 ## SOMETIMES_CONSUMES
+  gEfiHiiDatabaseProtocolGuid                     ## CONSUMES
+  gEfiDiskIo2ProtocolGuid
+  
 [FeaturePcd]
 
 [Pcd]
@@ -84,3 +134,6 @@
 
 [UserExtensions.TianoCore."ExtraFiles"]
   UiAppExtra.uni
+
+
+

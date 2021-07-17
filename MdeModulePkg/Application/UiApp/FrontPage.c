@@ -22,6 +22,112 @@ ToDo:
 #include <Protocol/ShellParameters.h>
 #include <Library/ShellLib.h>
 
+#include <Library/UefiLib.h> 
+#include <Library/ShellCEntryLib.h> 
+#include <Library/UefiApplicationEntryPoint.h>
+#include <Library/UefiBootServicesTableLib.h>
+#include <Library/UefiRuntimeServicesTableLib.h>
+#include <Library/UefiRuntimeLib.h>
+#include <Protocol/GraphicsOutput.h>
+#include <Protocol/SimplePointer.h>
+#include <Protocol/SimpleTextInEx.h>
+#include <Protocol/SimpleFileSystem.h>
+#include <Library/DebugLib.h>
+
+#include <Guid/GlobalVariable.h>
+#include <Guid/ShellLibHiiGuid.h>
+
+#include <Protocol/Shell.h>
+#include <Protocol/ShellParameters.h>
+#include <Protocol/DevicePath.h>
+#include <Protocol/LoadedImage.h>
+#include <Protocol/UnicodeCollation.h>
+
+#include <Library/BaseLib.h>
+#include <Library/BaseMemoryLib.h>
+#include <Library/MemoryAllocationLib.h>
+#include <Library/PcdLib.h>
+#include <Library/ShellCommandLib.h>
+#include <Library/ShellLib.h>
+#include <Library/UefiLib.h>
+#include <Library/UefiRuntimeServicesTableLib.h>
+#include <Library/HiiLib.h>
+#include <Library/SortLib.h>
+#include <Guid/GlobalVariable.h>
+#include <Guid/ConsoleInDevice.h>
+#include <Guid/ConsoleOutDevice.h>
+#include <Guid/ShellLibHiiGuid.h>
+
+#include <IndustryStandard/Pci.h>
+
+#include <Pi/PiFirmwareVolume.h>
+#include <Pi/PiFirmwareFile.h>
+
+#include <Library/FileHandleLib.h>
+#include <Pi/PiFirmwareFile.h>
+#include <Protocol/FirmwareVolume2.h>
+
+#include <Protocol/Shell.h>
+#include <Protocol/ShellParameters.h>
+#include <Protocol/DevicePath.h>
+#include <Protocol/LoadedImage.h>
+#include <Protocol/UnicodeCollation.h>
+#include <Protocol/DriverDiagnostics2.h>
+#include <Protocol/DriverDiagnostics.h>
+#include <Protocol/PlatformDriverOverride.h>
+#include <Protocol/BusSpecificDriverOverride.h>
+#include <Protocol/PlatformToDriverConfiguration.h>
+#include <Protocol/DriverSupportedEfiVersion.h>
+#include <Protocol/DriverFamilyOverride.h>
+#include <Protocol/DriverHealth.h>
+#include <Protocol/PciIo.h>
+#include <Protocol/PciRootBridgeIo.h>
+
+#include <Library/BaseLib.h>
+#include <Library/BaseMemoryLib.h>
+#include <Library/DebugLib.h>
+#include <Library/MemoryAllocationLib.h>
+#include <Library/PcdLib.h>
+#include <Library/ShellCommandLib.h>
+#include <Library/ShellLib.h>
+#include <Library/SortLib.h>
+#include <Library/UefiLib.h>
+#include <Library/UefiRuntimeServicesTableLib.h>
+#include <Library/UefiBootServicesTableLib.h>
+#include <Library/HiiLib.h>
+#include <Library/FileHandleLib.h>
+#include <Library/DevicePathLib.h>
+#include <Library/PrintLib.h>
+#include <Library/HandleParsingLib.h>
+#include <Library/PeCoffGetEntryPointLib.h>
+#include <Library/HandleParsingLib.h>
+#include <Guid/TtyTerm.h>
+#include <Guid/MdeModuleHii.h>
+#include <Guid/FileSystemVolumeLabelInfo.h>
+#include <Guid/GlobalVariable.h>
+#include <Guid/HiiBootMaintenanceFormset.h>
+
+#include <Protocol/LoadFile.h>
+#include <Protocol/HiiConfigAccess.h>
+#include <Protocol/SimpleFileSystem.h>
+#include <Protocol/SerialIo.h>
+#include <Protocol/DevicePathToText.h>
+#include <Protocol/FormBrowserEx2.h>
+
+#include <Library/PrintLib.h>
+#include <Library/DebugLib.h>
+#include <Library/BaseMemoryLib.h>
+#include <Library/UefiBootServicesTableLib.h>
+#include <Library/UefiLib.h>
+#include <Library/MemoryAllocationLib.h>
+#include <Library/UefiRuntimeServicesTableLib.h>
+#include <Library/DevicePathLib.h>
+#include <Library/HiiLib.h>
+#include <Library/UefiHiiServicesLib.h>
+#include <Library/UefiBootManagerLib.h>
+#include <Library/FileExplorerLib.h>
+
+
 
 static UINTN ScreenWidth, ScreenHeight;  
 
@@ -183,7 +289,9 @@ const UINT8 sChinese[][32] =
     {0x10,0x10,0x90,0x90,0xFE,0x10,0x10,0x10,0x10,0xFF,0x10,0x10,0x10,0x10,0x10,0x10,
      0x04,0x04,0x04,0x08,0x08,0x19,0x19,0x2A,0x48,0x0B,0x08,0x08,0x08,0x08,0x08,0x08}, 
     {0x01,0x41,0x21,0x37,0x21,0x01,0x01,0xF7,0x11,0x11,0x12,0x12,0x14,0x28,0x47,0x00,
-    0x10,0x10,0x10,0xFC,0x10,0x10,0x10,0xFE,0x10,0x10,0x10,0x10,0x10,0x00,0xFE,0x00},
+     0x10,0x10,0x10,0xFC,0x10,0x10,0x10,0xFE,0x10,0x10,0x10,0x10,0x10,0x00,0xFE,0x00},
+    {0x10,0x08,0x08,0x08,0xC8,0x38,0x08,0x00,0x20,0x38,0x26,0x21,0x20,0x20,0x18,0x00,
+	 0x00,0x00,0x00,0xFE,0x02,0x02,0x02,0x00,0x00,0x00,0x00,0x7F,0x40,0x40,0x40,0x00},
 };
 
 void CopyColorIntoBuffer(UINT8 *pBuffer, EFI_GRAPHICS_OUTPUT_BLT_PIXEL color, UINT16 x0, UINT16 y0, UINT16 AreaWidth)
@@ -208,7 +316,7 @@ void CopyColorIntoBuffer3(UINT8 *pBuffer, EFI_GRAPHICS_OUTPUT_BLT_PIXEL color, U
     pBuffer[y0 * fontWidth * 4 + x0 * 4 + 2] = color.Red;
 }
 
-INT32 abs(INT32 v)
+INT32 Math_ABS(INT32 v)
 {
 	return (v < 0) ? -v : v;
 }
@@ -219,9 +327,9 @@ EFI_STATUS DrawLineIntoBuffer(UINT8 *pBuffer,
         IN EFI_GRAPHICS_OUTPUT_BLT_PIXEL BorderColor, UINT16 AreaWidth)
 {
 
-    INT32 dx  = abs((int)(x1 - x0));
+    INT32 dx  = Math_ABS((int)(x1 - x0));
     INT32 sx  = x0 < x1 ? 1 : -1;
-    INT32 dy  = abs((int)(y1-y0)), sy = y0 < y1 ? 1 : -1;
+    INT32 dy  = Math_ABS((int)(y1-y0)), sy = y0 < y1 ? 1 : -1;
     INT32 err = ( dx > dy ? dx : -dy) / 2, e2;
     
     for(;;)
@@ -371,7 +479,7 @@ VOID EFIAPI DebugPrint1 (UINT16 x, UINT16 y, IN  CONST CHAR8  *Format, ...)
 EFI_STATUS Draw8_16IntoBuffer(UINT8 *pBuffer,UINT8 d,
         IN UINTN x0, UINTN y0,
         UINT8 width,
-        IN EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color, UINT8 AreaWidth)
+        IN EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color, UINT16 AreaWidth)
 {
     if ((d & 0x80) != 0) 
         CopyColorIntoBuffer(pBuffer, Color, x0 + 0, y0, AreaWidth ); 
@@ -435,52 +543,16 @@ EFI_STATUS Draw8_16IntoBufferWithWidth(UINT8 *pBuffer,UINT8 d,
     return EFI_SUCCESS;
 }
 
-
-// Draw 8 X 16 point
-EFI_STATUS Draw16_16IntoBuffer(UINT8 *pBuffer,UINT8 d,
-        IN UINTN x0, UINTN y0,
-        UINT8 width,
-        IN EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color, UINT16 AreaWidth)
-{
-    if ((d & 0x80) != 0) 
-        CopyColorIntoBuffer(pBuffer, Color, x0 + 0, y0, AreaWidth); 
-    
-    if ((d & 0x40) != 0) 
-        CopyColorIntoBuffer(pBuffer, Color, x0 + 1, y0 , AreaWidth);
-    
-    if ((d & 0x20) != 0) 
-        CopyColorIntoBuffer(pBuffer, Color, x0 + 2, y0 , AreaWidth);
-    
-    if ((d & 0x10) != 0) 
-        CopyColorIntoBuffer(pBuffer, Color, x0 + 3, y0 , AreaWidth);
-    
-    if ((d & 0x08) != 0) 
-        CopyColorIntoBuffer(pBuffer, Color, x0 + 4, y0 , AreaWidth);
-    
-    if ((d & 0x04) != 0) 
-        CopyColorIntoBuffer(pBuffer, Color, x0 + 5, y0 , AreaWidth);
-    
-    if ((d & 0x02) != 0) 
-        CopyColorIntoBuffer(pBuffer, Color, x0 + 6, y0 , AreaWidth);
-    
-    if ((d & 0x01) != 0) 
-        CopyColorIntoBuffer(pBuffer, Color, x0 + 7, y0 , AreaWidth);
-
-
-    return EFI_SUCCESS;
-}
-
-
 EFI_STATUS DrawChineseCharIntoBuffer(UINT8 *pBuffer,
-        IN UINTN x0, UINTN y0,UINT8 c,
-        IN EFI_GRAPHICS_OUTPUT_BLT_PIXEL BorderColor , UINT16 AreaWidth)
+        IN UINTN x0, UINTN y0,UINT8 offset,
+        IN EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color , UINT16 AreaWidth)
 {
-    INT8 i;    
-    	    
+    INT8 i;
+    
 	for(i = 0; i < 32; i += 2)
 	{
-        Draw8_16IntoBuffer(pBuffer, sChinese[0][i],     x0,     y0 + i / 2, 1, BorderColor, AreaWidth);		        
-		Draw8_16IntoBuffer(pBuffer, sChinese[0][i + 1], x0 + 8, y0 + i / 2, 1, BorderColor, AreaWidth);		
+        Draw8_16IntoBuffer(pBuffer, sChinese[offset][i],     x0,     y0 + i / 2, 1, Color, AreaWidth);		        
+		Draw8_16IntoBuffer(pBuffer, sChinese[offset][i + 1], x0 + 8, y0 + i / 2, 1, Color, AreaWidth);		
 	}
 	
     return EFI_SUCCESS;
@@ -592,6 +664,36 @@ void RectangleFillIntoBuffer(UINT8 *pBuffer,
 
 EFI_EVENT MultiTaskTriggerEvent;
 
+
+EFI_STATUS OpenShellProtocol( EFI_SHELL_PROTOCOL **gEfiShellProtocol )
+{
+    EFI_STATUS        Status;
+    
+    Status = gBS->OpenProtocol(
+            gImageHandle,
+            &gEfiShellProtocolGuid,
+            (VOID **)gEfiShellProtocol,
+            gImageHandle,
+            NULL,
+            EFI_OPEN_PROTOCOL_GET_PROTOCOL
+            );
+    if (EFI_ERROR(Status)) {
+    //
+    // Search for the shell protocol
+    //
+        Status = gBS->LocateProtocol(
+                &gEfiShellProtocolGuid,
+                NULL,
+                (VOID **)gEfiShellProtocol
+                );
+        if (EFI_ERROR(Status)) {
+            gEfiShellProtocol = NULL;
+        }
+  }
+  return Status;
+}
+
+
 VOID EFIAPI TimeSlice(
 	IN EFI_EVENT Event,
 	IN VOID           *Context
@@ -647,35 +749,113 @@ EFI_STATUS WindowCreateUseBuffer(UINT8 *pBuffer, UINT8 *pParent, UINT16 Width, U
 
 	for (i = 0; i < Height; i++)
 	{
-		for (j = 0; j < Width; j++)
+		for (j = 0; j < Width / 3; j++)
 		{
-			pBuffer[(i * Width + j) * 4] = 0x33;
-			pBuffer[(i * Width + j) * 4 + 1] = 0x33;
-			pBuffer[(i * Width + j) * 4 + 2] = 0x33;
+			pBuffer[(i * Width + j) * 4] = 230;
+			pBuffer[(i * Width + j) * 4 + 1] = 230;
+			pBuffer[(i * Width + j) * 4 + 2] = 230;
 		}
 	}
+	
+	for (i = 0; i < Height; i++)
+	{
+		for (j = Width / 3 - 1; j < Width; j++)
+		{
+			pBuffer[(i * Width + j) * 4] = 0xff;
+			pBuffer[(i * Width + j) * 4 + 1] = 0xff;
+			pBuffer[(i * Width + j) * 4 + 2] = 0xff;
+		}
+	}
+
+    EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
+    
+    Color.Blue = 145;
+    Color.Green= 145;
+    Color.Red= 145;
+    DrawChineseCharIntoBuffer(pBuffer, 3, 6,           0, Color, Width);
+    DrawChineseCharIntoBuffer(pBuffer, 3 + 16, 6,      1, Color, Width);
+    DrawChineseCharIntoBuffer(pBuffer, 3 + 16 * 2 , 6, 2, Color, Width);
+    DrawChineseCharIntoBuffer(pBuffer, 3 + 16 * 3, 6,  3, Color, Width);
+    DrawChineseCharIntoBuffer(pBuffer, 3 + 16 * 3, 6,  4, Color, Width);
+    DrawChineseCharIntoBuffer(pBuffer, 3 + 16 * 3, 6,  5, Color, Width);
+    DrawChineseCharIntoBuffer(pBuffer, 3 + 16 * 3, 6,  6, Color, Width);
+
+    Color.Blue = 145;
+    Color.Green= 145;
+    Color.Red= 145;
+	DrawLineIntoBuffer(pBuffer, 0, 0, 100, 100, 1, Color, Width);
+    DrawLineIntoBuffer(pBuffer, 100, 0, 0, 100, 1, Color, Width);
+    DrawLineIntoBuffer(pBuffer, 100, 0, 0, 100, 1, Color, Width);
+
+    FileRead();
 }
 
 UINT8 *pMyComputerBuffer;
+UINT16 MyComputerWidth = 400;
+UINT16 MyComputerHeight = 400;
 
 
-VOID MyComputer(UINT16 StartX, UINT16 StartY)
+VOID MyComputerWindow(UINT16 StartX, UINT16 StartY)
 {
 	UINT8 *pParent;
-	UINT16 Width = 700;
-	UINT16 Height = 800;
 	UINT16 Type;
 	CHAR8 * pWindowTitle;
 
-	pMyComputerBuffer = (UINT8 *)AllocateZeroPool(Width * Height * 4); 
+	pMyComputerBuffer = (UINT8 *)AllocateZeroPool(MyComputerWidth * MyComputerHeight * 4); 
 	if (pMyComputerBuffer == NULL)
 	{
 		DEBUG ((EFI_D_INFO, "MyComputer , AllocateZeroPool failed... "));
 		return;
 	}
 
-	WindowCreateUseBuffer(pMyComputerBuffer, pParent, Width, Height, Type, pWindowTitle);
+	WindowCreateUseBuffer(pMyComputerBuffer, pParent, MyComputerWidth, MyComputerHeight, Type, pWindowTitle);
 }
+
+FileRead()
+{    
+    Print(L"Hello Renqihong jiayou!!\r\n");
+
+    CHAR16 * OldLogFileName = L"test.txt";
+    //CHAR16  *LineBuff = NULL;
+    CHAR16  NewFileName[128] = L"test2.txt";
+    CHAR16 ArrayBuffer[39]  = L"renqihong";
+    EFI_STATUS Status ;
+    SHELL_FILE_HANDLE FileHandle;
+    EFI_SHELL_PROTOCOL  *gEfiShellProtocol;
+
+    Status = OpenShellProtocol(&gEfiShellProtocol);
+    
+    Status = gEfiShellProtocol->OpenFileByName(NewFileName, &FileHandle, EFI_FILE_MODE_READ); 
+    if (EFI_ERROR(Status))
+    {
+        DEBUG ((EFI_D_INFO, "OpenFileByName Failed!\n "));
+        
+        return (-1);
+    }
+    
+    UINT16 ReadSize = 3;
+    CHAR16 Buffer[39] = {0};
+    
+    Status = gEfiShellProtocol->ReadFile(FileHandle, &ReadSize, Buffer);    
+    if (EFI_ERROR(Status))
+    {
+        DEBUG ((EFI_D_INFO, "ReadFile Failed!\n "));
+        
+        return (-1);
+    }
+    EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
+    Color.Blue  = 0xff;
+    Color.Red   = 0xff;
+    Color.Green = 0xff;
+    UINT8 i = 0;
+    
+    for (i = 0; i < 10; i++)
+    	DrawAsciiCharIntoBuffer(pMyComputerBuffer, 10 + i * 8, 20, Buffer[i], Color, MyComputerWidth);
+	/**/
+    return EFI_SUCCESS;
+
+}
+
 
 STATIC
 VOID
@@ -834,11 +1014,9 @@ HandleMouseEvent (
     if (State.LeftButton == 0x01)
     {
         DEBUG ((EFI_D_INFO, "Left button clicked"));
-
         
 	    HandleMouseRightClick(iMouseX, iMouseY);
-	    //DrawAsciiCharUseBuffer(GraphicsOutput, 20 + process2_i * 8 + 16, 60, 'E', Color);
-	    
+	    //DrawAsciiCharUseBuffer(GraphicsOutput, 20 + process2_i * 8 + 16, 60, 'E', Color);  
     }
     
     if (State.RightButton == 0x01)
@@ -861,9 +1039,10 @@ HandleMouseEvent (
     GraphicsOutput->Blt(GraphicsOutput, 
 			            (EFI_GRAPHICS_OUTPUT_BLT_PIXEL *) pMyComputerBuffer,
 			            EfiBltBufferToVideo,
-			            0, 0, 
-			            200, 200, 
-			            200, 200, 0);		            
+			            0, 0,
+			            200, 200,
+			            MyComputerWidth, MyComputerHeight, 
+			            0);		            
 	            
     GraphicsOutput->Blt(GraphicsOutput, 
 			            (EFI_GRAPHICS_OUTPUT_BLT_PIXEL *) MouseBuffer,
@@ -950,15 +1129,13 @@ EFI_STATUS SystemTimeIntervalInit()
 {
     EFI_STATUS	Status;
 	EFI_HANDLE	TimerOne	= NULL;
-	static const UINTN SecondsToNanoSeconds = 1000000;
+	static const UINTN TimeInterval = 1000000;
 
-	Status = gBS->CreateEvent(
-                           		EVT_NOTIFY_SIGNAL | EVT_TIMER,
-                           		TPL_CALLBACK,
-                           		TimeSlice,
-                           		NULL,
-                           		&TimerOne
-                           		);
+	Status = gBS->CreateEvent(EVT_NOTIFY_SIGNAL | EVT_TIMER,
+                       		TPL_CALLBACK,
+                       		TimeSlice,
+                       		NULL,
+                       		&TimerOne);
 
 	if ( EFI_ERROR( Status ) )
 	{
@@ -966,11 +1143,9 @@ EFI_STATUS SystemTimeIntervalInit()
 		return(1);
 	}
 
-	Status = gBS->SetTimer(
-		TimerOne,
-		TimerPeriodic,
-		MultU64x32( SecondsToNanoSeconds, 1)
-		);
+	Status = gBS->SetTimer(TimerOne,
+						  TimerPeriodic,
+						  MultU64x32( TimeInterval, 1));
 
 	if ( EFI_ERROR( Status ) )
 	{
@@ -987,8 +1162,6 @@ EFI_STATUS SystemTimeIntervalInit()
 
 	return EFI_SUCCESS;
 }
-
-
 
 EFI_STATUS ScreenInit(EFI_GRAPHICS_OUTPUT_PROTOCOL   *GraphicsOutput)
 {
@@ -1084,20 +1257,22 @@ EFI_STATUS ScreenInit(EFI_GRAPHICS_OUTPUT_PROTOCOL   *GraphicsOutput)
     DrawLineIntoBuffer(DeskBuffer, 0, 0, 100, 100, 2, Color, ScreenWidth);
     DrawLineIntoBuffer(DeskBuffer, 100, 0, 0, 100, 1, Color, ScreenWidth);
 
+    Color.Red  = 0xFF;
+    Color.Green = 0xFF;
+    Color.Blue	= 0xFF;
+
+    // Display "wo"    
+    DrawChineseCharIntoBuffer(DeskBuffer, 20, 20 + 16, 0, Color, ScreenWidth);
+
 /**/
     //Display ASCII Char
     //count = 60;
     //for (i = 40; i < 65 + 60; i++)
     //    DrawAsciiCharIntoBuffer(DeskBuffer, 20 + (i - 40) * 8, 20, i, Color);
 
-    Color.Red  = 0xFF;
-    Color.Green = 0xFF;
-    Color.Blue	= 0xFF;
 
-    // Display "wo"    
-    //DrawChineseCharIntoBuffer(DeskBuffer, 20, 20 + 16, i, Color, ScreenWidth);
-        
-	MyComputer(100, 100);
+
+    MyComputerWindow(100, 100);
     GraphicsOutput->Blt(
                 GraphicsOutput, 
                 (EFI_GRAPHICS_OUTPUT_BLT_PIXEL *) DeskBuffer,
@@ -1106,6 +1281,7 @@ EFI_STATUS ScreenInit(EFI_GRAPHICS_OUTPUT_PROTOCOL   *GraphicsOutput)
                 0, 0, 
                 ScreenWidth, ScreenHeight, 0);   
 
+	// Desk graphics layer, buffer can not free!!
     //FreePool(DeskBuffer);
 
     
