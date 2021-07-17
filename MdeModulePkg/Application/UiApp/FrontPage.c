@@ -4,7 +4,13 @@
 Copyright (c) 2004 - 2017, Intel Corporation. All rights reserved.<BR>
 (C) Copyright 2018 Hewlett Packard Enterprise Development LP<BR>
 SPDX-License-Identifier: BSD-2-Clause-Patent
+ToDo:
 
+1. ReadFileFromPath;
+2. Fix trigger event with mouse and keyboard
+3. NetWork
+4. File System
+6. progcess
 **/
 
 #include "FrontPage.h"
@@ -635,6 +641,42 @@ EFI_STATUS MouseInit()
 
 }
 
+EFI_STATUS WindowCreateUseBuffer(UINT8 *pBuffer, UINT8 *pParent, UINT16 Width, UINT16 Height, UINT16 Type, CHAR8 *pWindowTitle)
+{
+	UINT16 i, j;
+
+	for (i = 0; i < Height; i++)
+	{
+		for (j = 0; j < Width; j++)
+		{
+			pBuffer[(i * Width + j) * 4] = 0x33;
+			pBuffer[(i * Width + j) * 4 + 1] = 0x33;
+			pBuffer[(i * Width + j) * 4 + 2] = 0x33;
+		}
+	}
+}
+
+UINT8 *pMyComputerBuffer;
+
+
+VOID MyComputer(UINT16 StartX, UINT16 StartY)
+{
+	UINT8 *pParent;
+	UINT16 Width = 700;
+	UINT16 Height = 800;
+	UINT16 Type;
+	CHAR8 * pWindowTitle;
+
+	pMyComputerBuffer = (UINT8 *)AllocateZeroPool(Width * Height * 4); 
+	if (pMyComputerBuffer == NULL)
+	{
+		DEBUG ((EFI_D_INFO, "MyComputer , AllocateZeroPool failed... "));
+		return;
+	}
+
+	WindowCreateUseBuffer(pMyComputerBuffer, pParent, Width, Height, Type, pWindowTitle);
+}
+
 STATIC
 VOID
 EFIAPI
@@ -655,7 +697,6 @@ HandleKeyboardEvent (
 	Color.Blue = 0xFF;
 	Color.Red = 0xFF;
 	Color.Green = 0xFF;
-	Color.Reserved = 0x66;
 	
 	Status = GetKeyEx(&scanCode, &uniChar, &shiftState, &toggleState);
     if (EFI_ERROR (Status)) 
@@ -728,7 +769,6 @@ HandleMouseEvent (
 	Color.Blue = 0xFF;
 	Color.Red = 0xFF;
 	Color.Green = 0xFF;
-	Color.Reserved = 0x66;
 	
     static int iMouseX = 500 / 2;
     static int iMouseY = 600 / 2;
@@ -758,7 +798,7 @@ HandleMouseEvent (
     }
     
     // cover old mouse cursor
-	DrawAsciiCharUseBuffer(GraphicsOutput, iMouseX, iMouseY, 0, Color);
+	//DrawAsciiCharUseBuffer(GraphicsOutput, iMouseX, iMouseY, 0, Color);
 
     //Y
 	if (State.RelativeMovementY < 0)
@@ -773,7 +813,7 @@ HandleMouseEvent (
     }
 
     DEBUG ((EFI_D_INFO, "X: %X, Y: %X ", x_move, y_move));
-    DebugPrint1(30, 70, "X: %X, Y: %X ", x_move, y_move );
+    //DebugPrint1(30, 70, "X: %X, Y: %X ", x_move, y_move );
     
     iMouseX = iMouseX + x_move;
     iMouseY = iMouseY + y_move;
@@ -797,14 +837,14 @@ HandleMouseEvent (
 
         
 	    HandleMouseRightClick(iMouseX, iMouseY);
-	    DrawAsciiCharUseBuffer(GraphicsOutput, 20 + process2_i * 8 + 16, 60, 'E', Color);
+	    //DrawAsciiCharUseBuffer(GraphicsOutput, 20 + process2_i * 8 + 16, 60, 'E', Color);
 	    
     }
     
     if (State.RightButton == 0x01)
     {
         DEBUG ((EFI_D_INFO, "Right button clicked"));
-	    DrawAsciiCharUseBuffer(GraphicsOutput, 20 + process2_i * 8 + 16, 60, 'R', Color);
+	    //DrawAsciiCharUseBuffer(GraphicsOutput, 20 + process2_i * 8 + 16, 60, 'R', Color);
 
 	    HandleMouseRightClick(iMouseX, iMouseY);
     }
@@ -817,7 +857,14 @@ HandleMouseEvent (
 			            0, 0, 
 			            0, 0, 
 			            ScreenWidth, ScreenHeight, 0);   
-            	
+
+    GraphicsOutput->Blt(GraphicsOutput, 
+			            (EFI_GRAPHICS_OUTPUT_BLT_PIXEL *) pMyComputerBuffer,
+			            EfiBltBufferToVideo,
+			            0, 0, 
+			            200, 200, 
+			            200, 200, 0);		            
+	            
     GraphicsOutput->Blt(GraphicsOutput, 
 			            (EFI_GRAPHICS_OUTPUT_BLT_PIXEL *) MouseBuffer,
 			            EfiBltBufferToVideo,
@@ -844,6 +891,23 @@ DisplaySystemDateTime (
 
 	DebugPrint1(ScreenWidth - 20 * 8, ScreenHeight - 19,"%04d-%02d-%02d %02d:%02d:%02d", et.Year, et.Month, et.Day, et.Hour, et.Minute, et.Second);
 }
+
+// create window
+STATIC
+VOID
+EFIAPI
+CreateMyComputerWindow (
+  IN EFI_EVENT Event,
+  IN VOID      *Context
+  )
+{
+    EFI_TIME et;
+
+	gRT->GetTime(&et, NULL);
+
+	DebugPrint1(ScreenWidth - 20 * 8, ScreenHeight - 19,"%04d-%02d-%02d %02d:%02d:%02d", et.Year, et.Month, et.Day, et.Hour, et.Minute, et.Second);
+}
+
 
 EFI_STATUS MultiProcessInit ()
 {
@@ -923,6 +987,7 @@ EFI_STATUS SystemTimeIntervalInit()
 
 	return EFI_SUCCESS;
 }
+
 
 
 EFI_STATUS ScreenInit(EFI_GRAPHICS_OUTPUT_PROTOCOL   *GraphicsOutput)
@@ -1032,6 +1097,7 @@ EFI_STATUS ScreenInit(EFI_GRAPHICS_OUTPUT_PROTOCOL   *GraphicsOutput)
     // Display "wo"    
     //DrawChineseCharIntoBuffer(DeskBuffer, 20, 20 + 16, i, Color, ScreenWidth);
         
+	MyComputer(100, 100);
     GraphicsOutput->Blt(
                 GraphicsOutput, 
                 (EFI_GRAPHICS_OUTPUT_BLT_PIXEL *) DeskBuffer,
@@ -1041,6 +1107,7 @@ EFI_STATUS ScreenInit(EFI_GRAPHICS_OUTPUT_PROTOCOL   *GraphicsOutput)
                 ScreenWidth, ScreenHeight, 0);   
 
     //FreePool(DeskBuffer);
+
     
     return EFI_SUCCESS;
 }
