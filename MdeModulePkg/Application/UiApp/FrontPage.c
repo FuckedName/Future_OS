@@ -614,69 +614,6 @@ EFI_STATUS DrawChineseCharUseBuffer(UINT8 *pBuffer,
     return EFI_SUCCESS;
 }
 
-//Name:  GetKeyEx
-//Input:
-//Output:
-//Descriptor:
-
-EFI_STATUS GetKeyEx(UINT16 *ScanCode, UINT16 *UniChar, UINT32 *ShiftState, EFI_KEY_TOGGLE_STATE * ToggleState)
-
-{
-
-	EFI_STATUS                        Status;
-	EFI_SIMPLE_TEXT_INPUT_EX_PROTOCOL *SimpleEx;
-  EFI_KEY_DATA                      KeyData;
-  EFI_HANDLE                        *Handles;
-  UINTN                             HandleCount;
-  UINTN                             HandleIndex;
-  UINTN								Index;
-
-  
-
-  Status = gBS->LocateHandleBuffer (
-              ByProtocol,
-              &gEfiSimpleTextInputExProtocolGuid,
-              NULL,
-              &HandleCount,
-              &Handles
-              );
-
-  if(EFI_ERROR (Status))
-  	return Status;
-
-  for (HandleIndex = 0; HandleIndex < HandleCount; HandleIndex++) 
-  {
-    Status = gBS->HandleProtocol (Handles[HandleIndex], &gEfiSimpleTextInputExProtocolGuid, (VOID **) &SimpleEx);
-    
-    if (EFI_ERROR(Status))	
-    	continue;
-	else
-	{
-		EFI_STATUS r = gBS->CheckEvent(SimpleEx->WaitForKeyEx);
-		if (Status == EFI_NOT_READY)
-			continue;
-		//DEBUG ((EFI_D_INFO, "gBS->CheckEvent: %x ...\n", EFI_ERROR(r)));
-		gBS->WaitForEvent(1,&(SimpleEx->WaitForKeyEx),&Index);
-		
-    	Status = SimpleEx->ReadKeyStrokeEx(SimpleEx,&KeyData);
-    	if(!EFI_ERROR(Status))
-    	{
-
-    		*ScanCode=KeyData.Key.ScanCode;
-  			*UniChar=KeyData.Key.UnicodeChar;
-  			*ShiftState=KeyData.KeyState.KeyShiftState;
-  			*ToggleState=KeyData.KeyState.KeyToggleState;
-  			return EFI_SUCCESS;
-  		}
-    }
-
-  }	 
-
-  return Status;
-
-}
-
-
 // fill into rectangle
 void RectangleFillIntoBuffer(UINT8 *pBuffer,
         IN UINTN x0, UINTN y0, UINTN x1, UINTN y1, 
@@ -1001,7 +938,6 @@ HandleKeyboardEvent (
     UINT16 scanCode = 0;
     UINT16 uniChar = 0;
     UINT32 shiftState;
-    UINT32 count = 0;
     EFI_STATUS Status;
 
     EFI_KEY_TOGGLE_STATE toggleState;
@@ -1010,17 +946,50 @@ HandleKeyboardEvent (
 	Color.Blue = 0xFF;
 	Color.Red = 0xFF;
 	Color.Green = 0xFF;
-	
-	Status = GetKeyEx(&scanCode, &uniChar, &shiftState, &toggleState);
-    if (EFI_ERROR (Status)) 
-    {
-    }
-    else
-    {
-    	++count;
-	    DrawAsciiCharUseBuffer(GraphicsOutput, 20, 40, uniChar, Color);
 
-    }
+    EFI_SIMPLE_TEXT_INPUT_EX_PROTOCOL *SimpleEx;
+    EFI_KEY_DATA                      KeyData;
+    EFI_HANDLE                        *Handles;
+    UINTN                             HandleCount;
+    UINTN                             HandleIndex;
+    UINTN                             Index;
+        
+    Status = gBS->LocateHandleBuffer ( ByProtocol,
+						                &gEfiSimpleTextInputExProtocolGuid,
+						                NULL,
+						                &HandleCount,
+						                &Handles
+						                );    
+    if(EFI_ERROR (Status))
+        return Status;
+    
+    for (HandleIndex = 0; HandleIndex < HandleCount; HandleIndex++) 
+    {
+		Status = gBS->HandleProtocol (Handles[HandleIndex], &gEfiSimpleTextInputExProtocolGuid, (VOID **) &SimpleEx);
+
+		if (EFI_ERROR(Status))  
+		    continue;
+		else
+		{
+			EFI_STATUS r = gBS->CheckEvent(SimpleEx->WaitForKeyEx);
+			if (Status == EFI_NOT_READY)
+			    continue;
+			  
+			//DEBUG ((EFI_D_INFO, "gBS->CheckEvent: %x ...\n", EFI_ERROR(r)));
+			gBS->WaitForEvent(1, &(SimpleEx->WaitForKeyEx), &Index);
+
+			Status = SimpleEx->ReadKeyStrokeEx(SimpleEx, &KeyData);
+			if(!EFI_ERROR(Status))
+			{    
+			    scanCode    = KeyData.Key.ScanCode;
+			    uniChar     = KeyData.Key.UnicodeChar;
+			    shiftState  = KeyData.KeyState.KeyShiftState;
+			    toggleState  = KeyData.KeyState.KeyToggleState;
+			}
+		}    
+    }  
+	
+	 DrawAsciiCharUseBuffer(GraphicsOutput, 20, 40, uniChar, Color);
 }
 
  // iMouseX: left top
