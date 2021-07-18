@@ -149,7 +149,6 @@ UINT8 *DeskBuffer = NULL;
 UINT8 *pDeskDisplayBuffer = NULL;
 
 UINT8 *MouseBuffer;
-UINT8 MouseAreaCode;
 EFI_GRAPHICS_OUTPUT_BLT_PIXEL MouseColor;
 
 
@@ -408,6 +407,9 @@ EFI_STATUS DrawAsciiCharUseBuffer(IN EFI_GRAPHICS_OUTPUT_PROTOCOL  *GraphicsOutp
     INT16 i;
     UINT8 d;
     UINT8 pBuffer[16 * 8 * 4];
+
+	if ('\0' == c)
+		return;
 
     for(i = 0; i < 16 * 8 * 4; i++)
 	{
@@ -882,13 +884,12 @@ EFI_STATUS WindowCreateUseBuffer(UINT8 *pBuffer, UINT8 *pParent, UINT16 Width, U
     Color.Blue = 145;
     Color.Green= 145;
     Color.Red= 145;
-    DrawChineseCharIntoBuffer(pBuffer, 3, 6,           0, Color, Width);
-    DrawChineseCharIntoBuffer(pBuffer, 3 + 16, 6,      1, Color, Width);
-    DrawChineseCharIntoBuffer(pBuffer, 3 + 16 * 2 , 6, 2, Color, Width);
-    DrawChineseCharIntoBuffer(pBuffer, 3 + 16 * 3, 6,  3, Color, Width);
-    DrawChineseCharIntoBuffer(pBuffer, 3 + 16 * 3, 6,  4, Color, Width);
-    DrawChineseCharIntoBuffer(pBuffer, 3 + 16 * 3, 6,  5, Color, Width);
-    DrawChineseCharIntoBuffer(pBuffer, 3 + 16 * 3, 6,  6, Color, Width);
+    
+    //DrawChineseCharIntoBuffer2(pBuffer, 3, 6,         46 * 94 + 50, Color, 16);
+    
+    //DrawChineseCharIntoBuffer2(pBuffer, 3 + 16, 6,     21 * 94 + 36, Color, Width);
+    //DrawChineseCharIntoBuffer2(pBuffer, 3 + 16 * 2, 6, 21 * 94 + 71, Color, Width);
+    //DrawChineseCharIntoBuffer2(pBuffer, 3 + 16 * 3, 6, 36 * 94 + 52, Color, Width);
 
     Color.Blue = 145;
     Color.Green= 145;
@@ -1245,29 +1246,11 @@ DisplaySystemDateTime (
 	DebugPrint1(ScreenWidth - 20 * 8, ScreenHeight - 21,"%04d-%02d-%02d %02d:%02d:%02d", et.Year, et.Month, et.Day, et.Hour, et.Minute, et.Second);
 }
 
-// create window
-STATIC
-VOID
-EFIAPI
-CreateMyComputerWindow (
-  IN EFI_EVENT Event,
-  IN VOID      *Context
-  )
-{
-    EFI_TIME et;
-
-	gRT->GetTime(&et, NULL);
-
-	DebugPrint1(ScreenWidth - 20 * 8, ScreenHeight - 19,"%04d-%02d-%02d %02d:%02d:%02d", et.Year, et.Month, et.Day, et.Hour, et.Minute, et.Second);
-}
-
-
 EFI_STATUS MultiProcessInit ()
 {
     UINT16 i;
 	EFI_GUID gMultiProcessGuid  = { 0x0579257E, 0x1843, 0x45FB, { 0x83, 0x9D, 0x6B, 0x79, 0x09, 0x38, 0x29, 0xA9 } };
     MouseBuffer = (UINT8 *)AllocateZeroPool(16 * 16 * 4);
-	MouseAreaCode = 11 * 94 + 42;
 	
 	MouseColor.Blue  = 0xff;
     MouseColor.Red   = 0xff;
