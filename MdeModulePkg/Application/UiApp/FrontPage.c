@@ -1209,6 +1209,14 @@ VOID GraphicsLayerCompute(int iMouseX, int iMouseY)
     
     DEBUG ((EFI_D_INFO, "Line: %d\n", __LINE__));
 
+    for (i = 0; i < 16; i++)
+        for (j = 0; j < 16; j++)
+        {       
+                MouseBuffer[(i * 16 + j) * 4]     = pDeskDisplayBuffer[((iMouseY + i) * ScreenWidth +  iMouseX + j) * 4];
+                MouseBuffer[(i * 16 + j) * 4 + 1] = pDeskDisplayBuffer[((iMouseY + i) * ScreenWidth +  iMouseX + j) * 4 + 1];
+                MouseBuffer[(i * 16 + j) * 4 + 2] = pDeskDisplayBuffer[((iMouseY + i) * ScreenWidth +  iMouseX + j) * 4 + 2];                   
+        }
+
 	/*
     DrawChineseCharIntoBuffer2(DeskBuffer,  16, ScreenHeight - 21,     (18 - 1) * 94 + 43 - 1, Color, ScreenWidth);
     DrawChineseCharIntoBuffer2(DeskBuffer,  16 * 2, ScreenHeight - 21, (21 - 1) * 94 + 05 - 1, Color, ScreenWidth);
@@ -1226,16 +1234,16 @@ VOID GraphicsLayerCompute(int iMouseX, int iMouseY)
 		{
 			for (j = 0; j < 32; j++)
 			{	
-				pMouseSelectedBuffer[(i * 32 + j) * 4]     = pDeskDisplayBuffer[((iMouseY + i) * ScreenWidth +  iMouseX + j) * 4];
-				pMouseSelectedBuffer[(i * 32 + j) * 4 + 1] = pDeskDisplayBuffer[((iMouseY + i) * ScreenWidth +  iMouseX + j) * 4 + 1];
-				pMouseSelectedBuffer[(i * 32 + j) * 4 + 2] = pDeskDisplayBuffer[((iMouseY + i) * ScreenWidth +  iMouseX + j) * 4 + 2];			
+				pMouseSelectedBuffer[(i * 32 + j) * 4]     = pDeskDisplayBuffer[((ScreenHeight - 21 + i) * ScreenWidth +  16 + j) * 4];
+				pMouseSelectedBuffer[(i * 32 + j) * 4 + 1] = pDeskDisplayBuffer[((ScreenHeight - 21 + i) * ScreenWidth +  16 + j) * 4 + 1];
+				pMouseSelectedBuffer[(i * 32 + j) * 4 + 2] = pDeskDisplayBuffer[((ScreenHeight - 21 + i) * ScreenWidth +  16 + j) * 4 + 2];			
 			}
 		}
 		 //RectangleFillIntoBuffer(UINT8 * pBuffer,IN UINTN x0,UINTN y0,UINTN x1,UINTN y1,IN UINTN BorderWidth,IN EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color)
 		
         //RectangleFillIntoBuffer(pMouseSelectedBuffer, 0,  0, 32, 16, 1,  Color);
         
-        RectangleDrawIntoBuffer(pMouseSelectedBuffer, 0,  0, 32, 16, 1,  Color, 32);
+        RectangleDrawIntoBuffer(pMouseSelectedBuffer, 0,  0, 31, 15, 1,  Color, 32);
         
         GraphicsCopy(pDeskDisplayBuffer, pMouseSelectedBuffer, ScreenWidth, ScreenHeight, 32, 16, 15, ScreenHeight - 22);
     }
