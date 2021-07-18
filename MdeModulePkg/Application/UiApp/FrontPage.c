@@ -602,6 +602,11 @@ EFI_STATUS DrawChineseCharIntoBuffer(UINT8 *pBuffer,
         IN EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color , UINT16 AreaWidth)
 {
     INT8 i;
+    if (NULL == pBuffer)
+	{
+		DEBUG ((EFI_D_INFO, "NULL == pBuffer"));
+		return EFI_SUCCESS;
+	}
     
 	for(i = 0; i < 32; i += 2)
 	{
@@ -619,6 +624,12 @@ EFI_STATUS DrawChineseCharIntoBuffer2(UINT8 *pBuffer,
     INT8 i;
     //DebugPrint1(10, 10, "%X %X %X %X", x0, y0, offset, AreaWidth);
     //DEBUG ((EFI_D_INFO, "%X %X %X %X", x0, y0, offset, AreaWidth));
+
+	if (NULL == pBuffer)
+	{
+		DEBUG ((EFI_D_INFO, "NULL == pBuffer"));
+		return EFI_SUCCESS;
+	}
 
 	if (offset < 1)
 	{
@@ -645,6 +656,11 @@ EFI_STATUS DrawChineseCharUseBuffer(UINT8 *pBuffer,
     INT16 i,j;    
     int k = y0;
     //UINT8 pBuffer[16 * 16 * 4];
+    if (NULL == pBuffer)
+	{
+		DEBUG ((EFI_D_INFO, "NULL == pBuffer"));
+		return EFI_SUCCESS;
+	}
 
     for (i = 0; i < 16 * 16 * 4; i++)
     {
@@ -670,6 +686,13 @@ void RectangleFillIntoBuffer(UINT8 *pBuffer,
         IN UINTN BorderWidth,
         IN EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color)
 {    
+    if (NULL == pBuffer)
+	{
+		DEBUG ((EFI_D_INFO, "NULL == pBuffer"));
+		return ;
+	}
+	
+
 	UINT32 i = 0;
 	UINT32 j = 0;
     for (j = y0; j <= y1; j++) 
@@ -927,6 +950,12 @@ EFI_STATUS WindowCreateUseBuffer(UINT8 *pBuffer, UINT8 *pParent, UINT16 Width, U
 {
 	UINT16 i, j;
 
+    if (NULL == pBuffer)
+	{
+		DEBUG ((EFI_D_INFO, "NULL == pBuffer"));
+		return EFI_SUCCESS;
+	}	
+
     // The Left of Window
 	for (i = 0; i < Height; i++)
 	{
@@ -1022,8 +1051,9 @@ VOID MyComputerWindow(UINT16 StartX, UINT16 StartY)
 }
 
 
-VOID ChineseCharArrayInit()
+EFI_STATUS ChineseCharArrayInit()
 {
+    // 87 line, 96 Chinese char each line, 32 Char each Chinese char
 	UINT32 size = 32 * 96 * 87;
     //UINT8 *sChineseChar;
     
@@ -1037,12 +1067,13 @@ VOID ChineseCharArrayInit()
     
 	if (FileReadSelf2(L"HZK16", size, sChineseChar) == -1)
 	{
-		FreePool(sChineseChar);
-		DEBUG ((EFI_D_INFO, "Read HZK16 failed\n "));
+		FreePool((VOID *)sChineseChar);
+		sChineseChar = NULL;
+		DEBUG ((EFI_D_INFO, "Read HZK16 failed\n"));
 		return EFI_SUCCESS;
 	}
 
-	DEBUG ((EFI_D_INFO, "Before color: \n "));
+
     EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
     Color.Blue  = 0x00;
     Color.Red   = 0x00;
@@ -1097,7 +1128,7 @@ HandleKeyboardEvent (
 						                &Handles
 						                );    
     if(EFI_ERROR (Status))
-        return Status;
+        return ;
     
     for (HandleIndex = 0; HandleIndex < HandleCount; HandleIndex++) 
     {
