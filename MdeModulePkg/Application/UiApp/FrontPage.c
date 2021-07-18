@@ -21,116 +21,67 @@ ToDo:
 #include "FrontPage.h"
 #include "FrontPageCustomizedUi.h"
 
-#include <Protocol/SimplePointer.h>
-#include <Protocol/AbsolutePointer.h>
-#include <Protocol/Shell.h>
-#include <Protocol/ShellParameters.h>
-#include <Library/ShellLib.h>
-
-#include <Library/UefiLib.h> 
-#include <Library/ShellCEntryLib.h> 
-#include <Library/UefiApplicationEntryPoint.h>
-#include <Library/UefiBootServicesTableLib.h>
-#include <Library/UefiRuntimeServicesTableLib.h>
-#include <Library/UefiRuntimeLib.h>
-#include <Protocol/GraphicsOutput.h>
-#include <Protocol/SimplePointer.h>
-#include <Protocol/SimpleTextInEx.h>
-#include <Protocol/SimpleFileSystem.h>
-#include <Library/DebugLib.h>
-
-#include <Guid/GlobalVariable.h>
-#include <Guid/ShellLibHiiGuid.h>
-
-#include <Protocol/Shell.h>
-#include <Protocol/ShellParameters.h>
-#include <Protocol/DevicePath.h>
-#include <Protocol/LoadedImage.h>
-#include <Protocol/UnicodeCollation.h>
-
-#include <Library/BaseLib.h>
-#include <Library/BaseMemoryLib.h>
-#include <Library/MemoryAllocationLib.h>
-#include <Library/PcdLib.h>
-#include <Library/ShellCommandLib.h>
-#include <Library/ShellLib.h>
-#include <Library/UefiLib.h>
-#include <Library/UefiRuntimeServicesTableLib.h>
-#include <Library/HiiLib.h>
-#include <Library/SortLib.h>
-#include <Guid/GlobalVariable.h>
 #include <Guid/ConsoleInDevice.h>
 #include <Guid/ConsoleOutDevice.h>
-#include <Guid/ShellLibHiiGuid.h>
-
-#include <IndustryStandard/Pci.h>
-
-#include <Pi/PiFirmwareVolume.h>
-#include <Pi/PiFirmwareFile.h>
-
-#include <Library/FileHandleLib.h>
-#include <Pi/PiFirmwareFile.h>
-#include <Protocol/FirmwareVolume2.h>
-
-#include <Protocol/Shell.h>
-#include <Protocol/ShellParameters.h>
-#include <Protocol/DevicePath.h>
-#include <Protocol/LoadedImage.h>
-#include <Protocol/UnicodeCollation.h>
-#include <Protocol/DriverDiagnostics2.h>
-#include <Protocol/DriverDiagnostics.h>
-#include <Protocol/PlatformDriverOverride.h>
-#include <Protocol/BusSpecificDriverOverride.h>
-#include <Protocol/PlatformToDriverConfiguration.h>
-#include <Protocol/DriverSupportedEfiVersion.h>
-#include <Protocol/DriverFamilyOverride.h>
-#include <Protocol/DriverHealth.h>
-#include <Protocol/PciIo.h>
-#include <Protocol/PciRootBridgeIo.h>
-
-#include <Library/BaseLib.h>
-#include <Library/BaseMemoryLib.h>
-#include <Library/DebugLib.h>
-#include <Library/MemoryAllocationLib.h>
-#include <Library/PcdLib.h>
-#include <Library/ShellCommandLib.h>
-#include <Library/ShellLib.h>
-#include <Library/SortLib.h>
-#include <Library/UefiLib.h>
-#include <Library/UefiRuntimeServicesTableLib.h>
-#include <Library/UefiBootServicesTableLib.h>
-#include <Library/HiiLib.h>
-#include <Library/FileHandleLib.h>
-#include <Library/DevicePathLib.h>
-#include <Library/PrintLib.h>
-#include <Library/HandleParsingLib.h>
-#include <Library/PeCoffGetEntryPointLib.h>
-#include <Library/HandleParsingLib.h>
-#include <Guid/TtyTerm.h>
-#include <Guid/MdeModuleHii.h>
 #include <Guid/FileSystemVolumeLabelInfo.h>
 #include <Guid/GlobalVariable.h>
 #include <Guid/HiiBootMaintenanceFormset.h>
-
-#include <Protocol/LoadFile.h>
-#include <Protocol/HiiConfigAccess.h>
-#include <Protocol/SimpleFileSystem.h>
-#include <Protocol/SerialIo.h>
-#include <Protocol/DevicePathToText.h>
-#include <Protocol/FormBrowserEx2.h>
-
-#include <Library/PrintLib.h>
-#include <Library/DebugLib.h>
+#include <Guid/MdeModuleHii.h>
+#include <Guid/ShellLibHiiGuid.h>
+#include <Guid/TtyTerm.h>
+#include <IndustryStandard/Pci.h>
+#include <Library/BaseLib.h>
 #include <Library/BaseMemoryLib.h>
-#include <Library/UefiBootServicesTableLib.h>
-#include <Library/UefiLib.h>
-#include <Library/MemoryAllocationLib.h>
-#include <Library/UefiRuntimeServicesTableLib.h>
+#include <Library/DebugLib.h>
 #include <Library/DevicePathLib.h>
-#include <Library/HiiLib.h>
-#include <Library/UefiHiiServicesLib.h>
-#include <Library/UefiBootManagerLib.h>
 #include <Library/FileExplorerLib.h>
+#include <Library/FileHandleLib.h>
+#include <Library/HandleParsingLib.h>
+#include <Library/HiiLib.h>
+#include <Library/MemoryAllocationLib.h>
+#include <Library/PcdLib.h>
+#include <Library/PeCoffGetEntryPointLib.h>
+#include <Library/PrintLib.h>
+#include <Library/ShellCEntryLib.h> 
+#include <Library/ShellCommandLib.h>
+#include <Library/ShellLib.h>
+#include <Library/SortLib.h>
+#include <Library/UefiApplicationEntryPoint.h>
+#include <Library/UefiBootManagerLib.h>
+#include <Library/UefiBootServicesTableLib.h>
+#include <Library/UefiHiiServicesLib.h>
+#include <Library/UefiLib.h>
+#include <Library/UefiRuntimeLib.h>
+#include <Library/UefiRuntimeServicesTableLib.h>
+#include <Pi/PiFirmwareFile.h>
+#include <Pi/PiFirmwareVolume.h>
+#include <Protocol/AbsolutePointer.h>
+#include <Protocol/BusSpecificDriverOverride.h>
+#include <Protocol/DevicePath.h>
+#include <Protocol/DevicePathToText.h>
+#include <Protocol/DriverDiagnostics2.h>
+#include <Protocol/DriverDiagnostics.h>
+#include <Protocol/DriverFamilyOverride.h>
+#include <Protocol/DriverHealth.h>
+#include <Protocol/DriverSupportedEfiVersion.h>
+#include <Protocol/FirmwareVolume2.h>
+#include <Protocol/FormBrowserEx2.h>
+#include <Protocol/GraphicsOutput.h>
+#include <Protocol/HiiConfigAccess.h>
+#include <Protocol/LoadedImage.h>
+#include <Protocol/LoadFile.h>
+#include <Protocol/PciIo.h>
+#include <Protocol/PciRootBridgeIo.h>
+#include <Protocol/PlatformDriverOverride.h>
+#include <Protocol/PlatformToDriverConfiguration.h>
+#include <Protocol/SerialIo.h>
+#include <Protocol/Shell.h>
+#include <Protocol/ShellParameters.h>
+#include <Protocol/SimpleFileSystem.h>
+#include <Protocol/SimplePointer.h>
+#include <Protocol/SimpleTextInEx.h>
+#include <Protocol/UnicodeCollation.h>
+
 
 static UINTN ScreenWidth, ScreenHeight;  
 
@@ -147,6 +98,7 @@ extern EFI_SIMPLE_FILE_SYSTEM_PROTOCOL *gSimpleFileSystem;
 
 UINT8 *DeskBuffer = NULL;
 UINT8 *pDeskDisplayBuffer = NULL;
+UINT8 *pMouseSelectedBuffer = NULL;
 
 UINT8 *MouseBuffer;
 EFI_GRAPHICS_OUTPUT_BLT_PIXEL MouseColor;
@@ -365,7 +317,7 @@ INT32 Math_ABS(INT32 v)
 	return (v < 0) ? -v : v;
 }
 
-EFI_STATUS DrawLineIntoBuffer(UINT8 *pBuffer,
+EFI_STATUS LineDrawIntoBuffer(UINT8 *pBuffer,
         IN UINTN x0, UINTN y0, UINTN x1, UINTN y1, 
         IN UINTN BorderWidth,
         IN EFI_GRAPHICS_OUTPUT_BLT_PIXEL BorderColor, UINT16 AreaWidth)
@@ -706,6 +658,26 @@ void RectangleFillIntoBuffer(UINT8 *pBuffer,
     }
 
 }
+
+// draw rectangle borders
+void RectangleDrawIntoBuffer(UINT8 *pBuffer,
+        IN UINTN x0, UINTN y0, UINTN x1, UINTN y1, 
+        IN UINTN BorderWidth,
+        IN EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color, UINT16 AreaWidth)
+{    
+    if (NULL == pBuffer)
+	{
+		DEBUG ((EFI_D_INFO, "NULL == pBuffer"));
+		return ;
+	}
+	
+    LineDrawIntoBuffer(pBuffer, x0, y0, x0, y1, 1, Color, AreaWidth);
+    LineDrawIntoBuffer(pBuffer, x0, y0, x1, y0, 1, Color, AreaWidth);
+    LineDrawIntoBuffer(pBuffer, x0, y1, x1, y1, 1, Color, AreaWidth);
+    LineDrawIntoBuffer(pBuffer, x1, y0, x1, y1, 1, Color, AreaWidth);
+
+}
+
 
 EFI_EVENT MultiTaskTriggerEvent;
 
@@ -1223,17 +1195,54 @@ VOID GraphicsLayerCompute(int iMouseX, int iMouseY)
 	GraphicsCopy(pDeskDisplayBuffer, pMyComputerBuffer, ScreenWidth, ScreenHeight, MyComputerWidth, MyComputerHeight, 100, 100);
 
 	int i, j;
-	for (i = 0; i < 16; i++)
-	{
-		for (j = 0; j < 16; j++)
-		{	
-			MouseBuffer[(i * 16 + j) * 4]     = pDeskDisplayBuffer[((iMouseY + i) * ScreenWidth +  iMouseX + j) * 4];
-			MouseBuffer[(i * 16 + j) * 4 + 1] = pDeskDisplayBuffer[((iMouseY + i) * ScreenWidth +  iMouseX + j) * 4 + 1];
-			MouseBuffer[(i * 16 + j) * 4 + 2] = pDeskDisplayBuffer[((iMouseY + i) * ScreenWidth +  iMouseX + j) * 4 + 2];			
-		}
-	}
 
+
+	//16, ScreenHeight - 21, For event trigger
+
+    EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;  
+
+	if (NULL == pMouseSelectedBuffer)
+	{
+		DEBUG ((EFI_D_INFO, "NULL == pMouseSelectedBuffer"));
+		return;
+	}
+    
+    DEBUG ((EFI_D_INFO, "Line: %d\n", __LINE__));
+
+	/*
+    DrawChineseCharIntoBuffer2(DeskBuffer,  16, ScreenHeight - 21,     (18 - 1) * 94 + 43 - 1, Color, ScreenWidth);
+    DrawChineseCharIntoBuffer2(DeskBuffer,  16 * 2, ScreenHeight - 21, (21 - 1) * 94 + 05 - 1, Color, ScreenWidth);
+
+	*/
+	
+    Color.Red   = 0xff;
+    Color.Green = 0x00;
+    Color.Blue	  = 0x00;
+    
+    if (iMouseX >= 16 && iMouseX <= 16 + 16 * 2
+        && iMouseY >= ScreenHeight - 21 && iMouseY <= ScreenHeight)
+    {	
+		for (i = 0; i < 16; i++)
+		{
+			for (j = 0; j < 32; j++)
+			{	
+				pMouseSelectedBuffer[(i * 32 + j) * 4]     = pDeskDisplayBuffer[((iMouseY + i) * ScreenWidth +  iMouseX + j) * 4];
+				pMouseSelectedBuffer[(i * 32 + j) * 4 + 1] = pDeskDisplayBuffer[((iMouseY + i) * ScreenWidth +  iMouseX + j) * 4 + 1];
+				pMouseSelectedBuffer[(i * 32 + j) * 4 + 2] = pDeskDisplayBuffer[((iMouseY + i) * ScreenWidth +  iMouseX + j) * 4 + 2];			
+			}
+		}
+		 //RectangleFillIntoBuffer(UINT8 * pBuffer,IN UINTN x0,UINTN y0,UINTN x1,UINTN y1,IN UINTN BorderWidth,IN EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color)
+		
+        //RectangleFillIntoBuffer(pMouseSelectedBuffer, 0,  0, 32, 16, 1,  Color);
+        
+        RectangleDrawIntoBuffer(pMouseSelectedBuffer, 0,  0, 32, 16, 1,  Color, 32);
+        
+        GraphicsCopy(pDeskDisplayBuffer, pMouseSelectedBuffer, ScreenWidth, ScreenHeight, 32, 16, 15, ScreenHeight - 22);
+    }
+
+    // init mouse buffer for use in use
 	DrawChineseCharIntoBuffer2(MouseBuffer, 0, 0, 11 * 94 + 42, MouseColor, 16);
+
 	
 	GraphicsCopy(pDeskDisplayBuffer, MouseBuffer, ScreenWidth, ScreenHeight, 16, 16, iMouseX, iMouseY);
 
@@ -1387,7 +1396,13 @@ EFI_STATUS MultiProcessInit ()
     UINT16 i;
 	EFI_GUID gMultiProcessGuid  = { 0x0579257E, 0x1843, 0x45FB, { 0x83, 0x9D, 0x6B, 0x79, 0x09, 0x38, 0x29, 0xA9 } };
     MouseBuffer = (UINT8 *)AllocateZeroPool(16 * 16 * 4);
+    if (NULL == MouseBuffer)
+		DEBUG ((EFI_D_INFO, "MultiProcessInit MouseBuffer pDeskDisplayBuffer NULL\n"));
 	
+	pMouseSelectedBuffer = (UINT8 *)AllocateZeroPool(16 * 16 * 4 * 2);
+    if (NULL == pDeskDisplayBuffer)
+		DEBUG ((EFI_D_INFO, "ScreenInit AllocatePool pDeskDisplayBuffer NULL\n"));
+		
 	MouseColor.Blue  = 0xff;
     MouseColor.Red   = 0xff;
     MouseColor.Green = 0xff;
@@ -1551,8 +1566,8 @@ EFI_STATUS ScreenInit(EFI_GRAPHICS_OUTPUT_PROTOCOL   *GraphicsOutput)
     Color.Green = 0x00;
     Color.Blue	= 0xFF;
 
-    DrawLineIntoBuffer(DeskBuffer, 0, 0, 100, 100, 2, Color, ScreenWidth);
-    DrawLineIntoBuffer(DeskBuffer, 100, 0, 0, 100, 1, Color, ScreenWidth);
+    LineDrawIntoBuffer(DeskBuffer, 0, 0, 100, 100, 2, Color, ScreenWidth);
+    LineDrawIntoBuffer(DeskBuffer, 100, 0, 0, 100, 1, Color, ScreenWidth);
 
     Color.Red  = 0xFF;
     Color.Green = 0xFF;
