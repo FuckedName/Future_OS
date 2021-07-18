@@ -136,7 +136,7 @@ static UINTN ScreenWidth, ScreenHeight;
 
 UINT8 *pMyComputerBuffer;
 UINT16 MyComputerWidth = 700;
-UINT16 MyComputerHeight = 600;
+UINT16 MyComputerHeight = 400;
 
 const UINT8 *sChineseChar;
 
@@ -146,9 +146,11 @@ EFI_SIMPLE_POINTER_PROTOCOL        *gMouse;
 extern EFI_SIMPLE_FILE_SYSTEM_PROTOCOL *gSimpleFileSystem; 
 
 UINT8 *DeskBuffer = NULL;
+UINT8 *pDeskDisplayBuffer = NULL;
 
 UINT8 *MouseBuffer;
-
+UINT8 MouseAreaCode;
+EFI_GRAPHICS_OUTPUT_BLT_PIXEL MouseColor;
 
 
 const UINT8 sASCII[][16] =
@@ -1060,7 +1062,67 @@ HandleKeyboardEvent (
  
  }
 
+VOID GraphicsCopy(UINT8 *pDest, UINT8 *pSource, 
+						   UINT16 DestWidth, UINT16 DestHeight, 
+						   UINT16 SourceWidth, UINT16 SourceHeight, 
+					       UINT16 StartX, UINT16 StartY)
+{
+	int i, j;
+	for(i = 0; i < SourceHeight; i++)
+	{
+		for (j = 0; j < SourceWidth; j++)
+		{
+			pDest[((StartY + i) * DestWidth + StartX + j) * 4] = pSource[(i * SourceWidth + j) * 4];
+			pDest[((StartY + i) * DestWidth + StartX + j) * 4 + 1] = pSource[(i * SourceWidth + j) * 4 + 1];
+			pDest[((StartY + i) * DestWidth + StartX + j) * 4 + 2] = pSource[(i * SourceWidth + j) * 4 + 2];
+		}
+	}
+}
 
+
+VOID GraphicsLayerCompute(int iMouseX, int iMouseY)
+{
+	GraphicsCopy(pDeskDisplayBuffer, DeskBuffer, ScreenWidth, ScreenHeight, ScreenWidth, ScreenHeight, 0, 0);
+	GraphicsCopy(pDeskDisplayBuffer, pMyComputerBuffer, ScreenWidth, ScreenHeight, MyComputerWidth, MyComputerHeight, 100, 100);
+
+	int i, j;
+	for (i = 0; i < 16; i++)
+	{
+		for (j = 0; j < 16; j++)
+		{	
+			MouseBuffer[(i * 16 + j) * 4]     = pDeskDisplayBuffer[((iMouseY + i) * ScreenWidth +  iMouseX + j) * 4];
+			MouseBuffer[(i * 16 + j) * 4 + 1] = pDeskDisplayBuffer[((iMouseY + i) * ScreenWidth +  iMouseX + j) * 4 + 1];
+			MouseBuffer[(i * 16 + j) * 4 + 2] = pDeskDisplayBuffer[((iMouseY + i) * ScreenWidth +  iMouseX + j) * 4 + 2];			
+		}
+	}
+
+	DrawChineseCharIntoBuffer2(MouseBuffer, 0, 0, 11 * 94 + 42, MouseColor, 16);
+	
+	GraphicsCopy(pDeskDisplayBuffer, MouseBuffer, ScreenWidth, ScreenHeight, 16, 16, iMouseX, iMouseY);
+
+    GraphicsOutput->Blt(GraphicsOutput, 
+			            (EFI_GRAPHICS_OUTPUT_BLT_PIXEL *) pDeskDisplayBuffer,
+			            EfiBltBufferToVideo,
+			            0, 0, 
+			            0, 0, 
+			            ScreenWidth, ScreenHeight, 0);   
+
+/*
+    GraphicsOutput->Blt(GraphicsOutput, 
+			            (EFI_GRAPHICS_OUTPUT_BLT_PIXEL *) pMyComputerBuffer,
+			            EfiBltBufferToVideo,
+			            0, 0,
+			            100, 0,
+			            MyComputerWidth, MyComputerHeight, 
+			            0);
+	           
+    GraphicsOutput->Blt(GraphicsOutput, 
+			            (EFI_GRAPHICS_OUTPUT_BLT_PIXEL *) MouseBuffer,
+			            EfiBltBufferToVideo,
+			            0, 0, 
+			            iMouseX, iMouseY, 
+			            16, 16, 0);  */ 
+}
 
 
 // for mouse move & click
@@ -1161,28 +1223,7 @@ HandleMouseEvent (
     }
     
     //DEBUG ((EFI_D_INFO, "\n"));
-    
-    GraphicsOutput->Blt(GraphicsOutput, 
-			            (EFI_GRAPHICS_OUTPUT_BLT_PIXEL *) DeskBuffer,
-			            EfiBltBufferToVideo,
-			            0, 0, 
-			            0, 0, 
-			            ScreenWidth, ScreenHeight, 0);   
-
-    GraphicsOutput->Blt(GraphicsOutput, 
-			            (EFI_GRAPHICS_OUTPUT_BLT_PIXEL *) pMyComputerBuffer,
-			            EfiBltBufferToVideo,
-			            0, 0,
-			            100, 0,
-			            MyComputerWidth, MyComputerHeight, 
-			            0);
-	            
-    GraphicsOutput->Blt(GraphicsOutput, 
-			            (EFI_GRAPHICS_OUTPUT_BLT_PIXEL *) MouseBuffer,
-			            EfiBltBufferToVideo,
-			            0, 0, 
-			            iMouseX, iMouseY, 
-			            16, 16, 0);  
+    GraphicsLayerCompute(iMouseX, iMouseY);
 	    
 	gBS->WaitForEvent( 1, &gMouse->WaitForInput, &Index );
 }
@@ -1224,19 +1265,13 @@ CreateMyComputerWindow (
 EFI_STATUS MultiProcessInit ()
 {
     UINT16 i;
-    EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
 	EFI_GUID gMultiProcessGuid  = { 0x0579257E, 0x1843, 0x45FB, { 0x83, 0x9D, 0x6B, 0x79, 0x09, 0x38, 0x29, 0xA9 } };
     MouseBuffer = (UINT8 *)AllocateZeroPool(16 * 16 * 4);
-
-    Color.Blue  = 0xff;
-    Color.Red   = 0xff;
-    Color.Green = 0xff;
-
-
-	for (i = 0; i < 16 * 16 * 4; i++)
-	{
-		MouseBuffer[i] = 0xff;
-	}
+	MouseAreaCode = 11 * 94 + 42;
+	
+	MouseColor.Blue  = 0xff;
+    MouseColor.Red   = 0xff;
+    MouseColor.Green = 0xff;
 
 	//DrawChineseCharIntoBuffer2(MouseBuffer, 0, 0, 11 * 94 + 42, Color, 16);
 	
@@ -1310,6 +1345,13 @@ EFI_STATUS ScreenInit(EFI_GRAPHICS_OUTPUT_PROTOCOL   *GraphicsOutput)
     EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
   
     DeskBuffer = (UINT8 *)AllocatePool(ScreenWidth * ScreenHeight * 4); 
+    if (NULL == DeskBuffer)
+    	DEBUG ((EFI_D_INFO, "ScreenInit AllocatePool DeskBuffer NULL\n"));
+
+    
+    pDeskDisplayBuffer = (UINT8 *)AllocatePool(ScreenWidth * ScreenHeight * 4); 
+    if (NULL == pDeskDisplayBuffer)
+    	DEBUG ((EFI_D_INFO, "ScreenInit AllocatePool pDeskDisplayBuffer NULL\n"));
               
     Color.Red   = 0x00;
     Color.Green = 0x84;
@@ -1405,18 +1447,17 @@ EFI_STATUS ScreenInit(EFI_GRAPHICS_OUTPUT_PROTOCOL   *GraphicsOutput)
     //count = 60;
     //for (i = 40; i < 65 + 60; i++)
     //    DrawAsciiCharIntoBuffer(DeskBuffer, 20 + (i - 40) * 8, 20, i, Color);
-
+	
     MyComputerWindow(100, 100);
-    
 	ChineseCharArrayInit();
-    GraphicsOutput->Blt(
+    /*GraphicsOutput->Blt(
                 GraphicsOutput, 
                 (EFI_GRAPHICS_OUTPUT_BLT_PIXEL *) DeskBuffer,
                 EfiBltBufferToVideo,
                 0, 0, 
                 0, 0, 
                 ScreenWidth, ScreenHeight, 0);   
-
+*/
 	// Desk graphics layer, buffer can not free!!
     //FreePool(DeskBuffer);
 
