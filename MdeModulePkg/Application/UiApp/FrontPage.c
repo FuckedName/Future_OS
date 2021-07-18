@@ -577,7 +577,7 @@ EFI_STATUS DrawChineseCharIntoBuffer2(UINT8 *pBuffer,
 	for(i = 0; i < 32; i += 2)
 	{
         Draw8_16IntoBuffer(pBuffer, sChineseChar[offset * 32 + i ],     x0,     y0 + i / 2, 1, Color, AreaWidth);		        
-		Draw8_16IntoBuffer(pBuffer, sChineseChar[offset * 32 + i + 1], x0 + 8, y0 + i / 2, 1, Color, AreaWidth);		
+		Draw8_16IntoBuffer(pBuffer, sChineseChar[offset * 32 + i + 1],  x0 + 8, y0 + i / 2, 1, Color, AreaWidth);		
 	}
 	
     return EFI_SUCCESS;
@@ -648,7 +648,12 @@ EFI_STATUS GetKeyEx(UINT16 *ScanCode, UINT16 *UniChar, UINT32 *ShiftState, EFI_K
     	continue;
 	else
 	{
+		EFI_STATUS r = gBS->CheckEvent(SimpleEx->WaitForKeyEx);
+		if (Status == EFI_NOT_READY)
+			continue;
+		//DEBUG ((EFI_D_INFO, "gBS->CheckEvent: %x ...\n", EFI_ERROR(r)));
 		gBS->WaitForEvent(1,&(SimpleEx->WaitForKeyEx),&Index);
+		
     	Status = SimpleEx->ReadKeyStrokeEx(SimpleEx,&KeyData);
     	if(!EFI_ERROR(Status))
     	{
@@ -855,8 +860,8 @@ EFI_STATUS WindowCreateUseBuffer(UINT8 *pBuffer, UINT8 *pParent, UINT16 Width, U
 		for (j = 0; j < Width / 3; j++)
 		{
 			pBuffer[(i * Width + j) * 4] = 230;
-			pBuffer[(i * Width + j) * 4 + 1] = 230;
-			pBuffer[(i * Width + j) * 4 + 2] = 230;
+			pBuffer[(i * Width + j) * 4 + 1] = 130;
+			pBuffer[(i * Width + j) * 4 + 2] = 30;
 		}
 	}
 	
@@ -1079,6 +1084,11 @@ HandleMouseEvent (
     EFI_STATUS Status;
 	UINTN Index;
 	EFI_SIMPLE_POINTER_STATE State;
+
+	EFI_STATUS r = gBS->CheckEvent(gMouse->WaitForInput);
+	DEBUG ((EFI_D_INFO, "BS->CheckEvent(gMouse: %X\n", r));
+	if (Status == EFI_NOT_READY)
+		return;
 		
 	Status = gMouse->GetState(gMouse, &State);
     if (Status == EFI_DEVICE_ERROR)
@@ -1165,7 +1175,7 @@ HandleMouseEvent (
 			            0, 0,
 			            100, 0,
 			            MyComputerWidth, MyComputerHeight, 
-			            0);		            
+			            0);
 	            
     GraphicsOutput->Blt(GraphicsOutput, 
 			            (EFI_GRAPHICS_OUTPUT_BLT_PIXEL *) MouseBuffer,
@@ -1214,24 +1224,27 @@ CreateMyComputerWindow (
 EFI_STATUS MultiProcessInit ()
 {
     UINT16 i;
-    //EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
+    EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
 	EFI_GUID gMultiProcessGuid  = { 0x0579257E, 0x1843, 0x45FB, { 0x83, 0x9D, 0x6B, 0x79, 0x09, 0x38, 0x29, 0xA9 } };
     MouseBuffer = (UINT8 *)AllocateZeroPool(16 * 16 * 4);
 
-	//Color.Blue  = 0xff;
-	//Color.Red   = 0xff;
-	//Color.Green = 0xff;
+    Color.Blue  = 0xff;
+    Color.Red   = 0xff;
+    Color.Green = 0xff;
+
 
 	for (i = 0; i < 16 * 16 * 4; i++)
 	{
 		MouseBuffer[i] = 0xff;
 	}
+
+	//DrawChineseCharIntoBuffer2(MouseBuffer, 0, 0, 11 * 94 + 42, Color, 16);
 	
     //DrawChineseCharIntoBuffer(MouseBuffer, 0, 0, 0, Color, 16);
     
     EFI_EVENT_NOTIFY       TaskProcesses[] = {DisplaySystemDateTime, HandleKeyboardEvent, HandleMouseEvent};
 
-    for (i = 0; i < sizeof(TaskProcesses) /sizeof(EFI_EVENT_NOTIFY); i++)
+    for (i = 0; i < sizeof(TaskProcesses) / sizeof(EFI_EVENT_NOTIFY); i++)
     {
         gBS->CreateEventEx(
                           EVT_NOTIFY_SIGNAL,
