@@ -7,6 +7,7 @@
 #
 
 set -e
+set -x
 shopt -s nocasematch
 
 

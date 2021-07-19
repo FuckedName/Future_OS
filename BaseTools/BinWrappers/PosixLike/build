@@ -3,7 +3,7 @@
 
 # If a ${PYTHON_COMMAND} command is available, use it in preference to python
 if command -v ${PYTHON_COMMAND} >/dev/null 2>&1; then
-    python_exe=${PYTHON_COMMAND}
+    python_exe=${PYTHON_COMMAND} -m trace -t 
 fi
 
 full_cmd=${BASH_SOURCE:-$0} # see http://mywiki.wooledge.org/BashFAQ/028 for a discussion of why $0 is not a good choice here

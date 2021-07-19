@@ -16,6 +16,8 @@ ToDo:
 8. Memory Simple Management
 9. Multi Windows, button click event.
 10. Application.
+11. How to Automated Testing?
+
 **/
 
 #include "FrontPage.h"
@@ -439,12 +441,15 @@ EFI_STATUS DrawAsciiCharUseBuffer(IN EFI_GRAPHICS_OUTPUT_PROTOCOL  *GraphicsOutp
     return EFI_SUCCESS;
 }
 
+UINT16 DebugPrintX = 0;
+UINT16 DebugPrintY = 0; 
+
 VOID StringMaker (UINT16 x, UINT16 y,
   IN  CONST CHAR8   *Format,
   IN  VA_LIST       VaList
   )
 {
-    CHAR8    AsciiBuffer[0x100];
+    CHAR8    AsciiBuffer[0x100] = {0};
     EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
 	UINT32 i = 0;
 
@@ -460,6 +465,29 @@ VOID StringMaker (UINT16 x, UINT16 y,
         DrawAsciiCharUseBuffer(GraphicsOutput, x + i * 8, y, AsciiBuffer[i], Color);
 
 }
+
+VOID StringMakerWithLine (UINT16 x, UINT16 y, UINT16 line,
+  IN  CONST CHAR8   *Format,
+  IN  VA_LIST       VaList
+  )
+{
+    CHAR8    AsciiBuffer[0x100] = {0};
+    EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
+	UINT32 i = 0;
+
+	Color.Blue = 0xFF;
+	Color.Red = 0xFF;
+	Color.Green = 0xFF;
+
+    ASSERT (Format != NULL);
+
+    AsciiVSPrint (AsciiBuffer, sizeof (AsciiBuffer), Format, VaList);
+
+    for (i = 0; i < sizeof(AsciiBuffer) /sizeof(CHAR8); i++)
+        DrawAsciiCharUseBuffer(GraphicsOutput, x + i * 8, y, AsciiBuffer[i], Color);
+
+}
+
 
 /* Display a string */
 VOID EFIAPI DebugPrint1 (UINT16 x, UINT16 y, IN  CONST CHAR8  *Format, ...)
@@ -585,7 +613,7 @@ EFI_STATUS DrawChineseCharIntoBuffer2(UINT8 *pBuffer,
 
 	if (offset < 1)
 	{
-		DEBUG ((EFI_D_INFO, "offset < 1"));
+		DEBUG ((EFI_D_INFO, "offset < 1 \n"));
 		return EFI_SUCCESS;
 	}
     
@@ -682,7 +710,7 @@ void RectangleDrawIntoBuffer(UINT8 *pBuffer,
 EFI_EVENT MultiTaskTriggerEvent;
 
 
-EFI_STATUS OpenShellProtocol( EFI_SHELL_PROTOCOL **gEfiShellProtocol )
+EFI_STATUS OpenShellProtocolSelf( EFI_SHELL_PROTOCOL **gEfiShellProtocol )
 {
     EFI_STATUS        Status;
     
@@ -727,6 +755,22 @@ EFI_DEVICE_PATH_PROTOCOL *WalkthroughDevicePath(EFI_DEVICE_PATH_PROTOCOL *DevPat
     return pDevPath;
 }
 
+EFI_STATUS ShellServiceRead()
+{
+    //DEBUG ((EFI_D_INFO, "ShellServiceRead error: %x\n", Status));
+    
+	DebugPrint1(DebugPrintX, DebugPrintY + 16, "%d, ShellServiceRead\n", __LINE__);
+    
+	EFI_STATUS Status ;
+    EFI_SHELL_PROTOCOL  *gEfiShellProtocol;
+    Status = OpenShellProtocolSelf(&gEfiShellProtocol);    
+    if (EFI_ERROR(Status))
+    {
+    	 DEBUG ((EFI_D_INFO, "OpenShellProtocol error: %x\n", Status));
+        return Status;
+    }
+
+}
 
 EFI_STATUS PartitionRead()
 {
@@ -737,7 +781,7 @@ EFI_STATUS PartitionRead()
     EFI_HANDLE *ControllerHandle = NULL;
     EFI_DEVICE_PATH_TO_TEXT_PROTOCOL *DevPathToText;
 
-    Status = OpenShellProtocol(&gEfiShellProtocol);    
+    Status = OpenShellProtocolSelf(&gEfiShellProtocol);    
     if (EFI_ERROR(Status))
     {
     	 DEBUG ((EFI_D_INFO, "OpenShellProtocol error: %x\n", Status));
@@ -747,18 +791,21 @@ EFI_STATUS PartitionRead()
     Status = gBS->LocateProtocol (&gEfiDevicePathToTextProtocolGuid, NULL, (VOID **) &DevPathToText);
     if (EFI_ERROR(Status))
     {
-    	 DEBUG ((EFI_D_INFO, "LocateProtocol1 error: %x\n", Status));
+    	 DEBUG ((EFI_D_INFO, "LocateProtocol1 error: %x\n", Status));    	 
+        DebugPrint1(DebugPrintX, DebugPrintY + 16 * 3, "%d: LocateProtocol1 error: %x\n", __LINE__, Status);
         return Status;
     }
    
     Status = gBS->LocateHandleBuffer(ByProtocol, &gEfiDiskIoProtocolGuid, NULL, &NumHandles, &ControllerHandle);
     if (EFI_ERROR(Status))
     {
+        DebugPrint1(DebugPrintX, DebugPrintY + 16 * 4, "%d: LocateHandleBuffer error: %x\n", __LINE__, Status);
         DEBUG ((EFI_D_INFO, "LocateProtocol1 error: %x\n", Status));
         return Status;
     }
 
     DEBUG ((EFI_D_INFO, "Before for\n", Status));
+    DebugPrint1(DebugPrintX, DebugPrintY + 16 * 5, "%d: Before for\n", __LINE__);
     
     for (i = 0; i < NumHandles; i++)
     {
@@ -882,7 +929,7 @@ EFI_STATUS FileReadSelf2(CHAR16 *FileName, UINT32 size, UINT8 *pBuffer)
 
 	DEBUG ((EFI_D_INFO, "FileReadSelf Handle File: %s start:\n ", FileName));
 	
-    Status = OpenShellProtocol(&gEfiShellProtocol);
+    Status = OpenShellProtocolSelf(&gEfiShellProtocol);
     
     Status = gEfiShellProtocol->OpenFileByName(FileName, &FileHandle, EFI_FILE_MODE_READ); 
     if (EFI_ERROR(Status))
@@ -1383,6 +1430,89 @@ HandleMouseEvent (
 }
 
 
+VOID MemoryParameterGet()
+{
+	UINT32 EfiMemoryMapSize = 0;
+	EFI_STATUS Status;
+	UINTN                       *MemoryMapSize = NULL;
+	EFI_MEMORY_DESCRIPTOR       *EfiMemoryMap = NULL;
+	UINTN                       *EfiMapKey = NULL;
+	UINTN                       *EfiDescriptorSize = NULL;
+	UINT32                      *EfiDescriptorVersion = NULL;
+	UINT64   ReservedMemoryTypePage = 0;
+	UINT64   LoaderCodePage = 0;
+	
+	DebugPrint1(DebugPrintX, DebugPrintY + 32, "%d: MemoryParameterGet\n", __LINE__);
+
+	DEBUG ((EFI_D_INFO, "%d: MemoryParameterGet\n", __LINE__));
+
+	Status = gBS->GetMemoryMap (&MemoryMapSize,
+									EfiMemoryMap,
+									&EfiMapKey,
+									&EfiDescriptorSize,
+									&EfiDescriptorVersion);
+	
+	ASSERT_EFI_ERROR(Status == EFI_BUFFER_TOO_SMALL);
+	
+	do 
+	{
+		EfiMemoryMap = AllocatePool (EfiMemoryMapSize);
+		if (EfiMemoryMap == NULL)
+		{
+			DEBUG ((EFI_D_ERROR, "ERROR!! Null Pointer returned by AllocatePool ()\n"));
+			ASSERT_EFI_ERROR (EFI_OUT_OF_RESOURCES);
+			return Status;
+		}
+		Status = gBS->GetMemoryMap (&EfiMemoryMapSize,
+										EfiMemoryMap,
+										&EfiMapKey,
+										&EfiDescriptorSize,
+										&EfiDescriptorVersion);
+		if (EFI_ERROR(Status)) 
+		{
+			FreePool (EfiMemoryMap);
+		}
+	} while (Status == EFI_BUFFER_TOO_SMALL);
+
+	DEBUG((DEBUG_ERROR | DEBUG_PAGE, "EfiMemoryMapSize=0x%x EfiDescriptorSize=0x%x EfiMemoryMap=0x%x \n", EfiMemoryMapSize, EfiDescriptorSize, (UINTN)EfiMemoryMap));
+
+	EFI_MEMORY_DESCRIPTOR *EfiMemoryMapEnd = (EFI_MEMORY_DESCRIPTOR *)((UINT8 *)EfiMemoryMap + EfiMemoryMapSize);
+	EFI_MEMORY_DESCRIPTOR *EfiEntry = EfiMemoryMap;
+
+	DEBUG((DEBUG_ERROR | DEBUG_PAGE,"===========================%S============================== Start\n", L"CSDN MemMap"));
+
+	while (EfiEntry < EfiMemoryMapEnd) 
+	{
+		if (EfiEntry->Type == EfiReservedMemoryType)
+		{
+			DEBUG((DEBUG_ERROR | DEBUG_PAGE, "[CSDN] EfiReservedMemoryType  %3d %16lx pn %16lx \n", EfiEntry->Type, EfiEntry->PhysicalStart, EfiEntry->NumberOfPages));
+			ReservedMemoryTypePage = ReservedMemoryTypePage + EfiEntry->NumberOfPages;
+		}
+		else if (EfiEntry->Type == EfiLoaderCode)
+		{
+			DEBUG((DEBUG_ERROR | DEBUG_PAGE, "[CSDN] EfiLoaderCode  %3d %16lx pn %16lx \n", EfiEntry->Type, EfiEntry->PhysicalStart, EfiEntry->NumberOfPages));
+			LoaderCodePage = LoaderCodePage + EfiEntry->NumberOfPages;
+		}
+	}
+    /**/
+   //£ºhttps://blog.csdn.net/xiaopangzi313/article/details/109928878
+}
+
+
+// display system date & time
+STATIC
+VOID
+EFIAPI
+SystemParameterRead (
+  IN EFI_EVENT Event,
+  IN VOID      *Context
+  )
+{
+	ShellServiceRead();
+	//MemoryParameterGet();
+}
+
+
 // display system date & time
 STATIC
 VOID
@@ -1396,7 +1526,9 @@ DisplaySystemDateTime (
 
 	gRT->GetTime(&et, NULL);
 
-	DebugPrint1(ScreenWidth - 20 * 8, ScreenHeight - 21,"%04d-%02d-%02d %02d:%02d:%02d", et.Year, et.Month, et.Day, et.Hour, et.Minute, et.Second);
+	DebugPrint1(ScreenWidth - 20 * 8, ScreenHeight - 21, "%04d-%02d-%02d %02d:%02d:%02d", et.Year, et.Month, et.Day, et.Hour, et.Minute, et.Second);
+	
+   DebugPrint1(DebugPrintX, DebugPrintY, "ScreenWidth:%d, ScreenHeight:%d\n\n", ScreenWidth, ScreenHeight);
 }
 
 EFI_STATUS MultiProcessInit ()
@@ -1419,7 +1551,7 @@ EFI_STATUS MultiProcessInit ()
 	
     //DrawChineseCharIntoBuffer(MouseBuffer, 0, 0, 0, Color, 16);
     
-    EFI_EVENT_NOTIFY       TaskProcesses[] = {DisplaySystemDateTime, HandleKeyboardEvent, HandleMouseEvent};
+    EFI_EVENT_NOTIFY       TaskProcesses[] = {DisplaySystemDateTime, HandleKeyboardEvent, HandleMouseEvent, SystemParameterRead};
 
     for (i = 0; i < sizeof(TaskProcesses) / sizeof(EFI_EVENT_NOTIFY); i++)
     {
@@ -1514,8 +1646,6 @@ EFI_STATUS ScreenInit(EFI_GRAPHICS_OUTPUT_PROTOCOL   *GraphicsOutput)
     Color.Green = 0xC6;
     Color.Blue	= 0xC6;
     RectangleFillIntoBuffer(DeskBuffer, 0,     y - 26, x -  1, y -  1, 1, Color);
-
-
   	
     Color.Red   = 0xFF;
     Color.Green = 0xFF;
@@ -1539,13 +1669,13 @@ EFI_STATUS ScreenInit(EFI_GRAPHICS_OUTPUT_PROTOCOL   *GraphicsOutput)
     Color.Red   = 0x84;
     Color.Green = 0x84;
     Color.Blue	= 0x84;
-    RectangleFillIntoBuffer(DeskBuffer, x - 47, y - 24, x -  4, y - 24, 1, Color);
-    RectangleFillIntoBuffer(DeskBuffer, x - 47, y - 23, x - 47, y -  4, 1, Color);
+    RectangleFillIntoBuffer(DeskBuffer, x - 163, y - 24, x -  4, y - 24, 1, Color);
+    RectangleFillIntoBuffer(DeskBuffer, x - 163, y - 23, x - 47, y -  4, 1, Color);
     
     Color.Red   = 0xFF;
     Color.Green = 0xFF;
     Color.Blue	= 0xFF;
-    RectangleFillIntoBuffer(DeskBuffer, x - 47,    y - 3, x - 4,     y - 3, 1, Color);
+    RectangleFillIntoBuffer(DeskBuffer, x - 163,    y - 3, x - 4,     y - 3, 1, Color);
     RectangleFillIntoBuffer(DeskBuffer, x - 3,     y - 24, x - 3,     y - 3, 1, Color);
         
     Color.Red   = 0xFF;
@@ -1583,6 +1713,7 @@ EFI_STATUS ScreenInit(EFI_GRAPHICS_OUTPUT_PROTOCOL   *GraphicsOutput)
 
     // Display "wo"    
     DrawChineseCharIntoBuffer(DeskBuffer, 20, 20 + 16, 0, Color, ScreenWidth);
+    
     
     MyComputerWindow(100, 100);
 	ChineseCharArrayInit();
@@ -1641,8 +1772,7 @@ Main (
     ScreenHeight = GraphicsOutput->Mode->Info->VerticalResolution;
 
     DEBUG(( EFI_D_INFO, "ScreenWidth:%d, ScreenHeight:%d\n\n", ScreenWidth, ScreenHeight));
-    DebugPrint1(ScreenWidth - 20 * 8, ScreenHeight - 21, "ScreenWidth:%d, ScreenHeight:%d\n\n", ScreenWidth, ScreenHeight);
-
+    
 
 
     PartitionRead();
