@@ -193,7 +193,57 @@ EFI_DEVICE_PATH_PROTOCOL *WalkthroughDevicePath(EFI_DEVICE_PATH_PROTOCOL *DevPat
     return pDevPath;
 }
 
+//refer to ReadFileToBuffer
+//refer to GetAllCapsuleOnDisk
+//refer to BmGetNextLoadOptionBuffer
+EFI_STATUS FileSystem1()
+{
+    Print(L"%d, FileSystem1 start\n", __LINE__);
+	EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *Fs = NULL;
+	EFI_FILE_HANDLE                  RootDir;
+	EFI_FILE_HANDLE                  FileDir;
+	EFI_STATUS                         Status;
+	EFI_HANDLE                       *FsHandle = NULL;
 
+	UINT16                           *TempOptionNumber;
+
+	TempOptionNumber = NULL;
+	//*CapsuleNum      = 0;
+
+	Status = GetEfiSysPartitionFromActiveBootOption( 3, &TempOptionNumber, FsHandle );
+	if ( EFI_ERROR( Status ) )
+	{
+		return(Status);
+	}
+
+	Status = gBS->HandleProtocol( *FsHandle, &gEfiSimpleFileSystemProtocolGuid, (VOID * *) &Fs );
+	if ( EFI_ERROR( Status ) )
+	{
+		return(Status);
+	}
+
+	Status = Fs->OpenVolume( Fs, &RootDir );
+	if ( EFI_ERROR( Status ) )
+	{
+		return(Status);
+	}
+
+	Status = RootDir->Open(
+		RootDir,
+		&FileDir,
+		EFI_CAPSULE_FILE_DIRECTORY,
+		EFI_FILE_MODE_READ,
+		0
+		);
+	if ( EFI_ERROR( Status ) )
+	{
+		DEBUG( (DEBUG_ERROR, "CodLibGetAllCapsuleOnDisk fail to open RootDir!\n") );
+		RootDir->Close( RootDir );
+		return(Status);
+	}
+	RootDir->Close (RootDir);
+
+}
 
 EFI_STATUS
 EFIAPI
@@ -202,7 +252,13 @@ UefiMain (
   IN EFI_SYSTEM_TABLE  *SystemTable
   )
 {
-    Print(L"Hello Renqihong jiayou!!\r\n");
+	UINTN     MaxRetry = 3;
+    Print(L"Hello Renqihong jiayou!!111\r\n");
+	//FileSystem1();
+    //CoDRelocateCapsule(MaxRetry);
+	EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *Fs;
+
+    
 
     CHAR16 * OldLogFileName = L"test.txt";
     //CHAR16  *LineBuff = NULL;
@@ -215,29 +271,66 @@ UefiMain (
     UINTN NumHandles, i;
     EFI_HANDLE *ControllerHandle = NULL;
     EFI_DEVICE_PATH_TO_TEXT_PROTOCOL *DevPathToText;
+	EFI_FILE_HANDLE                  FileDir;
 
-    Status = OpenShellProtocol(&gEfiShellProtocol);
+	EFI_FILE_HANDLE                  RootDir;
 
+    //Status = OpenShellProtocol(&gEfiShellProtocol);
     
     Status = gBS->LocateProtocol (&gEfiDevicePathToTextProtocolGuid, NULL, (VOID **) &DevPathToText);
     if (EFI_ERROR(Status))
     {
-        Print(L"LocateProtocol1 error: %x\n", Status);
+        Print(L"%d, LocateProtocol gEfiDevicePathToTextProtocolGuid error: %x\n", __LINE__, Status);
         return Status;
     }
    
     Status = gBS->LocateHandleBuffer(ByProtocol, &gEfiDiskIoProtocolGuid, NULL, &NumHandles, &ControllerHandle);
     if (EFI_ERROR(Status))
     {
-        Print(L"LocateHandleBuffer error: %x\n", Status);
+        Print(L"%d, LocateHandleBuffer gEfiDiskIoProtocolGuid error: %x\n", __LINE__, Status);
         return Status;
     }
 
-    Print(L"NumHandles: %d\n", NumHandles);
+    Print(L"%d, NumHandles: %d\n",__LINE__,  NumHandles);
     
     Print(L"Before for\n", Status);
     for (i = 0; i < NumHandles; i++)
     {
+		/*
+        Status = gBS->HandleProtocol(ControllerHandle[i], &gEfiSimpleFileSystemProtocolGuid, (VOID * *) &Fs );
+        if ( EFI_ERROR( Status ) )
+        {
+            Print(L"%d, HandleProtocol gEfiSimpleFileSystemProtocolGuid error: %x\n", __LINE__, Status);
+            return(Status);
+        }
+    
+    	 Print(L"%d\n",__LINE__);
+        Status = Fs->OpenVolume( Fs, &RootDir );
+        if ( EFI_ERROR( Status ) )
+        {
+            Print(L"%d, Fs->OpenVolume error: %x\n", __LINE__, Status);
+            return(Status);
+        }
+    
+        Status = RootDir->Open(
+            RootDir,
+            &FileDir,
+            EFI_CAPSULE_FILE_DIRECTORY,
+            EFI_FILE_MODE_READ,
+            0
+            );
+        if ( EFI_ERROR( Status ) )
+        {
+            DEBUG( (DEBUG_ERROR, "CodLibGetAllCapsuleOnDisk fail to open RootDir!\n") );
+            Print(L"%d, Fs->OpenVolume error: %x\n", __LINE__, Status);
+            RootDir->Close( RootDir );
+            return(Status);
+        }
+        RootDir->Close (RootDir);
+        
+        Print(L"%d\n",__LINE__);
+
+    */
         EFI_DEVICE_PATH_PROTOCOL *DiskDevicePath;
         Status = gBS->OpenProtocol(ControllerHandle[i],
                                    &gEfiDevicePathProtocolGuid,
@@ -250,10 +343,15 @@ UefiMain (
             Print(L"Status = gBS->OpenProtocol error index %d: %x\n", i, Status);
             return Status;
         }
+        Print(L"%d\n",__LINE__);
 
         CHAR16 *TextDevicePath = 0;
         TextDevicePath = DevPathToText->ConvertDeviceNodeToText(DiskDevicePath, TRUE, TRUE);
-        Print(L"%s\n", TextDevicePath);
+        
+        Print(L"%d %s\n",__LINE__, TextDevicePath);
+
+        TextDevicePath = DevPathToText->ConvertDevicePathToText(DiskDevicePath, TRUE, TRUE);
+        Print(L"%d %s\n",__LINE__, TextDevicePath);
 
         if (TextDevicePath) gBS->FreePool(TextDevicePath);
 
@@ -262,7 +360,7 @@ UefiMain (
         Print(L"\n\n");
     }
 
-    /*  
+      /*
     Status = gEfiShellProtocol->OpenFileByName((CONST CHAR16*)OldLogFileName, &FileHandle, EFI_FILE_MODE_READ); 
     if (EFI_ERROR(Status)){
       Print(L"Please Input Valid Filename!\n");
@@ -302,7 +400,7 @@ UefiMain (
     	Print(L"Read Filename Error!\n");
     	return (-1);
     }
-    */
+    
 
     //创建新的文件句柄
     Status = gEfiShellProtocol->CreateFile((CONST CHAR16*)NewFileName, 0, &FileHandle); 
@@ -317,6 +415,7 @@ UefiMain (
 
     //关闭文件句柄
     Status = gEfiShellProtocol->CloseFile(FileHandle);
+    */
 
     return EFI_SUCCESS;
 }
