@@ -310,11 +310,18 @@ EFI_FILE_PROTOCOL* EFIAPI GetFile( IN EFI_SYSTEM_TABLE *gST )
 	EFI_HANDLE			*Files = NULL;
 	EFI_FILE_PROTOCOL		*Root;
 	EFI_FILE_PROTOCOL		*file;
+	UINTN			Size = 100 ;
 /* UINTN               FileSize=512,i; */
 	CHAR16 FileName[100];
 
+	UINT8 *Buffer2 = (UINT8 *)AllocateZeroPool(100); 
+	if (Buffer2 == NULL)
+	{
+		Print( L"%d :Buffer2 == NULL\n", __LINE__  );
+	}
+
 	Print( L"%d  please input the file name : \n  ", __LINE__);
-	GetString( gST, FileName );
+	//GetString( gST, FileName );
 
 	Status = gST->BootServices->LocateHandleBuffer(
 													ByProtocol,
@@ -325,14 +332,14 @@ EFI_FILE_PROTOCOL* EFIAPI GetFile( IN EFI_SYSTEM_TABLE *gST )
 
 	if ( !EFI_ERROR( Status ) )
 	{
-		Print( L"%d==successed to find %d controllers==:%X\n", __LINE__, HandleFileCount,Status );
+		Print( L"%d==successed to find %d controllers==:%X\n", __LINE__, HandleFileCount, Status );
 
 		for ( HandleFileIndex = HandleFileCount - 1; HandleFileIndex > -1; --HandleFileIndex )
 		{
 			Status = gST->BootServices->HandleProtocol(
 														Files[HandleFileIndex],
 														&gEfiSimpleFileSystemProtocolGuid,
-														(VOID * *) &Sfs );
+														(VOID * *) &Sfs);
 
 			Print( L"%d :%X\n", __LINE__ ,Status );
 			if ( Status == EFI_SUCCESS )
@@ -345,22 +352,14 @@ EFI_FILE_PROTOCOL* EFIAPI GetFile( IN EFI_SYSTEM_TABLE *gST )
 				{
 					Print( L"==controller %d successed to open the volume==\n", HandleFileIndex );
 
-					Status = Root->Open( Root, &file, FileName, EFI_FILE_MODE_READ | EFI_FILE_MODE_WRITE, 0 );
+					Status = Root->Open( Root, &file, L"1.txt", EFI_FILE_MODE_READ | EFI_FILE_MODE_WRITE, 0 );
                	Print( L"%d :%X\n", __LINE__ ,Status );
-               	
-					Status = Sfs->OpenVolume( Sfs, &Root );
-               	Print( L"%d :%X\n", __LINE__ ,Status );
-
-					if ( Status == EFI_SUCCESS )
+               	if ( Status != EFI_SUCCESS )
 					{
-						Print( L"==controller %d successed to open the file : %s==\n", HandleFileIndex, FileName );
+						Print( L"%d :%X\n", __LINE__ , Status);
+					}
 
-						return(file);
-					}
-					else  
-					{
-						Print( L"!!controller %d failed to open the file : %s!!\n", HandleFileIndex, FileName );
-					}
+					return(file);								
 				}
 			}
 		}
@@ -408,7 +407,9 @@ VOID EFIAPI DecToCharBuffer( UINT8* Buffin, UINTN len, UINT8* Buffout )
 		{
 			*(Buffout + i * 4 + 2)	= '\r';
 			*(Buffout + i * 4 + 3)	= '\n';
-		}else  {
+		}
+		else  
+		{
 			*(Buffout + i * 4 + 2)	= ' ';
 			*(Buffout + i * 4 + 3)	= ' ';
 		}
@@ -469,6 +470,11 @@ UefiMain(
 	UINTN			WriteSize;
 	EFI_FILE_PROTOCOL	*file = GetFile( SystemTable );
 
+	if (NULL == file)
+	{
+		Print( L"%d :NULL == file\n", __LINE__ );
+		return EFI_SUCCESS;
+	}
 
 	Status = gBS->LocateProtocol( &gEfiDevicePathToTextProtocolGuid, NULL, (VOID * *) &DevPathToText );
 	Print( L"%d :%X\n", __LINE__ ,Status );
@@ -479,8 +485,8 @@ UefiMain(
 	}
 
 	Status = gBS->LocateHandleBuffer( ByProtocol, &gEfiDiskIoProtocolGuid, NULL, &NumHandles, &ControllerHandle );
-	Print( L"%d :%X\n", __LINE__ ,Status );
-	if ( EFI_ERROR( Status ) )
+	Print( L"%d :%X %d\n", __LINE__ , Status, NumHandles );
+	if ( EFI_ERROR( Status ))
 	{
 		Print( L"%d, LocateHandleBuffer gEfiDiskIoProtocolGuid error: %x\n", __LINE__, Status );
 		return(Status);
@@ -491,74 +497,129 @@ UefiMain(
 	Print( L"Before for\n", Status );
 	for ( i = 0; i < NumHandles; i++ )
 	{
+		Status = gBS->HandleProtocol(ControllerHandle[i],
+										&gEfiBlockIoProtocolGuid,
+										(VOID * *) &BlockIo );
+       Print( L"%d :%X\n", __LINE__ ,Status );
+
+		if ( EFI_SUCCESS == Status )
+		{
+			Status = gBS->HandleProtocol( ControllerHandle[i],
+									      &gEfiDiskIoProtocolGuid,
+									      (VOID * *) &DiskIo );
+
+	        Print( L"%d :%X\n", __LINE__ ,Status );
+			if ( Status == EFI_SUCCESS )
+			{
+				Print( L"%d ==read something==%d\n", __LINE__, BlockIo->Media->MediaId);
+
+				Status = DiskIo->ReadDisk( DiskIo, BlockIo->Media->MediaId, 0, BYTES, Buffer );
+				Print( L"%d :%X\n", __LINE__ ,Status );
+
+				if ( EFI_SUCCESS == Status )
+				{
+					Buffer[10] = '\0';
+					Print( L"%d :%s\n", __LINE__ , Buffer );
+				}
+			}
+			
+		
+			Print( L"%d ==read something==%d\n", __LINE__, BlockIo->Media->MediaId);
+
+			Status = DiskIo->ReadDisk( DiskIo, BlockIo->Media->MediaId, 0, BYTES, Buffer );
+           Print( L"%d :%X\n", __LINE__ ,Status );
+           
+			if ( EFI_SUCCESS == Status )
+			{
+				Buffer[10] = '\0';
+	           Print( L"%d :%s\n", __LINE__ , Buffer );
+			}
+           /*
+
+			DecToCharBuffer( Buffer, BYTES, Bufferout );
+
+			WriteSize = BYTES * EXBYTE;
+
+			
+			Status = file->Write( file, &WriteSize, Bufferout );
+            Print( L"%d %s Bufferout: %s\n", __LINE__ , Bufferout);
+
+			if ( EFI_SUCCESS == Status )
+			{
+				Print( L"%d \n", __LINE__);
+				Print( L"==successed to write %d BYTES==\n", WriteSize );
+			}
+			else 
+			{
+				Print( L"!!failed to write %d BYTES!!\n", WriteSize );
+			}
+
+
+			ShowHex( Buffer, 52 );
+			*/
+		}else {
+			Print( L"!!failed to read disk!!\n" );
+		}
+
+
+
+
+
+
+
+
+
+
+
+	
 		Status = gBS->HandleProtocol( ControllerHandle[i],
-					      &gEfiDiskIoProtocolGuid,
-					      (VOID * *) &DiskIo );
+								      &gEfiDiskIoProtocolGuid,
+								      (VOID * *) &DiskIo );
 
         Print( L"%d :%X\n", __LINE__ ,Status );
 
 		if ( Status == EFI_SUCCESS )
 		{
-			Status = gBS->HandleProtocol( Controllers[HandleIndex],
-						      &gEfiDevicePathProtocolGuid,
-						      (VOID * *) &DevicePath );
+			Status = gBS->HandleProtocol( ControllerHandle[i],
+									      &gEfiDevicePathProtocolGuid,
+									      (VOID * *) &DevicePath );
             Print( L"%d :%X\n", __LINE__ ,Status );
 
 			if ( EFI_SUCCESS == Status )
 			{
-				Status = gBS->LocateProtocol(
-					&gEfiDevicePathToTextProtocolGuid,
-					NULL,
-					(VOID * *) &DevicePathToText );
-                Print( L"%d :%X\n", __LINE__ ,Status );
+				Status = gBS->LocateProtocol( &gEfiDevicePathToTextProtocolGuid,
+												NULL,
+												(VOID * *) &DevicePathToText );
+              Print( L"%d :%X\n", __LINE__ ,Status );
 
 				if ( EFI_SUCCESS == Status )
 				{
-					TextOfDevicePath = DevicePathToText->ConvertDevicePathToText( DevicePath, TRUE, TRUE );
-
-					Print( L"== %d path== \n%s \n", HandleIndex, TextOfDevicePath );
-					Print( L"%d \n", __LINE__);
-					WriteSize = StrLen( TextOfDevicePath ) * 2;
-					file->Write( file, &WriteSize, TextOfDevicePath );
-					WriteSize = 2;
-					file->Write( file, &WriteSize, "\r\n" );
-
-					Status = gBS->HandleProtocol(
-													Controllers[HandleIndex],
-													&gEfiBlockIoProtocolGuid,
-													(VOID * *) &BlockIo );
-                    Print( L"%d :%X\n", __LINE__ ,Status );
-
-					Media = BlockIo->Media;
-
+					//Print( L"== %d path== %s \n", HandleIndex, TextOfDevicePath );
+					//Print( L"%d \n", __LINE__);
+					//WriteSize = StrLen( TextOfDevicePath ) * 2;
+					
+					//UINT8 *Buffer2 = (UINTN *)AllocateZeroPool(BYTES);					
+					//if ( NULL == Buffer2 )
+					//{
+					//	Print( L"%d AllocateZeroPool Failed:\n", __LINE__);
+					//}
+					
+					
+					UINTN			Size = 100 ;
+					UINT8        Buffer2[100];
+					Status = file->Read(file, &Size, Buffer2);
+					Print( L"%d :%X\n", __LINE__ , Status );
 					if ( EFI_SUCCESS == Status )
 					{
-						Print( L"==read something==\n" );
-						
-						Status = DiskIo->ReadDisk( DiskIo, Media->MediaId, 0, BYTES, Buffer );
-                        Print( L"%d :%X\n", __LINE__ ,Status );
-
-						DecToCharBuffer( Buffer, BYTES, Bufferout );
-
-						WriteSize = BYTES * EXBYTE;
-
-
-						Status = file->Write( file, &WriteSize, Bufferout );
-                        Print( L"%d :%X\n", __LINE__ ,Status );
-
-						if ( EFI_SUCCESS == Status )
-						{
-							Print( L"%d \n", __LINE__);
-							Print( L"==successed to write %d BYTES==\n", WriteSize );
-						}else {
-							Print( L"!!failed to write %d BYTES!!\n", WriteSize );
-						}
-
-
-						ShowHex( Buffer, 52 );
-					}else {
-						Print( L"!!failed to read disk!!\n" );
+						Print( L"%d Read buffer:%s\n", __LINE__ , Buffer2);
 					}
+					TextOfDevicePath = DevicePathToText->ConvertDevicePathToText( DevicePath, TRUE, TRUE );
+					file->Write( file, &WriteSize, TextOfDevicePath );
+					
+					WriteSize = 2 + 2;
+					file->Write( file, &WriteSize, "11\r\n" );
+
+					
 				}
 			}
 		}
