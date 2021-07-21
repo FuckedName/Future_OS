@@ -3,10 +3,10 @@
 #include <Library/UefiLib.h>
 #include <Library/UefiApplicationEntryPoint.h>
 
-//GLOBAL_REMOVE_IF_UNREFERENCED EFI_STRING_ID mStringHelpTokenId = STRING_TOKEN (STR_HELLO_WORLD_HELP_INFORMATION);
+/* GLOBAL_REMOVE_IF_UNREFERENCED EFI_STRING_ID mStringHelpTokenId = STRING_TOKEN (STR_HELLO_WORLD_HELP_INFORMATION); */
 
-#include <Library/UefiLib.h> 
-#include <Library/ShellCEntryLib.h> 
+#include <Library/UefiLib.h>
+#include <Library/ShellCEntryLib.h>
 #include <Library/UefiApplicationEntryPoint.h>
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/UefiRuntimeServicesTableLib.h>
@@ -25,14 +25,16 @@
 #include <Protocol/DevicePath.h>
 #include <Protocol/LoadedImage.h>
 #include <Protocol/UnicodeCollation.h>
-#include <Protocol/Diskio.h>
-#include <Protocol/Blockio.h>
+#include <Protocol/DiskIo.h>
+#include <Protocol/BlockIo.h>
 
 #include <Library/BaseLib.h>
 #include <Library/BaseMemoryLib.h>
 #include <Library/MemoryAllocationLib.h>
-//#include <Library/PcdLib.h>
-//#include <Library/ShellCommandLib.h>
+/*
+ * #include <Library/PcdLib.h>
+ * #include <Library/ShellCommandLib.h>
+ */
 #include <Library/ShellLib.h>
 #include <Library/UefiLib.h>
 #include <Library/UefiRuntimeServicesTableLib.h>
@@ -113,104 +115,120 @@
 #include <Library/FileExplorerLib.h>
 
 
-//#include <Protocol/EfiShell.h>
-//#include <guid/FileInfo.h>
+/*
+ * #include <Protocol/EfiShell.h>
+ * #include <guid/FileInfo.h>
+ */
 
 
 EFI_STATUS
 EFIAPI
-BZero (
-  OUT     CHAR16                    *Destination,
-  IN      UINTN                     Length
-  )
- {
-	UINT32 i ;
-	CHAR8 * ptr = (CHAR8 * )Destination;
-	for (i = 0; i < 2*Length ; i ++){
+BZero(
+	OUT CHAR16                    *Destination,
+	IN UINTN Length
+	)
+{
+	UINT32	i;
+	CHAR8	* ptr = (CHAR8 * ) Destination;
+	for ( i = 0; i < 2 * Length; i++ )
+	{
 		ptr [i] = 0;
 	}
-	return EFI_SUCCESS;
- }
+	return(EFI_SUCCESS);
+}
+
 
 EFI_STATUS OpenShellProtocol( EFI_SHELL_PROTOCOL            **gEfiShellProtocol )
 {
-    EFI_STATUS                      Status;
-    Status = gBS->OpenProtocol(
-            gImageHandle,
-            &gEfiShellProtocolGuid,
-            (VOID **)gEfiShellProtocol,
-            gImageHandle,
-            NULL,
-            EFI_OPEN_PROTOCOL_GET_PROTOCOL
-            );
-    if (EFI_ERROR(Status)) {
-    //
-    // Search for the shell protocol
-    //
-        Status = gBS->LocateProtocol(
-                &gEfiShellProtocolGuid,
-                NULL,
-                (VOID **)gEfiShellProtocol
-                );
-        if (EFI_ERROR(Status)) {
-            gEfiShellProtocol = NULL;
-        }
-  }
-  return Status;
+	EFI_STATUS Status;
+	Status = gBS->OpenProtocol(
+		gImageHandle,
+		&gEfiShellProtocolGuid,
+		(VOID * *) gEfiShellProtocol,
+		gImageHandle,
+		NULL,
+		EFI_OPEN_PROTOCOL_GET_PROTOCOL
+		);
+	if ( EFI_ERROR( Status ) )
+	{
+		/*
+		 *
+		 * Search for the shell protocol
+		 *
+		 */
+		Status = gBS->LocateProtocol(
+			&gEfiShellProtocolGuid,
+			NULL,
+			(VOID * *) gEfiShellProtocol
+			);
+		if ( EFI_ERROR( Status ) )
+		{
+			gEfiShellProtocol = NULL;
+		}
+	}
+	return(Status);
 }
+
 
 VOID
-Ascii2UnicodeString (
-  CHAR8    *String,
-  CHAR16   *UniString
-  )
+Ascii2UnicodeString(
+	CHAR8    *String,
+	CHAR16   *UniString
+	)
 {
-  while (*String != '\0') {
-    *(UniString++) = (CHAR16) *(String++);
-  }
-  //
-  // End the UniString with a NULL.
-  //
-  *UniString = '\0';
-} 
-
-
-EFI_STATUS PrintNode(EFI_DEVICE_PATH_PROTOCOL *Node)
-{
-    Print(L"(%d, %d)/", Node->Type, Node->SubType);
-    return 0;
+	while ( *String != '\0' )
+	{
+		*(UniString++) = (CHAR16) *(String++);
+	}
+	/*
+	 *
+	 * End the UniString with a NULL.
+	 *
+	 */
+	*UniString = '\0';
 }
 
-EFI_DEVICE_PATH_PROTOCOL *WalkthroughDevicePath(EFI_DEVICE_PATH_PROTOCOL *DevPath,
-                                                EFI_STATUS (* CallBack)(EFI_DEVICE_PATH_PROTOCOL*))
+
+EFI_STATUS PrintNode( EFI_DEVICE_PATH_PROTOCOL *Node )
 {
-    EFI_DEVICE_PATH_PROTOCOL *pDevPath = DevPath;
-
-    while(! IsDevicePathEnd(pDevPath))
-    {
-        CallBack(pDevPath);
-        pDevPath = NextDevicePathNode(pDevPath);
-    }
-
-    return pDevPath;
+	Print( L"(%d, %d)/", Node->Type, Node->SubType );
+	return(0);
 }
 
-//refer to ReadFileToBuffer
-//refer to GetAllCapsuleOnDisk
-//refer to BmGetNextLoadOptionBuffer
+
+EFI_DEVICE_PATH_PROTOCOL *WalkthroughDevicePath( EFI_DEVICE_PATH_PROTOCOL *DevPath,
+						 EFI_STATUS (* CallBack)( EFI_DEVICE_PATH_PROTOCOL* ) )
+{
+	EFI_DEVICE_PATH_PROTOCOL *pDevPath = DevPath;
+
+	while ( !IsDevicePathEnd( pDevPath ) )
+	{
+		CallBack( pDevPath );
+		pDevPath = NextDevicePathNode( pDevPath );
+	}
+
+	return(pDevPath);
+}
+
+
+/*
+ * refer to ReadFileToBuffer
+ * refer to GetAllCapsuleOnDisk
+ * refer to BmGetNextLoadOptionBuffer
+ */
 EFI_STATUS FileSystem1()
 {
-    Print(L"%d, FileSystem1 start\n", __LINE__);
-	EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *Fs = NULL;
-	EFI_FILE_HANDLE                  RootDir;
-	EFI_FILE_HANDLE                  FileDir;
-	EFI_STATUS                         Status;
-	EFI_HANDLE                       *FsHandle = NULL;
+	Print( L"%d, FileSystem1 start\n", __LINE__ );
+	EFI_SIMPLE_FILE_SYSTEM_PROTOCOL *Fs = NULL;
+	EFI_FILE_HANDLE			RootDir;
+	EFI_FILE_HANDLE			FileDir;
+	EFI_STATUS			Status;
+	EFI_HANDLE			*FsHandle = NULL;
 
-	UINT16                           *TempOptionNumber;
+	UINT16 *TempOptionNumber;
 
 	TempOptionNumber = NULL;
-	//*CapsuleNum      = 0;
+	/* *CapsuleNum      = 0; */
 
 	Status = GetEfiSysPartitionFromActiveBootOption( 3, &TempOptionNumber, FsHandle );
 	if ( EFI_ERROR( Status ) )
@@ -243,158 +261,162 @@ EFI_STATUS FileSystem1()
 		RootDir->Close( RootDir );
 		return(Status);
 	}
-	RootDir->Close (RootDir);
-
+	RootDir->Close( RootDir );
 }
 
-EFI_STATUS EFIAPI GetString(IN EFI_SYSTEM_TABLE *gST,CHAR16* Str)
+
+EFI_STATUS EFIAPI GetString( IN EFI_SYSTEM_TABLE *gST, CHAR16* Str )
 {
- UINTN                     Index1,Index2=0;
- EFI_STATUS                Status;
- EFI_INPUT_KEY             key;
+	UINTN		Index1, Index2 = 0;
+	EFI_STATUS	Status;
+	EFI_INPUT_KEY	key;
 
- while(EFI_SUCCESS == (Status = gST->BootServices->WaitForEvent(1, &(gST->ConIn->WaitForKey), &Index1)))
- {
-  gST->ConIn->ReadKeyStroke(gST->ConIn,&key);
+	while ( EFI_SUCCESS == (Status = gST->BootServices->WaitForEvent( 1, &(gST->ConIn->WaitForKey), &Index1 ) ) )
+	{
+		gST->ConIn->ReadKeyStroke( gST->ConIn, &key );
 
-  if(key.UnicodeChar == 13)
-  {
-   Str[Index2]=0;
-   break;
-  }
+		if ( key.UnicodeChar == 13 )
+		{
+			Str[Index2] = 0;
+			break;
+		}
 
-  if(key.UnicodeChar!=8)
-  {
-   Str[Index2]=key.UnicodeChar;
-   ++Index2;
-   Print(L"%c",key.UnicodeChar);
-  }
-  else
-  {
-   if(Index2>0)
-   {
-    Str[Index2]=0;
-    --Index2;
-    Print(L"\b");
-   }
-  }
- }
+		if ( key.UnicodeChar != 8 )
+		{
+			Str[Index2] = key.UnicodeChar;
+			++Index2;
+			Print( L"%c", key.UnicodeChar );
+		}else  {
+			if ( Index2 > 0 )
+			{
+				Str[Index2] = 0;
+				--Index2;
+				Print( L"\b" );
+			}
+		}
+	}
 
- Print(L"\n");
+	Print( L"\n" );
 
- return Status;
+	return(Status);
 }
 
-EFI_FILE_PROTOCOL* EFIAPI GetFile(IN EFI_SYSTEM_TABLE *gST)
-{ 
- EFI_STATUS              Status;         
- INTN               HandleFileCount,HandleFileIndex=0;   
- EFI_SIMPLE_FILE_SYSTEM_PROTOCOL   *Sfs;          
- EFI_HANDLE                        *Files=NULL;         
- EFI_FILE_PROTOCOL         *Root;        
- EFI_FILE_PROTOCOL         *file;      
-// UINTN               FileSize=512,i;      
- CHAR16                            FileName[100];    
 
- Print(L"  please input the file name : \n  ");
- GetString(gST,FileName);
-
- Status=gST->BootServices->LocateHandleBuffer(
-											   ByProtocol,
-											   &gEfiSimpleFileSystemProtocolGuid,
-											   NULL,
-											   &HandleFileCount,
-											   &Files);
-
- if(!EFI_ERROR(Status))
- {
-  Print(L"==successed to find %d controllers==\n",HandleFileCount);
-
-  for(HandleFileIndex=HandleFileCount-1; HandleFileIndex > -1; --HandleFileIndex)
-  {
-    Status = gST->BootServices->HandleProtocol(
-										     Files[HandleFileIndex],
-										     &gEfiSimpleFileSystemProtocolGuid,
-										     (VOID**)&Sfs);
-
-
-    if(Status == EFI_SUCCESS)
-    {
-     Status = Sfs->OpenVolume(Sfs, &Root);
-
-     if(Status == EFI_SUCCESS)
-     {
-      Print(L"==controller %d successed to open the volume==\n",HandleFileIndex);
-
-      Status = Root->Open(Root, &file, FileName, EFI_FILE_MODE_READ | EFI_FILE_MODE_WRITE, 0);
-
-      if(Status == EFI_SUCCESS)
-      {
-       Print(L"==controller %d successed to open the file : %s==\n",HandleFileIndex,FileName);  
-
-       return file;
-      }
-      else
-      {
-       Print(L"!!controller %d failed to open the file : %s!!\n",HandleFileIndex,FileName);       
-      }
-     }
-    }
-
-  }
-
- }  
-
-
- return NULL;
-}
-//https://blog.csdn.net/youyudexiaowangzi/article/details/42008465
-
-
-#define BYTES   512   
-#define EXBYTE   4  
-
-VOID EFIAPI ShowHex(UINT8* Buffer,UINTN len)
+EFI_FILE_PROTOCOL* EFIAPI GetFile( IN EFI_SYSTEM_TABLE *gST )
 {
- UINTN               i=0;
- for(i = 0; i < 52; ++i)
- {
-  if(i%26 == 0)
-   Print(L"\r\n");
+	EFI_STATUS			Status;
+	INTN				HandleFileCount, HandleFileIndex = 0;
+	EFI_SIMPLE_FILE_SYSTEM_PROTOCOL *Sfs;
+	EFI_HANDLE			*Files = NULL;
+	EFI_FILE_PROTOCOL		*Root;
+	EFI_FILE_PROTOCOL		*file;
+/* UINTN               FileSize=512,i; */
+	CHAR16 FileName[100];
 
-  Print(L"%02x ",Buffer[i]);
- }
+	Print( L"%d  please input the file name : \n  ", __LINE__);
+	GetString( gST, FileName );
+
+	Status = gST->BootServices->LocateHandleBuffer(
+													ByProtocol,
+													&gEfiSimpleFileSystemProtocolGuid,
+													NULL,
+													&HandleFileCount,
+													&Files );
+
+	if ( !EFI_ERROR( Status ) )
+	{
+		Print( L"%d==successed to find %d controllers==:%X\n", __LINE__, HandleFileCount,Status );
+
+		for ( HandleFileIndex = HandleFileCount - 1; HandleFileIndex > -1; --HandleFileIndex )
+		{
+			Status = gST->BootServices->HandleProtocol(
+														Files[HandleFileIndex],
+														&gEfiSimpleFileSystemProtocolGuid,
+														(VOID * *) &Sfs );
+
+			Print( L"%d :%X\n", __LINE__ ,Status );
+			if ( Status == EFI_SUCCESS )
+			{
+				Status = Sfs->OpenVolume( Sfs, &Root );
+                
+               Print( L"%d :%X\n", __LINE__ ,Status );
+
+				if ( Status == EFI_SUCCESS )
+				{
+					Print( L"==controller %d successed to open the volume==\n", HandleFileIndex );
+
+					Status = Root->Open( Root, &file, FileName, EFI_FILE_MODE_READ | EFI_FILE_MODE_WRITE, 0 );
+               	Print( L"%d :%X\n", __LINE__ ,Status );
+               	
+					Status = Sfs->OpenVolume( Sfs, &Root );
+               	Print( L"%d :%X\n", __LINE__ ,Status );
+
+					if ( Status == EFI_SUCCESS )
+					{
+						Print( L"==controller %d successed to open the file : %s==\n", HandleFileIndex, FileName );
+
+						return(file);
+					}
+					else  
+					{
+						Print( L"!!controller %d failed to open the file : %s!!\n", HandleFileIndex, FileName );
+					}
+				}
+			}
+		}
+	}
+
+
+	return(NULL);
 }
 
-VOID EFIAPI DecToChar(UINT8* CharBuff,UINT8 I)
+
+/* https://blog.csdn.net/youyudexiaowangzi/article/details/42008465 */
+
+
+#define BYTES	512
+#define EXBYTE	4
+
+VOID EFIAPI ShowHex( UINT8* Buffer, UINTN len )
 {
- CharBuff[0]=((I/16) > 9)?('A'+(I/16)-10):('0'+(I/16));
- CharBuff[1]=((I%16) > 9)?('A'+(I%16)-10):('0'+(I%16));
+	UINTN i = 0;
+	for ( i = 0; i < 52; ++i )
+	{
+		if ( i % 26 == 0 )
+			Print( L"\r\n" );
+
+		Print( L"%02x ", Buffer[i] );
+	}
 }
 
-VOID EFIAPI DecToCharBuffer(UINT8* Buffin,UINTN len,UINT8* Buffout)
+
+VOID EFIAPI DecToChar( UINT8* CharBuff, UINT8 I )
 {
- UINTN i=0;
-
- for(i=0;i<len;++i)
- {
-  DecToChar(Buffout+i*4,Buffin[i]);
-  if((i+1)%16==0)
-  {
-   *(Buffout+ i*4 +2)='\r';
-   *(Buffout+ i*4 +3)='\n';
-  }
-  else 
-  {
-   *(Buffout+ i*4 +2)=' ';
-   *(Buffout+ i*4 +3)=' ';
-  }
- }
+	CharBuff[0]	= ( (I / 16) > 9) ? ('A' + (I / 16) - 10) : ('0' + (I / 16) );
+	CharBuff[1]	= ( (I % 16) > 9) ? ('A' + (I % 16) - 10) : ('0' + (I % 16) );
 }
 
 
-//https://blog.csdn.net/youyudexiaowangzi/article/details/42008465
+VOID EFIAPI DecToCharBuffer( UINT8* Buffin, UINTN len, UINT8* Buffout )
+{
+	UINTN i = 0;
 
+	for ( i = 0; i < len; ++i )
+	{
+		DecToChar( Buffout + i * 4, Buffin[i] );
+		if ( (i + 1) % 16 == 0 )
+		{
+			*(Buffout + i * 4 + 2)	= '\r';
+			*(Buffout + i * 4 + 3)	= '\n';
+		}else  {
+			*(Buffout + i * 4 + 2)	= ' ';
+			*(Buffout + i * 4 + 3)	= ' ';
+		}
+	}
+}
+
+
+/* https://blog.csdn.net/youyudexiaowangzi/article/details/42008465 */
 
 
 EFI_STATUS
@@ -406,6 +428,8 @@ UefiMain(
 {
 	UINTN MaxRetry = 3;
 	Print( L"Hello Renqihong jiayou!!111\r\n" );
+
+
 	/*
 	 * FileSystem1();
 	 * CoDRelocateCapsule(MaxRetry);
@@ -426,27 +450,28 @@ UefiMain(
 	EFI_DEVICE_PATH_TO_TEXT_PROTOCOL	*DevPathToText;
 	EFI_FILE_HANDLE				FileDir;
 
-	EFI_FILE_HANDLE RootDir;                          
-	INTN                                          HandleCount,HandleIndex;           
-	EFI_HANDLE                                    *Controllers=NULL;                
-	EFI_DISK_IO_PROTOCOL                          *DiskIo;                           
-	EFI_BLOCK_IO_PROTOCOL                         *BlockIo;                         
-	EFI_DEVICE_PATH_PROTOCOL                      *DevicePath;                      
-	EFI_DEVICE_PATH_TO_TEXT_PROTOCOL              *DevicePathToText;                 
-	EFI_BLOCK_IO_MEDIA                            *Media;                          
-	CHAR16                                        *TextOfDevicePath;              
+	EFI_FILE_HANDLE				RootDir;
+	INTN					HandleCount, HandleIndex;
+	EFI_HANDLE				*Controllers = NULL;
+	EFI_DISK_IO_PROTOCOL			*DiskIo;
+	EFI_BLOCK_IO_PROTOCOL			*BlockIo;
+	EFI_DEVICE_PATH_PROTOCOL		*DevicePath;
+	EFI_DEVICE_PATH_TO_TEXT_PROTOCOL	*DevicePathToText;
+	EFI_BLOCK_IO_MEDIA			*Media;
+	CHAR16					*TextOfDevicePath;
 
-	EFI_BOOT_SERVICES                             *gBS=SystemTable->BootServices;    
-	
-	UINT8                                         Buffer[BYTES];                    
-	
-	UINT8                                         Bufferout[BYTES*EXBYTE];         
-	
-	UINTN            WriteSize;                          
-	EFI_FILE_PROTOCOL         *file=GetFile(SystemTable); 
-    
+	EFI_BOOT_SERVICES *gBS = SystemTable->BootServices;
+
+	UINT8 Buffer[BYTES];
+
+	UINT8 Bufferout[BYTES * EXBYTE];
+
+	UINTN			WriteSize;
+	EFI_FILE_PROTOCOL	*file = GetFile( SystemTable );
+
 
 	Status = gBS->LocateProtocol( &gEfiDevicePathToTextProtocolGuid, NULL, (VOID * *) &DevPathToText );
+	Print( L"%d :%X\n", __LINE__ ,Status );
 	if ( EFI_ERROR( Status ) )
 	{
 		Print( L"%d, LocateProtocol gEfiDevicePathToTextProtocolGuid error: %x\n", __LINE__, Status );
@@ -454,6 +479,7 @@ UefiMain(
 	}
 
 	Status = gBS->LocateHandleBuffer( ByProtocol, &gEfiDiskIoProtocolGuid, NULL, &NumHandles, &ControllerHandle );
+	Print( L"%d :%X\n", __LINE__ ,Status );
 	if ( EFI_ERROR( Status ) )
 	{
 		Print( L"%d, LocateHandleBuffer gEfiDiskIoProtocolGuid error: %x\n", __LINE__, Status );
@@ -469,12 +495,14 @@ UefiMain(
 					      &gEfiDiskIoProtocolGuid,
 					      (VOID * *) &DiskIo );
 
+        Print( L"%d :%X\n", __LINE__ ,Status );
 
 		if ( Status == EFI_SUCCESS )
 		{
 			Status = gBS->HandleProtocol( Controllers[HandleIndex],
 						      &gEfiDevicePathProtocolGuid,
 						      (VOID * *) &DevicePath );
+            Print( L"%d :%X\n", __LINE__ ,Status );
 
 			if ( EFI_SUCCESS == Status )
 			{
@@ -482,13 +510,14 @@ UefiMain(
 					&gEfiDevicePathToTextProtocolGuid,
 					NULL,
 					(VOID * *) &DevicePathToText );
+                Print( L"%d :%X\n", __LINE__ ,Status );
 
 				if ( EFI_SUCCESS == Status )
 				{
 					TextOfDevicePath = DevicePathToText->ConvertDevicePathToText( DevicePath, TRUE, TRUE );
 
 					Print( L"== %d path== \n%s \n", HandleIndex, TextOfDevicePath );
-					
+					Print( L"%d \n", __LINE__);
 					WriteSize = StrLen( TextOfDevicePath ) * 2;
 					file->Write( file, &WriteSize, TextOfDevicePath );
 					WriteSize = 2;
@@ -498,39 +527,43 @@ UefiMain(
 													Controllers[HandleIndex],
 													&gEfiBlockIoProtocolGuid,
 													(VOID * *) &BlockIo );
-						
+                    Print( L"%d :%X\n", __LINE__ ,Status );
+
 					Media = BlockIo->Media;
 
 					if ( EFI_SUCCESS == Status )
 					{
 						Print( L"==read something==\n" );
-
+						
 						Status = DiskIo->ReadDisk( DiskIo, Media->MediaId, 0, BYTES, Buffer );
-						
+                        Print( L"%d :%X\n", __LINE__ ,Status );
+
 						DecToCharBuffer( Buffer, BYTES, Bufferout );
-						
+
 						WriteSize = BYTES * EXBYTE;
 
 
 						Status = file->Write( file, &WriteSize, Bufferout );
+                        Print( L"%d :%X\n", __LINE__ ,Status );
 
 						if ( EFI_SUCCESS == Status )
 						{
+							Print( L"%d \n", __LINE__);
 							Print( L"==successed to write %d BYTES==\n", WriteSize );
-						}else  {
+						}else {
 							Print( L"!!failed to write %d BYTES!!\n", WriteSize );
 						}
 
 
 						ShowHex( Buffer, 52 );
-					}else  {
+					}else {
 						Print( L"!!failed to read disk!!\n" );
 					}
 				}
 			}
 		}
 
-		file->Close( file ); 
+		file->Close( file );
 
 		EFI_DEVICE_PATH_PROTOCOL *DiskDevicePath;
 		Status = gBS->OpenProtocol( ControllerHandle[i],
@@ -564,5 +597,8 @@ UefiMain(
 
 	return(EFI_SUCCESS);
 }
+
+
+
 
 
