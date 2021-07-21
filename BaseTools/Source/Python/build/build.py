@@ -82,6 +82,7 @@ TmpTableDict = {}
 #   Otherwise, False is returned
 #
 def IsToolInPath(tool):
+    print(sys._getframe().f_lineno)
     if 'PATHEXT' in os.environ:
         extns = os.environ['PATHEXT'].split(os.path.pathsep)
     else:
@@ -104,6 +105,7 @@ def IsToolInPath(tool):
 #   will be broken.
 #
 def CheckEnvVariable():
+    print(sys._getframe().f_lineno)
     # check WORKSPACE
     if "WORKSPACE" not in os.environ:
         EdkLogger.error("build", ATTRIBUTE_NOT_AVAILABLE, "Environment variable not found",
@@ -156,6 +158,7 @@ def CheckEnvVariable():
 # @retval string        The normalized file path
 #
 def NormFile(FilePath, Workspace):
+    print(sys._getframe().f_lineno)
     # check if the path is absolute or relative
     if os.path.isabs(FilePath):
         FileFullPath = os.path.normpath(FilePath)
@@ -183,6 +186,7 @@ def NormFile(FilePath, Workspace):
 # @param  ExitFlag  The flag used to indicate stopping reading
 #
 def ReadMessage(From, To, ExitFlag,MemTo=None):
+    print(sys._getframe().f_lineno)
     while True:
         # read one line a time
         Line = From.readline()
@@ -204,6 +208,7 @@ def ReadMessage(From, To, ExitFlag,MemTo=None):
 
 class MakeSubProc(Popen):
     def __init__(self,*args, **argv):
+        print(sys._getframe().f_lineno)
         super(MakeSubProc,self).__init__(*args, **argv)
         self.ProcOut = []
 
@@ -218,6 +223,7 @@ class MakeSubProc(Popen):
 # @param  WorkingDir            The directory in which the program will be running
 #
 def LaunchCommand(Command, WorkingDir,ModuleAuto = None):
+    print(sys._getframe().f_lineno)
     BeginTime = time.time()
     # if working directory doesn't exist, Popen() will raise an exception
     if not os.path.isdir(WorkingDir):
@@ -306,6 +312,7 @@ class BuildUnit:
     #   @param  WorkingDir  The directory build command starts in
     #
     def __init__(self, Obj, BuildCommand, Target, Dependency, WorkingDir="."):
+        print(sys._getframe().f_lineno)
         self.BuildObject = Obj
         self.Dependency = Dependency
         self.WorkingDir = WorkingDir
@@ -326,6 +333,7 @@ class BuildUnit:
     #   @param  self        The object pointer
     #
     def __str__(self):
+        print(sys._getframe().f_lineno)
         return str(self.BuildObject)
 
     ## "==" operator method
@@ -337,6 +345,7 @@ class BuildUnit:
     #   @param  Other       The other BuildUnit object compared to
     #
     def __eq__(self, Other):
+        print(sys._getframe().f_lineno)
         return Other and self.BuildObject == Other.BuildObject \
                 and Other.BuildObject \
                 and self.BuildObject.Arch == Other.BuildObject.Arch
@@ -348,9 +357,11 @@ class BuildUnit:
     #   @param  self        The object pointer
     #
     def __hash__(self):
+        print(sys._getframe().f_lineno)
         return hash(self.BuildObject) + hash(self.BuildObject.Arch)
 
     def __repr__(self):
+        print(sys._getframe().f_lineno)
         return repr(self.BuildObject)
 
 ## The smallest module unit that can be built by nmake/make command in multi-thread build mode
@@ -369,6 +380,7 @@ class ModuleMakeUnit(BuildUnit):
     #   @param  Target      The build target name, one of gSupportedTarget
     #
     def __init__(self, Obj, BuildCommand,Target):
+        print(sys._getframe().f_lineno)
         Dependency = [ModuleMakeUnit(La, BuildCommand,Target) for La in Obj.LibraryAutoGenList]
         BuildUnit.__init__(self, Obj, BuildCommand, Target, Dependency, Obj.MakeFileDir)
         if Target in [None, "", "all"]:
@@ -390,6 +402,7 @@ class PlatformMakeUnit(BuildUnit):
     #   @param  Target      The build target name, one of gSupportedTarget
     #
     def __init__(self, Obj, BuildCommand, Target):
+        print(sys._getframe().f_lineno)
         Dependency = [ModuleMakeUnit(Lib, BuildCommand, Target) for Lib in self.BuildObject.LibraryAutoGenList]
         Dependency.extend([ModuleMakeUnit(Mod, BuildCommand,Target) for Mod in self.BuildObject.ModuleAutoGenList])
         BuildUnit.__init__(self, Obj, BuildCommand, Target, Dependency, Obj.MakeFileDir)
@@ -434,6 +447,7 @@ class BuildTask:
     #
     @staticmethod
     def StartScheduler(MaxThreadNumber, ExitFlag):
+        print(sys._getframe().f_lineno)
         SchedulerThread = Thread(target=BuildTask.Scheduler, args=(MaxThreadNumber, ExitFlag))
         SchedulerThread.setName("Build-Task-Scheduler")
         SchedulerThread.setDaemon(False)
@@ -449,6 +463,7 @@ class BuildTask:
     #
     @staticmethod
     def Scheduler(MaxThreadNumber, ExitFlag):
+        print(sys._getframe().f_lineno)
         BuildTask._SchedulerStopped.clear()
         try:
             # use BoundedSemaphore to control the maximum running threads
@@ -527,17 +542,20 @@ class BuildTask:
     #
     @staticmethod
     def WaitForComplete():
+        print(sys._getframe().f_lineno)
         BuildTask._SchedulerStopped.wait()
 
     ## Check if the scheduler is running or not
     #
     @staticmethod
     def IsOnGoing():
+        print(sys._getframe().f_lineno)
         return not BuildTask._SchedulerStopped.isSet()
 
     ## Abort the build
     @staticmethod
     def Abort():
+        print(sys._getframe().f_lineno)
         if BuildTask.IsOnGoing():
             BuildTask._ErrorFlag.set()
             BuildTask.WaitForComplete()
@@ -549,6 +567,7 @@ class BuildTask:
     #
     @staticmethod
     def HasError():
+        print(sys._getframe().f_lineno)
         return BuildTask._ErrorFlag.isSet()
 
     ## Get error message in running thread
@@ -558,6 +577,7 @@ class BuildTask:
     #
     @staticmethod
     def GetErrorMessage():
+        print(sys._getframe().f_lineno)
         return BuildTask._ErrorMessage
 
     ## Factory method to create a BuildTask object
@@ -572,6 +592,7 @@ class BuildTask:
     #
     @staticmethod
     def New(BuildItem, Dependency=None):
+        print(sys._getframe().f_lineno)
         if BuildItem in BuildTask._TaskQueue:
             Bt = BuildTask._TaskQueue[BuildItem]
             return Bt
@@ -592,6 +613,7 @@ class BuildTask:
     #   @param  Dependency      The dependent build object of BuildItem
     #
     def _Init(self, BuildItem, Dependency=None):
+        print(sys._getframe().f_lineno)
         self.BuildItem = BuildItem
 
         self.DependencyList = []
@@ -606,6 +628,7 @@ class BuildTask:
     ## Check if all dependent build tasks are completed or not
     #
     def IsReady(self):
+        print(sys._getframe().f_lineno)
         ReadyFlag = True
         for Dep in self.DependencyList:
             if Dep.CompleteFlag == True:
@@ -620,6 +643,7 @@ class BuildTask:
     #   @param  Dependency      The list of dependent build objects
     #
     def AddDependency(self, Dependency):
+        print(sys._getframe().f_lineno)
         for Dep in Dependency:
             if not Dep.BuildObject.IsBinaryModule and not Dep.BuildObject.CanSkipbyCache(GlobalData.gModuleCacheHit):
                 self.DependencyList.append(BuildTask.New(Dep))    # BuildTask list
@@ -630,6 +654,7 @@ class BuildTask:
     # @param  WorkingDir            The directory in which the program will be running
     #
     def _CommandThread(self, Command, WorkingDir):
+        print(sys._getframe().f_lineno)
         try:
             self.BuildItem.BuildObject.BuildTime = LaunchCommand(Command, WorkingDir,self.BuildItem.BuildObject)
             self.CompleteFlag = True
@@ -666,6 +691,7 @@ class BuildTask:
     ## Start build task thread
     #
     def Start(self):
+        print(sys._getframe().f_lineno)
         EdkLogger.quiet("Building ... %s" % repr(self.BuildItem))
         Command = self.BuildItem.BuildCommand + [self.BuildItem.Target]
         self.BuildTread = Thread(target=self._CommandThread, args=(Command, self.BuildItem.WorkingDir))
@@ -688,6 +714,7 @@ class PeImageInfo():
     #   @param  ImageClass        PeImage Information
     #
     def __init__(self, BaseName, Guid, Arch, OutputDir, DebugDir, ImageClass):
+        print(sys._getframe().f_lineno)
         self.BaseName         = BaseName
         self.Guid             = Guid
         self.Arch             = Arch
@@ -717,6 +744,7 @@ class Build():
     #   @param  BuildOptions        Build options passed from command line
     #
     def __init__(self, Target, WorkspaceDir, BuildOptions,log_q):
+        print(sys._getframe().f_lineno)
         self.WorkspaceDir   = WorkspaceDir
         self.Target         = Target
         self.PlatformFile   = BuildOptions.PlatformFile
@@ -850,6 +878,7 @@ class Build():
         GlobalData.gModuleCacheHit = set()
 
     def StartAutoGen(self,mqueue, DataPipe,SkipAutoGen,PcdMaList,cqueue):
+        print(sys._getframe().f_lineno)
         try:
             if SkipAutoGen:
                 return True,0
@@ -900,6 +929,7 @@ class Build():
     # $(TARGET), $(TOOLCHAIN), $(TOOLCHAIN_TAG), or $(ARCH) operands.
     #
     def GetToolChainAndFamilyFromDsc (self, File):
+        print(sys._getframe().f_lineno)
         SavedGlobalDefines = GlobalData.gGlobalDefines.copy()
         for BuildTarget in self.BuildTargetList:
             GlobalData.gGlobalDefines['TARGET'] = BuildTarget
@@ -940,6 +970,7 @@ class Build():
     #   This method will parse target.txt and get the build configurations.
     #
     def LoadConfiguration(self):
+        print(sys._getframe().f_lineno)
 
         # if no ARCH given in command line, get it from target.txt
         if not self.ArchList:
@@ -1008,6 +1039,7 @@ class Build():
     #   command line and target.txt, then get the final build configurations.
     #
     def InitBuild(self):
+        print(sys._getframe().f_lineno)
         # parse target.txt, tools_def.txt, and platform file
         self.LoadConfiguration()
 
@@ -1018,6 +1050,7 @@ class Build():
 
 
     def InitPreBuild(self):
+        print(sys._getframe().f_lineno)
         self.LoadConfiguration()
         ErrorCode, ErrorInfo = self.PlatformFile.Validate(".dsc", False)
         if ErrorCode != 0:
@@ -1071,6 +1104,7 @@ class Build():
             self.Prebuild += self.PassCommandOption(self.BuildTargetList, self.ArchList, self.ToolChainList, self.PlatformFile, self.Target)
 
     def InitPostBuild(self):
+        print(sys._getframe().f_lineno)
         if 'POSTBUILD' in GlobalData.gCommandLineDefines:
             self.Postbuild = GlobalData.gCommandLineDefines.get('POSTBUILD')
         else:
@@ -1110,6 +1144,7 @@ class Build():
             self.Postbuild += self.PassCommandOption(self.BuildTargetList, self.ArchList, self.ToolChainList, self.PlatformFile, self.Target)
 
     def PassCommandOption(self, BuildTarget, TargetArch, ToolChain, PlatformFile, Target):
+        print(sys._getframe().f_lineno)
         BuildStr = ''
         if GlobalData.gCommand and isinstance(GlobalData.gCommand, list):
             BuildStr += ' ' + ' '.join(GlobalData.gCommand)
@@ -1154,6 +1189,7 @@ class Build():
         return BuildStr
 
     def LaunchPrebuild(self):
+        print(sys._getframe().f_lineno)
         if self.Prebuild:
             EdkLogger.info("\n- Prebuild Start -\n")
             self.LaunchPrebuildFlag = True
@@ -1208,6 +1244,7 @@ class Build():
             EdkLogger.info("\n- Prebuild Done -\n")
 
     def LaunchPostbuild(self):
+        print(sys._getframe().f_lineno)
         if self.Postbuild:
             EdkLogger.info("\n- Postbuild Start -\n")
             if sys.platform == "win32":
@@ -1256,6 +1293,7 @@ class Build():
     #                                       for dependent modules/Libraries
     #
     def _BuildPa(self, Target, AutoGenObject, CreateDepsCodeFile=True, CreateDepsMakeFile=True, BuildModule=False, FfsCommand=None, PcdMaList=None):
+        print(sys._getframe().f_lineno)
         if AutoGenObject is None:
             return False
         if FfsCommand is None:
@@ -1410,6 +1448,7 @@ class Build():
     #                                       for dependent modules/Libraries
     #
     def _Build(self, Target, AutoGenObject, CreateDepsCodeFile=True, CreateDepsMakeFile=True, BuildModule=False):
+        print(sys._getframe().f_lineno)
         if AutoGenObject is None:
             return False
 
@@ -1493,6 +1532,7 @@ class Build():
     ## Rebase module image and Get function address for the input module list.
     #
     def _RebaseModule (self, MapBuffer, BaseAddress, ModuleList, AddrIsOffset = True, ModeIsSmm = False):
+        print(sys._getframe().f_lineno)
         if ModeIsSmm:
             AddrIsOffset = False
         for InfFile in ModuleList:
@@ -1588,6 +1628,7 @@ class Build():
     ## Collect MAP information of all FVs
     #
     def _CollectFvMapBuffer (self, MapBuffer, Wa, ModuleList):
+        print(sys._getframe().f_lineno)
         if self.Fdf:
             # First get the XIP base address for FV map file.
             GuidPattern = re.compile("[-a-fA-F0-9]+")
@@ -1626,6 +1667,7 @@ class Build():
     ## Collect MAP information of all modules
     #
     def _CollectModuleMapBuffer (self, MapBuffer, ModuleList):
+        print(sys._getframe().f_lineno)
         sys.stdout.write ("Generate Load Module At Fix Address Map")
         sys.stdout.flush()
         PatchEfiImageList = []
@@ -1756,6 +1798,7 @@ class Build():
     ## Save platform Map file
     #
     def _SaveMapFile (self, MapBuffer, Wa):
+        print(sys._getframe().f_lineno)
         #
         # Map file path is got.
         #
@@ -1771,6 +1814,7 @@ class Build():
     ## Build active platform for different build targets and different tool chains
     #
     def _BuildPlatform(self):
+        print(sys._getframe().f_lineno)
         SaveFileOnChange(self.PlatformBuildPath, '# DO NOT EDIT \n# FILE auto-generated\n', False)
         for BuildTarget in self.BuildTargetList:
             GlobalData.gGlobalDefines['TARGET'] = BuildTarget
@@ -1869,6 +1913,7 @@ class Build():
     ## Build active module for different build targets, different tool chains and different archs
     #
     def _BuildModule(self):
+        print(sys._getframe().f_lineno)
         for BuildTarget in self.BuildTargetList:
             GlobalData.gGlobalDefines['TARGET'] = BuildTarget
             index = 0
@@ -2052,6 +2097,7 @@ class Build():
                     self._SaveMapFile (MapBuffer, Wa)
 
     def _GenFfsCmd(self,ArchList):
+        print(sys._getframe().f_lineno)
         # convert dictionary of Cmd:(Inf,Arch)
         # to a new dictionary of (Inf,Arch):Cmd,Cmd,Cmd...
         CmdSetDict = defaultdict(set)
@@ -2061,6 +2107,7 @@ class Build():
             CmdSetDict[tmpInf, tmpArch].add(Cmd)
         return CmdSetDict
     def VerifyAutoGenFiles(self):
+        print(sys._getframe().f_lineno)
         AutoGenIdFile = os.path.join(GlobalData.gConfDirectory,".AutoGenIdFile.txt")
         try:
             with open(AutoGenIdFile) as fd:
@@ -2107,6 +2154,7 @@ class Build():
             Wa.AutoGenObjectList.append(Pa)
         return Wa
     def SetupMakeSetting(self,Wa):
+        print(sys._getframe().f_lineno)
         BuildModules = []
         for Pa in Wa.AutoGenObjectList:
             for m in Pa._MbList:
@@ -2132,6 +2180,7 @@ class Build():
     ## Build a platform in multi-thread mode
     #
     def PerformAutoGen(self,BuildTarget,ToolChain):
+        print(sys._getframe().f_lineno)
         WorkspaceAutoGenTime = time.time()
         Wa = WorkspaceAutoGen(
                 self.WorkspaceDir,
@@ -2263,6 +2312,7 @@ class Build():
         return Wa, BuildModules
 
     def _MultiThreadBuildPlatform(self):
+        print(sys._getframe().f_lineno)
         SaveFileOnChange(self.PlatformBuildPath, '# DO NOT EDIT \n# FILE auto-generated\n', False)
         for BuildTarget in self.BuildTargetList:
             GlobalData.gGlobalDefines['TARGET'] = BuildTarget
@@ -2386,6 +2436,7 @@ class Build():
     #   @retval int             Threshold value
     #
     def GetFreeSizeThreshold(self):
+        print(sys._getframe().f_lineno)
         Threshold = None
         Threshold_Str = GlobalData.gCommandLineDefines.get('FV_SPARE_SPACE_THRESHOLD')
         if Threshold_Str:
@@ -2399,6 +2450,7 @@ class Build():
         return Threshold
 
     def CheckFreeSizeThreshold(self, Threshold=None, FvDir=None):
+        print(sys._getframe().f_lineno)
         if not isinstance(Threshold, int):
             return
         if not isinstance(FvDir, str) or not FvDir:
@@ -2423,6 +2475,7 @@ class Build():
     ## Generate GuidedSectionTools.txt in the FV directories.
     #
     def CreateGuidedSectionToolsFile(self,Wa):
+        print(sys._getframe().f_lineno)
         for BuildTarget in self.BuildTargetList:
             for ToolChain in self.ToolChainList:
                 FvDir = Wa.FvDir
@@ -2474,6 +2527,7 @@ class Build():
     ## Returns the real path of the tool.
     #
     def GetRealPathOfTool (self, tool):
+        print(sys._getframe().f_lineno)
         if os.path.exists(tool):
             return os.path.realpath(tool)
         return tool
@@ -2481,6 +2535,7 @@ class Build():
     ## Launch the module or platform build
     #
     def Launch(self):
+        print(sys._getframe().f_lineno)
         self.AllDrivers = set()
         self.AllModules = set()
         self.PreMakeCacheMiss = set()
@@ -2501,21 +2556,25 @@ class Build():
             RemoveDirectory(os.path.dirname(GlobalData.gDatabasePath), True)
 
     def CreateAsBuiltInf(self):
+        print(sys._getframe().f_lineno)
         for Module in self.BuildModules:
             Module.CreateAsBuiltInf()
 
     def GenDestCache(self):
+        print(sys._getframe().f_lineno)
         for Module in self.AllModules:
             Module.GenPreMakefileHashList()
             Module.GenMakefileHashList()
             Module.CopyModuleToCache()
 
     def GenLocalPreMakeCache(self):
+        print(sys._getframe().f_lineno)
         for Module in self.PreMakeCacheMiss:
             Module.GenPreMakefileHashList()
 
     ## Do some clean-up works when error occurred
     def Relinquish(self):
+        print(sys._getframe().f_lineno)
         OldLogLevel = EdkLogger.GetLevel()
         EdkLogger.SetLevel(EdkLogger.ERROR)
         Utils.Progressor.Abort()
@@ -2524,6 +2583,7 @@ class Build():
         EdkLogger.SetLevel(OldLogLevel)
 
 def ParseDefines(DefineList=[]):
+    print(sys._getframe().f_lineno)
     DefineDict = {}
     if DefineList is not None:
         for Define in DefineList:
@@ -2542,6 +2602,7 @@ def ParseDefines(DefineList=[]):
 
 
 def LogBuildTime(Time):
+    print(sys._getframe().f_lineno)
     if Time:
         TimeDurStr = ''
         TimeDur = time.gmtime(Time)
@@ -2553,6 +2614,7 @@ def LogBuildTime(Time):
     else:
         return None
 def ThreadNum():
+    print(sys._getframe().f_lineno)
     OptionParser = MyOptionParser()
     if not OptionParser.BuildOption and not OptionParser.BuildTarget:
         OptionParser.GetOption()
@@ -2584,6 +2646,7 @@ def ThreadNum():
 #
 LogQMaxSize = ThreadNum() * 10
 def Main():
+    print(sys._getframe().f_lineno)
     StartTime = time.time()
 
     #

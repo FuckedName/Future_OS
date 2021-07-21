@@ -524,16 +524,25 @@ def GetFileList(SourceFileList, IncludeList, SkipList):
 def SearchString(UniObjectClass, FileList, IsCompatibleMode):
     if FileList == []:
         return UniObjectClass
-
+    i = 0
+    print("filename:")
     for File in FileList:
+        i = 0
+        Line = ""
+        #print("filename: " + File)
         try:
             if os.path.isfile(File):
                 Lines = open(File, 'r')
                 for Line in Lines:
+                    i += 1
+                    #print("Line:" + Line)
                     for StrName in STRING_TOKEN.findall(Line):
+                        #print("StrName: " + StrName)
                         EdkLogger.debug(EdkLogger.DEBUG_5, "Found string identifier: " + StrName)
                         UniObjectClass.SetStringReferenced(StrName)
         except:
+            print("error line: %d", i)
+            print("error line: %s", Line)
             EdkLogger.error("UnicodeStringGather", AUTOGEN_ERROR, "SearchString: Error while processing file", File=File, RaiseError=False)
             raise
 
