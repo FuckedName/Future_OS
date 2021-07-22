@@ -83,6 +83,8 @@ ToDo:
 #include <Protocol/SimplePointer.h>
 #include <Protocol/SimpleTextInEx.h>
 #include <Protocol/UnicodeCollation.h>
+#include <Protocol/DiskIo.h>
+#include <Protocol/BlockIo.h>
 
 
 static UINTN ScreenWidth, ScreenHeight;  
@@ -919,46 +921,99 @@ EFI_STATUS FileReadSelf(CHAR16 *FileName, UINT32 size, UINT8 *pBuffer)
 
 }
 
-
 EFI_STATUS FileReadSelf2(CHAR16 *FileName, UINT32 size, UINT8 *pBuffer)
 {    
-    //CHAR16  FileName[128] = L"test2.txt";
-    EFI_STATUS Status ;
-    SHELL_FILE_HANDLE FileHandle;
-    EFI_SHELL_PROTOCOL  *gEfiShellProtocol;
+	EFI_SIMPLE_FILE_SYSTEM_PROTOCOL *Fs;
+	EFI_STATUS		Status;
+	SHELL_FILE_HANDLE	FileHandle;
+	EFI_SHELL_PROTOCOL	*gEfiShellProtocol;
+	UINTN					NumHandles, i;
+	EFI_HANDLE				*ControllerHandle = NULL;
+	EFI_DEVICE_PATH_TO_TEXT_PROTOCOL	*DevPathToText;
+	EFI_FILE_HANDLE				FileDir;
 
-	DEBUG ((EFI_D_INFO, "FileReadSelf Handle File: %s start:\n ", FileName));
-	
-    Status = OpenShellProtocolSelf(&gEfiShellProtocol);
-    
-    Status = gEfiShellProtocol->OpenFileByName(FileName, &FileHandle, EFI_FILE_MODE_READ); 
-    if (EFI_ERROR(Status))
-    {
-        DEBUG ((EFI_D_INFO, "OpenFileByName: %s Failed!\n ", FileName));
-        
-        return (-1);
-    }
-/*
-	UINT64 position = 0;
-    Status = gEfiShellProtocol->SetFilePosition(FileHandle, &position);    
-    if (EFI_ERROR(Status))
-    {
-        DEBUG ((EFI_D_INFO, "SetFilePosition Failed: %x!\n ", Status));
-        
-        return (-1);
-    }
-  */      
-    Status = gEfiShellProtocol->ReadFile(FileHandle, &size, pBuffer);    
-    if (EFI_ERROR(Status))
-    {
-        DEBUG ((EFI_D_INFO, "ReadFile Failed: %x!\n ", Status));
-        
-        return (-1);
-    }
-	UINT64 Position;
-    gEfiShellProtocol->GetFilePosition(FileHandle, &Position);
+	EFI_FILE_HANDLE				RootDir;
+	INTN					HandleCount, HandleIndex;
+	EFI_HANDLE				*Controllers = NULL;
+	EFI_DISK_IO_PROTOCOL			*DiskIo;
+	EFI_BLOCK_IO_PROTOCOL			*BlockIo;
+	EFI_DEVICE_PATH_PROTOCOL		*DevicePath;
+	EFI_DEVICE_PATH_TO_TEXT_PROTOCOL	*DevicePathToText;
+	EFI_BLOCK_IO_MEDIA			*Media;
+	CHAR16					*TextOfDevicePath;
 
-    DEBUG ((EFI_D_INFO, "Read File: %s successfully, Postion: %d!\n ", FileName, Position));
+	UINTN			WriteSize;
+	DEBUG ((EFI_D_INFO, "%d FileReadSelf2 START\n ", __LINE__));
+	Status = gBS->LocateProtocol( &gEfiDevicePathToTextProtocolGuid, NULL, (VOID * *) &DevPathToText );
+	Print( L"%d :%X\n", __LINE__ ,Status );
+	if ( EFI_ERROR( Status ) )
+	{
+		Print( L"%d, LocateProtocol gEfiDevicePathToTextProtocolGuid error: %x\n", __LINE__, Status );
+		return(Status);
+	}
+
+	Status = gBS->LocateHandleBuffer( ByProtocol, &gEfiDiskIoProtocolGuid, NULL, &NumHandles, &ControllerHandle );
+	Print( L"%d :%X %d\n", __LINE__ , Status, NumHandles );
+	if ( EFI_ERROR( Status ))
+	{
+		Print( L"%d, LocateHandleBuffer gEfiDiskIoProtocolGuid error: %x\n", __LINE__, Status );
+		return(Status);
+	}
+
+	Print( L"%d, NumHandles: %d\n", __LINE__, NumHandles );
+
+	Print( L"Before for\n", Status );
+	for ( i = 0; i < NumHandles; i++ )
+	{
+		Status = gBS->HandleProtocol(ControllerHandle[i],
+										&gEfiBlockIoProtocolGuid,
+										(VOID * *) &BlockIo );
+       Print( L"%d :%X\n", __LINE__ ,Status );
+
+		if ( EFI_SUCCESS == Status )
+		{
+			Status = gBS->HandleProtocol( ControllerHandle[i],
+									      &gEfiDiskIoProtocolGuid,
+									      (VOID * *) &DiskIo );
+
+	       Print( L"%d :%X\n", __LINE__ ,Status );
+			if ( Status == EFI_SUCCESS )
+			{
+				Print( L"%d ==read something==%d\n", __LINE__, BlockIo->Media->MediaId);
+
+
+				/*
+                (EFIAPI *EFI_DISK_READ)(
+                  IN EFI_DISK_IO_PROTOCOL         *This,
+                  IN UINT32                       MediaId,
+                  IN UINT64                       Offset,
+                  IN UINTN                        BufferSize,
+                  OUT VOID                        *Buffer
+                  );
+
+				*/
+				Status = DiskIo->ReadDisk( DiskIo, BlockIo->Media->MediaId, 0x1C5166000, 267616, pBuffer);
+				Print( L"%d :%X\n", __LINE__ ,Status );
+
+				if ( EFI_SUCCESS == Status )
+				{
+					//Buffer[10] = '\0';
+					Print( L"%d EFI_SUCCESS == Status\n", __LINE__ );
+
+					//DecToCharBuffer(Buffer, BYTES, Bufferout);
+			       
+			       //ShowHex(Buffer, BYTES);
+				}
+
+				return -1;
+			}		
+		}
+		else 
+		{
+			Print( L"!!failed to read disk!!\n" );
+		}
+
+	}
 
     return EFI_SUCCESS;
 
@@ -1073,7 +1128,7 @@ VOID MyComputerWindow(UINT16 StartX, UINT16 StartY)
 EFI_STATUS ChineseCharArrayInit()
 {
     // 87 line, 96 Chinese char each line, 32 Char each Chinese char
-	UINT32 size = 32 * 96 * 87;
+	UINT32 size = 267616 + 1;
     //UINT8 *sChineseChar;
     
 	sChineseChar = (UINT8 *)AllocateZeroPool(size);
@@ -1254,7 +1309,7 @@ VOID GraphicsLayerCompute(int iMouseX, int iMouseY)
 		return;
 	}
     
-    DEBUG ((EFI_D_INFO, "Line: %d\n", __LINE__));
+    //DEBUG ((EFI_D_INFO, "Line: %d\n", __LINE__));
 
     for (i = 0; i < 16; i++)
         for (j = 0; j < 16; j++)
@@ -1389,7 +1444,7 @@ HandleMouseEvent (
     }
 
     //DEBUG ((EFI_D_INFO, "X: %X, Y: %X ", x_move, y_move));
-    //DebugPrint1(30, 70, "X: %X, Y: %X ", x_move, y_move );
+    DebugPrint1(30, 70, "X: %X, Y: %X ", x_move, y_move );
     
     iMouseX = iMouseX + x_move;
     iMouseY = iMouseY + y_move;
@@ -1730,14 +1785,14 @@ EFI_STATUS ScreenInit(EFI_GRAPHICS_OUTPUT_PROTOCOL   *GraphicsOutput)
     //for (i = 40; i < 65 + 60; i++)
     //    DrawAsciiCharIntoBuffer(DeskBuffer, 20 + (i - 40) * 8, 20, i, Color);
 	
-    /*GraphicsOutput->Blt(
+    GraphicsOutput->Blt(
                 GraphicsOutput, 
                 (EFI_GRAPHICS_OUTPUT_BLT_PIXEL *) DeskBuffer,
                 EfiBltBufferToVideo,
                 0, 0, 
                 0, 0, 
                 ScreenWidth, ScreenHeight, 0);   
-*/
+
 	// Desk graphics layer, buffer can not free!!
     //FreePool(DeskBuffer);
 

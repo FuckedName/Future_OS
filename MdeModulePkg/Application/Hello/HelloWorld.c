@@ -302,7 +302,7 @@ EFI_STATUS EFIAPI GetString( IN EFI_SYSTEM_TABLE *gST, CHAR16* Str )
 }
 
 
-EFI_FILE_PROTOCOL* EFIAPI GetFile( IN EFI_SYSTEM_TABLE *gST )
+EFI_FILE_PROTOCOL* EFIAPI GetFile1( IN EFI_SYSTEM_TABLE *gST )
 {
 	EFI_STATUS			Status;
 	INTN				HandleFileCount, HandleFileIndex = 0;
@@ -468,7 +468,7 @@ UefiMain(
 	UINT8 Bufferout[BYTES * EXBYTE];
 
 	UINTN			WriteSize;
-	EFI_FILE_PROTOCOL	*file = GetFile( SystemTable );
+	EFI_FILE_PROTOCOL	*file = GetFile1( SystemTable );
 
 	if (NULL == file)
 	{
@@ -508,7 +508,7 @@ UefiMain(
 									      &gEfiDiskIoProtocolGuid,
 									      (VOID * *) &DiskIo );
 
-	        Print( L"%d :%X\n", __LINE__ ,Status );
+	       Print( L"%d :%X\n", __LINE__ ,Status );
 			if ( Status == EFI_SUCCESS )
 			{
 				Print( L"%d ==read something==%d\n", __LINE__, BlockIo->Media->MediaId);
@@ -520,130 +520,62 @@ UefiMain(
 				{
 					Buffer[10] = '\0';
 					Print( L"%d :%s\n", __LINE__ , Buffer );
+
+					DecToCharBuffer(Buffer, BYTES, Bufferout);
+			       
+			       ShowHex(Buffer, BYTES);
 				}
-			}
-			
-		
-			Print( L"%d ==read something==%d\n", __LINE__, BlockIo->Media->MediaId);
-
-			Status = DiskIo->ReadDisk( DiskIo, BlockIo->Media->MediaId, 0, BYTES, Buffer );
-           Print( L"%d :%X\n", __LINE__ ,Status );
-           
-			if ( EFI_SUCCESS == Status )
-			{
-				Buffer[10] = '\0';
-	           Print( L"%d :%s\n", __LINE__ , Buffer );
-			}
-           /*
-
-			DecToCharBuffer( Buffer, BYTES, Bufferout );
-
-			WriteSize = BYTES * EXBYTE;
-
-			
-			Status = file->Write( file, &WriteSize, Bufferout );
-            Print( L"%d %s Bufferout: %s\n", __LINE__ , Bufferout);
-
-			if ( EFI_SUCCESS == Status )
-			{
-				Print( L"%d \n", __LINE__);
-				Print( L"==successed to write %d BYTES==\n", WriteSize );
-			}
-			else 
-			{
-				Print( L"!!failed to write %d BYTES!!\n", WriteSize );
-			}
-
-
-			ShowHex( Buffer, 52 );
-			*/
-		}else {
+			}		
+		}
+		else 
+		{
 			Print( L"!!failed to read disk!!\n" );
 		}
 
-
-
-
-
-
-
-
-
-
-
-	
-		Status = gBS->HandleProtocol( ControllerHandle[i],
-								      &gEfiDiskIoProtocolGuid,
-								      (VOID * *) &DiskIo );
-
+        Status = gBS->HandleProtocol( ControllerHandle[i],
+                                      &gEfiDevicePathProtocolGuid,
+                                      (VOID * *) &DevicePath );
         Print( L"%d :%X\n", __LINE__ ,Status );
 
-		if ( Status == EFI_SUCCESS )
-		{
-			Status = gBS->HandleProtocol( ControllerHandle[i],
-									      &gEfiDevicePathProtocolGuid,
-									      (VOID * *) &DevicePath );
+        if ( EFI_SUCCESS == Status )
+        {
+            Status = gBS->LocateProtocol( &gEfiDevicePathToTextProtocolGuid,
+                                            NULL,
+                                            (VOID * *) &DevicePathToText );
             Print( L"%d :%X\n", __LINE__ ,Status );
 
-			if ( EFI_SUCCESS == Status )
-			{
-				Status = gBS->LocateProtocol( &gEfiDevicePathToTextProtocolGuid,
-												NULL,
-												(VOID * *) &DevicePathToText );
-              Print( L"%d :%X\n", __LINE__ ,Status );
-
-				if ( EFI_SUCCESS == Status )
-				{
-					//Print( L"== %d path== %s \n", HandleIndex, TextOfDevicePath );
-					//Print( L"%d \n", __LINE__);
-					//WriteSize = StrLen( TextOfDevicePath ) * 2;
-					
-					//UINT8 *Buffer2 = (UINTN *)AllocateZeroPool(BYTES);					
-					//if ( NULL == Buffer2 )
-					//{
-					//	Print( L"%d AllocateZeroPool Failed:\n", __LINE__);
-					//}
-					
-					
-					UINTN			Size = 100 ;
-					UINT8        Buffer2[100];
-					Status = file->Read(file, &Size, Buffer2);
-					Print( L"%d :%X\n", __LINE__ , Status );
-					if ( EFI_SUCCESS == Status )
-					{
-						Print( L"%d Read buffer:%s\n", __LINE__ , Buffer2);
-					}
-					TextOfDevicePath = DevicePathToText->ConvertDevicePathToText( DevicePath, TRUE, TRUE );
-					file->Write( file, &WriteSize, TextOfDevicePath );
-					
-					WriteSize = 2 + 2;
-					file->Write( file, &WriteSize, "11\r\n" );
-
-					
-				}
-			}
-		}
+            if ( EFI_SUCCESS == Status )
+            {
+                
+                UINTN           Size = 100 ;
+                UINT8        Buffer2[100];
+                Status = file->Read(file, &Size, Buffer2);
+                Print( L"%d :%X\n", __LINE__ , Status );
+                if ( EFI_SUCCESS == Status )
+                {
+                    Print( L"%d Read buffer:%s\n", __LINE__ , Buffer2);
+                }                
+            }
+        }
 
 		file->Close( file );
+		
 
 		EFI_DEVICE_PATH_PROTOCOL *DiskDevicePath;
 		Status = gBS->OpenProtocol( ControllerHandle[i],
-					    &gEfiDevicePathProtocolGuid,
-					    (VOID * *) &DiskDevicePath,
-					    gImageHandle,
-					    NULL,
-					    EFI_OPEN_PROTOCOL_GET_PROTOCOL );
+								    &gEfiDevicePathProtocolGuid,
+								    (VOID * *) &DiskDevicePath,
+								    gImageHandle,
+								    NULL,
+								    EFI_OPEN_PROTOCOL_GET_PROTOCOL );
 		if ( EFI_ERROR( Status ) )
 		{
 			Print( L"Status = gBS->OpenProtocol error index %d: %x\n", i, Status );
-			return(Status);
+			return EFI_SUCCESS;
 		}
 		Print( L"%d\n", __LINE__ );
 
-		CHAR16 *TextDevicePath = 0;
-		/* TextDevicePath = DevPathToText->ConvertDeviceNodeToText(DiskDevicePath, TRUE, TRUE); */
-
-		/* Print(L"%d %s\n",__LINE__, TextDevicePath); */
+		CHAR16 *TextDevicePath = 0;		
 
 		TextDevicePath = DevPathToText->ConvertDevicePathToText( DiskDevicePath, TRUE, TRUE );
 		Print( L"%d %s\n", __LINE__, TextDevicePath );
