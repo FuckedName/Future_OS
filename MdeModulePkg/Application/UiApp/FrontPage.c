@@ -89,9 +89,8 @@ ToDo:
 
 static UINTN ScreenWidth, ScreenHeight;  
 
-UINT8 *pMyComputerBuffer = NULL;
-UINT16 MyComputerWidth = 700;
-UINT16 MyComputerHeight = 400;
+UINT16 MyComputerWidth = 100;
+UINT16 MyComputerHeight = 100;
 
 const UINT8 *sChineseChar = NULL;
 
@@ -99,6 +98,8 @@ EFI_GRAPHICS_OUTPUT_PROTOCOL       *GraphicsOutput;
 EFI_SIMPLE_POINTER_PROTOCOL        *gMouse;
 
 extern EFI_SIMPLE_FILE_SYSTEM_PROTOCOL *gSimpleFileSystem; 
+
+UINT8 *pMyComputerBuffer = NULL;
 
 UINT8 *pDeskBuffer = NULL;
 UINT8 *pDeskDisplayBuffer = NULL; //desk display after multi graphicses layers compute
@@ -328,6 +329,23 @@ void CopyColorIntoBuffer3(UINT8 *pBuffer, EFI_GRAPHICS_OUTPUT_BLT_PIXEL color, U
 INT32 Math_ABS(INT32 v)
 {
 	return (v < 0) ? -v : v;
+}
+
+VOID GraphicsCopy(UINT8 *pDest, UINT8 *pSource, 
+						   UINT16 DestWidth, UINT16 DestHeight, 
+						   UINT16 SourceWidth, UINT16 SourceHeight, 
+					       UINT16 StartX, UINT16 StartY)
+{
+	int i, j;
+	for(i = 0; i < SourceHeight; i++)
+	{
+		for (j = 0; j < SourceWidth; j++)
+		{
+			pDest[((StartY + i) * DestWidth + StartX + j) * 4] = pSource[(i * SourceWidth + j) * 4];
+			pDest[((StartY + i) * DestWidth + StartX + j) * 4 + 1] = pSource[(i * SourceWidth + j) * 4 + 1];
+			pDest[((StartY + i) * DestWidth + StartX + j) * 4 + 2] = pSource[(i * SourceWidth + j) * 4 + 2];
+		}
+	}
 }
 
 EFI_STATUS LineDrawIntoBuffer(UINT8 *pBuffer,
@@ -649,9 +667,8 @@ EFI_STATUS DrawChineseCharUseBuffer(UINT8 *pBuffer,
         IN UINTN x0, UINTN y0,UINT8 *c, UINT8 count,
         IN EFI_GRAPHICS_OUTPUT_BLT_PIXEL FontColor, UINT16 AreaWidth)
 {
-    INT16 i,j;    
-    int k = y0;
-    //UINT8 pBuffer[16 * 16 * 4];
+    INT16 i, j;    
+    
     if (NULL == pBuffer)
 	{
 		DEBUG ((EFI_D_INFO, "NULL == pBuffer"));
@@ -786,6 +803,7 @@ EFI_STATUS ShellServiceRead()
     	 DEBUG ((EFI_D_INFO, "OpenShellProtocol error: %x\n", Status));
         return Status;
     }
+    return EFI_SUCCESS;
 }
 
 EFI_STATUS PartitionRead()
@@ -849,6 +867,7 @@ EFI_STATUS PartitionRead()
         
         DEBUG ((EFI_D_INFO, "\n\n"));
     }
+    return EFI_SUCCESS;
 
 }
 
@@ -938,26 +957,14 @@ EFI_STATUS FileReadSelf(CHAR16 *FileName, UINT32 size, UINT8 *pBuffer)
 
 EFI_STATUS FileReadSelf2(CHAR16 *FileName, UINT32 size, UINT8 *pBuffer)
 {    
-	EFI_SIMPLE_FILE_SYSTEM_PROTOCOL *Fs;
 	EFI_STATUS		Status;
-	SHELL_FILE_HANDLE	FileHandle;
-	EFI_SHELL_PROTOCOL	*gEfiShellProtocol;
 	UINTN					NumHandles, i;
 	EFI_HANDLE				*ControllerHandle = NULL;
 	EFI_DEVICE_PATH_TO_TEXT_PROTOCOL	*DevPathToText;
-	EFI_FILE_HANDLE				FileDir;
-
-	EFI_FILE_HANDLE				RootDir;
-	INTN					HandleCount, HandleIndex;
-	EFI_HANDLE				*Controllers = NULL;
 	EFI_DISK_IO_PROTOCOL			*DiskIo;
 	EFI_BLOCK_IO_PROTOCOL			*BlockIo;
-	EFI_DEVICE_PATH_PROTOCOL		*DevicePath;
-	EFI_DEVICE_PATH_TO_TEXT_PROTOCOL	*DevicePathToText;
-	EFI_BLOCK_IO_MEDIA			*Media;
-	CHAR16					*TextOfDevicePath;
 
-	UINTN			WriteSize;
+
 	DEBUG ((EFI_D_INFO, "%d FileReadSelf2 START\n ", __LINE__));
 	Status = gBS->LocateProtocol( &gEfiDevicePathToTextProtocolGuid, NULL, (VOID * *) &DevPathToText );
 	Print( L"%d :%X\n", __LINE__ ,Status );
@@ -1180,7 +1187,7 @@ EFI_STATUS ChineseCharArrayInit()
 		x = 10;
 		y += 16;
 	 }
-	
+	return EFI_SUCCESS;
 }
 
 STATIC
@@ -1227,11 +1234,10 @@ HandleKeyboardEvent (
 		    continue;
 		else
 		{
-			EFI_STATUS r = gBS->CheckEvent(SimpleEx->WaitForKeyEx);
+			Status = gBS->CheckEvent(SimpleEx->WaitForKeyEx);
 			if (Status == EFI_NOT_READY)
 			    continue;
 			  
-			//DEBUG ((EFI_D_INFO, "gBS->CheckEvent: %x ...\n", EFI_ERROR(r)));
 			gBS->WaitForEvent(1, &(SimpleEx->WaitForKeyEx), &Index);
 
 			Status = SimpleEx->ReadKeyStrokeEx(SimpleEx, &KeyData);
@@ -1246,6 +1252,121 @@ HandleKeyboardEvent (
     }  
 	
 	 DrawAsciiCharUseBuffer(pDeskBuffer, 20, 40, uniChar, Color);
+}
+
+#define BYTES	512
+#define EXBYTE	4
+
+VOID EFIAPI ShowHex1( UINT8* Buffer, UINTN len )
+{
+	UINTN i = 0;
+	for ( i = 0; i < 52; ++i )
+	{
+		if ( i % 26 == 0 )			
+        	DebugPrint1(1350, 16 * 16, "%d\n", __LINE__);
+			
+		DebugPrint1(i * 4, 16 * 16, L"%02x ", Buffer[i] );
+	}
+}
+
+VOID EFIAPI DecToChar1( UINT8* CharBuff, UINT8 I )
+{
+	CharBuff[0]	= ( (I / 16) > 9) ? ('A' + (I / 16) - 10) : ('0' + (I / 16) );
+	CharBuff[1]	= ( (I % 16) > 9) ? ('A' + (I % 16) - 10) : ('0' + (I % 16) );
+}
+
+VOID EFIAPI DecToCharBuffer1( UINT8* Buffin, UINTN len, UINT8* Buffout )
+{
+	UINTN i = 0;
+
+	for ( i = 0; i < len; ++i )
+	{
+		DecToChar1( Buffout + i * 4, Buffin[i] );
+		if ( (i + 1) % 16 == 0 )
+		{
+			*(Buffout + i * 4 + 2)	= '\r';
+			*(Buffout + i * 4 + 3)	= '\n';
+		}
+		else  
+		{
+			*(Buffout + i * 4 + 2)	= ' ';
+			*(Buffout + i * 4 + 3)	= ' ';
+		}
+	}
+}
+
+
+EFI_STATUS DiskRead1()
+{	
+    DebugPrint1(550, 0, "%d: DiskRead1 \n", __LINE__);
+	EFI_STATUS		Status;
+	UINTN					NumHandles, i;
+	EFI_HANDLE				*ControllerHandle = NULL;
+	EFI_DEVICE_PATH_TO_TEXT_PROTOCOL	*DevPathToText;
+    EFI_DISK_IO_PROTOCOL            *DiskIo;
+    EFI_BLOCK_IO_PROTOCOL           *BlockIo;
+
+    UINT8 Buffer[BYTES];
+
+    UINT8 Bufferout[BYTES * EXBYTE];
+
+    Status = gBS->LocateProtocol( &gEfiDevicePathToTextProtocolGuid, NULL, (VOID * *) &DevPathToText );
+    Print( L"%d :%X\n", __LINE__ ,Status );
+    if ( EFI_ERROR( Status ) )
+    {
+        Print( L"%d, LocateProtocol gEfiDevicePathToTextProtocolGuid error: %x\n", __LINE__, Status );
+        return(Status);
+    }
+
+    Status = gBS->LocateHandleBuffer( ByProtocol, &gEfiDiskIoProtocolGuid, NULL, &NumHandles, &ControllerHandle );
+    Print( L"%d :%X %d\n", __LINE__ , Status, NumHandles );
+    if ( EFI_ERROR( Status ))
+    {
+        Print( L"%d, LocateHandleBuffer gEfiDiskIoProtocolGuid error: %x\n", __LINE__, Status );
+        return(Status);
+    }
+
+    Print( L"%d, NumHandles: %d\n", __LINE__, NumHandles );
+
+    Print( L"Before for\n", Status );
+    for ( i = 0; i < NumHandles; i++ )
+    {
+        Status = gBS->HandleProtocol(ControllerHandle[i],
+                                        &gEfiBlockIoProtocolGuid,
+                                        (VOID * *) &BlockIo );
+       Print( L"%d :%X\n", __LINE__ ,Status );
+
+        if ( EFI_SUCCESS == Status )
+        {
+            Status = gBS->HandleProtocol( ControllerHandle[i],
+                                          &gEfiDiskIoProtocolGuid,
+                                          (VOID * *) &DiskIo );
+
+           Print( L"%d :%X\n", __LINE__ ,Status );
+            if ( Status == EFI_SUCCESS )
+            {
+                Print( L"%d, %d\n", __LINE__, BlockIo->Media->MediaId);
+
+                Status = DiskIo->ReadDisk( DiskIo, BlockIo->Media->MediaId, 0, BYTES, Buffer );
+                //Print( L"%d :%X\n", __LINE__ ,Status );
+
+                if ( EFI_SUCCESS == Status )
+                {
+                    Buffer[10] = '\0';
+                    Print( L"%d :%s\n", __LINE__ , Buffer );
+
+                    DecToCharBuffer1(Buffer, BYTES, Bufferout);
+                   
+                    ShowHex1(Bufferout, BYTES);
+                }
+            }       
+        }
+        else 
+        {
+            Print( L"!!failed to read disk!!\n" );
+        }
+    }
+    return EFI_SUCCESS;
 }
 
  // iMouseX: left top
@@ -1267,7 +1388,7 @@ HandleKeyboardEvent (
      Color.Blue = 0xFF;
      Color.Red  = 0xFF;
      Color.Green= 0xFF;
-
+	 
      //DrawChineseCharUseBuffer(pBuffer, 10, 10, sChinese[0], 5, Color, width);
      /*
      GraphicsOutput->Blt(GraphicsOutput, 
@@ -1282,28 +1403,10 @@ HandleKeyboardEvent (
  
  }
 
-VOID GraphicsCopy(UINT8 *pDest, UINT8 *pSource, 
-						   UINT16 DestWidth, UINT16 DestHeight, 
-						   UINT16 SourceWidth, UINT16 SourceHeight, 
-					       UINT16 StartX, UINT16 StartY)
-{
-	int i, j;
-	for(i = 0; i < SourceHeight; i++)
-	{
-		for (j = 0; j < SourceWidth; j++)
-		{
-			pDest[((StartY + i) * DestWidth + StartX + j) * 4] = pSource[(i * SourceWidth + j) * 4];
-			pDest[((StartY + i) * DestWidth + StartX + j) * 4 + 1] = pSource[(i * SourceWidth + j) * 4 + 1];
-			pDest[((StartY + i) * DestWidth + StartX + j) * 4 + 2] = pSource[(i * SourceWidth + j) * 4 + 2];
-		}
-	}
-}
-
-
 VOID GraphicsLayerCompute(int iMouseX, int iMouseY)
 {
 	GraphicsCopy(pDeskDisplayBuffer, pDeskBuffer, ScreenWidth, ScreenHeight, ScreenWidth, ScreenHeight, 0, 0);
-	GraphicsCopy(pDeskDisplayBuffer, pMyComputerBuffer, ScreenWidth, ScreenHeight, MyComputerWidth, MyComputerHeight, 100, 100);
+	GraphicsCopy(pDeskDisplayBuffer, pMyComputerBuffer, ScreenWidth, ScreenHeight, MyComputerWidth, MyComputerHeight, 100, 900);
 
 	int i, j;
 
@@ -1386,13 +1489,7 @@ HandleMouseEvent (
   IN EFI_EVENT Event,
   IN VOID      *Context
   )
-{
-    EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
-
-	Color.Blue = 0xFF;
-	Color.Red = 0xFF;
-	Color.Green = 0xFF;
-	
+{	
     static int iMouseX = 500 / 2;
     static int iMouseY = 600 / 2;
 
@@ -1400,11 +1497,12 @@ HandleMouseEvent (
 	UINTN Index;
 	EFI_SIMPLE_POINTER_STATE State;
 
-	EFI_STATUS r = gBS->CheckEvent(gMouse->WaitForInput);
-	//DEBUG ((EFI_D_INFO, "BS->CheckEvent(gMouse: %X\n", r));
-	if (Status == EFI_NOT_READY)
-		return;
-		
+	Status = gBS->CheckEvent(gMouse->WaitForInput);	
+    if (Status == EFI_NOT_READY)
+    {
+        return ;
+    }
+	
 	Status = gMouse->GetState(gMouse, &State);
     if (Status == EFI_DEVICE_ERROR)
     {
@@ -1424,9 +1522,6 @@ HandleMouseEvent (
     {
         x_move = (State.RelativeMovementX >> 16) & 0xff;
     }
-    
-    // cover old mouse cursor
-	//DrawAsciiCharUseBuffer(GraphicsOutput, iMouseX, iMouseY, 0, Color);
 
     //Y
 	if (State.RelativeMovementY < 0)
@@ -1721,7 +1816,7 @@ EFI_STATUS ScreenInit(EFI_GRAPHICS_OUTPUT_PROTOCOL   *GraphicsOutput)
     Color.Blue	= 0xFF;
     RectangleFillIntoBuffer(pDeskBuffer, x - 163,    y - 3, x - 4,     y - 3, 1, Color);
     RectangleFillIntoBuffer(pDeskBuffer, x - 3,     y - 24, x - 3,     y - 3, 1, Color);
-        
+        /*
     Color.Red   = 0xFF;
     Color.Green = 0xFF;
     Color.Blue	= 0xFF;
@@ -1758,7 +1853,7 @@ EFI_STATUS ScreenInit(EFI_GRAPHICS_OUTPUT_PROTOCOL   *GraphicsOutput)
     // Display "wo"    
     //DrawChineseCharIntoBuffer(pDeskBuffer, 20, 20 + 16, 0, Color, ScreenWidth);
     
-    
+    */
     MyComputerWindow(100, 100);
 	//ChineseCharArrayInit();
 	
@@ -1809,7 +1904,8 @@ EFI_STATUS AllocateMemory1()
 	if (pMouseClickBuffer == NULL)
 	{
 		return -1;
-	}    
+	}   
+	return EFI_SUCCESS;
 }
 
 EFI_STATUS
@@ -1855,6 +1951,7 @@ Main (
     }
     
     PartitionRead();
+    DiskRead1();
     
     MultiProcessInit();
 
