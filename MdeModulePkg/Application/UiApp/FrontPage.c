@@ -750,10 +750,11 @@ EFI_STATUS OpenShellProtocolSelf( EFI_SHELL_PROTOCOL **gEfiShellProtocol )
     return Status;
 }
 
-
+int Nodei = 0;
 EFI_STATUS PrintNode(EFI_DEVICE_PATH_PROTOCOL *Node)
-{
-    Print(L"(%d, %d)/", Node->Type, Node->SubType);
+{    
+    DebugPrint1(350 + 700, 16 * Nodei, "%d: (%d, %d)\n", __LINE__, Node->Type, Node->SubType);
+    Nodei++;
     return 0;
 }
 
@@ -789,41 +790,35 @@ EFI_STATUS ShellServiceRead()
 
 EFI_STATUS PartitionRead()
 {
+    DebugPrint1(350, 0, "%d: PartitionRead \n", __LINE__);
     DEBUG ((EFI_D_INFO, "PartitionRead!!\r\n"));
     EFI_STATUS Status ;
-    EFI_SHELL_PROTOCOL  *gEfiShellProtocol;
     UINTN NumHandles, i;
     EFI_HANDLE *ControllerHandle = NULL;
     EFI_DEVICE_PATH_TO_TEXT_PROTOCOL *DevPathToText;
-
-    Status = OpenShellProtocolSelf(&gEfiShellProtocol);    
-    if (EFI_ERROR(Status))
-    {
-    	 DEBUG ((EFI_D_INFO, "OpenShellProtocol error: %x\n", Status));
-        return Status;
-    }
     
     Status = gBS->LocateProtocol (&gEfiDevicePathToTextProtocolGuid, NULL, (VOID **) &DevPathToText);
     if (EFI_ERROR(Status))
     {
     	 DEBUG ((EFI_D_INFO, "LocateProtocol1 error: %x\n", Status));    	 
-        DebugPrint1(DebugPrintX, DebugPrintY + 16 * 3, "%d: LocateProtocol1 error: %x\n", __LINE__, Status);
+    	 DebugPrint1(350, 16 * 2, "%d: OpenShellProtocolSelf: %x \n", __LINE__, Status);
         return Status;
     }
    
     Status = gBS->LocateHandleBuffer(ByProtocol, &gEfiDiskIoProtocolGuid, NULL, &NumHandles, &ControllerHandle);
     if (EFI_ERROR(Status))
     {
-        DebugPrint1(DebugPrintX, DebugPrintY + 16 * 4, "%d: LocateHandleBuffer error: %x\n", __LINE__, Status);
+        DebugPrint1(350, 16 * 4, "%d: LocateHandleBuffer error: %x\n", __LINE__, Status);
         DEBUG ((EFI_D_INFO, "LocateProtocol1 error: %x\n", Status));
         return Status;
     }
 
     DEBUG ((EFI_D_INFO, "Before for\n", Status));
-    DebugPrint1(DebugPrintX, DebugPrintY + 16 * 5, "%d: Before for\n", __LINE__);
+    DebugPrint1(350, 16 * 5, "%d: LocateHandleBuffer error: %x\n", __LINE__, Status);
     
     for (i = 0; i < NumHandles; i++)
     {
+    	DebugPrint1(350, 16 * 6, "%d: LocateHandleBuffer error: %x\n", __LINE__, Status);
         EFI_DEVICE_PATH_PROTOCOL *DiskDevicePath;
         Status = gBS->OpenProtocol(ControllerHandle[i],
                                    &gEfiDevicePathProtocolGuid,
@@ -833,14 +828,20 @@ EFI_STATUS PartitionRead()
                                    EFI_OPEN_PROTOCOL_GET_PROTOCOL);
         if (EFI_ERROR(Status))
         {
+    		 DebugPrint1(350, 16 * 7, "%d: LocateHandleBuffer error: %x\n", __LINE__, Status);
             DEBUG ((EFI_D_INFO, "Status = gBS->OpenProtocol error index %d: %x\n", i, Status));
             return Status;
         }
 
         CHAR16 *TextDevicePath = 0;
         TextDevicePath = DevPathToText->ConvertDevicePathToText(DiskDevicePath, TRUE, TRUE);
+        
+    	 DebugPrint1(350 + 350, 16 * i, "%d: : %s\n", __LINE__, TextDevicePath);
+    	 
         DEBUG ((EFI_D_INFO, "%s\n", TextDevicePath));
-        //DebugPrint1(30, 70, "X: %X, Y: %X ", x_move, y_move );
+        
+        //DebugPrint1(0, (6 + i) * 16 , "%s\n", TextDevicePath);
+        
 
         if (TextDevicePath) gBS->FreePool(TextDevicePath);
 
@@ -1844,7 +1845,6 @@ Main (
 		DEBUG(( EFI_D_INFO, "-1 == AllocateMemory1()\n\n"));
     }
     
-    PartitionRead();
     
     ScreenInit(GraphicsOutput);
         
@@ -1854,7 +1854,10 @@ Main (
         return EFI_UNSUPPORTED;
     }
     
+    PartitionRead();
+    
     MultiProcessInit();
+
     SystemTimeIntervalInit();
 	
     return EFI_SUCCESS;
