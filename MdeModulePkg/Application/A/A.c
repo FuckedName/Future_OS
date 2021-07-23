@@ -20,6 +20,10 @@ ToDo:
 
 **/
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <Library/BaseLib.h>
 
 #include <Guid/ConsoleInDevice.h>
 #include <Guid/ConsoleOutDevice.h>
@@ -98,6 +102,7 @@ UINT8 *pDeskDisplayBuffer = NULL; //desk display after multi graphicses layers c
 UINT8 *pMouseSelectedBuffer = NULL;  // after mouse selected
 UINT8 *pMouseClickBuffer = NULL; // for mouse click 
 UINT8 *pMouseBuffer = NULL;
+
 
 const UINT8 *sChineseChar = NULL;
 static UINTN ScreenWidth, ScreenHeight;  
@@ -341,6 +346,82 @@ VOID GraphicsCopy(UINT8 *pDest, UINT8 *pSource,
 		}
 	}
 }
+VOID GraphicsLayerCompute(int iMouseX, int iMouseY)
+{
+	GraphicsCopy(pDeskDisplayBuffer, pDeskBuffer, ScreenWidth, ScreenHeight, ScreenWidth, ScreenHeight, 0, 0);
+	GraphicsCopy(pDeskDisplayBuffer, pMyComputerBuffer, ScreenWidth, ScreenHeight, MyComputerWidth, MyComputerHeight, 100, 900);
+
+	int i, j;
+
+
+	//16, ScreenHeight - 21, For event trigger
+
+    EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;  
+
+	if (NULL == pMouseSelectedBuffer)
+	{
+		DEBUG ((EFI_D_INFO, "NULL == pMouseSelectedBuffer"));
+		return;
+	}
+    
+    //DEBUG ((EFI_D_INFO, "Line: %d\n", __LINE__));
+
+    for (i = 0; i < 16; i++)
+        for (j = 0; j < 16; j++)
+        {       
+                /*pMouseBuffer[(i * 16 + j) * 4]     = pDeskDisplayBuffer[((iMouseY + i) * ScreenWidth +  iMouseX + j) * 4];
+                pMouseBuffer[(i * 16 + j) * 4 + 1] = pDeskDisplayBuffer[((iMouseY + i) * ScreenWidth +  iMouseX + j) * 4 + 1];
+                pMouseBuffer[(i * 16 + j) * 4 + 2] = pDeskDisplayBuffer[((iMouseY + i) * ScreenWidth +  iMouseX + j) * 4 + 2];            
+					*/
+                pMouseBuffer[(i * 16 + j) * 4]     = 0xff;
+                pMouseBuffer[(i * 16 + j) * 4 + 1] = 0xff;
+                pMouseBuffer[(i * 16 + j) * 4 + 2] = 0;             
+        }
+
+	/*
+    DrawChineseCharIntoBuffer2(pDeskBuffer,  16, ScreenHeight - 21,     (18 - 1) * 94 + 43 - 1, Color, ScreenWidth);
+    DrawChineseCharIntoBuffer2(pDeskBuffer,  16 * 2, ScreenHeight - 21, (21 - 1) * 94 + 05 - 1, Color, ScreenWidth);
+
+	*/
+	
+    Color.Red   = 0xff;
+    Color.Green = 0x00;
+    Color.Blue	  = 0x00;
+    
+    if (iMouseX >= 16 && iMouseX <= 16 + 16 * 2
+        && iMouseY >= ScreenHeight - 21 && iMouseY <= ScreenHeight)
+    {	
+		for (i = 0; i < 16; i++)
+		{
+			for (j = 0; j < 32; j++)
+			{	
+				pMouseSelectedBuffer[(i * 32 + j) * 4]     = pDeskDisplayBuffer[((ScreenHeight - 21 + i) * ScreenWidth +  16 + j) * 4];
+				pMouseSelectedBuffer[(i * 32 + j) * 4 + 1] = pDeskDisplayBuffer[((ScreenHeight - 21 + i) * ScreenWidth +  16 + j) * 4 + 1];
+				pMouseSelectedBuffer[(i * 32 + j) * 4 + 2] = pDeskDisplayBuffer[((ScreenHeight - 21 + i) * ScreenWidth +  16 + j) * 4 + 2];			
+			}
+		}
+		 //RectangleFillIntoBuffer(UINT8 * pBuffer,IN UINTN x0,UINTN y0,UINTN x1,UINTN y1,IN UINTN BorderWidth,IN EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color)
+		
+        //RectangleFillIntoBuffer(pMouseSelectedBuffer, 0,  0, 32, 16, 1,  Color);
+        
+        RectangleDrawIntoBuffer(pMouseSelectedBuffer, 0,  0, 31, 15, 1,  Color, 32);
+        
+        GraphicsCopy(pDeskDisplayBuffer, pMouseSelectedBuffer, ScreenWidth, ScreenHeight, 32, 16, 15, ScreenHeight - 22);
+    }
+
+    // init mouse buffer for use in use
+	//DrawChineseCharIntoBuffer2(pMouseBuffer, 0, 0, 11 * 94 + 42, MouseColor, 16);
+
+	
+	GraphicsCopy(pDeskDisplayBuffer, pMouseBuffer, ScreenWidth, ScreenHeight, 16, 16, iMouseX, iMouseY);
+
+   GraphicsOutput->Blt(GraphicsOutput, 
+			            (EFI_GRAPHICS_OUTPUT_BLT_PIXEL *) pDeskDisplayBuffer,
+			            EfiBltBufferToVideo,
+			            0, 0, 
+			            0, 0, 
+			            ScreenWidth, ScreenHeight, 0);   
+}
 
 EFI_STATUS LineDrawIntoBuffer(UINT8 *pBuffer,
         IN UINTN x0, UINTN y0, UINTN x1, UINTN y1, 
@@ -470,15 +551,19 @@ EFI_STATUS DrawAsciiCharUseBuffer(UINT8 *pBufferDest,
 UINT16 DebugPrintX = 0;
 UINT16 DebugPrintY = 0; 
 
+CHAR8    AsciiBuffer[0x100] = {0};
+
 VOID StringMaker (UINT16 x, UINT16 y,
   IN  CONST CHAR8   *Format,
   IN  VA_LIST       VaList
   )
 {
-    CHAR8    AsciiBuffer[0x100] = {0};
     EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
 	UINT32 i = 0;
-
+	
+	for (i = 0; i < 0x100; i++)
+		AsciiBuffer[i] = 0;
+		
 	Color.Blue = 0xFF;
 	Color.Red = 0xFF;
 	Color.Green = 0xFF;
@@ -521,7 +606,6 @@ VOID StringMakerWithLine (UINT16 x, UINT16 y, UINT16 line,
 VOID EFIAPI DebugPrint1 (UINT16 x, UINT16 y, IN  CONST CHAR8  *Format, ...)
 {
 	VA_LIST         VaList;
-
 	VA_START (VaList, Format);
 	StringMaker(x, y, Format, VaList);
 	VA_END (VaList);
@@ -764,8 +848,8 @@ EFI_STATUS OpenShellProtocolSelf( EFI_SHELL_PROTOCOL **gEfiShellProtocol )
 int Nodei = 0;
 EFI_STATUS PrintNode(EFI_DEVICE_PATH_PROTOCOL *Node)
 {    
-    DebugPrint1(350 + 700, 16 * Nodei, "%d: (%d, %d)\n", __LINE__, Node->Type, Node->SubType);
-    Nodei++;
+    //DebugPrint1(350 + 700, 16 * (Nodei + 10), "%d:Nodei:%d (%d, %d)\n", __LINE__, Nodei, Node->Type, Node->SubType);
+    //Nodei++;
     return 0;
 }
 
@@ -787,7 +871,7 @@ EFI_STATUS ShellServiceRead()
 {
     //DEBUG ((EFI_D_INFO, "ShellServiceRead error: %x\n", Status));
     
-	DebugPrint1(DebugPrintX, DebugPrintY + 16, "%d, ShellServiceRead\n", __LINE__);
+	//DebugPrint1(0, 16 * 6, "%d, ShellServiceRead\n", __LINE__);
     
 	EFI_STATUS Status ;
     EFI_SHELL_PROTOCOL  *gEfiShellProtocol;
@@ -800,9 +884,362 @@ EFI_STATUS ShellServiceRead()
     return EFI_SUCCESS;
 }
 
+typedef struct
+{
+	unsigned int DeviceType; // 0 Disk, 1 USB;
+	unsigned int PartitionType; // 0 MBR, 1 GPT;
+	unsigned int PartitionID; // a physics device consist of Several parts like c: d: e:
+	unsigned int PartitionGUID; // like FA458FD2-4FF7-44D8-B542-BA560A5990B3
+	unsigned int DeviceSquenceID; //0025384961B47ECD
+	char Signare[50]; // MBR:0x077410A0
+	long long StartSectorNumber; //0x194000
+	long long SectorCount; //0xC93060
+}DEVICE_PARAMETER;
+
+UINTN strlen1(char *String)
+{
+    UINTN  Length;
+    for (Length = 0; *String != '\0'; String++, Length++) ;
+//	 DEBUG ((EFI_D_INFO, "%d Length: %d\n", __LINE__, Length));
+    return Length;
+}
+
+int isspaceSelf (int c)
+{
+  //
+  // <space> ::= [ ]
+  //
+  return ((c) == ' ') || ((c) == '\t') || ((c) == '\r') || ((c) == '\n') || ((c) == '\v')  || ((c) == '\f');
+}
+
+int isalnumSelf (int c)
+{
+  //
+  // <alnum> ::= [0-9] | [a-z] | [A-Z]
+  //
+  return ((('0' <= (c)) && ((c) <= '9')) ||
+          (('a' <= (c)) && ((c) <= 'z')) ||
+          (('A' <= (c)) && ((c) <= 'Z')));
+}
+
+#define LLONG_MIN  (((INT64) -9223372036854775807LL) - 1)
+#define LLONG_MAX   ((INT64)0x7FFFFFFFFFFFFFFFULL)
+
+int
+toupperSelf(
+  IN  int c
+  )
+{
+  if ( (c >= 'a') && (c <= 'z') ) {
+    c = c - ('a' - 'A');
+  }
+  return c;
+}
+
+
+
+int
+Digit2ValSelf( int c)
+{
+  if (((c >= 'a') && (c <= 'z')) || ((c >= 'A') && (c <= 'Z'))) {  /* If c is one of [A-Za-z]... */
+    c = toupperSelf(c) - 7;   // Adjust so 'A' is ('9' + 1)
+  }
+  return c - '0';   // Value returned is between 0 and 35, inclusive.
+}
+
+long long Multi(long x, long y)
+{
+	return x * y;
+}
+
+long long
+strtollSelf(const char * nptr, char ** endptr, int base)
+{
+  const char *pEnd;
+  long long   Result = 0;
+  long long   Previous;
+  int         temp;
+  BOOLEAN     Negative = FALSE;
+
+  pEnd = nptr;
+    
+  base = 16; 
+  ++nptr;
+  ++nptr;
+  DEBUG ((EFI_D_INFO, "line:%d device->StartSectorNumber: %a base: %d \n", __LINE__, nptr, base));
+
+  while( isalnumSelf(*nptr) && ((temp = Digit2ValSelf(*nptr)) < base)) 
+  {
+    DEBUG ((EFI_D_INFO, "line:%d temp: %d, Result: %d \n", __LINE__, temp, Result));
+    Previous = Result;
+    Result = Multi (Result, base) + (long long int)temp;
+    if( Result <= Previous) 
+    {   // Detect Overflow
+      if(Negative) 
+      {
+	    DEBUG ((EFI_D_INFO, "line:%d Negative!!!!\n", __LINE__, temp, Result));
+        Result = LLONG_MIN;
+      }
+      else 
+      {
+        Result = LLONG_MAX;
+      }
+      Negative = FALSE;
+      break;
+    }
+    pEnd = ++nptr;
+  }
+
+  DEBUG ((EFI_D_INFO, "line:%d device->StartSectorNumber: %d \n", __LINE__, Result));
+  if(Negative) 
+  {
+    Result = -Result;
+  }
+
+  // Save pointer to final sequence
+  if(endptr != NULL) 
+  {
+    *endptr = (char *)pEnd;
+  }
+
+  DEBUG ((EFI_D_INFO, "line:%d temp: %d, Result: %d \n", __LINE__, temp, Result));
+  return Result;
+}
+
+
+void TextDevicePathAnalysis(char *p, DEVICE_PARAMETER *device)
+{
+    int length = strlen1(p);
+    int i = 0;
+    DebugPrint1(0, 11 * 16, "line: %d string: %s, length: %d\n", __LINE__, p, length);
+    for (i = 0; i < length - 3; i++)
+    { 
+        //USB
+        if (p[i] == 'U' && p[i + 1] == 'S' && p[i + 2] == 'B')
+        {
+            device->DeviceType = 1;
+            break;
+        }
+            
+        //Sata
+        if (p[i] == 'S' && p[i + 1] == 'a' && p[i + 2] == 't' && p[i + 3] == 'a')
+        {
+            device->DeviceType = 2;
+            break;
+        }
+    }
+    //printf("line:%d i: %d\n", __LINE__, i);
+    
+    //HD
+    while (i++)
+        if (p[i] == 'H' && p[i + 1] == 'D')
+            break;
+            
+    //printf("line:%d i: %d\n", __LINE__, i);
+    if (i >= length)
+        return;
+                
+    //printf("line:%d i: %d\n", __LINE__, i);
+    device->PartitionID = p[i + 3] - '0';
+    
+    i+=3;
+    
+    while (i++)
+    {
+        //MBR
+        if (p[i] == 'M' && p[i + 1] == 'B' && p[i + 2] == 'R')
+        {
+            device->PartitionType = 1;
+            break;
+        }
+            
+        //GPT
+        if (p[i] == 'G' && p[i + 1] == 'P' && p[i + 2] == 'T')
+        {
+            device->PartitionType = 2;    
+            break;
+        }
+    }
+        
+    i+=3;
+    
+    //printf("line:%d i: %d\n", __LINE__, i);
+    int commalocation[2];
+    int count = 0;
+    for (int j = i + 1; p[j] != ')'; j++)
+    {
+        if (p[j] == ',')
+        {
+           commalocation [count++] = j;
+           //printf("line:%d, j: %d, data: %c%c\n", __LINE__, j, p[j], p[j+1]);
+        }
+    }
+    
+    char temp[20];
+    int j = 0;
+    //start
+    for (i = commalocation[0] + 1; i < commalocation[1]; i++)
+    {
+        temp[j++] = p[i];
+        //printf("%c", p[i]);
+    }
+    temp[j] = '\0';
+    //strtol(const char * nptr,char * * endptr,int base)
+    //puts(temp);
+    DEBUG ((EFI_D_INFO, "line:%d device->StartSectorNumber: %a \n", __LINE__, temp));
+    //printf("line:%d start: %d\n", __LINE__, strtol(temp));
+    device->StartSectorNumber = strtollSelf(temp, NULL, 10);
+    //putchar('\n');
+    
+    j = 0;
+    //length
+    for (i = commalocation[1] + 1; i < length - 1; i++)
+    {
+        temp[j++] = p[i];
+        //printf("%c", p[i]);
+    }
+    temp[j] = '\0';
+    //puts(temp);
+    //printf("line:%d end: %d\n", __LINE__, strtol(temp));
+    device->SectorCount = strtollSelf(temp, NULL, 10);;
+    DEBUG ((EFI_D_INFO, "line:%d device->SectorCount: %a \n", __LINE__, temp));
+    //putchar('\n');
+    
+    //DebugPrint1(0, 11 * 16, "line: %d string: %s, length: %d\n",       __LINE__, p, strlen(p));
+    DebugPrint1(0, 22 * 16, "line:%d device->DeviceType: %d \n",        __LINE__, device->DeviceType);
+    DebugPrint1(0, 21 * 16, "line:%d device->PartitionType: %d \n",     __LINE__, device->PartitionType);
+    DebugPrint1(0, 20 * 16, "line:%d device->PartitionID: %d \n",       __LINE__, device->PartitionID);
+    DebugPrint1(0, 19 * 16, "line:%d device->StartSectorNumber: %d \n",  __LINE__, device->StartSectorNumber);
+    DebugPrint1(0, 18 * 16, "line:%d device->SectorCount: %d \n",        __LINE__, device->SectorCount);
+
+    DEBUG ((EFI_D_INFO, "line:%d device->DeviceType: %d \n", __LINE__, device->DeviceType));
+    DEBUG ((EFI_D_INFO, "line:%d device->PartitionType: %d \n", __LINE__, device->PartitionType));
+    DEBUG ((EFI_D_INFO, "line:%d device->PartitionID: %d \n", __LINE__, device->PartitionID));
+    DEBUG ((EFI_D_INFO, "line:%d device->StartSectorNumber: %d \n", __LINE__, device->StartSectorNumber));
+    DEBUG ((EFI_D_INFO, "line:%d device->SectorCount: %d \n", __LINE__, device->SectorCount));
+    //putchar('\n');
+}
+
+int PartitionCount = 0;
+void TextDevicePathAnalysisCHAR16(CHAR16 *p, DEVICE_PARAMETER *device)
+{
+    int length = StrLen(p);
+    int i = 0;
+    DebugPrint1(0, 11 * 16, "line: %d string: %s, length: %d\n", __LINE__, p, length);
+    for (i = 0; i < length - 3; i++)
+    { 
+        //USB
+        if (p[i] == 'U' && p[i + 1] == 'S' && p[i + 2] == 'B')
+        {
+            device->DeviceType = 1;
+            break;
+        }
+            
+        //Sata
+        if (p[i] == 'S' && p[i + 1] == 'a' && p[i + 2] == 't' && p[i + 3] == 'a')
+        {
+            device->DeviceType = 2;
+            break;
+        }
+    }
+    //printf("line:%d i: %d\n", __LINE__, i);
+    
+    //HD
+    while (i++)
+        if (p[i] == 'H' && p[i + 1] == 'D')
+            break;
+            
+    //printf("line:%d i: %d\n", __LINE__, i);
+    if (i >= length)
+        return;
+                
+    //printf("line:%d i: %d\n", __LINE__, i);
+    device->PartitionID = p[i + 3] - '0';
+    
+    i+=3;
+    
+    while (i++)
+    {
+        //MBR
+        if (p[i] == 'M' && p[i + 1] == 'B' && p[i + 2] == 'R')
+        {
+            device->PartitionType = 1;
+            break;
+        }
+            
+        //GPT
+        if (p[i] == 'G' && p[i + 1] == 'P' && p[i + 2] == 'T')
+        {
+            device->PartitionType = 2;    
+            break;
+        }
+    }
+        
+    i+=3;
+    
+    //printf("line:%d i: %d\n", __LINE__, i);
+    int commalocation[2];
+    int count = 0;
+    for (int j = i + 1; p[j] != ')'; j++)
+    {
+        if (p[j] == ',')
+        {
+           commalocation [count++] = j;
+           //printf("line:%d, j: %d, data: %c%c\n", __LINE__, j, p[j], p[j+1]);
+        }
+    }
+    
+    char temp[20];
+    int j = 0;
+    //start
+    for (i = commalocation[0] + 1; i < commalocation[1]; i++)
+    {
+        temp[j++] = p[i];
+        //printf("%c", p[i]);
+    }
+    temp[j] = '\0';
+    //strtol(const char * nptr,char * * endptr,int base)
+    //puts(temp);
+    DEBUG ((EFI_D_INFO, "line:%d device->StartSectorNumber: %a \n", __LINE__, temp));
+    //printf("line:%d start: %d\n", __LINE__, strtol(temp));
+    device->StartSectorNumber = strtollSelf(temp, NULL, 10);
+    //putchar('\n');
+    
+    j = 0;
+    //length
+    for (i = commalocation[1] + 1; i < length - 1; i++)
+    {
+        temp[j++] = p[i];
+        //printf("%c", p[i]);
+    }
+    temp[j] = '\0';
+    //puts(temp);
+    //printf("line:%d end: %d\n", __LINE__, strtol(temp));
+    device->SectorCount = strtollSelf(temp, NULL, 10);;
+    DEBUG ((EFI_D_INFO, "line:%d device->SectorCount: %a \n", __LINE__, temp));
+    //putchar('\n');
+    
+    //DebugPrint1(0, 11 * 16, "line: %d string: %s, length: %d\n",       __LINE__, p, strlen(p));
+    DebugPrint1(0, (22 + PartitionCount++) * 16, "line:%d StartSectorNumber: %d SectorCount: %d  device->DeviceType: %d PartitionType: %d PartitionID: %d\n",        
+    							__LINE__, 
+    							device->StartSectorNumber,
+    							device->SectorCount,
+    							device->DeviceType,
+    							device->PartitionType,
+    							device->PartitionID);
+
+    DEBUG ((EFI_D_INFO, "line:%d device->DeviceType: %d \n", __LINE__, device->DeviceType));
+    DEBUG ((EFI_D_INFO, "line:%d device->PartitionType: %d \n", __LINE__, device->PartitionType));
+    DEBUG ((EFI_D_INFO, "line:%d device->PartitionID: %d \n", __LINE__, device->PartitionID));
+    DEBUG ((EFI_D_INFO, "line:%d device->StartSectorNumber: %d \n", __LINE__, device->StartSectorNumber));
+    DEBUG ((EFI_D_INFO, "line:%d device->SectorCount: %d \n", __LINE__, device->SectorCount));
+    //putchar('\n');
+}
+
+
 EFI_STATUS PartitionRead()
 {
-    DebugPrint1(350, 0, "%d: PartitionRead \n", __LINE__);
+    DebugPrint1(350, 0, "%d: 0 PartitionRead \n", __LINE__);
     DEBUG ((EFI_D_INFO, "PartitionRead!!\r\n"));
     EFI_STATUS Status ;
     UINTN NumHandles, i;
@@ -813,24 +1250,49 @@ EFI_STATUS PartitionRead()
     if (EFI_ERROR(Status))
     {
     	 DEBUG ((EFI_D_INFO, "LocateProtocol1 error: %x\n", Status));    	 
-    	 DebugPrint1(350, 16 * 2, "%d: OpenShellProtocolSelf: %x \n", __LINE__, Status);
+    	 DebugPrint1(350, 16 * 2, "%d: 2 : %x \n", __LINE__, Status);
         return Status;
     }
    
     Status = gBS->LocateHandleBuffer(ByProtocol, &gEfiDiskIoProtocolGuid, NULL, &NumHandles, &ControllerHandle);
     if (EFI_ERROR(Status))
     {
-        DebugPrint1(350, 16 * 4, "%d: LocateHandleBuffer error: %x\n", __LINE__, Status);
-        DEBUG ((EFI_D_INFO, "LocateProtocol1 error: %x\n", Status));
+        DebugPrint1(350, 16 * 3, "%d : %x\n", __LINE__, Status);
+        DEBUG ((EFI_D_INFO, "LocateProtocol1 error: %x\n", Status));   
+
+		 CHAR8 sTest[20] = "123456789";
+		 DebugPrint1(350, 16 * 4, "%d : %a\n", __LINE__, sTest);
+		
+        CHAR16  pPatitionsParameterBuffer[20][200] = 
+        {
+           L"PciRoot(0x0)/Pci(0x14,0x0)/USB(0x1,0x0)",
+		    L"PciRoot(0x0)/Pci(0x14,0x0)/USB(0x1,0x0)/HD(1,MBR,0x077410A0,0x194000,0xC93060)",
+		    L"PciRoot(0x0)/Pci(0x14,0x0)/USB(0x1,0x0)/HD(2,MBR,0x077410A0,0xE27800,0xDF85F)",
+		    L"PciRoot(0x0)/Pci(0x17,0x0)/Sata(0x1800,0x8000,0x1)/HD(1,GPT,85CA0C62-D24C-4D6C-A8ED-B469EE665B5C,0x800,0x82000)",
+		    L"PciRoot(0x0)/Pci(0x17,0x0)/Sata(0x1800,0x8000,0x1)/HD(2,GPT,432E1506-D24C-4D6C-A8ED-B469EE665B5C,0x82800,0x8000)",
+		    L"PciRoot(0x0)/Pci(0x17,0x0)/Sata(0x1800,0x8000,0x1)/HD(3,GPT,69262129-D24C-4D6C-A8ED-B469EE665B5C,0x8A800,0x1F263000)",
+		    L"PciRoot(0x0)/Pci(0x17,0x0)/Sata(0x1800,0x8000,0x1)/HD(4,GPT,9E518177-D24C-4D6C-A8ED-B469EE665B5C,0x1F2ED800,0x112800)",
+		    L"PciRoot(0x0)/Pci(0x17,0x0)/Sata(0x1800,0x8000,0x1)/HD(5,GPT,FE80C43C-D24C-4D6C-A8ED-B469EE665B5C,0x1F400000,0x1C5E00CF)"
+		 };
+	    
+        DEBUG ((EFI_D_INFO, "%d: %a\n", __LINE__, sTest));
+
+        DEVICE_PARAMETER  device;
+		for (i = 0; i < 2; i++)
+	    {
+        	DEBUG ((EFI_D_INFO, "%d: %a\n", __LINE__, pPatitionsParameterBuffer[i]));
+        	TextDevicePathAnalysisCHAR16(pPatitionsParameterBuffer[i], &device);
+	    	DebugPrint1(0, 16 * (i + 8), "%d: %a\n", __LINE__, pPatitionsParameterBuffer[i]);
+	    }
         return Status;
     }
 
     DEBUG ((EFI_D_INFO, "Before for\n", Status));
-    DebugPrint1(350, 16 * 5, "%d: LocateHandleBuffer error: %x\n", __LINE__, Status);
+    DebugPrint1(350, 16 * 5, "%d: %x\n", __LINE__, Status);
     
     for (i = 0; i < NumHandles; i++)
     {
-    	DebugPrint1(350, 16 * 6, "%d: LocateHandleBuffer error: %x\n", __LINE__, Status);
+    	DebugPrint1(350, 16 * 6, "%d: %x\n", __LINE__, Status);
         EFI_DEVICE_PATH_PROTOCOL *DiskDevicePath;
         Status = gBS->OpenProtocol(ControllerHandle[i],
                                    &gEfiDevicePathProtocolGuid,
@@ -840,7 +1302,7 @@ EFI_STATUS PartitionRead()
                                    EFI_OPEN_PROTOCOL_GET_PROTOCOL);
         if (EFI_ERROR(Status))
         {
-    		 DebugPrint1(350, 16 * 7, "%d: LocateHandleBuffer error: %x\n", __LINE__, Status);
+    		 DebugPrint1(350, 16 * 7, "%d: %x\n", __LINE__, Status);
             DEBUG ((EFI_D_INFO, "Status = gBS->OpenProtocol error index %d: %x\n", i, Status));
             return Status;
         }
@@ -848,19 +1310,20 @@ EFI_STATUS PartitionRead()
         CHAR16 *TextDevicePath = 0;
         TextDevicePath = DevPathToText->ConvertDevicePathToText(DiskDevicePath, TRUE, TRUE);
         
-    	 DebugPrint1(350 + 350, 16 * i, "%d: : %s\n", __LINE__, TextDevicePath);
+    	 DebugPrint1(350 + 350, 16 * i, "%d: %s\n", __LINE__, TextDevicePath);
+
+		 DEVICE_PARAMETER device = {0};
+		TextDevicePathAnalysisCHAR16(TextDevicePath, &device);
     	 
         DEBUG ((EFI_D_INFO, "%s\n", TextDevicePath));
-        
-        //DebugPrint1(0, (6 + i) * 16 , "%s\n", TextDevicePath);
-        
-
+           
         if (TextDevicePath) gBS->FreePool(TextDevicePath);
 
         WalkthroughDevicePath(DiskDevicePath, PrintNode);
         
         DEBUG ((EFI_D_INFO, "\n\n"));
     }
+	
     return EFI_SUCCESS;
 
 }
@@ -1398,82 +1861,7 @@ EFI_STATUS DiskRead1()
  
  }
 
-VOID GraphicsLayerCompute(int iMouseX, int iMouseY)
-{
-	GraphicsCopy(pDeskDisplayBuffer, pDeskBuffer, ScreenWidth, ScreenHeight, ScreenWidth, ScreenHeight, 0, 0);
-	GraphicsCopy(pDeskDisplayBuffer, pMyComputerBuffer, ScreenWidth, ScreenHeight, MyComputerWidth, MyComputerHeight, 100, 900);
 
-	int i, j;
-
-
-	//16, ScreenHeight - 21, For event trigger
-
-    EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;  
-
-	if (NULL == pMouseSelectedBuffer)
-	{
-		DEBUG ((EFI_D_INFO, "NULL == pMouseSelectedBuffer"));
-		return;
-	}
-    
-    //DEBUG ((EFI_D_INFO, "Line: %d\n", __LINE__));
-
-    for (i = 0; i < 16; i++)
-        for (j = 0; j < 16; j++)
-        {       
-                /*pMouseBuffer[(i * 16 + j) * 4]     = pDeskDisplayBuffer[((iMouseY + i) * ScreenWidth +  iMouseX + j) * 4];
-                pMouseBuffer[(i * 16 + j) * 4 + 1] = pDeskDisplayBuffer[((iMouseY + i) * ScreenWidth +  iMouseX + j) * 4 + 1];
-                pMouseBuffer[(i * 16 + j) * 4 + 2] = pDeskDisplayBuffer[((iMouseY + i) * ScreenWidth +  iMouseX + j) * 4 + 2];            
-					*/
-                pMouseBuffer[(i * 16 + j) * 4]     = 0xff;
-                pMouseBuffer[(i * 16 + j) * 4 + 1] = 0xff;
-                pMouseBuffer[(i * 16 + j) * 4 + 2] = 0;             
-        }
-
-	/*
-    DrawChineseCharIntoBuffer2(pDeskBuffer,  16, ScreenHeight - 21,     (18 - 1) * 94 + 43 - 1, Color, ScreenWidth);
-    DrawChineseCharIntoBuffer2(pDeskBuffer,  16 * 2, ScreenHeight - 21, (21 - 1) * 94 + 05 - 1, Color, ScreenWidth);
-
-	*/
-	
-    Color.Red   = 0xff;
-    Color.Green = 0x00;
-    Color.Blue	  = 0x00;
-    
-    if (iMouseX >= 16 && iMouseX <= 16 + 16 * 2
-        && iMouseY >= ScreenHeight - 21 && iMouseY <= ScreenHeight)
-    {	
-		for (i = 0; i < 16; i++)
-		{
-			for (j = 0; j < 32; j++)
-			{	
-				pMouseSelectedBuffer[(i * 32 + j) * 4]     = pDeskDisplayBuffer[((ScreenHeight - 21 + i) * ScreenWidth +  16 + j) * 4];
-				pMouseSelectedBuffer[(i * 32 + j) * 4 + 1] = pDeskDisplayBuffer[((ScreenHeight - 21 + i) * ScreenWidth +  16 + j) * 4 + 1];
-				pMouseSelectedBuffer[(i * 32 + j) * 4 + 2] = pDeskDisplayBuffer[((ScreenHeight - 21 + i) * ScreenWidth +  16 + j) * 4 + 2];			
-			}
-		}
-		 //RectangleFillIntoBuffer(UINT8 * pBuffer,IN UINTN x0,UINTN y0,UINTN x1,UINTN y1,IN UINTN BorderWidth,IN EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color)
-		
-        //RectangleFillIntoBuffer(pMouseSelectedBuffer, 0,  0, 32, 16, 1,  Color);
-        
-        RectangleDrawIntoBuffer(pMouseSelectedBuffer, 0,  0, 31, 15, 1,  Color, 32);
-        
-        GraphicsCopy(pDeskDisplayBuffer, pMouseSelectedBuffer, ScreenWidth, ScreenHeight, 32, 16, 15, ScreenHeight - 22);
-    }
-
-    // init mouse buffer for use in use
-	//DrawChineseCharIntoBuffer2(pMouseBuffer, 0, 0, 11 * 94 + 42, MouseColor, 16);
-
-	
-	GraphicsCopy(pDeskDisplayBuffer, pMouseBuffer, ScreenWidth, ScreenHeight, 16, 16, iMouseX, iMouseY);
-
-   GraphicsOutput->Blt(GraphicsOutput, 
-			            (EFI_GRAPHICS_OUTPUT_BLT_PIXEL *) pDeskDisplayBuffer,
-			            EfiBltBufferToVideo,
-			            0, 0, 
-			            0, 0, 
-			            ScreenWidth, ScreenHeight, 0);   
-}
 
 
 
@@ -1529,7 +1917,7 @@ HandleMouseEvent (
     }
 
     //DEBUG ((EFI_D_INFO, "X: %X, Y: %X ", x_move, y_move));
-    DebugPrint1(30, 70, "X: %X, Y: %X ", x_move, y_move );
+    DebugPrint1(0, 70, "X: %X, Y: %X ", x_move, y_move );
     
     iMouseX = iMouseX + x_move;
     iMouseY = iMouseY + y_move;
@@ -1582,7 +1970,7 @@ VOID MemoryParameterGet()
 	UINT64   ReservedMemoryTypePage = 0;
 	UINT64   LoaderCodePage = 0;
 	
-	DebugPrint1(DebugPrintX, DebugPrintY + 32, "%d: MemoryParameterGet\n", __LINE__);
+	DebugPrint1(0, 8 * 16, "%d: \n", __LINE__);
 
 	DEBUG ((EFI_D_INFO, "%d: MemoryParameterGet\n", __LINE__));
 
@@ -1666,9 +2054,10 @@ DisplaySystemDateTime (
 
 	gRT->GetTime(&et, NULL);
 
-	DebugPrint1(ScreenWidth - 20 * 8, ScreenHeight - 21, "%04d-%02d-%02d %02d:%02d:%02d", et.Year, et.Month, et.Day, et.Hour, et.Minute, et.Second);
+	DebugPrint1(ScreenWidth - 20 * 8, ScreenHeight - 21, "%04d-%02d-%02d %02d:%02d:%02d", 
+				  et.Year, et.Month, et.Day, et.Hour, et.Minute, et.Second);
 	
-   DebugPrint1(DebugPrintX, DebugPrintY, "ScreenWidth:%d, ScreenHeight:%d\n\n", ScreenWidth, ScreenHeight);
+   DebugPrint1(0, 2 * 16, "%d ScreenWidth:%d, ScreenHeight:%d\n", __LINE__, ScreenWidth, ScreenHeight);
    GraphicsLayerCompute(iMouseX, iMouseY);
 }
 
@@ -1878,7 +2267,7 @@ EFI_STATUS ScreenInit(EFI_GRAPHICS_OUTPUT_PROTOCOL   *GraphicsOutput)
     return EFI_SUCCESS;
 }
 
-EFI_STATUS AllocateMemory1()
+EFI_STATUS ParametersInitial()
 {
 	pDeskBuffer = (UINT8 *)AllocatePool(ScreenWidth * ScreenHeight * 4); 
 	if (NULL == pDeskBuffer)
@@ -1902,6 +2291,7 @@ EFI_STATUS AllocateMemory1()
 
 	iMouseX = ScreenWidth / 2;
 	iMouseY = ScreenHeight / 2;
+    
 	
 	return EFI_SUCCESS;
 }
@@ -1913,7 +2303,6 @@ Main (
   IN EFI_SYSTEM_TABLE  *SystemTable
   )
 {
-    EFI_HII_HANDLE                     HiiHandle;
     EFI_STATUS                         Status;
     
     Status = gBS->LocateProtocol(&gEfiGraphicsOutputProtocolGuid, NULL, (VOID **) &GraphicsOutput);        
@@ -1927,7 +2316,7 @@ Main (
 
     DEBUG(( EFI_D_INFO, "ScreenWidth:%d, ScreenHeight:%d\n\n", ScreenWidth, ScreenHeight));
 
-    if (-1 == AllocateMemory1())
+    if (-1 == ParametersInitial())
     {
 		DEBUG(( EFI_D_INFO, "-1 == AllocateMemory1()\n\n"));
     }
