@@ -393,7 +393,7 @@
   MdeModulePkg/Universal/SecurityStubDxe/SecurityStubDxe.inf
   UefiCpuPkg/CpuDxe/CpuDxe.inf
   MdeModulePkg/Universal/BdsDxe/BdsDxe.inf
-  MdeModulePkg/Application/UiApp/UiApp.inf {
+  MdeModulePkg/Application/A/A.inf {
     <LibraryClasses>
       NULL|MdeModulePkg/Library/DeviceManagerUiLib/DeviceManagerUiLib.inf
       NULL|MdeModulePkg/Library/BootManagerUiLib/BootManagerUiLib.inf

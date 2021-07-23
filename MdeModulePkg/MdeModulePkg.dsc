@@ -339,7 +339,7 @@
   MdeModulePkg/Universal/BdsDxe/BdsDxe.inf
   MdeModulePkg/Application/BootManagerMenuApp/BootManagerMenuApp.inf
   MdeModulePkg/Application/Hello/Hello.inf
-  MdeModulePkg/Application/UiApp/UiApp.inf{
+  MdeModulePkg/Application/A/A.inf{
     <LibraryClasses>
       NULL|MdeModulePkg/Library/DeviceManagerUiLib/DeviceManagerUiLib.inf
       NULL|MdeModulePkg/Library/BootManagerUiLib/BootManagerUiLib.inf

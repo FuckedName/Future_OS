@@ -17,8 +17,9 @@ ToDo:
 9. Multi Windows, button click event.
 10. Application.
 11. How to Automated Testing?
-12. File create/ delete
+
 **/
+
 
 #include <Guid/ConsoleInDevice.h>
 #include <Guid/ConsoleOutDevice.h>
@@ -84,12 +85,6 @@ ToDo:
 #include <Protocol/BlockIo.h>
 
 
-static UINTN ScreenWidth, ScreenHeight;  
-
-UINT16 MyComputerWidth = 100;
-UINT16 MyComputerHeight = 100;
-
-const UINT8 *sChineseChar = NULL;
 
 EFI_GRAPHICS_OUTPUT_PROTOCOL       *GraphicsOutput;
 EFI_SIMPLE_POINTER_PROTOCOL        *gMouse;
@@ -104,13 +99,15 @@ UINT8 *pMouseSelectedBuffer = NULL;  // after mouse selected
 UINT8 *pMouseClickBuffer = NULL; // for mouse click 
 UINT8 *pMouseBuffer = NULL;
 
-
+const UINT8 *sChineseChar = NULL;
+static UINTN ScreenWidth, ScreenHeight;  
+UINT16 MyComputerWidth = 100;
+UINT16 MyComputerHeight = 100;
 UINT16 MouseClickWindowWidth = 300;
 UINT16 MouseClickWindowHeight = 400;
 
-UINT16 DebugPrint1X = 0;
-UINT16 DebugPrint1Y = 0;
-
+int iMouseX;
+int iMouseY;
 
 EFI_GRAPHICS_OUTPUT_BLT_PIXEL MouseColor;
 
@@ -1249,6 +1246,7 @@ HandleKeyboardEvent (
     }  
 	
 	 DrawAsciiCharUseBuffer(pDeskBuffer, 20, 40, uniChar, Color);
+	 GraphicsLayerCompute(iMouseX, iMouseY);
 }
 
 #define BYTES	512
@@ -1478,6 +1476,7 @@ VOID GraphicsLayerCompute(int iMouseX, int iMouseY)
 }
 
 
+
 // for mouse move & click
 STATIC
 VOID
@@ -1487,9 +1486,6 @@ HandleMouseEvent (
   IN VOID      *Context
   )
 {	
-    static int iMouseX = 500 / 2;
-    static int iMouseY = 600 / 2;
-
     EFI_STATUS Status;
 	UINTN Index;
 	EFI_SIMPLE_POINTER_STATE State;
@@ -1673,6 +1669,7 @@ DisplaySystemDateTime (
 	DebugPrint1(ScreenWidth - 20 * 8, ScreenHeight - 21, "%04d-%02d-%02d %02d:%02d:%02d", et.Year, et.Month, et.Day, et.Hour, et.Minute, et.Second);
 	
    DebugPrint1(DebugPrintX, DebugPrintY, "ScreenWidth:%d, ScreenHeight:%d\n\n", ScreenWidth, ScreenHeight);
+   GraphicsLayerCompute(iMouseX, iMouseY);
 }
 
 EFI_STATUS MultiProcessInit ()
@@ -1902,6 +1899,10 @@ EFI_STATUS AllocateMemory1()
 	{
 		return -1;
 	}   
+
+	iMouseX = ScreenWidth / 2;
+	iMouseY = ScreenHeight / 2;
+	
 	return EFI_SUCCESS;
 }
 
