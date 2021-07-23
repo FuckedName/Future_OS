@@ -9,9 +9,6 @@
 #ifndef _FRONT_PAGE_H_
 #define _FRONT_PAGE_H_
 
-#include "String.h"
-#include "Ui.h"
-
 #include <Protocol/BootLogo.h>
 /*
  *

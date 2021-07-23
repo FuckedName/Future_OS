@@ -1,11 +1,3 @@
-## @file
-#  UiApp module is driver for BDS phase.
-#
-#  Copyright (c) 2011 - 2018, Intel Corporation. All rights reserved.<BR>
-#  SPDX-License-Identifier: BSD-2-Clause-Patent
-#
-##
-
 [Defines]
   INF_VERSION                    = 0x00010005
   BASE_NAME                      = U
@@ -15,24 +7,8 @@
   VERSION_STRING                 = 1.0
   ENTRY_POINT                    = Main
 
-#
-# The following information is for reference only and not required by the build tools.
-#
-#  VALID_ARCHITECTURES           = IA32 X64 EBC
-#
-
 [Sources]
-  FrontPage.h
-  String.h
-  Ui.h
-  FrontPageVfr.Vfr
-  FrontPageStrings.uni
-  FrontPage.c
-  String.c
-  FrontPageCustomizedUi.c
-  FrontPageCustomizedUiSupport.c
-  FrontPageCustomizedUi.h
-  FrontPageCustomizedUiSupport.h
+  Main.c
 
 [Packages]
   MdePkg/MdePkg.dec
@@ -132,8 +108,6 @@
   gEfiMdeModulePkgTokenSpaceGuid.PcdFirmwareVersionString           ## CONSUMES
   gEfiMdeModulePkgTokenSpaceGuid.PcdTestKeyUsed                     ## CONSUMES
 
-[UserExtensions.TianoCore."ExtraFiles"]
-  UiAppExtra.uni
 
 
 

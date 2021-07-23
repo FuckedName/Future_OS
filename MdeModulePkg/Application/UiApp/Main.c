@@ -17,8 +17,9 @@ ToDo:
 9. Multi Windows, button click event.
 10. Application.
 11. How to Automated Testing?
-12. File create/ delete
+
 **/
+
 
 #include <Guid/ConsoleInDevice.h>
 #include <Guid/ConsoleOutDevice.h>
