@@ -134,7 +134,7 @@ char pKeyboardInputBuffer[KEYBOARD_BUFFER_LENGTH] = {0};
 
 UINT16 StatusErrorCount = 0;
 // For exception returned status 
-#define DISPLAY_ERROR_STATUS_X (ScreenWidth / 2) 
+#define DISPLAY_ERROR_STATUS_X (ScreenWidth * 3 / 4) 
 #define DISPLAY_ERROR_STATUS_Y (16 * StatusErrorCount++)
 
 #define DEBUG_STATUS_2(x, y, Express)  DebugPrint1(x, y,IN CONST CHAR8 * Format,...)
@@ -1313,8 +1313,9 @@ void TextDevicePathAnalysisCHAR16(CHAR16 *p, DEVICE_PARAMETER *device, UINTN cou
     //putchar('\n');
     
     //DebugPrint1(0, 11 * 16, "line: %d string: %s, length: %d\n",       __LINE__, p, strlen(p));
-    
-    DebugPrint1(TEXT_DEVICE_PATH_X, TEXT_DEVICE_PATH_Y + 16 * (2 * count1 + 1), "%d: Start: %d Count: %d  DeviceType: %d PartitionType: %d PartitionID: %d\n",        
+
+    // second display
+    DebugPrint1(TEXT_DEVICE_PATH_X, TEXT_DEVICE_PATH_Y + 16 * (4 * count1 + 1), "%d: Start: %d Count: %d  DeviceType: %d PartitionType: %d PartitionID: %d\n",        
     							__LINE__, 
     							device->StartSectorNumber,
     							device->SectorCount,
@@ -1339,6 +1340,9 @@ EFI_STATUS PartitionRead()
     UINTN NumHandles, i;
     EFI_HANDLE *ControllerHandle = NULL;
     EFI_DEVICE_PATH_TO_TEXT_PROTOCOL *DevPathToText;
+    EFI_BLOCK_IO_PROTOCOL           *BlockIo;
+    UINT8 Buffer1[BYTES];
+    EFI_DISK_IO_PROTOCOL            *DiskIo;
     
     Status = gBS->LocateProtocol (&gEfiDevicePathToTextProtocolGuid, NULL, (VOID **) &DevPathToText);
     if (EFI_ERROR(Status))
@@ -1418,18 +1422,38 @@ EFI_STATUS PartitionRead()
 
         CHAR16 *TextDevicePath = 0;
         TextDevicePath = DevPathToText->ConvertDevicePathToText(DiskDevicePath, TRUE, TRUE);
-        
-    	 DebugPrint1(TEXT_DEVICE_PATH_X, TEXT_DEVICE_PATH_Y + 16 * 2 * i, "%d: %s\n", __LINE__, TextDevicePath);
+
+        // first display
+    	 DebugPrint1(TEXT_DEVICE_PATH_X, TEXT_DEVICE_PATH_Y + 16 * 4 * i, "%d: %s\n", __LINE__, TextDevicePath);
+        //DEBUG ((EFI_D_INFO, "%s\n", TextDevicePath));
 
 		 TextDevicePathAnalysisCHAR16(TextDevicePath, &device[i], i);
-    	 
-        DEBUG ((EFI_D_INFO, "%s\n", TextDevicePath));
-           
+    	            
         if (TextDevicePath) gBS->FreePool(TextDevicePath);
-
-        WalkthroughDevicePath(DiskDevicePath, PrintNode);
         
-        DEBUG ((EFI_D_INFO, "\n"));
+        Status = gBS->HandleProtocol(ControllerHandle[i],
+                                    &gEfiBlockIoProtocolGuid,
+                                    (VOID * *) &BlockIo );                                                
+        DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
+        
+        if ( EFI_SUCCESS == Status )
+        {			        	 
+            Status = gBS->HandleProtocol( ControllerHandle[i],
+                                          &gEfiDiskIoProtocolGuid,
+                                          (VOID * *) &DiskIo ); 
+            DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
+            
+            if ( Status == EFI_SUCCESS )
+            {
+                Status = DiskIo->ReadDisk( DiskIo, BlockIo->Media->MediaId, 0, BYTES, Buffer1 );
+                
+                DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X BlockIo->Media->MediaId: %d\n", __LINE__, Status, BlockIo->Media->MediaId);
+
+                if ( EFI_SUCCESS == Status )
+					  for (int j = 0; j < 50; j++)
+					  	   DebugPrint1(DISK_READ_BUFFER_X + j * 8 * 3, TEXT_DEVICE_PATH_Y + 16 * (4 * i + 2) , "%02X ", Buffer1[j] & 0xff);
+            }       
+        }
     }
 	
     return EFI_SUCCESS;
@@ -1802,7 +1826,7 @@ EFI_STATUS DiskReadUseDiskIo(UINT32   MediaId,
 										  UINTN    BufferSize,
 										  VOID    *Buffer)
 {	
-    DebugPrint1(DISK_READ_X, DISK_READ_Y, "%d: DiskReadUseDiskIo \n", __LINE__);
+    //DebugPrint1(DISK_READ_X, DISK_READ_Y, "%d: DiskReadUseDiskIo \n", __LINE__);
 	EFI_STATUS		Status;
 	UINTN					NumHandles, i;
 	EFI_HANDLE				*ControllerHandle = NULL;
