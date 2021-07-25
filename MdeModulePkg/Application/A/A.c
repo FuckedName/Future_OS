@@ -199,12 +199,9 @@ typedef struct
 	unsigned char xxx4[4] ; // 0x1c 4 隐藏扇区, 与MBR中地址0x1C6开始的4个字节数值相等
 	unsigned char SectorCounts[4] ; // 0x20 4 总扇区数（如果超过65535使用此地址，小于65536参见偏移0x13，对FAT32，此域必须是非0）
 	unsigned char SectorsPerFat[4] ; // Sectors count each FAT use
-	unsigned char xxx6[1] ; // 0x25 1 当前磁头（FAT16），格式化FAT卷时必须设为0
-	unsigned char xxx7[1] ; // 0x26 1 签名（FAT16），扩展引导标记（0x29）用于指明此后的3个域可用
-	unsigned char xxx8[4] ; // 0x27 4 ID (FAT16)
-	unsigned char xxx9[2] ; // 0x28 2 Flags (FAT32特有)
-	unsigned char version[2] ; // 0x2a 2 版本号 (FAT32特有)
-	unsigned char Boot[4] ; // 0x2c 4 根目录起始簇 (FAT32)，一般为2
+	unsigned char Fat32Flag[2] ; // 0x28 2 Flags (FAT32特有)
+	unsigned char FatVersion[2] ; // 0x2a 2 版本号 (FAT32特有)
+	unsigned char BootPathStartCluster[4] ; // 0x2c 4 根目录起始簇 (FAT32)，一般为2
 	unsigned char ClusterName[11] ; // 0x2b 11 卷标（非FAT32）
 	unsigned char BootStrap[2] ; // 0x30 2 FSInfo 扇区 (FAT32) bootstrap
 	unsigned char BootSectorBackup[2] ; // 0x32 2 启动扇区备份 (FAT32)如果不为0，表示在保留区中引导记录的备数据所占的扇区数，通常为6同时不建议使用6以外的其他数值
@@ -229,6 +226,8 @@ typedef struct
 {
 	UINT16 ReservedSelector;
 	UINT16 SectorsPerFat;	
+	UINT16 BootPathStartCluster;
+	UINT16 NumFATS;
 }MasterBootRecordSwitched;
 
 
@@ -1561,10 +1560,13 @@ VOID Transfer(MasterBootRecord *pSource, MasterBootRecordSwitched *pDest)
 {
     pDest->ReservedSelector = pSource->ReservedSelector[0] + pSource->ReservedSelector[1] * 16 * 16;
     pDest->SectorsPerFat    = (UINT16)pSource->SectorsPerFat[0] + (UINT16)(pSource->SectorsPerFat[1]) * 16 * 16 + pSource->SectorsPerFat[2] * 16 * 16 * 16 * 16 + pSource->SectorsPerFat[3] * 16 * 16 * 16 * 16 * 16 * 16;
-    
-	DebugPrint1(DISK_MBR_X, DISK_MBR_Y + 16, "ReservedSelector:%d SectorsPerFat:%d", 
+    pDest->BootPathStartCluster = (UINT16)pSource->BootPathStartCluster[0] + pSource->BootPathStartCluster[1] * 16 * 16 + pSource->BootPathStartCluster[2] * 16 * 16 * 16 * 16, pSource->BootPathStartCluster[3] * 16 * 16 * 16 * 16 * 16 * 16;
+    pDest->NumFATS      = pSource->NumFATS[0];
+	DebugPrint1(DISK_MBR_X, DISK_MBR_Y + 16, "ReservedSelector:%d SectorsPerFat:%d BootPathStartCluster: %d NumFATS:%d", 
 											    pDest->ReservedSelector,
-											    pDest->SectorsPerFat);
+											    pDest->SectorsPerFat,
+											    pDest->BootPathStartCluster,
+											    pDest->NumFATS);
 }
 
 EFI_STATUS BufferAnalysis(UINT8 *p, MasterBootRecordSwitched *pMBRSwitched)
@@ -1576,9 +1578,11 @@ EFI_STATUS BufferAnalysis(UINT8 *p, MasterBootRecordSwitched *pMBRSwitched)
 
 	// 大端字节序：低位字节在高地址，高位字节低地址上。这是人类读写数值的方法。
     // 小端字节序：与上面相反。低位字节在低地址，高位字节在高地址。
-	DebugPrint1(DISK_MBR_X, DISK_MBR_Y, "ReservedSelector:%02X%02X SectorsPerFat:%02X%02X%02X%02X", 
+	DebugPrint1(DISK_MBR_X, DISK_MBR_Y, "ReservedSelector:%02X%02X SectorsPerFat:%02X%02X%02X%02X BootPathStartCluster:%02X%02X%02X%02X NumFATS: %X", 
 	                                    pMBR->ReservedSelector[0], pMBR->ReservedSelector[1], 
-	                                    pMBR->SectorsPerFat[0], pMBR->SectorsPerFat[1], pMBR->SectorsPerFat[2], pMBR->SectorsPerFat[3]);
+	                                    pMBR->SectorsPerFat[0], pMBR->SectorsPerFat[1], pMBR->SectorsPerFat[2], pMBR->SectorsPerFat[3],
+	                                    pMBR->BootPathStartCluster[0], pMBR->BootPathStartCluster[1], pMBR->BootPathStartCluster[2], pMBR->BootPathStartCluster[3],
+	                                    pMBR->NumFATS[0]);
 
 	Transfer(pMBR, pMBRSwitched);
 
@@ -1696,7 +1700,7 @@ EFI_STATUS PartitionUSBReadSynchronous()
 						 MasterBootRecordSwitched MBRSwitched;
 					     BufferAnalysis(Buffer1, &MBRSwitched); 
 					 //}
-					 sector_count = MBRSwitched.ReservedSelector + MBRSwitched.SectorsPerFat * 2;
+					 sector_count = MBRSwitched.ReservedSelector + MBRSwitched.SectorsPerFat * MBRSwitched.NumFATS + MBRSwitched.BootPathStartCluster - 2;
 		        }       
 		    }
 
