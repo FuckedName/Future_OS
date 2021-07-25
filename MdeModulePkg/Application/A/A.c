@@ -132,12 +132,16 @@ char pKeyboardInputBuffer[KEYBOARD_BUFFER_LENGTH] = {0};
 #define DISK_READ_BUFFER_Y (16 * 56)
 
 
+#define DISK_MBR_X (0) 
+#define DISK_MBR_Y (16 * 62)
+
+
 //last Line
 #define DISPLAY_DESK_DATE_TIME_X (ScreenWidth - 20 * 8) 
 #define DISPLAY_DESK_DATE_TIME_Y (ScreenHeight - 21)
 
 
-#define BYTES	512
+#define DISK_BUFFER_SIZE 512
 #define EXBYTE	4
 
 
@@ -177,6 +181,55 @@ typedef struct
 	long long StartSectorNumber; //0x194000
 	long long SectorCount; //0xC93060
 }DEVICE_PARAMETER;
+
+typedef struct
+{
+	unsigned char JMP[3] ; // 0x00 3 跳转指令（跳过开头一段区域）
+	unsigned char OEM[8] ; // 0x03 8 OEM名称常见值是MSDOS5.0.
+	unsigned char BitsOfSector[2] ; // 0x0b 2 每个扇区的字节数。取值只能是以下几种：512，1024，2048或是4096。设为512会取得最好的兼容性
+	unsigned char SectorOfCluster[1] ; // 0x0d 1 每簇扇区数。 其值必须中2的整数次方，同时还要保证每簇的字节数不能超过32K
+	unsigned char ReservedSelector[2] ; // 0x0e 2 保留扇区数（包括启动扇区）此域不能为0，FAT12/FAT16必须为1，FAT32的典型值取为32
+	unsigned char NumFATS[1] ; // 0x10 1 文件分配表数目。 NumFATS，任何FAT格式都建议为2
+	unsigned char RootPathRecords[2] ; // 0x11 2 最大根目录条目个数, 0 for fat32, 512 for fat16
+	unsigned char AllSectors[2] ; // 0x13 2 总扇区数（如果是0，就使用偏移0x20处的4字节值）0 for fat32
+	unsigned char Description[1] ; // 0x15 1 介质描述 0xF8 单面、每面80磁道、每磁道9扇区
+	unsigned char xxx1[2] ; // 0x16 2 每个文件分配表的扇区（FAT16）,0 for fat32
+	unsigned char xxx2[2] ; // 0x18 2 每磁道的扇区, 0x003f
+	unsigned char xxx3[2] ; // 0x1a 2 磁头数，0xff
+	unsigned char xxx4[4] ; // 0x1c 4 隐藏扇区, 与MBR中地址0x1C6开始的4个字节数值相等
+	unsigned char SectorCounts[4] ; // 0x20 4 总扇区数（如果超过65535使用此地址，小于65536参见偏移0x13，对FAT32，此域必须是非0）
+	unsigned char SectorsPerFat[4] ; // Sectors count each FAT use
+	unsigned char xxx6[1] ; // 0x25 1 当前磁头（FAT16），格式化FAT卷时必须设为0
+	unsigned char xxx7[1] ; // 0x26 1 签名（FAT16），扩展引导标记（0x29）用于指明此后的3个域可用
+	unsigned char xxx8[4] ; // 0x27 4 ID (FAT16)
+	unsigned char xxx9[2] ; // 0x28 2 Flags (FAT32特有)
+	unsigned char version[2] ; // 0x2a 2 版本号 (FAT32特有)
+	unsigned char Boot[4] ; // 0x2c 4 根目录起始簇 (FAT32)，一般为2
+	unsigned char ClusterName[11] ; // 0x2b 11 卷标（非FAT32）
+	unsigned char BootStrap[2] ; // 0x30 2 FSInfo 扇区 (FAT32) bootstrap
+	unsigned char BootSectorBackup[2] ; // 0x32 2 启动扇区备份 (FAT32)如果不为0，表示在保留区中引导记录的备数据所占的扇区数，通常为6同时不建议使用6以外的其他数值
+	unsigned char Reserved[2] ; // 0x34 2 保留未使用 (FAT32) 此域用0填充
+	unsigned char FileSystemType[8] ; // 0x36 8 FAT文件系统类型（如FAT、FAT12、FAT16）含"FAT"就是PBR,否则就是MBR
+	unsigned char SelfBootCode[2] ; // 0x3e 2 操作系统自引导代码
+	unsigned char DeviceNumber[1] ; // 0x40 1 BIOS设备代号 (FAT32)
+	unsigned char NoUse[1] ; // 0x41 1 未使用 (FAT32)
+	unsigned char Flag[1] ; // 0x42 1 标记 (FAT32)
+	unsigned char SequeenNumber[4] ; // 0x43 4 卷序号 (FAT32)
+	unsigned char juanbiao[11] ; // 0x47 11 卷标（FAT32）
+	unsigned char TypeOfFileSystem[8] ; // 0x52 8 FAT文件系统类型（FAT32）
+	unsigned char BootAssembleCode[338]; // code
+	unsigned char Partition1[16] ; // 0x1be 64 partitions table, DOS_PART_TBL_OFFSET
+	unsigned char Partition2[16] ; // 0X1BE ~0X1CD 16 talbe entry for Partition 1
+	unsigned char Partition3[16] ; // 0X1CE ~0X1DD 16 talbe entry for Partition 2
+	unsigned char Partition4[16] ; // 0X1DE ~0X1ED 16 talbe entry for Partition 3
+	unsigned char EndFlag[2] ; // 0x1FE 2 扇区结束符（0x55 0xAA） 结束标志：MBR的结束标志与DBR，EBR的结束标志相同。
+}MasterBootRecord;
+
+typedef struct 
+{
+	UINT16 ReservedSelector;
+	UINT16 SectorsPerFat;	
+}MasterBootRecordSwitched;
 
 
 typedef struct {
@@ -1353,7 +1406,7 @@ EFI_STATUS PartitionRead()
     EFI_HANDLE *ControllerHandle = NULL;
     EFI_DEVICE_PATH_TO_TEXT_PROTOCOL *DevPathToText;
     EFI_BLOCK_IO_PROTOCOL           *BlockIo;
-    UINT8 Buffer1[BYTES];
+    UINT8 Buffer1[DISK_BUFFER_SIZE];
     EFI_DISK_IO_PROTOCOL            *DiskIo;
     
     Status = gBS->LocateProtocol (&gEfiDevicePathToTextProtocolGuid, NULL, (VOID **) &DevPathToText);
@@ -1457,7 +1510,7 @@ EFI_STATUS PartitionRead()
             
             if ( Status == EFI_SUCCESS )
             {
-                Status = DiskIo->ReadDisk( DiskIo, BlockIo->Media->MediaId, 0, BYTES, Buffer1 );
+                Status = DiskIo->ReadDisk( DiskIo, BlockIo->Media->MediaId, 0, DISK_BUFFER_SIZE, Buffer1 );
                 
                 DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X BlockIo->Media->MediaId: %d\n", __LINE__, Status, BlockIo->Media->MediaId);
 
@@ -1488,7 +1541,7 @@ EFI_STATUS PartitionUSBReadPassThrough()
     EFI_HANDLE *ControllerHandle = NULL;
     EFI_DEVICE_PATH_TO_TEXT_PROTOCOL *DevPathToText;
     EFI_BLOCK_IO_PROTOCOL           *BlockIo;
-    UINT8 Buffer1[BYTES];
+    UINT8 Buffer1[DISK_BUFFER_SIZE];
     EFI_DISK_IO_PROTOCOL            *DiskIo;
 /*    EFI_ATA_PASS_THRU_PROTOCOL        *AtaPassThru;
 
@@ -1504,7 +1557,37 @@ EFI_STATUS PartitionUSBReadPassThrough()
 */
 }
 
-unsigned int sector_count = 0;
+VOID Transfer(MasterBootRecord *pSource, MasterBootRecordSwitched *pDest)
+{
+    pDest->ReservedSelector = pSource->ReservedSelector[0] + pSource->ReservedSelector[1] * 16 * 16;
+    pDest->SectorsPerFat    = (UINT16)pSource->SectorsPerFat[0] + (UINT16)(pSource->SectorsPerFat[1]) * 16 * 16 + pSource->SectorsPerFat[2] * 16 * 16 * 16 * 16 + pSource->SectorsPerFat[3] * 16 * 16 * 16 * 16 * 16 * 16;
+    
+	DebugPrint1(DISK_MBR_X, DISK_MBR_Y + 16, "ReservedSelector:%d SectorsPerFat:%d", 
+											    pDest->ReservedSelector,
+											    pDest->SectorsPerFat);
+}
+
+EFI_STATUS BufferAnalysis(UINT8 *p, MasterBootRecordSwitched *pMBRSwitched)
+{
+	MasterBootRecord *pMBR;
+	
+	pMBR = (MasterBootRecord *)AllocateZeroPool(DISK_BUFFER_SIZE);
+	memcpy(pMBR, p, DISK_BUFFER_SIZE);
+
+	// 大端字节序：低位字节在高地址，高位字节低地址上。这是人类读写数值的方法。
+    // 小端字节序：与上面相反。低位字节在低地址，高位字节在高地址。
+	DebugPrint1(DISK_MBR_X, DISK_MBR_Y, "ReservedSelector:%02X%02X SectorsPerFat:%02X%02X%02X%02X", 
+	                                    pMBR->ReservedSelector[0], pMBR->ReservedSelector[1], 
+	                                    pMBR->SectorsPerFat[0], pMBR->SectorsPerFat[1], pMBR->SectorsPerFat[2], pMBR->SectorsPerFat[3]);
+
+	Transfer(pMBR, pMBRSwitched);
+
+	FreePool(pMBR);
+}
+
+
+UINT32 sector_count = 0;
+
 
 //DiskIo: Block mode, operation can handle by byte and any position 
 //DiskIo2: UnBlocks, operation can handle by byte and any position
@@ -1520,7 +1603,7 @@ EFI_STATUS PartitionUSBReadSynchronous()
     EFI_HANDLE *ControllerHandle = NULL;
     EFI_DEVICE_PATH_TO_TEXT_PROTOCOL *DevPathToText;
     EFI_BLOCK_IO_PROTOCOL           *BlockIo;
-    UINT8 Buffer1[BYTES];
+    UINT8 Buffer1[DISK_BUFFER_SIZE];
     EFI_DISK_IO_PROTOCOL            *DiskIo;
     
     Status = gBS->LocateProtocol (&gEfiDevicePathToTextProtocolGuid, NULL, (VOID **) &DevPathToText);
@@ -1597,9 +1680,10 @@ EFI_STATUS PartitionUSBReadSynchronous()
 							  IN UINTN                        BufferSize,
 							  OUT VOID                        *Buffer
 			            */
-			        	 Status = DiskIo->ReadDisk( DiskIo, BlockIo->Media->MediaId, BYTES * sector_count++, BYTES, Buffer1 );
+			        	 Status = DiskIo->ReadDisk( DiskIo, BlockIo->Media->MediaId, DISK_BUFFER_SIZE * sector_count, DISK_BUFFER_SIZE, Buffer1 );
 			            
-			            DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X BlockIo->Media->MediaId: %d\n", __LINE__, Status, BlockIo->Media->MediaId);
+			            DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X sector_count:%ld BlockIo->Media->MediaId: %d\n", 
+			            																   __LINE__, Status, sector_count, BlockIo->Media->MediaId);
 
 			            if ( EFI_SUCCESS == Status )
 			            {
@@ -1608,7 +1692,11 @@ EFI_STATUS PartitionUSBReadSynchronous()
 							  		DebugPrint1(DISK_READ_BUFFER_X + (j % 50) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 50), "%02X ", Buffer1[j] & 0xff);
 							  }
 					     }
+						  
+						 MasterBootRecordSwitched MBRSwitched;
+					     BufferAnalysis(Buffer1, &MBRSwitched); 
 					 //}
+					 sector_count = MBRSwitched.ReservedSelector + MBRSwitched.SectorsPerFat * 2;
 		        }       
 		    }
 
@@ -1628,7 +1716,7 @@ EFI_STATUS PartitionUSBReadAsynchronous()
     EFI_DEVICE_PATH_TO_TEXT_PROTOCOL *DevPathToText;
     EFI_BLOCK_IO2_PROTOCOL           *BlockIo2;
     EFI_BLOCK_IO2_PROTOCOL           BlockIo22;
-    UINT8 Buffer1[BYTES];
+    UINT8 Buffer1[DISK_BUFFER_SIZE];
     EFI_DISK_IO2_PROTOCOL            *DiskIo2;
 
     EFI_DEVICE_PATH_PROTOCOL* dp;
@@ -1653,7 +1741,7 @@ EFI_STATUS PartitionUSBReadAsynchronous()
 
         EFI_LBA  LBA = 0;
         
-       BlockIo2->ReadBlocksEx(BlockIo2, BlockIo2->Media->MediaId, LBA, &disk_handle_task.DiskIo2Token, BYTES, Buffer1);
+       BlockIo2->ReadBlocksEx(BlockIo2, BlockIo2->Media->MediaId, LBA, &disk_handle_task.DiskIo2Token, DISK_BUFFER_SIZE, Buffer1);
         
         //gBS->SignalEvent (disk_handle_task.FileIoToken->Event);
         DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X BlockIo->Media->MediaId: %d\n", __LINE__, Status, BlockIo2->Media->MediaId);
@@ -1773,7 +1861,7 @@ EFI_STATUS PartitionUSBReadAsynchronous()
                        );
 
 		        	 
-		            Status = DiskIo2->ReadDiskEx( DiskIo2, BlockIo2->Media->MediaId, &disk_handle_task.DiskIo2Token, 0, BYTES, Buffer1 );
+		            Status = DiskIo2->ReadDiskEx( DiskIo2, BlockIo2->Media->MediaId, &disk_handle_task.DiskIo2Token, 0, DISK_BUFFER_SIZE, Buffer1 );
 
 					
 					typedef
@@ -1790,7 +1878,7 @@ EFI_STATUS PartitionUSBReadAsynchronous()
 
 					EFI_LBA  LBA = 0;
 
-		           BlockIo2->ReadBlocksEx(BlockIo2, BlockIo2->Media->MediaId, LBA, &disk_handle_task.DiskIo2Token, BYTES, Buffer1);
+		           BlockIo2->ReadBlocksEx(BlockIo2, BlockIo2->Media->MediaId, LBA, &disk_handle_task.DiskIo2Token, DISK_BUFFER_SIZE, Buffer1);
 		            
 			        //gBS->SignalEvent (disk_handle_task.FileIoToken->Event);
 		            DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X BlockIo->Media->MediaId: %d\n", __LINE__, Status, BlockIo2->Media->MediaId);
@@ -1822,6 +1910,10 @@ VOID EFIAPI TimeSlice(
 
 	return;
 }
+
+
+
+
 
 EFI_STATUS MouseInit()
 {
@@ -1962,9 +2054,9 @@ EFI_STATUS FileReadSelf2(CHAR16 *FileName, UINT32 size, UINT8 *pBuffer)
 					//Buffer[10] = '\0';
 					Print( L"%d EFI_SUCCESS == Status\n", __LINE__ );
 
-					//DecToCharBuffer(Buffer, BYTES, Bufferout);
+					//DecToCharBuffer(Buffer, DISK_BUFFER_SIZE, Bufferout);
 			       
-			       //ShowHex(Buffer, BYTES);
+			       //ShowHex(Buffer, DISK_BUFFER_SIZE);
 				}
 
 				return -1;
@@ -2186,8 +2278,8 @@ EFI_STATUS DiskReadUseDiskIo(UINT32   MediaId,
     EFI_DISK_IO_PROTOCOL            *DiskIo;
     EFI_BLOCK_IO_PROTOCOL           *BlockIo;
 
-    UINT8 Buffer1[BYTES];
-    UINT8 Bufferout[BYTES * EXBYTE];
+    UINT8 Buffer1[DISK_BUFFER_SIZE];
+    UINT8 Bufferout[DISK_BUFFER_SIZE * EXBYTE];
 
     Status = gBS->LocateProtocol( &gEfiDevicePathToTextProtocolGuid, NULL, (VOID * *) &DevPathToText );
     //Print( L"%d :%X\n", __LINE__ ,Status );
@@ -2232,7 +2324,7 @@ EFI_STATUS DiskReadUseDiskIo(UINT32   MediaId,
             	  BlockIo->Media->MediaId;
                 //Print( L"%d, %d\n", __LINE__, BlockIo->Media->MediaId);
 
-                Status = DiskIo->ReadDisk( DiskIo, BlockIo->Media->MediaId, 0, BYTES, Buffer1 );
+                Status = DiskIo->ReadDisk( DiskIo, BlockIo->Media->MediaId, 0, DISK_BUFFER_SIZE, Buffer1 );
                 //Print( L"%d :%X\n", __LINE__ ,Status );
                 DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X BlockIo->Media->MediaId: %d\n", __LINE__, Status, BlockIo->Media->MediaId);
 
@@ -2244,9 +2336,9 @@ EFI_STATUS DiskReadUseDiskIo(UINT32   MediaId,
 					  for (int j = 0; j < 50; j++)
 					  	   DebugPrint1(DISK_READ_BUFFER_X + j * 8 * 3, DISK_READ_BUFFER_Y + i * 16, "%02X ", Buffer1[j] & 0xff);
 
-                    //DecToCharBuffer1(Buffer1, BYTES, Bufferout);
+                    //DecToCharBuffer1(Buffer1, DISK_BUFFER_SIZE, Bufferout);
                    
-                    //ShowHex1(Bufferout, BYTES);
+                    //ShowHex1(Bufferout, DISK_BUFFER_SIZE);
                 }
             }       
         }
@@ -2366,9 +2458,9 @@ HandleKeyboardEvent (
      EFI_DISK_IO2_PROTOCOL            *DiskIo2;
      EFI_BLOCK_IO2_PROTOCOL           *BlockIo2;
  
-     UINT8 Buffer[BYTES];
+     UINT8 Buffer[DISK_BUFFER_SIZE];
  
-     UINT8 Bufferout[BYTES * EXBYTE];
+     UINT8 Bufferout[DISK_BUFFER_SIZE * EXBYTE];
  
      Status = gBS->LocateProtocol( &gEfiDevicePathToTextProtocolGuid, NULL, (VOID * *) &DevPathToText );
      Print( L"%d :%X\n", __LINE__ ,Status );
@@ -2413,7 +2505,7 @@ HandleKeyboardEvent (
              {
                  Print( L"%d, %d\n", __LINE__, BlockIo2->Media->MediaId);
  
-                 Status = DiskIo2->ReadDiskEx( DiskIo2, BlockIo2->Media->MediaId, disk_handle_task.DiskIo2Token.Event, 0, BYTES, Buffer );
+                 Status = DiskIo2->ReadDiskEx( DiskIo2, BlockIo2->Media->MediaId, disk_handle_task.DiskIo2Token.Event, 0, DISK_BUFFER_SIZE, Buffer );
 				  
                  //Print( L"%d :%X\n", __LINE__ ,Status );
  
@@ -2422,9 +2514,9 @@ HandleKeyboardEvent (
                      Buffer[10] = '\0';
                      //Print( L"%d :%s\n", __LINE__ , Buffer );
  
-                     DecToCharBuffer1(Buffer, BYTES, Bufferout);
+                     DecToCharBuffer1(Buffer, DISK_BUFFER_SIZE, Bufferout);
                     
-                     ShowHex1(Bufferout, BYTES);
+                     ShowHex1(Bufferout, DISK_BUFFER_SIZE);
                  }
              }       
          }
