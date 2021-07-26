@@ -234,6 +234,14 @@ typedef struct
 {
 	unsigned char FileName[8];
 	unsigned char ExtensionName[3];
+
+	// 00000000(Read/Write)
+    // 00000001(ReadOnly)
+    // 00000010(Hide)
+    // 00000100(System)
+    // 00001000(Volume name)
+    // 00010000(Sub path)
+    // 00100000(FILING: guidang)
 	unsigned char Attribute[1];  // if 0x0FH then Long path structor
 	unsigned char Reserved[1];
 	unsigned char CreateTimeLow[1];
@@ -846,6 +854,9 @@ VOID StringMaker (UINT16 x, UINT16 y,
 /* Display a string */
 VOID EFIAPI DebugPrint1 (UINT16 x, UINT16 y,  IN  CONST CHAR8  *Format, ...)
 {
+	if (y > ScreenHeight - 16)
+		return;
+
 	VA_LIST         VaList;
 	VA_START (VaList, Format);
 	StringMaker(x, y, Format, VaList);
@@ -1653,16 +1664,22 @@ EFI_STATUS RootPathAnalysis(UINT8 *p)
 	}
 */
 	memcpy(&pItems, p, DISK_BUFFER_SIZE);
+	UINT16 valid_count = 0;
 
-	for (int i = 0; i < 10; i++)
-        DebugPrint1(DISK_MBR_X, 16 * 30 + (i) * 16, "FileName:%2c%2c%2c%2c%2c%2c%2c%2c ExtensionName:%2c%2c%2c StartCluster:%02X%02X%02X%02X FileLength: %02X%02X%02X%02X Attribute: %02X", 
+	//display filing file and subpath. 
+	for (int i = 0; i < 30; i++)
+		if (pItems[i].FileName[0] != 0xE5 && (pItems[i].Attribute[0] == 0x20 
+		    || pItems[i].Attribute[0] == 0x10))
+        {
+        DebugPrint1(DISK_MBR_X, 16 * 30 + (valid_count) * 16, "FileName:%2c%2c%2c%2c%2c%2c%2c%2c ExtensionName:%2c%2c%2c StartCluster:%02X%02X%02X%02X FileLength: %02X%02X%02X%02X Attribute: %02X    ", 
                                             pItems[i].FileName[0], pItems[i].FileName[1], pItems[i].FileName[2], pItems[i].FileName[3], pItems[i].FileName[4], pItems[i].FileName[5], pItems[i].FileName[6], pItems[i].FileName[7],
                                             pItems[i].ExtensionName[0], pItems[i].ExtensionName[1],pItems[i].ExtensionName[2],
                                             pItems[i].StartClusterHigh2B[0], pItems[i].StartClusterHigh2B[1],
                                             pItems[i].StartClusterLow2B[0], pItems[i].StartClusterLow2B[1],
                                             pItems[i].FileLength[0], pItems[i].FileLength[1], pItems[i].FileLength[2], pItems[i].FileLength[3],
                                             pItems[i].Attribute[0]);
-
+			valid_count++;
+		}
 
 }
 
