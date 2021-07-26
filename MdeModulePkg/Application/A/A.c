@@ -149,7 +149,7 @@ char pKeyboardInputBuffer[KEYBOARD_BUFFER_LENGTH] = {0};
 UINT16 StatusErrorCount = 0;
 // For exception returned status 
 #define DISPLAY_ERROR_STATUS_X (ScreenWidth * 3 / 4) 
-#define DISPLAY_ERROR_STATUS_Y (16 * (StatusErrorCount++ % 15) )
+#define DISPLAY_ERROR_STATUS_Y (16 * (StatusErrorCount++ % 60) )
 
 #define DEBUG_STATUS_2(x, y, Express)  DebugPrint1(x, y,IN CONST CHAR8 * Format,...)
 
@@ -254,6 +254,20 @@ typedef struct
 	unsigned char StartClusterLow2B[2]; //*
 	unsigned char FileLength[4];
 }FAT32_ROOTPATH_SHORT_FILE_ITEM;
+
+typedef struct 
+{
+	unsigned char Reserved[1];
+	unsigned char CreateTimeLow[1];
+	unsigned char CreateTimeHigh[2];
+	unsigned char CreateDate[2];
+	unsigned char LatestVisitedDate[2];
+	unsigned char StartClusterHigh2B[2];
+	unsigned char LatestModiedTime[2];
+	unsigned char LatestModiedDate[2];
+	unsigned char StartClusterLow2B[2]; //*
+	unsigned char FileLength[4];
+}FAT32_ROOTPATH_SHORT_FILE_ITEMSwitched;
 
 
 typedef struct 
@@ -845,7 +859,7 @@ VOID StringMaker (UINT16 x, UINT16 y,
     ASSERT (Format != NULL);
 
     AsciiVSPrint (AsciiBuffer, sizeof (AsciiBuffer), Format, VaList);
-
+		
     for (i = 0; i < sizeof(AsciiBuffer) /sizeof(CHAR8); i++)
         DrawAsciiCharUseBuffer(pDeskBuffer, x + i * 8, y, AsciiBuffer[i], Color);
 
@@ -1817,7 +1831,74 @@ EFI_STATUS PartitionUSBReadSynchronous()
 		    }
 
 		    return EFI_SUCCESS;
-		 }  
+		 } 
+		 else if (device[i].DeviceType == 1 && device[i].SectorCount == 13185120)
+		 {
+			DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
+		 	Status = gBS->HandleProtocol(ControllerHandle[i],
+                                    &gEfiBlockIoProtocolGuid,
+                                    (VOID * *) &BlockIo );                                                
+		    DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
+		    
+		    if ( EFI_SUCCESS == Status )
+		    {			        	 
+		        Status = gBS->HandleProtocol( ControllerHandle[i],
+		                                      &gEfiDiskIoProtocolGuid,
+		                                      (VOID * *) &DiskIo ); 
+		        DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
+		        
+		        if ( Status == EFI_SUCCESS )
+		        {
+		        	 // Read from disk....
+
+		        	 //for (int k = 0; k < 10; k++)
+			        //{
+			            /*
+			                 IN EFI_DISK_IO_PROTOCOL         *This,
+							  IN UINT32                       MediaId,
+							  IN UINT64                       Offset,
+							  IN UINTN                        BufferSize,
+							  OUT VOID                        *Buffer
+			            */
+						 if (device[i].SectorCount <= sector_count)
+						 {
+							  DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: device[i].SectorCount <= sector_count \n", __LINE__);
+							  return EFI_SUCCESS;
+						 }
+			            
+			        	 Status = DiskIo->ReadDisk( DiskIo, BlockIo->Media->MediaId, DISK_BUFFER_SIZE * sector_count, DISK_BUFFER_SIZE, Buffer1 );
+			            
+			            DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X sector_count:%ld BlockIo->Media->MediaId: %d\n", 
+			            																   __LINE__, Status, sector_count, BlockIo->Media->MediaId);
+
+			            if ( EFI_SUCCESS == Status )
+			            {
+							  for (int j = 0; j < 250; j++)
+							  {
+							  		DebugPrint1(DISK_READ_BUFFER_X + (j % 50) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 50), "%02X ", Buffer1[j] & 0xff);
+							  }
+					     }
+						  
+						 MasterBootRecordSwitched MBRSwitched;
+						 if (0 == sector_count)
+						 {
+						 	// analysis data area of patition
+						 	BufferAnalysis(Buffer1, &MBRSwitched); 
+						 }
+						 else if (sector_count == 25736)
+						 {
+						 	//When get root path data sector start number, we can get content of root path.
+						 	RootPathAnalysis(Buffer1);						 	
+						 }
+					 //}
+					 sector_count = MBRSwitched.ReservedSelector + MBRSwitched.SectorsPerFat * MBRSwitched.NumFATS + MBRSwitched.BootPathStartCluster - 2;
+					 
+                   DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: sector_count:%ld \n",  __LINE__, sector_count);
+		        }       
+		    }
+
+		    return EFI_SUCCESS;
+		}
     }
     return EFI_SUCCESS;
 }
