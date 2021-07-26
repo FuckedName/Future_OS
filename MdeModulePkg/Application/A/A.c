@@ -230,6 +230,59 @@ typedef struct
 	UINT16 NumFATS;
 }MasterBootRecordSwitched;
 
+typedef struct 
+{
+	unsigned char FileName[8];
+	unsigned char ExtensionName[3];
+	unsigned char Attribute[1];  // if 0x0FH then Long path structor
+	unsigned char Reserved[1];
+	unsigned char CreateTimeLow[1];
+	unsigned char CreateTimeHigh[2];
+	unsigned char CreateDate[2];
+	unsigned char LatestVisitedDate[2];
+	unsigned char StartClusterHigh2B[2];
+	unsigned char LatestModiedTime[2];
+	unsigned char LatestModiedDate[2];
+	unsigned char StartClusterLow2B[2]; //*
+	unsigned char FileLength[4];
+}FAT32_ROOTPATH_SHORT_FILE_ITEM;
+
+
+typedef struct 
+{
+	unsigned char FileName[8];
+	unsigned char ExtensionName[3];
+	unsigned char Attribute[1];  // if 0x0FH then Long path structor
+	unsigned char Reserved[1];
+	unsigned char CreateTimeLow[1];
+	unsigned char CreateTimeHigh[2];
+	unsigned char CreateDate[2];
+	unsigned char LatestVisitedDate[2];
+	unsigned char StartClusterHigh2B[2];
+	unsigned char LatestModiedTime[2];
+	unsigned char LatestModiedDate[2];
+	unsigned char StartClusterLow2B[2]; //*
+	unsigned char FileLength[4];
+}FAT32_ROOTPATH_LONG_FILE_ITEM;
+
+
+typedef struct 
+{
+	UINT16 ReservedSelector;
+	UINT16 SectorsPerFat;	
+	UINT16 BootPathStartCluster;
+	UINT16 NumFATS;
+}ROOT_PATH;
+
+/*目录项首字节含义*/
+enum DirFirstChar
+{
+	DirUnUsed            = 0x00,        /*本表项没有使用*/
+	DirCharE5            = 0x05,        /*首字符为0xe5*/
+	DirisSubDir          = 0x2e,        /*是一个子目录 .,..为父目录*/
+	DirFileisDeleted     = 0xe5        /*文件已删除*/
+};
+
 
 typedef struct {
   UINTN               Signature;
@@ -1589,6 +1642,31 @@ EFI_STATUS BufferAnalysis(UINT8 *p, MasterBootRecordSwitched *pMBRSwitched)
 	FreePool(pMBR);
 }
 
+EFI_STATUS RootPathAnalysis(UINT8 *p)
+{
+	FAT32_ROOTPATH_SHORT_FILE_ITEM pItems[32];
+	/*pItems = (FAT32_ROOTPATH_SHORT_FILE_ITEM *)AllocateZeroPool(DISK_BUFFER_SIZE);
+	if (NULL == pItems)
+	{
+		DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: \n", __LINE__);
+		return EFI_SUCCESS;
+	}
+*/
+	memcpy(&pItems, p, DISK_BUFFER_SIZE);
+
+	for (int i = 0; i < 10; i++)
+        DebugPrint1(DISK_MBR_X, 16 * 30 + (i) * 16, "FileName:%2c%2c%2c%2c%2c%2c%2c%2c ExtensionName:%2c%2c%2c StartCluster:%02X%02X%02X%02X FileLength: %02X%02X%02X%02X Attribute: %02X", 
+                                            pItems[i].FileName[0], pItems[i].FileName[1], pItems[i].FileName[2], pItems[i].FileName[3], pItems[i].FileName[4], pItems[i].FileName[5], pItems[i].FileName[6], pItems[i].FileName[7],
+                                            pItems[i].ExtensionName[0], pItems[i].ExtensionName[1],pItems[i].ExtensionName[2],
+                                            pItems[i].StartClusterHigh2B[0], pItems[i].StartClusterHigh2B[1],
+                                            pItems[i].StartClusterLow2B[0], pItems[i].StartClusterLow2B[1],
+                                            pItems[i].FileLength[0], pItems[i].FileLength[1], pItems[i].FileLength[2], pItems[i].FileLength[3],
+                                            pItems[i].Attribute[0]);
+
+
+}
+
+
 
 UINT32 sector_count = 0;
 
@@ -1684,6 +1762,12 @@ EFI_STATUS PartitionUSBReadSynchronous()
 							  IN UINTN                        BufferSize,
 							  OUT VOID                        *Buffer
 			            */
+						 if (device[i].SectorCount <= sector_count)
+						 {
+							  DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: device[i].SectorCount <= sector_count \n", __LINE__);
+							  return EFI_SUCCESS;
+						 }
+			            
 			        	 Status = DiskIo->ReadDisk( DiskIo, BlockIo->Media->MediaId, DISK_BUFFER_SIZE * sector_count, DISK_BUFFER_SIZE, Buffer1 );
 			            
 			            DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X sector_count:%ld BlockIo->Media->MediaId: %d\n", 
@@ -1698,9 +1782,20 @@ EFI_STATUS PartitionUSBReadSynchronous()
 					     }
 						  
 						 MasterBootRecordSwitched MBRSwitched;
-					     BufferAnalysis(Buffer1, &MBRSwitched); 
+						 if (0 == sector_count)
+						 {
+						 	// analysis data area of patition
+						 	BufferAnalysis(Buffer1, &MBRSwitched); 
+						 }
+						 else if (sector_count == 1824)
+						 {
+						 	//When get root path data sector start number, we can get content of root path.
+						 	RootPathAnalysis(Buffer1);						 	
+						 }
 					 //}
 					 sector_count = MBRSwitched.ReservedSelector + MBRSwitched.SectorsPerFat * MBRSwitched.NumFATS + MBRSwitched.BootPathStartCluster - 2;
+					 
+                   DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: sector_count:%ld \n",  __LINE__, sector_count);
 		        }       
 		    }
 
