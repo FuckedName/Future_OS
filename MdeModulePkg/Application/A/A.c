@@ -142,6 +142,7 @@ char pKeyboardInputBuffer[KEYBOARD_BUFFER_LENGTH] = {0};
 
 
 #define DISK_BUFFER_SIZE 512
+#define DISK_BLOCK_BUFFER_SIZE (512 * 8)
 #define EXBYTE	4
 
 
@@ -228,6 +229,7 @@ typedef struct
 	UINT16 SectorsPerFat;	
 	UINT16 BootPathStartCluster;
 	UINT16 NumFATS;
+	UINT16 SectorOfCluster;
 }MasterBootRecordSwitched;
 
 typedef struct 
@@ -345,6 +347,12 @@ UINT16 MyComputerWidth = 100;
 UINT16 MyComputerHeight = 100;
 UINT16 MouseClickWindowWidth = 300;
 UINT16 MouseClickWindowHeight = 400;
+
+
+UINT32 sector_count = 0;
+UINT32 FileBlockStart = 0;
+UINT32 BlockSize = 0;
+UINT32 FileLength = 0;
 
 
 DEVICE_PARAMETER device[10] = {0};
@@ -1640,11 +1648,13 @@ VOID Transfer(MasterBootRecord *pSource, MasterBootRecordSwitched *pDest)
     pDest->SectorsPerFat    = (UINT16)pSource->SectorsPerFat[0] + (UINT16)(pSource->SectorsPerFat[1]) * 16 * 16 + pSource->SectorsPerFat[2] * 16 * 16 * 16 * 16 + pSource->SectorsPerFat[3] * 16 * 16 * 16 * 16 * 16 * 16;
     pDest->BootPathStartCluster = (UINT16)pSource->BootPathStartCluster[0] + pSource->BootPathStartCluster[1] * 16 * 16 + pSource->BootPathStartCluster[2] * 16 * 16 * 16 * 16, pSource->BootPathStartCluster[3] * 16 * 16 * 16 * 16 * 16 * 16;
     pDest->NumFATS      = pSource->NumFATS[0];
-	DebugPrint1(DISK_MBR_X, DISK_MBR_Y + 16, "ReservedSelector:%d SectorsPerFat:%d BootPathStartCluster: %d NumFATS:%d", 
+    pDest->SectorOfCluster = pSource->SectorOfCluster[0];
+	DebugPrint1(DISK_MBR_X, DISK_MBR_Y + 16, "ReservedSelector:%d SectorsPerFat:%d BootPathStartCluster: %d NumFATS:%d SectorOfCluster:%d", 
 											    pDest->ReservedSelector,
 											    pDest->SectorsPerFat,
 											    pDest->BootPathStartCluster,
-											    pDest->NumFATS);
+											    pDest->NumFATS,
+											    pDest->SectorOfCluster);
 }
 
 EFI_STATUS BufferAnalysis(UINT8 *p, MasterBootRecordSwitched *pMBRSwitched)
@@ -1677,6 +1687,13 @@ EFI_STATUS StrCmpSelf(unsigned char *p1, unsigned char *p2, UINT16 length)
 		//DebugPrint1(DISK_MBR_X + i * 6 * 8, 16 * 30 + 10 * 16, "%02X %02X ", p1[i], p2[i]);
 	return EFI_SUCCESS;
 }
+
+EFI_STATUS ReadFileContentFromFAT32()
+{
+    DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: ReadFileContentFromFAT32: %d \n",  __LINE__, sector_count);
+
+}
+
 
 EFI_STATUS RootPathAnalysis(UINT8 *p)
 {
@@ -1717,6 +1734,8 @@ EFI_STATUS RootPathAnalysis(UINT8 *p)
                                 pItems[i].StartClusterLow2B[0], pItems[i].StartClusterLow2B[1],
                                 pItems[i].FileLength[0], pItems[i].FileLength[1], pItems[i].FileLength[2], pItems[i].FileLength[3],
                                 pItems[i].Attribute[0]);
+              FileBlockStart = (UINT32)pItems[i].StartClusterHigh2B[0] * 16 * 16 * 16 * 16 + (UINT32)pItems[i].StartClusterHigh2B[1] * 16 * 16 * 16 * 16 * 16 * 16 + pItems[i].StartClusterLow2B[0] + (UINT32)pItems[i].StartClusterLow2B[1] * 16 * 16;
+              FileLength = pItems[i].FileLength[0] + (UINT32)pItems[i].FileLength[1] * 16 * 16 + (UINT32)pItems[i].FileLength[2] * 16 * 16 * 16 * 16 + (UINT32)pItems[i].FileLength[3] * 16 * 16 * 16 * 16 * 16 * 16;
 			}
 		}
 
@@ -1724,7 +1743,6 @@ EFI_STATUS RootPathAnalysis(UINT8 *p)
 
 
 
-UINT32 sector_count = 0;
 
 
 //DiskIo: Block mode, operation can handle by byte and any position 
@@ -1742,6 +1760,7 @@ EFI_STATUS PartitionUSBReadSynchronous()
     EFI_DEVICE_PATH_TO_TEXT_PROTOCOL *DevPathToText;
     EFI_BLOCK_IO_PROTOCOL           *BlockIo;
     UINT8 Buffer1[DISK_BUFFER_SIZE];
+    UINT8 BufferBlock[DISK_BLOCK_BUFFER_SIZE];
     EFI_DISK_IO_PROTOCOL            *DiskIo;
     
     Status = gBS->LocateProtocol (&gEfiDevicePathToTextProtocolGuid, NULL, (VOID **) &DevPathToText);
@@ -1793,42 +1812,29 @@ EFI_STATUS PartitionUSBReadSynchronous()
 		 if (device[i].DeviceType == 1 && device[i].SectorCount == 915551)
 		 {
 		    DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
-		 	Status = gBS->HandleProtocol(ControllerHandle[i],
-                                    &gEfiBlockIoProtocolGuid,
-                                    (VOID * *) &BlockIo );                                                
+		 	Status = gBS->HandleProtocol(ControllerHandle[i], &gEfiBlockIoProtocolGuid, (VOID * *) &BlockIo );                                                
 		    DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
 		    
 		    if ( EFI_SUCCESS == Status )
 		    {			        	 
-		        Status = gBS->HandleProtocol( ControllerHandle[i],
-		                                      &gEfiDiskIoProtocolGuid,
-		                                      (VOID * *) &DiskIo ); 
+		        Status = gBS->HandleProtocol( ControllerHandle[i], &gEfiDiskIoProtocolGuid, (VOID * *) &DiskIo ); 
 		        DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
 		        
 		        if ( Status == EFI_SUCCESS )
 		        {
-		        	 // Read from disk....
+					 if (device[i].SectorCount <= sector_count)
+					 {
+						  DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: device[i].SectorCount <= sector_count \n", __LINE__);
+						  return EFI_SUCCESS;
+					 }
 
-		        	 //for (int k = 0; k < 10; k++)
-			        //{
-			            /*
-			                 IN EFI_DISK_IO_PROTOCOL         *This,
-							  IN UINT32                       MediaId,
-							  IN UINT64                       Offset,
-							  IN UINTN                        BufferSize,
-							  OUT VOID                        *Buffer
-			            */
-						 if (device[i].SectorCount <= sector_count)
-						 {
-							  DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: device[i].SectorCount <= sector_count \n", __LINE__);
-							  return EFI_SUCCESS;
-						 }
-			            
-			        	 Status = DiskIo->ReadDisk( DiskIo, BlockIo->Media->MediaId, DISK_BUFFER_SIZE * sector_count, DISK_BUFFER_SIZE, Buffer1 );
-			            
-			            DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X sector_count:%ld BlockIo->Media->MediaId: %d\n", 
-			            																   __LINE__, Status, sector_count, BlockIo->Media->MediaId);
-
+					 
+		            
+		        	 if (FileLength == 0)
+		        	 {
+		        	    // Read FAT32 file system partition infomation , minimum unit is sector.
+		        	 	DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
+		        	 	Status = DiskIo->ReadDisk( DiskIo, BlockIo->Media->MediaId, DISK_BUFFER_SIZE * sector_count, DISK_BUFFER_SIZE, Buffer1 );
 			            if ( EFI_SUCCESS == Status )
 			            {
 							  for (int j = 0; j < 250; j++)
@@ -1836,20 +1842,47 @@ EFI_STATUS PartitionUSBReadSynchronous()
 							  		DebugPrint1(DISK_READ_BUFFER_X + (j % 50) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 50), "%02X ", Buffer1[j] & 0xff);
 							  }
 					     }
-						  
-						 MasterBootRecordSwitched MBRSwitched;
-						 if (0 == sector_count)
-						 {
-						 	// analysis data area of patition
-						 	BufferAnalysis(Buffer1, &MBRSwitched); 
-						 }
-						 else if (sector_count == 1824)
-						 {
-						 	//When get root path data sector start number, we can get content of root path.
-						 	RootPathAnalysis(Buffer1);						 	
-						 }
-					 //}
-					 sector_count = MBRSwitched.ReservedSelector + MBRSwitched.SectorsPerFat * MBRSwitched.NumFATS + MBRSwitched.BootPathStartCluster - 2;
+		        	 }
+		        	 else
+		        	 {
+		        	    // Read file content from FAT32(USB), minimum unit is block
+		        	    
+		        	 	DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
+		        	 	Status = DiskIo->ReadDisk( DiskIo, BlockIo->Media->MediaId, DISK_BUFFER_SIZE * sector_count, DISK_BLOCK_BUFFER_SIZE, BufferBlock);
+		        	 	
+			            if ( EFI_SUCCESS == Status )
+			            {
+							  for (int j = 0; j < 250; j++)
+							  {
+							  		DebugPrint1(DISK_READ_BUFFER_X + (j % 50) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 50), "%02X ", BufferBlock[j] & 0xff);
+							  }
+					     }
+		            }
+		            DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X sector_count:%ld BlockIo->Media->MediaId: %d\n", 
+		            																   __LINE__, Status, sector_count, BlockIo->Media->MediaId);
+
+					  
+					 MasterBootRecordSwitched MBRSwitched;
+					 if (0 == sector_count)
+					 {
+					 	// analysis data area of patition
+					 	BufferAnalysis(Buffer1, &MBRSwitched); 
+					 	sector_count = MBRSwitched.ReservedSelector + MBRSwitched.SectorsPerFat * MBRSwitched.NumFATS + MBRSwitched.BootPathStartCluster - 2;
+					 	BlockSize = MBRSwitched.SectorOfCluster * 512;
+                   	DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: sector_count:%ld BlockSize: %d\n",  __LINE__, sector_count, BlockSize);
+					 }
+					 else if (sector_count == 1824)
+					 {
+					 	//When get root path data sector start number, we can get content of root path.
+					 	RootPathAnalysis(Buffer1);	
+					 	sector_count = 1824 + (FileBlockStart - 2) * 8;
+					 	DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: sector_count:%ld FileLength: %d\n",  __LINE__, sector_count, FileLength);
+					 }
+					 else
+					 {
+					 	DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: sector_count:%ld FileBlockStart: %d\n",  __LINE__, sector_count, FileBlockStart);
+					 	ReadFileContentFromFAT32();
+					 }
 					 
                    DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: sector_count:%ld \n",  __LINE__, sector_count);
 		        }       
