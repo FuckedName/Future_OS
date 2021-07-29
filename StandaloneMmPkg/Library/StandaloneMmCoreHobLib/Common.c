@@ -17,6 +17,15 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 #include <Guid/MemoryAllocationHob.h>
 
+
+#define INFO(...)   \
+				do {   \
+					 Print(L"[INFO  ]%a %a(Line %d): ", __FILE__,__FUNCTION__,__LINE__);  \
+				    Print(__VA_ARGS__); \
+				}while(0);
+
+
+
 /**
   Returns the pointer to the HOB list.
 
