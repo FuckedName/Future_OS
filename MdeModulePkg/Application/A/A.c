@@ -155,7 +155,7 @@ char pKeyboardInputBuffer[KEYBOARD_BUFFER_LENGTH] = {0};
 
 UINT16 StatusErrorCount = 0;
 // For exception returned status 
-#define DISPLAY_ERROR_STATUS_X (ScreenWidth * 3 / 4) 
+#define DISPLAY_ERROR_STATUS_X (ScreenWidth * 2 / 4) 
 #define DISPLAY_ERROR_STATUS_Y (16 * (StatusErrorCount++ % 60) )
 
 #define DEBUG_STATUS_2(x, y, Express)  DebugPrint1(x, y,IN CONST CHAR8 * Format,...)
@@ -2990,9 +2990,11 @@ void MemoryParameterGet2()
     E820EntryCount = 0;
     LastEndAddr = 0;
     MemoryMapPtr = MemoryMap;
+    UINTN E820Type = 0;
+    UINTN TypeSize[6] = {0};
     for (Index = 0; Index < (MemoryMapSize / DescriptorSize); Index++) 
     {
-      UINTN E820Type = 0;
+    	E820Type = 0;
       //DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Index:%X \n", __LINE__, Index);
       	
 	  //DEBUG ((EFI_D_INFO, "%d:  Status:%X \n", __LINE__, Status));
@@ -3011,14 +3013,17 @@ void MemoryParameterGet2()
 	      case EfiMemoryMappedIOPortSpace:
 	      case EfiPalCode:
 		        E820Type = E820_RESERVED;
+		        TypeSize[0] += MemoryMap->NumberOfPages;
 		        break;
 	    
 	      case EfiUnusableMemory:
 		        E820Type = E820_UNUSABLE;
+		        TypeSize[1] += MemoryMap->NumberOfPages;
 		        break;
 		    
 	      case EfiACPIReclaimMemory:
 		        E820Type = E820_ACPI;
+		        TypeSize[2] += MemoryMap->NumberOfPages;
 		        break;
 	    
 	      case EfiLoaderCode:
@@ -3027,13 +3032,16 @@ void MemoryParameterGet2()
 	      case EfiBootServicesData:
 	      case EfiConventionalMemory:
 		        E820Type = E820_RAM;
+		        TypeSize[3] += MemoryMap->NumberOfPages;
 		        break;
 	    
-	      case EfiACPIMemoryNVS:
+	      case EfiACPIMemoryNVS:	      
+		        TypeSize[4] += MemoryMap->NumberOfPages;
 		        E820Type = E820_NVS;
 		        break;
 	    
 	      default:
+		        TypeSize[5] += MemoryMap->NumberOfPages;
 		        DEBUG ((DEBUG_ERROR,
 		          "Invalid EFI memory descriptor type (0x%x)!\n",
 		          MemoryMap->Type));
@@ -3058,9 +3066,15 @@ void MemoryParameterGet2()
 		MemoryMap = (EFI_MEMORY_DESCRIPTOR *)((UINTN)MemoryMap + DescriptorSize);
     }
 
-
-
-
+    DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: (MemoryMapSize / DescriptorSize):%X TypeSize[0]:%d %d %d %d %d %d \n", __LINE__, 
+                                                                        (MemoryMapSize / DescriptorSize),
+                                                                        TypeSize[0],
+                                                                        TypeSize[1],
+                                                                        TypeSize[2],
+                                                                        TypeSize[3],
+                                                                        TypeSize[4],
+                                                                        TypeSize[5]
+                                                                        );
 }
 
 VOID MemoryParameterGet()
