@@ -146,6 +146,12 @@ char pKeyboardInputBuffer[KEYBOARD_BUFFER_LENGTH] = {0};
 #define EXBYTE	4
 
 
+#define E820_RAM		1
+#define E820_RESERVED		2
+#define E820_ACPI		3
+#define E820_NVS		4
+#define E820_UNUSABLE		5
+
 
 UINT16 StatusErrorCount = 0;
 // For exception returned status 
@@ -170,6 +176,24 @@ UINT8 *pDeskDisplayBuffer = NULL; //desk display after multi graphicses layers c
 UINT8 *pMouseSelectedBuffer = NULL;  // after mouse selected
 UINT8 *pMouseClickBuffer = NULL; // for mouse click 
 UINT8 *pMouseBuffer = NULL;
+
+struct efi_info_self {
+	UINT32 efi_loader_signature;
+	UINT32 efi_systab;
+	UINT32 efi_memdesc_size;
+	UINT32 efi_memdesc_version;
+	UINT32 efi_memmap;
+	UINT32 efi_memmap_size;
+	UINT32 efi_systab_hi;
+	UINT32 efi_memmap_hi;
+};
+
+struct e820_entry_self {
+	UINT64 addr;		/* start of memory segment */
+	UINT64 size;		/* size of memory segment */
+	UINT32 type;		/* type of memory segment */
+};
+
 
 typedef struct
 {
@@ -2909,6 +2933,135 @@ HandleMouseEvent (
 	gBS->WaitForEvent( 1, &gMouse->WaitForInput, &Index );
 }
 
+void MemoryParameterGet2()
+{  
+	EFI_STATUS                           Status;
+	UINT8                                TmpMemoryMap[1];
+	UINTN                                MapKey;
+	UINTN                                DescriptorSize;
+	UINT32                               DescriptorVersion;
+	UINTN                                MemoryMapSize;
+	EFI_MEMORY_DESCRIPTOR                *MemoryMap;
+	EFI_MEMORY_DESCRIPTOR                *MemoryMapPtr;
+	UINTN                                Index;
+	struct efi_info_self                  *Efi;
+	struct e820_entry_self               *LastE820;
+	struct e820_entry_self               *E820;
+	UINTN                                E820EntryCount;
+	EFI_PHYSICAL_ADDRESS                 LastEndAddr;
+    
+    //
+    // Get System MemoryMapSize
+    //
+    MemoryMapSize = sizeof (TmpMemoryMap);
+    Status = gBS->GetMemoryMap (&MemoryMapSize,
+			                    (EFI_MEMORY_DESCRIPTOR *)TmpMemoryMap,
+			                    &MapKey,
+			                    &DescriptorSize,
+			                    &DescriptorVersion);
+	DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);			
+	DEBUG ((EFI_D_INFO, "%d:  Status:%X \n", __LINE__, Status));
+    ASSERT (Status == EFI_BUFFER_TOO_SMALL);
+    //
+    // Enlarge space here, because we will allocate pool now.
+    //
+    MemoryMapSize += EFI_PAGE_SIZE;
+    Status = gBS->AllocatePool (EfiLoaderData,
+			                    MemoryMapSize,
+			                    (VOID **) &MemoryMap);
+    ASSERT_EFI_ERROR (Status);
+    DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
+    	
+	DEBUG ((EFI_D_INFO, "%d:  Status:%X \n", __LINE__, Status));
+    //
+    // Get System MemoryMap
+    //
+    Status = gBS->GetMemoryMap (&MemoryMapSize,
+			                    MemoryMap,
+			                    &MapKey,
+			                    &DescriptorSize,
+			                    &DescriptorVersion);
+    ASSERT_EFI_ERROR (Status);
+    DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
+    	
+	DEBUG ((EFI_D_INFO, "%d:  Status:%X \n", __LINE__, Status));
+    
+    LastE820 = NULL;
+    E820EntryCount = 0;
+    LastEndAddr = 0;
+    MemoryMapPtr = MemoryMap;
+    for (Index = 0; Index < (MemoryMapSize / DescriptorSize); Index++) 
+    {
+      UINTN E820Type = 0;
+      //DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Index:%X \n", __LINE__, Index);
+      	
+	  //DEBUG ((EFI_D_INFO, "%d:  Status:%X \n", __LINE__, Status));
+    
+      if (MemoryMap->NumberOfPages == 0) 
+      {
+          continue;
+      }
+    
+      switch(MemoryMap->Type) 
+      {
+	      case EfiReservedMemoryType:
+	      case EfiRuntimeServicesCode:
+	      case EfiRuntimeServicesData:
+	      case EfiMemoryMappedIO:
+	      case EfiMemoryMappedIOPortSpace:
+	      case EfiPalCode:
+		        E820Type = E820_RESERVED;
+		        break;
+	    
+	      case EfiUnusableMemory:
+		        E820Type = E820_UNUSABLE;
+		        break;
+		    
+	      case EfiACPIReclaimMemory:
+		        E820Type = E820_ACPI;
+		        break;
+	    
+	      case EfiLoaderCode:
+	      case EfiLoaderData:
+	      case EfiBootServicesCode:
+	      case EfiBootServicesData:
+	      case EfiConventionalMemory:
+		        E820Type = E820_RAM;
+		        break;
+	    
+	      case EfiACPIMemoryNVS:
+		        E820Type = E820_NVS;
+		        break;
+	    
+	      default:
+		        DEBUG ((DEBUG_ERROR,
+		          "Invalid EFI memory descriptor type (0x%x)!\n",
+		          MemoryMap->Type));
+		          	
+				   DEBUG ((EFI_D_INFO, "%d:  Invalid EFI memory descriptor type (0x%x)!\n", __LINE__, MemoryMap->Type));
+		        continue;
+		  
+		  
+      }
+    
+      	DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: E820Type:%X Start:%X Number:%X\n", __LINE__, 
+      	  																	E820Type, 
+      	  																	MemoryMap->PhysicalStart, 
+      	  																	MemoryMap->NumberOfPages);
+		DEBUG ((EFI_D_INFO, "%d: E820Type:%X Start:%X Number:%X\n", __LINE__, 
+      	  																	E820Type, 
+      	  																	MemoryMap->PhysicalStart, 
+      	  																	MemoryMap->NumberOfPages));
+		//
+		// Get next item
+		//
+		MemoryMap = (EFI_MEMORY_DESCRIPTOR *)((UINTN)MemoryMap + DescriptorSize);
+    }
+
+
+
+
+}
 
 VOID MemoryParameterGet()
 {
@@ -2921,59 +3074,52 @@ VOID MemoryParameterGet()
 	UINT32                      *EfiDescriptorVersion = NULL;
 	UINT64   ReservedMemoryTypePage = 0;
 	UINT64   LoaderCodePage = 0;
+		
+    DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
 	
-	//DebugPrint1(0, 8 * 16, "%d: \n", __LINE__);
-
 	DEBUG ((EFI_D_INFO, "%d: MemoryParameterGet\n", __LINE__));
-
-	Status = gBS->GetMemoryMap (&MemoryMapSize,
-									EfiMemoryMap,
-									&EfiMapKey,
-									&EfiDescriptorSize,
-									&EfiDescriptorVersion);
-	
-	ASSERT_EFI_ERROR(Status == EFI_BUFFER_TOO_SMALL);
-	
+ 	
 	do 
 	{
+		DEBUG ((EFI_D_INFO, "%d: \n", __LINE__));
 		EfiMemoryMap = AllocatePool (EfiMemoryMapSize);
 		if (EfiMemoryMap == NULL)
 		{
 			DEBUG ((EFI_D_ERROR, "ERROR!! Null Pointer returned by AllocatePool ()\n"));
 			ASSERT_EFI_ERROR (EFI_OUT_OF_RESOURCES);
-			return Status;
+			return ;
 		}
 		Status = gBS->GetMemoryMap (&EfiMemoryMapSize,
 										EfiMemoryMap,
 										&EfiMapKey,
 										&EfiDescriptorSize,
 										&EfiDescriptorVersion);
+		DEBUG ((EFI_D_INFO, "%d: Status:%x\n", __LINE__, Status));
 		if (EFI_ERROR(Status)) 
 		{
 			FreePool (EfiMemoryMap);
+			//return EFI_SUCCESS;
 		}
 	} while (Status == EFI_BUFFER_TOO_SMALL);
 
-	DEBUG((DEBUG_ERROR | DEBUG_PAGE, "EfiMemoryMapSize=0x%x EfiDescriptorSize=0x%x EfiMemoryMap=0x%x \n", EfiMemoryMapSize, EfiDescriptorSize, (UINTN)EfiMemoryMap));
+	DEBUG((DEBUG_ERROR | DEBUG_PAGE, "%d EfiMemoryMapSize=0x%x EfiDescriptorSize=0x%x EfiMemoryMap=0x%x \n", __LINE__, EfiMemoryMapSize, EfiDescriptorSize, (UINTN)EfiMemoryMap));
 
 	EFI_MEMORY_DESCRIPTOR *EfiMemoryMapEnd = (EFI_MEMORY_DESCRIPTOR *)((UINT8 *)EfiMemoryMap + EfiMemoryMapSize);
 	EFI_MEMORY_DESCRIPTOR *EfiEntry = EfiMemoryMap;
 
-	DEBUG((DEBUG_ERROR | DEBUG_PAGE,"===========================%S============================== Start\n", L"CSDN MemMap"));
+	DEBUG((DEBUG_ERROR | DEBUG_PAGE,"%d ===========================%S============================== Start\n", __LINE__));
 
+	UINT8 count = 0;
 	while (EfiEntry < EfiMemoryMapEnd) 
 	{
-		if (EfiEntry->Type == EfiReservedMemoryType)
-		{
-			DEBUG((DEBUG_ERROR | DEBUG_PAGE, "[CSDN] EfiReservedMemoryType  %3d %16lx pn %16lx \n", EfiEntry->Type, EfiEntry->PhysicalStart, EfiEntry->NumberOfPages));
-			ReservedMemoryTypePage = ReservedMemoryTypePage + EfiEntry->NumberOfPages;
-		}
-		else if (EfiEntry->Type == EfiLoaderCode)
-		{
-			DEBUG((DEBUG_ERROR | DEBUG_PAGE, "[CSDN] EfiLoaderCode  %3d %16lx pn %16lx \n", EfiEntry->Type, EfiEntry->PhysicalStart, EfiEntry->NumberOfPages));
-			LoaderCodePage = LoaderCodePage + EfiEntry->NumberOfPages;
-		}
+		DEBUG ((EFI_D_INFO, "%d Type:%3d Start:%16lx Count:%16lx count:%d \n", __LINE__, 
+									EfiEntry->Type, 
+									EfiEntry->PhysicalStart, 
+									EfiEntry->NumberOfPages, 
+									count++));
+		EfiEntry++;
 	}
+
     /**/
    //£ºhttps://blog.csdn.net/xiaopangzi313/article/details/109928878
 }
@@ -3323,6 +3469,8 @@ Main (
     PartitionRead();    
     
     MultiProcessInit();
+
+    MemoryParameterGet2();
 
     SystemTimeIntervalInit();
 
