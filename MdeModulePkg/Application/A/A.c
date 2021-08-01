@@ -2242,19 +2242,16 @@ EFI_STATUS PartitionAnalysisFSM()
 					 }
 
 					 // read from USB by sector(512B)
-					 if (FileLength == 0)
-		        	 {
-		        	    // Read FAT32 file system partition infomation , minimum unit is sector.
-		        	 	DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
-		        	 	Status = DiskIo->ReadDisk( DiskIo, BlockIo->Media->MediaId, DISK_BUFFER_SIZE * sector_count, DISK_BUFFER_SIZE, Buffer1 );
-			            if ( EFI_SUCCESS == Status )
-			            {
-							  for (int j = 0; j < 250; j++)
-							  {
-							  		DebugPrint1(DISK_READ_BUFFER_X + (j % 50) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 50), "%02X ", Buffer1[j] & 0xff);
-							  }
-					     }
-		        	 }
+	        	    // Read FAT32 file system partition infomation , minimum unit is sector.
+		        	 	DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X sector_count:%ld\n", __LINE__, Status, sector_count);
+	        	 	Status = DiskIo->ReadDisk( DiskIo, BlockIo->Media->MediaId, DISK_BUFFER_SIZE * sector_count, DISK_BUFFER_SIZE, Buffer1 );
+		            if ( EFI_SUCCESS == Status )
+		            {
+						  for (int j = 0; j < 250; j++)
+						  {
+						  		DebugPrint1(DISK_READ_BUFFER_X + (j % 50) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 50), "%02X ", Buffer1[j] & 0xff);
+						  }
+				     }
 		        	 
 		            DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X sector_count:%ld BlockIo->Media->MediaId: %d\n", 
 		            																   __LINE__, Status, sector_count, BlockIo->Media->MediaId);
@@ -2355,28 +2352,24 @@ EFI_STATUS RootPathAnalysisFSM()
 						  return EFI_SUCCESS;
 					 }
 
-					 // read from USB by sector(512B)
-					 if (FileLength == 0)
-		        	 {
-		        	    // Read FAT32 file system partition infomation , minimum unit is sector.
-		        	 	DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
-		        	 	Status = DiskIo->ReadDisk( DiskIo, BlockIo->Media->MediaId, DISK_BUFFER_SIZE * sector_count, DISK_BUFFER_SIZE, Buffer1 );
-			            if ( EFI_SUCCESS == Status )
-			            {
-							  for (int j = 0; j < 250; j++)
-							  {
-							  		DebugPrint1(DISK_READ_BUFFER_X + (j % 50) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 50), "%02X ", Buffer1[j] & 0xff);
-							  }
-					     }
-		        	 }
+	        	    // Read FAT32 file system partition infomation , minimum unit is sector.
+	        	 	DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X sector_count:%ld\n", __LINE__, Status, sector_count);
+	        	 	Status = DiskIo->ReadDisk( DiskIo, BlockIo->Media->MediaId, DISK_BUFFER_SIZE * sector_count, DISK_BUFFER_SIZE, Buffer1 );
+		            if ( EFI_SUCCESS == Status )
+		            {
+						  for (int j = 0; j < 250; j++)
+						  {
+						  		DebugPrint1(DISK_READ_BUFFER_X + (j % 50) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 50), "%02X ", Buffer1[j] & 0xff);
+						  }
+				     }
 		        	 
 				 	//When get root path data sector start number, we can get content of root path.
 				 	RootPathAnalysis(Buffer1);	
 
 					// data area start from 1824, HZK16 file start from 	FileBlockStart	block, so need to convert into sector by multi 8, block start number is 2 	
 					// next state is to read FAT table
-				 	sector_count = 1824 + MBRSwitched.ReservedSelector;
-				 	DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: sector_count:%ld FileLength: %d\n",  __LINE__, sector_count, FileLength);
+				 	sector_count = MBRSwitched.ReservedSelector;
+				 	DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: sector_count:%ld FileLength: %d MBRSwitched.ReservedSelector:%ld\n",  __LINE__, sector_count, FileLength, MBRSwitched.ReservedSelector);
 		        }       
 		    }
 
@@ -2439,7 +2432,7 @@ EFI_STATUS GetFatTableFSM()
         CHAR16 *TextDevicePath = DevPathToText->ConvertDevicePathToText(DiskDevicePath, TRUE, TRUE);
 
         // first display
-    	 DebugPrint1(DISK_READ_BUFFER_X, DISK_READ_BUFFER_Y + 16 * i, "%d: %s\n", __LINE__, TextDevicePath);
+    	 //DebugPrint1(DISK_READ_BUFFER_X, DISK_READ_BUFFER_Y + 16 * i, "%d: %s\n", __LINE__, TextDevicePath);
         //DEBUG ((EFI_D_INFO, "%s\n", TextDevicePath));
 
 		 TextDevicePathAnalysisCHAR16(TextDevicePath, &device[i], i);
@@ -2466,20 +2459,17 @@ EFI_STATUS GetFatTableFSM()
 						  return EFI_SUCCESS;
 					 }
 
-					 // read from USB by sector(512B)
-					 if (FileLength == 0)
-		        	 {
-		        	    // Read FAT32 file system partition infomation , minimum unit is sector.
-		        	 	DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
-		        	 	Status = DiskIo->ReadDisk( DiskIo, BlockIo->Media->MediaId, DISK_BUFFER_SIZE * sector_count, DISK_BUFFER_SIZE, Buffer1 );
-			            if ( EFI_SUCCESS == Status )
-			            {
-							  for (int j = 0; j < 250; j++)
-							  {
-							  		DebugPrint1(DISK_READ_BUFFER_X + (j % 50) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 50), "%02X ", Buffer1[j] & 0xff);
-							  }
-					     }
-		        	 }		        	 
+	        	    // Read FAT32 file system partition infomation , minimum unit is sector.
+	        	 	DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X sector_count:%ld\n", __LINE__, Status, sector_count);
+	        	 	Status = DiskIo->ReadDisk( DiskIo, BlockIo->Media->MediaId, DISK_BUFFER_SIZE * sector_count, DISK_BUFFER_SIZE, Buffer1 );
+		            if ( EFI_SUCCESS == Status )
+		            {
+						  for (int j = 0; j < 250; j++)
+						  {
+						  		DebugPrint1(DISK_READ_BUFFER_X + (j % 50) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 50), "%02X ", Buffer1[j] & 0xff);
+						  }
+				     }        	 
+				     
 		            DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X sector_count:%ld BlockIo->Media->MediaId: %d\n", 
 		            																   __LINE__, Status, sector_count, BlockIo->Media->MediaId);
 
@@ -2583,7 +2573,7 @@ EFI_STATUS ReadFileFSM()
 					 if (FileLength == 0)
 		        	 {
 		        	    // Read FAT32 file system partition infomation , minimum unit is sector.
-		        	 	DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
+		        	 	DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X sector_count: %d\n", __LINE__, Status, sector_count);
 		        	 	Status = DiskIo->ReadDisk( DiskIo, BlockIo->Media->MediaId, DISK_BUFFER_SIZE * sector_count, DISK_BUFFER_SIZE, Buffer1 );
 			            if ( EFI_SUCCESS == Status )
 			            {
@@ -2621,33 +2611,6 @@ EFI_STATUS ReadFileFSM()
 		            																   __LINE__, Status, sector_count, BlockIo->Media->MediaId);
 
 					  
-					 MasterBootRecordSwitched MBRSwitched;
-					 if (0 == sector_count)
-					 {
-					 	// analysis data area of patition
-					 	BufferAnalysis(Buffer1, &MBRSwitched); 
-
-					 	// data sector number start include: reserved selector, fat sectors(usually is 2: fat1 and fat2), and file system boot path start cluster(usually is 2, data block start number is 2)
-					 	sector_count = MBRSwitched.ReservedSelector + MBRSwitched.SectorsPerFat * MBRSwitched.NumFATS + MBRSwitched.BootPathStartCluster - 2;
-					 	BlockSize = MBRSwitched.SectorOfCluster * 512;
-                   	DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: sector_count:%ld BlockSize: %d\n",  __LINE__, sector_count, BlockSize);
-					 }
-					 else if (sector_count == 1824)
-					 {
-					 	//When get root path data sector start number, we can get content of root path.
-					 	RootPathAnalysis(Buffer1);	
-
-						// data area start from 1824, HZK16 file start from 	FileBlockStart	block, so need to convert into sector by multi 8, block start number is 2 	
-					 	sector_count = 1824 + (FileBlockStart - 2) * 8;
-					 	DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: sector_count:%ld FileLength: %d\n",  __LINE__, sector_count, FileLength);
-
-					 }
-					 else
-					 {
-					 	DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: sector_count:%ld FileBlockStart: %d\n",  __LINE__, sector_count, FileBlockStart);
-					 	ReadFileContentFromFAT32();
-					 }
-					 
                    DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: sector_count:%ld \n",  __LINE__, sector_count);
 		        }       
 		    }
