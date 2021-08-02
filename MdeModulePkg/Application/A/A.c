@@ -3060,12 +3060,14 @@ EFIAPI HandleEnterPressed()
 	DEBUG ((EFI_D_INFO, "%d HandleEnterPressed\n", __LINE__));
 	
     //PartitionUSBReadSynchronous();
+	for (int i = 0; i < 5; i++)
+    {
+		DEBUG ((EFI_D_INFO, "%d HandleEnterPressed FSM_Event: %d\n", __LINE__, FSM_Event));
+	    FileReadFSM(FSM_Event++);
 
-    FileReadFSM(FSM_Event++);
-
-    if (READ_FILE_EVENT <= FSM_Event)
-    	FSM_Event = READ_FILE_EVENT;
-
+	    if (READ_FILE_EVENT <= FSM_Event)
+	    	FSM_Event = READ_FILE_EVENT;
+	}
     //PartitionUSBReadAsynchronous();
 
 	DEBUG ((EFI_D_INFO, "%d HandleEnterPressed\n", __LINE__));
