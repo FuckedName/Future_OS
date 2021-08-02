@@ -961,7 +961,7 @@ VOID StringMaker (UINT16 x, UINT16 y,
 	{
 		for (int j = 2; j < 54 * 16; j++)
 		{
-			for (int i = 0; i < ScreenWidth / 2; i++)
+			for (int i = 0; i < ScreenWidth / 4; i++)
 			{
 				pDeskBuffer[(j * ScreenWidth + i) * 4]     = 0x84;
 				pDeskBuffer[(j * ScreenWidth + i) * 4 + 1] = 0x84;
@@ -2564,39 +2564,40 @@ EFI_STATUS ReadFileFSM()
 
 		        	 // read from USB by block(512 * 8)
 	        	    // Read file content from FAT32(USB), minimum unit is block
-	        	    
-	        	 	//DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
-	        	 	Status = DiskIo->ReadDisk( DiskIo, BlockIo->Media->MediaId, DISK_BUFFER_SIZE * sector_count, DISK_BLOCK_BUFFER_SIZE, BufferBlock);
-	        	 	DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
-	        	 	
-					if ( EFI_SUCCESS == Status )
-					{  
-					     ChineseCharArrayInit();
+	        	    for (int i = 0; i < FileLength / (512 * 8); i++)
+	        	 	{
+		        	 	//DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
+		        	 	Status = DiskIo->ReadDisk( DiskIo, BlockIo->Media->MediaId, DISK_BUFFER_SIZE * sector_count, DISK_BLOCK_BUFFER_SIZE, BufferBlock);
+		        	 	DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
+		        	 	
+						if ( EFI_SUCCESS == Status )
+						{  
+						     ChineseCharArrayInit();
+						     
+	                       DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: HZK16FileReadCount: %d DISK_BLOCK_BUFFER_SIZE: %d\n", __LINE__, HZK16FileReadCount, DISK_BLOCK_BUFFER_SIZE);
+
+							  //Copy buffer to ChineseBuffer
+							  if (sChineseChar != NULL)
+							  {
+									//	UINT8 *p = memcopy(sChineseChar[HZK16FileReadCount * DISK_BLOCK_BUFFER_SIZE], BufferBlock, DISK_BLOCK_BUFFER_SIZE);
+							  		for (UINT16 i = 0; i < DISK_BLOCK_BUFFER_SIZE; i++)
+							  			sChineseChar[HZK16FileReadCount * DISK_BLOCK_BUFFER_SIZE + i] = BufferBlock[i];
+	                             DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: sChineseChar: %X BufferBlock: %X\n", __LINE__, sChineseChar, BufferBlock);
+							  		
+							  }
+							  for (int j = 0; j < 250; j++)
+							  {
+							  		//DebugPrint1(DISK_READ_BUFFER_X + (j % 39) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 39), "%02X ", BufferBlock[j] & 0xff);
+							  }
+							  HZK16FileReadCount++;
+						 }
+
+					 	 sector_count = MBRSwitched.ReservedSelector + MBRSwitched.SectorsPerFat * MBRSwitched.NumFATS + MBRSwitched.BootPathStartCluster - 2 + (GetNextBlockNumber() - 2) * 8;
+					 	 PreviousBlockNumber = GetNextBlockNumber();
 					     
-                       DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: HZK16FileReadCount: %d DISK_BLOCK_BUFFER_SIZE: %d\n", __LINE__, HZK16FileReadCount, DISK_BLOCK_BUFFER_SIZE);
-
-						  //Copy buffer to ChineseBuffer
-						  if (sChineseChar != NULL)
-						  {
-								//	UINT8 *p = memcopy(sChineseChar[HZK16FileReadCount * DISK_BLOCK_BUFFER_SIZE], BufferBlock, DISK_BLOCK_BUFFER_SIZE);
-						  		for (UINT16 i = 0; i < DISK_BLOCK_BUFFER_SIZE; i++)
-						  			sChineseChar[HZK16FileReadCount * DISK_BLOCK_BUFFER_SIZE + i] = BufferBlock[i];
-                             DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: sChineseChar: %X BufferBlock: %X\n", __LINE__, sChineseChar, BufferBlock);
-						  		
-						  }
-						  for (int j = 0; j < 250; j++)
-						  {
-						  		//DebugPrint1(DISK_READ_BUFFER_X + (j % 39) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 39), "%02X ", BufferBlock[j] & 0xff);
-						  }
-						  HZK16FileReadCount++;
-					 }
-
-				 	 sector_count = MBRSwitched.ReservedSelector + MBRSwitched.SectorsPerFat * MBRSwitched.NumFATS + MBRSwitched.BootPathStartCluster - 2 + (GetNextBlockNumber() - 2) * 8;
-				 	 PreviousBlockNumber = GetNextBlockNumber();
-				     
-		            DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: PreviousBlockNumber:%d sector_count:%ld HZK16FileReadCount: %d\n", 
-		            																   __LINE__, PreviousBlockNumber, sector_count, HZK16FileReadCount);
-
+			            DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: PreviousBlockNumber:%d sector_count:%ld HZK16FileReadCount: %d\n", 
+			            																   __LINE__, PreviousBlockNumber, sector_count, HZK16FileReadCount);
+				  }
 		        } 
 		    }
 
