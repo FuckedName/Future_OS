@@ -367,8 +367,9 @@ DISK_HANDLE_TASK  disk_handle_task;
 
 UINT8 *FAT32_Table;
 
+UINT8 *sChineseChar = NULL;
+//UINT8 sChineseChar[267616];
 
-const UINT8 *sChineseChar = NULL;
 UINT8 HZK16FileReadCount = 0;
 static UINTN ScreenWidth, ScreenHeight;  
 UINT16 MyComputerWidth = 100;
@@ -701,13 +702,18 @@ VOID GraphicsCopy(UINT8 *pDest, UINT8 *pSource,
 }
 VOID GraphicsLayerCompute(int iMouseX, int iMouseY)
 {
-	DebugPrint1(DISPLAY_X, DISPLAY_Y, "%d: GraphicsLayerCompute\n", __LINE__);
+	DebugPrint1(DISPLAY_X, DISPLAY_Y, "%d: pDeskDisplayBuffer: %X pDeskBuffer: %X ScreenWidth: %d ScreenHeight: %d pMouseBuffer: %X\n", __LINE__, 
+																pDeskDisplayBuffer,
+																pDeskBuffer,
+																ScreenWidth,
+																ScreenHeight,
+																pMouseBuffer);
 	//desk 
 	GraphicsCopy(pDeskDisplayBuffer, pDeskBuffer, ScreenWidth, ScreenHeight, ScreenWidth, ScreenHeight, 0, 0);
     DebugPrint1(DISPLAY_X, DISPLAY_Y, "%d: GraphicsLayerCompute\n", __LINE__);
 
 	//my computer
-	GraphicsCopy(pDeskDisplayBuffer, pMyComputerBuffer, ScreenWidth, ScreenHeight, MyComputerWidth, MyComputerHeight, ScreenWidth - 150, ScreenHeight - 150);
+	//GraphicsCopy(pDeskDisplayBuffer, pMyComputerBuffer, ScreenWidth, ScreenHeight, MyComputerWidth, MyComputerHeight, ScreenWidth - 150, ScreenHeight - 150);
 
 	int i, j;
 
@@ -741,7 +747,8 @@ VOID GraphicsLayerCompute(int iMouseX, int iMouseY)
     DrawChineseCharIntoBuffer2(pDeskBuffer,  16 * 2, ScreenHeight - 21, (21 - 1) * 94 + 05 - 1, Color, ScreenWidth);
 
 	*/
-	
+
+	/*
     Color.Red   = 0xff;
     Color.Green = 0x00;
     Color.Blue	  = 0x00;
@@ -770,6 +777,7 @@ VOID GraphicsLayerCompute(int iMouseX, int iMouseY)
         
         GraphicsCopy(pDeskDisplayBuffer, pMouseSelectedBuffer, ScreenWidth, ScreenHeight, 32, 16, 15, ScreenHeight - 22);
     }
+    */
 
     // init mouse buffer for use in use
 	//DrawChineseCharIntoBuffer2(pMouseBuffer, 0, 0, 11 * 94 + 42, MouseColor, 16);
@@ -970,7 +978,7 @@ VOID StringMaker (UINT16 x, UINT16 y,
 /* Display a string */
 VOID EFIAPI DebugPrint1 (UINT16 x, UINT16 y,  IN  CONST CHAR8  *Format, ...)
 {
-	if (y > ScreenHeight - 16)
+	if (y > ScreenHeight - 16 || x > ScreenWidth - 8)
 		return;
 
 	VA_LIST         VaList;
@@ -2401,14 +2409,9 @@ EFI_STATUS ChineseCharArrayInit()
 	UINT32 size = 267616;
     //UINT8 *sChineseChar;
 
-	if (NULL != sChineseChar)
-    {
-    	DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: ChineseCharArrayInit\n",  __LINE__);
-    	return EFI_SUCCESS;
-    }
-
-    if (HZK16FileReadCount >= 60)
+    if (HZK16FileReadCount >= 50)
     {		
+    	DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: HZK16FileReadCount >= 60\n",  __LINE__);
 		EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
 		Color.Blue  = 0x00;
 		Color.Red   = 0x00;
@@ -2427,13 +2430,20 @@ EFI_STATUS ChineseCharArrayInit()
 			y += 16;
 		}
     }
+
+	if (NULL != sChineseChar)
+    {
+    	DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: ChineseCharArrayInit\n",  __LINE__);
+    	return EFI_SUCCESS;
+    }
+
     
-	//sChineseChar = (UINT8 *)AllocateZeroPool(size);
-	sChineseChar = (UINT8 *)AllocatePages(65);
+	sChineseChar = (UINT8 *)AllocateZeroPool(size);
+	// sChineseChar = (UINT8 *)AllocatePages(65);
 	if (NULL == sChineseChar)
     {
         DEBUG ((EFI_D_INFO, "ChineseCharArrayInit AllocateZeroPool Failed: %x!\n "));
-        DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: ChineseCharArrayInit\n",  __LINE__);
+        DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: ChineseCharArrayInit AllocateZeroPool failed\n",  __LINE__);
         //DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: ChineseCharArrayInit AllocateZeroPool Failed: %x\n",  __LINE__);
         return (EFI_SUCCESS);
     }
@@ -2446,10 +2456,33 @@ EFI_STATUS ChineseCharArrayInit()
 		return EFI_SUCCESS;
 	}
 	*/
-
+    DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: ChineseCharArrayInit finished...\n",  __LINE__);
 	return EFI_SUCCESS;
 }
 
+void *memcopy(void *dest, const void *src, size_t count)
+{
+	char *d;
+	const char *s;
+
+	if (dest > (src + count) || (dest < src))
+	{
+		d = dest;
+		s = src;
+		while (count--)
+			*d++ = *s++;        
+	}
+	else
+	{
+		d = (char *)(dest + count - 1);
+		s = (char *)(src + count -1);
+		while (count --)
+			*d-- = *s--;
+	}
+
+	return dest;
+}
+//https://blog.csdn.net/goodwillyang/article/details/45559925
 
 EFI_STATUS ReadFileFSM()
 {    
@@ -2544,11 +2577,16 @@ EFI_STATUS ReadFileFSM()
 
 						  //Copy buffer to ChineseBuffer
 						  if (sChineseChar != NULL)
-							  CopyMem(sChineseChar[HZK16FileReadCount * DISK_BLOCK_BUFFER_SIZE], BufferBlock, DISK_BLOCK_BUFFER_SIZE);
-
+						  {
+								//	UINT8 *p = memcopy(sChineseChar[HZK16FileReadCount * DISK_BLOCK_BUFFER_SIZE], BufferBlock, DISK_BLOCK_BUFFER_SIZE);
+						  		for (UINT16 i = 0; i < DISK_BLOCK_BUFFER_SIZE; i++)
+						  			sChineseChar[HZK16FileReadCount * DISK_BLOCK_BUFFER_SIZE + i] = BufferBlock[i];
+                             DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: sChineseChar: %X BufferBlock: %X\n", __LINE__, sChineseChar, BufferBlock);
+						  		
+						  }
 						  for (int j = 0; j < 250; j++)
 						  {
-						  		DebugPrint1(DISK_READ_BUFFER_X + (j % 39) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 39), "%02X ", BufferBlock[j] & 0xff);
+						  		//DebugPrint1(DISK_READ_BUFFER_X + (j % 39) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 39), "%02X ", BufferBlock[j] & 0xff);
 						  }
 						  HZK16FileReadCount++;
 					 }
@@ -2583,7 +2621,7 @@ int FileReadFSM(EVENT event)
 {
     EFI_STATUS Status;
         
-	if (HZK16FileReadCount > 62)
+	if (HZK16FileReadCount > 64)
 	{
 		DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
 		return;
@@ -3893,4 +3931,5 @@ Main (
 	
     return EFI_SUCCESS;
 }
+
 
