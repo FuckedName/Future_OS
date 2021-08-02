@@ -700,24 +700,101 @@ VOID GraphicsCopy(UINT8 *pDest, UINT8 *pSource,
 		}
 	}
 }
-VOID GraphicsLayerCompute(int iMouseX, int iMouseY)
+
+// Draw 8 X 16 point
+EFI_STATUS Draw8_16IntoBuffer(UINT8 *pBuffer,UINT8 d,
+        IN UINTN x0, UINTN y0,
+        UINT8 width,
+        IN EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color, UINT16 AreaWidth)
 {
-	DebugPrint1(DISPLAY_X, DISPLAY_Y, "%d: pDeskDisplayBuffer: %X pDeskBuffer: %X ScreenWidth: %d ScreenHeight: %d pMouseBuffer: %X\n", __LINE__, 
+    //DebugPrint1(10, 10, "%X %X %X %X", x0, y0, AreaWidth);
+    if (NULL == pBuffer)
+    {
+    	DEBUG ((EFI_D_INFO, "pBuffer is NULL\n"));
+    	return EFI_SUCCESS;
+    }
+        
+    if ((d & 0x80) != 0) 
+        CopyColorIntoBuffer(pBuffer, Color, x0 + 0, y0, AreaWidth ); 
+    
+    if ((d & 0x40) != 0) 
+        CopyColorIntoBuffer(pBuffer, Color, x0 + 1, y0, AreaWidth );
+    
+    if ((d & 0x20) != 0) 
+        CopyColorIntoBuffer(pBuffer, Color, x0 + 2, y0, AreaWidth );
+    
+    if ((d & 0x10) != 0) 
+        CopyColorIntoBuffer(pBuffer, Color, x0 + 3, y0, AreaWidth );
+    
+    if ((d & 0x08) != 0) 
+        CopyColorIntoBuffer(pBuffer, Color, x0 + 4, y0, AreaWidth );
+    
+    if ((d & 0x04) != 0) 
+        CopyColorIntoBuffer(pBuffer, Color, x0 + 5, y0, AreaWidth );
+    
+    if ((d & 0x02) != 0) 
+        CopyColorIntoBuffer(pBuffer, Color, x0 + 6, y0, AreaWidth );
+    
+    if ((d & 0x01) != 0) 
+        CopyColorIntoBuffer(pBuffer, Color, x0 + 7, y0, AreaWidth );
+
+
+
+    return EFI_SUCCESS;
+}
+
+
+EFI_STATUS DrawChineseCharIntoBuffer2(UINT8 *pBuffer,
+        IN UINTN x0, UINTN y0, UINT32 offset,
+        IN EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color , UINT16 AreaWidth)
+{
+    INT8 i;
+    //DebugPrint1(10, 10, "%X %X %X %X", x0, y0, offset, AreaWidth);
+    //DEBUG ((EFI_D_INFO, "%X %X %X %X", x0, y0, offset, AreaWidth));
+
+	if (NULL == pBuffer)
+	{
+		DEBUG ((EFI_D_INFO, "NULL == pBuffer"));
+		return EFI_SUCCESS;
+	}
+
+	if (offset < 1)
+	{
+		DEBUG ((EFI_D_INFO, "offset < 1 \n"));
+		return EFI_SUCCESS;
+	}
+    
+	for(i = 0; i < 32; i += 2)
+	{
+        Draw8_16IntoBuffer(pBuffer, sChineseChar[offset * 32 + i ],     x0,     y0 + i / 2, 1, Color, AreaWidth);		        
+		 Draw8_16IntoBuffer(pBuffer, sChineseChar[offset * 32 + i + 1],  x0 + 8, y0 + i / 2, 1, Color, AreaWidth);		
+	}
+	
+    //DEBUG ((EFI_D_INFO, "\n"));
+	
+    return EFI_SUCCESS;
+}
+
+
+VOID GraphicsLayerCompute(int iMouseX, int iMouseY, UINT8 MouseClickFlag)
+{
+	/*DebugPrint1(DISPLAY_X, DISPLAY_Y, "%d: pDeskDisplayBuffer: %X pDeskBuffer: %X ScreenWidth: %d ScreenHeight: %d pMouseBuffer: %X\n", __LINE__, 
 																pDeskDisplayBuffer,
 																pDeskBuffer,
 																ScreenWidth,
 																ScreenHeight,
 																pMouseBuffer);
+	*/
 	//desk 
 	GraphicsCopy(pDeskDisplayBuffer, pDeskBuffer, ScreenWidth, ScreenHeight, ScreenWidth, ScreenHeight, 0, 0);
-    DebugPrint1(DISPLAY_X, DISPLAY_Y, "%d: GraphicsLayerCompute\n", __LINE__);
+    //DebugPrint1(DISPLAY_X, DISPLAY_Y, "%d: GraphicsLayerCompute\n", __LINE__);
 
 	//my computer
-	//GraphicsCopy(pDeskDisplayBuffer, pMyComputerBuffer, ScreenWidth, ScreenHeight, MyComputerWidth, MyComputerHeight, ScreenWidth - 150, ScreenHeight - 150);
+	GraphicsCopy(pDeskDisplayBuffer, pMyComputerBuffer, ScreenWidth, ScreenHeight, MyComputerWidth, MyComputerHeight, ScreenWidth - 150, ScreenHeight - 150);
 
 	int i, j;
 
-	DebugPrint1(DISPLAY_X, DISPLAY_Y, "%d: GraphicsLayerCompute\n", __LINE__);
+	//DebugPrint1(DISPLAY_X, DISPLAY_Y, "%d: GraphicsLayerCompute\n", __LINE__);
 	//16, ScreenHeight - 21, For event trigger
 
     EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;  
@@ -742,13 +819,11 @@ VOID GraphicsLayerCompute(int iMouseX, int iMouseY)
                 pMouseBuffer[(i * 16 + j) * 4 + 2] = 0;             
         }
 
-	/*
+	
     DrawChineseCharIntoBuffer2(pDeskBuffer,  16, ScreenHeight - 21,     (18 - 1) * 94 + 43 - 1, Color, ScreenWidth);
     DrawChineseCharIntoBuffer2(pDeskBuffer,  16 * 2, ScreenHeight - 21, (21 - 1) * 94 + 05 - 1, Color, ScreenWidth);
 
-	*/
-
-	/*
+	
     Color.Red   = 0xff;
     Color.Green = 0x00;
     Color.Blue	  = 0x00;
@@ -773,18 +848,38 @@ VOID GraphicsLayerCompute(int iMouseX, int iMouseY)
         // Draw a red rectangle when mouse move over left down (like menu button)
         RectangleDrawIntoBuffer(pMouseSelectedBuffer, 0,  0, 31, 15, 1,  Color, 32);
 
-        DebugPrint1(DISPLAY_X, DISPLAY_Y, "%d: GraphicsLayerCompute\n", __LINE__);
+        //DebugPrint1(DISPLAY_X, DISPLAY_Y, "%d: GraphicsLayerCompute\n", __LINE__);
+
+        if (MouseClickFlag == 1)
+        {
+				char *pClickMenuBuffer = (UINT8 *)AllocateZeroPool(16 * 16 * 4);
+			    if (NULL != pClickMenuBuffer)
+				{
+					DEBUG ((EFI_D_INFO, "ScreenInit AllocatePool pDeskDisplayBuffer NULL\n"));
+
+				    for(int i = 0; i < 16; i++)
+				    	for(int j = 0; j < 16; j++)
+				    	{
+				    		pClickMenuBuffer[(i * 16 + j) * 4] = 0x33;
+				    		pClickMenuBuffer[(i * 16 + j) * 4 + 1] = 0x33;
+				    		pClickMenuBuffer[(i * 16 + j) * 4 + 2] = 0x33;
+				    	}
+					GraphicsCopy(pDeskDisplayBuffer, pClickMenuBuffer, ScreenWidth, ScreenHeight, 16, 16, 0, ScreenHeight - 22 - 16);
+				}
+					
+
+        }
         
         GraphicsCopy(pDeskDisplayBuffer, pMouseSelectedBuffer, ScreenWidth, ScreenHeight, 32, 16, 15, ScreenHeight - 22);
     }
-    */
+    
 
     // init mouse buffer for use in use
-	//DrawChineseCharIntoBuffer2(pMouseBuffer, 0, 0, 11 * 94 + 42, MouseColor, 16);
-    DebugPrint1(DISPLAY_X, DISPLAY_Y, "%d: GraphicsLayerCompute\n", __LINE__);
+	DrawChineseCharIntoBuffer2(pMouseBuffer, 0, 0, 11 * 94 + 42, MouseColor, 16);
+    //DebugPrint1(DISPLAY_X, DISPLAY_Y, "%d: GraphicsLayerCompute\n", __LINE__);
 	
 	GraphicsCopy(pDeskDisplayBuffer, pMouseBuffer, ScreenWidth, ScreenHeight, 16, 16, iMouseX, iMouseY);
-    DebugPrint1(DISPLAY_X, DISPLAY_Y, "%d: GraphicsLayerCompute\n", __LINE__);
+    //DebugPrint1(DISPLAY_X, DISPLAY_Y, "%d: GraphicsLayerCompute\n", __LINE__);
    GraphicsOutput->Blt(GraphicsOutput, 
 			            (EFI_GRAPHICS_OUTPUT_BLT_PIXEL *) pDeskDisplayBuffer,
 			            EfiBltBufferToVideo,
@@ -945,7 +1040,7 @@ VOID StringMaker (UINT16 x, UINT16 y,
 	
 	if (StatusErrorCount % 61 == 0)
 	{
-		for (int j = 0; j < ScreenHeight; j++)
+		for (int j = 0; j < ScreenHeight - 25; j++)
 		{
 			for (int i = ScreenWidth / 2; i < ScreenWidth; i++)
 			{
@@ -987,47 +1082,6 @@ VOID EFIAPI DebugPrint1 (UINT16 x, UINT16 y,  IN  CONST CHAR8  *Format, ...)
 	VA_END (VaList);
 }
 
-// Draw 8 X 16 point
-EFI_STATUS Draw8_16IntoBuffer(UINT8 *pBuffer,UINT8 d,
-        IN UINTN x0, UINTN y0,
-        UINT8 width,
-        IN EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color, UINT16 AreaWidth)
-{
-    //DebugPrint1(10, 10, "%X %X %X %X", x0, y0, AreaWidth);
-    if (NULL == pBuffer)
-    {
-    	DEBUG ((EFI_D_INFO, "pBuffer is NULL\n"));
-    	return EFI_SUCCESS;
-    }
-        
-    if ((d & 0x80) != 0) 
-        CopyColorIntoBuffer(pBuffer, Color, x0 + 0, y0, AreaWidth ); 
-    
-    if ((d & 0x40) != 0) 
-        CopyColorIntoBuffer(pBuffer, Color, x0 + 1, y0, AreaWidth );
-    
-    if ((d & 0x20) != 0) 
-        CopyColorIntoBuffer(pBuffer, Color, x0 + 2, y0, AreaWidth );
-    
-    if ((d & 0x10) != 0) 
-        CopyColorIntoBuffer(pBuffer, Color, x0 + 3, y0, AreaWidth );
-    
-    if ((d & 0x08) != 0) 
-        CopyColorIntoBuffer(pBuffer, Color, x0 + 4, y0, AreaWidth );
-    
-    if ((d & 0x04) != 0) 
-        CopyColorIntoBuffer(pBuffer, Color, x0 + 5, y0, AreaWidth );
-    
-    if ((d & 0x02) != 0) 
-        CopyColorIntoBuffer(pBuffer, Color, x0 + 6, y0, AreaWidth );
-    
-    if ((d & 0x01) != 0) 
-        CopyColorIntoBuffer(pBuffer, Color, x0 + 7, y0, AreaWidth );
-
-
-
-    return EFI_SUCCESS;
-}
 
 // Draw 8 X 16 point
 EFI_STATUS Draw8_16IntoBufferWithWidth(UINT8 *pBuffer,UINT8 d,
@@ -1085,36 +1139,6 @@ EFI_STATUS DrawChineseCharIntoBuffer(UINT8 *pBuffer,
     return EFI_SUCCESS;
 }
 
-EFI_STATUS DrawChineseCharIntoBuffer2(UINT8 *pBuffer,
-        IN UINTN x0, UINTN y0, UINT32 offset,
-        IN EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color , UINT16 AreaWidth)
-{
-    INT8 i;
-    //DebugPrint1(10, 10, "%X %X %X %X", x0, y0, offset, AreaWidth);
-    //DEBUG ((EFI_D_INFO, "%X %X %X %X", x0, y0, offset, AreaWidth));
-
-	if (NULL == pBuffer)
-	{
-		DEBUG ((EFI_D_INFO, "NULL == pBuffer"));
-		return EFI_SUCCESS;
-	}
-
-	if (offset < 1)
-	{
-		DEBUG ((EFI_D_INFO, "offset < 1 \n"));
-		return EFI_SUCCESS;
-	}
-    
-	for(i = 0; i < 32; i += 2)
-	{
-        Draw8_16IntoBuffer(pBuffer, sChineseChar[offset * 32 + i ],     x0,     y0 + i / 2, 1, Color, AreaWidth);		        
-		 Draw8_16IntoBuffer(pBuffer, sChineseChar[offset * 32 + i + 1],  x0 + 8, y0 + i / 2, 1, Color, AreaWidth);		
-	}
-	
-    //DEBUG ((EFI_D_INFO, "\n"));
-	
-    return EFI_SUCCESS;
-}
 
 
 EFI_STATUS DrawChineseCharUseBuffer(UINT8 *pBuffer,
@@ -3101,7 +3125,7 @@ HandleKeyboardEvent (
 						                );    
     if(EFI_ERROR (Status))
         return ;
-    DebugPrint1(DISPLAY_X, DISPLAY_Y, "%d:HandleKeyboardEvent \n", __LINE__);
+    //DebugPrint1(DISPLAY_X, DISPLAY_Y, "%d:HandleKeyboardEvent \n", __LINE__);
     for (HandleIndex = 0; HandleIndex < HandleCount; HandleIndex++) 
     {
 		Status = gBS->HandleProtocol (Handles[HandleIndex], &gEfiSimpleTextInputExProtocolGuid, (VOID **) &SimpleEx);
@@ -3131,7 +3155,7 @@ HandleKeyboardEvent (
 		     	 {
 		        	keyboard_input_count = 0;
 		        	memset(pKeyboardInputBuffer, '\0', KEYBOARD_BUFFER_LENGTH);
-		     	 	DebugPrint1(DISPLAY_KEYBOARD_X, DISPLAY_KEYBOARD_Y, "%a keyboard_input_count: %04d enter pressed", pKeyboardInputBuffer, keyboard_input_count);
+		     	 	//DebugPrint1(DISPLAY_KEYBOARD_X, DISPLAY_KEYBOARD_Y, "%a keyboard_input_count: %04d enter pressed", pKeyboardInputBuffer, keyboard_input_count);
 		     	 	HandleEnterPressed();
 		     	 }
 		     	 else
@@ -3144,7 +3168,7 @@ HandleKeyboardEvent (
 	
 	 //DrawAsciiCharUseBuffer(pDeskBuffer, DISPLAY_KEYBOARD_X, DISPLAY_KEYBOARD_Y, uniChar, Color);
 	 
-	 GraphicsLayerCompute(iMouseX, iMouseY);
+	 GraphicsLayerCompute(iMouseX, iMouseY, 0);
 }
 
  EFI_STATUS DiskReadEx()
@@ -3271,7 +3295,7 @@ HandleMouseEvent (
   IN VOID      *Context
   )
 {	
-	DebugPrint1(DISPLAY_X, DISPLAY_Y, "%d: HandleMouseEvent\n", __LINE__);
+	//DebugPrint1(DISPLAY_X, DISPLAY_Y, "%d: HandleMouseEvent\n", __LINE__);
     EFI_STATUS Status;
 	UINTN Index;
 	EFI_SIMPLE_POINTER_STATE State;
@@ -3332,12 +3356,16 @@ HandleMouseEvent (
     if (iMouseY > ScreenHeight)
         iMouseY = ScreenHeight;
 
+	UINT8 MouseClickFlag = 0;
+
     //Button
     if (State.LeftButton == 0x01)
     {
         DEBUG ((EFI_D_INFO, "Left button clicked\n"));
         
 	    HandleMouseRightClick(iMouseX, iMouseY);
+
+	    MouseClickFlag = 1;
 	    //DrawAsciiCharUseBuffer(GraphicsOutput, 20 + process2_i * 8 + 16, 60, 'E', Color);  
     }
     
@@ -3347,10 +3375,12 @@ HandleMouseEvent (
 	    //DrawAsciiCharUseBuffer(GraphicsOutput, 20 + process2_i * 8 + 16, 60, 'R', Color);
 
 	    HandleMouseRightClick(iMouseX, iMouseY);
+	    
+	    MouseClickFlag = 2;
     }
-    DebugPrint1(DISPLAY_X, DISPLAY_Y, "%d: HandleMouseEvent\n", __LINE__);
+    //DebugPrint1(DISPLAY_X, DISPLAY_Y, "%d: HandleMouseEvent\n", __LINE__);
     //DEBUG ((EFI_D_INFO, "\n"));
-    GraphicsLayerCompute(iMouseX, iMouseY);
+    GraphicsLayerCompute(iMouseX, iMouseY, MouseClickFlag);
 	    
 	gBS->WaitForEvent( 1, &gMouse->WaitForInput, &Index );
 }
@@ -3572,7 +3602,7 @@ SystemParameterRead (
   IN VOID      *Context
   )
 {	
-	DebugPrint1(DISPLAY_X, DISPLAY_Y, "%d: SystemParameterRead\n", __LINE__);
+	//DebugPrint1(DISPLAY_X, DISPLAY_Y, "%d: SystemParameterRead\n", __LINE__);
 	//ShellServiceRead();
 	//MemoryParameterGet();
 }
@@ -3586,7 +3616,7 @@ DisplaySystemDateTime (
   IN VOID      *Context
   )
 {	
-    DebugPrint1(DISPLAY_X, DISPLAY_Y, "%d: DisplaySystemDateTime\n", __LINE__);
+    //DebugPrint1(DISPLAY_X, DISPLAY_Y, "%d: DisplaySystemDateTime\n", __LINE__);
     EFI_TIME et;
 	date_time_count++;
 	gRT->GetTime(&et, NULL);
@@ -3595,7 +3625,7 @@ DisplaySystemDateTime (
 				  et.Year, et.Month, et.Day, et.Hour, et.Minute, et.Second);
 	
    DebugPrint1(DISPLAY_DESK_HEIGHT_WEIGHT_X, DISPLAY_DESK_HEIGHT_WEIGHT_Y, "%d ScreenWidth:%d, ScreenHeight:%d\n", __LINE__, ScreenWidth, ScreenHeight);
-   GraphicsLayerCompute(iMouseX, iMouseY);
+   GraphicsLayerCompute(iMouseX, iMouseY, 0);
 }
 
 EFI_STATUS MultiProcessInit ()
