@@ -369,7 +369,7 @@ UINT8 *FAT32_Table;
 
 
 const UINT8 *sChineseChar = NULL;
-UINT8 HZK16FileReadCount;
+UINT8 HZK16FileReadCount = 0;
 static UINTN ScreenWidth, ScreenHeight;  
 UINT16 MyComputerWidth = 100;
 UINT16 MyComputerHeight = 100;
@@ -433,9 +433,7 @@ typedef enum
 	GET_PARTITION_INFO_STATE,
 	GET_ROOT_PATH_INFO_STATE,
 	GET_FAT_TABLE_STATE,
-	READ_FILE_START_STATE,
 	READ_FILE_STATE,
-	READ_FILE_FINISH_STATE,
 }STATE;
 
 typedef enum
@@ -444,7 +442,6 @@ typedef enum
 	READ_ROOT_PATH_EVENT,
 	READ_FAT_TABLE_EVENT,
 	READ_FILE_EVENT,
-	READ_FILE_FINISH_EVENT,
 }EVENT;
 
 typedef struct
@@ -704,23 +701,24 @@ VOID GraphicsCopy(UINT8 *pDest, UINT8 *pSource,
 }
 VOID GraphicsLayerCompute(int iMouseX, int iMouseY)
 {
-	DebugPrint1(DISPLAY_X, DISPLAY_Y, "%d: HandleMouseEvent\n", __LINE__);
+	DebugPrint1(DISPLAY_X, DISPLAY_Y, "%d: GraphicsLayerCompute\n", __LINE__);
 	//desk 
 	GraphicsCopy(pDeskDisplayBuffer, pDeskBuffer, ScreenWidth, ScreenHeight, ScreenWidth, ScreenHeight, 0, 0);
+    DebugPrint1(DISPLAY_X, DISPLAY_Y, "%d: GraphicsLayerCompute\n", __LINE__);
 
 	//my computer
 	GraphicsCopy(pDeskDisplayBuffer, pMyComputerBuffer, ScreenWidth, ScreenHeight, MyComputerWidth, MyComputerHeight, ScreenWidth - 150, ScreenHeight - 150);
 
 	int i, j;
 
-	DebugPrint1(DISPLAY_X, DISPLAY_Y, "%d: HandleMouseEvent\n", __LINE__);
+	DebugPrint1(DISPLAY_X, DISPLAY_Y, "%d: GraphicsLayerCompute\n", __LINE__);
 	//16, ScreenHeight - 21, For event trigger
 
     EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;  
 
 	if (NULL == pMouseSelectedBuffer)
 	{
-		DEBUG ((EFI_D_INFO, "NULL == pMouseSelectedBuffer"));
+		DEBUG ((EFI_D_INFO, "NULL == GraphicsLayerCompute"));
 		return;
 	}
     
@@ -747,7 +745,7 @@ VOID GraphicsLayerCompute(int iMouseX, int iMouseY)
     Color.Red   = 0xff;
     Color.Green = 0x00;
     Color.Blue	  = 0x00;
-    DebugPrint1(DISPLAY_X, DISPLAY_Y, "%d: HandleMouseEvent\n", __LINE__);
+    //DebugPrint1(DISPLAY_X, DISPLAY_Y, "%d: GraphicsLayerCompute\n", __LINE__);
     if (iMouseX >= 16 && iMouseX <= 16 + 16 * 2
         && iMouseY >= ScreenHeight - 21 && iMouseY <= ScreenHeight)
     {	
@@ -768,16 +766,17 @@ VOID GraphicsLayerCompute(int iMouseX, int iMouseY)
         // Draw a red rectangle when mouse move over left down (like menu button)
         RectangleDrawIntoBuffer(pMouseSelectedBuffer, 0,  0, 31, 15, 1,  Color, 32);
 
-        DebugPrint1(DISPLAY_X, DISPLAY_Y, "%d: HandleMouseEvent\n", __LINE__);
+        DebugPrint1(DISPLAY_X, DISPLAY_Y, "%d: GraphicsLayerCompute\n", __LINE__);
         
         GraphicsCopy(pDeskDisplayBuffer, pMouseSelectedBuffer, ScreenWidth, ScreenHeight, 32, 16, 15, ScreenHeight - 22);
     }
 
     // init mouse buffer for use in use
 	//DrawChineseCharIntoBuffer2(pMouseBuffer, 0, 0, 11 * 94 + 42, MouseColor, 16);
+    DebugPrint1(DISPLAY_X, DISPLAY_Y, "%d: GraphicsLayerCompute\n", __LINE__);
 	
 	GraphicsCopy(pDeskDisplayBuffer, pMouseBuffer, ScreenWidth, ScreenHeight, 16, 16, iMouseX, iMouseY);
-    DebugPrint1(DISPLAY_X, DISPLAY_Y, "%d: HandleMouseEvent\n", __LINE__);
+    DebugPrint1(DISPLAY_X, DISPLAY_Y, "%d: GraphicsLayerCompute\n", __LINE__);
    GraphicsOutput->Blt(GraphicsOutput, 
 			            (EFI_GRAPHICS_OUTPUT_BLT_PIXEL *) pDeskDisplayBuffer,
 			            EfiBltBufferToVideo,
@@ -935,12 +934,26 @@ VOID StringMaker (UINT16 x, UINT16 y,
     ASSERT (Format != NULL);
 
     AsciiVSPrint (AsciiBuffer, sizeof (AsciiBuffer), Format, VaList);
-
-	if (StatusErrorCount % 60 == 0)
+	
+	if (StatusErrorCount % 61 == 0)
 	{
 		for (int j = 0; j < ScreenHeight; j++)
 		{
 			for (int i = ScreenWidth / 2; i < ScreenWidth; i++)
+			{
+				pDeskBuffer[(j * ScreenWidth + i) * 4]     = 0x84;
+				pDeskBuffer[(j * ScreenWidth + i) * 4 + 1] = 0x84;
+				pDeskBuffer[(j * ScreenWidth + i) * 4 + 2] = 0x00;
+			}
+		}		
+	}
+	
+	
+	if (DisplayCount % 52 == 0)
+	{
+		for (int j = 2; j < 54 * 16; j++)
+		{
+			for (int i = 0; i < ScreenWidth / 2; i++)
 			{
 				pDeskBuffer[(j * ScreenWidth + i) * 4]     = 0x84;
 				pDeskBuffer[(j * ScreenWidth + i) * 4 + 1] = 0x84;
@@ -2036,7 +2049,7 @@ EFI_STATUS PartitionAnalysisFSM()
     EFI_DISK_IO_PROTOCOL            *DiskIo;
     
     Status = gBS->LocateProtocol (&gEfiDevicePathToTextProtocolGuid, NULL, (VOID **) &DevPathToText);
-    DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
+    //DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
     if (EFI_ERROR(Status))
     {
     	 DEBUG ((EFI_D_INFO, "LocateProtocol1 error: %x\n", Status));    	 
@@ -2045,7 +2058,7 @@ EFI_STATUS PartitionAnalysisFSM()
     }
    
     Status = gBS->LocateHandleBuffer(ByProtocol, &gEfiDiskIoProtocolGuid, NULL, &NumHandles, &ControllerHandle);
-    DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
+    //DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
     if (EFI_ERROR(Status))
     {
         DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
@@ -2086,7 +2099,7 @@ EFI_STATUS PartitionAnalysisFSM()
 		 // the USB we save our *.efi file and relative resource files..
 		 if (device[i].DeviceType == 1 && device[i].SectorCount == 915551)
 		 {
-		    DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
+		    //DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
 		 	Status = gBS->HandleProtocol(ControllerHandle[i], &gEfiBlockIoProtocolGuid, (VOID * *) &BlockIo );                                                
 		    DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
 		    
@@ -2197,7 +2210,7 @@ EFI_STATUS RootPathAnalysisFSM()
 		 // the USB we save our *.efi file and relative resource files..
 		 if (device[i].DeviceType == 1 && device[i].SectorCount == 915551)
 		 {
-		    DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
+		    //DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
 		 	Status = gBS->HandleProtocol(ControllerHandle[i], &gEfiBlockIoProtocolGuid, (VOID * *) &BlockIo );                                                
 		    DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
 		    
@@ -2306,7 +2319,7 @@ EFI_STATUS GetFatTableFSM()
 		 // the USB we save our *.efi file and relative resource files..
 		 if (device[i].DeviceType == 1 && device[i].SectorCount == 915551)
 		 {
-		    DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
+		    //DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
 		 	Status = gBS->HandleProtocol(ControllerHandle[i], &gEfiBlockIoProtocolGuid, (VOID * *) &BlockIo );                                                
 		    DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
 		    
@@ -2380,6 +2393,63 @@ UINT32 GetNextBlockNumber()
 	return FAT32_Table[PreviousBlockNumber * 4] + (UINT32)FAT32_Table[PreviousBlockNumber * 4 + 1] * 16 * 16 + (UINT32)FAT32_Table[PreviousBlockNumber * 4 + 2] * 16 * 16 * 16 * 16 + (UINT32)FAT32_Table[PreviousBlockNumber * 4 + 3] * 16 * 16 * 16 * 16 * 16 * 16;	
 }
 
+EFI_STATUS ChineseCharArrayInit()
+{
+	DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: ChineseCharArrayInit\n",  __LINE__);
+	DEBUG ((EFI_D_INFO, "%d ChineseCharArrayInit\n", __LINE__));
+    // 87 line, 96 Chinese char each line, 32 Char each Chinese char
+	UINT32 size = 267616;
+    //UINT8 *sChineseChar;
+
+	if (NULL != sChineseChar)
+    {
+    	DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: ChineseCharArrayInit\n",  __LINE__);
+    	return EFI_SUCCESS;
+    }
+
+    if (HZK16FileReadCount >= 60)
+    {		
+		EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
+		Color.Blue  = 0x00;
+		Color.Red   = 0x00;
+		Color.Green = 0x00;
+		UINT16 x, y;
+		x = 10;
+		y = 20;
+		for (UINT16 j = 0 ; j < 40 ; j++)
+		{
+			for (UINT16 i = 0 ; i < 37 ; i++)
+			{	    
+				DrawChineseCharIntoBuffer2(pDeskBuffer, x + i * 16, y, j * 94 + i, Color, ScreenWidth);
+				//DEBUG ((EFI_D_INFO, "ChineseCharArrayInit: %x \n ", sChineseChar[1504 * 32 + i]));
+			}
+			x = 10;
+			y += 16;
+		}
+    }
+    
+	//sChineseChar = (UINT8 *)AllocateZeroPool(size);
+	sChineseChar = (UINT8 *)AllocatePages(65);
+	if (NULL == sChineseChar)
+    {
+        DEBUG ((EFI_D_INFO, "ChineseCharArrayInit AllocateZeroPool Failed: %x!\n "));
+        DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: ChineseCharArrayInit\n",  __LINE__);
+        //DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: ChineseCharArrayInit AllocateZeroPool Failed: %x\n",  __LINE__);
+        return (EFI_SUCCESS);
+    }
+    /*
+	if (FileReadSelf2(L"HZK16", size, sChineseChar) == -1)
+	{
+		FreePool((VOID *)sChineseChar);
+		sChineseChar = NULL;
+		DEBUG ((EFI_D_INFO, "Read HZK16 failed\n"));
+		return EFI_SUCCESS;
+	}
+	*/
+
+	return EFI_SUCCESS;
+}
+
 
 EFI_STATUS ReadFileFSM()
 {    
@@ -2442,7 +2512,7 @@ EFI_STATUS ReadFileFSM()
 		 // the USB we save our *.efi file and relative resource files..
 		 if (device[i].DeviceType == 1 && device[i].SectorCount == 915551)
 		 {
-		    DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
+		    //DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
 		 	Status = gBS->HandleProtocol(ControllerHandle[i], &gEfiBlockIoProtocolGuid, (VOID * *) &BlockIo );                                                
 		    DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
 		    
@@ -2462,14 +2532,20 @@ EFI_STATUS ReadFileFSM()
 		        	 // read from USB by block(512 * 8)
 	        	    // Read file content from FAT32(USB), minimum unit is block
 	        	    
-	        	 	DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
+	        	 	//DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
 	        	 	Status = DiskIo->ReadDisk( DiskIo, BlockIo->Media->MediaId, DISK_BUFFER_SIZE * sector_count, DISK_BLOCK_BUFFER_SIZE, BufferBlock);
 	        	 	DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
 	        	 	
 					if ( EFI_SUCCESS == Status )
-					{
+					{  
+					     ChineseCharArrayInit();
+					     
+                       DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: HZK16FileReadCount: %d DISK_BLOCK_BUFFER_SIZE: %d\n", __LINE__, HZK16FileReadCount, DISK_BLOCK_BUFFER_SIZE);
+
 						  //Copy buffer to ChineseBuffer
-						  CopyMem(sChineseChar[HZK16FileReadCount * DISK_BLOCK_BUFFER_SIZE], BufferBlock, DISK_BLOCK_BUFFER_SIZE);
+						  if (sChineseChar != NULL)
+							  CopyMem(sChineseChar[HZK16FileReadCount * DISK_BLOCK_BUFFER_SIZE], BufferBlock, DISK_BLOCK_BUFFER_SIZE);
+
 						  for (int j = 0; j < 250; j++)
 						  {
 						  		DebugPrint1(DISK_READ_BUFFER_X + (j % 39) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 39), "%02X ", BufferBlock[j] & 0xff);
@@ -2477,9 +2553,11 @@ EFI_STATUS ReadFileFSM()
 						  HZK16FileReadCount++;
 					 }
 
-				     sector_count = GetNextBlockNumber();
-		            DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X sector_count:%ld BlockIo->Media->MediaId: %d\n", 
-		            																   __LINE__, Status, sector_count, BlockIo->Media->MediaId);
+				 	 sector_count = MBRSwitched.ReservedSelector + MBRSwitched.SectorsPerFat * MBRSwitched.NumFATS + MBRSwitched.BootPathStartCluster - 2 + (GetNextBlockNumber() - 2) * 8;
+				 	 PreviousBlockNumber = GetNextBlockNumber();
+				     
+		            DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: PreviousBlockNumber:%d sector_count:%ld HZK16FileReadCount: %d\n", 
+		            																   __LINE__, PreviousBlockNumber, sector_count, HZK16FileReadCount);
 
 		        } 
 		    }
@@ -2495,17 +2573,21 @@ STATE_TRANS StatusTransitionTable[] =
 	{ INIT_STATE,                READ_PATITION_EVENT,   GET_PARTITION_INFO_STATE, PartitionAnalysisFSM},
 	{ GET_PARTITION_INFO_STATE,  READ_ROOT_PATH_EVENT,  GET_ROOT_PATH_INFO_STATE, RootPathAnalysisFSM},
 	{ GET_ROOT_PATH_INFO_STATE,  READ_FAT_TABLE_EVENT,  GET_FAT_TABLE_STATE,      GetFatTableFSM},
-	{ GET_FAT_TABLE_STATE,       READ_FILE_EVENT,       READ_FILE_START_STATE,    ReadFileFSM},
-	{ READ_FILE_START_STATE,     READ_FILE_EVENT,       READ_FILE_STATE,          ReadFileFSM },
+	{ GET_FAT_TABLE_STATE,       READ_FILE_EVENT,       READ_FILE_STATE,          ReadFileFSM},
 	{ READ_FILE_STATE,           READ_FILE_EVENT,       READ_FILE_STATE,          ReadFileFSM },
-	{ READ_FILE_FINISH_STATE,    READ_FILE_EVENT,       INIT_STATE,               ReadFileFSM },
 };
 
 STATE	NextState = INIT_STATE;
 
 int FileReadFSM(EVENT event)
 {
-	EFI_STATUS Status;
+    EFI_STATUS Status;
+        
+	if (HZK16FileReadCount > 62)
+	{
+		DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
+		return;
+	}
 	DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: FileReadFSM current event: %d, NextState: %d table event:%d table NextState: %d\n", 
 							  __LINE__, 
                             event, 
@@ -2700,7 +2782,6 @@ EFI_STATUS FileReadSelf2(CHAR16 *FileName, UINT32 size, UINT8 *pBuffer)
 
 }
 
-
 EFI_STATUS WindowCreateUseBuffer(UINT8 *pBuffer, UINT8 *pParent, UINT16 Width, UINT16 Height, UINT16 Type, CHAR8 *pWindowTitle)
 {
 	UINT16 i, j;
@@ -2804,55 +2885,6 @@ VOID MyComputerWindow(UINT16 StartX, UINT16 StartY)
 
 	WindowCreateUseBuffer(pMyComputerBuffer, pParent, MyComputerWidth, MyComputerHeight, Type, pWindowTitle);
 }
-
-
-EFI_STATUS ChineseCharArrayInit()
-{
-	DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: ChineseCharArrayInit\n",  __LINE__);
-	DEBUG ((EFI_D_INFO, "%d ChineseCharArrayInit\n", __LINE__));
-    // 87 line, 96 Chinese char each line, 32 Char each Chinese char
-	UINT32 size = 267616 + 1;
-    //UINT8 *sChineseChar;
-    
-	sChineseChar = (UINT8 *)AllocateZeroPool(size);
-	if (NULL == sChineseChar)
-    {
-        DEBUG ((EFI_D_INFO, "ChineseCharArrayInit AllocateZeroPool Failed: %x!\n "));
-                
-        DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: ChineseCharArrayInit AllocateZeroPool Failed: %x\n",  __LINE__);
-        return (EFI_SUCCESS);
-    }
-    /*
-	if (FileReadSelf2(L"HZK16", size, sChineseChar) == -1)
-	{
-		FreePool((VOID *)sChineseChar);
-		sChineseChar = NULL;
-		DEBUG ((EFI_D_INFO, "Read HZK16 failed\n"));
-		return EFI_SUCCESS;
-	}
-	*/
-
-    EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
-    Color.Blue  = 0x00;
-    Color.Red   = 0x00;
-    Color.Green = 0x00;
-    UINT16 x, y;
-    x = 10;
-    y = 20;
-    for (UINT16 j = 0 ; j < 40 ; j++)
-	{
-		for (UINT16 i = 0 ; i < 37 ; i++)
-	    {	    
-	    	//DrawChineseCharIntoBuffer2(pMyComputerBuffer, x + i * 16, y, j * 94 + i, Color, MyComputerWidth);
-	    	//DEBUG ((EFI_D_INFO, "ChineseCharArrayInit: %x \n ", sChineseChar[1504 * 32 + i]));
-	    }
-		x = 10;
-		y += 16;
-	 }
-	return EFI_SUCCESS;
-}
-
-
 
 VOID EFIAPI DecToChar1( UINT8* CharBuff, UINT8 I )
 {
@@ -2992,8 +3024,8 @@ EFIAPI HandleEnterPressed()
 
     FileReadFSM(FSM_Event++);
 
-    if (READ_FILE_FINISH_EVENT < FSM_Event)
-    	FSM_Event = READ_FILE_FINISH_EVENT;
+    if (READ_FILE_EVENT <= FSM_Event)
+    	FSM_Event = READ_FILE_EVENT;
 
     //PartitionUSBReadAsynchronous();
 
@@ -3196,10 +3228,6 @@ HandleKeyboardEvent (
      return ;
  
  }
-
-
-
-
 
 // for mouse move & click
 STATIC
@@ -3524,7 +3552,8 @@ DisplaySystemDateTime (
   IN EFI_EVENT Event,
   IN VOID      *Context
   )
-{
+{	
+    DebugPrint1(DISPLAY_X, DISPLAY_Y, "%d: DisplaySystemDateTime\n", __LINE__);
     EFI_TIME et;
 	date_time_count++;
 	gRT->GetTime(&et, NULL);
@@ -3757,6 +3786,8 @@ DiskHandleComplete (
 EFI_STATUS ParametersInitial()
 {
     EFI_STATUS	Status;
+	
+    
 	pDeskBuffer = (UINT8 *)AllocatePool(ScreenWidth * ScreenHeight * 4); 
 	if (NULL == pDeskBuffer)
 	{
@@ -3805,6 +3836,7 @@ EFI_STATUS ParametersInitial()
     	DEBUG((EFI_D_INFO, "%d Status:%X\n", __LINE__, Status));
        return Status;
     }
+
 	return EFI_SUCCESS;
 }
 
