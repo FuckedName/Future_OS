@@ -6,18 +6,23 @@ Copyright (c) 2004 - 2017, Intel Corporation. All rights reserved.<BR>
 SPDX-License-Identifier: BSD-2-Clause-Patent
 ToDo:
 
-1. ReadFileFromPath;
-2. Fix trigger event with mouse and keyboard
-3. NetWork connect baidu.com
-4. File System Simple Management
-5. progcess
-6. My Computer window(disk partition) 
-7. Setting window(select file, delete file, modify file)
-8. Memory Simple Management
-9. Multi Windows, button click event.
-10. Application.
-11. How to Automated Testing?
-
+1. ReadFileFromPath; OK
+2. Fix trigger event with mouse and keyboard; OK
+3. NetWork connect baidu.com; ==> driver not found
+4. File System Simple Management; ==> current can read and write
+5. progcess; ==> current mouse move, keyboard input, read file they can similar to process, but the real process is very complex, for example: 
+	a.register push and pop, 
+	b.progress communicate, 
+	c.progress priority,
+	d.PCB
+	e.semaphoe
+	etc.
+6. My Computer window(disk partition)  ==> finish partly
+7. Setting window(select file, delete file, modify file) ==> 0%
+8. Memory Simple Management ==> can get memory infomation, but it looks like something wrong.
+9. Multi Windows, button click event. ==> 10%
+10. Application. ==>10%
+11. How to Automated Testing? ==>0%
 **/
 
 #include <stdio.h>
@@ -372,8 +377,8 @@ UINT8 *sChineseChar = NULL;
 
 UINT8 HZK16FileReadCount = 0;
 static UINTN ScreenWidth, ScreenHeight;  
-UINT16 MyComputerWidth = 100;
-UINT16 MyComputerHeight = 100;
+UINT16 MyComputerWidth = 16 * 50;
+UINT16 MyComputerHeight = 16 * 30;
 UINT16 MouseClickWindowWidth = 300;
 UINT16 MouseClickWindowHeight = 400;
 
@@ -790,7 +795,7 @@ VOID GraphicsLayerCompute(int iMouseX, int iMouseY, UINT8 MouseClickFlag)
     //DebugPrint1(DISPLAY_X, DISPLAY_Y, "%d: GraphicsLayerCompute\n", __LINE__);
 
 	//my computer
-	GraphicsCopy(pDeskDisplayBuffer, pMyComputerBuffer, ScreenWidth, ScreenHeight, MyComputerWidth, MyComputerHeight, ScreenWidth - 150, ScreenHeight - 150);
+	GraphicsCopy(pDeskDisplayBuffer, pMyComputerBuffer, ScreenWidth, ScreenHeight, MyComputerWidth, MyComputerHeight, 100, 160);
 
 	int i, j;
 
@@ -895,6 +900,11 @@ EFI_STATUS DrawAsciiCharIntoBuffer(UINT8 *pBuffer,
 {
     INT8 i;
     UINT8 d;
+
+    if (pBuffer == NULL)
+    {
+		return;
+    }
     
 	for(i = 0; i < 16; i++)
 	{
@@ -1051,7 +1061,7 @@ VOID StringMaker (UINT16 x, UINT16 y,
 		}		
 	}
 	
-	
+	/*
 	if (DisplayCount % 52 == 0)
 	{
 		for (int j = 2; j < 54 * 16; j++)
@@ -1064,7 +1074,7 @@ VOID StringMaker (UINT16 x, UINT16 y,
 			}
 		}		
 	}
-	
+	*/
     for (i = 0; i < sizeof(AsciiBuffer) /sizeof(CHAR8); i++)
         DrawAsciiCharUseBuffer(pDeskBuffer, x + i * 8, y, AsciiBuffer[i], Color);
 
@@ -1839,14 +1849,14 @@ EFI_STATUS RootPathAnalysis(UINT8 *p)
 		if (pItems[i].FileName[0] != 0xE5 && (pItems[i].Attribute[0] == 0x20 
 		    || pItems[i].Attribute[0] == 0x10))
        {
-        	/*DebugPrint1(DISK_MBR_X, 16 * 30 + (valid_count) * 16, "FileName:%2c%2c%2c%2c%2c%2c%2c%2c ExtensionName:%2c%2c%2c StartCluster:%02X%02X%02X%02X FileLength: %02X%02X%02X%02X Attribute: %02X    ", 
+        	DebugPrint1(DISK_MBR_X, 16 * 30 + (valid_count) * 16, "FileName:%2c%2c%2c%2c%2c%2c%2c%2c ExtensionName:%2c%2c%2c StartCluster:%02X%02X%02X%02X FileLength: %02X%02X%02X%02X Attribute: %02X    ", 
                                             pItems[i].FileName[0], pItems[i].FileName[1], pItems[i].FileName[2], pItems[i].FileName[3], pItems[i].FileName[4], pItems[i].FileName[5], pItems[i].FileName[6], pItems[i].FileName[7],
                                             pItems[i].ExtensionName[0], pItems[i].ExtensionName[1],pItems[i].ExtensionName[2],
                                             pItems[i].StartClusterHigh2B[0], pItems[i].StartClusterHigh2B[1],
                                             pItems[i].StartClusterLow2B[0], pItems[i].StartClusterLow2B[1],
                                             pItems[i].FileLength[0], pItems[i].FileLength[1], pItems[i].FileLength[2], pItems[i].FileLength[3],
                                             pItems[i].Attribute[0]);
-			*/
+			
 			valid_count++;
 
 			//for (int j = 0; j < 5; j++)
@@ -2441,9 +2451,9 @@ EFI_STATUS ChineseCharArrayInit()
 		Color.Red   = 0x00;
 		Color.Green = 0x00;
 		UINT16 x, y;
-		x = 10;
+		x = 32;
 		y = 20;
-		for (UINT16 j = 0 ; j < 40 ; j++)
+		for (UINT16 j = 13 ; j < 20 ; j++)
 		{
 			for (UINT16 i = 0 ; i < 37 ; i++)
 			{	    
@@ -2846,7 +2856,9 @@ EFI_STATUS FileReadSelf2(CHAR16 *FileName, UINT32 size, UINT8 *pBuffer)
 }
 
 EFI_STATUS WindowCreateUseBuffer(UINT8 *pBuffer, UINT8 *pParent, UINT16 Width, UINT16 Height, UINT16 Type, CHAR8 *pWindowTitle)
-{
+{	
+    DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Width: %d \n", __LINE__, Width);
+	
 	UINT16 i, j;
 
     if (NULL == pBuffer)
@@ -2854,83 +2866,76 @@ EFI_STATUS WindowCreateUseBuffer(UINT8 *pBuffer, UINT8 *pParent, UINT16 Width, U
 		DEBUG ((EFI_D_INFO, "NULL == pBuffer"));
 		return EFI_SUCCESS;
 	}	
+	
+    EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
+    
+	Color.Blue  = 0xff;
+	Color.Red   = 0xff;
+	Color.Green = 0xff;
+
+    DrawChineseCharIntoBuffer2(pBuffer, 3, 6,          (46 - 1 ) * 94 + 50 - 1, Color, Width);    
+    DrawChineseCharIntoBuffer2(pBuffer, 3 + 16 , 6,     (21 - 1) * 94 + 36 - 1, Color, Width);
+    DrawChineseCharIntoBuffer2(pBuffer, 3 + 16 * 2, 6, (21 - 1) * 94 + 71 - 1, Color, Width);
+    DrawChineseCharIntoBuffer2(pBuffer, 3 + 16 * 3, 6, (36 - 1) * 94 + 52 - 1, Color, Width);
 
     // The Left of Window
-	for (i = 0; i < Height; i++)
+	for (i = 20; i < Height; i++)
 	{
 		for (j = 0; j < Width / 3; j++)
 		{
-			pBuffer[(i * Width + j) * 4] = 230;
-			pBuffer[(i * Width + j) * 4 + 1] = 130;
-			pBuffer[(i * Width + j) * 4 + 2] = 30;
+			pBuffer[(i * Width + j) * 4] = 214;
+			pBuffer[(i * Width + j) * 4 + 1] = 211;
+			pBuffer[(i * Width + j) * 4 + 2] = 204;
 		}
 	}
 
 	// The right of Window
-	for (i = 0; i < Height; i++)
+	for (i = 20; i < Height; i++)
 	{
 		for (j = Width / 3 - 1; j < Width; j++)
 		{
-			pBuffer[(i * Width + j) * 4] = 0xff;
-			pBuffer[(i * Width + j) * 4 + 1] = 0xff;
-			pBuffer[(i * Width + j) * 4 + 2] = 0xff;
+			pBuffer[(i * Width + j) * 4] = 214;
+			pBuffer[(i * Width + j) * 4 + 1] = 211;
+			pBuffer[(i * Width + j) * 4 + 2] = 104;
 		}
 	}
 
-    EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
-    
-    Color.Blue = 145;
-    Color.Green= 145;
-    Color.Red= 145;
-    
-    //DrawChineseCharIntoBuffer2(pBuffer, 3, 6,         46 * 94 + 50, Color, 16);
-    
-    //DrawChineseCharIntoBuffer2(pBuffer, 3 + 16, 6,     21 * 94 + 36, Color, Width);
-    //DrawChineseCharIntoBuffer2(pBuffer, 3 + 16 * 2, 6, 21 * 94 + 71, Color, Width);
-    //DrawChineseCharIntoBuffer2(pBuffer, 3 + 16 * 3, 6, 36 * 94 + 52, Color, Width);
-    /*
+	Color.Blue  = 0x00;
+	Color.Red   = 0x00;
+	Color.Green = 0x00;
 
-    Color.Blue = 145;
-    Color.Green= 145;
-    Color.Red= 145;
-	DrawLineIntoBuffer(pBuffer, 0, 0, 100, 100, 1, Color, Width);
-    DrawLineIntoBuffer(pBuffer, 100, 0, 0, 100, 1, Color, Width);
-    DrawLineIntoBuffer(pBuffer, 100, 0, 0, 100, 1, Color, Width);
-
-
-    // Display *.txt from disk
-    UINT16 size = 27;
-    UINT8 *pBuffer2;
-    
-	pBuffer2 = (UINT8 *)AllocateZeroPool(size);
-	if (NULL == pBuffer2)
-    {
-        DEBUG ((EFI_D_INFO, "AllocateZeroPool Failed: %x!\n "));
-        
-        return (-1);
-    }
-    
-	EFI_STATUS Status = FileReadSelf(L"test2.txt", size, pBuffer2);
-	if (Status == -1)
-	{
-		FreePool(pBuffer2);
-		DEBUG ((EFI_D_INFO, "Read test2.txt failed: \n "));
-		return EFI_SUCCESS;
-	}
+	UINT16 x, y;
+	x = 32;
+	y = 20;
 	
-    DEBUG ((EFI_D_INFO, "Before color: \n "));
-    Color.Blue  = 0x00;
-    Color.Red   = 0x00;
-    Color.Green = 0x00;
-    
-    for (i = 0; i < 10; i++)
-    	DrawAsciiCharIntoBuffer(pMyComputerBuffer, 10 + i * 8, 20, pBuffer2[i], Color, MyComputerWidth);
-	*/
+    for (UINT16 j = 0 ; j < 20 ; j++)
+	{
+		for (UINT16 i = 0 ; i < 27 ; i++)
+		{	    
+			DrawChineseCharIntoBuffer2(pBuffer, x + i * 18, y, j * 94 + i, Color, Width);
+			//DEBUG ((EFI_D_INFO, "ChineseCharArrayInit: %x \n ", sChineseChar[1504 * 32 + i]));
+		}
+		x = 10;
+		y += 18;
+	}
 
+	for (UINT16 i = 0 ; i < 7 ; i++)
+	{
+		//DrawAsciiCharIntoBuffer(pDeskBuffer, 20 + (i - 40) * 8, 20, i, Color);
+		
+	}
+	/*
+    DebugPrint1(TEXT_DEVICE_PATH_X, TEXT_DEVICE_PATH_Y + 16 * (4 * count1 + 1), "%d: Start: %d Count: %d  DeviceType: %d PartitionType: %d PartitionID: %d\n",        
+							__LINE__, 
+							device->StartSectorNumber,
+							device->SectorCount,
+							device->DeviceType,
+							device->PartitionType,
+							device->PartitionID);
+    			
+*/
 	return EFI_SUCCESS;
 }
-
-
 
 VOID MyComputerWindow(UINT16 StartX, UINT16 StartY)
 {
@@ -2938,14 +2943,14 @@ VOID MyComputerWindow(UINT16 StartX, UINT16 StartY)
 	UINT16 Type;
 	CHAR8 * pWindowTitle;
 
-
 	pMyComputerBuffer = (UINT8 *)AllocateZeroPool(MyComputerWidth * MyComputerHeight * 4); 
 	if (pMyComputerBuffer == NULL)
 	{
 		DEBUG ((EFI_D_INFO, "MyComputer , AllocateZeroPool failed... "));
 		return;
 	}
-
+	
+    DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: MyComputerWidth: %d \n", __LINE__, MyComputerWidth);
 	WindowCreateUseBuffer(pMyComputerBuffer, pParent, MyComputerWidth, MyComputerHeight, Type, pWindowTitle);
 }
 
@@ -3697,7 +3702,7 @@ EFI_STATUS SystemTimeIntervalInit()
 
 	while (1)
 	{
-		DebugPrint1(DISPLAY_X, DISPLAY_Y, "%d: SystemTimeIntervalInit while\n", __LINE__);
+		//DebugPrint1(DISPLAY_X, DISPLAY_Y, "%d: SystemTimeIntervalInit while\n", __LINE__);
 	}
 	
 	gBS->SetTimer( TimerOne, TimerCancel, 0 );
@@ -3805,7 +3810,6 @@ EFI_STATUS ScreenInit(EFI_GRAPHICS_OUTPUT_PROTOCOL   *GraphicsOutput)
     //DrawChineseCharIntoBuffer(pDeskBuffer, 20, 20 + 16, 0, Color, ScreenWidth);
     
     */
-    MyComputerWindow(100, 100);
 	
     Color.Red   = 0x00;
     Color.Green = 0x00;
@@ -3962,9 +3966,10 @@ Main (
 
     InitChineseChar();
 
-    SystemTimeIntervalInit();
-	
-	//ChineseCharArrayInit();
+    
+    MyComputerWindow(100, 100);
+
+    SystemTimeIntervalInit();	
 	
 	DebugPrint1(100, 100, "%d %d\n", __LINE__, Status);
 	
