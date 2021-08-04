@@ -1044,19 +1044,19 @@ VOID GraphicsLayerCompute(int iMouseX, int iMouseY, UINT8 MouseClickFlag)
 	GraphicsCopy(pDeskDisplayBuffer, pDeskBuffer, ScreenWidth, ScreenHeight, ScreenWidth, ScreenHeight, 0, 0);
     //DebugPrint1(DISPLAY_X, DISPLAY_Y, "%d: GraphicsLayerCompute\n", __LINE__);
 
-	GraphicsCopy(pDeskDisplayBuffer, pMyComputerBuffer, ScreenWidth, ScreenHeight, MyComputerWidth, MyComputerHeight, MyComputerPositionX, MyComputerPositionX);
+	GraphicsCopy(pDeskDisplayBuffer, pMyComputerBuffer, ScreenWidth, ScreenHeight, MyComputerWidth, MyComputerHeight, MyComputerPositionX, MyComputerPositionY);
 
 	//my computer
 	if (MouseClickFlag == 1 && pDeskDisplayBuffer[(iMouseY * ScreenWidth + iMouseX) * 4 + 3] == GRAPHICS_LAYER_MY_COMPUTER)
 	{
 		MyComputerPositionX += x_move;
 		MyComputerPositionY += y_move;
-		GraphicsCopy(pDeskDisplayBuffer, pMyComputerBuffer, ScreenWidth, ScreenHeight, MyComputerWidth, MyComputerHeight, MyComputerPositionX, MyComputerPositionX);
+	//	GraphicsCopy(pDeskDisplayBuffer, pMyComputerBuffer, ScreenWidth, ScreenHeight, MyComputerWidth, MyComputerHeight, MyComputerPositionX, MyComputerPositionX);
 	}
 
-	DebugPrint1(DISPLAY_X, DISPLAY_Y, "%d: Graphics Layer id: %d ", __LINE__, pDeskDisplayBuffer[(iMouseY * ScreenWidth + iMouseX) * 4 + 3]);
+	// display graphics layer id mouse over, for mouse click event.
+	//DebugPrint1(DISPLAY_X, DISPLAY_Y, "%d: Graphics Layer id: %d ", __LINE__, pDeskDisplayBuffer[(iMouseY * ScreenWidth + iMouseX) * 4 + 3]);
 	
-
 	int i, j;
 
 	//16, ScreenHeight - 21, For event trigger
@@ -1085,6 +1085,16 @@ VOID GraphicsLayerCompute(int iMouseX, int iMouseY, UINT8 MouseClickFlag)
     Color.Red   = 0xff;
     Color.Green = 0x00;
     Color.Blue	  = 0x00;
+
+	// this is draw a rectangle when mouse move on disk partition 
+	for (int i = 0; i < 8; i++)
+		if (iMouseX >= MyComputerPositionX + 50 && iMouseX <= MyComputerPositionX + 50 + 16 * 6
+			&& iMouseY >= MyComputerPositionY + i * 16 + 16 * 2 && iMouseY <= MyComputerPositionY + i * 16 + 16 * 3)
+		{
+			RectangleDrawIntoBuffer(pMouseSelectedBuffer, 0,  0, 31, 15, 1,  Color, 32);
+	       GraphicsCopy(pDeskDisplayBuffer, pMouseSelectedBuffer, ScreenWidth, ScreenHeight, 32, 16, MyComputerPositionX + 50, MyComputerPositionY  + i * 16 + 16 * 2);	
+		}
+    
     //DebugPrint1(DISPLAY_X, DISPLAY_Y, "%d: GraphicsLayerCompute\n", __LINE__);
     if (iMouseX >= 16 && iMouseX <= 16 + 16 * 2
         && iMouseY >= ScreenHeight - 21 && iMouseY <= ScreenHeight)
