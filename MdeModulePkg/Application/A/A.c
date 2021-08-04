@@ -1375,7 +1375,7 @@ DisplayItemsOfPartition(UINT16 Index)
 		if (pItems[i].FileName[0] != 0xE5 && (pItems[i].Attribute[0] == 0x20 
 		    || pItems[i].Attribute[0] == 0x10))
        {
-        	DebugPrint2(0, 8 * 16 + (valid_count) * 16, "%d FileName:%2c%2c%2c%2c%2c%2c%2c%2c ExtensionName:%2c%2c%2c StartCluster:%02X%02X%02X%02X FileLength: %02X%02X%02X%02X Attribute: %02X    ", __LINE__,
+        	DebugPrint2(0, 8 * 16 + (valid_count) * 16, pMyComputerBuffer, "%d FileName:%2c%2c%2c%2c%2c%2c%2c%2c ExtensionName:%2c%2c%2c StartCluster:%02X%02X%02X%02X FileLength: %02X%02X%02X%02X Attribute: %02X    ", __LINE__,
                                             pItems[i].FileName[0], pItems[i].FileName[1], pItems[i].FileName[2], pItems[i].FileName[3], pItems[i].FileName[4], pItems[i].FileName[5], pItems[i].FileName[6], pItems[i].FileName[7],
                                             pItems[i].ExtensionName[0], pItems[i].ExtensionName[1],pItems[i].ExtensionName[2],
                                             pItems[i].StartClusterHigh2B[0], pItems[i].StartClusterHigh2B[1],
@@ -1387,13 +1387,9 @@ DisplayItemsOfPartition(UINT16 Index)
 		}
 }
 
-
-
 UINT8 MouseClickFlag = 0;
 INT8 DisplayRootItemsFlag = 0;
 UINT8 PreviousItem = -1;
-
-
 VOID GraphicsLayerCompute(int iMouseX, int iMouseY, UINT8 MouseClickFlag)
 {
 	/*DebugPrint1(DISPLAY_X, DISPLAY_Y, "%d: pDeskDisplayBuffer: %X pDeskBuffer: %X ScreenWidth: %d ScreenHeight: %d pMouseBuffer: %X\n", __LINE__, 
@@ -3664,7 +3660,7 @@ EFI_STATUS WindowCreateUseBuffer(UINT8 *pBuffer, UINT8 *pParent, UINT16 Width, U
 	x += 16;
 	
 	// Get memory infomation
-	
+	x = 0;
 	// Note: the other class memory can not use
 	float size = (float)MemoryParameterGet2();
 	size = size * 4;
