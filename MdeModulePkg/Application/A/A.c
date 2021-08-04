@@ -9,7 +9,7 @@ ToDo:
 1. ReadFileFromPath; OK
 2. Fix trigger event with mouse and keyboard; OK
 3. NetWork connect baidu.com; ==> driver not found
-4. File System Simple Management; ==> current can read and write
+4. File System Simple Management; ==> current can read and write, Sub directory read.
 5. progcess; ==> current mouse move, keyboard input, read file they can similar to process, but the real process is very complex, for example: 
 	a.register push and pop, 
 	b.progress communicate, 
@@ -23,6 +23,7 @@ ToDo:
 9. Multi Windows, button click event. ==> 10%
 10. Application. ==>10%
 11. How to Automated Testing? ==>0%
+12. Graphics run slowly. ===> need to fix the bug.
 **/
 
 #include <stdio.h>
@@ -95,7 +96,10 @@ ToDo:
 #include <Protocol/DiskIo2.h>
 #include <Protocol/BlockIo2.h>
 
-unsigned int date_time_count = 0;
+UINT16 date_time_count = 0;
+UINT16 keyboard_count = 0;
+UINT16 mouse_count = 0;
+UINT16 parameter_count = 0;
 
 //Line 0
 #define DISPLAY_DESK_HEIGHT_WEIGHT_X (date_time_count % 30) 
@@ -880,6 +884,7 @@ VOID StringMaker (UINT16 x, UINT16 y,
 
     ASSERT (Format != NULL);
 
+	// Note this api do not supported ("%f", float)
     AsciiVSPrint (AsciiBuffer, sizeof (AsciiBuffer), Format, VaList);
 	
 	if (StatusErrorCount % 61 == 0)
@@ -1051,9 +1056,11 @@ VOID GraphicsLayerCompute(int iMouseX, int iMouseY, UINT8 MouseClickFlag)
 	{
 		MyComputerPositionX += x_move;
 		MyComputerPositionY += y_move;
+		
 	//	GraphicsCopy(pDeskDisplayBuffer, pMyComputerBuffer, ScreenWidth, ScreenHeight, MyComputerWidth, MyComputerHeight, MyComputerPositionX, MyComputerPositionX);
 	}
-
+	x_move = 0;
+	y_move = 0;
 	// display graphics layer id mouse over, for mouse click event.
 	//DebugPrint1(DISPLAY_X, DISPLAY_Y, "%d: Graphics Layer id: %d ", __LINE__, pDeskDisplayBuffer[(iMouseY * ScreenWidth + iMouseX) * 4 + 3]);
 	
@@ -2249,7 +2256,7 @@ EFI_STATUS PartitionAnalysis()
                                    gImageHandle, 
                                    NULL,
                                    EFI_OPEN_PROTOCOL_GET_PROTOCOL);
-        DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
+        //DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
         if (EFI_ERROR(Status))
         {
             DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
@@ -2270,7 +2277,7 @@ EFI_STATUS PartitionAnalysis()
 // all partitions analysis
 EFI_STATUS PartitionAnalysisFSM()
 {    
-    DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d PartitionAnalysisFSM\n", __LINE__);
+    //DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d PartitionAnalysisFSM\n", __LINE__);
     DEBUG ((EFI_D_INFO, "PartitionUSBRead!!\r\n"));
     EFI_STATUS Status ;
     UINTN NumHandles, i;
@@ -2312,7 +2319,7 @@ EFI_STATUS PartitionAnalysisFSM()
                                    gImageHandle, 
                                    NULL,
                                    EFI_OPEN_PROTOCOL_GET_PROTOCOL);
-        DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
+        //DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
         if (EFI_ERROR(Status))
         {
             DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
@@ -2322,7 +2329,7 @@ EFI_STATUS PartitionAnalysisFSM()
         CHAR16 *TextDevicePath = DevPathToText->ConvertDevicePathToText(DiskDevicePath, TRUE, TRUE);
 
         // first display
-    	 DebugPrint1(DISK_READ_BUFFER_X, DISK_READ_BUFFER_Y + 16 * i, "%d: %s\n", __LINE__, TextDevicePath);
+    	 //DebugPrint1(DISK_READ_BUFFER_X, DISK_READ_BUFFER_Y + 16 * i, "%d: %s\n", __LINE__, TextDevicePath);
         //DEBUG ((EFI_D_INFO, "%s\n", TextDevicePath));
 
 		 TextDevicePathAnalysisCHAR16(TextDevicePath, &device[i], i);
@@ -2334,24 +2341,24 @@ EFI_STATUS PartitionAnalysisFSM()
 		 {
 		    //DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
 		 	Status = gBS->HandleProtocol(ControllerHandle[i], &gEfiBlockIoProtocolGuid, (VOID * *) &BlockIo );                                                
-		    DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
+		    //DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
 		    
 		    if ( EFI_SUCCESS == Status )
 		    {			        	 
 		        Status = gBS->HandleProtocol( ControllerHandle[i], &gEfiDiskIoProtocolGuid, (VOID * *) &DiskIo ); 
-		        DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
+		        //DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
 		        
 		        if ( Status == EFI_SUCCESS )
 		        {
 					 if (device[i].SectorCount <= sector_count)
 					 {
-						  DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: device[i].SectorCount <= sector_count \n", __LINE__);
+						  //DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: device[i].SectorCount <= sector_count \n", __LINE__);
 						  return EFI_SUCCESS;
 					 }
 
 					 // read from USB by sector(512B)
 	        	    // Read FAT32 file system partition infomation , minimum unit is sector.
-		        	 	DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X sector_count:%ld\n", __LINE__, Status, sector_count);
+		        	 	//DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X sector_count:%ld\n", __LINE__, Status, sector_count);
 	        	 	Status = DiskIo->ReadDisk( DiskIo, BlockIo->Media->MediaId, DISK_BUFFER_SIZE * sector_count, DISK_BUFFER_SIZE, Buffer1 );
 		            if ( EFI_SUCCESS == Status )
 		            {
@@ -2361,8 +2368,8 @@ EFI_STATUS PartitionAnalysisFSM()
 						  }
 				     }
 		        	 
-		            DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X sector_count:%ld BlockIo->Media->MediaId: %d\n", 
-		            																   __LINE__, Status, sector_count, BlockIo->Media->MediaId);
+		            //DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X sector_count:%ld BlockIo->Media->MediaId: %d\n", 
+		            //																   __LINE__, Status, sector_count, BlockIo->Media->MediaId);
 					  
 				 	// analysis data area of patition
 				 	BufferAnalysis(Buffer1, &MBRSwitched); 
@@ -2370,7 +2377,7 @@ EFI_STATUS PartitionAnalysisFSM()
 				 	// data sector number start include: reserved selector, fat sectors(usually is 2: fat1 and fat2), and file system boot path start cluster(usually is 2, data block start number is 2)
 				 	sector_count = MBRSwitched.ReservedSelector + MBRSwitched.SectorsPerFat * MBRSwitched.NumFATS + MBRSwitched.BootPathStartCluster - 2;
 				 	BlockSize = MBRSwitched.SectorOfCluster * 512;
-               	DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: sector_count:%ld BlockSize: %d\n",  __LINE__, sector_count, BlockSize);
+               	//DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: sector_count:%ld BlockSize: %d\n",  __LINE__, sector_count, BlockSize);
 				  }       
 		    }
 
@@ -2383,7 +2390,7 @@ EFI_STATUS PartitionAnalysisFSM()
 // analysis a partition 
 EFI_STATUS RootPathAnalysisFSM()
 {
-    DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d RootPathAnalysisFSM\n", __LINE__);
+    //DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d RootPathAnalysisFSM\n", __LINE__);
     //printf( "RootPathAnalysis\n" );
     DEBUG ((EFI_D_INFO, "PartitionUSBRead!!\r\n"));
     EFI_STATUS Status ;
@@ -2399,14 +2406,14 @@ EFI_STATUS RootPathAnalysisFSM()
     if (EFI_ERROR(Status))
     {
     	 DEBUG ((EFI_D_INFO, "LocateProtocol1 error: %x\n", Status));    	 
-    	 DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
+    	 //DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
         return Status;
     }
    
     Status = gBS->LocateHandleBuffer(ByProtocol, &gEfiDiskIoProtocolGuid, NULL, &NumHandles, &ControllerHandle);
     if (EFI_ERROR(Status))
     {
-        DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
+        //DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
 	    
         return EFI_SUCCESS;
     }
@@ -2433,7 +2440,7 @@ EFI_STATUS RootPathAnalysisFSM()
         CHAR16 *TextDevicePath = DevPathToText->ConvertDevicePathToText(DiskDevicePath, TRUE, TRUE);
 
         // first display
-    	 DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: %s\n", __LINE__, TextDevicePath);
+    	 //DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: %s\n", __LINE__, TextDevicePath);
         //DEBUG ((EFI_D_INFO, "%s\n", TextDevicePath));
 
 		 TextDevicePathAnalysisCHAR16(TextDevicePath, &device[i], i);
@@ -2445,23 +2452,23 @@ EFI_STATUS RootPathAnalysisFSM()
 		 {
 		    //DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
 		 	Status = gBS->HandleProtocol(ControllerHandle[i], &gEfiBlockIoProtocolGuid, (VOID * *) &BlockIo );                                                
-		    DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
+		    //DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
 		    
 		    if ( EFI_SUCCESS == Status )
 		    {			        	 
 		        Status = gBS->HandleProtocol( ControllerHandle[i], &gEfiDiskIoProtocolGuid, (VOID * *) &DiskIo ); 
-		        DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
+		        //DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
 		        
 		        if ( Status == EFI_SUCCESS )
 		        {
 					 if (device[i].SectorCount <= sector_count)
 					 {
-						  DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: device[i].SectorCount <= sector_count \n", __LINE__);
+						  //DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: device[i].SectorCount <= sector_count \n", __LINE__);
 						  return EFI_SUCCESS;
 					 }
 
 	        	    // Read FAT32 file system partition infomation , minimum unit is sector.
-	        	 	DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X sector_count:%ld\n", __LINE__, Status, sector_count);
+	        	 	//DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X sector_count:%ld\n", __LINE__, Status, sector_count);
 	        	 	Status = DiskIo->ReadDisk( DiskIo, BlockIo->Media->MediaId, DISK_BUFFER_SIZE * sector_count, DISK_BUFFER_SIZE, Buffer1 );
 		            if ( EFI_SUCCESS == Status )
 		            {
@@ -2477,7 +2484,7 @@ EFI_STATUS RootPathAnalysisFSM()
 					// data area start from 1824, HZK16 file start from 	FileBlockStart	block, so need to convert into sector by multi 8, block start number is 2 	
 					// next state is to read FAT table
 				 	sector_count = MBRSwitched.ReservedSelector;
-				 	DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: sector_count:%ld FileLength: %d MBRSwitched.ReservedSelector:%ld\n",  __LINE__, sector_count, FileLength, MBRSwitched.ReservedSelector);
+				 	//DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: sector_count:%ld FileLength: %d MBRSwitched.ReservedSelector:%ld\n",  __LINE__, sector_count, FileLength, MBRSwitched.ReservedSelector);
 		        }       
 		    }
 
@@ -2492,7 +2499,7 @@ EFI_STATUS RootPathAnalysisFSM()
 // 
 EFI_STATUS GetFatTableFSM()
 {    
-    DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d GetFatTableFSM\n", __LINE__);
+    //DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d GetFatTableFSM\n", __LINE__);
     //printf( "RootPathAnalysis\n" );
     DEBUG ((EFI_D_INFO, "PartitionUSBRead!!\r\n"));
     EFI_STATUS Status ;
@@ -2554,23 +2561,23 @@ EFI_STATUS GetFatTableFSM()
 		 {
 		    //DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
 		 	Status = gBS->HandleProtocol(ControllerHandle[i], &gEfiBlockIoProtocolGuid, (VOID * *) &BlockIo );                                                
-		    DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
+		    //DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
 		    
 		    if ( EFI_SUCCESS == Status )
 		    {			        	 
 		        Status = gBS->HandleProtocol( ControllerHandle[i], &gEfiDiskIoProtocolGuid, (VOID * *) &DiskIo ); 
-		        DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
+		        //DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
 		        
 		        if ( Status == EFI_SUCCESS )
 		        {
 					 if (device[i].SectorCount <= sector_count)
 					 {
-						  DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: device[i].SectorCount <= sector_count \n", __LINE__);
+						  //DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: device[i].SectorCount <= sector_count \n", __LINE__);
 						  return EFI_SUCCESS;
 					 }
 
 	        	    // Read FAT32 file system partition infomation , minimum unit is sector.
-	        	 	DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X sector_count:%ld\n", __LINE__, Status, sector_count);
+	        	 	//DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X sector_count:%ld\n", __LINE__, Status, sector_count);
 	        	 	Status = DiskIo->ReadDisk( DiskIo, BlockIo->Media->MediaId, DISK_BUFFER_SIZE * sector_count, DISK_BUFFER_SIZE, Buffer1 );
 		            if ( EFI_SUCCESS == Status )
 		            {
@@ -2587,8 +2594,8 @@ EFI_STATUS GetFatTableFSM()
 						  }
 				     } 
 				     
-		            DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X sector_count:%ld BlockIo->Media->MediaId: %d\n", 
-		            																   __LINE__, Status, sector_count, BlockIo->Media->MediaId);
+		            //DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X sector_count:%ld BlockIo->Media->MediaId: %d\n", 
+		            //																   __LINE__, Status, sector_count, BlockIo->Media->MediaId);
 
 					  
 				 	//When get root path data sector start number, we can get content of root path.
@@ -2598,7 +2605,7 @@ EFI_STATUS GetFatTableFSM()
 					// next state is to read File content use block unit, and start with block start.
 				 	sector_count = MBRSwitched.ReservedSelector + MBRSwitched.SectorsPerFat * MBRSwitched.NumFATS + MBRSwitched.BootPathStartCluster - 2 + (FileBlockStart - 2) * 8;
 				 	PreviousBlockNumber = FileBlockStart;
-				 	DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: sector_count:%ld FileLength: %d PreviousBlockNumber: %d\n",  __LINE__, sector_count, FileLength, PreviousBlockNumber);
+				 	//DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: sector_count:%ld FileLength: %d PreviousBlockNumber: %d\n",  __LINE__, sector_count, FileLength, PreviousBlockNumber);
 					 
 		        }       
 		    }
@@ -2611,7 +2618,7 @@ EFI_STATUS GetFatTableFSM()
 
 UINT32 GetNextBlockNumber()
 {
-	DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: PreviousBlockNumber: %d\n",  __LINE__, PreviousBlockNumber);
+	//DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: PreviousBlockNumber: %d\n",  __LINE__, PreviousBlockNumber);
 	FAT32_Table[PreviousBlockNumber * 4];
 
 	if (FAT32_Table[PreviousBlockNumber * 4] == 0xff 
@@ -2619,7 +2626,7 @@ UINT32 GetNextBlockNumber()
 	    && FAT32_Table[PreviousBlockNumber * 4 + 2] == 0xff 
 	    && FAT32_Table[PreviousBlockNumber * 4 + 3] == 0x0f)
 	{
-		DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: PreviousBlockNumber: %d, PreviousBlockNumber: %llX\n",  __LINE__, PreviousBlockNumber, 0x0fffffff);
+		//DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: PreviousBlockNumber: %d, PreviousBlockNumber: %llX\n",  __LINE__, PreviousBlockNumber, 0x0fffffff);
 		return 0x0fffffff;
 	}
 
@@ -2628,7 +2635,7 @@ UINT32 GetNextBlockNumber()
 
 EFI_STATUS ChineseCharArrayInit()
 {
-	DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: ChineseCharArrayInit\n",  __LINE__);
+	//DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: ChineseCharArrayInit\n",  __LINE__);
 	DEBUG ((EFI_D_INFO, "%d ChineseCharArrayInit\n", __LINE__));
     // 87 line, 96 Chinese char each line, 32 Char each Chinese char
 	UINT32 size = 267616;
@@ -2636,7 +2643,7 @@ EFI_STATUS ChineseCharArrayInit()
 
     if (HZK16FileReadCount >= 50)
     {		
-    	DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: HZK16FileReadCount >= 60\n",  __LINE__);
+    	//DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: HZK16FileReadCount >= 60\n",  __LINE__);
 		EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
 		Color.Blue  = 0x00;
 		Color.Red   = 0x00;
@@ -2658,7 +2665,7 @@ EFI_STATUS ChineseCharArrayInit()
 
 	if (NULL != sChineseChar)
     {
-    	DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: ChineseCharArrayInit\n",  __LINE__);
+    	//DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: ChineseCharArrayInit\n",  __LINE__);
     	return EFI_SUCCESS;
     }
 
@@ -2681,7 +2688,7 @@ EFI_STATUS ChineseCharArrayInit()
 		return EFI_SUCCESS;
 	}
 	*/
-    DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: ChineseCharArrayInit finished...\n",  __LINE__);
+    //DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: ChineseCharArrayInit finished...\n",  __LINE__);
 	return EFI_SUCCESS;
 }
 
@@ -2711,7 +2718,7 @@ void *memcopy(void *dest, const void *src, size_t count)
 
 EFI_STATUS ReadFileFSM()
 {    
-    DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d ReadFileFSM\n", __LINE__);
+    //DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d ReadFileFSM\n", __LINE__);
     DEBUG ((EFI_D_INFO, "PartitionUSBRead!!\r\n"));
     EFI_STATUS Status ;
     UINTN NumHandles, i;
@@ -2760,7 +2767,7 @@ EFI_STATUS ReadFileFSM()
         CHAR16 *TextDevicePath = DevPathToText->ConvertDevicePathToText(DiskDevicePath, TRUE, TRUE);
 
         // first display
-    	 DebugPrint1(DISK_READ_BUFFER_X, DISK_READ_BUFFER_Y + 16 * i, "%d: %s\n", __LINE__, TextDevicePath);
+    	 //DebugPrint1(DISK_READ_BUFFER_X, DISK_READ_BUFFER_Y + 16 * i, "%d: %s\n", __LINE__, TextDevicePath);
         //DEBUG ((EFI_D_INFO, "%s\n", TextDevicePath));
 
 		 TextDevicePathAnalysisCHAR16(TextDevicePath, &device[i], i);
@@ -2772,18 +2779,18 @@ EFI_STATUS ReadFileFSM()
 		 {
 		    //DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
 		 	Status = gBS->HandleProtocol(ControllerHandle[i], &gEfiBlockIoProtocolGuid, (VOID * *) &BlockIo );                                                
-		    DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
+		    //DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
 		    
 		    if ( EFI_SUCCESS == Status )
 		    {			        	 
 		        Status = gBS->HandleProtocol( ControllerHandle[i], &gEfiDiskIoProtocolGuid, (VOID * *) &DiskIo ); 
-		        DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
+		        //DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
 		        
 		        if ( Status == EFI_SUCCESS )
 		        {
 					 if (device[i].SectorCount <= sector_count)
 					 {
-						  DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: device[i].SectorCount <= sector_count \n", __LINE__);
+						  //DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: device[i].SectorCount <= sector_count \n", __LINE__);
 						  return EFI_SUCCESS;
 					 }
 
@@ -2793,13 +2800,13 @@ EFI_STATUS ReadFileFSM()
 	        	 	{
 		        	 	//DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
 		        	 	Status = DiskIo->ReadDisk( DiskIo, BlockIo->Media->MediaId, DISK_BUFFER_SIZE * sector_count, DISK_BLOCK_BUFFER_SIZE, BufferBlock);
-		        	 	DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
+		        	 	//DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
 		        	 	
 						if ( EFI_SUCCESS == Status )
 						{  
 						     ChineseCharArrayInit();
 						     
-	                       DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: HZK16FileReadCount: %d DISK_BLOCK_BUFFER_SIZE: %d\n", __LINE__, HZK16FileReadCount, DISK_BLOCK_BUFFER_SIZE);
+	                       //DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: HZK16FileReadCount: %d DISK_BLOCK_BUFFER_SIZE: %d\n", __LINE__, HZK16FileReadCount, DISK_BLOCK_BUFFER_SIZE);
 
 							  //Copy buffer to ChineseBuffer
 							  if (sChineseChar != NULL)
@@ -2807,7 +2814,7 @@ EFI_STATUS ReadFileFSM()
 									//	UINT8 *p = memcopy(sChineseChar[HZK16FileReadCount * DISK_BLOCK_BUFFER_SIZE], BufferBlock, DISK_BLOCK_BUFFER_SIZE);
 							  		for (UINT16 i = 0; i < DISK_BLOCK_BUFFER_SIZE; i++)
 							  			sChineseChar[HZK16FileReadCount * DISK_BLOCK_BUFFER_SIZE + i] = BufferBlock[i];
-	                             DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: sChineseChar: %X BufferBlock: %X\n", __LINE__, sChineseChar, BufferBlock);
+	                             //DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: sChineseChar: %X BufferBlock: %X\n", __LINE__, sChineseChar, BufferBlock);
 							  		
 							  }
 							  for (int j = 0; j < 250; j++)
@@ -2820,8 +2827,8 @@ EFI_STATUS ReadFileFSM()
 					 	 sector_count = MBRSwitched.ReservedSelector + MBRSwitched.SectorsPerFat * MBRSwitched.NumFATS + MBRSwitched.BootPathStartCluster - 2 + (GetNextBlockNumber() - 2) * 8;
 					 	 PreviousBlockNumber = GetNextBlockNumber();
 					     
-			            DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: PreviousBlockNumber:%d sector_count:%ld HZK16FileReadCount: %d\n", 
-			            																   __LINE__, PreviousBlockNumber, sector_count, HZK16FileReadCount);
+			            //DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: PreviousBlockNumber:%d sector_count:%ld HZK16FileReadCount: %d\n", 
+			            //																   __LINE__, PreviousBlockNumber, sector_count, HZK16FileReadCount);
 				  }
 		        } 
 		    }
@@ -2852,26 +2859,26 @@ int FileReadFSM(EVENT event)
 		DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
 		return;
 	}
-	DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: FileReadFSM current event: %d, NextState: %d table event:%d table NextState: %d\n", 
+	/*DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: FileReadFSM current event: %d, NextState: %d table event:%d table NextState: %d\n", 
 							  __LINE__, 
                             event, 
                             NextState,
                             StatusTransitionTable[NextState].event,
                             StatusTransitionTable[NextState].NextState);
-    
+    */
 	if ( event == StatusTransitionTable[NextState].event )
 	{
-		DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
+		//DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
 		StatusTransitionTable[NextState].pFunc();
 		NextState = StatusTransitionTable[NextState].NextState;
 	}
 	else  
 	{
-		DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
+		//DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
 		NextState = INIT_STATE;
 	}
 
-	DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
+	//DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
 	StatusErrorCount++;
 }
 
@@ -3046,6 +3053,190 @@ EFI_STATUS FileReadSelf2(CHAR16 *FileName, UINT32 size, UINT8 *pBuffer)
 
 }
 
+float MemoryParameterGet2()
+{  
+	EFI_STATUS                           Status;
+	UINT8                                TmpMemoryMap[1];
+	UINTN                                MapKey;
+	UINTN                                DescriptorSize;
+	UINT32                               DescriptorVersion;
+	UINTN                                MemoryMapSize;
+	EFI_MEMORY_DESCRIPTOR                *MemoryMap;
+	EFI_MEMORY_DESCRIPTOR                *MemoryMapPtr;
+	UINTN                                Index;
+	struct efi_info_self                  *Efi;
+	struct e820_entry_self               *LastE820;
+	struct e820_entry_self               *E820;
+	UINTN                                E820EntryCount;
+	EFI_PHYSICAL_ADDRESS                 LastEndAddr;
+	UINTN MemoryClassifySize[6] = {0};
+    
+    //
+    // Get System MemoryMapSize
+    //
+    MemoryMapSize = sizeof (TmpMemoryMap);
+    Status = gBS->GetMemoryMap (&MemoryMapSize,
+			                    (EFI_MEMORY_DESCRIPTOR *)TmpMemoryMap,
+			                    &MapKey,
+			                    &DescriptorSize,
+			                    &DescriptorVersion);
+	//DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);			
+	DEBUG ((EFI_D_INFO, "%d:  Status:%X \n", __LINE__, Status));
+    ASSERT (Status == EFI_BUFFER_TOO_SMALL);
+    //
+    // Enlarge space here, because we will allocate pool now.
+    //
+    MemoryMapSize += EFI_PAGE_SIZE;
+    Status = gBS->AllocatePool (EfiLoaderData,
+			                    MemoryMapSize,
+			                    (VOID **) &MemoryMap);
+    ASSERT_EFI_ERROR (Status);
+    //DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
+    	
+	DEBUG ((EFI_D_INFO, "%d:  Status:%X \n", __LINE__, Status));
+    //
+    // Get System MemoryMap
+    //
+    Status = gBS->GetMemoryMap (&MemoryMapSize,
+			                    MemoryMap,
+			                    &MapKey,
+			                    &DescriptorSize,
+			                    &DescriptorVersion);
+    ASSERT_EFI_ERROR (Status);
+    //DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
+    	
+	DEBUG ((EFI_D_INFO, "%d:  Status:%X \n", __LINE__, Status));
+    
+    LastE820 = NULL;
+    E820EntryCount = 0;
+    LastEndAddr = 0;
+    MemoryMapPtr = MemoryMap;
+    UINTN E820Type = 0;
+    for (Index = 0; Index < (MemoryMapSize / DescriptorSize); Index++) 
+    {
+    	E820Type = 0;
+      //DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Index:%X \n", __LINE__, Index);
+      	
+	  //DEBUG ((EFI_D_INFO, "%d:  Status:%X \n", __LINE__, Status));
+    
+      if (MemoryMap->NumberOfPages == 0) 
+      {
+          continue;
+      }
+    
+      switch(MemoryMap->Type) 
+      {
+	      case EfiReservedMemoryType:
+	      case EfiRuntimeServicesCode:
+	      case EfiRuntimeServicesData:
+	      case EfiMemoryMappedIO:
+	      case EfiMemoryMappedIOPortSpace:
+	      case EfiPalCode:
+		        E820Type = E820_RESERVED;
+		        MemoryClassifySize[0] += MemoryMap->NumberOfPages;
+		        break;
+		        
+	      /// Memory in which errors have been detected.
+	      case EfiUnusableMemory:
+		        E820Type = E820_UNUSABLE;
+		        MemoryClassifySize[1] += MemoryMap->NumberOfPages;
+		        break;
+
+		   //// Memory that holds the ACPI tables.
+	      case EfiACPIReclaimMemory:
+		        E820Type = E820_ACPI;
+		        MemoryClassifySize[2] += MemoryMap->NumberOfPages;
+		        break;
+	    
+	      case EfiLoaderCode:
+	      case EfiLoaderData:
+	      case EfiBootServicesCode:
+	      case EfiBootServicesData:
+	      case EfiConventionalMemory:
+		        E820Type = E820_RAM; // Random access memory
+		        MemoryClassifySize[3] += MemoryMap->NumberOfPages;
+		        break;
+	    
+	      case EfiACPIMemoryNVS:	   // // Address space reserved for use by the firmware.
+		        MemoryClassifySize[4] += MemoryMap->NumberOfPages;
+		        E820Type = E820_NVS;
+		        break;
+	    
+	      default:
+		        MemoryClassifySize[5] += MemoryMap->NumberOfPages;
+		        DEBUG ((DEBUG_ERROR,
+		          "Invalid EFI memory descriptor type (0x%x)!\n",
+		          MemoryMap->Type));
+		          	
+				   DEBUG ((EFI_D_INFO, "%d:  Invalid EFI memory descriptor type (0x%x)!\n", __LINE__, MemoryMap->Type));
+		        continue;		  
+      }
+    
+      	/*DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: %d: E820Type:%X Start:%X Number:%X End: %X\n", __LINE__, 
+      	  																	Index,
+      	  																	E820Type, 
+      	  																	MemoryMap->PhysicalStart, 
+      	  																	MemoryMap->NumberOfPages,
+      	  																	MemoryMap->PhysicalStart + MemoryMap->NumberOfPages * 4 * 1024);
+
+		*/
+		DEBUG ((EFI_D_INFO, "%d: E820Type:%X Start:%X Number:%X\n", __LINE__, 
+      	  																	E820Type, 
+      	  																	MemoryMap->PhysicalStart, 
+      	  																	MemoryMap->NumberOfPages));
+		//
+		// Get next item
+		//
+		MemoryMap = (EFI_MEMORY_DESCRIPTOR *)((UINTN)MemoryMap + DescriptorSize);
+    }
+
+    DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: %d: (MemoryMapSize / DescriptorSize):%X MemoryClassifySize[0]:%d %d %d %d %d %d \n", __LINE__,
+    																		    Index,
+                                                                        (MemoryMapSize / DescriptorSize),
+                                                                        MemoryClassifySize[0],
+                                                                        MemoryClassifySize[1],
+                                                                        MemoryClassifySize[2],
+                                                                        MemoryClassifySize[3],
+                                                                        MemoryClassifySize[4],
+                                                                        MemoryClassifySize[5]
+                                                                        );
+	return  MemoryClassifySize[3];                                                                    
+}
+
+char *float2str(float val, int precision, char *buf)
+{
+    char *cur, *end;
+    float temp = 0;
+    int count = 0;
+
+	if (val == 0)
+	{
+		buf[count++] = '0';
+		buf[count++] = '\0';
+		return;
+	}
+
+    if (val > 0)
+    {
+	buf[count++] = (int)val + '0'; 
+    }
+
+    buf[count++] = '.'; 
+
+    temp = val - (int)val;
+    //printf("%d: %f\n", __LINE__, temp);
+
+    while(precision--) 
+    {
+	    temp = temp * 10;
+	    buf[count++] = (int)temp + '0';
+	    temp = temp - (int)temp;
+    }
+    return buf;
+}
+
+
+
 EFI_STATUS WindowCreateUseBuffer(UINT8 *pBuffer, UINT8 *pParent, UINT16 Width, UINT16 Height, UINT16 Type, CHAR8 *pWindowTitle)
 {	
     DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Width: %d \n", __LINE__, Width);
@@ -3101,10 +3292,10 @@ EFI_STATUS WindowCreateUseBuffer(UINT8 *pBuffer, UINT8 *pParent, UINT16 Width, U
 	Color.Blue  = 0x00;
 	Color.Red   = 0x00;
 	Color.Green = 0x00;
+	int x, y;
 
 	for (UINT16 i = 0 ; i < 7 ; i++)
 	{
-		int x, y;
 		x = 50;
 		y = i * 18 + 16 * 2;		
 
@@ -3174,7 +3365,35 @@ EFI_STATUS WindowCreateUseBuffer(UINT8 *pBuffer, UINT8 *pParent, UINT16 Width, U
 
 		//CHAR16 s[4] = L"´ó";
 		DebugPrint2(x, y, pBuffer, "%d%a", size, sizePostfix);
+
+
+
 	}
+	
+	y += 16;
+	y += 16;
+	//3658
+	//ÄÚ
+	//2070
+	//´æ
+	DrawChineseCharIntoBuffer2(pBuffer, x, y,          (36 - 1 ) * 94 + 58 - 1, Color, Width);  
+	x += 16;
+	
+	DrawChineseCharIntoBuffer2(pBuffer, x, y,          (20 - 1 ) * 94 + 70 - 1, Color, Width);  
+	x += 16;
+	
+	// Get memory infomation
+	
+	// Note: the other class memory can not use
+	float size = (float)MemoryParameterGet2();
+	size = size * 4;
+	size = size / (1024 * 1024);
+	CHAR8 buf[7] = {0};
+	DebugPrint2(x, y, pBuffer, "%a", float2str(size, 3, buf));
+	x += 10 * 8;
+	
+	DrawChineseCharIntoBuffer2(pBuffer, x, y,          (28 - 1 ) * 94 + 10 - 1, Color, Width);  
+	x += 16;
 	return EFI_SUCCESS;
 }
 
@@ -3346,6 +3565,7 @@ HandleKeyboardEvent (
   IN VOID      *Context
   )
 {
+	keyboard_count++;
     UINT16 scanCode = 0;
     UINT16 uniChar = 0;
     UINT32 shiftState;
@@ -3540,6 +3760,7 @@ VOID
 EFIAPI
 HandleMouseEvent (IN EFI_EVENT Event, IN VOID *Context)
 {
+	mouse_count++;
 	//DebugPrint1(DISPLAY_X, DISPLAY_Y, "%d: HandleMouseEvent\n", __LINE__);
     EFI_STATUS Status;
 	UINTN Index;
@@ -3629,152 +3850,6 @@ HandleMouseEvent (IN EFI_EVENT Event, IN VOID *Context)
 	gBS->WaitForEvent( 1, &gMouse->WaitForInput, &Index );
 }
 
-void MemoryParameterGet2()
-{  
-	EFI_STATUS                           Status;
-	UINT8                                TmpMemoryMap[1];
-	UINTN                                MapKey;
-	UINTN                                DescriptorSize;
-	UINT32                               DescriptorVersion;
-	UINTN                                MemoryMapSize;
-	EFI_MEMORY_DESCRIPTOR                *MemoryMap;
-	EFI_MEMORY_DESCRIPTOR                *MemoryMapPtr;
-	UINTN                                Index;
-	struct efi_info_self                  *Efi;
-	struct e820_entry_self               *LastE820;
-	struct e820_entry_self               *E820;
-	UINTN                                E820EntryCount;
-	EFI_PHYSICAL_ADDRESS                 LastEndAddr;
-    
-    //
-    // Get System MemoryMapSize
-    //
-    MemoryMapSize = sizeof (TmpMemoryMap);
-    Status = gBS->GetMemoryMap (&MemoryMapSize,
-			                    (EFI_MEMORY_DESCRIPTOR *)TmpMemoryMap,
-			                    &MapKey,
-			                    &DescriptorSize,
-			                    &DescriptorVersion);
-	DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);			
-	DEBUG ((EFI_D_INFO, "%d:  Status:%X \n", __LINE__, Status));
-    ASSERT (Status == EFI_BUFFER_TOO_SMALL);
-    //
-    // Enlarge space here, because we will allocate pool now.
-    //
-    MemoryMapSize += EFI_PAGE_SIZE;
-    Status = gBS->AllocatePool (EfiLoaderData,
-			                    MemoryMapSize,
-			                    (VOID **) &MemoryMap);
-    ASSERT_EFI_ERROR (Status);
-    DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
-    	
-	DEBUG ((EFI_D_INFO, "%d:  Status:%X \n", __LINE__, Status));
-    //
-    // Get System MemoryMap
-    //
-    Status = gBS->GetMemoryMap (&MemoryMapSize,
-			                    MemoryMap,
-			                    &MapKey,
-			                    &DescriptorSize,
-			                    &DescriptorVersion);
-    ASSERT_EFI_ERROR (Status);
-    DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
-    	
-	DEBUG ((EFI_D_INFO, "%d:  Status:%X \n", __LINE__, Status));
-    
-    LastE820 = NULL;
-    E820EntryCount = 0;
-    LastEndAddr = 0;
-    MemoryMapPtr = MemoryMap;
-    UINTN E820Type = 0;
-    UINTN TypeSize[6] = {0};
-    for (Index = 0; Index < (MemoryMapSize / DescriptorSize); Index++) 
-    {
-    	E820Type = 0;
-      //DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Index:%X \n", __LINE__, Index);
-      	
-	  //DEBUG ((EFI_D_INFO, "%d:  Status:%X \n", __LINE__, Status));
-    
-      if (MemoryMap->NumberOfPages == 0) 
-      {
-          continue;
-      }
-    
-      switch(MemoryMap->Type) 
-      {
-	      case EfiReservedMemoryType:
-	      case EfiRuntimeServicesCode:
-	      case EfiRuntimeServicesData:
-	      case EfiMemoryMappedIO:
-	      case EfiMemoryMappedIOPortSpace:
-	      case EfiPalCode:
-		        E820Type = E820_RESERVED;
-		        TypeSize[0] += MemoryMap->NumberOfPages;
-		        break;
-	    
-	      case EfiUnusableMemory:
-		        E820Type = E820_UNUSABLE;
-		        TypeSize[1] += MemoryMap->NumberOfPages;
-		        break;
-		    
-	      case EfiACPIReclaimMemory:
-		        E820Type = E820_ACPI;
-		        TypeSize[2] += MemoryMap->NumberOfPages;
-		        break;
-	    
-	      case EfiLoaderCode:
-	      case EfiLoaderData:
-	      case EfiBootServicesCode:
-	      case EfiBootServicesData:
-	      case EfiConventionalMemory:
-		        E820Type = E820_RAM;
-		        TypeSize[3] += MemoryMap->NumberOfPages;
-		        break;
-	    
-	      case EfiACPIMemoryNVS:	      
-		        TypeSize[4] += MemoryMap->NumberOfPages;
-		        E820Type = E820_NVS;
-		        break;
-	    
-	      default:
-		        TypeSize[5] += MemoryMap->NumberOfPages;
-		        DEBUG ((DEBUG_ERROR,
-		          "Invalid EFI memory descriptor type (0x%x)!\n",
-		          MemoryMap->Type));
-		          	
-				   DEBUG ((EFI_D_INFO, "%d:  Invalid EFI memory descriptor type (0x%x)!\n", __LINE__, MemoryMap->Type));
-		        continue;
-		  
-		  
-      }
-    
-      	/*DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: E820Type:%X Start:%X Number:%X\n", __LINE__, 
-      	  																	E820Type, 
-      	  																	MemoryMap->PhysicalStart, 
-      	  																	MemoryMap->NumberOfPages);
-
-		*/
-		DEBUG ((EFI_D_INFO, "%d: E820Type:%X Start:%X Number:%X\n", __LINE__, 
-      	  																	E820Type, 
-      	  																	MemoryMap->PhysicalStart, 
-      	  																	MemoryMap->NumberOfPages));
-		//
-		// Get next item
-		//
-		MemoryMap = (EFI_MEMORY_DESCRIPTOR *)((UINTN)MemoryMap + DescriptorSize);
-    }
-
-    DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: (MemoryMapSize / DescriptorSize):%X TypeSize[0]:%d %d %d %d %d %d \n", __LINE__, 
-                                                                        (MemoryMapSize / DescriptorSize),
-                                                                        TypeSize[0],
-                                                                        TypeSize[1],
-                                                                        TypeSize[2],
-                                                                        TypeSize[3],
-                                                                        TypeSize[4],
-                                                                        TypeSize[5]
-                                                                        );
-}
-
 VOID MemoryParameterGet()
 {
 	UINT32 EfiMemoryMapSize = 0;
@@ -3846,6 +3921,7 @@ SystemParameterRead (
   IN VOID      *Context
   )
 {	
+	parameter_count++;
 	//DebugPrint1(DISPLAY_X, DISPLAY_Y, "%d: SystemParameterRead\n", __LINE__);
 	//ShellServiceRead();
 	//MemoryParameterGet();
@@ -3860,7 +3936,6 @@ DisplaySystemDateTime (
   IN VOID      *Context
   )
 {	
-    //DebugPrint1(DISPLAY_X, DISPLAY_Y, "%d: DisplaySystemDateTime\n", __LINE__);
     EFI_TIME et;
 	date_time_count++;
 	gRT->GetTime(&et, NULL);
@@ -3869,6 +3944,12 @@ DisplaySystemDateTime (
 				  et.Year, et.Month, et.Day, et.Hour, et.Minute, et.Second);
 	
    DebugPrint1(DISPLAY_DESK_HEIGHT_WEIGHT_X, DISPLAY_DESK_HEIGHT_WEIGHT_Y, "%d ScreenWidth:%d, ScreenHeight:%d\n", __LINE__, ScreenWidth, ScreenHeight);
+   
+   DebugPrint1(DISPLAY_DESK_DATE_TIME_X - 250, DISPLAY_DESK_DATE_TIME_Y - 26, "%d: time: %8ld keyboard: %8ld mouse: %8ld parameter:%8ld\n", __LINE__,
+   																				date_time_count,
+   																				keyboard_count,
+   																				mouse_count,
+   																				parameter_count);
    GraphicsLayerCompute(iMouseX, iMouseY, 0);
 }
 
@@ -4201,16 +4282,13 @@ Main (
     
     MultiProcessInit();
 
-    MemoryParameterGet2();
-
     InitChineseChar();
-
     
     MyComputerWindow(100, 100);
 
     SystemTimeIntervalInit();	
 	
-	DebugPrint1(100, 100, "%d %d\n", __LINE__, Status);
+	//DebugPrint1(100, 100, "%d %d\n", __LINE__, Status);
 	
     return EFI_SUCCESS;
 }
