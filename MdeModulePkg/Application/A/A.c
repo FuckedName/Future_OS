@@ -146,6 +146,7 @@ char pKeyboardInputBuffer[KEYBOARD_BUFFER_LENGTH] = {0};
 
 #define DISK_BUFFER_SIZE 512
 #define DISK_BLOCK_BUFFER_SIZE (512 * 8)
+#define DISK_MFT_BUFFER_SIZE (512 * 2 * 15)
 #define EXBYTE	4
 
 
@@ -902,6 +903,41 @@ const UINT8 sChinese[][32] =
 	 0x00,0x00,0x00,0xFE,0x02,0x02,0x02,0x00,0x00,0x00,0x00,0x7F,0x40,0x40,0x40,0x00},
 };
 
+
+// 小端模式
+// byte转int  
+UINT64 BytesToInt8(UINT8 *bytes)
+{
+    UINT64 s = bytes[0];
+    s += ((UINT64)bytes[1]) << 8;
+    s += ((UINT64)bytes[2]) << 16;
+    s += ((UINT64)bytes[3]) << 24;
+    s += ((UINT64)bytes[4]) << 32;
+    s += ((UINT64)bytes[5]) << 40;
+    s += ((UINT64)bytes[6]) << 48;
+    s += ((UINT64)bytes[7]) << 56;
+    //printf("%llu\n",  s );
+
+    return s;
+}
+
+UINT32 BytesToInt4(UINT8 *bytes)
+{
+    UINT32 Result = bytes[0] & 0xFF;
+    Result |= (bytes[1] << 8 & 0xFF00);
+    Result |= ((bytes[2] << 16) & 0xFF0000);
+    Result |= ((bytes[3] << 24) & 0xFF000000);
+    return Result;
+}
+
+UINT16 BytesToInt2(UINT8 *bytes)
+{
+    UINT16 Result = bytes[0] & 0xFF;
+    Result |= (bytes[1] << 8 & 0xFF00);
+    return Result;
+}
+
+
 void CopyColorIntoBuffer(UINT8 *pBuffer, EFI_GRAPHICS_OUTPUT_BLT_PIXEL color, UINT16 x0, UINT16 y0, UINT16 AreaWidth)
 {
     pBuffer[y0 * AreaWidth * 4 + x0 * 4]     = color.Blue;
@@ -1388,6 +1424,26 @@ EFI_STATUS RootPathAnalysis1(UINT8 *p)
 MasterBootRecordSwitched MBRSwitched;
 DollarBootSwitched NTFSBootSwitched;
 
+EFI_STATUS  MFTAnalysisBuffer(UINT8 *pBuffer)
+{
+	MFT_HEADER *p = NULL;
+	
+	p = (MasterBootRecord *)AllocateZeroPool(DISK_BUFFER_SIZE);
+	
+	for (int j = 0; j < 16; j++)
+	{
+		memcpy(p, pBuffer[512 * 2 * j], DISK_BUFFER_SIZE);
+		DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d index: %d mark: %c%c%c%c, firstAttr: u%, MftUseLen: %ld maxLen:%lld\n", __LINE__, j,
+					  p->mark[0],
+					  p->mark[1],
+					  p->mark[2],
+					  p->mark[3],
+					  BytesToInt2(p->firstAttr),
+					  BytesToInt4(p->MftUseLen),
+					  BytesToInt4(p->maxLen));
+	}	
+}
+
 
 // analysis a partition 
 EFI_STATUS RootPathAnalysisFSM1(unsigned int DeviceType, long long SectorCount)
@@ -1497,7 +1553,7 @@ EFI_STATUS RootPathAnalysisFSM1(unsigned int DeviceType, long long SectorCount)
 }
 
 // NTFS Main File Table items analysis
-EFI_STATUS MFTAnalysis(unsigned int DeviceType, long long SectorCount)
+EFI_STATUS MFTReadFromPartition(unsigned int DeviceType, long long SectorCount)
 {
     DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d DeviceType: %d, SectorCount: %lld\n", __LINE__, DeviceType, SectorCount);
     //printf( "RootPathAnalysis\n" );
@@ -1507,8 +1563,7 @@ EFI_STATUS MFTAnalysis(unsigned int DeviceType, long long SectorCount)
     EFI_HANDLE *ControllerHandle = NULL;
     EFI_DEVICE_PATH_TO_TEXT_PROTOCOL *DevPathToText;
     EFI_BLOCK_IO_PROTOCOL           *BlockIo;
-    UINT8 Buffer1[DISK_BUFFER_SIZE];
-    UINT8 BufferBlock[DISK_BLOCK_BUFFER_SIZE];
+    UINT8 BufferMFT[DISK_MFT_BUFFER_SIZE];
     EFI_DISK_IO_PROTOCOL            *DiskIo;
     
     Status = gBS->LocateProtocol (&gEfiDevicePathToTextProtocolGuid, NULL, (VOID **) &DevPathToText);
@@ -1557,7 +1612,8 @@ EFI_STATUS MFTAnalysis(unsigned int DeviceType, long long SectorCount)
         if (TextDevicePath) gBS->FreePool(TextDevicePath);
 
 		 // the USB we save our *.efi file and relative resource files..
-		 if (device[i].DeviceType == DeviceType && device[i].SectorCount == SectorCount)
+		 //if (device[i].DeviceType == DeviceType && device[i].SectorCount == SectorCount)
+		 if (device[i].DeviceType == DeviceType && device[i].SectorCount == 522596352)
 		 {
 		    //DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
 		 	Status = gBS->HandleProtocol(ControllerHandle[i], &gEfiBlockIoProtocolGuid, (VOID * *) &BlockIo );                                                
@@ -1572,23 +1628,23 @@ EFI_STATUS MFTAnalysis(unsigned int DeviceType, long long SectorCount)
 		        {
 					 if (device[i].SectorCount <= sector_count)
 					 {
-						  DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: device[i].SectorCount <= sector_count \n", __LINE__);
+						  DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: device[i].SectorCount <= sector_count: %ld device[i].SectorCount: %ld\n", __LINE__, sector_count, device[i].SectorCount);
 						  return EFI_SUCCESS;
 					 }
 
 	        	    // Read FAT32 file system partition infomation , minimum unit is sector.
 	        	 	DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X sector_count:%ld\n", __LINE__, Status, sector_count);
-	        	 	Status = DiskIo->ReadDisk( DiskIo, BlockIo->Media->MediaId, DISK_BUFFER_SIZE * sector_count, DISK_BUFFER_SIZE, Buffer1 );
+	        	 	Status = DiskIo->ReadDisk( DiskIo, BlockIo->Media->MediaId, DISK_BUFFER_SIZE * sector_count, DISK_MFT_BUFFER_SIZE, BufferMFT);
 		            if ( EFI_SUCCESS == Status )
 		            {
 						  for (int j = 0; j < 250; j++)
 						  {
-						  		DebugPrint1(DISK_READ_BUFFER_X + (j % 39) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 39), "%02X ", Buffer1[j] & 0xff);
+						  		DebugPrint1(DISK_READ_BUFFER_X + (j % 39) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 32), "%02X ", BufferMFT[j] & 0xff);
 						  }
 				     }
 		        	 
 				 	//When get root path data sector start number, we can get content of root path.
-				 	RootPathAnalysis1(Buffer1);	
+				 	MFTAnalysisBuffer(BufferMFT);	
 
 					// data area start from 1824, HZK16 file start from 	FileBlockStart	block, so need to convert into sector by multi 8, block start number is 2 	
 					// next state is to read FAT table
@@ -1613,12 +1669,12 @@ EFI_STATUS BufferAnalysis(UINT8 *p, MasterBootRecordSwitched *pMBRSwitched)
 
 	// 大端字节序：低位字节在高地址，高位字节低地址上。这是人类读写数值的方法。
     // 小端字节序：与上面相反。低位字节在低地址，高位字节在高地址。
-	DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "ReservedSelector:%02X%02X SectorsPerFat:%02X%02X%02X%02X BootPathStartCluster:%02X%02X%02X%02X NumFATS: %X", 
+	/*DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "ReservedSelector:%02X%02X SectorsPerFat:%02X%02X%02X%02X BootPathStartCluster:%02X%02X%02X%02X NumFATS: %X", 
 	                                    pMBR->ReservedSelector[0], pMBR->ReservedSelector[1], 
 	                                    pMBR->SectorsPerFat[0], pMBR->SectorsPerFat[1], pMBR->SectorsPerFat[2], pMBR->SectorsPerFat[3],
 	                                    pMBR->BootPathStartCluster[0], pMBR->BootPathStartCluster[1], pMBR->BootPathStartCluster[2], pMBR->BootPathStartCluster[3],
 	                                    pMBR->NumFATS[0]);
-
+	*/
 	Transfer(pMBR, pMBRSwitched);
 
 	FreePool(pMBR);
@@ -1633,57 +1689,24 @@ EFI_STATUS FirstSelectorAnalysis(UINT8 *p, MasterBootRecordSwitched *pMBRSwitche
 
 	// 大端字节序：低位字节在高地址，高位字节低地址上。这是人类读写数值的方法。
     // 小端字节序：与上面相反。低位字节在低地址，高位字节在高地址。
-	DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "ReservedSelector:%02X%02X SectorsPerFat:%02X%02X%02X%02X BootPathStartCluster:%02X%02X%02X%02X NumFATS: %X", 
+	/*DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "ReservedSelector:%02X%02X SectorsPerFat:%02X%02X%02X%02X BootPathStartCluster:%02X%02X%02X%02X NumFATS: %X", 
 	                                    pMBR->ReservedSelector[0], pMBR->ReservedSelector[1], 
 	                                    pMBR->SectorsPerFat[0], pMBR->SectorsPerFat[1], pMBR->SectorsPerFat[2], pMBR->SectorsPerFat[3],
 	                                    pMBR->BootPathStartCluster[0], pMBR->BootPathStartCluster[1], pMBR->BootPathStartCluster[2], pMBR->BootPathStartCluster[3],
 	                                    pMBR->NumFATS[0]);
 
-
+	*/
 	DOLLAR_BOOT *pDollarBoot;
 	Transfer(pMBR, pMBRSwitched);
 
 	FreePool(pMBR);
 }
 
-// 小端模式
-// byte转int  
-UINT64 BytesToInt8(UINT8 *bytes)
-{
-    UINT64 s = bytes[0];
-    s += ((UINT64)bytes[1]) << 8;
-    s += ((UINT64)bytes[2]) << 16;
-    s += ((UINT64)bytes[3]) << 24;
-    s += ((UINT64)bytes[4]) << 32;
-    s += ((UINT64)bytes[5]) << 40;
-    s += ((UINT64)bytes[6]) << 48;
-    s += ((UINT64)bytes[7]) << 56;
-    //printf("%llu\n",  s );
-
-    return s;
-}
-
-UINT32 BytesToInt4(UINT8 *bytes)
-{
-    UINT32 Result = bytes[0] & 0xFF;
-    Result |= (bytes[1] << 8 & 0xFF00);
-    Result |= ((bytes[2] << 16) & 0xFF0000);
-    Result |= ((bytes[3] << 24) & 0xFF000000);
-    return Result;
-}
-
-UINT16 BytesToInt2(UINT8 *bytes)
-{
-    UINT16 Result = bytes[0] & 0xFF;
-    Result |= (bytes[1] << 8 & 0xFF00);
-    return Result;
-}
-
 VOID TransferNTFS(DOLLAR_BOOT *pSource, DollarBootSwitched *pDest)
 {
     pDest->BitsOfSector = BytesToInt2(pSource->BitsOfSector);
     pDest->SectorOfCluster = (UINT16)pSource->SectorOfCluster;
-    pDest->AllSectorCount = BytesToInt8(pSource->AllSectorCount);
+    pDest->AllSectorCount = BytesToInt8(pSource->AllSectorCount) + 1;
     pDest->MFT_StartCluster = BytesToInt8(pSource->MFT_StartCluster);
     pDest->MFT_MirrStartCluster = BytesToInt8(pSource->MFT_MirrStartCluster);
     
@@ -1822,13 +1845,13 @@ EFI_STATUS PartitionAnalysisFSM1(unsigned int DeviceType, long long SectorCount)
         CHAR16 *TextDevicePath = DevPathToText->ConvertDevicePathToText(DiskDevicePath, TRUE, TRUE);
 
         // first display
-    	 DebugPrint1(DISK_READ_BUFFER_X, DISK_READ_BUFFER_Y + 16 * i, "%d: %s\n", __LINE__, TextDevicePath);
+    	 //DebugPrint1(DISK_READ_BUFFER_X, DISK_READ_BUFFER_Y + 16 * i, "%d: %s\n", __LINE__, TextDevicePath);
         //DEBUG ((EFI_D_INFO, "%s\n", TextDevicePath));
 
 		 TextDevicePathAnalysisCHAR16(TextDevicePath, &device[i], i);
     	 
         if (TextDevicePath) gBS->FreePool(TextDevicePath);
-        DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d device[i].DeviceType: %d, device[i].SectorCount: %lld\n", __LINE__, device[i].DeviceType, device[i].SectorCount);
+        //DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d device[i].DeviceType: %d, device[i].SectorCount: %lld\n", __LINE__, device[i].DeviceType, device[i].SectorCount);
 
 		 // the USB we save our *.efi file and relative resource files..
 		 //if (device[i].DeviceType == DeviceType && device[i].SectorCount == SectorCount)
@@ -1865,12 +1888,7 @@ EFI_STATUS PartitionAnalysisFSM1(unsigned int DeviceType, long long SectorCount)
 		        	 
 		            DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X sector_count:%ld BlockIo->Media->MediaId: %d\n", 
 		            																   __LINE__, Status, sector_count, BlockIo->Media->MediaId);
-					DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Buffer1[0x52]:%c [0x53]:%c [0x54]:%c [0x55]:%c [0x56]:%c\n", 
-		            																   __LINE__, Buffer1[0x52], Buffer1[0x53], Buffer1[0x54], Buffer1[0x55], Buffer1[0x56]);
-
-					DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Buffer1[0x3]:%c [0x4]:%c [0x5]:%c [0x6]:%c \n", 
-		            																   __LINE__, Buffer1[0x3], Buffer1[0x4], Buffer1[0x5], Buffer1[0x6]);
-		            																   
+															   
 					// FAT32 file system
 					if (Buffer1[0x52] == 'F' && Buffer1[0x53] == 'A' && Buffer1[0x54] == 'T' && Buffer1[0x55] == '3' && Buffer1[0x56] == '2')	
 				 	{				 		
@@ -1885,9 +1903,9 @@ EFI_STATUS PartitionAnalysisFSM1(unsigned int DeviceType, long long SectorCount)
                	}
                	else if (Buffer1[3] == 'N' && Buffer1[4] == 'T' && Buffer1[5] == 'F' && Buffer1[6] == 'S')
                	{
-               		DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: NTFS\n",  __LINE__);
 						FirstSelectorAnalysisNTFS(Buffer1, &NTFSBootSwitched);
 						sector_count = NTFSBootSwitched.MFT_StartCluster * 8;
+               		DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: NTFS sector_count:%ld\n",  __LINE__, sector_count);
                	}
                	else
                	{
@@ -1932,7 +1950,7 @@ DisplayItemsOfPartition(UINT16 Index)
 		else if (device[Index].DeviceType == 2)
 		{
 			PartitionAnalysisFSM1(device[Index].DeviceType, device[Index].SectorCount);
-			MFTAnalysis(device[Index].DeviceType, device[Index].SectorCount);
+			MFTReadFromPartition(device[Index].DeviceType, device[Index].SectorCount);
 		}
 }
 
@@ -3093,7 +3111,7 @@ EFI_STATUS PartitionAnalysis()
         }
 
         CHAR16 *TextDevicePath = DevPathToText->ConvertDevicePathToText(DiskDevicePath, TRUE, TRUE);
-		 DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X Partition: %s\n", __LINE__, Status, TextDevicePath);
+		 //DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X Partition: %s\n", __LINE__, Status, TextDevicePath);
 		 TextDevicePathAnalysisCHAR16(TextDevicePath, &device[i], i);
     	            
         if (TextDevicePath) gBS->FreePool(TextDevicePath);		 
@@ -4770,11 +4788,11 @@ DisplaySystemDateTime (
 	
    DebugPrint1(DISPLAY_DESK_HEIGHT_WEIGHT_X, DISPLAY_DESK_HEIGHT_WEIGHT_Y, "%d ScreenWidth:%d, ScreenHeight:%d\n", __LINE__, ScreenWidth, ScreenHeight);
    
-   DebugPrint1(DISPLAY_DESK_DATE_TIME_X - 250, DISPLAY_DESK_DATE_TIME_Y - 26, "%d: time: %8ld keyboard: %8ld mouse: %8ld parameter:%8ld\n", __LINE__,
+   /*DebugPrint1(DISPLAY_DESK_DATE_TIME_X - 250, DISPLAY_DESK_DATE_TIME_Y - 26, "%d: time: %8ld keyboard: %8ld mouse: %8ld parameter:%8ld\n", __LINE__,
    																				date_time_count,
    																				keyboard_count,
    																				mouse_count,
-   																				parameter_count);
+   																				parameter_count);*/
    GraphicsLayerCompute(iMouseX, iMouseY, 0);
 }
 
