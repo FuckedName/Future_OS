@@ -101,6 +101,13 @@ UINT16 keyboard_count = 0;
 UINT16 mouse_count = 0;
 UINT16 parameter_count = 0;
 
+#define INFO(...)   \
+			do {   \
+				  Print(L"[INFO  ]%a %a(Line %d): ", __FILE__,__FUNCTION__,__LINE__);  \
+			     Print(__VA_ARGS__); \
+			}while(0);
+
+
 //Line 0
 #define DISPLAY_DESK_HEIGHT_WEIGHT_X (date_time_count % 30) 
 #define DISPLAY_DESK_HEIGHT_WEIGHT_Y (0)
@@ -133,7 +140,7 @@ char pKeyboardInputBuffer[KEYBOARD_BUFFER_LENGTH] = {0};
 // Line 22
 
 #define DISK_READ_BUFFER_X (0) 
-#define DISK_READ_BUFFER_Y (16 * 56)
+#define DISK_READ_BUFFER_Y (6 * 56)
 
 #define DISK_MBR_X (0) 
 #define DISK_MBR_Y (16 * 62)
@@ -155,6 +162,9 @@ char pKeyboardInputBuffer[KEYBOARD_BUFFER_LENGTH] = {0};
 #define E820_ACPI		3
 #define E820_NVS		4
 #define E820_UNUSABLE		5
+
+#define LLONG_MIN  (((INT64) -9223372036854775807LL) - 1)
+#define LLONG_MAX   ((INT64)0x7FFFFFFFFFFFFFFFULL)
 
 
 UINT16 StatusErrorCount = 0;
@@ -224,11 +234,11 @@ struct e820_entry_self {
 
 typedef struct
 {
-	unsigned int DeviceType; // 0 Disk, 1: USB, 2: Sata;
-	unsigned int PartitionType; // 0 MBR, 1 GPT;
-	unsigned int PartitionID; // a physics device consist of Several parts like c: d: e:
-	unsigned int PartitionGUID; // like FA458FD2-4FF7-44D8-B542-BA560A5990B3
-	unsigned int DeviceSquenceID; //0025384961B47ECD
+	UINT16 DeviceType; // 0 Disk, 1: USB, 2: Sata;
+	UINT16 PartitionType; // 0 MBR, 1 GPT;
+	UINT16 PartitionID; // a physics device consist of Several parts like c: d: e:
+	UINT16 PartitionGUID; // like FA458FD2-4FF7-44D8-B542-BA560A5990B3
+	UINT16 DeviceSquenceID; //0025384961B47ECD
 	char Signare[50]; // MBR:0x077410A0
 	long long StartSectorNumber; //0x194000
 	long long SectorCount; //0xC93060
@@ -240,42 +250,42 @@ typedef struct
 
 typedef struct
 {
-	unsigned char JMP[3] ; // 0x00 3 跳转指令（跳过开头一段区域）
-	unsigned char OEM[8] ; // 0x03 8 OEM名称常见值是MSDOS5.0.
-	unsigned char BitsOfSector[2] ; // 0x0b 2 每个扇区的字节数。取值只能是以下几种：512，1024，2048或是4096。设为512会取得最好的兼容性
-	unsigned char SectorOfCluster[1] ; // 0x0d 1 每簇扇区数。 其值必须中2的整数次方，同时还要保证每簇的字节数不能超过32K
-	unsigned char ReservedSelector[2] ; // 0x0e 2 保留扇区数（包括启动扇区）此域不能为0，FAT12/FAT16必须为1，FAT32的典型值取为32
-	unsigned char NumFATS[1] ; // 0x10 1 文件分配表数目。 NumFATS，任何FAT格式都建议为2
-	unsigned char RootPathRecords[2] ; // 0x11 2 最大根目录条目个数, 0 for fat32, 512 for fat16
-	unsigned char AllSectors[2] ; // 0x13 2 总扇区数（如果是0，就使用偏移0x20处的4字节值）0 for fat32
-	unsigned char Description[1] ; // 0x15 1 介质描述 0xF8 单面、每面80磁道、每磁道9扇区
-	unsigned char xxx1[2] ; // 0x16 2 每个文件分配表的扇区（FAT16）,0 for fat32
-	unsigned char xxx2[2] ; // 0x18 2 每磁道的扇区, 0x003f
-	unsigned char xxx3[2] ; // 0x1a 2 磁头数，0xff
-	unsigned char xxx4[4] ; // 0x1c 4 隐藏扇区, 与MBR中地址0x1C6开始的4个字节数值相等
-	unsigned char SectorCounts[4] ; // 0x20 4 总扇区数（如果超过65535使用此地址，小于65536参见偏移0x13，对FAT32，此域必须是非0）
-	unsigned char SectorsPerFat[4] ; // Sectors count each FAT use
-	unsigned char Fat32Flag[2] ; // 0x28 2 Flags (FAT32特有)
-	unsigned char FatVersion[2] ; // 0x2a 2 版本号 (FAT32特有)
-	unsigned char BootPathStartCluster[4] ; // 0x2c 4 根目录起始簇 (FAT32)，一般为2
-	unsigned char ClusterName[11] ; // 0x2b 11 卷标（非FAT32）
-	unsigned char BootStrap[2] ; // 0x30 2 FSInfo 扇区 (FAT32) bootstrap
-	unsigned char BootSectorBackup[2] ; // 0x32 2 启动扇区备份 (FAT32)如果不为0，表示在保留区中引导记录的备数据所占的扇区数，通常为6同时不建议使用6以外的其他数值
-	unsigned char Reserved[2] ; // 0x34 2 保留未使用 (FAT32) 此域用0填充
-	unsigned char FileSystemType[8] ; // 0x36 8 FAT文件系统类型（如FAT、FAT12、FAT16）含"FAT"就是PBR,否则就是MBR
-	unsigned char SelfBootCode[2] ; // 0x3e 2 操作系统自引导代码
-	unsigned char DeviceNumber[1] ; // 0x40 1 BIOS设备代号 (FAT32)
-	unsigned char NoUse[1] ; // 0x41 1 未使用 (FAT32)
-	unsigned char Flag[1] ; // 0x42 1 标记 (FAT32)
-	unsigned char SequeenNumber[4] ; // 0x43 4 卷序号 (FAT32)
-	unsigned char juanbiao[11] ; // 0x47 11 卷标（FAT32）
-	unsigned char TypeOfFileSystem[8] ; // 0x52 8 FAT文件系统类型（FAT32）
-	unsigned char BootAssembleCode[338]; // code
-	unsigned char Partition1[16] ; // 0x1be 64 partitions table, DOS_PART_TBL_OFFSET
-	unsigned char Partition2[16] ; // 0X1BE ~0X1CD 16 talbe entry for Partition 1
-	unsigned char Partition3[16] ; // 0X1CE ~0X1DD 16 talbe entry for Partition 2
-	unsigned char Partition4[16] ; // 0X1DE ~0X1ED 16 talbe entry for Partition 3
-	unsigned char EndFlag[2] ; // 0x1FE 2 扇区结束符（0x55 0xAA） 结束标志：MBR的结束标志与DBR，EBR的结束标志相同。
+	UINT8 JMP[3] ; // 0x00 3 跳转指令（跳过开头一段区域）
+	UINT8 OEM[8] ; // 0x03 8 OEM名称常见值是MSDOS5.0.
+	UINT8 BitsOfSector[2] ; // 0x0b 2 每个扇区的字节数。取值只能是以下几种：512，1024，2048或是4096。设为512会取得最好的兼容性
+	UINT8 SectorOfCluster[1] ; // 0x0d 1 每簇扇区数。 其值必须中2的整数次方，同时还要保证每簇的字节数不能超过32K
+	UINT8 ReservedSelector[2] ; // 0x0e 2 保留扇区数（包括启动扇区）此域不能为0，FAT12/FAT16必须为1，FAT32的典型值取为32
+	UINT8 NumFATS[1] ; // 0x10 1 文件分配表数目。 NumFATS，任何FAT格式都建议为2
+	UINT8 RootPathRecords[2] ; // 0x11 2 最大根目录条目个数, 0 for fat32, 512 for fat16
+	UINT8 AllSectors[2] ; // 0x13 2 总扇区数（如果是0，就使用偏移0x20处的4字节值）0 for fat32
+	UINT8 Description[1] ; // 0x15 1 介质描述 0xF8 单面、每面80磁道、每磁道9扇区
+	UINT8 xxx1[2] ; // 0x16 2 每个文件分配表的扇区（FAT16）,0 for fat32
+	UINT8 xxx2[2] ; // 0x18 2 每磁道的扇区, 0x003f
+	UINT8 xxx3[2] ; // 0x1a 2 磁头数，0xff
+	UINT8 xxx4[4] ; // 0x1c 4 隐藏扇区, 与MBR中地址0x1C6开始的4个字节数值相等
+	UINT8 SectorCounts[4] ; // 0x20 4 总扇区数（如果超过65535使用此地址，小于65536参见偏移0x13，对FAT32，此域必须是非0）
+	UINT8 SectorsPerFat[4] ; // Sectors count each FAT use
+	UINT8 Fat32Flag[2] ; // 0x28 2 Flags (FAT32特有)
+	UINT8 FatVersion[2] ; // 0x2a 2 版本号 (FAT32特有)
+	UINT8 BootPathStartCluster[4] ; // 0x2c 4 根目录起始簇 (FAT32)，一般为2
+	UINT8 ClusterName[11] ; // 0x2b 11 卷标（非FAT32）
+	UINT8 BootStrap[2] ; // 0x30 2 FSInfo 扇区 (FAT32) bootstrap
+	UINT8 BootSectorBackup[2] ; // 0x32 2 启动扇区备份 (FAT32)如果不为0，表示在保留区中引导记录的备数据所占的扇区数，通常为6同时不建议使用6以外的其他数值
+	UINT8 Reserved[2] ; // 0x34 2 保留未使用 (FAT32) 此域用0填充
+	UINT8 FileSystemType[8] ; // 0x36 8 FAT文件系统类型（如FAT、FAT12、FAT16）含"FAT"就是PBR,否则就是MBR
+	UINT8 SelfBootCode[2] ; // 0x3e 2 操作系统自引导代码
+	UINT8 DeviceNumber[1] ; // 0x40 1 BIOS设备代号 (FAT32)
+	UINT8 NoUse[1] ; // 0x41 1 未使用 (FAT32)
+	UINT8 Flag[1] ; // 0x42 1 标记 (FAT32)
+	UINT8 SequeenNumber[4] ; // 0x43 4 卷序号 (FAT32)
+	UINT8 juanbiao[11] ; // 0x47 11 卷标（FAT32）
+	UINT8 TypeOfFileSystem[8] ; // 0x52 8 FAT文件系统类型（FAT32）
+	UINT8 BootAssembleCode[338]; // code
+	UINT8 Partition1[16] ; // 0x1be 64 partitions table, DOS_PART_TBL_OFFSET
+	UINT8 Partition2[16] ; // 0X1BE ~0X1CD 16 talbe entry for Partition 1
+	UINT8 Partition3[16] ; // 0X1CE ~0X1DD 16 talbe entry for Partition 2
+	UINT8 Partition4[16] ; // 0X1DE ~0X1ED 16 talbe entry for Partition 3
+	UINT8 EndFlag[2] ; // 0x1FE 2 扇区结束符（0x55 0xAA） 结束标志：MBR的结束标志与DBR，EBR的结束标志相同。
 }MasterBootRecord;
 
 /*
@@ -286,8 +296,8 @@ typedef struct
 // first sector of partition
 typedef struct
 {
-	unsigned char JMP[3] ; // 0x00 3 跳转指令（跳过开头一段区域）
-	unsigned char OEM[8] ; // 0x03 8 OEM名称常见值是MSDOS5.0, NTFS.
+	UINT8 JMP[3] ; // 0x00 3 跳转指令（跳过开头一段区域）
+	UINT8 OEM[8] ; // 0x03 8 OEM名称常见值是MSDOS5.0, NTFS.
 
 	// 0x0B
 	UINT8 BitsOfSector[2];        //  0x0200　　扇区大小，512B
@@ -321,7 +331,7 @@ typedef struct
 	//0x48
 	UINT8 SerialNumber[8];    // 卷序列号
 	UINT8 CheckSum[8];    // 校验和
-	unsigned char EndFlag[2];    // 0x1FE 2 扇区结束符（0x55 0xAA） 结束标志：MBR的结束标志与DBR，EBR的结束标志相同。
+	UINT8 EndFlag[2];    // 0x1FE 2 扇区结束符（0x55 0xAA） 结束标志：MBR的结束标志与DBR，EBR的结束标志相同。
 }DOLLAR_BOOT;
 
 
@@ -547,8 +557,8 @@ typedef struct
 
 typedef struct 
 {
-	unsigned char FileName[8];
-	unsigned char ExtensionName[3];
+	UINT8 FileName[8];
+	UINT8 ExtensionName[3];
 
 	// 00000000(Read/Write)
     // 00000001(ReadOnly)
@@ -557,49 +567,49 @@ typedef struct
     // 00001000(Volume name)
     // 00010000(Sub path)
     // 00100000(FILING: guidang)
-	unsigned char Attribute[1];  // if 0x0FH then Long path structor
-	unsigned char Reserved[1];
-	unsigned char CreateTimeLow[1];
-	unsigned char CreateTimeHigh[2];
-	unsigned char CreateDate[2];
-	unsigned char LatestVisitedDate[2];
-	unsigned char StartClusterHigh2B[2];
-	unsigned char LatestModiedTime[2];
-	unsigned char LatestModiedDate[2];
-	unsigned char StartClusterLow2B[2]; //*
-	unsigned char FileLength[4];
+	UINT8 Attribute[1];  // if 0x0FH then Long path structor
+	UINT8 Reserved[1];
+	UINT8 CreateTimeLow[1];
+	UINT8 CreateTimeHigh[2];
+	UINT8 CreateDate[2];
+	UINT8 LatestVisitedDate[2];
+	UINT8 StartClusterHigh2B[2];
+	UINT8 LatestModiedTime[2];
+	UINT8 LatestModiedDate[2];
+	UINT8 StartClusterLow2B[2]; //*
+	UINT8 FileLength[4];
 }FAT32_ROOTPATH_SHORT_FILE_ITEM;
 
 typedef struct 
 {
-	unsigned char Reserved[1];
-	unsigned char CreateTimeLow[1];
-	unsigned char CreateTimeHigh[2];
-	unsigned char CreateDate[2];
-	unsigned char LatestVisitedDate[2];
-	unsigned char StartClusterHigh2B[2];
-	unsigned char LatestModiedTime[2];
-	unsigned char LatestModiedDate[2];
-	unsigned char StartClusterLow2B[2]; //*
-	unsigned char FileLength[4];
+	UINT8 Reserved[1];
+	UINT8 CreateTimeLow[1];
+	UINT8 CreateTimeHigh[2];
+	UINT8 CreateDate[2];
+	UINT8 LatestVisitedDate[2];
+	UINT8 StartClusterHigh2B[2];
+	UINT8 LatestModiedTime[2];
+	UINT8 LatestModiedDate[2];
+	UINT8 StartClusterLow2B[2]; //*
+	UINT8 FileLength[4];
 }FAT32_ROOTPATH_SHORT_FILE_ITEMSwitched;
 
 
 typedef struct 
 {
-	unsigned char FileName[8];
-	unsigned char ExtensionName[3];
-	unsigned char Attribute[1];  // if 0x0FH then Long path structor
-	unsigned char Reserved[1];
-	unsigned char CreateTimeLow[1];
-	unsigned char CreateTimeHigh[2];
-	unsigned char CreateDate[2];
-	unsigned char LatestVisitedDate[2];
-	unsigned char StartClusterHigh2B[2];
-	unsigned char LatestModiedTime[2];
-	unsigned char LatestModiedDate[2];
-	unsigned char StartClusterLow2B[2]; //*
-	unsigned char FileLength[4];
+	UINT8 FileName[8];
+	UINT8 ExtensionName[3];
+	UINT8 Attribute[1];  // if 0x0FH then Long path structor
+	UINT8 Reserved[1];
+	UINT8 CreateTimeLow[1];
+	UINT8 CreateTimeHigh[2];
+	UINT8 CreateDate[2];
+	UINT8 LatestVisitedDate[2];
+	UINT8 StartClusterHigh2B[2];
+	UINT8 LatestModiedTime[2];
+	UINT8 LatestModiedDate[2];
+	UINT8 StartClusterLow2B[2]; //*
+	UINT8 FileLength[4];
 }FAT32_ROOTPATH_LONG_FILE_ITEM;
 
 
@@ -668,7 +678,7 @@ UINT16 MouseClickWindowWidth = 300;
 UINT16 MouseClickWindowHeight = 400;
 
 
-UINT32 sector_count = 0;
+UINT64 sector_count = 0;
 UINT32 FileBlockStart = 0;
 UINT32 BlockSize = 0;
 UINT32 FileLength = 0;
@@ -1334,7 +1344,7 @@ VOID EFIAPI DebugPrint2 (UINT16 x, UINT16 y, UINT8 *pBuffer, IN  CONST CHAR8  *F
 }
 
 
-EFI_STATUS StrCmpSelf(unsigned char *p1, unsigned char *p2, UINT16 length)
+EFI_STATUS StrCmpSelf(UINT8 *p1, UINT8 *p2, UINT16 length)
 {
 	DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: \n", __LINE__);
 	
@@ -1424,29 +1434,349 @@ EFI_STATUS RootPathAnalysis1(UINT8 *p)
 MasterBootRecordSwitched MBRSwitched;
 DollarBootSwitched NTFSBootSwitched;
 
-EFI_STATUS  MFTAnalysisBuffer(UINT8 *pBuffer)
+// 文件记录头
+typedef struct
 {
-	MFT_HEADER *p = NULL;
+	/*+0x00*/ UINT8 Type[4];    // 固定值'FILE'
+	/*+0x04*/ UINT8 USNOffset[2]; // 更新序列号偏移, 与操作系统有关
+	/*+0x06*/ UINT8 USNCount[2]; // 固定列表大小Size in words of Update Sequence Number & Array (S)
+	/*+0x08*/ UINT8 Lsn[8]; // 日志文件序列号(LSN)
+	/*+0x10*/ UINT8 SequenceNumber[2]; // 序列号(用于记录文件被反复使用的次数)
+	/*+0x12*/ UINT8 LinkCount[2];// 硬连接数
+	/*+0x14*/ UINT8 AttributeOffset[2]; // 第一个属性偏移
+	/*+0x16*/ UINT8 Flags[2];// flags, 00表示删除文件,01表示正常文件,02表示删除目录,03表示正常目录
+	/*+0x18*/ UINT8 BytesInUse[4]; // 文件记录实时大小(字节) 当前MFT表项长度,到FFFFFF的长度+4
+	/*+0x1C*/ UINT8 BytesAllocated[4]; // 文件记录分配大小(字节)
+	/*+0x20*/ UINT8 BaseFileRecord[8]; // = 0 基础文件记录 File reference to the base FILE record
+	/*+0x28*/ UINT8 NextAttributeNumber[2]; // 下一个自由ID号
+	/*+0x2A*/ UINT8 Pading[2]; // 边界
+	/*+0x2C*/ UINT8 MFTRecordNumber[4]; // windows xp中使用,本MFT记录号
+	/*+0x30*/ UINT8 USN[2]; // 更新序列号
+	/*+0x32*/ UINT8 UpdateArray[0]; // 更新数组
+ } FILE_HEADER, *pFILE_HEADER; 
+
+typedef struct  
+{
+	UINT8 Type[4];   //属性类型
+	UINT8 Size[4];   //属性头和属性体的总长度
+	UINT8 ResidentFlag; //是否是常驻属性（0常驻 1非常驻）
+	UINT8 NameSize;   //属性名的长度
+	UINT8 NameOffset[2]; //属性名的偏移 相对于属性头
+	UINT8 Flags[2]; //标志（0x0001压缩 0x4000加密 0x8000稀疏）
+	UINT8 Id[2]; //属性唯一ID
+}CommonAttributeHeader;
+
+
+// Find $Root file from all MFT(may be 15 file,)
+// pBuffer store all MFT
+EFI_STATUS  MFTDollarRootFileAnalysisBuffer(UINT8 *pBuffer)
+{
+	UINT8 *p = NULL;
+	UINT8 pItem[200] = {0};
 	
-	p = (MasterBootRecord *)AllocateZeroPool(DISK_BUFFER_SIZE);
-	
-	for (int j = 0; j < 16; j++)
+	p = (UINT8 *)AllocateZeroPool(DISK_BUFFER_SIZE * 2);
+	if (p == NULL)
 	{
-		memcpy(p, pBuffer[512 * 2 * j], DISK_BUFFER_SIZE);
-		DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d index: %d mark: %c%c%c%c, firstAttr: u%, MftUseLen: %ld maxLen:%lld\n", __LINE__, j,
-					  p->mark[0],
-					  p->mark[1],
-					  p->mark[2],
-					  p->mark[3],
-					  BytesToInt2(p->firstAttr),
-					  BytesToInt4(p->MftUseLen),
-					  BytesToInt4(p->maxLen));
-	}	
+		DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: p == NULL \n", __LINE__);
+		return EFI_SUCCESS;
+	}
+
+	// Root file buffer copy
+	memcpy(p, pBuffer[512 * 2 * 5], DISK_BUFFER_SIZE * 2);
+
+    for (int j = 0; j < 512; j++)
+    {
+	   //%02X: 8 * 3, 
+      DebugPrint1(DISK_READ_BUFFER_X + (j % 32) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 32), "%02X ", p[j] & 0xff);
+    }
+
+	// File header length
+	UINT16 AttributeOffset = BytesToInt2(((FILE_HEADER *)p)->AttributeOffset);
+	DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: AttributeOffset:%X \n", __LINE__, AttributeOffset);
+
+	for (int i = 0; i < 7; i++)
+	{
+		UINT8 size[4];
+		for (int i = 0; i < 4; i++)
+			size[i] = p[AttributeOffset + 4 + i];
+		//INFO("%02X%02X%02X%02X\n", size[0], size[1], size[2], size[3]);
+		UINT16 AttributeSize = BytesToInt4(size);
+		
+		for (int i = 0; i < AttributeSize; i++)
+			pItem[i] = p[AttributeOffset + i];
+		DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: AttributeSize: %02X\n", __LINE__,  AttributeSize);
+		DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Type[0]: %02X\n", __LINE__, ((CommonAttributeHeader *)pItem)->Type[0]);   
+		
+		UINT16  NameSize = ((CommonAttributeHeader *)pItem)->NameSize;		
+		DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: NameSize: %02X\n", __LINE__, NameSize);   
+		
+		UINT16  NameOffset = BytesToInt2(((CommonAttributeHeader *)pItem)->NameOffset);
+		DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: NameOffset: %02X\n", __LINE__, NameOffset);   
+		if (NameSize>0)
+		for (int i = 0; i < NameSize; i++)
+			//printf("%c ", p[AttributeOffset + NameOffset + i]);
+			DebugPrint1(DISK_READ_BUFFER_X + (i % 32) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (i / 32), "%c ", p[AttributeOffset + NameOffset + i] & 0xff);
+		int printTag = 0;
+		if (((CommonAttributeHeader *)pItem)->Type[0] == 0x30)
+			for (int i = 0; i < 0x50; i++)
+				if (p[AttributeOffset + NameOffset + i] == '$' || printTag == 1)
+				{
+					//printf("%c ", p[AttributeOffset + NameOffset + i]);
+					DebugPrint1(DISK_READ_BUFFER_X + (i % 32) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (i / 32), "%c ", p[AttributeOffset + NameOffset + i] & 0xff);
+					printTag = 1;
+				}
+		 DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: \n", __LINE__);
+		 DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: \n", __LINE__);
+		AttributeOffset +=AttributeSize;
+	}
+}
+
+
+// Index Header
+typedef struct {
+    UINT8 Flag[4]; //固定值 "INDX"
+    UINT8 USNOffset[2];//更新序列号偏移
+    UINT8 USNSize[2];//更新序列号和更新数组大小
+    UINT8 LogSequenceNumber[8]; // 日志文件序列号(LSN)
+    UINT8 IndexCacheVCN[8];//本索引缓冲区在索引分配中的VCN
+    UINT8 IndexEntryOffset[4];//索引项的偏移 相对于当前位置
+    UINT8 IndexEntrySize[4];//索引项的大小
+    UINT8 IndexEntryAllocSize[4];//索引项分配的大小
+    UINT8 HasLeafNode;//置一 表示有子节点
+    UINT8 Fill[3];//填充
+    UINT8 USN[2];//更新序列号
+    UINT8 USNArray[0];//更新序列数组
+}INDEX_HEADER;
+
+typedef struct {
+     UINT8 MFTReferNumber[8];//文件的MFT参考号
+     UINT8 IndexEntrySize[2];//索引项的大小
+     UINT8 FileNameAttriBodySize[2];//文件名属性体的大小
+     UINT8 IndexFlag[2];//索引标志
+     UINT8 Fill[2];//填充
+     UINT8 FatherDirMFTReferNumber[8];//父目录MFT文件参考号
+     UINT8 CreatTime[8];//文件创建时间 8
+     UINT8 AlterTime[8];//文件最后修改时间
+     UINT8 MFTChgTime[8];//文件记录最后修改时间
+     UINT8 ReadTime[8];//文件最后访问时间
+     UINT8 FileAllocSize[8];//文件分配大小
+     UINT8 FileRealSize[8];//文件实际大小
+     UINT8 FileFlag[8];//文件标志
+     UINT8 FileNameSize;//文件名长度
+     UINT8 FileNamespace;//文件命名空间
+     UINT8 FileNameAndFill[0];//文件名和填充
+}INDEX_ITEM;
+
+
+EFI_STATUS  MFTDollarIndexAnalysisBuffer(UINT8 *pBuffer)
+{
+	INDEX_HEADER *p = NULL;
+	
+	p = (INDEX_HEADER *)AllocateZeroPool(DISK_BUFFER_SIZE * 2);
+	
+	memcpy(p, pBuffer[512 * 2], DISK_BUFFER_SIZE);
+
+	//IndexEntryOffset:索引项的偏移 相对于当前位置
+	DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d IndexEntryOffset: %d IndexEntrySize: %d\n", __LINE__, 
+																     BytesToInt4(p->IndexEntryOffset),
+																     BytesToInt4(p->IndexEntrySize));
+
+	// 相对于当前位置 need to add size before this Byte.
+	UINT8 length = BytesToInt4(p->IndexEntryOffset) + 24;
+    UINT8 pItem[200] = {0};
+
+	for (UINT8 i = 0; i < 20; i++)
+	{        
+		 UINT16 length2 = pBuffer[length + 8] + pBuffer[length + 9] * 16;
+        for (int i = 0; i < length2; i++)
+            pItem[i] = pBuffer[length + i];
+
+	}
+}
+
+
+long long Multi(long x, long y)
+{
+	return x * y;
+}
+
+
+long long
+strtollSelf(const char * nptr, char ** endptr, int base)
+{
+  const char *pEnd;
+  long long   Result = 0;
+  long long   Previous;
+  int         temp;
+  BOOLEAN     Negative = FALSE;
+
+  pEnd = nptr;
+    
+  base = 16; 
+  ++nptr;
+  ++nptr;
+  DEBUG ((EFI_D_INFO, "line:%d device->StartSectorNumber: %a base: %d \n", __LINE__, nptr, base));
+
+  while( isalnumSelf(*nptr) && ((temp = Digit2ValSelf(*nptr)) < base)) 
+  {
+    DEBUG ((EFI_D_INFO, "line:%d temp: %d, Result: %d \n", __LINE__, temp, Result));
+    Previous = Result;
+    Result = Multi (Result, base) + (long long int)temp;
+    if( Result <= Previous) 
+    {   // Detect Overflow
+      if(Negative) 
+      {
+	    DEBUG ((EFI_D_INFO, "line:%d Negative!!!!\n", __LINE__, temp, Result));
+        Result = LLONG_MIN;
+      }
+      else 
+      {
+        Result = LLONG_MAX;
+      }
+      Negative = FALSE;
+      break;
+    }
+    pEnd = ++nptr;
+  }
+
+  DEBUG ((EFI_D_INFO, "line:%d device->StartSectorNumber: %d \n", __LINE__, Result));
+  if(Negative) 
+  {
+    Result = -Result;
+  }
+
+  // Save pointer to final sequence
+  if(endptr != NULL) 
+  {
+    *endptr = (char *)pEnd;
+  }
+
+  DEBUG ((EFI_D_INFO, "line:%d temp: %d, Result: %d \n", __LINE__, temp, Result));
+  return Result;
+}
+
+
+int PartitionCount = 0;
+void TextDevicePathAnalysisCHAR16(CHAR16 *p, DEVICE_PARAMETER *device, UINTN count1)
+{
+    int length = StrLen(p);
+    int i = 0;
+    //DebugPrint1(0, 11 * 16, "line: %d string: %s, length: %d\n", __LINE__, p, length);
+    for (i = 0; i < length - 3; i++)
+    { 
+        //USB
+        if (p[i] == 'U' && p[i + 1] == 'S' && p[i + 2] == 'B')
+        {
+            device->DeviceType = 1;
+            break;
+        }
+            
+        //Sata
+        if (p[i] == 'S' && p[i + 1] == 'a' && p[i + 2] == 't' && p[i + 3] == 'a')
+        {
+            device->DeviceType = 2;
+            break;
+        }
+    }
+    //printf("line:%d i: %d\n", __LINE__, i);
+    
+    //HD
+    while (i++)
+        if (p[i] == 'H' && p[i + 1] == 'D')
+            break;
+            
+    //printf("line:%d i: %d\n", __LINE__, i);
+    if (i >= length)
+        return;
+                
+    //printf("line:%d i: %d\n", __LINE__, i);
+    device->PartitionID = p[i + 3] - '0';
+    
+    i+=3;
+    
+    while (i++)
+    {
+        //MBR
+        if (p[i] == 'M' && p[i + 1] == 'B' && p[i + 2] == 'R')
+        {
+            device->PartitionType = 1;
+            break;
+        }
+            
+        //GPT
+        if (p[i] == 'G' && p[i + 1] == 'P' && p[i + 2] == 'T')
+        {
+            device->PartitionType = 2;    
+            break;
+        }
+    }
+        
+    i+=3;
+    
+    //printf("line:%d i: %d\n", __LINE__, i);
+    int commalocation[2];
+    int count = 0;
+    for (int j = i + 1; p[j] != ')'; j++)
+    {
+        if (p[j] == ',')
+        {
+           commalocation [count++] = j;
+           //printf("line:%d, j: %d, data: %c%c\n", __LINE__, j, p[j], p[j+1]);
+        }
+    }
+    
+    char temp[20];
+    int j = 0;
+    //start
+    for (i = commalocation[0] + 1; i < commalocation[1]; i++)
+    {
+        temp[j++] = p[i];
+        //printf("%c", p[i]);
+    }
+    temp[j] = '\0';
+    //strtol(const char * nptr,char * * endptr,int base)
+    //puts(temp);
+    DEBUG ((EFI_D_INFO, "line:%d device->StartSectorNumber: %a \n", __LINE__, temp));
+    //printf("line:%d start: %d\n", __LINE__, strtol(temp));
+    device->StartSectorNumber = strtollSelf(temp, NULL, 10);
+    //putchar('\n');
+    
+    j = 0;
+    //length
+    for (i = commalocation[1] + 1; i < length - 1; i++)
+    {
+        temp[j++] = p[i];
+        //printf("%c", p[i]);
+    }
+    temp[j] = '\0';
+    //puts(temp);
+    //printf("line:%d end: %d\n", __LINE__, strtol(temp));
+    device->SectorCount = strtollSelf(temp, NULL, 10);;
+    DEBUG ((EFI_D_INFO, "line:%d device->SectorCount: %a \n", __LINE__, temp));
+    //putchar('\n');
+    
+    //DebugPrint1(0, 11 * 16, "line: %d string: %s, length: %d\n",       __LINE__, p, strlen(p));
+
+    // second display
+    /*DebugPrint1(TEXT_DEVICE_PATH_X, TEXT_DEVICE_PATH_Y + 16 * (4 * count1 + 1), "%d: Start: %d Count: %d  DeviceType: %d PartitionType: %d PartitionID: %d\n",        
+    							__LINE__, 
+    							device->StartSectorNumber,
+    							device->SectorCount,
+    							device->DeviceType,
+    							device->PartitionType,
+    							device->PartitionID);
+    */							
+    DEBUG ((EFI_D_INFO, "line:%d device->DeviceType: %d \n", __LINE__, device->DeviceType));
+    DEBUG ((EFI_D_INFO, "line:%d device->PartitionType: %d \n", __LINE__, device->PartitionType));
+    DEBUG ((EFI_D_INFO, "line:%d device->PartitionID: %d \n", __LINE__, device->PartitionID));
+    DEBUG ((EFI_D_INFO, "line:%d device->StartSectorNumber: %d \n", __LINE__, device->StartSectorNumber));
+    DEBUG ((EFI_D_INFO, "line:%d device->SectorCount: %d \n", __LINE__, device->SectorCount));
+    //putchar('\n');
 }
 
 
 // analysis a partition 
-EFI_STATUS RootPathAnalysisFSM1(unsigned int DeviceType, long long SectorCount)
+EFI_STATUS RootPathAnalysisFSM1(UINT16 DeviceType, long long SectorCount)
 {
     DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d DeviceType: %d, SectorCount: %lld\n", __LINE__, DeviceType, SectorCount);
     //printf( "RootPathAnalysis\n" );
@@ -1532,7 +1862,7 @@ EFI_STATUS RootPathAnalysisFSM1(unsigned int DeviceType, long long SectorCount)
 		            {
 						  for (int j = 0; j < 250; j++)
 						  {
-						  		DebugPrint1(DISK_READ_BUFFER_X + (j % 39) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 39), "%02X ", Buffer1[j] & 0xff);
+						  		DebugPrint1(DISK_READ_BUFFER_X + (j % 32) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 32), "%02X ", Buffer1[j] & 0xff);
 						  }
 				     }
 		        	 
@@ -1553,7 +1883,7 @@ EFI_STATUS RootPathAnalysisFSM1(unsigned int DeviceType, long long SectorCount)
 }
 
 // NTFS Main File Table items analysis
-EFI_STATUS MFTReadFromPartition(unsigned int DeviceType, long long SectorCount)
+EFI_STATUS MFTReadFromPartition(UINT16 DeviceType, long long SectorCount)
 {
     DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d DeviceType: %d, SectorCount: %lld\n", __LINE__, DeviceType, SectorCount);
     //printf( "RootPathAnalysis\n" );
@@ -1634,17 +1964,20 @@ EFI_STATUS MFTReadFromPartition(unsigned int DeviceType, long long SectorCount)
 
 	        	    // Read FAT32 file system partition infomation , minimum unit is sector.
 	        	 	DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X sector_count:%ld\n", __LINE__, Status, sector_count);
-	        	 	Status = DiskIo->ReadDisk( DiskIo, BlockIo->Media->MediaId, DISK_BUFFER_SIZE * sector_count, DISK_MFT_BUFFER_SIZE, BufferMFT);
+
+	        	 	// sector_count: MFT start , and plus 5 * 2: $Root table, we need the A0 attribute to analysis items of root path.
+	        	 	Status = DiskIo->ReadDisk( DiskIo, BlockIo->Media->MediaId, DISK_BUFFER_SIZE * (sector_count), DISK_MFT_BUFFER_SIZE, BufferMFT);
 		            if ( EFI_SUCCESS == Status )
 		            {
 						  for (int j = 0; j < 250; j++)
 						  {
-						  		DebugPrint1(DISK_READ_BUFFER_X + (j % 39) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 32), "%02X ", BufferMFT[j] & 0xff);
+						  		;//DebugPrint1(DISK_READ_BUFFER_X + (j % 32) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 32), "%02X ", BufferMFT[j] & 0xff);
 						  }
 				     }
 		        	 
-				 	//When get root path data sector start number, we can get content of root path.
-				 	MFTAnalysisBuffer(BufferMFT);	
+				 	//Analysis MFT of NTFS File System..
+				 	MFTDollarRootFileAnalysisBuffer(BufferMFT);
+				 	//MFTDollarRootAnalysisBuffer(BufferMFTDollarRoot);	
 
 					// data area start from 1824, HZK16 file start from 	FileBlockStart	block, so need to convert into sector by multi 8, block start number is 2 	
 					// next state is to read FAT table
@@ -1710,7 +2043,7 @@ VOID TransferNTFS(DOLLAR_BOOT *pSource, DollarBootSwitched *pDest)
     pDest->MFT_StartCluster = BytesToInt8(pSource->MFT_StartCluster);
     pDest->MFT_MirrStartCluster = BytesToInt8(pSource->MFT_MirrStartCluster);
     
-	DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "BitsOfSector:%ld SectorOfCluster:%d AllSectorCount: %llu MFT_StartCluster:%llu MFT_MirrStartCluster:%llu", 
+	DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d BitsOfSector:%ld SectorOfCluster:%d AllSectorCount: %llu MFT_StartCluster:%llu MFT_MirrStartCluster:%llu", __LINE__,
 											    pDest->BitsOfSector,
 											    pDest->SectorOfCluster,
 											    pDest->AllSectorCount,
@@ -1789,7 +2122,7 @@ EFI_STATUS FirstSelectorAnalysisNTFS(UINT8 *p, DollarBootSwitched *pNTFSBootSwit
 
 
 // all partitions analysis
-EFI_STATUS PartitionAnalysisFSM1(unsigned int DeviceType, long long SectorCount)
+EFI_STATUS PartitionAnalysisFSM1(UINT16 DeviceType, long long SectorCount)
 {    
     DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d DeviceType: %d, SectorCount: %lld\n", __LINE__, DeviceType, SectorCount);
     DEBUG ((EFI_D_INFO, "PartitionUSBRead!!\r\n"));
@@ -1882,7 +2215,7 @@ EFI_STATUS PartitionAnalysisFSM1(unsigned int DeviceType, long long SectorCount)
 		            {
 						  for (int j = 0; j < 250; j++)
 						  {
-						  		DebugPrint1(DISK_READ_BUFFER_X + (j % 39) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 32), "%02X ", Buffer1[j] & 0xff);
+						  		DebugPrint1(DISK_READ_BUFFER_X + (j % 32) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 32), "%02X ", Buffer1[j] & 0xff);
 						  }
 				     }
 		        	 
@@ -1901,11 +2234,12 @@ EFI_STATUS PartitionAnalysisFSM1(unsigned int DeviceType, long long SectorCount)
 					 	BlockSize = MBRSwitched.SectorOfCluster * 512;
 	               	DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: sector_count:%ld BlockSize: %d\n",  __LINE__, sector_count, BlockSize);
                	}
+               	// NTFS
                	else if (Buffer1[3] == 'N' && Buffer1[4] == 'T' && Buffer1[5] == 'F' && Buffer1[6] == 'S')
                	{
 						FirstSelectorAnalysisNTFS(Buffer1, &NTFSBootSwitched);
 						sector_count = NTFSBootSwitched.MFT_StartCluster * 8;
-               		DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: NTFS sector_count:%ld\n",  __LINE__, sector_count);
+               		DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: NTFS sector_count:%llu\n",  __LINE__, sector_count);
                	}
                	else
                	{
@@ -2015,7 +2349,7 @@ VOID GraphicsLayerCompute(int iMouseX, int iMouseY, UINT8 MouseClickFlag)
     Color.Blue	  = 0x00;
 
 	// this is draw a rectangle when mouse move on disk partition 
-	for (UINT16 i = 0; i < 8; i++)
+	for (UINT16 i = 0; i < 12; i++)
 	{		
 		if (iMouseX >= MyComputerPositionX + 50 && iMouseX <= MyComputerPositionX + 50 + 16 * 6
 			&& iMouseY >= MyComputerPositionY + i * 16 + 16 * 2 && iMouseY <= MyComputerPositionY + i * 16 + 16 * 3)
@@ -2372,8 +2706,6 @@ int isalnumSelf (int c)
           (('A' <= (c)) && ((c) <= 'Z')));
 }
 
-#define LLONG_MIN  (((INT64) -9223372036854775807LL) - 1)
-#define LLONG_MAX   ((INT64)0x7FFFFFFFFFFFFFFFULL)
 
 int
 toupperSelf(
@@ -2395,65 +2727,6 @@ Digit2ValSelf( int c)
     c = toupperSelf(c) - 7;   // Adjust so 'A' is ('9' + 1)
   }
   return c - '0';   // Value returned is between 0 and 35, inclusive.
-}
-
-long long Multi(long x, long y)
-{
-	return x * y;
-}
-
-long long
-strtollSelf(const char * nptr, char ** endptr, int base)
-{
-  const char *pEnd;
-  long long   Result = 0;
-  long long   Previous;
-  int         temp;
-  BOOLEAN     Negative = FALSE;
-
-  pEnd = nptr;
-    
-  base = 16; 
-  ++nptr;
-  ++nptr;
-  DEBUG ((EFI_D_INFO, "line:%d device->StartSectorNumber: %a base: %d \n", __LINE__, nptr, base));
-
-  while( isalnumSelf(*nptr) && ((temp = Digit2ValSelf(*nptr)) < base)) 
-  {
-    DEBUG ((EFI_D_INFO, "line:%d temp: %d, Result: %d \n", __LINE__, temp, Result));
-    Previous = Result;
-    Result = Multi (Result, base) + (long long int)temp;
-    if( Result <= Previous) 
-    {   // Detect Overflow
-      if(Negative) 
-      {
-	    DEBUG ((EFI_D_INFO, "line:%d Negative!!!!\n", __LINE__, temp, Result));
-        Result = LLONG_MIN;
-      }
-      else 
-      {
-        Result = LLONG_MAX;
-      }
-      Negative = FALSE;
-      break;
-    }
-    pEnd = ++nptr;
-  }
-
-  DEBUG ((EFI_D_INFO, "line:%d device->StartSectorNumber: %d \n", __LINE__, Result));
-  if(Negative) 
-  {
-    Result = -Result;
-  }
-
-  // Save pointer to final sequence
-  if(endptr != NULL) 
-  {
-    *endptr = (char *)pEnd;
-  }
-
-  DEBUG ((EFI_D_INFO, "line:%d temp: %d, Result: %d \n", __LINE__, temp, Result));
-  return Result;
 }
 
 
@@ -2570,123 +2843,7 @@ void TextDevicePathAnalysis(char *p, DEVICE_PARAMETER *device)
     //putchar('\n');
 }
 
-int PartitionCount = 0;
-void TextDevicePathAnalysisCHAR16(CHAR16 *p, DEVICE_PARAMETER *device, UINTN count1)
-{
-    int length = StrLen(p);
-    int i = 0;
-    //DebugPrint1(0, 11 * 16, "line: %d string: %s, length: %d\n", __LINE__, p, length);
-    for (i = 0; i < length - 3; i++)
-    { 
-        //USB
-        if (p[i] == 'U' && p[i + 1] == 'S' && p[i + 2] == 'B')
-        {
-            device->DeviceType = 1;
-            break;
-        }
-            
-        //Sata
-        if (p[i] == 'S' && p[i + 1] == 'a' && p[i + 2] == 't' && p[i + 3] == 'a')
-        {
-            device->DeviceType = 2;
-            break;
-        }
-    }
-    //printf("line:%d i: %d\n", __LINE__, i);
-    
-    //HD
-    while (i++)
-        if (p[i] == 'H' && p[i + 1] == 'D')
-            break;
-            
-    //printf("line:%d i: %d\n", __LINE__, i);
-    if (i >= length)
-        return;
-                
-    //printf("line:%d i: %d\n", __LINE__, i);
-    device->PartitionID = p[i + 3] - '0';
-    
-    i+=3;
-    
-    while (i++)
-    {
-        //MBR
-        if (p[i] == 'M' && p[i + 1] == 'B' && p[i + 2] == 'R')
-        {
-            device->PartitionType = 1;
-            break;
-        }
-            
-        //GPT
-        if (p[i] == 'G' && p[i + 1] == 'P' && p[i + 2] == 'T')
-        {
-            device->PartitionType = 2;    
-            break;
-        }
-    }
-        
-    i+=3;
-    
-    //printf("line:%d i: %d\n", __LINE__, i);
-    int commalocation[2];
-    int count = 0;
-    for (int j = i + 1; p[j] != ')'; j++)
-    {
-        if (p[j] == ',')
-        {
-           commalocation [count++] = j;
-           //printf("line:%d, j: %d, data: %c%c\n", __LINE__, j, p[j], p[j+1]);
-        }
-    }
-    
-    char temp[20];
-    int j = 0;
-    //start
-    for (i = commalocation[0] + 1; i < commalocation[1]; i++)
-    {
-        temp[j++] = p[i];
-        //printf("%c", p[i]);
-    }
-    temp[j] = '\0';
-    //strtol(const char * nptr,char * * endptr,int base)
-    //puts(temp);
-    DEBUG ((EFI_D_INFO, "line:%d device->StartSectorNumber: %a \n", __LINE__, temp));
-    //printf("line:%d start: %d\n", __LINE__, strtol(temp));
-    device->StartSectorNumber = strtollSelf(temp, NULL, 10);
-    //putchar('\n');
-    
-    j = 0;
-    //length
-    for (i = commalocation[1] + 1; i < length - 1; i++)
-    {
-        temp[j++] = p[i];
-        //printf("%c", p[i]);
-    }
-    temp[j] = '\0';
-    //puts(temp);
-    //printf("line:%d end: %d\n", __LINE__, strtol(temp));
-    device->SectorCount = strtollSelf(temp, NULL, 10);;
-    DEBUG ((EFI_D_INFO, "line:%d device->SectorCount: %a \n", __LINE__, temp));
-    //putchar('\n');
-    
-    //DebugPrint1(0, 11 * 16, "line: %d string: %s, length: %d\n",       __LINE__, p, strlen(p));
 
-    // second display
-    /*DebugPrint1(TEXT_DEVICE_PATH_X, TEXT_DEVICE_PATH_Y + 16 * (4 * count1 + 1), "%d: Start: %d Count: %d  DeviceType: %d PartitionType: %d PartitionID: %d\n",        
-    							__LINE__, 
-    							device->StartSectorNumber,
-    							device->SectorCount,
-    							device->DeviceType,
-    							device->PartitionType,
-    							device->PartitionID);
-    */							
-    DEBUG ((EFI_D_INFO, "line:%d device->DeviceType: %d \n", __LINE__, device->DeviceType));
-    DEBUG ((EFI_D_INFO, "line:%d device->PartitionType: %d \n", __LINE__, device->PartitionType));
-    DEBUG ((EFI_D_INFO, "line:%d device->PartitionID: %d \n", __LINE__, device->PartitionID));
-    DEBUG ((EFI_D_INFO, "line:%d device->StartSectorNumber: %d \n", __LINE__, device->StartSectorNumber));
-    DEBUG ((EFI_D_INFO, "line:%d device->SectorCount: %d \n", __LINE__, device->SectorCount));
-    //putchar('\n');
-}
 
 
 EFI_STATUS PartitionRead()
@@ -3211,7 +3368,7 @@ EFI_STATUS PartitionAnalysisFSM()
 		            {
 						  for (int j = 0; j < 250; j++)
 						  {
-						  		DebugPrint1(DISK_READ_BUFFER_X + (j % 39) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 39), "%02X ", Buffer1[j] & 0xff);
+						  		DebugPrint1(DISK_READ_BUFFER_X + (j % 32) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 32), "%02X ", Buffer1[j] & 0xff);
 						  }
 				     }
 		        	 
@@ -3321,7 +3478,7 @@ EFI_STATUS RootPathAnalysisFSM()
 		            {
 						  for (int j = 0; j < 250; j++)
 						  {
-						  		DebugPrint1(DISK_READ_BUFFER_X + (j % 39) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 39), "%02X ", Buffer1[j] & 0xff);
+						  		DebugPrint1(DISK_READ_BUFFER_X + (j % 32) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 32), "%02X ", Buffer1[j] & 0xff);
 						  }
 				     }
 		        	 
@@ -3435,7 +3592,7 @@ EFI_STATUS GetFatTableFSM()
                         CopyMem(FAT32_Table, Buffer1, DISK_BUFFER_SIZE);
 						  for (int j = 0; j < 250; j++)
 						  {
-						  		DebugPrint1(DISK_READ_BUFFER_X + (j % 39) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 39), "%02X ", Buffer1[j] & 0xff);
+						  		DebugPrint1(DISK_READ_BUFFER_X + (j % 32) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 32), "%02X ", Buffer1[j] & 0xff);
 						  }
 				     } 
 				     
@@ -3664,7 +3821,7 @@ EFI_STATUS ReadFileFSM()
 							  }
 							  for (int j = 0; j < 250; j++)
 							  {
-							  		//DebugPrint1(DISK_READ_BUFFER_X + (j % 39) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 39), "%02X ", BufferBlock[j] & 0xff);
+							  		//DebugPrint1(DISK_READ_BUFFER_X + (j % 32) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 32), "%02X ", BufferBlock[j] & 0xff);
 							  }
 							  HZK16FileReadCount++;
 						 }
@@ -4139,7 +4296,7 @@ EFI_STATUS WindowCreateUseBuffer(UINT8 *pBuffer, UINT8 *pParent, UINT16 Width, U
 	Color.Green = 0x00;
 	int x, y;
 
-	for (UINT16 i = 0 ; i < 7 ; i++)
+	for (UINT16 i = 0 ; i < 12 ; i++)
 	{
 		x = 50;
 		y = i * 18 + 16 * 2;		
