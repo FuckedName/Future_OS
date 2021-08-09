@@ -1657,7 +1657,7 @@ EFI_STATUS  MFTIndexItemsBufferAnalysis(UINT8 *pBuffer)
 {
 	UINT8 *p = NULL;
 	
-	p = (UINT8 *)AllocateZeroPool(DISK_BUFFER_SIZE * 2);
+	p = (UINT8 *)AllocateZeroPool(DISK_BUFFER_SIZE * 8);
 
 	if (NULL == p)
 	{
@@ -1666,7 +1666,7 @@ EFI_STATUS  MFTIndexItemsBufferAnalysis(UINT8 *pBuffer)
 	}
 	
 	//memcpy(p, pBuffer[512 * 2], DISK_BUFFER_SIZE);
-	for (UINT16 i = 0; i < 512 * 2; i++)
+	for (UINT16 i = 0; i < 512 * 8; i++)
 		p[i] = pBuffer[i];
 
 	//IndexEntryOffset:索引项的偏移 相对于当前位置
@@ -1679,18 +1679,21 @@ EFI_STATUS  MFTIndexItemsBufferAnalysis(UINT8 *pBuffer)
     UINT8 pItem[200] = {0};
     UINT16 index = length;
 
-	for (UINT8 i = 0; i < 4; i++)
-	{        
-		 DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%s index: %d\n", __LINE__,  index);  
+	for (UINT8 i = 0; ; i++)
+	{    
+		 if (index >= BytesToInt4(((INDEX_HEADER *)p)->IndexEntrySize))
+			break;
+			
+		 //DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%s index: %d\n", __LINE__,  index);  
 		 UINT16 length2 = pBuffer[index + 8] + pBuffer[index + 9] * 16;
 		 
         for (int i = 0; i < length2; i++)
             pItem[i] = pBuffer[index + i];
             
 		 UINT8 FileNameSize =	 ((INDEX_ITEM *)pItem)->FileNameSize;
-		 DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d attribut length2: %d FileNameSize: %d\n", __LINE__, 
-																     length2,
-																     FileNameSize);    
+		 //DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d attribut length2: %d FileNameSize: %d\n", __LINE__, 
+		//														     length2,
+		//														     FileNameSize);    
 		 UINT8 attributeName[20];																     
 		 for (int i = 0; i < FileNameSize; i++)
 		 {
@@ -2161,22 +2164,31 @@ EFI_STATUS NTFSRootPathIndexItemsRead(UINT8 i)
 {
 	DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d DeviceType: %d, SectorCount: %lld\n", __LINE__, i);
     EFI_STATUS Status ;
+    UINT8 BufferBlock[DISK_BLOCK_BUFFER_SIZE];
 
 	EFI_BLOCK_IO_PROTOCOL *BlockIo = NULL;
 	EFI_DISK_IO_PROTOCOL *DiskIo = NULL;
-
-	// cluster need to multi with 8 then it is sector.
-   ReadDataFromPartition(i, A0Indexes[0].Offset * 8 , A0Indexes[0].OccupyCluster * 8, BufferMFT);
-
-	for (int j = 0; j < 250; j++)
+	UINT8 k = 0;
+	UINT16 lastOffset = 0;
+	
+	//while(A0Indexes[k].Offset != 0)
 	{
-		DebugPrint1(DISK_READ_BUFFER_X + (j % 16) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 16), "%02X ", BufferMFT[j] & 0xff);
+		// cluster need to multi with 8 then it is sector.
+	   ReadDataFromPartition(i, (A0Indexes[k].Offset + lastOffset) * 8 , A0Indexes[k].OccupyCluster * 8, BufferBlock);
+
+		for (int j = 0; j < 250; j++)
+		{
+			DebugPrint1(DISK_READ_BUFFER_X + (j % 16) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 16), "%02X ", BufferBlock[j] & 0xff);
+		}
+
+		MFTIndexItemsBufferAnalysis(BufferBlock);	
+	 	//sector_count = MBRSwitched.ReservedSelector;
+	 	//DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: sector_count:%ld FileLength: %d MBRSwitched.ReservedSelector:%ld\n",  __LINE__, sector_count, FileLength, MBRSwitched.ReservedSelector);
+
+	 	lastOffset = A0Indexes[k].Offset;
+	 	k++;
 	}
-
-	MFTIndexItemsBufferAnalysis(BufferMFT);	
- 	//sector_count = MBRSwitched.ReservedSelector;
- 	//DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: sector_count:%ld FileLength: %d MBRSwitched.ReservedSelector:%ld\n",  __LINE__, sector_count, FileLength, MBRSwitched.ReservedSelector);
-
+	
     return EFI_SUCCESS;
 }
 
