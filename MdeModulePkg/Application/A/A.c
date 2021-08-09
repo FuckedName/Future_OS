@@ -1691,12 +1691,12 @@ EFI_STATUS  MFTIndexItemsBufferAnalysis(UINT8 *pBuffer)
 		 DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d attribut length2: %d FileNameSize: %d\n", __LINE__, 
 																     length2,
 																     FileNameSize);    
-		 CHAR16 attributeName[20];																     
-		 for (int i = 0; i < FileNameSize * 2; i++)
+		 UINT8 attributeName[20];																     
+		 for (int i = 0; i < FileNameSize; i++)
 		 {
-		 	attributeName[i] = pItem[82 + i];
-			DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: attributeName: %c\n", __LINE__, attributeName[i]);
+		 	attributeName[i] = pItem[82 + 2 * i];
 		 }
+		 DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: attributeName: %a\n", __LINE__, attributeName);
 		 //DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%s attributeName: %a\n", __LINE__,  attributeName);  
 		 index += length2;
 	}
