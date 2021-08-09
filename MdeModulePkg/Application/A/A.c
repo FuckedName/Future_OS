@@ -1468,6 +1468,65 @@ typedef struct
 }CommonAttributeHeader;
 
 int display_sector_number = 0;
+typedef struct 
+{
+	UINT8 OccupyCluster;
+	UINT64 Offset; //Please Note: The first item is start offset, and next item is relative offset....
+}IndexInformation;
+
+UINT16 BytesToInt3(UINT8 *bytes)
+{
+	//INFO("%x %x %x\n", bytes[0], bytes[1], bytes[2]);
+	UINT16 Result = bytes[0] & 0xFF;
+    Result |= (bytes[1] << 8 & 0xFF00);
+    Result |= ((bytes[2] << 16) & 0xFF0000);
+	return Result;
+}
+
+UINTN strlen1(char *String)
+{
+    UINTN  Length;
+    for (Length = 0; *String != '\0'; String++, Length++) ;
+//	 DEBUG ((EFI_D_INFO, "%d Length: %d\n", __LINE__, Length));
+    return Length;
+}
+
+
+// Analysis attribut A0 of $Root
+EFI_STATUS  DollarRootA0DatarunAnalysis(UINT8 *p)
+{
+    DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: string length: %d\n", __LINE__,  strlen1(p));
+    UINT16 i = 0;
+    UINT16 length = strlen1(p);
+    UINT8 occupyCluster = 0;
+    UINT16 offset = 0;
+    while(i < length)
+    {
+        int  offsetLength  = p[i] >> 4;
+        int  occupyClusterLength = p[i] & 0x0f;
+    	 DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: occupyClusterLength: %d offsetLength: %d\n", __LINE__,  occupyClusterLength, offsetLength);
+        
+        i++;
+        if (occupyClusterLength == 1)
+            occupyCluster = p[i];
+        i++;
+        //INFO(" i: %d\n", i);
+        if (offsetLength == 1)
+            offset = p[i];
+        else if (offsetLength == 3)
+        {
+            UINT8 size[3];
+            size[0] = p[i];
+            size[1] = p[i + 1];
+            size[2] = p[i + 2];
+            offset = BytesToInt3(size);
+        }
+        DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d offset:%d \n", __LINE__, offset);
+        i += offsetLength;
+        //INFO(" i: %d\n", i);
+    }
+
+}
 
 // Find $Root file from all MFT(may be 15 file,)
 // pBuffer store all MFT
@@ -1522,22 +1581,27 @@ EFI_STATUS  MFTDollarRootFileAnalysisBuffer(UINT8 *pBuffer)
 															NameSize,
 															NameOffset);   
 							
-		int printTag = 0;
-		if (((CommonAttributeHeader *)pItem)->Type[0] == 0x30)
-			for (int i = 0; i < 0x50; i++)
-				if (p[AttributeOffset + NameOffset + i] == '$' || printTag == 1)
-				{
-		 			DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%c ", p[AttributeOffset + NameOffset + i]);
-					DebugPrint1(DISK_READ_BUFFER_X + (i % 32) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (i / 32), "%c ", p[AttributeOffset + NameOffset + i] & 0xff);
-					printTag = 1;
-				}
-		 DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: \n", __LINE__);
-		 DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: \n", __LINE__);
 		 if (0xA0 == ((CommonAttributeHeader *)pItem)->Type[0])
 		 {
+		 	UINT16 DataRunsSize = AttributeSize - NameOffset - NameSize * 2;
+		 	if (DataRunsSize > 100 || DataRunsSize < 0)
+		 	{
+				DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: DataRunsSize illegal.", __LINE__);
+				return ;
+		 	}
+		 	UINT8 DataRuns[20] = {0};
 		 	DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: A0 attribute has been found: ", __LINE__);
-		 	for (int i = NameOffset; i < AttributeSize; i++)
+		 	for (int i = NameOffset; i < NameOffset + NameSize * 2; i++)
 		 		DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%02X ", pItem[i] & 0xff);
+
+		 	int j = 0;
+		 	for (int i = NameOffset + NameSize * 2; i < AttributeSize; i++)
+		 	{	 		
+		 		DataRuns[j] = pItem[i] & 0xff;
+		 		DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%02X ", DataRuns[j] & 0xff);	
+		 		j++;
+		 	}
+		 	DollarRootA0DatarunAnalysis(DataRuns);
 		 	break;
 		 }
 		 
@@ -2712,13 +2776,6 @@ EFI_STATUS ShellServiceRead()
     return EFI_SUCCESS;
 }
 
-UINTN strlen1(char *String)
-{
-    UINTN  Length;
-    for (Length = 0; *String != '\0'; String++, Length++) ;
-//	 DEBUG ((EFI_D_INFO, "%d Length: %d\n", __LINE__, Length));
-    return Length;
-}
 
 int isspaceSelf (int c)
 {
@@ -4484,7 +4541,7 @@ VOID EFIAPI ShowHex1( UINT8* Buffer, UINTN len )
 		if ( i % 26 == 0 )			
         	DebugPrint1(1350, 16 * 16, "%d\n", __LINE__);
 			
-		DebugPrint1(i * 4, 16 * 16, L"%02x ", Buffer[i] );
+		DebugPrint1(i * 4, 16 * 16, "%02x ", Buffer[i] );
 	}
 }
 
@@ -4596,7 +4653,7 @@ EFIAPI HandleEnterPressed()
     MFTDollarRootFileAnalysisBuffer(BufferMFT);
 
 	DEBUG ((EFI_D_INFO, "%d HandleEnterPressed\n", __LINE__));
-
+	return EFI_SUCCESS;
 }
 
 STATIC
