@@ -1492,6 +1492,9 @@ UINTN strlen1(char *String)
 }
 
 
+// Index of A0 attribute
+IndexInformation A0Indexes[10] = {0};
+
 // Analysis attribut A0 of $Root
 EFI_STATUS  DollarRootA0DatarunAnalysis(UINT8 *p)
 {
@@ -1500,6 +1503,8 @@ EFI_STATUS  DollarRootA0DatarunAnalysis(UINT8 *p)
     UINT16 length = strlen1(p);
     UINT8 occupyCluster = 0;
     UINT16 offset = 0;
+
+    UINT16 Index = 0;
     while(i < length)
     {
         int  offsetLength  = p[i] >> 4;
@@ -1508,7 +1513,7 @@ EFI_STATUS  DollarRootA0DatarunAnalysis(UINT8 *p)
         
         i++;
         if (occupyClusterLength == 1)
-            occupyCluster = p[i];
+            A0Indexes[Index].OccupyCluster = p[i];
         i++;
         //INFO(" i: %d\n", i);
         if (offsetLength == 1)
@@ -1521,8 +1526,10 @@ EFI_STATUS  DollarRootA0DatarunAnalysis(UINT8 *p)
             size[2] = p[i + 2];
             offset = BytesToInt3(size);
         }
+        A0Indexes[Index].Offset = offset;
         DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d offset:%d \n", __LINE__, offset);
         i += offsetLength;
+        Index++;
         //INFO(" i: %d\n", i);
     }
 
@@ -1553,7 +1560,7 @@ EFI_STATUS  MFTDollarRootFileAnalysisBuffer(UINT8 *pBuffer)
 		for (int j = 0; j < 512; j++)
 	    {
 		   //%02X: 8 * 3, 
-	      DebugPrint1(DISK_READ_BUFFER_X + (j % 16) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 16), "%02X ", p[j] & 0xff);
+	      //DebugPrint1(DISK_READ_BUFFER_X + (j % 16) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 16), "%02X ", p[j] & 0xff);
 	    }
 	//}
 	
@@ -2085,6 +2092,72 @@ EFI_STATUS MFTReadFromPartition(UINT16 DeviceType, long long SectorCount)
     return EFI_SUCCESS;
 }
 
+//Note: ReadSize will be multi with 512
+EFI_STATUS ReadDataFromPartition(UINT8 deviceID, UINT64 StartSectorNumber, UINT16 ReadSize, UINT8 *pBuffer)
+{
+	DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: deviceID: %d StartSectorNumber: %ld ReadSize: %d\n", __LINE__, deviceID, StartSectorNumber, ReadSize);
+	EFI_STATUS Status;
+    UINTN NumHandles;
+    EFI_BLOCK_IO_PROTOCOL *BlockIo;
+    EFI_DISK_IO_PROTOCOL *DiskIo;
+    EFI_HANDLE *ControllerHandle = NULL;
+    
+    Status = gBS->LocateHandleBuffer(ByProtocol, &gEfiDiskIoProtocolGuid, NULL, &NumHandles, &ControllerHandle);
+    if (EFI_ERROR(Status))
+    {
+        DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);	    
+        return EFI_SUCCESS;
+    }
+
+ 	Status = gBS->HandleProtocol(ControllerHandle[deviceID], &gEfiBlockIoProtocolGuid, (VOID * *) &BlockIo );   
+    if (EFI_ERROR(Status))
+    {
+		DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
+		return EFI_SUCCESS;
+    }
+    
+    Status = gBS->HandleProtocol( ControllerHandle[deviceID], &gEfiDiskIoProtocolGuid, (VOID * *) &DiskIo );     
+    if (EFI_ERROR(Status))
+    {
+		DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
+		return EFI_SUCCESS;
+    }
+
+   	Status = DiskIo->ReadDisk(DiskIo, BlockIo->Media->MediaId, DISK_BUFFER_SIZE * (StartSectorNumber), DISK_BUFFER_SIZE * ReadSize, pBuffer);
+ 	if (EFI_ERROR(Status))
+ 	{
+		DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X sector_count:%ld\n", __LINE__, Status, sector_count);
+		return Status;
+ 	}
+    DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
+    
+
+}
+
+EFI_STATUS NTFSRootPathIndexItemsRead(UINT8 i)
+{
+	DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d DeviceType: %d, SectorCount: %lld\n", __LINE__, i);
+    EFI_STATUS Status ;
+
+	EFI_BLOCK_IO_PROTOCOL *BlockIo = NULL;
+	EFI_DISK_IO_PROTOCOL *DiskIo = NULL;
+
+	// cluster need to multi with 8 then it is sector.
+   ReadDataFromPartition(i, A0Indexes[0].Offset * 8 , A0Indexes[0].OccupyCluster * 8, BufferMFT);
+
+	for (int j = 0; j < 250; j++)
+	{
+		DebugPrint1(DISK_READ_BUFFER_X + (j % 16) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 16), "%02X ", BufferMFT[j] & 0xff);
+	}
+
+ 	//MFTDollarRootFileAnalysisBuffer(BufferMFT);
+ 	//MFTDollarRootAnalysisBuffer(BufferMFTDollarRoot);	
+
+ 	//sector_count = MBRSwitched.ReservedSelector;
+ 	//DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: sector_count:%ld FileLength: %d MBRSwitched.ReservedSelector:%ld\n",  __LINE__, sector_count, FileLength, MBRSwitched.ReservedSelector);
+
+    return EFI_SUCCESS;
+}
 
 EFI_STATUS BufferAnalysis(UINT8 *p, MasterBootRecordSwitched *pMBRSwitched)
 {
@@ -4647,10 +4720,11 @@ EFIAPI HandleEnterPressed()
 	{
 		PartitionAnalysisFSM1(device[8].DeviceType, device[8].SectorCount);
 		MFTReadFromPartition(device[8].DeviceType, device[8].SectorCount);
+    	MFTDollarRootFileAnalysisBuffer(BufferMFT);
 		flag = 1;
 	}
 	
-    MFTDollarRootFileAnalysisBuffer(BufferMFT);
+    NTFSRootPathIndexItemsRead(8);
 
 	DEBUG ((EFI_D_INFO, "%d HandleEnterPressed\n", __LINE__));
 	return EFI_SUCCESS;
