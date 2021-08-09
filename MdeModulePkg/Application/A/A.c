@@ -151,7 +151,7 @@ char pKeyboardInputBuffer[KEYBOARD_BUFFER_LENGTH] = {0};
 #define DISPLAY_DESK_DATE_TIME_Y (ScreenHeight - 21)
 
 
-#define DISK_BUFFER_SIZE 512
+#define DISK_BUFFER_SIZE (512)
 #define DISK_BLOCK_BUFFER_SIZE (512 * 8)
 #define DISK_MFT_BUFFER_SIZE (512 * 2 * 15)
 #define EXBYTE	4
@@ -178,6 +178,7 @@ UINT16 DisplayCount = 0;
 #define DISPLAY_X (0) 
 #define DISPLAY_Y (16 * (2 + DisplayCount++ % 52) )
 
+UINTN NumHandles = 0;
 
 CHAR8 x_move = 0;
 CHAR8 y_move = 0;
@@ -670,9 +671,9 @@ UINT8 *sChineseChar = NULL;
 
 UINT8 HZK16FileReadCount = 0;
 static UINTN ScreenWidth, ScreenHeight;  
-UINT16 MyComputerWidth = 16 * 50;
+UINT16 MyComputerWidth = 16 * 15;
 UINT16 MyComputerHeight = 16 * 30;
-UINT16 MyComputerPositionX = 100;
+UINT16 MyComputerPositionX = 700;
 UINT16 MyComputerPositionY = 160;
 UINT16 MouseClickWindowWidth = 300;
 UINT16 MouseClickWindowHeight = 400;
@@ -1466,6 +1467,7 @@ typedef struct
 	UINT8 Id[2]; // Ù–‘Œ®“ªID
 }CommonAttributeHeader;
 
+int display_sector_number = 0;
 
 // Find $Root file from all MFT(may be 15 file,)
 // pBuffer store all MFT
@@ -1482,19 +1484,25 @@ EFI_STATUS  MFTDollarRootFileAnalysisBuffer(UINT8 *pBuffer)
 	}
 
 	// Root file buffer copy
-	memcpy(p, pBuffer[512 * 2 * 5], DISK_BUFFER_SIZE * 2);
+//	memcpy(p, pBuffer[512 * 2 * 5], DISK_BUFFER_SIZE * 2);
 
-    for (int j = 0; j < 512; j++)
-    {
-	   //%02X: 8 * 3, 
-      DebugPrint1(DISK_READ_BUFFER_X + (j % 32) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 32), "%02X ", p[j] & 0xff);
-    }
+	for (int i = 0; i < DISK_BUFFER_SIZE * 2; i++)
+		p[i] = pBuffer[i];
 
+	//for (int i = 0; i < 7; i++)
+	//{
+		for (int j = 0; j < 512; j++)
+	    {
+		   //%02X: 8 * 3, 
+	      DebugPrint1(DISK_READ_BUFFER_X + (j % 16) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 16), "%02X ", p[j] & 0xff);
+	    }
+	//}
+	
 	// File header length
 	UINT16 AttributeOffset = BytesToInt2(((FILE_HEADER *)p)->AttributeOffset);
 	DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: AttributeOffset:%X \n", __LINE__, AttributeOffset);
 
-	for (int i = 0; i < 7; i++)
+	for (int i = 0; i < 10; i++)
 	{
 		UINT8 size[4];
 		for (int i = 0; i < 4; i++)
@@ -1504,29 +1512,35 @@ EFI_STATUS  MFTDollarRootFileAnalysisBuffer(UINT8 *pBuffer)
 		
 		for (int i = 0; i < AttributeSize; i++)
 			pItem[i] = p[AttributeOffset + i];
-		DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: AttributeSize: %02X\n", __LINE__,  AttributeSize);
-		DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Type[0]: %02X\n", __LINE__, ((CommonAttributeHeader *)pItem)->Type[0]);   
 		
 		UINT16  NameSize = ((CommonAttributeHeader *)pItem)->NameSize;		
-		DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: NameSize: %02X\n", __LINE__, NameSize);   
 		
 		UINT16  NameOffset = BytesToInt2(((CommonAttributeHeader *)pItem)->NameOffset);
-		DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: NameOffset: %02X\n", __LINE__, NameOffset);   
-		if (NameSize>0)
-		for (int i = 0; i < NameSize; i++)
-			//printf("%c ", p[AttributeOffset + NameOffset + i]);
-			DebugPrint1(DISK_READ_BUFFER_X + (i % 32) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (i / 32), "%c ", p[AttributeOffset + NameOffset + i] & 0xff);
+		DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Type[0]: %02X AttributeSize: %02X NameSize: %02X NameOffset: %02X\n", __LINE__, 
+															((CommonAttributeHeader *)pItem)->Type[0],
+															AttributeSize,
+															NameSize,
+															NameOffset);   
+							
 		int printTag = 0;
 		if (((CommonAttributeHeader *)pItem)->Type[0] == 0x30)
 			for (int i = 0; i < 0x50; i++)
 				if (p[AttributeOffset + NameOffset + i] == '$' || printTag == 1)
 				{
-					//printf("%c ", p[AttributeOffset + NameOffset + i]);
+		 			DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%c ", p[AttributeOffset + NameOffset + i]);
 					DebugPrint1(DISK_READ_BUFFER_X + (i % 32) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (i / 32), "%c ", p[AttributeOffset + NameOffset + i] & 0xff);
 					printTag = 1;
 				}
 		 DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: \n", __LINE__);
 		 DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: \n", __LINE__);
+		 if (0xA0 == ((CommonAttributeHeader *)pItem)->Type[0])
+		 {
+		 	DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: A0 attribute has been found: ", __LINE__);
+		 	for (int i = NameOffset; i < AttributeSize; i++)
+		 		DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%02X ", pItem[i] & 0xff);
+		 	break;
+		 }
+		 
 		AttributeOffset +=AttributeSize;
 	}
 }
@@ -1677,7 +1691,15 @@ void TextDevicePathAnalysisCHAR16(CHAR16 *p, DEVICE_PARAMETER *device, UINTN cou
             device->DeviceType = 2;
             break;
         }
+        
+        //NVMe
+        if (p[i] == 'N' && p[i + 1] == 'V' && p[i + 2] == 'M' && p[i + 3] == 'e')
+        {
+            device->DeviceType = 2;
+            break;
+        }
     }
+
     //printf("line:%d i: %d\n", __LINE__, i);
     
     //HD
@@ -1758,14 +1780,15 @@ void TextDevicePathAnalysisCHAR16(CHAR16 *p, DEVICE_PARAMETER *device, UINTN cou
     //DebugPrint1(0, 11 * 16, "line: %d string: %s, length: %d\n",       __LINE__, p, strlen(p));
 
     // second display
-    /*DebugPrint1(TEXT_DEVICE_PATH_X, TEXT_DEVICE_PATH_Y + 16 * (4 * count1 + 1), "%d: Start: %d Count: %d  DeviceType: %d PartitionType: %d PartitionID: %d\n",        
+    DebugPrint1(TEXT_DEVICE_PATH_X, TEXT_DEVICE_PATH_Y + 16 * (4 * count1 + 1), "%d: i: %d Start: %d Count: %d  DeviceType: %d PartitionType: %d PartitionID: %d\n",        
     							__LINE__, 
+    							count1,
     							device->StartSectorNumber,
     							device->SectorCount,
     							device->DeviceType,
     							device->PartitionType,
     							device->PartitionID);
-    */							
+    							
     DEBUG ((EFI_D_INFO, "line:%d device->DeviceType: %d \n", __LINE__, device->DeviceType));
     DEBUG ((EFI_D_INFO, "line:%d device->PartitionType: %d \n", __LINE__, device->PartitionType));
     DEBUG ((EFI_D_INFO, "line:%d device->PartitionID: %d \n", __LINE__, device->PartitionID));
@@ -1862,7 +1885,7 @@ EFI_STATUS RootPathAnalysisFSM1(UINT16 DeviceType, long long SectorCount)
 		            {
 						  for (int j = 0; j < 250; j++)
 						  {
-						  		DebugPrint1(DISK_READ_BUFFER_X + (j % 32) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 32), "%02X ", Buffer1[j] & 0xff);
+						  		DebugPrint1(DISK_READ_BUFFER_X + (j % 16) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 16), "%02X ", Buffer1[j] & 0xff);
 						  }
 				     }
 		        	 
@@ -1882,6 +1905,8 @@ EFI_STATUS RootPathAnalysisFSM1(UINT16 DeviceType, long long SectorCount)
     return EFI_SUCCESS;
 }
 
+UINT8 BufferMFT[DISK_BUFFER_SIZE * 2];
+
 // NTFS Main File Table items analysis
 EFI_STATUS MFTReadFromPartition(UINT16 DeviceType, long long SectorCount)
 {
@@ -1893,7 +1918,6 @@ EFI_STATUS MFTReadFromPartition(UINT16 DeviceType, long long SectorCount)
     EFI_HANDLE *ControllerHandle = NULL;
     EFI_DEVICE_PATH_TO_TEXT_PROTOCOL *DevPathToText;
     EFI_BLOCK_IO_PROTOCOL           *BlockIo;
-    UINT8 BufferMFT[DISK_MFT_BUFFER_SIZE];
     EFI_DISK_IO_PROTOCOL            *DiskIo;
     
     Status = gBS->LocateProtocol (&gEfiDevicePathToTextProtocolGuid, NULL, (VOID **) &DevPathToText);
@@ -1915,9 +1939,11 @@ EFI_STATUS MFTReadFromPartition(UINT16 DeviceType, long long SectorCount)
     DEBUG ((EFI_D_INFO, "Before for\n", Status));
     //DebugPrint1(350, 16 * 5, "%d: %x\n", __LINE__, Status);
 
-    for (i = 0; i < NumHandles; i++)
+	for (i = 8; i < 9; i++)
+
+    //for (i = 0; i < NumHandles; i++)
     {
-    	DebugPrint1(350, 16 * 6, "%d: %x\n", __LINE__, Status);
+    	//DebugPrint1(350, 16 * 6, "%d: %x\n", __LINE__, Status);
         EFI_DEVICE_PATH_PROTOCOL *DiskDevicePath;
         Status = gBS->OpenProtocol(ControllerHandle[i],
                                    &gEfiDevicePathProtocolGuid,
@@ -1943,7 +1969,7 @@ EFI_STATUS MFTReadFromPartition(UINT16 DeviceType, long long SectorCount)
 
 		 // the USB we save our *.efi file and relative resource files..
 		 //if (device[i].DeviceType == DeviceType && device[i].SectorCount == SectorCount)
-		 if (device[i].DeviceType == DeviceType && device[i].SectorCount == 522596352)
+		 //if (device[i].DeviceType == DeviceType && device[i].SectorCount == device[4].SectorCount)
 		 {
 		    //DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
 		 	Status = gBS->HandleProtocol(ControllerHandle[i], &gEfiBlockIoProtocolGuid, (VOID * *) &BlockIo );                                                
@@ -1959,22 +1985,25 @@ EFI_STATUS MFTReadFromPartition(UINT16 DeviceType, long long SectorCount)
 					 if (device[i].SectorCount <= sector_count)
 					 {
 						  DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: device[i].SectorCount <= sector_count: %ld device[i].SectorCount: %ld\n", __LINE__, sector_count, device[i].SectorCount);
-						  return EFI_SUCCESS;
+						  continue;
 					 }
 
+					//sector_count = 6858752;
 	        	    // Read FAT32 file system partition infomation , minimum unit is sector.
 	        	 	DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X sector_count:%ld\n", __LINE__, Status, sector_count);
 
 	        	 	// sector_count: MFT start , and plus 5 * 2: $Root table, we need the A0 attribute to analysis items of root path.
-	        	 	Status = DiskIo->ReadDisk( DiskIo, BlockIo->Media->MediaId, DISK_BUFFER_SIZE * (sector_count), DISK_MFT_BUFFER_SIZE, BufferMFT);
-		            if ( EFI_SUCCESS == Status )
-		            {
-						  for (int j = 0; j < 250; j++)
-						  {
-						  		;//DebugPrint1(DISK_READ_BUFFER_X + (j % 32) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 32), "%02X ", BufferMFT[j] & 0xff);
-						  }
-				     }
-		        	 
+	        	 	Status = DiskIo->ReadDisk( DiskIo, BlockIo->Media->MediaId, DISK_BUFFER_SIZE * (sector_count + 5 *2), DISK_BUFFER_SIZE * 2, BufferMFT);
+	        	 	if (EFI_ERROR(Status))
+	        	 	{
+						DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X sector_count:%ld\n", __LINE__, Status, sector_count);
+						return Status;
+	        	 	}
+					for (int j = 0; j < 250; j++)
+					{
+						DebugPrint1(DISK_READ_BUFFER_X + (j % 16) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 16), "%02X ", BufferMFT[j] & 0xff);
+					}
+
 				 	//Analysis MFT of NTFS File System..
 				 	MFTDollarRootFileAnalysisBuffer(BufferMFT);
 				 	//MFTDollarRootAnalysisBuffer(BufferMFTDollarRoot);	
@@ -2131,8 +2160,8 @@ EFI_STATUS PartitionAnalysisFSM1(UINT16 DeviceType, long long SectorCount)
     EFI_HANDLE *ControllerHandle = NULL;
     EFI_DEVICE_PATH_TO_TEXT_PROTOCOL *DevPathToText;
     EFI_BLOCK_IO_PROTOCOL           *BlockIo;
-    UINT8 Buffer1[DISK_BUFFER_SIZE];
-    UINT8 BufferBlock[DISK_BLOCK_BUFFER_SIZE];
+    UINT8 Buffer1[DISK_BUFFER_SIZE] = {0};
+    UINT8 BufferBlock[DISK_BLOCK_BUFFER_SIZE] = {0};
     EFI_DISK_IO_PROTOCOL            *DiskIo;
 
     sector_count = 0;
@@ -2158,7 +2187,9 @@ EFI_STATUS PartitionAnalysisFSM1(UINT16 DeviceType, long long SectorCount)
     DEBUG ((EFI_D_INFO, "Before for\n", Status));
     //DebugPrint1(350, 16 * 5, "%d: %x\n", __LINE__, Status);
 
-    for (i = 0; i < NumHandles; i++)
+	for (i = 8; i < 9; i++)
+    //for (i = 0; i < NumHandles; i++)
+
     {
     	//DebugPrint1(350, 16 * 6, "%d: %x\n", __LINE__, Status);
         EFI_DEVICE_PATH_PROTOCOL *DiskDevicePath;
@@ -2184,11 +2215,12 @@ EFI_STATUS PartitionAnalysisFSM1(UINT16 DeviceType, long long SectorCount)
 		 TextDevicePathAnalysisCHAR16(TextDevicePath, &device[i], i);
     	 
         if (TextDevicePath) gBS->FreePool(TextDevicePath);
-        //DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d device[i].DeviceType: %d, device[i].SectorCount: %lld\n", __LINE__, device[i].DeviceType, device[i].SectorCount);
+        DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d device[i].DeviceType: %d, device[i].SectorCount: %lld\n", __LINE__, device[i].DeviceType, device[i].SectorCount);
 
 		 // the USB we save our *.efi file and relative resource files..
 		 //if (device[i].DeviceType == DeviceType && device[i].SectorCount == SectorCount)
-		 if (device[i].DeviceType == DeviceType && device[i].SectorCount == 522596352)
+		 //if (device[i].DeviceType == DeviceType && device[i].SectorCount == device[4].SectorCount)
+		 //if (device[i].DeviceType == DeviceType && device[i].SectorCount == 522596352)
 		 {
 		    //DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
 		 	Status = gBS->HandleProtocol(ControllerHandle[i], &gEfiBlockIoProtocolGuid, (VOID * *) &BlockIo );                                                
@@ -2204,7 +2236,7 @@ EFI_STATUS PartitionAnalysisFSM1(UINT16 DeviceType, long long SectorCount)
 					 if (device[i].SectorCount <= sector_count)
 					 {
 						  DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: device[i].SectorCount <= sector_count \n", __LINE__);
-						  return EFI_SUCCESS;
+						  continue;
 					 }
 
 					 // read from USB by sector(512B)
@@ -2215,7 +2247,7 @@ EFI_STATUS PartitionAnalysisFSM1(UINT16 DeviceType, long long SectorCount)
 		            {
 						  for (int j = 0; j < 250; j++)
 						  {
-						  		DebugPrint1(DISK_READ_BUFFER_X + (j % 32) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 32), "%02X ", Buffer1[j] & 0xff);
+						  		DebugPrint1(DISK_READ_BUFFER_X + (j % 16) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 16), "%02X ", Buffer1[j] & 0xff);
 						  }
 				     }
 		        	 
@@ -2349,7 +2381,7 @@ VOID GraphicsLayerCompute(int iMouseX, int iMouseY, UINT8 MouseClickFlag)
     Color.Blue	  = 0x00;
 
 	// this is draw a rectangle when mouse move on disk partition 
-	for (UINT16 i = 0; i < 12; i++)
+	for (UINT16 i = 0; i < NumHandles; i++)
 	{		
 		if (iMouseX >= MyComputerPositionX + 50 && iMouseX <= MyComputerPositionX + 50 + 16 * 6
 			&& iMouseY >= MyComputerPositionY + i * 16 + 16 * 2 && iMouseY <= MyComputerPositionY + i * 16 + 16 * 3)
@@ -2362,7 +2394,7 @@ VOID GraphicsLayerCompute(int iMouseX, int iMouseY, UINT8 MouseClickFlag)
 			RectangleDrawIntoBuffer(pMouseSelectedBuffer, 0,  0, 31, 15, 1,  Color, 32);
 			DisplayItemsOfPartition(i);
 			PreviousItem = i;
-	       GraphicsCopy(pDeskDisplayBuffer, pMouseSelectedBuffer, ScreenWidth, ScreenHeight, 32, 16, MyComputerPositionX + 50, MyComputerPositionY  + i * 16 + 16 * 2);	
+	       GraphicsCopy(pDeskDisplayBuffer, pMouseSelectedBuffer, ScreenWidth, ScreenHeight, 32, 16, MyComputerPositionX + 50, MyComputerPositionY  + i * (16 + 2) + 16 * 2);	
 		}
 	}
     
@@ -2374,9 +2406,9 @@ VOID GraphicsLayerCompute(int iMouseX, int iMouseY, UINT8 MouseClickFlag)
 		{
 			for (j = 0; j < 32; j++)
 			{	
-				pMouseSelectedBuffer[(i * 32 + j) * 4]     = pDeskDisplayBuffer[((ScreenHeight - 21 + i) * ScreenWidth +  16 + j) * 4];
-				pMouseSelectedBuffer[(i * 32 + j) * 4 + 1] = pDeskDisplayBuffer[((ScreenHeight - 21 + i) * ScreenWidth +  16 + j) * 4 + 1];
-				pMouseSelectedBuffer[(i * 32 + j) * 4 + 2] = pDeskDisplayBuffer[((ScreenHeight - 21 + i) * ScreenWidth +  16 + j) * 4 + 2];			
+				pMouseSelectedBuffer[(i * 32 + j) * 4]     = pDeskDisplayBuffer[((MyComputerPositionX + 50 + i) * ScreenWidth +  MyComputerPositionY  + i * (16 + 2) + 16 * 2 + j) * 4];
+				pMouseSelectedBuffer[(i * 32 + j) * 4 + 1] = pDeskDisplayBuffer[((MyComputerPositionX + 50 + i) * ScreenWidth +  MyComputerPositionY  + i * (16 + 2) + 16 * 2 + j) * 4 + 1];
+				pMouseSelectedBuffer[(i * 32 + j) * 4 + 2] = pDeskDisplayBuffer[((MyComputerPositionX + 50 + i) * ScreenWidth +  MyComputerPositionY  + i * (16 + 2) + 16 * 2 + j) * 4 + 2];			
 			}
 		}
 		 //RectangleFillIntoBuffer(UINT8 * pBuffer,IN UINTN x0,UINTN y0,UINTN x1,UINTN y1,IN UINTN BorderWidth,IN EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color)
@@ -3074,7 +3106,7 @@ EFI_STATUS PartitionUSBReadAsynchronous()
         {
               for (int j = 0; j < 250; j++)
               {
-                    DebugPrint1(DISK_READ_BUFFER_X + (j % 50) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 50) , "%02X ", Buffer1[j] & 0xff);
+                    DebugPrint1(DISK_READ_BUFFER_X + (j % 16) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 16) , "%02X ", Buffer1[j] & 0xff);
               }
          }
 
@@ -3228,7 +3260,7 @@ EFI_STATUS PartitionAnalysis()
 {    
     DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d PartitionAnalysisFSM\n", __LINE__);
     EFI_STATUS Status ;
-    UINTN NumHandles, i;
+    UINTN i;
     EFI_HANDLE *ControllerHandle = NULL;
     EFI_DEVICE_PATH_TO_TEXT_PROTOCOL *DevPathToText;
     EFI_DISK_IO_PROTOCOL            *DiskIo;
@@ -3268,7 +3300,7 @@ EFI_STATUS PartitionAnalysis()
         }
 
         CHAR16 *TextDevicePath = DevPathToText->ConvertDevicePathToText(DiskDevicePath, TRUE, TRUE);
-		 //DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X Partition: %s\n", __LINE__, Status, TextDevicePath);
+		 DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X Partition: %s\n", __LINE__, Status, TextDevicePath);
 		 TextDevicePathAnalysisCHAR16(TextDevicePath, &device[i], i);
     	            
         if (TextDevicePath) gBS->FreePool(TextDevicePath);		 
@@ -3333,7 +3365,7 @@ EFI_STATUS PartitionAnalysisFSM()
         CHAR16 *TextDevicePath = DevPathToText->ConvertDevicePathToText(DiskDevicePath, TRUE, TRUE);
 
         // first display
-    	 //DebugPrint1(DISK_READ_BUFFER_X, DISK_READ_BUFFER_Y + 16 * i, "%d: %s\n", __LINE__, TextDevicePath);
+    	 //DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: %s\n", __LINE__, TextDevicePath);
         //DEBUG ((EFI_D_INFO, "%s\n", TextDevicePath));
 
 		 TextDevicePathAnalysisCHAR16(TextDevicePath, &device[i], i);
@@ -3368,7 +3400,7 @@ EFI_STATUS PartitionAnalysisFSM()
 		            {
 						  for (int j = 0; j < 250; j++)
 						  {
-						  		DebugPrint1(DISK_READ_BUFFER_X + (j % 32) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 32), "%02X ", Buffer1[j] & 0xff);
+						  		DebugPrint1(DISK_READ_BUFFER_X + (j % 16) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 16), "%02X ", Buffer1[j] & 0xff);
 						  }
 				     }
 		        	 
@@ -3478,7 +3510,7 @@ EFI_STATUS RootPathAnalysisFSM()
 		            {
 						  for (int j = 0; j < 250; j++)
 						  {
-						  		DebugPrint1(DISK_READ_BUFFER_X + (j % 32) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 32), "%02X ", Buffer1[j] & 0xff);
+						  		DebugPrint1(DISK_READ_BUFFER_X + (j % 16) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 16), "%02X ", Buffer1[j] & 0xff);
 						  }
 				     }
 		        	 
@@ -3592,7 +3624,7 @@ EFI_STATUS GetFatTableFSM()
                         CopyMem(FAT32_Table, Buffer1, DISK_BUFFER_SIZE);
 						  for (int j = 0; j < 250; j++)
 						  {
-						  		DebugPrint1(DISK_READ_BUFFER_X + (j % 32) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 32), "%02X ", Buffer1[j] & 0xff);
+						  		DebugPrint1(DISK_READ_BUFFER_X + (j % 16) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 16), "%02X ", Buffer1[j] & 0xff);
 						  }
 				     } 
 				     
@@ -4296,7 +4328,7 @@ EFI_STATUS WindowCreateUseBuffer(UINT8 *pBuffer, UINT8 *pParent, UINT16 Width, U
 	Color.Green = 0x00;
 	int x, y;
 
-	for (UINT16 i = 0 ; i < 12 ; i++)
+	for (UINT16 i = 0 ; i < NumHandles ; i++)
 	{
 		x = 50;
 		y = i * 18 + 16 * 2;		
@@ -4546,12 +4578,22 @@ EFI_STATUS DiskReadUseDiskIo(UINT32   MediaId,
 
 int FSM_Event = READ_PATITION_EVENT;
 
+int flag = 0;
 EFIAPI HandleEnterPressed()
 {
 	DEBUG ((EFI_D_INFO, "%d HandleEnterPressed\n", __LINE__));
 	
     //PartitionUSBReadSynchronous();
     //PartitionUSBReadAsynchronous();
+
+	if (flag == 0)	
+	{
+		PartitionAnalysisFSM1(device[8].DeviceType, device[8].SectorCount);
+		MFTReadFromPartition(device[8].DeviceType, device[8].SectorCount);
+		flag = 1;
+	}
+	
+    MFTDollarRootFileAnalysisBuffer(BufferMFT);
 
 	DEBUG ((EFI_D_INFO, "%d HandleEnterPressed\n", __LINE__));
 
@@ -4617,6 +4659,21 @@ HandleKeyboardEvent (
 			    toggleState  = KeyData.KeyState.KeyToggleState;
                 
                pKeyboardInputBuffer[keyboard_input_count++] = uniChar;
+               
+               display_sector_number = uniChar - '0';
+               
+               if (display_sector_number > 10)
+               {
+                   display_sector_number = 10;                     
+               }
+               
+               if (display_sector_number < 0)
+               {
+                   display_sector_number = 0;                     
+               }
+               
+               DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: uniChar: %d display_sector_number: %d \n", __LINE__, uniChar, display_sector_number);
+               
 
 			    // Enter pressed
 		     	 if (0x0D == uniChar)
@@ -4624,6 +4681,7 @@ HandleKeyboardEvent (
 		        	keyboard_input_count = 0;
 		        	memset(pKeyboardInputBuffer, '\0', KEYBOARD_BUFFER_LENGTH);
 		     	 	//DebugPrint1(DISPLAY_KEYBOARD_X, DISPLAY_KEYBOARD_Y, "%a keyboard_input_count: %04d enter pressed", pKeyboardInputBuffer, keyboard_input_count);
+
 		     	 	HandleEnterPressed();
 		     	 }
 		     	 else
