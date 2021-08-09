@@ -1653,29 +1653,52 @@ typedef struct {
 }INDEX_ITEM;
 
 
-EFI_STATUS  MFTDollarIndexAnalysisBuffer(UINT8 *pBuffer)
+EFI_STATUS  MFTIndexItemsBufferAnalysis(UINT8 *pBuffer)
 {
-	INDEX_HEADER *p = NULL;
+	UINT8 *p = NULL;
 	
-	p = (INDEX_HEADER *)AllocateZeroPool(DISK_BUFFER_SIZE * 2);
+	p = (UINT8 *)AllocateZeroPool(DISK_BUFFER_SIZE * 2);
+
+	if (NULL == p)
+	{
+		DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d NULL == p\n", __LINE__);
+		return EFI_SUCCESS;
+	}
 	
-	memcpy(p, pBuffer[512 * 2], DISK_BUFFER_SIZE);
+	//memcpy(p, pBuffer[512 * 2], DISK_BUFFER_SIZE);
+	for (UINT16 i = 0; i < 512 * 2; i++)
+		p[i] = pBuffer[i];
 
 	//IndexEntryOffset:索引项的偏移 相对于当前位置
-	DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d IndexEntryOffset: %d IndexEntrySize: %d\n", __LINE__, 
-																     BytesToInt4(p->IndexEntryOffset),
-																     BytesToInt4(p->IndexEntrySize));
+	DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d IndexEntryOffset: %llu IndexEntrySize: %llu\n", __LINE__, 
+																     BytesToInt4(((INDEX_HEADER *)p)->IndexEntryOffset),
+																     BytesToInt4(((INDEX_HEADER *)p)->IndexEntrySize));
 
 	// 相对于当前位置 need to add size before this Byte.
-	UINT8 length = BytesToInt4(p->IndexEntryOffset) + 24;
+	UINT8 length = BytesToInt4(((INDEX_HEADER *)p)->IndexEntryOffset) + 24;
     UINT8 pItem[200] = {0};
+    UINT16 index = length;
 
-	for (UINT8 i = 0; i < 20; i++)
+	for (UINT8 i = 0; i < 4; i++)
 	{        
-		 UINT16 length2 = pBuffer[length + 8] + pBuffer[length + 9] * 16;
+		 DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%s index: %d\n", __LINE__,  index);  
+		 UINT16 length2 = pBuffer[index + 8] + pBuffer[index + 9] * 16;
+		 
         for (int i = 0; i < length2; i++)
-            pItem[i] = pBuffer[length + i];
-
+            pItem[i] = pBuffer[index + i];
+            
+		 UINT8 FileNameSize =	 ((INDEX_ITEM *)pItem)->FileNameSize;
+		 DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d attribut length2: %d FileNameSize: %d\n", __LINE__, 
+																     length2,
+																     FileNameSize);    
+		 CHAR16 attributeName[20];																     
+		 for (int i = 0; i < FileNameSize * 2; i++)
+		 {
+		 	attributeName[i] = pItem[82 + i];
+			DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: attributeName: %c\n", __LINE__, attributeName[i]);
+		 }
+		 //DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%s attributeName: %a\n", __LINE__,  attributeName);  
+		 index += length2;
 	}
 }
 
@@ -2150,9 +2173,7 @@ EFI_STATUS NTFSRootPathIndexItemsRead(UINT8 i)
 		DebugPrint1(DISK_READ_BUFFER_X + (j % 16) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 16), "%02X ", BufferMFT[j] & 0xff);
 	}
 
- 	//MFTDollarRootFileAnalysisBuffer(BufferMFT);
- 	//MFTDollarRootAnalysisBuffer(BufferMFTDollarRoot);	
-
+	MFTIndexItemsBufferAnalysis(BufferMFT);	
  	//sector_count = MBRSwitched.ReservedSelector;
  	//DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: sector_count:%ld FileLength: %d MBRSwitched.ReservedSelector:%ld\n",  __LINE__, sector_count, FileLength, MBRSwitched.ReservedSelector);
 
