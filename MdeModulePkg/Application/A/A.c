@@ -9,7 +9,7 @@ ToDo:
 1. ReadFileFromPath; OK
 2. Fix trigger event with mouse and keyboard; OK
 3. NetWork connect baidu.com; ==> driver not found
-4. File System Simple Management; ==> current can read and write, Sub directory read.
+4. File System Simple Management; ==> current can read and write, Sub directory read,NTFS almost ok.
 5. progcess; ==> current mouse move, keyboard input, read file they can similar to process, but the real process is very complex, for example: 
 	a.register push and pop, 
 	b.progress communicate, 
@@ -544,8 +544,8 @@ UINT8 *sChineseChar = NULL;
 
 UINT8 HZK16FileReadCount = 0;
 static UINTN ScreenWidth, ScreenHeight;  
-UINT16 MyComputerWidth = 16 * 15;
-UINT16 MyComputerHeight = 16 * 30;
+UINT16 MyComputerWidth = 16 * 50;
+UINT16 MyComputerHeight = 16 * 40;
 UINT16 MyComputerPositionX = 700;
 UINT16 MyComputerPositionY = 160;
 UINT16 MouseClickWindowWidth = 300;
@@ -1437,6 +1437,7 @@ EFI_STATUS  MFTDollarRootFileAnalysisBuffer(UINT8 *pBuffer)
 	UINT16 AttributeOffset = BytesToInt2(((FILE_HEADER *)p)->AttributeOffset);
 	DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: AttributeOffset:%X \n", __LINE__, AttributeOffset);
 
+	// location of a0 attribute may be in front of 10 
 	for (int i = 0; i < 10; i++)
 	{
 		UINT8 size[4];
@@ -1905,9 +1906,9 @@ EFI_STATUS MFTReadFromPartition(UINT16 DeviceType, long long SectorCount)
     DEBUG ((EFI_D_INFO, "Before for\n", Status));
     //DebugPrint1(350, 16 * 5, "%d: %x\n", __LINE__, Status);
 
-	for (i = 8; i < 9; i++)
+	//for (i = 8; i < 9; i++)
 
-    //for (i = 0; i < NumHandles; i++)
+    for (i = 0; i < NumHandles; i++)
     {
     	//DebugPrint1(350, 16 * 6, "%d: %x\n", __LINE__, Status);
         EFI_DEVICE_PATH_PROTOCOL *DiskDevicePath;
@@ -1934,7 +1935,7 @@ EFI_STATUS MFTReadFromPartition(UINT16 DeviceType, long long SectorCount)
         if (TextDevicePath) gBS->FreePool(TextDevicePath);
 
 		 // the USB we save our *.efi file and relative resource files..
-		 //if (device[i].DeviceType == DeviceType && device[i].SectorCount == SectorCount)
+		 if (device[i].DeviceType == DeviceType && device[i].SectorCount == SectorCount)
 		 //if (device[i].DeviceType == DeviceType && device[i].SectorCount == device[4].SectorCount)
 		 {
 		    //DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
@@ -2229,8 +2230,8 @@ EFI_STATUS PartitionAnalysisFSM1(UINT16 DeviceType, long long SectorCount)
     DEBUG ((EFI_D_INFO, "Before for\n", Status));
     //DebugPrint1(350, 16 * 5, "%d: %x\n", __LINE__, Status);
 
-	for (i = 8; i < 9; i++)
-    //for (i = 0; i < NumHandles; i++)
+	//for (i = 8; i < 9; i++)
+    for (i = 0; i < NumHandles; i++)
 
     {
     	//DebugPrint1(350, 16 * 6, "%d: %x\n", __LINE__, Status);
@@ -2260,7 +2261,7 @@ EFI_STATUS PartitionAnalysisFSM1(UINT16 DeviceType, long long SectorCount)
         DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d device[i].DeviceType: %d, device[i].SectorCount: %lld\n", __LINE__, device[i].DeviceType, device[i].SectorCount);
 
 		 // the USB we save our *.efi file and relative resource files..
-		 //if (device[i].DeviceType == DeviceType && device[i].SectorCount == SectorCount)
+		 if (device[i].DeviceType == DeviceType && device[i].SectorCount == SectorCount)
 		 //if (device[i].DeviceType == DeviceType && device[i].SectorCount == device[4].SectorCount)
 		 //if (device[i].DeviceType == DeviceType && device[i].SectorCount == 522596352)
 		 {
@@ -2335,7 +2336,6 @@ DisplayItemsOfPartition(UINT16 Index)
 	// others use this code must be careful...
 	if (device[Index].DeviceType == 1)
 	{
-		return;
 		PartitionAnalysisFSM1(device[Index].DeviceType, device[Index].SectorCount);
 		RootPathAnalysisFSM1(device[Index].DeviceType, device[Index].SectorCount);
 		UINT16 valid_count = 0;
@@ -2344,12 +2344,10 @@ DisplayItemsOfPartition(UINT16 Index)
 			if (pItems[i].FileName[0] != 0xE5 && (pItems[i].Attribute[0] == 0x20 
 			    || pItems[i].Attribute[0] == 0x10))
 	       {
-	        	DebugPrint2(0, 8 * 16 + (valid_count) * 16, pMyComputerBuffer, "%d FileName:%2c%2c%2c%2c%2c%2c%2c%2c ExtensionName:%2c%2c%2c StartCluster:%02X%02X%02X%02X FileLength: %02X%02X%02X%02X Attribute: %02X    ", __LINE__,
+	        	DebugPrint2(0, 8 * 16 + (valid_count) * 16, pMyComputerBuffer, "%d %2c%2c%2c%2c%2c%2c%2c%2c.%2c%2c%2c FileLength: %d Attribute: %02X    ", __LINE__,
 	                                            pItems[i].FileName[0], pItems[i].FileName[1], pItems[i].FileName[2], pItems[i].FileName[3], pItems[i].FileName[4], pItems[i].FileName[5], pItems[i].FileName[6], pItems[i].FileName[7],
 	                                            pItems[i].ExtensionName[0], pItems[i].ExtensionName[1],pItems[i].ExtensionName[2],
-	                                            pItems[i].StartClusterHigh2B[0], pItems[i].StartClusterHigh2B[1],
-	                                            pItems[i].StartClusterLow2B[0], pItems[i].StartClusterLow2B[1],
-	                                            pItems[i].FileLength[0], pItems[i].FileLength[1], pItems[i].FileLength[2], pItems[i].FileLength[3],
+	                                            BytesToInt4(pItems[i].FileLength),
 	                                            pItems[i].Attribute[0]);
 				
 				valid_count++;
@@ -2359,6 +2357,8 @@ DisplayItemsOfPartition(UINT16 Index)
 		{
 			PartitionAnalysisFSM1(device[Index].DeviceType, device[Index].SectorCount);
 			MFTReadFromPartition(device[Index].DeviceType, device[Index].SectorCount);
+	    	MFTDollarRootFileAnalysisBuffer(BufferMFT);			
+		    NTFSRootPathIndexItemsRead(Index);
 		}
 }
 
@@ -3855,15 +3855,6 @@ EFIAPI HandleEnterPressed()
     //PartitionUSBReadSynchronous();
     //PartitionUSBReadAsynchronous();
 
-	if (flag == 0)	
-	{
-		PartitionAnalysisFSM1(device[8].DeviceType, device[8].SectorCount);
-		MFTReadFromPartition(device[8].DeviceType, device[8].SectorCount);
-    	MFTDollarRootFileAnalysisBuffer(BufferMFT);
-		flag = 1;
-	}
-	
-    NTFSRootPathIndexItemsRead(8);
 
 	DEBUG ((EFI_D_INFO, "%d HandleEnterPressed\n", __LINE__));
 	return EFI_SUCCESS;
