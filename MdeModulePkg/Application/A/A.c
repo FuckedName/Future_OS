@@ -1347,11 +1347,11 @@ VOID EFIAPI DebugPrint2 (UINT16 x, UINT16 y, UINT8 *pBuffer, IN  CONST CHAR8  *F
 
 EFI_STATUS StrCmpSelf(UINT8 *p1, UINT8 *p2, UINT16 length)
 {
-	DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: \n", __LINE__);
+	//DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: \n", __LINE__);
 	
 	for (int i = 0; i < length; i++)
 	{
-		DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%02X %02X ", p1[i], p2[i]);
+		//DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%02X %02X ", p1[i], p2[i]);
 		if (p1[i] != p2[i])
 			return -1;
 	}
@@ -2171,8 +2171,11 @@ EFI_STATUS NTFSRootPathIndexItemsRead(UINT8 i)
 	UINT8 k = 0;
 	UINT16 lastOffset = 0;
 	
-	//while(A0Indexes[k].Offset != 0)
+	//while(k < 2)
 	{
+		DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Offset:%ld OccupyCluster:%ld\n",  __LINE__, 
+																		 (A0Indexes[k].Offset + lastOffset) * 8, 
+																		 A0Indexes[k].OccupyCluster * 8);
 		// cluster need to multi with 8 then it is sector.
 	   ReadDataFromPartition(i, (A0Indexes[k].Offset + lastOffset) * 8 , A0Indexes[k].OccupyCluster * 8, BufferBlock);
 
@@ -2182,7 +2185,7 @@ EFI_STATUS NTFSRootPathIndexItemsRead(UINT8 i)
 		}
 
 		MFTIndexItemsBufferAnalysis(BufferBlock);	
-	 	//sector_count = MBRSwitched.ReservedSelector;
+		
 	 	//DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: sector_count:%ld FileLength: %d MBRSwitched.ReservedSelector:%ld\n",  __LINE__, sector_count, FileLength, MBRSwitched.ReservedSelector);
 
 	 	lastOffset = A0Indexes[k].Offset;
@@ -4547,7 +4550,7 @@ EFI_STATUS WindowCreateUseBuffer(UINT8 *pBuffer, UINT8 *pParent, UINT16 Width, U
 		if (size > 1024.0)
 		{
 			size /= 1024;	
-			sizePostfix[3] = "GB";
+			sizePostfix[0] = 'G';
 		}
 
 		//2083
@@ -4567,6 +4570,8 @@ EFI_STATUS WindowCreateUseBuffer(UINT8 *pBuffer, UINT8 *pParent, UINT16 Width, U
 	
 	y += 16;
 	y += 16;
+	
+	x = 50;
 	//3658
 	//ÄÚ
 	//2070
@@ -4578,15 +4583,16 @@ EFI_STATUS WindowCreateUseBuffer(UINT8 *pBuffer, UINT8 *pParent, UINT16 Width, U
 	x += 16;
 	
 	// Get memory infomation
-	x = 0;
+	//x = 0;
 	// Note: the other class memory can not use
 	float size = (float)MemoryParameterGet2();
 	size = size * 4;
 	size = size / (1024 * 1024);
 	CHAR8 buf[7] = {0};
 	DebugPrint2(x, y, pBuffer, "%a", float2str(size, 3, buf));
-	x += 10 * 8;
-	
+	x += 5 * 8;
+
+	//g
 	DrawChineseCharIntoBuffer2(pBuffer, x, y,          (28 - 1 ) * 94 + 10 - 1, Color, Width);  
 	x += 16;
 	return EFI_SUCCESS;
