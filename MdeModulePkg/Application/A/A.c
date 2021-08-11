@@ -3779,11 +3779,11 @@ DiskHandleComplete (
     gBS->SignalEvent(disk_handle_task.DiskIo2Token.Event);
 }
 
-
 EFI_STATUS ParametersInitial()
 {
     EFI_STATUS	Status;
 	
+    INFO("ScreenWidth:%d, ScreenHeight:%d\n", ScreenWidth, ScreenHeight);
     
 	pDeskBuffer = (UINT8 *)AllocatePool(ScreenWidth * ScreenHeight * 4); 
 	if (NULL == pDeskBuffer)
@@ -3807,16 +3807,6 @@ EFI_STATUS ParametersInitial()
 
 	iMouseX = ScreenWidth / 2;
 	iMouseY = ScreenHeight / 2;
-
-    //disk_handle_task.DiskIo2Token.Event;
-
-	/*
-	  IN  UINT32                       Type,
-	  IN  EFI_TPL                      NotifyTpl,
-	  IN  EFI_EVENT_NOTIFY             NotifyFunction,
-	  IN  VOID                         *NotifyContext,
-	  OUT EFI_EVENT                    *Event
-	*/
 
 	HZK16FileReadCount = 0;
 	FAT32_Table = NULL;
@@ -3860,35 +3850,23 @@ Main (
   IN EFI_SYSTEM_TABLE  *SystemTable
   )
 {
-    EFI_STATUS                         Status;
-    
+    EFI_STATUS  Status;    
+
     Status = gBS->LocateProtocol(&gEfiGraphicsOutputProtocolGuid, NULL, (VOID **) &GraphicsOutput);        
     if (EFI_ERROR (Status)) 
     {
-    	 DebugPrint1(100, 100, "%d %d\n", __LINE__, Status);
+    	 INFO("%X\n", Status);
         return EFI_UNSUPPORTED;
     }
-    handle = &ImageHandle;
-
-
+    
     ScreenWidth  = GraphicsOutput->Mode->Info->HorizontalResolution;
     ScreenHeight = GraphicsOutput->Mode->Info->VerticalResolution;
 
-    DEBUG(( EFI_D_INFO, "ScreenWidth:%d, ScreenHeight:%d\n", ScreenWidth, ScreenHeight));
-
-    if (-1 == ParametersInitial())
-    {
-		DEBUG(( EFI_D_INFO, "-1 == AllocateMemory1()\n"));
-    }
-    
-    
+    ParametersInitial();
+        
     ScreenInit(GraphicsOutput);
         
-	Status = MouseInit();    
-	if (EFI_ERROR (Status)) 
-    {
-        return EFI_UNSUPPORTED;
-    }
+	MouseInit();
     
 	// get partitions from api
 	PartitionAnalysis();
