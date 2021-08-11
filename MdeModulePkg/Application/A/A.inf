@@ -16,46 +16,25 @@
   ShellPkg/ShellPkg.dec
   
 [LibraryClasses]
+  BaseLib
+  BaseMemoryLib
+  DebugLib
   DevicePathLib
-  BaseLib
-  UefiRuntimeServicesTableLib
-  ReportStatusCodeLib
-  MemoryAllocationLib
-  UefiLib
-  UefiBootServicesTableLib
-  BaseMemoryLib
-  DebugLib
-  PrintLib
   HiiLib
-  UefiApplicationEntryPoint
-  PcdLib
-  UefiHiiServicesLib
-  UefiBootManagerLib
-  UefiApplicationEntryPoint
-  UefiLib
-  PcdLib
-  BaseLib
-  UefiLib
-  UefiApplicationEntryPoint
-  PcdLib
-  DebugLib
-  UefiBootServicesTableLib
-  UefiRuntimeServicesTableLib
-  BaseMemoryLib
   MemoryAllocationLib
-  SortLib
-  PrintLib
-  MemoryAllocationLib
-  BaseLib
-  BaseMemoryLib
-  DebugLib
-  ShellLib
-  UefiLib
-  UefiRuntimeServicesTableLib
-  UefiBootServicesTableLib
-  SortLib
-  PrintLib
+  PcdLib
   PeCoffGetEntryPointLib
+  PrintLib
+  ReportStatusCodeLib
+  ShellLib
+  SortLib
+  UefiApplicationEntryPoint
+  UefiBootManagerLib
+  UefiBootServicesTableLib
+  UefiHiiServicesLib
+  UefiLib
+  UefiRuntimeServicesTableLib
+
 
 [Guids]
   gEfiIfrTianoGuid                              ## CONSUMES ## GUID (Extended IFR Guid Opcode)
@@ -63,36 +42,32 @@
   gShellVariableGuid                                      ## SOMETIMES_CONSUMES ## GUID
   gShellAliasGuid                                         ## SOMETIMES_CONSUMES ## GUID
 
-
 [Protocols]
-  gEfiSmbiosProtocolGuid                        ## CONSUMES
-  gEfiSimplePointerProtocolGuid
-  gEfiHiiConfigAccessProtocolGuid               ## CONSUMES
-  gEfiGraphicsOutputProtocolGuid
-  gEfiSimpleFileSystemProtocolGuid
-  gEfiDevicePathProtocolGuid
-  gEfiShellProtocolGuid
-  gEfiShellParametersProtocolGuid                         ## PRODUCES
-  gEfiUnicodeCollation2ProtocolGuid                       # ALWAYS_CONSUMED
-  gEfiDevicePathProtocolGuid                              # ALWAYS_CONSUMED
-  gEfiLoadedImageProtocolGuid                             # ALWAYS_CONSUMED
-  gEfiSimpleFileSystemProtocolGuid                        # ALWAYS_CONSUMED
-  gEfiDevicePathToTextProtocolGuid                        # ALWAYS_CONSUMED
-  gEfiPlatformDriverOverrideProtocolGuid
-  gEfiBlockIoProtocolGuid                                 ## TO_START
-  gEfiDriverBindingProtocolGuid
+  gEfiBlockIo2ProtocolGuid                
+  gEfiBlockIoProtocolGuid                 
   gEfiComponentNameProtocolGuid    
+  gEfiDevicePathProtocolGuid
+  gEfiDevicePathProtocolGuid              
+  gEfiDevicePathToTextProtocolGuid        
+  gEfiDiskIo2ProtocolGuid
   gEfiDiskIoProtocolGuid
+  gEfiDriverBindingProtocolGuid
+  gEfiDriverFamilyOverrideProtocolGuid     
+  gEfiDriverHealthProtocolGuid            
+  gEfiGraphicsOutputProtocolGuid
+  gEfiHiiConfigAccessProtocolGuid         
+  gEfiHiiDatabaseProtocolGuid             
+  gEfiLoadedImageProtocolGuid             
   gEfiPciIoProtocolGuid
+  gEfiPlatformDriverOverrideProtocolGuid
+  gEfiShellParametersProtocolGuid         
+  gEfiShellProtocolGuid
+  gEfiSimpleFileSystemProtocolGuid
+  gEfiSimpleFileSystemProtocolGuid        
   gEfiSimplePointerProtocolGuid
   gEfiSimpleTextInputExProtocolGuid
-  gEfiShellProtocolGuid
-  gEfiDriverHealthProtocolGuid                    ## UNDEFINED
-  gEfiDriverFamilyOverrideProtocolGuid            ## UNDEFINED
-  gEfiHiiConfigAccessProtocolGuid                 ## SOMETIMES_CONSUMES
-  gEfiHiiDatabaseProtocolGuid                     ## CONSUMES
-  gEfiDiskIo2ProtocolGuid
-  gEfiBlockIo2ProtocolGuid                                 ## TO_START
+  gEfiSmbiosProtocolGuid                  
+  gEfiUnicodeCollation2ProtocolGuid   
   
 [FeaturePcd]
 
