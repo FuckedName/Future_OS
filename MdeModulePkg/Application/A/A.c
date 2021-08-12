@@ -3678,11 +3678,6 @@ SystemParameterRead (
 	//MemoryParameterGet();
 }
 
-GraphicsLayerDateTimeDispaly()
-{
-}
-
-
 // display system date & time
 STATIC
 VOID
@@ -3701,20 +3696,12 @@ DisplaySystemDateTime (
 	
    DebugPrint1(DISPLAY_DESK_HEIGHT_WEIGHT_X, DISPLAY_DESK_HEIGHT_WEIGHT_Y, "%d ScreenWidth:%d, ScreenHeight:%d\n", __LINE__, ScreenWidth, ScreenHeight);
    
-   /*DebugPrint1(DISPLAY_DESK_DATE_TIME_X - 250, DISPLAY_DESK_DATE_TIME_Y - 26, "%d: time: %8ld keyboard: %8ld mouse: %8ld parameter:%8ld\n", __LINE__,
-   																				date_time_count,
-   																				keyboard_count,
-   																				mouse_count,
-   																				parameter_count);*/
-	
-   GraphicsLayerCompute(iMouseX, iMouseY, 0);
-
-  GraphicsOutput->Blt(GraphicsOutput, 
-		            (EFI_GRAPHICS_OUTPUT_BLT_PIXEL *) pDateTimeBuffer,
-		            EfiBltBufferToVideo,
-		            0, 0, 
-		            DISPLAY_DESK_HEIGHT_WEIGHT_X, DISPLAY_DESK_HEIGHT_WEIGHT_Y, 
-		            8 * 20, 16, 0);
+   GraphicsOutput->Blt(GraphicsOutput, 
+			            (EFI_GRAPHICS_OUTPUT_BLT_PIXEL *) pDateTimeBuffer,
+			            EfiBltBufferToVideo,
+			            0, 0, 
+			            0, 16 * 8, 
+			            8 * 50, 16, 0);
 }
 
 EFI_STATUS MultiProcessInit ()
@@ -3729,11 +3716,17 @@ EFI_STATUS MultiProcessInit ()
 	
     pMouseBuffer = (UINT8 *)AllocateZeroPool(16 * 16 * 4);
     if (NULL == pMouseBuffer)
+	{
 		DEBUG ((EFI_D_INFO, "MultiProcessInit pMouseBuffer pDeskDisplayBuffer NULL\n"));
+		return -1;
+	}
 	
 	pMouseSelectedBuffer = (UINT8 *)AllocateZeroPool(16 * 16 * 4 * 2);
     if (NULL == pDeskDisplayBuffer)
+	{
 		DEBUG ((EFI_D_INFO, "ScreenInit AllocatePool pDeskDisplayBuffer NULL\n"));
+		return -1;
+	}
 		
 	MouseColor.Blue  = 0xff;
     MouseColor.Red   = 0xff;
@@ -3995,7 +3988,7 @@ EFI_STATUS ParametersInitial()
 		return -1;
 	}   
 	
-	pDateTimeBuffer = (UINT8 *)AllocatePool(8 * 16 * 50 * 4); 
+	pDateTimeBuffer = (UINT8 *)AllocateZeroPool(8 * 16 * 50 * 4); 
 	if (pDateTimeBuffer == NULL)
 	{
 		return -1;
@@ -4006,19 +3999,6 @@ EFI_STATUS ParametersInitial()
 
 	HZK16FileReadCount = 0;
 	FAT32_Table = NULL;
-
-	//refer to FatDiskIo
-	Status = gBS->CreateEvent(
-					          EVT_NOTIFY_SIGNAL,
-					          TPL_NOTIFY,
-					          DiskHandleComplete,
-					          &disk_handle_task,
-					          disk_handle_task.DiskIo2Token.Event);
-	if (EFI_ERROR (Status)) 
-    {
-    	DEBUG((EFI_D_INFO, "%d Status:%X\n", __LINE__, Status));
-       return Status;
-    }
 
 	return EFI_SUCCESS;
 }
@@ -4059,8 +4039,7 @@ Main (
     ScreenHeight = GraphicsOutput->Mode->Info->VerticalResolution;
 
     ParametersInitial();
-        
-        
+                
 	MouseInit();
     
 	// get partitions from api
