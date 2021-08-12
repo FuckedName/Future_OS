@@ -2421,7 +2421,8 @@ void RectangleFillIntoBuffer(UINT8 *pBuffer,
 
 }
 
-EFI_EVENT MultiTaskTriggerEvent;
+EFI_EVENT MultiTaskTriggerGroup1Event;
+EFI_EVENT MultiTaskTriggerGroup2Event;
 
 int Nodei = 0;
 EFI_STATUS PrintNode(EFI_DEVICE_PATH_PROTOCOL *Node)
@@ -2847,9 +2848,17 @@ VOID EFIAPI TimeSlice(
 	IN VOID           *Context
 	)
 {
+    DebugPrint1(0, 5 * 16, "%d:TimeSlice %x %lu \n", __LINE__, Context, *((UINT32 *)Context));
+    //Print(L"%lu\n", *((UINT32 *)Context));
+    if (*((UINT32 *)Context) % 100000000 == 0)
+       gBS->SignalEvent (MultiTaskTriggerGroup1Event);
+       
+    if (*((UINT32 *)Context) % 400000000 == 0)
+       gBS->SignalEvent (MultiTaskTriggerGroup2Event);
+
     
     //DEBUG ((EFI_D_INFO, "System time slice Loop ...\n"));
-    gBS->SignalEvent (MultiTaskTriggerEvent);
+    //gBS->SignalEvent (MultiTaskTriggerEvent);
 
 	return;
 }
@@ -3566,7 +3575,13 @@ DisplaySystemDateTime (
 EFI_STATUS MultiProcessInit ()
 {
     UINT16 i;
-	EFI_GUID gMultiProcessGuid  = { 0x0579257E, 0x1843, 0x45FB, { 0x83, 0x9D, 0x6B, 0x79, 0x09, 0x38, 0x29, 0xA9 } };
+
+    // task group for mouse keyboard
+	EFI_GUID gMultiProcessGroup1Guid  = { 0x0579257E, 0x1843, 0x45FB, { 0x83, 0x9D, 0x6B, 0x79, 0x09, 0x38, 0x29, 0xA9 } };
+	
+    // task group for display date time
+	EFI_GUID gMultiProcessGroup2Guid  = { 0x0579257E, 0x1843, 0x45FB, { 0x83, 0x9D, 0x6B, 0x79, 0x09, 0x38, 0x29, 0xAA } };
+	
     pMouseBuffer = (UINT8 *)AllocateZeroPool(16 * 16 * 4);
     if (NULL == pMouseBuffer)
 		DEBUG ((EFI_D_INFO, "MultiProcessInit pMouseBuffer pDeskDisplayBuffer NULL\n"));
@@ -3583,17 +3598,31 @@ EFI_STATUS MultiProcessInit ()
 	
     //DrawChineseCharIntoBuffer(pMouseBuffer, 0, 0, 0, Color, 16);
     
-    EFI_EVENT_NOTIFY       TaskProcesses[] = {DisplaySystemDateTime, HandleKeyboardEvent, HandleMouseEvent, SystemParameterRead};
+    EFI_EVENT_NOTIFY       TaskProcessesGroup1[] = {HandleKeyboardEvent, HandleMouseEvent};
 
-    for (i = 0; i < sizeof(TaskProcesses) / sizeof(EFI_EVENT_NOTIFY); i++)
+    EFI_EVENT_NOTIFY       TaskProcessesGroup2[] = {DisplaySystemDateTime};
+
+    for (i = 0; i < sizeof(TaskProcessesGroup1) / sizeof(EFI_EVENT_NOTIFY); i++)
     {
         gBS->CreateEventEx(
                           EVT_NOTIFY_SIGNAL,
                           TPL_NOTIFY,
-                          TaskProcesses[i],
+                          TaskProcessesGroup1[i],
                           NULL,
-                          &gMultiProcessGuid,
-                          &MultiTaskTriggerEvent
+                          &gMultiProcessGroup1Guid,
+                          &MultiTaskTriggerGroup1Event
+                          );
+    }    
+
+    for (i = 0; i < sizeof(TaskProcessesGroup2) / sizeof(EFI_EVENT_NOTIFY); i++)
+    {
+        gBS->CreateEventEx(
+                          EVT_NOTIFY_SIGNAL,
+                          TPL_CALLBACK,
+                          TaskProcessesGroup2[i],
+                          NULL,
+                          &gMultiProcessGroup2Guid,
+                          &MultiTaskTriggerGroup2Event
                           );
     }    
 
@@ -3607,11 +3636,20 @@ EFI_STATUS SystemTimeIntervalInit()
     EFI_STATUS	Status;
 	EFI_HANDLE	TimerOne	= NULL;
 	static const UINTN TimeInterval = 1000000;
+	
+	UINT32 *TimerCount;
+
+	TimerCount = (UINT32 *)AllocateZeroPool(4);
+	if (NULL == TimerCount)
+	{
+		DEBUG(( EFI_D_INFO, "%d, NULL == TimerCount \r\n", __LINE__));
+		return;
+	}
 
 	Status = gBS->CreateEvent(EVT_NOTIFY_SIGNAL | EVT_TIMER,
                        		TPL_CALLBACK,
                        		TimeSlice,
-                       		NULL,
+                       		(VOID *)TimerCount,
                        		&TimerOne);
 
 	if ( EFI_ERROR( Status ) )
@@ -3632,7 +3670,10 @@ EFI_STATUS SystemTimeIntervalInit()
 
 	while (1)
 	{
+		*TimerCount = *TimerCount + 1;
 		//DebugPrint1(DISPLAY_X, DISPLAY_Y, "%d: SystemTimeIntervalInit while\n", __LINE__);
+		if (*TimerCount % 100000000 == 0)
+	       DebugPrint1(0, 4 * 16, "%d: while (1) p:%x %lu \n", __LINE__, TimerCount, *TimerCount);
 	}
 	
 	gBS->SetTimer( TimerOne, TimerCancel, 0 );
