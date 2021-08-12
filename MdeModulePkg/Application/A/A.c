@@ -2283,32 +2283,12 @@ MenuButtonClickResponse()
 
 VOID GraphicsLayerMouseMove(int iMouseX, int iMouseY, UINT8 MouseClickFlag)
 {
-	EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
-	
 	// display graphics layer id mouse over, for mouse click event.
 	//DebugPrint1(DISPLAY_X, DISPLAY_Y, "%d: Graphics Layer id: %d ", __LINE__, pDeskDisplayBuffer[(iMouseY * ScreenWidth + iMouseX) * 4 + 3]);
 	
-	int i, j;
-
-	//16, ScreenHeight - 21, For event trigger
-
-	if (NULL == pMouseSelectedBuffer)
-	{
-		DEBUG ((EFI_D_INFO, "NULL == GraphicsLayerCompute"));
-		return;
-	}
-
 	MouseClickResponse();
     
 	MouseMoveoverResponse();
-    
-    //DEBUG ((EFI_D_INFO, "Line: %d\n", __LINE__));
-
-    
-    // init mouse buffer for use in use
-	DrawChineseCharIntoBuffer2(pMouseBuffer, 0, 0, 11 * 94 + 42, MouseColor, 16);
-    //DebugPrint1(DISPLAY_X, DISPLAY_Y, "%d: GraphicsLayerCompute\n", __LINE__);
-
 }
 
 
@@ -2906,9 +2886,8 @@ VOID EFIAPI TimeSlice(
     if (TimerSliceCount % 2 == 0)
        gBS->SignalEvent (MultiTaskTriggerGroup1Event);
        
-    if (TimerSliceCount % 10 == 0)
+    if (TimerSliceCount % 30 == 0)
        gBS->SignalEvent (MultiTaskTriggerGroup2Event);
-
     
     //DEBUG ((EFI_D_INFO, "System time slice Loop ...\n"));
     //gBS->SignalEvent (MultiTaskTriggerEvent);
@@ -3613,7 +3592,7 @@ DisplaySystemDateTime (
 	date_time_count++;
 	gRT->GetTime(&et, NULL);
 	
-	DebugPrint2(0, 0, pDateTimeBuffer, "%04d-%02d-%02d %02d:%02d:%02d", 
+	DebugPrint1(DISPLAY_DESK_DATE_TIME_X, DISPLAY_DESK_DATE_TIME_Y, "%04d-%02d-%02d %02d:%02d:%02d", 
 				  et.Year, et.Month, et.Day, et.Hour, et.Minute, et.Second);
 	
    DebugPrint1(DISPLAY_DESK_HEIGHT_WEIGHT_X, DISPLAY_DESK_HEIGHT_WEIGHT_Y, "%d ScreenWidth:%d, ScreenHeight:%d\n", __LINE__, ScreenWidth, ScreenHeight);
@@ -3714,7 +3693,7 @@ EFI_STATUS SystemTimeIntervalInit()
 	{
 		*TimerCount = *TimerCount + 1;
 		//DebugPrint1(DISPLAY_X, DISPLAY_Y, "%d: SystemTimeIntervalInit while\n", __LINE__);
-		if (*TimerCount % 1000000 == 0)
+		//if (*TimerCount % 1000000 == 0)
 	       DebugPrint1(0, 4 * 16, "%d: while (1) p:%x %lu \n", __LINE__, TimerCount, *TimerCount);
 	}
 	
