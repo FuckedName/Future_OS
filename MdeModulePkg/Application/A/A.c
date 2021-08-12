@@ -2309,12 +2309,6 @@ VOID GraphicsLayerMouseMove(int iMouseX, int iMouseY, UINT8 MouseClickFlag)
 	DrawChineseCharIntoBuffer2(pMouseBuffer, 0, 0, 11 * 94 + 42, MouseColor, 16);
     //DebugPrint1(DISPLAY_X, DISPLAY_Y, "%d: GraphicsLayerCompute\n", __LINE__);
 
-   GraphicsOutput->Blt(GraphicsOutput, 
-			            (EFI_GRAPHICS_OUTPUT_BLT_PIXEL *) pMouseBuffer,
-			            EfiBltBufferToVideo,
-			            0, 0, 
-			            iMouseX, iMouseX, 
-			            16, 16, 0);
 }
 
 
@@ -3642,24 +3636,6 @@ EFI_STATUS MultiProcessInit ()
     // task group for display date time
 	EFI_GUID gMultiProcessGroup2Guid  = { 0x0579257E, 0x1843, 0x45FB, { 0x83, 0x9D, 0x6B, 0x79, 0x09, 0x38, 0x29, 0xAA } };
 	
-    pMouseBuffer = (UINT8 *)AllocateZeroPool(16 * 16 * 4);
-    if (NULL == pMouseBuffer)
-	{
-		DEBUG ((EFI_D_INFO, "MultiProcessInit pMouseBuffer pDeskDisplayBuffer NULL\n"));
-		return -1;
-	}
-	
-	pMouseSelectedBuffer = (UINT8 *)AllocateZeroPool(16 * 16 * 4 * 2);
-    if (NULL == pDeskDisplayBuffer)
-	{
-		DEBUG ((EFI_D_INFO, "ScreenInit AllocatePool pDeskDisplayBuffer NULL\n"));
-		return -1;
-	}
-		
-	MouseColor.Blue  = 0xff;
-    MouseColor.Red   = 0xff;
-    MouseColor.Green = 0xff;
-
 	//DrawChineseCharIntoBuffer2(pMouseBuffer, 0, 0, 11 * 94 + 42, Color, 16);
 	
     //DrawChineseCharIntoBuffer(pMouseBuffer, 0, 0, 0, Color, 16);
@@ -3921,6 +3897,24 @@ EFI_STATUS ParametersInitial()
 	{
 		return -1;
 	}   
+	
+    pMouseBuffer = (UINT8 *)AllocateZeroPool(16 * 16 * 4);
+    if (NULL == pMouseBuffer)
+	{
+		DEBUG ((EFI_D_INFO, "MultiProcessInit pMouseBuffer pDeskDisplayBuffer NULL\n"));
+		return -1;
+	}
+	
+	pMouseSelectedBuffer = (UINT8 *)AllocateZeroPool(16 * 16 * 4 * 2);
+    if (NULL == pDeskDisplayBuffer)
+	{
+		DEBUG ((EFI_D_INFO, "ScreenInit AllocatePool pDeskDisplayBuffer NULL\n"));
+		return -1;
+	}
+		
+	MouseColor.Blue  = 0xff;
+    MouseColor.Red   = 0xff;
+    MouseColor.Green = 0xff;
 
 	iMouseX = ScreenWidth / 2;
 	iMouseY = ScreenHeight / 2;
