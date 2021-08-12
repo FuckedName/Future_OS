@@ -2246,7 +2246,7 @@ VOID GraphicsLayerCompute(int iMouseX, int iMouseY, UINT8 MouseClickFlag)
         GraphicsCopy(pDeskDisplayBuffer, pMouseSelectedBuffer, ScreenWidth, ScreenHeight, 32, 16, 15, ScreenHeight - 22);
     }
     
-    // init mouse buffer for use in use
+    // init mouse buffer with cursor
 	DrawChineseCharIntoBuffer2(pMouseBuffer, 0, 0, 11 * 94 + 42, MouseColor, 16);
     //DebugPrint1(DISPLAY_X, DISPLAY_Y, "%d: GraphicsLayerCompute\n", __LINE__);
 
@@ -2981,10 +2981,10 @@ VOID EFIAPI TimeSlice(
     DebugPrint1(0, 5 * 16, "%d TimeSlice %x %lu \n", __LINE__, Context, *((UINT32 *)Context));
     DebugPrint1(0, 6 * 16, "%d TimerSliceCount: %lu \n", __LINE__, TimerSliceCount);
     //Print(L"%lu\n", *((UINT32 *)Context));
-    if (*((UINT32 *)Context) % 100000000 == 0)
+    if (TimerSliceCount % 2 == 0)
        gBS->SignalEvent (MultiTaskTriggerGroup1Event);
        
-    if (*((UINT32 *)Context) % 300000000 == 0)
+    if (TimerSliceCount % 3 == 0)
        gBS->SignalEvent (MultiTaskTriggerGroup2Event);
 
     
@@ -3706,7 +3706,15 @@ DisplaySystemDateTime (
    																				keyboard_count,
    																				mouse_count,
    																				parameter_count);*/
+	
    GraphicsLayerCompute(iMouseX, iMouseY, 0);
+
+  GraphicsOutput->Blt(GraphicsOutput, 
+		            (EFI_GRAPHICS_OUTPUT_BLT_PIXEL *) pDateTimeBuffer,
+		            EfiBltBufferToVideo,
+		            0, 0, 
+		            DISPLAY_DESK_HEIGHT_WEIGHT_X, DISPLAY_DESK_HEIGHT_WEIGHT_Y, 
+		            8 * 20, 16, 0);
 }
 
 EFI_STATUS MultiProcessInit ()
@@ -3755,7 +3763,7 @@ EFI_STATUS MultiProcessInit ()
     {
         gBS->CreateEventEx(
                           EVT_NOTIFY_SIGNAL,
-                          TPL_CALLBACK,
+                          TPL_NOTIFY,
                           TaskProcessesGroup2[i],
                           NULL,
                           &gMultiProcessGroup2Guid,
@@ -3987,7 +3995,7 @@ EFI_STATUS ParametersInitial()
 		return -1;
 	}   
 	
-	pDateTimeBuffer = (UINT8 *)AllocatePool(8 * 16 * 20 * 4); 
+	pDateTimeBuffer = (UINT8 *)AllocatePool(8 * 16 * 50 * 4); 
 	if (pDateTimeBuffer == NULL)
 	{
 		return -1;
