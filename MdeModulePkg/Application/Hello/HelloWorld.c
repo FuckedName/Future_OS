@@ -114,310 +114,96 @@
 #include <Library/UefiBootManagerLib.h>
 #include <Library/FileExplorerLib.h>
 
+VOID PrintA (EFI_EVENT Event, VOID *Context)
+{	
+    Print( L"A" );
+}
 
-/*
- * #include <Protocol/EfiShell.h>
- * #include <guid/FileInfo.h>
- */
+VOID PrintB (EFI_EVENT Event, VOID *Context)
+{	
+    Print( L"B" );
+}
+
+VOID PrintC (EFI_EVENT Event, VOID *Context)
+{	
+    Print( L"C" );
+}
+
+VOID PrintD (EFI_EVENT Event, VOID *Context)
+{	
+    Print( L"D" );
+}
 
 
-EFI_STATUS
-EFIAPI
-BZero(
-	OUT CHAR16                    *Destination,
-	IN UINTN Length
+EFI_EVENT MultiTaskTriggerEvent1;
+EFI_EVENT MultiTaskTriggerEvent2;
+
+VOID EFIAPI TimeSlice1(
+	IN EFI_EVENT Event,
+	IN VOID           *Context
 	)
-{
-	UINT32	i;
-	CHAR8	* ptr = (CHAR8 * ) Destination;
-	for ( i = 0; i < 2 * Length; i++ )
-	{
-		ptr [i] = 0;
-	}
-	return(EFI_SUCCESS);
+{    
+	 DEBUG ((EFI_D_INFO, "TimeSlice1 :%x %lu \n", Context, *((UINT32 *)Context)));
+	 //Print(L"%lu\n", *((UINT32 *)Context));
+	 if (*((UINT32 *)Context) % 100000000 == 0)
+	 	gBS->SignalEvent (MultiTaskTriggerEvent1);
+	 	
+	 if (*((UINT32 *)Context) % 200000000 == 0)
+	 	gBS->SignalEvent (MultiTaskTriggerEvent2);
+
+	return;
 }
 
-
-EFI_STATUS OpenShellProtocol( EFI_SHELL_PROTOCOL            **gEfiShellProtocol )
+EFI_STATUS SystemTimeIntervalInit1()
 {
-	EFI_STATUS Status;
-	Status = gBS->OpenProtocol(
-		gImageHandle,
-		&gEfiShellProtocolGuid,
-		(VOID * *) gEfiShellProtocol,
-		gImageHandle,
-		NULL,
-		EFI_OPEN_PROTOCOL_GET_PROTOCOL
-		);
+    EFI_STATUS	Status;
+	EFI_HANDLE	Timer1	= NULL;
+	static const UINTN TimeInterval = 10000000;
+	UINT32 *p;
+
+	p = (UINT32 *)AllocateZeroPool(4);
+	if (NULL == p)
+	{
+		DEBUG(( EFI_D_INFO, "%d, NULL == p \r\n", __LINE__));
+		return;
+	}
+
+
+	Status = gBS->CreateEvent(EVT_NOTIFY_SIGNAL | EVT_TIMER,
+                       		TPL_CALLBACK,
+                       		TimeSlice1,
+                       		(VOID *)p,
+                       		&Timer1);
+
 	if ( EFI_ERROR( Status ) )
 	{
-		/*
-		 *
-		 * Search for the shell protocol
-		 *
-		 */
-		Status = gBS->LocateProtocol(
-			&gEfiShellProtocolGuid,
-			NULL,
-			(VOID * *) gEfiShellProtocol
-			);
-		if ( EFI_ERROR( Status ) )
-		{
-			gEfiShellProtocol = NULL;
-		}
-	}
-	return(Status);
-}
-
-
-VOID
-Ascii2UnicodeString(
-	CHAR8    *String,
-	CHAR16   *UniString
-	)
-{
-	while ( *String != '\0' )
-	{
-		*(UniString++) = (CHAR16) *(String++);
-	}
-	/*
-	 *
-	 * End the UniString with a NULL.
-	 *
-	 */
-	*UniString = '\0';
-}
-
-
-EFI_STATUS PrintNode( EFI_DEVICE_PATH_PROTOCOL *Node )
-{
-	Print( L"(%d, %d)/", Node->Type, Node->SubType );
-	return(0);
-}
-
-
-EFI_DEVICE_PATH_PROTOCOL *WalkthroughDevicePath( EFI_DEVICE_PATH_PROTOCOL *DevPath,
-						 EFI_STATUS (* CallBack)( EFI_DEVICE_PATH_PROTOCOL* ) )
-{
-	EFI_DEVICE_PATH_PROTOCOL *pDevPath = DevPath;
-
-	while ( !IsDevicePathEnd( pDevPath ) )
-	{
-		CallBack( pDevPath );
-		pDevPath = NextDevicePathNode( pDevPath );
+		DEBUG(( EFI_D_INFO, "Create Event Error! \r\n" ));
+		return(1);
 	}
 
-	return(pDevPath);
-}
+	Status = gBS->SetTimer(Timer1,
+						  TimerPeriodic,
+						  MultU64x32( TimeInterval, 1));
 
-
-/*
- * refer to ReadFileToBuffer
- * refer to GetAllCapsuleOnDisk
- * refer to BmGetNextLoadOptionBuffer
- */
-EFI_STATUS FileSystem1()
-{
-	Print( L"%d, FileSystem1 start\n", __LINE__ );
-	EFI_SIMPLE_FILE_SYSTEM_PROTOCOL *Fs = NULL;
-	EFI_FILE_HANDLE			RootDir;
-	EFI_FILE_HANDLE			FileDir;
-	EFI_STATUS			Status;
-	EFI_HANDLE			*FsHandle = NULL;
-
-	UINT16 *TempOptionNumber;
-
-	TempOptionNumber = NULL;
-	/* *CapsuleNum      = 0; */
-
-	Status = GetEfiSysPartitionFromActiveBootOption( 3, &TempOptionNumber, FsHandle );
 	if ( EFI_ERROR( Status ) )
 	{
-		return(Status);
+		DEBUG(( EFI_D_INFO, "Set Timer Error! %x\r\n", p ));
+		return(2);
 	}
 
-	Status = gBS->HandleProtocol( *FsHandle, &gEfiSimpleFileSystemProtocolGuid, (VOID * *) &Fs );
-	if ( EFI_ERROR( Status ) )
-	{
-		return(Status);
-	}
+    /**/
+    while (1)
+    {    	
+		 *p = *p + 1;
+		 if (*p % 100000000 == 0)
+	        DEBUG(( EFI_D_INFO, "while (1) p:%x %lu\r\n", p, *p));
+    }
+        
+	gBS->SetTimer( Timer1, TimerCancel, 0 );
+	gBS->CloseEvent( Timer1 );    
 
-	Status = Fs->OpenVolume( Fs, &RootDir );
-	if ( EFI_ERROR( Status ) )
-	{
-		return(Status);
-	}
-
-	Status = RootDir->Open(
-		RootDir,
-		&FileDir,
-		EFI_CAPSULE_FILE_DIRECTORY,
-		EFI_FILE_MODE_READ,
-		0
-		);
-	if ( EFI_ERROR( Status ) )
-	{
-		DEBUG( (DEBUG_ERROR, "CodLibGetAllCapsuleOnDisk fail to open RootDir!\n") );
-		RootDir->Close( RootDir );
-		return(Status);
-	}
-	RootDir->Close( RootDir );
+	return EFI_SUCCESS;
 }
-
-
-EFI_STATUS EFIAPI GetString( IN EFI_SYSTEM_TABLE *gST, CHAR16* Str )
-{
-	UINTN		Index1, Index2 = 0;
-	EFI_STATUS	Status;
-	EFI_INPUT_KEY	key;
-
-	while ( EFI_SUCCESS == (Status = gST->BootServices->WaitForEvent( 1, &(gST->ConIn->WaitForKey), &Index1 ) ) )
-	{
-		gST->ConIn->ReadKeyStroke( gST->ConIn, &key );
-
-		if ( key.UnicodeChar == 13 )
-		{
-			Str[Index2] = 0;
-			break;
-		}
-
-		if ( key.UnicodeChar != 8 )
-		{
-			Str[Index2] = key.UnicodeChar;
-			++Index2;
-			Print( L"%c", key.UnicodeChar );
-		}else  {
-			if ( Index2 > 0 )
-			{
-				Str[Index2] = 0;
-				--Index2;
-				Print( L"\b" );
-			}
-		}
-	}
-
-	Print( L"\n" );
-
-	return(Status);
-}
-
-
-EFI_FILE_PROTOCOL* EFIAPI GetFile1( IN EFI_SYSTEM_TABLE *gST )
-{
-	EFI_STATUS			Status;
-	INTN				HandleFileCount, HandleFileIndex = 0;
-	EFI_SIMPLE_FILE_SYSTEM_PROTOCOL *Sfs;
-	EFI_HANDLE			*Files = NULL;
-	EFI_FILE_PROTOCOL		*Root;
-	EFI_FILE_PROTOCOL		*file;
-	UINTN			Size = 100 ;
-/* UINTN               FileSize=512,i; */
-	CHAR16 FileName[100];
-
-	UINT8 *Buffer2 = (UINT8 *)AllocateZeroPool(100); 
-	if (Buffer2 == NULL)
-	{
-		Print( L"%d :Buffer2 == NULL\n", __LINE__  );
-	}
-
-	Print( L"%d  please input the file name : \n  ", __LINE__);
-	//GetString( gST, FileName );
-
-	Status = gST->BootServices->LocateHandleBuffer(
-													ByProtocol,
-													&gEfiSimpleFileSystemProtocolGuid,
-													NULL,
-													&HandleFileCount,
-													&Files );
-
-	if ( !EFI_ERROR( Status ) )
-	{
-		Print( L"%d==successed to find %d controllers==:%X\n", __LINE__, HandleFileCount, Status );
-
-		for ( HandleFileIndex = HandleFileCount - 1; HandleFileIndex > -1; --HandleFileIndex )
-		{
-			Status = gST->BootServices->HandleProtocol(
-														Files[HandleFileIndex],
-														&gEfiSimpleFileSystemProtocolGuid,
-														(VOID * *) &Sfs);
-
-			Print( L"%d :%X\n", __LINE__ ,Status );
-			if ( Status == EFI_SUCCESS )
-			{
-				Status = Sfs->OpenVolume( Sfs, &Root );
-                
-               Print( L"%d :%X\n", __LINE__ ,Status );
-
-				if ( Status == EFI_SUCCESS )
-				{
-					Print( L"==controller %d successed to open the volume==\n", HandleFileIndex );
-
-					Status = Root->Open( Root, &file, L"1.txt", EFI_FILE_MODE_READ | EFI_FILE_MODE_WRITE, 0 );
-               	Print( L"%d :%X\n", __LINE__ ,Status );
-               	if ( Status != EFI_SUCCESS )
-					{
-						Print( L"%d :%X\n", __LINE__ , Status);
-					}
-
-					return(file);								
-				}
-			}
-		}
-	}
-
-
-	return(NULL);
-}
-
-
-/* https://blog.csdn.net/youyudexiaowangzi/article/details/42008465 */
-
-
-#define BYTES	512
-#define EXBYTE	4
-
-VOID EFIAPI ShowHex( UINT8* Buffer, UINTN len )
-{
-	UINTN i = 0;
-	for ( i = 0; i < 52; ++i )
-	{
-		if ( i % 26 == 0 )
-			Print( L"\r\n" );
-
-		Print( L"%02x ", Buffer[i] );
-	}
-}
-
-
-VOID EFIAPI DecToChar( UINT8* CharBuff, UINT8 I )
-{
-	CharBuff[0]	= ( (I / 16) > 9) ? ('A' + (I / 16) - 10) : ('0' + (I / 16) );
-	CharBuff[1]	= ( (I % 16) > 9) ? ('A' + (I % 16) - 10) : ('0' + (I % 16) );
-}
-
-
-VOID EFIAPI DecToCharBuffer( UINT8* Buffin, UINTN len, UINT8* Buffout )
-{
-	UINTN i = 0;
-
-	for ( i = 0; i < len; ++i )
-	{
-		DecToChar( Buffout + i * 4, Buffin[i] );
-		if ( (i + 1) % 16 == 0 )
-		{
-			*(Buffout + i * 4 + 2)	= '\r';
-			*(Buffout + i * 4 + 3)	= '\n';
-		}
-		else  
-		{
-			*(Buffout + i * 4 + 2)	= ' ';
-			*(Buffout + i * 4 + 3)	= ' ';
-		}
-	}
-}
-
-
-/* https://blog.csdn.net/youyudexiaowangzi/article/details/42008465 */
 
 
 EFI_STATUS
@@ -427,171 +213,38 @@ UefiMain(
 	IN EFI_SYSTEM_TABLE  *SystemTable
 	)
 {
-	UINTN MaxRetry = 3;
-	Print( L"Hello Renqihong jiayou!!111\r\n" );
+	EFI_GUID gMultiProcessGuid1  = { 0x0579257E, 0x1843, 0x45FB, { 0x83, 0x9D, 0x6B, 0x79, 0x09, 0x38, 0x29, 0xAA } };
+	EFI_GUID gMultiProcessGuid2  = { 0x0579257f, 0x1843, 0x45FB, { 0x83, 0x9D, 0x6B, 0x79, 0x09, 0x38, 0x29, 0xAA } };
 
+    EFI_EVENT_NOTIFY TaskProcesses1[] = {PrintA, PrintB};
+    EFI_EVENT_NOTIFY TaskProcesses2[] = {PrintC, PrintD};
+    UINT8 TaskPriorityLevel1[] = {TPL_CALLBACK, TPL_CALLBACK};
+    UINT8 TaskPriorityLevel2[] = {TPL_NOTIFY, TPL_NOTIFY};
+    
+    for (int i = 0; i < sizeof(TaskProcesses1) / sizeof(EFI_EVENT_NOTIFY); i++)
+    {
+        gBS->CreateEventEx(EVT_NOTIFY_SIGNAL,
+                          TaskPriorityLevel1[i],
+                          TaskProcesses1[i],
+                          NULL,
+                          &gMultiProcessGuid1,
+                          &MultiTaskTriggerEvent1
+                          );
+    }    
 
-	/*
-	 * FileSystem1();
-	 * CoDRelocateCapsule(MaxRetry);
-	 */
-	EFI_SIMPLE_FILE_SYSTEM_PROTOCOL *Fs;
+    for (int i = 0; i < sizeof(TaskProcesses2) / sizeof(EFI_EVENT_NOTIFY); i++)
+    {
+        gBS->CreateEventEx(EVT_NOTIFY_SIGNAL,
+                          TaskPriorityLevel2[i],
+                          TaskProcesses2[i],
+                          NULL,
+                          &gMultiProcessGuid2,
+                          &MultiTaskTriggerEvent2
+                          );
+    }    
 
-
-	CHAR16 * OldLogFileName = L"test.txt";
-	/* CHAR16  *LineBuff = NULL; */
-	CHAR16			NewFileName[128]	= L"test2.txt";
-	CHAR16			ArrayBuffer[39]		= L"renqihong";
-	EFI_STATUS		Status;
-	SHELL_FILE_HANDLE	FileHandle;
-	EFI_SHELL_PROTOCOL	*gEfiShellProtocol;
-	/* CHAR8 *Ptr = NULL; */
-	UINTN					NumHandles, i;
-	EFI_HANDLE				*ControllerHandle = NULL;
-	EFI_DEVICE_PATH_TO_TEXT_PROTOCOL	*DevPathToText;
-	EFI_FILE_HANDLE				FileDir;
-
-	EFI_FILE_HANDLE				RootDir;
-	INTN					HandleCount, HandleIndex;
-	EFI_HANDLE				*Controllers = NULL;
-	EFI_DISK_IO_PROTOCOL			*DiskIo;
-	EFI_BLOCK_IO_PROTOCOL			*BlockIo;
-	EFI_DEVICE_PATH_PROTOCOL		*DevicePath;
-	EFI_DEVICE_PATH_TO_TEXT_PROTOCOL	*DevicePathToText;
-	EFI_BLOCK_IO_MEDIA			*Media;
-	CHAR16					*TextOfDevicePath;
-
-	EFI_BOOT_SERVICES *gBS = SystemTable->BootServices;
-
-	UINT8 Buffer[BYTES];
-
-	UINT8 Bufferout[BYTES * EXBYTE];
-
-	UINTN			WriteSize;
-	EFI_FILE_PROTOCOL	*file = GetFile1( SystemTable );
-
-	if (NULL == file)
-	{
-		Print( L"%d :NULL == file\n", __LINE__ );
-		return EFI_SUCCESS;
-	}
-
-	Status = gBS->LocateProtocol( &gEfiDevicePathToTextProtocolGuid, NULL, (VOID * *) &DevPathToText );
-	Print( L"%d :%X\n", __LINE__ ,Status );
-	if ( EFI_ERROR( Status ) )
-	{
-		Print( L"%d, LocateProtocol gEfiDevicePathToTextProtocolGuid error: %x\n", __LINE__, Status );
-		return(Status);
-	}
-
-	Status = gBS->LocateHandleBuffer( ByProtocol, &gEfiDiskIoProtocolGuid, NULL, &NumHandles, &ControllerHandle );
-	Print( L"%d :%X %d\n", __LINE__ , Status, NumHandles );
-	if ( EFI_ERROR( Status ))
-	{
-		Print( L"%d, LocateHandleBuffer gEfiDiskIoProtocolGuid error: %x\n", __LINE__, Status );
-		return(Status);
-	}
-
-	Print( L"%d, NumHandles: %d\n", __LINE__, NumHandles );
-
-	Print( L"Before for\n", Status );
-	for ( i = 0; i < NumHandles; i++ )
-	{
-		Status = gBS->HandleProtocol(ControllerHandle[i],
-										&gEfiBlockIoProtocolGuid,
-										(VOID * *) &BlockIo );
-       Print( L"%d :%X\n", __LINE__ ,Status );
-
-		if ( EFI_SUCCESS == Status )
-		{
-			Status = gBS->HandleProtocol( ControllerHandle[i],
-									      &gEfiDiskIoProtocolGuid,
-									      (VOID * *) &DiskIo );
-
-	       Print( L"%d :%X\n", __LINE__ ,Status );
-			if ( Status == EFI_SUCCESS )
-			{
-				Print( L"%d ==read something==%d\n", __LINE__, BlockIo->Media->MediaId);
-
-				Status = DiskIo->ReadDisk( DiskIo, BlockIo->Media->MediaId, 0, BYTES, Buffer );
-				Print( L"%d :%X\n", __LINE__ ,Status );
-
-				if ( EFI_SUCCESS == Status )
-				{
-					Buffer[10] = '\0';
-					Print( L"%d :%s\n", __LINE__ , Buffer );
-
-					DecToCharBuffer(Buffer, BYTES, Bufferout);
-			       
-			       ShowHex(Buffer, BYTES);
-				}
-			}		
-		}
-		else 
-		{
-			Print( L"!!failed to read disk!!\n" );
-		}
-
-        Status = gBS->HandleProtocol( ControllerHandle[i],
-                                      &gEfiDevicePathProtocolGuid,
-                                      (VOID * *) &DevicePath );
-        Print( L"%d :%X\n", __LINE__ ,Status );
-
-        if ( EFI_SUCCESS == Status )
-        {
-            Status = gBS->LocateProtocol( &gEfiDevicePathToTextProtocolGuid,
-                                            NULL,
-                                            (VOID * *) &DevicePathToText );
-            Print( L"%d :%X\n", __LINE__ ,Status );
-
-            if ( EFI_SUCCESS == Status )
-            {
-                
-                UINTN           Size = 100 ;
-                UINT8        Buffer2[100];
-                Status = file->Read(file, &Size, Buffer2);
-                Print( L"%d :%X\n", __LINE__ , Status );
-                if ( EFI_SUCCESS == Status )
-                {
-                    Print( L"%d Read buffer:%s\n", __LINE__ , Buffer2);
-                }                
-            }
-        }
-
-		file->Close( file );
-		
-
-		EFI_DEVICE_PATH_PROTOCOL *DiskDevicePath;
-		Status = gBS->OpenProtocol( ControllerHandle[i],
-								    &gEfiDevicePathProtocolGuid,
-								    (VOID * *) &DiskDevicePath,
-								    gImageHandle,
-								    NULL,
-								    EFI_OPEN_PROTOCOL_GET_PROTOCOL );
-		if ( EFI_ERROR( Status ) )
-		{
-			Print( L"Status = gBS->OpenProtocol error index %d: %x\n", i, Status );
-			return EFI_SUCCESS;
-		}
-		Print( L"%d\n", __LINE__ );
-
-		CHAR16 *TextDevicePath = 0;		
-
-		TextDevicePath = DevPathToText->ConvertDevicePathToText( DiskDevicePath, TRUE, TRUE );
-		Print( L"%d %s\n", __LINE__, TextDevicePath );
-
-		if ( TextDevicePath )
-			gBS->FreePool( TextDevicePath );
-
-		WalkthroughDevicePath( DiskDevicePath, PrintNode );
-
-		Print( L"\n\n" );
-	}
+	 SystemTimeIntervalInit1();
 
 	return(EFI_SUCCESS);
 }
-
-
-
-
 
