@@ -2161,18 +2161,26 @@ VOID GraphicsLayerCompute(int iMouseX, int iMouseY, UINT8 MouseClickFlag)
 	//16, ScreenHeight - 21, For event trigger
 
     EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;  
-
-	if (NULL == pMouseSelectedBuffer)
-	{
-		DEBUG ((EFI_D_INFO, "NULL == GraphicsLayerCompute"));
-		return;
-	}
     
     //DEBUG ((EFI_D_INFO, "Line: %d\n", __LINE__));
 
     Color.Red   = 0xff;
     Color.Green = 0x00;
     Color.Blue	  = 0x00;
+
+		//start button
+    if (iMouseX >= 0 && iMouseX <= 16 + 16 * 2
+        && iMouseY >= ScreenHeight - 21 && iMouseY <= ScreenHeight)
+    {   
+    	DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: iMouseX: %d iMouseY: %d \n",  __LINE__, iMouseX, iMouseY);
+		RectangleDrawIntoBuffer(pMouseSelectedBuffer, 0,  0, 31, 15, 1,  Color, 32);
+    	//MenuButtonClickResponse();
+    	Color.Red   = 0xFF;
+	    Color.Green = 0xFF;
+	    Color.Blue	= 0xFF;
+	    //RectangleFillIntoBuffer(pDeskBuffer, 3,     ScreenHeight - 21, 13,     ScreenHeight - 11, 1, Color);
+    	GraphicsCopy(pDeskDisplayBuffer, pMouseSelectedBuffer, ScreenWidth, ScreenHeight, 32, 16, 3, ScreenHeight - 21);
+    }
     
     // init mouse buffer with cursor
 	DrawChineseCharIntoBuffer2(pMouseBuffer, 0, 0, 11 * 94 + 42, MouseColor, 16);
@@ -2191,9 +2199,11 @@ VOID GraphicsLayerCompute(int iMouseX, int iMouseY, UINT8 MouseClickFlag)
 
 MouseMoveoverResponse()
 {
-
+ 	//DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: iMouseX: %d iMouseY: %d \n",  __LINE__, iMouseX, iMouseY);
 	EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
 	Color.Red = 0xff;
+	Color.Green= 0xff;
+	Color.Blue= 0x00;
 
 	// this is draw a rectangle when mouse move on disk partition in my computer window
 	for (UINT16 i = 0; i < PartitionCount; i++)
@@ -2213,12 +2223,6 @@ MouseMoveoverResponse()
 		}
 	}
 
-	//start button
-    if (iMouseX >= 0 && iMouseX <= 16 + 16 * 2
-        && iMouseY >= ScreenHeight - 21 && iMouseY <= ScreenHeight)
-    {   
-    	MenuButtonClickResponse();
-    }
 
 }
 
@@ -2281,8 +2285,10 @@ MenuButtonClickResponse()
     GraphicsCopy(pDeskDisplayBuffer, pMouseSelectedBuffer, ScreenWidth, ScreenHeight, 32, 16, 15, ScreenHeight - 22); 
 }
 
-VOID GraphicsLayerMouseMove(int iMouseX, int iMouseY, UINT8 MouseClickFlag)
-{
+VOID GraphicsLayerMouseMove()
+{	
+    //DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: GraphicsLayerMouseMove\n",  __LINE__);
+	
 	// display graphics layer id mouse over, for mouse click event.
 	//DebugPrint1(DISPLAY_X, DISPLAY_Y, "%d: Graphics Layer id: %d ", __LINE__, pDeskDisplayBuffer[(iMouseY * ScreenWidth + iMouseX) * 4 + 3]);
 	
@@ -2886,7 +2892,7 @@ VOID EFIAPI TimeSlice(
     if (TimerSliceCount % 2 == 0)
        gBS->SignalEvent (MultiTaskTriggerGroup1Event);
        
-    if (TimerSliceCount % 30 == 0)
+    if (TimerSliceCount % 20 == 0)
        gBS->SignalEvent (MultiTaskTriggerGroup2Event);
     
     //DEBUG ((EFI_D_INFO, "System time slice Loop ...\n"));
@@ -3559,7 +3565,7 @@ HandleMouseEvent (IN EFI_EVENT Event, IN VOID *Context)
     }
     //DebugPrint1(DISPLAY_X, DISPLAY_Y, "%d: HandleMouseEvent\n", __LINE__);
     //DEBUG ((EFI_D_INFO, "\n"));
-    GraphicsLayerMouseMove(iMouseX, iMouseY, MouseClickFlag);
+    GraphicsLayerMouseMove();
 	
 	gBS->WaitForEvent( 1, &gMouse->WaitForInput, &Index );
 }
@@ -3596,13 +3602,13 @@ DisplaySystemDateTime (
 				  et.Year, et.Month, et.Day, et.Hour, et.Minute, et.Second);
 	
    DebugPrint1(DISPLAY_DESK_HEIGHT_WEIGHT_X, DISPLAY_DESK_HEIGHT_WEIGHT_Y, "%d ScreenWidth:%d, ScreenHeight:%d\n", __LINE__, ScreenWidth, ScreenHeight);
-   
+   /*
    GraphicsOutput->Blt(GraphicsOutput, 
 			            (EFI_GRAPHICS_OUTPUT_BLT_PIXEL *) pDateTimeBuffer,
 			            EfiBltBufferToVideo,
 			            0, 0, 
 			            0, 16 * 8, 
-			            8 * 50, 16, 0);
+			            8 * 50, 16, 0);*/
 }
 
 EFI_STATUS MultiProcessInit ()
@@ -3884,8 +3890,8 @@ EFI_STATUS ParametersInitial()
 		return -1;
 	}
 	
-	pMouseSelectedBuffer = (UINT8 *)AllocateZeroPool(16 * 16 * 4 * 2);
-    if (NULL == pDeskDisplayBuffer)
+	pMouseSelectedBuffer = (UINT8 *)AllocateZeroPool(16 * 16 * 2 * 4);
+    if (NULL == pMouseSelectedBuffer)
 	{
 		DEBUG ((EFI_D_INFO, "ScreenInit AllocatePool pDeskDisplayBuffer NULL\n"));
 		return -1;
