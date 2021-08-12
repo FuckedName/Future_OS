@@ -197,15 +197,16 @@ EFI_SIMPLE_POINTER_PROTOCOL        *gMouse;
 
 extern EFI_SIMPLE_FILE_SYSTEM_PROTOCOL *gSimpleFileSystem; 
 
-UINT8 *pMyComputerBuffer = NULL;
 
 EFI_HANDLE *handle;
 
-UINT8 *pDeskBuffer = NULL;
+UINT8 *pDeskBuffer = NULL; //Desk layer: 1
+UINT8 *pMyComputerBuffer = NULL; // MyComputer layer: 2
 UINT8 *pDeskDisplayBuffer = NULL; //desk display after multi graphicses layers compute
 UINT8 *pMouseSelectedBuffer = NULL;  // after mouse selected
 UINT8 *pMouseClickBuffer = NULL; // for mouse click 
-UINT8 *pMouseBuffer = NULL;
+UINT8 *pDateTimeBuffer = NULL; //Mouse layer: 3
+UINT8 *pMouseBuffer = NULL; //Mouse layer: 4
 
 typedef enum
 {
@@ -2260,6 +2261,135 @@ VOID GraphicsLayerCompute(int iMouseX, int iMouseY, UINT8 MouseClickFlag)
 			            ScreenWidth, ScreenHeight, 0);
 }
 
+MouseMoveoverResponse()
+{
+
+	EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
+	Color.Red = 0xff;
+
+	// this is draw a rectangle when mouse move on disk partition in my computer window
+	for (UINT16 i = 0; i < PartitionCount; i++)
+	{		
+		if (iMouseX >= MyComputerPositionX + 50 && iMouseX <= MyComputerPositionX + 50 + 16 * 6
+			&& iMouseY >= MyComputerPositionY + i * 16 + 16 * 2 && iMouseY <= MyComputerPositionY + i * 16 + 16 * 3)
+		{
+			if (PreviousItem == i)
+			{
+				break;
+			}
+			
+			RectangleDrawIntoBuffer(pMouseSelectedBuffer, 0,  0, 31, 15, 1,  Color, 32);
+			//DisplayItemsOfPartition(i);
+			PreviousItem = i;
+	       GraphicsCopy(pDeskDisplayBuffer, pMouseSelectedBuffer, ScreenWidth, ScreenHeight, 32, 16, MyComputerPositionX + 50, MyComputerPositionY  + i * (16 + 2) + 16 * 2);	
+		}
+	}
+
+	//start button
+    if (iMouseX >= 0 && iMouseX <= 16 + 16 * 2
+        && iMouseY >= ScreenHeight - 21 && iMouseY <= ScreenHeight)
+    {   
+    	MenuButtonClickResponse();
+    }
+
+}
+
+MouseClickResponse()
+{
+    //my computer
+    if (MouseClickFlag == 1 && pDeskDisplayBuffer[(iMouseY * ScreenWidth + iMouseX) * 4 + 3] == GRAPHICS_LAYER_MY_COMPUTER)
+    {
+        MyComputerPositionX += x_move * 3;
+        MyComputerPositionY += y_move * 3;
+        
+    //  GraphicsCopy(pDeskDisplayBuffer, pMyComputerBuffer, ScreenWidth, ScreenHeight, MyComputerWidth, MyComputerHeight, MyComputerPositionX, MyComputerPositionX);
+    }
+    x_move = 0;
+    y_move = 0;
+
+}
+
+MenuButtonClickResponse()
+{    
+	EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
+	Color.Red = 0xff;
+	
+    for (int i = 0; i < 16; i++)
+    {
+        for (int j = 0; j < 32; j++)
+        {   
+            pMouseSelectedBuffer[(i * 32 + j) * 4]     = pDeskDisplayBuffer[((MyComputerPositionX + 50 + i) * ScreenWidth +  MyComputerPositionY  + i * (16 + 2) + 16 * 2 + j) * 4];
+            pMouseSelectedBuffer[(i * 32 + j) * 4 + 1] = pDeskDisplayBuffer[((MyComputerPositionX + 50 + i) * ScreenWidth +  MyComputerPositionY  + i * (16 + 2) + 16 * 2 + j) * 4 + 1];
+            pMouseSelectedBuffer[(i * 32 + j) * 4 + 2] = pDeskDisplayBuffer[((MyComputerPositionX + 50 + i) * ScreenWidth +  MyComputerPositionY  + i * (16 + 2) + 16 * 2 + j) * 4 + 2];            
+        }
+    }
+     //RectangleFillIntoBuffer(UINT8 * pBuffer,IN UINTN x0,UINTN y0,UINTN x1,UINTN y1,IN UINTN BorderWidth,IN EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color)
+    
+    //RectangleFillIntoBuffer(pMouseSelectedBuffer, 0,  0, 32, 16, 1,  Color);
+
+    // Draw a red rectangle when mouse move over left down (like menu button)
+    RectangleDrawIntoBuffer(pMouseSelectedBuffer, 0,  0, 31, 15, 1,  Color, 32);
+
+    //DebugPrint1(DISPLAY_X, DISPLAY_Y, "%d: GraphicsLayerCompute\n", __LINE__);
+
+    if (MouseClickFlag == 1)
+    {
+        char *pClickMenuBuffer = (UINT8 *)AllocateZeroPool(16 * 16 * 4);
+        if (NULL != pClickMenuBuffer)
+        {
+            DEBUG ((EFI_D_INFO, "ScreenInit AllocatePool pDeskDisplayBuffer NULL\n"));
+
+            for(int i = 0; i < 16; i++)
+                for(int j = 0; j < 16; j++)
+                {
+                    pClickMenuBuffer[(i * 16 + j) * 4] = 0x33;
+                    pClickMenuBuffer[(i * 16 + j) * 4 + 1] = 0x33;
+                    pClickMenuBuffer[(i * 16 + j) * 4 + 2] = 0x33;
+                }
+            GraphicsCopy(pDeskDisplayBuffer, pClickMenuBuffer, ScreenWidth, ScreenHeight, 16, 16, 0, ScreenHeight - 22 - 16);
+        }
+    }
+    
+    GraphicsCopy(pDeskDisplayBuffer, pMouseSelectedBuffer, ScreenWidth, ScreenHeight, 32, 16, 15, ScreenHeight - 22); 
+}
+
+VOID GraphicsLayerMouseMove(int iMouseX, int iMouseY, UINT8 MouseClickFlag)
+{
+	EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
+	
+	// display graphics layer id mouse over, for mouse click event.
+	//DebugPrint1(DISPLAY_X, DISPLAY_Y, "%d: Graphics Layer id: %d ", __LINE__, pDeskDisplayBuffer[(iMouseY * ScreenWidth + iMouseX) * 4 + 3]);
+	
+	int i, j;
+
+	//16, ScreenHeight - 21, For event trigger
+
+	if (NULL == pMouseSelectedBuffer)
+	{
+		DEBUG ((EFI_D_INFO, "NULL == GraphicsLayerCompute"));
+		return;
+	}
+
+	MouseClickResponse();
+    
+	MouseMoveoverResponse();
+    
+    //DEBUG ((EFI_D_INFO, "Line: %d\n", __LINE__));
+
+    
+    // init mouse buffer for use in use
+	DrawChineseCharIntoBuffer2(pMouseBuffer, 0, 0, 11 * 94 + 42, MouseColor, 16);
+    //DebugPrint1(DISPLAY_X, DISPLAY_Y, "%d: GraphicsLayerCompute\n", __LINE__);
+
+   GraphicsOutput->Blt(GraphicsOutput, 
+			            (EFI_GRAPHICS_OUTPUT_BLT_PIXEL *) pMouseBuffer,
+			            EfiBltBufferToVideo,
+			            0, 0, 
+			            iMouseX, iMouseX, 
+			            16, 16, 0);
+}
+
+
 EFI_STATUS DrawAsciiCharIntoBuffer(UINT8 *pBuffer,
         IN UINTN x0, UINTN y0,UINT8 c,
         IN EFI_GRAPHICS_OUTPUT_BLT_PIXEL BorderColor, UINT16 AreaWidth)
@@ -2842,24 +2972,26 @@ int FileReadFSM(EVENT event)
 	StatusErrorCount++;
 }
 
-
+UINT32 TimerSliceCount = 0;
 VOID EFIAPI TimeSlice(
 	IN EFI_EVENT Event,
 	IN VOID           *Context
 	)
 {
-    DebugPrint1(0, 5 * 16, "%d:TimeSlice %x %lu \n", __LINE__, Context, *((UINT32 *)Context));
+    DebugPrint1(0, 5 * 16, "%d TimeSlice %x %lu \n", __LINE__, Context, *((UINT32 *)Context));
+    DebugPrint1(0, 6 * 16, "%d TimerSliceCount: %lu \n", __LINE__, TimerSliceCount);
     //Print(L"%lu\n", *((UINT32 *)Context));
     if (*((UINT32 *)Context) % 100000000 == 0)
        gBS->SignalEvent (MultiTaskTriggerGroup1Event);
        
-    if (*((UINT32 *)Context) % 400000000 == 0)
+    if (*((UINT32 *)Context) % 300000000 == 0)
        gBS->SignalEvent (MultiTaskTriggerGroup2Event);
 
     
     //DEBUG ((EFI_D_INFO, "System time slice Loop ...\n"));
     //gBS->SignalEvent (MultiTaskTriggerEvent);
 
+	TimerSliceCount++;
 	return;
 }
 
@@ -3526,7 +3658,7 @@ HandleMouseEvent (IN EFI_EVENT Event, IN VOID *Context)
     }
     //DebugPrint1(DISPLAY_X, DISPLAY_Y, "%d: HandleMouseEvent\n", __LINE__);
     //DEBUG ((EFI_D_INFO, "\n"));
-    GraphicsLayerCompute(iMouseX, iMouseY, MouseClickFlag);
+    GraphicsLayerMouseMove(iMouseX, iMouseY, MouseClickFlag);
 	
 	gBS->WaitForEvent( 1, &gMouse->WaitForInput, &Index );
 }
@@ -3546,6 +3678,11 @@ SystemParameterRead (
 	//MemoryParameterGet();
 }
 
+GraphicsLayerDateTimeDispaly()
+{
+}
+
+
 // display system date & time
 STATIC
 VOID
@@ -3558,8 +3695,8 @@ DisplaySystemDateTime (
     EFI_TIME et;
 	date_time_count++;
 	gRT->GetTime(&et, NULL);
-
-	DebugPrint1(DISPLAY_DESK_DATE_TIME_X, DISPLAY_DESK_DATE_TIME_Y, "%04d-%02d-%02d %02d:%02d:%02d", 
+	
+	DebugPrint2(0, 0, pDateTimeBuffer, "%04d-%02d-%02d %02d:%02d:%02d", 
 				  et.Year, et.Month, et.Day, et.Hour, et.Minute, et.Second);
 	
    DebugPrint1(DISPLAY_DESK_HEIGHT_WEIGHT_X, DISPLAY_DESK_HEIGHT_WEIGHT_Y, "%d ScreenWidth:%d, ScreenHeight:%d\n", __LINE__, ScreenWidth, ScreenHeight);
@@ -3635,7 +3772,7 @@ EFI_STATUS SystemTimeIntervalInit()
 {
     EFI_STATUS	Status;
 	EFI_HANDLE	TimerOne	= NULL;
-	static const UINTN TimeInterval = 1000000;
+	static const UINTN TimeInterval = 20000;
 	
 	UINT32 *TimerCount;
 
@@ -3660,7 +3797,7 @@ EFI_STATUS SystemTimeIntervalInit()
 
 	Status = gBS->SetTimer(TimerOne,
 						  TimerPeriodic,
-						  MultU64x32( TimeInterval, 1));
+						  MultU64x32( TimeInterval, 1)); // will multi 100, ns
 
 	if ( EFI_ERROR( Status ) )
 	{
@@ -3672,7 +3809,7 @@ EFI_STATUS SystemTimeIntervalInit()
 	{
 		*TimerCount = *TimerCount + 1;
 		//DebugPrint1(DISPLAY_X, DISPLAY_Y, "%d: SystemTimeIntervalInit while\n", __LINE__);
-		if (*TimerCount % 100000000 == 0)
+		if (*TimerCount % 1000000 == 0)
 	       DebugPrint1(0, 4 * 16, "%d: while (1) p:%x %lu \n", __LINE__, TimerCount, *TimerCount);
 	}
 	
@@ -3682,7 +3819,7 @@ EFI_STATUS SystemTimeIntervalInit()
 	return EFI_SUCCESS;
 }
 
-EFI_STATUS ScreenInit(EFI_GRAPHICS_OUTPUT_PROTOCOL   *GraphicsOutput)
+EFI_STATUS ScreenInit()
 {
 	//UINT32 i = 0;
 	//UINT32 j = 0;
@@ -3786,6 +3923,10 @@ EFI_STATUS ScreenInit(EFI_GRAPHICS_OUTPUT_PROTOCOL   *GraphicsOutput)
     Color.Red   = 0x00;
     Color.Green = 0x00;
     Color.Blue	 = 0x00;
+
+    DrawChineseCharIntoBuffer2(pDeskBuffer,  16, ScreenHeight - 21,     (18 - 1) * 94 + 43 - 1, Color, ScreenWidth);
+    DrawChineseCharIntoBuffer2(pDeskBuffer,  16 * 2, ScreenHeight - 21, (21 - 1) * 94 + 05 - 1, Color, ScreenWidth);
+    
     //DrawChineseCharIntoBuffer2(pDeskBuffer,  16, ScreenHeight - 21,     (18 - 1) * 94 + 43 - 1, Color, ScreenWidth);
     //DrawChineseCharIntoBuffer2(pDeskBuffer,  16 * 2, ScreenHeight - 21, (21 - 1) * 94 + 05 - 1, Color, ScreenWidth);
 
@@ -3842,6 +3983,12 @@ EFI_STATUS ParametersInitial()
 
 	pMouseClickBuffer = (UINT8 *)AllocatePool(MouseClickWindowWidth * MouseClickWindowHeight * 4); 
 	if (pMouseClickBuffer == NULL)
+	{
+		return -1;
+	}   
+	
+	pDateTimeBuffer = (UINT8 *)AllocatePool(8 * 16 * 20 * 4); 
+	if (pDateTimeBuffer == NULL)
 	{
 		return -1;
 	}   
@@ -3905,7 +4052,6 @@ Main (
 
     ParametersInitial();
         
-    ScreenInit(GraphicsOutput);
         
 	MouseInit();
     
@@ -3915,6 +4061,8 @@ Main (
     MultiProcessInit();
 
     InitChineseChar();
+    
+    ScreenInit();
     
     MyComputerWindow(100, 100);
 
