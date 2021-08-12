@@ -2170,81 +2170,9 @@ VOID GraphicsLayerCompute(int iMouseX, int iMouseY, UINT8 MouseClickFlag)
     
     //DEBUG ((EFI_D_INFO, "Line: %d\n", __LINE__));
 
-    for (i = 0; i < 16; i++)
-        for (j = 0; j < 16; j++)
-        {       
-            pMouseBuffer[(i * 16 + j) * 4]     = 0xff;
-            pMouseBuffer[(i * 16 + j) * 4 + 1] = 0xff;
-            pMouseBuffer[(i * 16 + j) * 4 + 2] = 0;             
-        }
-	
-    DrawChineseCharIntoBuffer2(pDeskBuffer,  16, ScreenHeight - 21,     (18 - 1) * 94 + 43 - 1, Color, ScreenWidth);
-    DrawChineseCharIntoBuffer2(pDeskBuffer,  16 * 2, ScreenHeight - 21, (21 - 1) * 94 + 05 - 1, Color, ScreenWidth);
-	
     Color.Red   = 0xff;
     Color.Green = 0x00;
     Color.Blue	  = 0x00;
-
-	// this is draw a rectangle when mouse move on disk partition 
-	for (UINT16 i = 0; i < PartitionCount; i++)
-	{		
-		if (iMouseX >= MyComputerPositionX + 50 && iMouseX <= MyComputerPositionX + 50 + 16 * 6
-			&& iMouseY >= MyComputerPositionY + i * 16 + 16 * 2 && iMouseY <= MyComputerPositionY + i * 16 + 16 * 3)
-		{
-			if (PreviousItem == i)
-			{
-				break;
-			}
-			
-			RectangleDrawIntoBuffer(pMouseSelectedBuffer, 0,  0, 31, 15, 1,  Color, 32);
-			//DisplayItemsOfPartition(i);
-			PreviousItem = i;
-	       GraphicsCopy(pDeskDisplayBuffer, pMouseSelectedBuffer, ScreenWidth, ScreenHeight, 32, 16, MyComputerPositionX + 50, MyComputerPositionY  + i * (16 + 2) + 16 * 2);	
-		}
-	}
-    
-    //DebugPrint1(DISPLAY_X, DISPLAY_Y, "%d: GraphicsLayerCompute\n", __LINE__);
-    if (iMouseX >= 16 && iMouseX <= 16 + 16 * 2
-        && iMouseY >= ScreenHeight - 21 && iMouseY <= ScreenHeight)
-    {	
-		for (i = 0; i < 16; i++)
-		{
-			for (j = 0; j < 32; j++)
-			{	
-				pMouseSelectedBuffer[(i * 32 + j) * 4]     = pDeskDisplayBuffer[((MyComputerPositionX + 50 + i) * ScreenWidth +  MyComputerPositionY  + i * (16 + 2) + 16 * 2 + j) * 4];
-				pMouseSelectedBuffer[(i * 32 + j) * 4 + 1] = pDeskDisplayBuffer[((MyComputerPositionX + 50 + i) * ScreenWidth +  MyComputerPositionY  + i * (16 + 2) + 16 * 2 + j) * 4 + 1];
-				pMouseSelectedBuffer[(i * 32 + j) * 4 + 2] = pDeskDisplayBuffer[((MyComputerPositionX + 50 + i) * ScreenWidth +  MyComputerPositionY  + i * (16 + 2) + 16 * 2 + j) * 4 + 2];			
-			}
-		}
-		 //RectangleFillIntoBuffer(UINT8 * pBuffer,IN UINTN x0,UINTN y0,UINTN x1,UINTN y1,IN UINTN BorderWidth,IN EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color)
-		
-        //RectangleFillIntoBuffer(pMouseSelectedBuffer, 0,  0, 32, 16, 1,  Color);
-
-        // Draw a red rectangle when mouse move over left down (like menu button)
-        RectangleDrawIntoBuffer(pMouseSelectedBuffer, 0,  0, 31, 15, 1,  Color, 32);
-
-        //DebugPrint1(DISPLAY_X, DISPLAY_Y, "%d: GraphicsLayerCompute\n", __LINE__);
-
-        if (MouseClickFlag == 1)
-        {
-			char *pClickMenuBuffer = (UINT8 *)AllocateZeroPool(16 * 16 * 4);
-		    if (NULL != pClickMenuBuffer)
-			{
-				DEBUG ((EFI_D_INFO, "ScreenInit AllocatePool pDeskDisplayBuffer NULL\n"));
-
-			    for(int i = 0; i < 16; i++)
-			    	for(int j = 0; j < 16; j++)
-			    	{
-			    		pClickMenuBuffer[(i * 16 + j) * 4] = 0x33;
-			    		pClickMenuBuffer[(i * 16 + j) * 4 + 1] = 0x33;
-			    		pClickMenuBuffer[(i * 16 + j) * 4 + 2] = 0x33;
-			    	}
-				GraphicsCopy(pDeskDisplayBuffer, pClickMenuBuffer, ScreenWidth, ScreenHeight, 16, 16, 0, ScreenHeight - 22 - 16);
-			}
-        }
-        
-        GraphicsCopy(pDeskDisplayBuffer, pMouseSelectedBuffer, ScreenWidth, ScreenHeight, 32, 16, 15, ScreenHeight - 22);
-    }
     
     // init mouse buffer with cursor
 	DrawChineseCharIntoBuffer2(pMouseBuffer, 0, 0, 11 * 94 + 42, MouseColor, 16);
@@ -2984,7 +2912,7 @@ VOID EFIAPI TimeSlice(
     if (TimerSliceCount % 2 == 0)
        gBS->SignalEvent (MultiTaskTriggerGroup1Event);
        
-    if (TimerSliceCount % 3 == 0)
+    if (TimerSliceCount % 10 == 0)
        gBS->SignalEvent (MultiTaskTriggerGroup2Event);
 
     
