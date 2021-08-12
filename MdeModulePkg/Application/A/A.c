@@ -2182,6 +2182,24 @@ VOID GraphicsLayerCompute(int iMouseX, int iMouseY, UINT8 MouseClickFlag)
     	GraphicsCopy(pDeskDisplayBuffer, pMouseSelectedBuffer, ScreenWidth, ScreenHeight, 32, 16, 3, ScreenHeight - 21);
     }
     
+	// this is draw a rectangle when mouse move on disk partition in my computer window
+	for (UINT16 i = 0; i < PartitionCount; i++)
+	{		
+		if (iMouseX >= MyComputerPositionX + 50 && iMouseX <= MyComputerPositionX + 50 + 16 * 6
+			&& iMouseY >= MyComputerPositionY + i * 16 + 16 * 2 && iMouseY <= MyComputerPositionY + i * 16 + 16 * 3)
+		{
+			if (PreviousItem == i)
+			{
+				break;
+			}
+			
+			RectangleDrawIntoBuffer(pMouseSelectedBuffer, 0,  0, 31, 15, 1,  Color, 32);
+			//DisplayItemsOfPartition(i);
+			PreviousItem = i;
+	       GraphicsCopy(pDeskDisplayBuffer, pMouseSelectedBuffer, ScreenWidth, ScreenHeight, 32, 16, MyComputerPositionX + 50, MyComputerPositionY  + i * (16 + 2) + 16 * 2);	
+		}
+	}
+    
     // init mouse buffer with cursor
 	DrawChineseCharIntoBuffer2(pMouseBuffer, 0, 0, 11 * 94 + 42, MouseColor, 16);
     //DebugPrint1(DISPLAY_X, DISPLAY_Y, "%d: GraphicsLayerCompute\n", __LINE__);
@@ -2204,25 +2222,6 @@ MouseMoveoverResponse()
 	Color.Red = 0xff;
 	Color.Green= 0xff;
 	Color.Blue= 0x00;
-
-	// this is draw a rectangle when mouse move on disk partition in my computer window
-	for (UINT16 i = 0; i < PartitionCount; i++)
-	{		
-		if (iMouseX >= MyComputerPositionX + 50 && iMouseX <= MyComputerPositionX + 50 + 16 * 6
-			&& iMouseY >= MyComputerPositionY + i * 16 + 16 * 2 && iMouseY <= MyComputerPositionY + i * 16 + 16 * 3)
-		{
-			if (PreviousItem == i)
-			{
-				break;
-			}
-			
-			RectangleDrawIntoBuffer(pMouseSelectedBuffer, 0,  0, 31, 15, 1,  Color, 32);
-			//DisplayItemsOfPartition(i);
-			PreviousItem = i;
-	       GraphicsCopy(pDeskDisplayBuffer, pMouseSelectedBuffer, ScreenWidth, ScreenHeight, 32, 16, MyComputerPositionX + 50, MyComputerPositionY  + i * (16 + 2) + 16 * 2);	
-		}
-	}
-
 
 }
 
