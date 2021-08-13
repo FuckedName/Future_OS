@@ -1270,7 +1270,7 @@ EFI_STATUS RootPathAnalysis(UINT8 *p)
 
 			//for (int j = 0; j < 5; j++)
 			//	DebugPrint1(j * 3 * 8, 16 * 40 + valid_count * 16, "%02X ", pItems[i].FileName[j]);
-			if (StrCmpSelf(pItems[i].FileName, "HZK16", 5) == EFI_SUCCESS)			
+			if (StrCmpSelf(pItems[i].FileName, ReadFileName, ReadFileNameLength) == EFI_SUCCESS)			
 			{
 	        	/*DebugPrint1(DISK_MBR_X, 16 * 30 + (valid_count) * 16 + 4 * 16, "FileName:%2c%2c%2c%2c%2c%2c%2c%2c ExtensionName:%2c%2c%2c StartCluster:%02X%02X%02X%02X FileLength: %02X%02X%02X%02X Attribute: %02X    ", 
                                 pItems[i].FileName[0], pItems[i].FileName[1], pItems[i].FileName[2], pItems[i].FileName[3], pItems[i].FileName[4], pItems[i].FileName[5], pItems[i].FileName[6], pItems[i].FileName[7],
@@ -2774,10 +2774,10 @@ EFI_STATUS ReadFileFSM()
                 //DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: HZK16FileReadCount: %d DISK_BLOCK_BUFFER_SIZE: %d\n", __LINE__, HZK16FileReadCount, DISK_BLOCK_BUFFER_SIZE);
 
 				  //Copy buffer to ChineseBuffer
-				  if (sChineseChar != NULL)
+				  if (pReadFileDestBuffer != NULL)
 				  {
 				  		for (UINT16 j = 0; j < DISK_BLOCK_BUFFER_SIZE; j++)
-				  			sChineseChar[FileReadCount * DISK_BLOCK_BUFFER_SIZE + j] = BufferBlock[j];
+				  			pReadFileDestBuffer[FileReadCount * DISK_BLOCK_BUFFER_SIZE + j] = BufferBlock[j];
                  }
 				  
 				  for (int j = 0; j < 250; j++)
@@ -3910,16 +3910,7 @@ EFI_STATUS InitChineseChar()
 {
     DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d:  \n", __LINE__);
 
-	for (int i = 0; i < 5; i++)
-    {
-    	DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: i: %d \n", __LINE__, i);
-		DEBUG ((EFI_D_INFO, "%d HandleEnterPressed FSM_Event: %d\n", __LINE__, FSM_Event));
-	    FileReadFSM(FSM_Event++);
-
-	    if (READ_FILE_EVENT <= FSM_Event)
-	    	FSM_Event = READ_FILE_EVENT;
-	}
-
+	ReadFile("HZK16", 5, sChineseChar);
 }
 
 EFI_STATUS
