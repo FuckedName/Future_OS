@@ -1806,10 +1806,10 @@ EFI_STATUS ReadDataFromPartition(UINT8 deviceID, UINT64 StartSectorNumber, UINT1
 		return Status;
  	}
  	
-	//for (int j = 0; j < 250; j++)
-	//{
-		//DebugPrint1(DISK_READ_BUFFER_X + (j % 16) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 16), "%02X ", pBuffer[j] & 0xff);
-	//}
+	for (int j = 0; j < 250; j++)
+	{
+		DebugPrint1(DISK_READ_BUFFER_X + (j % 16) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 16), "%02X ", pBuffer[j] & 0xff);
+	}
 	//INFO("\n");
     //DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
     return EFI_SUCCESS;
@@ -1828,10 +1828,8 @@ EFI_STATUS MFTReadFromPartition(UINT16 DeviceID)
     DEBUG ((EFI_D_INFO, "PartitionUSBRead!!\r\n"));
     EFI_STATUS Status ;
     EFI_HANDLE *ControllerHandle = NULL;
-    
-    UINT8 Buffer1[DISK_BUFFER_SIZE];
-    
-    Status = ReadDataFromPartition(DeviceID, DISK_BUFFER_SIZE * (sector_count + 5 *2), DISK_BUFFER_SIZE * 2, BufferMFT); 
+        
+    Status = ReadDataFromPartition(DeviceID, sector_count + 5 *2, 2, BufferMFT); 
     if (EFI_ERROR(Status))
     {
     	DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d Status: %X\n", __LINE__, Status);
@@ -1864,7 +1862,7 @@ EFI_STATUS RootPathAnalysisFSM1(UINT16 DeviceID)
     EFI_STATUS Status ;
     UINT8 Buffer1[DISK_BUFFER_SIZE];
     
-    Status = ReadDataFromPartition(DeviceID, DISK_BUFFER_SIZE * sector_count, DISK_BUFFER_SIZE, Buffer1); 
+    Status = ReadDataFromPartition(DeviceID, sector_count, 1, Buffer1); 
 	if (EFI_ERROR(Status))
     {
     	DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d Status: %X\n", __LINE__, Status);
@@ -2050,7 +2048,7 @@ EFI_STATUS PartitionAnalysisFSM1(UINT16 DeviceID)
 
     sector_count = 0;
 
-	Status = ReadDataFromPartition(DeviceID, DISK_BUFFER_SIZE * sector_count, DISK_BUFFER_SIZE, Buffer1 );    
+	Status = ReadDataFromPartition(DeviceID, sector_count, 1, Buffer1 );    
     if (EFI_ERROR(Status))
     {
         DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d Status: %X\n", __LINE__, Status);
@@ -2094,13 +2092,14 @@ DisplayItemsOfPartition(UINT16 Index)
 	// this code may be have some problems, because my USB file system is FAT32, my Disk file system is NTFS.
 	// others use this code must be careful...
 	UINT8 FileSystemType = PartitionAnalysisFSM1(Index);
-			
+
 	if (FileSystemType == FILE_SYSTEM_FAT32)
 	{
 		RootPathAnalysisFSM1(Index);
 		UINT16 valid_count = 0;
 
-		for (UINT16 i = 0; i < 30; i++)
+		
+		for (UINT16 i = 0; i < 1; i++)
 			if (pItems[i].FileName[0] != 0xE5 && (pItems[i].Attribute[0] == 0x20 
 			    || pItems[i].Attribute[0] == 0x10))
 	       {
@@ -2112,6 +2111,7 @@ DisplayItemsOfPartition(UINT16 Index)
 				
 				valid_count++;
 			}
+		
 	}
 	else if (FileSystemType == FILE_SYSTEM_NTFS)
 	{
@@ -2168,37 +2168,7 @@ VOID GraphicsLayerCompute(int iMouseX, int iMouseY, UINT8 MouseClickFlag)
     Color.Green = 0x00;
     Color.Blue	  = 0x00;
 
-		//start button
-    if (iMouseX >= 0 && iMouseX <= 16 + 16 * 2
-        && iMouseY >= ScreenHeight - 21 && iMouseY <= ScreenHeight)
-    {   
-    	DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: iMouseX: %d iMouseY: %d \n",  __LINE__, iMouseX, iMouseY);
-		RectangleDrawIntoBuffer(pMouseSelectedBuffer, 0,  0, 31, 15, 1,  Color, 32);
-    	//MenuButtonClickResponse();
-    	Color.Red   = 0xFF;
-	    Color.Green = 0xFF;
-	    Color.Blue	= 0xFF;
-	    //RectangleFillIntoBuffer(pDeskBuffer, 3,     ScreenHeight - 21, 13,     ScreenHeight - 11, 1, Color);
-    	GraphicsCopy(pDeskDisplayBuffer, pMouseSelectedBuffer, ScreenWidth, ScreenHeight, 32, 16, 3, ScreenHeight - 21);
-    }
-    
-	// this is draw a rectangle when mouse move on disk partition in my computer window
-	for (UINT16 i = 0; i < PartitionCount; i++)
-	{		
-		if (iMouseX >= MyComputerPositionX + 50 && iMouseX <= MyComputerPositionX + 50 + 16 * 6
-			&& iMouseY >= MyComputerPositionY + i * 16 + 16 * 2 && iMouseY <= MyComputerPositionY + i * 16 + 16 * 3)
-		{
-			if (PreviousItem == i)
-			{
-				break;
-			}
-			
-			RectangleDrawIntoBuffer(pMouseSelectedBuffer, 0,  0, 31, 15, 1,  Color, 32);
-			//DisplayItemsOfPartition(i);
-			PreviousItem = i;
-	       GraphicsCopy(pDeskDisplayBuffer, pMouseSelectedBuffer, ScreenWidth, ScreenHeight, 32, 16, MyComputerPositionX + 50, MyComputerPositionY  + i * (16 + 2) + 16 * 2);	
-		}
-	}
+	GraphicsLayerMouseMove();
     
     // init mouse buffer with cursor
 	DrawChineseCharIntoBuffer2(pMouseBuffer, 0, 0, 11 * 94 + 42, MouseColor, 16);
@@ -2222,6 +2192,41 @@ MouseMoveoverResponse()
 	Color.Red = 0xff;
 	Color.Green= 0xff;
 	Color.Blue= 0x00;
+	
+	//start button
+    if (iMouseX >= 0 && iMouseX <= 16 + 16 * 2
+        && iMouseY >= ScreenHeight - 21 && iMouseY <= ScreenHeight)
+    {   
+    	//DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: iMouseX: %d iMouseY: %d \n",  __LINE__, iMouseX, iMouseY);
+		RectangleDrawIntoBuffer(pMouseSelectedBuffer, 0,  0, 31, 15, 1,  Color, 32);
+    	//MenuButtonClickResponse();
+    	Color.Red   = 0xFF;
+	    Color.Green = 0xFF;
+	    Color.Blue	= 0xFF;
+	    //RectangleFillIntoBuffer(pDeskBuffer, 3,     ScreenHeight - 21, 13,     ScreenHeight - 11, 1, Color);
+    	GraphicsCopy(pDeskDisplayBuffer, pMouseSelectedBuffer, ScreenWidth, ScreenHeight, 32, 16, 3, ScreenHeight - 21);
+    }
+    
+	// this is draw a rectangle when mouse move on disk partition in my computer window
+	for (UINT16 i = 0; i < PartitionCount; i++)
+	{		
+		if (iMouseX >= MyComputerPositionX + 50 && iMouseX <= MyComputerPositionX + 50 + 16 * 6
+			&& iMouseY >= MyComputerPositionY + i * 16 + 16 * 2 && iMouseY <= MyComputerPositionY + i * 16 + 16 * 3)
+		{
+			
+			if (PreviousItem == i)
+			{
+				break;
+			}
+			
+			RectangleDrawIntoBuffer(pMouseSelectedBuffer, 0,  0, 31, 15, 1,  Color, 32);
+
+			// need to save result into cache, for next time to read, reduce disk operation
+			DisplayItemsOfPartition(i);
+			PreviousItem = i;
+	       GraphicsCopy(pDeskDisplayBuffer, pMouseSelectedBuffer, ScreenWidth, ScreenHeight, 32, 16, MyComputerPositionX + 50, MyComputerPositionY  + i * (16 + 2) + 16 * 2);	
+		}
+	}
 
 }
 
