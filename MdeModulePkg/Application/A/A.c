@@ -552,6 +552,7 @@ DISK_HANDLE_TASK  disk_handle_task;
 UINT8 *FAT32_Table;
 
 UINT8 *sChineseChar = NULL;
+UINT8 *pWallPaperBuffer = NULL;
 //UINT8 sChineseChar[267616];
 
 static UINTN ScreenWidth, ScreenHeight;  
@@ -1258,7 +1259,7 @@ EFI_STATUS RootPathAnalysis(UINT8 *p)
 		if (pItems[i].FileName[0] != 0xE5 && (pItems[i].Attribute[0] == 0x20 
 		    || pItems[i].Attribute[0] == 0x10))
        {
-        	DebugPrint1(DISK_MBR_X, 16 * 36 + (valid_count) * 16, "FileName:%2c%2c%2c%2c%2c%2c%2c%2c ExtensionName:%2c%2c%2c StartCluster:%02X%02X%02X%02X FileLength: %02X%02X%02X%02X Attribute: %02X    ", 
+        	DebugPrint1(DISK_MBR_X, 16 * 37 + (valid_count) * 16, "FileName:%2c%2c%2c%2c%2c%2c%2c%2c ExtensionName:%2c%2c%2c StartCluster:%02X%02X%02X%02X FileLength: %02X%02X%02X%02X Attribute: %02X    ", 
                                             pItems[i].FileName[0], pItems[i].FileName[1], pItems[i].FileName[2], pItems[i].FileName[3], pItems[i].FileName[4], pItems[i].FileName[5], pItems[i].FileName[6], pItems[i].FileName[7],
                                             pItems[i].ExtensionName[0], pItems[i].ExtensionName[1],pItems[i].ExtensionName[2],
                                             pItems[i].StartClusterHigh2B[0], pItems[i].StartClusterHigh2B[1],
@@ -1272,14 +1273,14 @@ EFI_STATUS RootPathAnalysis(UINT8 *p)
 			//	DebugPrint1(j * 3 * 8, 16 * 40 + valid_count * 16, "%02X ", pItems[i].FileName[j]);
 			if (StrCmpSelf(pItems[i].FileName, ReadFileName, ReadFileNameLength) == EFI_SUCCESS)			
 			{
-	        	/*DebugPrint1(DISK_MBR_X, 16 * 30 + (valid_count) * 16 + 4 * 16, "FileName:%2c%2c%2c%2c%2c%2c%2c%2c ExtensionName:%2c%2c%2c StartCluster:%02X%02X%02X%02X FileLength: %02X%02X%02X%02X Attribute: %02X    ", 
+	        	DebugPrint1(DISK_MBR_X, 16 * 30 + (valid_count) * 16 + 4 * 16, "FileName:%2c%2c%2c%2c%2c%2c%2c%2c ExtensionName:%2c%2c%2c StartCluster:%02X%02X%02X%02X FileLength: %02X%02X%02X%02X Attribute: %02X    ", 
                                 pItems[i].FileName[0], pItems[i].FileName[1], pItems[i].FileName[2], pItems[i].FileName[3], pItems[i].FileName[4], pItems[i].FileName[5], pItems[i].FileName[6], pItems[i].FileName[7],
                                 pItems[i].ExtensionName[0], pItems[i].ExtensionName[1],pItems[i].ExtensionName[2],
                                 pItems[i].StartClusterHigh2B[0], pItems[i].StartClusterHigh2B[1],
                                 pItems[i].StartClusterLow2B[0], pItems[i].StartClusterLow2B[1],
                                 pItems[i].FileLength[0], pItems[i].FileLength[1], pItems[i].FileLength[2], pItems[i].FileLength[3],
                                 pItems[i].Attribute[0]);
-				*/
+				
               FileBlockStart = (UINT32)pItems[i].StartClusterHigh2B[0] * 16 * 16 * 16 * 16 + (UINT32)pItems[i].StartClusterHigh2B[1] * 16 * 16 * 16 * 16 * 16 * 16 + pItems[i].StartClusterLow2B[0] + (UINT32)pItems[i].StartClusterLow2B[1] * 16 * 16;
               FileLength = pItems[i].FileLength[0] + (UINT32)pItems[i].FileLength[1] * 16 * 16 + (UINT32)pItems[i].FileLength[2] * 16 * 16 * 16 * 16 + (UINT32)pItems[i].FileLength[3] * 16 * 16 * 16 * 16 * 16 * 16;
 
@@ -2684,6 +2685,7 @@ EFI_STATUS GetFatTableFSM()
             Status = ReadDataFromPartition(i, sector_count, 1, Buffer1); 
             if ( EFI_SUCCESS == Status )
             {
+            	  // 512 = 16 * 32 = 4 item * 32
                  FAT32_Table = (UINT8 *)AllocateZeroPool(DISK_BUFFER_SIZE + 1);
 				  if (NULL == FAT32_Table)
 				  {
@@ -2695,7 +2697,11 @@ EFI_STATUS GetFatTableFSM()
 				  {
 				  		//DebugPrint1(DISK_READ_BUFFER_X + (j % 16) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 16), "%02X ", Buffer1[j] & 0xff);
 				  }
+
+				  // start sector of file
 				  sector_count = MBRSwitched.ReservedSelector + MBRSwitched.SectorsPerFat * MBRSwitched.NumFATS + MBRSwitched.BootPathStartCluster - 2 + (FileBlockStart - 2) * 8;
+
+				  // for FAT32_Table get next block number
 				  PreviousBlockNumber = FileBlockStart;
 				  //DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: sector_count:%ld FileLength: %d PreviousBlockNumber: %d\n",  __LINE__, sector_count, FileLength, PreviousBlockNumber);
              }           
@@ -2812,7 +2818,7 @@ STATE	NextState = INIT_STATE;
 int FileReadFSM(EVENT event)
 {
     EFI_STATUS Status;
-        
+    
 	if (FileReadCount > 64)
 	{
 		DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
@@ -3661,7 +3667,7 @@ EFI_STATUS SystemTimeIntervalInit()
 		*TimerCount = *TimerCount + 1;
 		//DebugPrint1(DISPLAY_X, DISPLAY_Y, "%d: SystemTimeIntervalInit while\n", __LINE__);
 		//if (*TimerCount % 1000000 == 0)
-	       DebugPrint1(0, 4 * 16, "%d: while (1) p:%x %lu \n", __LINE__, TimerCount, *TimerCount);
+	   //    DebugPrint1(0, 4 * 16, "%d: while (1) p:%x %lu \n", __LINE__, TimerCount, *TimerCount);
 	}
 	
 	gBS->SetTimer( TimerOne, TimerCancel, 0 );
@@ -3679,7 +3685,8 @@ EFI_STATUS ScreenInit()
 	//UINT8 p[100];
 	
     EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
-  
+
+  	//ReadFileSelf("zhufeng.bmp", 11, pWallPaperBuffer);
  
     Color.Red   = 0x00;
     Color.Green = 0x84;
@@ -3868,6 +3875,14 @@ EFI_STATUS ParametersInitial()
         return -1;
     }
 		
+	pWallPaperBuffer = (UINT8 *)AllocateZeroPool(7372854);
+	if (NULL == pWallPaperBuffer)
+    {
+        DEBUG ((EFI_D_INFO, "pWallPaperBuffer AllocateZeroPool Failed: %x!\n "));
+        DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: pWallPaperBuffer AllocateZeroPool failed\n",  __LINE__);
+        return -1;
+    }
+    
 	MouseColor.Blue  = 0xff;
     MouseColor.Red   = 0xff;
     MouseColor.Green = 0xff;
@@ -3881,8 +3896,9 @@ EFI_STATUS ParametersInitial()
 	return EFI_SUCCESS;
 }
 
-EFI_STATUS ReadFile(UINT8 *FileName, UINT8 NameLength, UINT8 *pBuffer)
+EFI_STATUS ReadFileSelf(UINT8 *FileName, UINT8 NameLength, UINT8 *pBuffer)
 {
+	DebugPrint1(0, 6 * 16, "%d: ReadFileSelf\n", __LINE__);
 	if (pBuffer == NULL)
 	{
 		DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d:  \n", __LINE__);
@@ -3910,7 +3926,7 @@ EFI_STATUS InitChineseChar()
 {
     DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d:  \n", __LINE__);
 
-	ReadFile("HZK16", 5, sChineseChar);
+	ReadFileSelf("HZK16", 5, sChineseChar);
 }
 
 EFI_STATUS
