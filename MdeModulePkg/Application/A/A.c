@@ -2727,25 +2727,9 @@ EFI_STATUS ChineseCharArrayInit()
 	//DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: ChineseCharArrayInit\n",  __LINE__);
 	DEBUG ((EFI_D_INFO, "%d ChineseCharArrayInit\n", __LINE__));
     // 87 line, 96 Chinese char each line, 32 Char each Chinese char
-	UINT32 size = 267616;
-    //UINT8 *sChineseChar;
-	if (NULL != sChineseChar)
-    {
-    	//DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: ChineseCharArrayInit\n",  __LINE__);
-    	return EFI_SUCCESS;
-    }
-
+	
     
-	sChineseChar = (UINT8 *)AllocateZeroPool(size);
-	if (NULL == sChineseChar)
-    {
-        DEBUG ((EFI_D_INFO, "ChineseCharArrayInit AllocateZeroPool Failed: %x!\n "));
-        DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: ChineseCharArrayInit AllocateZeroPool failed\n",  __LINE__);
-        //DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: ChineseCharArrayInit AllocateZeroPool Failed: %x\n",  __LINE__);
-        return -1;
-    }
-    
-    DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: ChineseCharArrayInit finished...\n",  __LINE__);
+    //DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: ChineseCharArrayInit finished...\n",  __LINE__);
 	return EFI_SUCCESS;
 }
 
@@ -3873,6 +3857,16 @@ EFI_STATUS ParametersInitial()
 		DEBUG ((EFI_D_INFO, "ScreenInit AllocatePool pDeskDisplayBuffer NULL\n"));
 		return -1;
 	}
+
+	UINT32 size = 267616;
+    
+	sChineseChar = (UINT8 *)AllocateZeroPool(size);
+	if (NULL == sChineseChar)
+    {
+        DEBUG ((EFI_D_INFO, "ChineseCharArrayInit AllocateZeroPool Failed: %x!\n "));
+        DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: ChineseCharArrayInit AllocateZeroPool failed\n",  __LINE__);
+        return -1;
+    }
 		
 	MouseColor.Blue  = 0xff;
     MouseColor.Red   = 0xff;
