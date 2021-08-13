@@ -208,6 +208,13 @@ UINT8 *pMouseClickBuffer = NULL; // for mouse click
 UINT8 *pDateTimeBuffer = NULL; //Mouse layer: 3
 UINT8 *pMouseBuffer = NULL; //Mouse layer: 4
 
+// Read File 
+UINT8 ReadFileName[20];
+UINT8 *pReadFileDestBuffer = NULL;
+UINT8 ReadFileNameLength = 0;
+UINT16 FileReadCount = 0;
+
+
 typedef enum
 {
 	GRAPHICS_LAYER_DESK = 0,
@@ -547,7 +554,6 @@ UINT8 *FAT32_Table;
 UINT8 *sChineseChar = NULL;
 //UINT8 sChineseChar[267616];
 
-UINT8 HZK16FileReadCount = 0;
 static UINTN ScreenWidth, ScreenHeight;  
 UINT16 MyComputerWidth = 16 * 50;
 UINT16 MyComputerHeight = 16 * 40;
@@ -2723,29 +2729,6 @@ EFI_STATUS ChineseCharArrayInit()
     // 87 line, 96 Chinese char each line, 32 Char each Chinese char
 	UINT32 size = 267616;
     //UINT8 *sChineseChar;
-	/*
-    if (HZK16FileReadCount >= 50)
-    {		
-    	//DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: HZK16FileReadCount >= 60\n",  __LINE__);
-		EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
-		Color.Blue  = 0x00;
-		Color.Red   = 0x00;
-		Color.Green = 0x00;
-		UINT16 x, y;
-		x = 32;
-		y = 20;
-		for (UINT16 j = 13 ; j < 20 ; j++)
-		{
-			for (UINT16 i = 0 ; i < 37 ; i++)
-			{	    
-				//DrawChineseCharIntoBuffer2(pDeskBuffer, x + i * 16, y, j * 94 + i, Color, ScreenWidth);
-				//DEBUG ((EFI_D_INFO, "ChineseCharArrayInit: %x \n ", sChineseChar[1504 * 32 + i]));
-			}
-			x = 10;
-			y += 16;
-		}
-    }
-	*/
 	if (NULL != sChineseChar)
     {
     	//DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: ChineseCharArrayInit\n",  __LINE__);
@@ -2759,33 +2742,23 @@ EFI_STATUS ChineseCharArrayInit()
         DEBUG ((EFI_D_INFO, "ChineseCharArrayInit AllocateZeroPool Failed: %x!\n "));
         DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: ChineseCharArrayInit AllocateZeroPool failed\n",  __LINE__);
         //DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: ChineseCharArrayInit AllocateZeroPool Failed: %x\n",  __LINE__);
-        return (EFI_SUCCESS);
+        return -1;
     }
     
     DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: ChineseCharArrayInit finished...\n",  __LINE__);
 	return EFI_SUCCESS;
 }
 
-void *memcopy(void *dest, const void *src, size_t count)
+void *memcopy(UINT8 *dest, const UINT8 *src, UINT8 count)
 {
-	char *d;
-	const char *s;
+	UINT8 *d;
+	const UINT8 *s;
 
-	if (dest > (src + count) || (dest < src))
-	{
-		d = dest;
-		s = src;
-		while (count--)
-			*d++ = *s++;        
-	}
-	else
-	{
-		d = (char *)(dest + count - 1);
-		s = (char *)(src + count -1);
-		while (count --)
-			*d-- = *s--;
-	}
-
+	d = dest;
+	s = src;
+	while (count--)
+		*d++ = *s++;        
+	
 	return dest;
 }
 //https://blog.csdn.net/goodwillyang/article/details/45559925
@@ -2820,7 +2793,7 @@ EFI_STATUS ReadFileFSM()
 				  if (sChineseChar != NULL)
 				  {
 				  		for (UINT16 j = 0; j < DISK_BLOCK_BUFFER_SIZE; j++)
-				  			sChineseChar[HZK16FileReadCount * DISK_BLOCK_BUFFER_SIZE + j] = BufferBlock[j];
+				  			sChineseChar[FileReadCount * DISK_BLOCK_BUFFER_SIZE + j] = BufferBlock[j];
                  }
 				  
 				  for (int j = 0; j < 250; j++)
@@ -2828,7 +2801,7 @@ EFI_STATUS ReadFileFSM()
 				  		//DebugPrint1(DISK_READ_BUFFER_X + (j % 32) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 32), "%02X ", BufferBlock[j] & 0xff);
 				  }
 				  
-				  HZK16FileReadCount++;
+				  FileReadCount++;
 		 	 	  sector_count = MBRSwitched.ReservedSelector + MBRSwitched.SectorsPerFat * MBRSwitched.NumFATS + MBRSwitched.BootPathStartCluster - 2 + (GetNextBlockNumber() - 2) * 8;
 		 	 	  PreviousBlockNumber = GetNextBlockNumber();
 			 }
@@ -2856,7 +2829,7 @@ int FileReadFSM(EVENT event)
 {
     EFI_STATUS Status;
         
-	if (HZK16FileReadCount > 64)
+	if (FileReadCount > 64)
 	{
 		DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
 		return;
@@ -3908,10 +3881,35 @@ EFI_STATUS ParametersInitial()
 	iMouseX = ScreenWidth / 2;
 	iMouseY = ScreenHeight / 2;
 
-	HZK16FileReadCount = 0;
+	FileReadCount = 0;
 	FAT32_Table = NULL;
 
 	return EFI_SUCCESS;
+}
+
+EFI_STATUS ReadFile(UINT8 *FileName, UINT8 NameLength, UINT8 *pBuffer)
+{
+	if (pBuffer == NULL)
+	{
+		DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d:  \n", __LINE__);
+		return -1;
+	}
+	
+	memcopy(ReadFileName, FileName, NameLength);
+	pReadFileDestBuffer = pBuffer;
+	ReadFileNameLength = NameLength;
+
+	for (int i = 0; i < 5; i++)
+    {
+    	DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: i: %d \n", __LINE__, i);
+		DEBUG ((EFI_D_INFO, "%d HandleEnterPressed FSM_Event: %d\n", __LINE__, FSM_Event));
+	    FileReadFSM(FSM_Event++);
+
+	    if (READ_FILE_EVENT <= FSM_Event)
+	    	FSM_Event = READ_FILE_EVENT;
+	}
+
+	
 }
 
 EFI_STATUS InitChineseChar()
