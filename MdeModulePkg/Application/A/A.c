@@ -2106,9 +2106,9 @@ DisplayItemsOfPartition(UINT16 Index)
 		UINT16 valid_count = 0;
 
 		
-		for (UINT16 i = 0; i < 1; i++)
-			if (pItems[i].FileName[0] != 0xE5 && (pItems[i].Attribute[0] == 0x20 
-			    || pItems[i].Attribute[0] == 0x10))
+		for (UINT16 i = 0; i < 32; i++)
+			//if (pItems[i].FileName[0] != 0xE5 && (pItems[i].Attribute[0] == 0x20 
+			//    || pItems[i].Attribute[0] == 0x10))
 	       {
 	        	DebugPrint2(0, 8 * 16 + (valid_count) * 16, pMyComputerBuffer, "%d %2c%2c%2c%2c%2c%2c%2c%2c.%2c%2c%2c FileLength: %d Attribute: %02X    ", __LINE__,
 	                                            pItems[i].FileName[0], pItems[i].FileName[1], pItems[i].FileName[2], pItems[i].FileName[3], pItems[i].FileName[4], pItems[i].FileName[5], pItems[i].FileName[6], pItems[i].FileName[7],
