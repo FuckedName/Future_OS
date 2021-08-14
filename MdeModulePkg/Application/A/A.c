@@ -214,6 +214,8 @@ UINT8 *pReadFileDestBuffer = NULL;
 UINT8 ReadFileNameLength = 0;
 UINT16 FileReadCount = 0;
 
+UINT8 *pDeskWallpaperBuffer = NULL;
+
 
 typedef enum
 {
@@ -577,6 +579,32 @@ DEVICE_PARAMETER device[10] = {0};
 
 int iMouseX = 0;
 int iMouseY = 0;
+
+#pragma  pack(1)
+typedef struct     //这个结构体就是对上面那个图做一个封装。
+{
+    //bmp header
+    UINT8  Signatue[2] ;   // B  M
+    UINT8 FileSize[4] ;     //文件大小
+    UINT8 Reserv1[2] ; 
+    UINT8 Reserv2[2] ; 
+    UINT8 FileOffset[4] ;   //文件头偏移量
+
+    //DIB header
+    UINT8 DIBHeaderSize[4] ; //DIB头大小
+    UINT8 ImageWidth[4]   ;  //文件宽度
+    UINT8 ImageHight[4]   ;  //文件高度
+    UINT8 Planes[2]       ; 
+    UINT8 BPP[2]          ;  //每个相素点的位数
+    UINT8 Compression[4]  ; 
+    UINT8 ImageSize[4]    ;  //图文件大小
+    UINT8 XPPM[4] ; 
+    UINT8 YPPM[4] ; 
+    UINT8 CCT[4] ; 
+    UINT8 ICC[4] ;          
+}BMP_HEADER;
+#pragma  pack()
+
 
 EFI_GRAPHICS_OUTPUT_BLT_PIXEL MouseColor;
 
@@ -3679,7 +3707,7 @@ EFI_STATUS SystemTimeIntervalInit()
 		*TimerCount = *TimerCount + 1;
 		//DebugPrint1(DISPLAY_X, DISPLAY_Y, "%d: SystemTimeIntervalInit while\n", __LINE__);
 		//if (*TimerCount % 1000000 == 0)
-	   //    DebugPrint1(0, 4 * 16, "%d: while (1) p:%x %lu \n", __LINE__, TimerCount, *TimerCount);
+	       DebugPrint1(0, 4 * 16, "%d: while (1) p:%x %lu \n", __LINE__, TimerCount, *TimerCount);
 	}
 	
 	gBS->SetTimer( TimerOne, TimerCancel, 0 );
@@ -3688,8 +3716,36 @@ EFI_STATUS SystemTimeIntervalInit()
 	return EFI_SUCCESS;
 }
 
+EFI_STATUS ReadFileSelf(UINT8 *FileName, UINT8 NameLength, UINT8 *pBuffer)
+{
+	DebugPrint1(0, 6 * 16, "%d: ReadFileSelf\n", __LINE__);
+	if (pBuffer == NULL)
+	{
+		DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d:  \n", __LINE__);
+		return -1;
+	}
+	
+	memcopy(ReadFileName, FileName, NameLength);
+	pReadFileDestBuffer = pBuffer;
+	ReadFileNameLength = NameLength;
+
+	for (int i = 0; i < 5; i++)
+    {
+    	DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: i: %d \n", __LINE__, i);
+		DEBUG ((EFI_D_INFO, "%d HandleEnterPressed FSM_Event: %d\n", __LINE__, FSM_Event));
+	    FileReadFSM(FSM_Event++);
+
+	    if (READ_FILE_EVENT <= FSM_Event)
+	    	FSM_Event = READ_FILE_EVENT;
+	}
+
+	
+}
+
+
 EFI_STATUS ScreenInit()
 {
+	EFI_STATUS status = 0;
 	//UINT32 i = 0;
 	//UINT32 j = 0;
 	UINT32 x = ScreenWidth;
@@ -3698,8 +3754,22 @@ EFI_STATUS ScreenInit()
 	
     EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
 
-  	//ReadFileSelf("zhufeng.bmp", 11, pWallPaperBuffer);
- 
+  	status = ReadFileSelf("zhufeng.bmp", 11, pDeskWallpaperBuffer);
+	if (EFI_ERROR(status))
+	{
+		INFO_SELF(L"ReadFileSelf error.\r\n");
+  		return;
+	}
+  	/*
+	for (int i = 0; i < ScreenHeight; i++)
+		for (int j = 0; j < ScreenWidth; j++)
+		{
+			// BMP 3bits, and desk buffer 4bits
+			pDeskBuffer[(i * ScreenWidth + j) * 4]     = pDeskWallpaperBuffer[0x36 + (i * 1920 + j) * 3 ];
+			pDeskBuffer[(i * ScreenWidth + j) * 4 + 1] = pDeskWallpaperBuffer[0x36 + (i * 1920 + j) * 3 + 1];
+			pDeskBuffer[(i * ScreenWidth + j) * 4 + 2] = pDeskWallpaperBuffer[0x36 + (i * 1920 + j) * 3 + 2];
+		}
+ 	
     Color.Red   = 0x00;
     Color.Green = 0x84;
     Color.Blue	= 0x84;
@@ -3751,6 +3821,7 @@ EFI_STATUS ScreenInit()
     Color.Blue	= 0xFF;
     RectangleFillIntoBuffer(pDeskBuffer, x - 163,    y - 3, x - 4,     y - 3, 1, Color);
     RectangleFillIntoBuffer(pDeskBuffer, x - 3,     y - 24, x - 3,     y - 3, 1, Color);
+    */
         /*
     Color.Red   = 0xFF;
     Color.Green = 0xFF;
@@ -3835,7 +3906,7 @@ EFI_STATUS ParametersInitial()
 {
     EFI_STATUS	Status;
 	
-    INFO_SELF("ScreenWidth:%d, ScreenHeight:%d\n", ScreenWidth, ScreenHeight);
+    INFO_SELF(L"\r\n");
     
 	pDeskBuffer = (UINT8 *)AllocatePool(ScreenWidth * ScreenHeight * 4); 
 	if (NULL == pDeskBuffer)
@@ -3846,6 +3917,15 @@ EFI_STATUS ParametersInitial()
 
 	pDeskDisplayBuffer = (UINT8 *)AllocatePool(ScreenWidth * ScreenHeight * 4); 
 	if (NULL == pDeskDisplayBuffer)
+	{
+		DEBUG ((EFI_D_INFO, "ScreenInit AllocatePool pDeskDisplayBuffer NULL\n"));
+		return -1;
+	}
+    
+    UINT32 DeskWallpaperBufferSize = 7372854;
+	//bmp size, is so big about 7.3MB
+	pDeskWallpaperBuffer = (UINT8 *)AllocatePool(DeskWallpaperBufferSize); 
+	if (NULL == pDeskWallpaperBuffer)
 	{
 		DEBUG ((EFI_D_INFO, "ScreenInit AllocatePool pDeskDisplayBuffer NULL\n"));
 		return -1;
@@ -3885,15 +3965,7 @@ EFI_STATUS ParametersInitial()
         DEBUG ((EFI_D_INFO, "ChineseCharArrayInit AllocateZeroPool Failed: %x!\n "));
         DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: ChineseCharArrayInit AllocateZeroPool failed\n",  __LINE__);
         return -1;
-    }
-		
-	pWallPaperBuffer = (UINT8 *)AllocateZeroPool(7372854);
-	if (NULL == pWallPaperBuffer)
-    {
-        DEBUG ((EFI_D_INFO, "pWallPaperBuffer AllocateZeroPool Failed: %x!\n "));
-        DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: pWallPaperBuffer AllocateZeroPool failed\n",  __LINE__);
-        return -1;
-    }
+    }		
     
 	MouseColor.Blue  = 0xff;
     MouseColor.Red   = 0xff;
@@ -3906,36 +3978,12 @@ EFI_STATUS ParametersInitial()
 	FAT32_Table = NULL;
 
 	
-    INFO_SELF("\n");
+    INFO_SELF(L"\r\n");
 
 	return EFI_SUCCESS;
 }
 
-EFI_STATUS ReadFileSelf(UINT8 *FileName, UINT8 NameLength, UINT8 *pBuffer)
-{
-	DebugPrint1(0, 6 * 16, "%d: ReadFileSelf\n", __LINE__);
-	if (pBuffer == NULL)
-	{
-		DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d:  \n", __LINE__);
-		return -1;
-	}
-	
-	memcopy(ReadFileName, FileName, NameLength);
-	pReadFileDestBuffer = pBuffer;
-	ReadFileNameLength = NameLength;
 
-	for (int i = 0; i < 5; i++)
-    {
-    	DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: i: %d \n", __LINE__, i);
-		DEBUG ((EFI_D_INFO, "%d HandleEnterPressed FSM_Event: %d\n", __LINE__, FSM_Event));
-	    FileReadFSM(FSM_Event++);
-
-	    if (READ_FILE_EVENT <= FSM_Event)
-	    	FSM_Event = READ_FILE_EVENT;
-	}
-
-	
-}
 
 EFI_STATUS InitChineseChar()
 {
@@ -3954,38 +4002,41 @@ Main (
     EFI_STATUS  Status;    
 
     Status = gBS->LocateProtocol(&gEfiGraphicsOutputProtocolGuid, NULL, (VOID **) &GraphicsOutput);    
-    INFO_SELF("%X\n", Status);    
+    INFO_SELF(L"\r\n");    
     if (EFI_ERROR (Status)) 
     {
-    	 INFO_SELF("%X\n", Status);
+    	 INFO_SELF(L"%X\n", Status);
         return EFI_UNSUPPORTED;
     }
     
     ScreenWidth  = GraphicsOutput->Mode->Info->HorizontalResolution;
     ScreenHeight = GraphicsOutput->Mode->Info->VerticalResolution;
 
+    INFO_SELF(L"\r\n");
+
     ParametersInitial();
                 
+    INFO_SELF(L"\r\n");
 	MouseInit();
     
-    INFO_SELF("1");
+    INFO_SELF(L"\r\n");
     
 	// get partitions from api
 	PartitionAnalysis();
 	
-	INFO_SELF("1");
+	INFO_SELF(L"\r\n");
     MultiProcessInit();
     
-    INFO_SELF("1");
+    INFO_SELF(L"\r\n");
     InitChineseChar();
     
-    INFO_SELF("1");
+    INFO_SELF(L"\r\n");
     ScreenInit();
     
-    INFO_SELF("1");
+    INFO_SELF(L"\r\n");
     MyComputerWindow(100, 100);
     
-    INFO_SELF("1");
+    INFO_SELF(L"\r\n");
     SystemTimeIntervalInit();	
 
     //GraphicsLayerCompute(iMouseX, iMouseY, 0);
