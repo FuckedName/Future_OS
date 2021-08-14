@@ -1259,11 +1259,11 @@ VOID EFIAPI DebugPrint2 (UINT16 x, UINT16 y, UINT8 *pBuffer, IN  CONST CHAR8  *F
 
 EFI_STATUS StrCmpSelf(UINT8 *p1, UINT8 *p2, UINT16 length)
 {
-	//DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: \n", __LINE__);
+	DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: StrCmpSelf\n", __LINE__);
 	
 	for (int i = 0; i < length; i++)
 	{
-		//DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%02X %02X ", p1[i], p2[i]);
+		DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%02X %02X ", p1[i], p2[i]);
 		if (p1[i] != p2[i])
 			return -1;
 	}
@@ -1275,15 +1275,10 @@ FAT32_ROOTPATH_SHORT_FILE_ITEM pItems[32];
 
 EFI_STATUS RootPathAnalysis(UINT8 *p)
 {
-	/*pItems = (FAT32_ROOTPATH_SHORT_FILE_ITEM *)AllocateZeroPool(DISK_BUFFER_SIZE);
-	if (NULL == pItems)
-	{
-		DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: \n", __LINE__);
-		return EFI_SUCCESS;
-	}
-	*/
 	memcpy(&pItems, p, DISK_BUFFER_SIZE);
 	UINT16 valid_count = 0;
+	
+	DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: .: %d\n", __LINE__, ReadFileName[7]);
 
 	//display filing file and subpath. 
 	for (int i = 0; i < 30; i++)
@@ -1300,9 +1295,33 @@ EFI_STATUS RootPathAnalysis(UINT8 *p)
 			
 			valid_count++;
 
+			UINT8 FileName[12] = {0};
+			int count = 0;
+			while (pItems[i].FileName[count] != 0)
+			{
+				FileName[count] = pItems[i].FileName[count];
+				count++;
+			}
+
+			if (pItems[i].ExtensionName[0] != 0)
+			{
+				FileName[count] = ' ';
+				count++;
+			}
+			int count2 = 0;
+			while (pItems[i].ExtensionName[count2] != 0)
+			{
+				FileName[count] = pItems[i].ExtensionName[count2];
+				count++;
+				count2++;
+			}
+
+			DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: FileName: %a\n", __LINE__, FileName);
+			DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: ReadFileName: %a\n", __LINE__, ReadFileName);
+
 			//for (int j = 0; j < 5; j++)
 			//	DebugPrint1(j * 3 * 8, 16 * 40 + valid_count * 16, "%02X ", pItems[i].FileName[j]);
-			if (StrCmpSelf(pItems[i].FileName, ReadFileName, ReadFileNameLength) == EFI_SUCCESS)			
+			if (StrCmpSelf(FileName, ReadFileName, ReadFileNameLength) == EFI_SUCCESS)			
 			{
 	        	DebugPrint1(DISK_MBR_X, 16 * 30 + (valid_count) * 16 + 4 * 16, "%d FileName:%2c%2c%2c%2c%2c%2c%2c%2c ExtensionName:%2c%2c%2c StartCluster:%02X%02X%02X%02X FileLength: %02X%02X%02X%02X Attribute: %02X    ",  __LINE__,
                                 pItems[i].FileName[0], pItems[i].FileName[1], pItems[i].FileName[2], pItems[i].FileName[3], pItems[i].FileName[4], pItems[i].FileName[5], pItems[i].FileName[6], pItems[i].FileName[7],
@@ -1809,6 +1828,12 @@ void TextDevicePathAnalysisCHAR16(CHAR16 *p, DEVICE_PARAMETER *device, UINTN cou
 //Note: ReadSize will be multi with 512
 EFI_STATUS ReadDataFromPartition(UINT8 deviceID, UINT64 StartSectorNumber, UINT16 ReadSize, UINT8 *pBuffer)
 {
+	if (StartSectorNumber > device[deviceID].SectorCount)
+	{
+		DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: deviceID: %d StartSectorNumber: %ld ReadSize: %d\n", __LINE__, deviceID, StartSectorNumber, ReadSize);
+		return -1;
+	}
+
 	//DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: deviceID: %d StartSectorNumber: %ld ReadSize: %d\n", __LINE__, deviceID, StartSectorNumber, ReadSize);
 	EFI_STATUS Status;
     UINTN NumHandles;
@@ -1974,14 +1999,14 @@ EFI_STATUS FirstSelectorAnalysis(UINT8 *p, MasterBootRecordSwitched *pMBRSwitche
 
 	// 大端字节序：低位字节在高地址，高位字节低地址上。这是人类读写数值的方法。
     // 小端字节序：与上面相反。低位字节在低地址，高位字节在高地址。
-	/*DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "ReservedSelector:%02X%02X SectorsPerFat:%02X%02X%02X%02X BootPathStartCluster:%02X%02X%02X%02X NumFATS: %X", 
+	DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d ReservedSelector:%02X%02X SectorsPerFat:%02X%02X%02X%02X BootPathStartCluster:%02X%02X%02X%02X NumFATS: %X", 
+	                                    __LINE__,
 	                                    pMBR->ReservedSelector[0], pMBR->ReservedSelector[1], 
 	                                    pMBR->SectorsPerFat[0], pMBR->SectorsPerFat[1], pMBR->SectorsPerFat[2], pMBR->SectorsPerFat[3],
 	                                    pMBR->BootPathStartCluster[0], pMBR->BootPathStartCluster[1], pMBR->BootPathStartCluster[2], pMBR->BootPathStartCluster[3],
 	                                    pMBR->NumFATS[0]);
 
-	*/
-	DOLLAR_BOOT *pDollarBoot;
+	
 	Transfer(pMBR, pMBRSwitched);
 
 	FreePool(pMBR);
@@ -2643,7 +2668,7 @@ EFI_STATUS PartitionAnalysis()
 // all partitions analysis
 EFI_STATUS PartitionAnalysisFSM()
 {    
-    //DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d PartitionAnalysisFSM\n", __LINE__);
+    DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d PartitionAnalysisFSM\n", __LINE__);
     EFI_STATUS Status ;
     UINT8 Buffer1[DISK_BUFFER_SIZE];
     
@@ -2654,7 +2679,7 @@ EFI_STATUS PartitionAnalysisFSM()
         	 Status = ReadDataFromPartition(i, sector_count, 1, Buffer1); 
 			 if ( EFI_SUCCESS == Status )
             {
-	            //DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
+	            DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
 				  
 			 	  // analysis data area of patition
 			 	  FirstSelectorAnalysis(Buffer1, &MBRSwitched); 
@@ -2662,7 +2687,7 @@ EFI_STATUS PartitionAnalysisFSM()
 			 	  // data sector number start include: reserved selector, fat sectors(usually is 2: fat1 and fat2), and file system boot path start cluster(usually is 2, data block start number is 2)
 			 	  sector_count = MBRSwitched.ReservedSelector + MBRSwitched.SectorsPerFat * MBRSwitched.NumFATS + MBRSwitched.BootPathStartCluster - 2;
 			 	  BlockSize = MBRSwitched.SectorOfCluster * 512;
-	       		  //DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: sector_count:%ld BlockSize: %d\n",  __LINE__, sector_count, BlockSize);
+	       		  DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: sector_count:%ld BlockSize: %d\n",  __LINE__, sector_count, BlockSize);
 		     }        	 
             break;
 		 }       
@@ -2674,7 +2699,7 @@ EFI_STATUS PartitionAnalysisFSM()
 // analysis a partition 
 EFI_STATUS RootPathAnalysisFSM()
 {
-    //DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d RootPathAnalysisFSM\n", __LINE__);
+    DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d RootPathAnalysisFSM\n", __LINE__);
     EFI_STATUS Status ;
     UINT8 Buffer1[DISK_BUFFER_SIZE];
     
@@ -2893,8 +2918,8 @@ VOID EFIAPI TimeSlice(
 	IN VOID           *Context
 	)
 {
-    DebugPrint1(0, 5 * 16, "%d TimeSlice %x %lu \n", __LINE__, Context, *((UINT32 *)Context));
-    DebugPrint1(0, 6 * 16, "%d TimerSliceCount: %lu \n", __LINE__, TimerSliceCount);
+    //DebugPrint1(0, 5 * 16, "%d TimeSlice %x %lu \n", __LINE__, Context, *((UINT32 *)Context));
+    //DebugPrint1(0, 6 * 16, "%d TimerSliceCount: %lu \n", __LINE__, TimerSliceCount);
     //Print(L"%lu\n", *((UINT32 *)Context));
     if (TimerSliceCount % 2 == 0)
        gBS->SignalEvent (MultiTaskTriggerGroup1Event);
@@ -3337,14 +3362,49 @@ VOID EFIAPI DecToCharBuffer1( UINT8* Buffin, UINTN len, UINT8* Buffout )
 int FSM_Event = READ_PATITION_EVENT;
 
 int flag = 0;
+
+EFI_STATUS ReadFileSelf(UINT8 *FileName, UINT8 NameLength, UINT8 *pBuffer)
+{
+	DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: FileName: %a \n", __LINE__, FileName);
+	if (pBuffer == NULL)
+	{
+		DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d:  \n", __LINE__);
+		return -1;
+	}
+	
+	memcopy(ReadFileName, FileName, NameLength);
+	pReadFileDestBuffer = pBuffer;
+	ReadFileNameLength = NameLength;
+
+	FileReadCount = 0;
+	sector_count = 0;
+	PreviousBlockNumber = 0;
+	FileBlockStart = 0;
+	NextState = INIT_STATE;
+	FSM_Event = 0;
+
+	for (int i = 0; i < 5; i++)
+    {
+    	DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: i: %d \n", __LINE__, i);
+		DEBUG ((EFI_D_INFO, "%d HandleEnterPressed FSM_Event: %d\n", __LINE__, FSM_Event));
+	    FileReadFSM(FSM_Event++);
+
+	    if (READ_FILE_EVENT <= FSM_Event)
+	    	FSM_Event = READ_FILE_EVENT;
+	}
+
+	
+}
+
+
 EFIAPI HandleEnterPressed()
 {
 	DEBUG ((EFI_D_INFO, "%d HandleEnterPressed\n", __LINE__));
 	
+		
     //PartitionUSBReadSynchronous();
     //PartitionUSBReadAsynchronous();
-
-
+    
 	DEBUG ((EFI_D_INFO, "%d HandleEnterPressed\n", __LINE__));
 	return EFI_SUCCESS;
 }
@@ -3707,39 +3767,13 @@ EFI_STATUS SystemTimeIntervalInit()
 		*TimerCount = *TimerCount + 1;
 		//DebugPrint1(DISPLAY_X, DISPLAY_Y, "%d: SystemTimeIntervalInit while\n", __LINE__);
 		//if (*TimerCount % 1000000 == 0)
-	       DebugPrint1(0, 4 * 16, "%d: while (1) p:%x %lu \n", __LINE__, TimerCount, *TimerCount);
+	       //DebugPrint1(0, 4 * 16, "%d: while (1) p:%x %lu \n", __LINE__, TimerCount, *TimerCount);
 	}
 	
 	gBS->SetTimer( TimerOne, TimerCancel, 0 );
 	gBS->CloseEvent( TimerOne );    
 
 	return EFI_SUCCESS;
-}
-
-EFI_STATUS ReadFileSelf(UINT8 *FileName, UINT8 NameLength, UINT8 *pBuffer)
-{
-	DebugPrint1(0, 6 * 16, "%d: ReadFileSelf\n", __LINE__);
-	if (pBuffer == NULL)
-	{
-		DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d:  \n", __LINE__);
-		return -1;
-	}
-	
-	memcopy(ReadFileName, FileName, NameLength);
-	pReadFileDestBuffer = pBuffer;
-	ReadFileNameLength = NameLength;
-
-	for (int i = 0; i < 5; i++)
-    {
-    	DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: i: %d \n", __LINE__, i);
-		DEBUG ((EFI_D_INFO, "%d HandleEnterPressed FSM_Event: %d\n", __LINE__, FSM_Event));
-	    FileReadFSM(FSM_Event++);
-
-	    if (READ_FILE_EVENT <= FSM_Event)
-	    	FSM_Event = READ_FILE_EVENT;
-	}
-
-	
 }
 
 
@@ -3754,13 +3788,34 @@ EFI_STATUS ScreenInit()
 	
     EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
 
-  	status = ReadFileSelf("zhufeng.bmp", 11, pDeskWallpaperBuffer);
+	if (StatusErrorCount % 61 == 0)
+	{
+		for (int j = 0; j < ScreenHeight - 25; j++)
+		{
+			for (int i = 0; i < ScreenWidth; i++)
+			{
+				pDeskBuffer[(j * ScreenWidth + i) * 4]     = 0x84;
+				pDeskBuffer[(j * ScreenWidth + i) * 4 + 1] = 0x84;
+				pDeskBuffer[(j * ScreenWidth + i) * 4 + 2] = 0x00;
+			}
+		}		
+	}
+	StatusErrorCount = 0;
+    DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: FAT32\n",  __LINE__);
+
+  	status = ReadFileSelf("ZHUFENG BMP", 11, pDeskWallpaperBuffer);
 	if (EFI_ERROR(status))
 	{
 		INFO_SELF(L"ReadFileSelf error.\r\n");
   		return;
 	}
-  	/*
+
+   for (int j = 0; j < 250; j++)
+   {
+       DebugPrint1(DISK_READ_BUFFER_X + (j % 16) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 16), "%02X ", pDeskWallpaperBuffer[j] & 0xff);
+   }
+	
+  	
 	for (int i = 0; i < ScreenHeight; i++)
 		for (int j = 0; j < ScreenWidth; j++)
 		{
@@ -3769,7 +3824,7 @@ EFI_STATUS ScreenInit()
 			pDeskBuffer[(i * ScreenWidth + j) * 4 + 1] = pDeskWallpaperBuffer[0x36 + (i * 1920 + j) * 3 + 1];
 			pDeskBuffer[(i * ScreenWidth + j) * 4 + 2] = pDeskWallpaperBuffer[0x36 + (i * 1920 + j) * 3 + 2];
 		}
- 	
+ 	/*
     Color.Red   = 0x00;
     Color.Green = 0x84;
     Color.Blue	= 0x84;
@@ -3921,9 +3976,10 @@ EFI_STATUS ParametersInitial()
 		DEBUG ((EFI_D_INFO, "ScreenInit AllocatePool pDeskDisplayBuffer NULL\n"));
 		return -1;
 	}
-    
-    UINT32 DeskWallpaperBufferSize = 7372854;
-	//bmp size, is so big about 7.3MB
+
+    // BMP header size: 0x36
+    UINT32 DeskWallpaperBufferSize = 1920 * 1080 * 3 + 0x36;
+	//bmp size, is so big
 	pDeskWallpaperBuffer = (UINT8 *)AllocatePool(DeskWallpaperBufferSize); 
 	if (NULL == pDeskWallpaperBuffer)
 	{
