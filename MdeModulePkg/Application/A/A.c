@@ -2685,7 +2685,9 @@ EFI_STATUS GetFatTableFSM()
     {
         if (device[i].DeviceType == 1 && device[i].SectorCount == 915551)
         {
-            Status = ReadDataFromPartition(i, sector_count, 1, Buffer1); 
+        	 //start block need to recompute depends on file block start number 
+        	 //FileBlockStart;
+            Status = ReadDataFromPartition(i, sector_count + FileBlockStart / 128,  1, Buffer1); 
             if ( EFI_SUCCESS == Status )
             {
             	  // 512 = 16 * 32 = 4 item * 32
@@ -2717,18 +2719,23 @@ EFI_STATUS GetFatTableFSM()
 
 UINT32 GetNextBlockNumber()
 {
-	//DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: PreviousBlockNumber: %d\n",  __LINE__, PreviousBlockNumber);
+	DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: PreviousBlockNumber: %d\n",  __LINE__, PreviousBlockNumber);
 
-	if (FAT32_Table[PreviousBlockNumber * 4] == 0xff 
-	    && FAT32_Table[PreviousBlockNumber * 4 + 1] == 0xff 
-	    && FAT32_Table[PreviousBlockNumber * 4 + 2] == 0xff 
-	    && FAT32_Table[PreviousBlockNumber * 4 + 3] == 0x0f)
+	UINT8 number = PreviousBlockNumber % 128 ;
+
+	if (127 == number)
+		GetFatTableFSM();
+	
+	if (FAT32_Table[number * 4] == 0xff 
+	    && FAT32_Table[number * 4 + 1] == 0xff 
+	    && FAT32_Table[number * 4 + 2] == 0xff 
+	    && FAT32_Table[number * 4 + 3] == 0x0f)
 	{
 		DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: PreviousBlockNumber: %d, PreviousBlockNumber: %llX\n",  __LINE__, PreviousBlockNumber, 0x0fffffff);
 		return 0x0fffffff;
 	}
-
-	return FAT32_Table[PreviousBlockNumber * 4] + (UINT32)FAT32_Table[PreviousBlockNumber * 4 + 1] * 16 * 16 + (UINT32)FAT32_Table[PreviousBlockNumber * 4 + 2] * 16 * 16 * 16 * 16 + (UINT32)FAT32_Table[PreviousBlockNumber * 4 + 3] * 16 * 16 * 16 * 16 * 16 * 16;	
+	
+	return FAT32_Table[number  * 4] + (UINT32)FAT32_Table[number * 4 + 1] * 16 * 16 + (UINT32)FAT32_Table[number * 4 + 2] * 16 * 16 * 16 * 16 + (UINT32)FAT32_Table[number * 4 + 3] * 16 * 16 * 16 * 16 * 16 * 16;	
 }
 
 EFI_STATUS ChineseCharArrayInit()
@@ -2769,7 +2776,7 @@ EFI_STATUS ReadFileFSM()
 		{
 			// read from USB by block(512 * 8)
     	    // Read file content from FAT32(USB), minimum unit is block
-    	    for (int k = 0; k < FileLength / (512 * 8); k++)
+    	    for (UINT16 k = 0; k < FileLength / (512 * 8); k++)
     	 	{
         	 	Status = ReadDataFromPartition(i, sector_count, 8, BufferBlock); 
 				if (EFI_ERROR(Status))
@@ -2795,8 +2802,10 @@ EFI_STATUS ReadFileFSM()
 				  }
 				  
 				  FileReadCount++;
-		 	 	  sector_count = MBRSwitched.ReservedSelector + MBRSwitched.SectorsPerFat * MBRSwitched.NumFATS + MBRSwitched.BootPathStartCluster - 2 + (GetNextBlockNumber() - 2) * 8;
-		 	 	  PreviousBlockNumber = GetNextBlockNumber();
+				  UINT32 NextBlockNumber = GetNextBlockNumber();
+		 	 	  sector_count = MBRSwitched.ReservedSelector + MBRSwitched.SectorsPerFat * MBRSwitched.NumFATS + MBRSwitched.BootPathStartCluster - 2 + (NextBlockNumber - 2) * 8;
+		 	 	  PreviousBlockNumber = NextBlockNumber;
+		 	 	  DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: NextBlockNumber: %llu\n",  __LINE__, NextBlockNumber);
 			 }
 			 
 			break;
@@ -2822,7 +2831,7 @@ int FileReadFSM(EVENT event)
 {
     EFI_STATUS Status;
     
-	if (FileReadCount > 64)
+	if (FileReadCount > FileLength / (512 * 8))
 	{
 		DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
 		return;
