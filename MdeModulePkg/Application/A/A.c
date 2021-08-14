@@ -101,9 +101,9 @@ UINT16 keyboard_count = 0;
 UINT16 mouse_count = 0;
 UINT16 parameter_count = 0;
 
-#define INFO(...)   \
+#define INFO_SELF(...)   \
 			do {   \
-				  Print(L"[INFO  ]%a %a(Line %d): ", __FILE__,__FUNCTION__,__LINE__);  \
+				  Print(L"%d %a %a: ",__LINE__, __FILE__, __FUNCTION__);  \
 			     Print(__VA_ARGS__); \
 			}while(0);
 
@@ -575,8 +575,8 @@ DEVICE_PARAMETER device[10] = {0};
 
 
 
-int iMouseX;
-int iMouseY;
+int iMouseX = 0;
+int iMouseY = 0;
 
 EFI_GRAPHICS_OUTPUT_BLT_PIXEL MouseColor;
 
@@ -1207,6 +1207,9 @@ VOID EFIAPI DebugPrint1 (UINT16 x, UINT16 y,  IN  CONST CHAR8  *Format, ...)
 	if (y > ScreenHeight - 16 || x > ScreenWidth - 8)
 		return;
 
+	if (NULL == pDeskBuffer)
+		return;
+
 	VA_LIST         VaList;
 	VA_START (VaList, Format);
 	StringMaker(x, y, Format, VaList);
@@ -1259,7 +1262,7 @@ EFI_STATUS RootPathAnalysis(UINT8 *p)
 		if (pItems[i].FileName[0] != 0xE5 && (pItems[i].Attribute[0] == 0x20 
 		    || pItems[i].Attribute[0] == 0x10))
        {
-        	DebugPrint1(DISK_MBR_X, 16 * 37 + (valid_count) * 16, "FileName:%2c%2c%2c%2c%2c%2c%2c%2c ExtensionName:%2c%2c%2c StartCluster:%02X%02X%02X%02X FileLength: %02X%02X%02X%02X Attribute: %02X    ", 
+        	DebugPrint1(DISK_MBR_X, 16 * 37 + (valid_count) * 16, "%d FileName:%2c%2c%2c%2c%2c%2c%2c%2c ExtensionName:%2c%2c%2c StartCluster:%02X%02X%02X%02X FileLength: %02X%02X%02X%02X Attribute: %02X    ", __LINE__,
                                             pItems[i].FileName[0], pItems[i].FileName[1], pItems[i].FileName[2], pItems[i].FileName[3], pItems[i].FileName[4], pItems[i].FileName[5], pItems[i].FileName[6], pItems[i].FileName[7],
                                             pItems[i].ExtensionName[0], pItems[i].ExtensionName[1],pItems[i].ExtensionName[2],
                                             pItems[i].StartClusterHigh2B[0], pItems[i].StartClusterHigh2B[1],
@@ -1273,7 +1276,7 @@ EFI_STATUS RootPathAnalysis(UINT8 *p)
 			//	DebugPrint1(j * 3 * 8, 16 * 40 + valid_count * 16, "%02X ", pItems[i].FileName[j]);
 			if (StrCmpSelf(pItems[i].FileName, ReadFileName, ReadFileNameLength) == EFI_SUCCESS)			
 			{
-	        	DebugPrint1(DISK_MBR_X, 16 * 30 + (valid_count) * 16 + 4 * 16, "FileName:%2c%2c%2c%2c%2c%2c%2c%2c ExtensionName:%2c%2c%2c StartCluster:%02X%02X%02X%02X FileLength: %02X%02X%02X%02X Attribute: %02X    ", 
+	        	DebugPrint1(DISK_MBR_X, 16 * 30 + (valid_count) * 16 + 4 * 16, "%d FileName:%2c%2c%2c%2c%2c%2c%2c%2c ExtensionName:%2c%2c%2c StartCluster:%02X%02X%02X%02X FileLength: %02X%02X%02X%02X Attribute: %02X    ",  __LINE__,
                                 pItems[i].FileName[0], pItems[i].FileName[1], pItems[i].FileName[2], pItems[i].FileName[3], pItems[i].FileName[4], pItems[i].FileName[5], pItems[i].FileName[6], pItems[i].FileName[7],
                                 pItems[i].ExtensionName[0], pItems[i].ExtensionName[1],pItems[i].ExtensionName[2],
                                 pItems[i].StartClusterHigh2B[0], pItems[i].StartClusterHigh2B[1],
@@ -1297,10 +1300,10 @@ EFI_STATUS RootPathAnalysis1(UINT8 *p)
 
 	//display filing file and subpath. 
 	for (int i = 0; i < 30; i++)
-		if (pItems[i].FileName[0] != 0xE5 && (pItems[i].Attribute[0] == 0x20 
-		    || pItems[i].Attribute[0] == 0x10))
+		//if (pItems[i].FileName[0] != 0xE5 && (pItems[i].Attribute[0] == 0x20 
+		//    || pItems[i].Attribute[0] == 0x10))
        {
-        	DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "FileName:%2c%2c%2c%2c%2c%2c%2c%2c ExtensionName:%2c%2c%2c StartCluster:%02X%02X%02X%02X FileLength: %02X%02X%02X%02X Attribute: %02X    ", 
+        	DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d FileName:%2c%2c%2c%2c%2c%2c%2c%2c ExtensionName:%2c%2c%2c StartCluster:%02X%02X%02X%02X FileLength: %02X%02X%02X%02X Attribute: %02X    ",  __LINE__,
                                             pItems[i].FileName[0], pItems[i].FileName[1], pItems[i].FileName[2], pItems[i].FileName[3], pItems[i].FileName[4], pItems[i].FileName[5], pItems[i].FileName[6], pItems[i].FileName[7],
                                             pItems[i].ExtensionName[0], pItems[i].ExtensionName[1],pItems[i].ExtensionName[2],
                                             pItems[i].StartClusterHigh2B[0], pItems[i].StartClusterHigh2B[1],
@@ -1357,7 +1360,7 @@ typedef struct
 
 UINT16 BytesToInt3(UINT8 *bytes)
 {
-	//INFO("%x %x %x\n", bytes[0], bytes[1], bytes[2]);
+	//INFO_SELF("%x %x %x\n", bytes[0], bytes[1], bytes[2]);
 	UINT16 Result = bytes[0] & 0xFF;
     Result |= (bytes[1] << 8 & 0xFF00);
     Result |= ((bytes[2] << 16) & 0xFF0000);
@@ -1396,7 +1399,7 @@ EFI_STATUS  DollarRootA0DatarunAnalysis(UINT8 *p)
         if (occupyClusterLength == 1)
             A0Indexes[Index].OccupyCluster = p[i];
         i++;
-        //INFO(" i: %d\n", i);
+        //INFO_SELF(" i: %d\n", i);
         if (offsetLength == 1)
             offset = p[i];
         else if (offsetLength == 3)
@@ -1411,7 +1414,7 @@ EFI_STATUS  DollarRootA0DatarunAnalysis(UINT8 *p)
         DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d offset:%d \n", __LINE__, offset);
         i += offsetLength;
         Index++;
-        //INFO(" i: %d\n", i);
+        //INFO_SELF(" i: %d\n", i);
     }
 
 }
@@ -1455,7 +1458,7 @@ EFI_STATUS  MFTDollarRootFileAnalysisBuffer(UINT8 *pBuffer)
 		UINT8 size[4];
 		for (int i = 0; i < 4; i++)
 			size[i] = p[AttributeOffset + 4 + i];
-		//INFO("%02X%02X%02X%02X\n", size[0], size[1], size[2], size[3]);
+		//INFO_SELF("%02X%02X%02X%02X\n", size[0], size[1], size[2], size[3]);
 		UINT16 AttributeSize = BytesToInt4(size);
 		
 		for (int i = 0; i < AttributeSize; i++)
@@ -1817,7 +1820,7 @@ EFI_STATUS ReadDataFromPartition(UINT8 deviceID, UINT64 StartSectorNumber, UINT1
 	{
 		DebugPrint1(DISK_READ_BUFFER_X + (j % 16) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 16), "%02X ", pBuffer[j] & 0xff);
 	}
-	//INFO("\n");
+	//INFO_SELF("\n");
     //DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
     return EFI_SUCCESS;
 }
@@ -3823,7 +3826,7 @@ EFI_STATUS ParametersInitial()
 {
     EFI_STATUS	Status;
 	
-    INFO("ScreenWidth:%d, ScreenHeight:%d\n", ScreenWidth, ScreenHeight);
+    INFO_SELF("ScreenWidth:%d, ScreenHeight:%d\n", ScreenWidth, ScreenHeight);
     
 	pDeskBuffer = (UINT8 *)AllocatePool(ScreenWidth * ScreenHeight * 4); 
 	if (NULL == pDeskBuffer)
@@ -3893,6 +3896,9 @@ EFI_STATUS ParametersInitial()
 	FileReadCount = 0;
 	FAT32_Table = NULL;
 
+	
+    INFO_SELF("\n");
+
 	return EFI_SUCCESS;
 }
 
@@ -3938,10 +3944,11 @@ Main (
 {
     EFI_STATUS  Status;    
 
-    Status = gBS->LocateProtocol(&gEfiGraphicsOutputProtocolGuid, NULL, (VOID **) &GraphicsOutput);        
+    Status = gBS->LocateProtocol(&gEfiGraphicsOutputProtocolGuid, NULL, (VOID **) &GraphicsOutput);    
+    INFO_SELF("%X\n", Status);    
     if (EFI_ERROR (Status)) 
     {
-    	 INFO("%X\n", Status);
+    	 INFO_SELF("%X\n", Status);
         return EFI_UNSUPPORTED;
     }
     
@@ -3952,18 +3959,27 @@ Main (
                 
 	MouseInit();
     
+    INFO_SELF("1");
+    
 	// get partitions from api
 	PartitionAnalysis();
 	
+	INFO_SELF("1");
     MultiProcessInit();
-
+    
+    INFO_SELF("1");
     InitChineseChar();
     
+    INFO_SELF("1");
     ScreenInit();
     
+    INFO_SELF("1");
     MyComputerWindow(100, 100);
-
+    
+    INFO_SELF("1");
     SystemTimeIntervalInit();	
+
+    //GraphicsLayerCompute(iMouseX, iMouseY, 0);
 	
 	//DebugPrint1(100, 100, "%d %d\n", __LINE__, Status);
 	
