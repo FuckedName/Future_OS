@@ -3783,7 +3783,7 @@ EFI_STATUS ScreenInit()
 	//UINT8 p[100];
 	
     EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
-
+/*
 	if (StatusErrorCount % 61 == 0)
 	{
 		for (int j = 0; j < ScreenHeight - 25; j++)
@@ -3796,6 +3796,7 @@ EFI_STATUS ScreenInit()
 			}
 		}		
 	}
+	*/
 	StatusErrorCount = 0;
     DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: FAT32\n",  __LINE__);
 
@@ -3816,9 +3817,9 @@ EFI_STATUS ScreenInit()
 		for (int j = 0; j < ScreenWidth; j++)
 		{
 			// BMP 3bits, and desk buffer 4bits
-			pDeskBuffer[(i * ScreenWidth + j) * 4]     = pDeskWallpaperBuffer[0x36 + (i * 1920 + j) * 3 ];
-			pDeskBuffer[(i * ScreenWidth + j) * 4 + 1] = pDeskWallpaperBuffer[0x36 + (i * 1920 + j) * 3 + 1];
-			pDeskBuffer[(i * ScreenWidth + j) * 4 + 2] = pDeskWallpaperBuffer[0x36 + (i * 1920 + j) * 3 + 2];
+			pDeskBuffer[(i * ScreenWidth + j) * 4]     = pDeskWallpaperBuffer[0x36 + ((ScreenHeight - i) * 1920 + j) * 3 ];
+			pDeskBuffer[(i * ScreenWidth + j) * 4 + 1] = pDeskWallpaperBuffer[0x36 + ((ScreenHeight - i) * 1920 + j) * 3 + 1];
+			pDeskBuffer[(i * ScreenWidth + j) * 4 + 2] = pDeskWallpaperBuffer[0x36 + ((ScreenHeight - i) * 1920 + j) * 3 + 2];
 		}
  	/*
     Color.Red   = 0x00;
