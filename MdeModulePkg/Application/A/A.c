@@ -2732,7 +2732,7 @@ EFI_STATUS GetFatTableFSM()
 {    
     //DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d GetFatTableFSM\n", __LINE__);
     EFI_STATUS Status ;
-    UINT8 Buffer1[DISK_BUFFER_SIZE];
+    UINT8 Buffer1[DISK_BUFFER_SIZE * MBRSwitched.SectorsPerFat];
     
     for (int i = 0; i < PartitionCount; i++)
     {
@@ -2740,17 +2740,18 @@ EFI_STATUS GetFatTableFSM()
         {
         	 //start block need to recompute depends on file block start number 
         	 //FileBlockStart;
-            Status = ReadDataFromPartition(i, sector_count + FileBlockStart / 128,  1, Buffer1); 
+        	 DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d MBRSwitched.SectorsPerFat: %d\n", __LINE__, MBRSwitched.SectorsPerFat);
+            Status = ReadDataFromPartition(i, sector_count,  MBRSwitched.SectorsPerFat, Buffer1); 
             if ( EFI_SUCCESS == Status )
             {
             	  // 512 = 16 * 32 = 4 item * 32
-                 FAT32_Table = (UINT8 *)AllocateZeroPool(DISK_BUFFER_SIZE + 1);
+                 FAT32_Table = (UINT8 *)AllocateZeroPool(DISK_BUFFER_SIZE * MBRSwitched.SectorsPerFat);
 				  if (NULL == FAT32_Table)
 				  {
 					  DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: NULL == FAT32_Table\n", __LINE__);						  	  
 				  }
             	  
-                CopyMem(FAT32_Table, Buffer1, DISK_BUFFER_SIZE);
+                CopyMem(FAT32_Table, Buffer1, DISK_BUFFER_SIZE * MBRSwitched.SectorsPerFat);
 				  for (int j = 0; j < 250; j++)
 				  {
 				  		//DebugPrint1(DISK_READ_BUFFER_X + (j % 16) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 16), "%02X ", Buffer1[j] & 0xff);
@@ -2773,22 +2774,17 @@ EFI_STATUS GetFatTableFSM()
 UINT32 GetNextBlockNumber()
 {
 	DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: PreviousBlockNumber: %d\n",  __LINE__, PreviousBlockNumber);
-
-	UINT8 number = PreviousBlockNumber % 128 ;
-
-	if (127 == number)
-		GetFatTableFSM();
 	
-	if (FAT32_Table[number * 4] == 0xff 
-	    && FAT32_Table[number * 4 + 1] == 0xff 
-	    && FAT32_Table[number * 4 + 2] == 0xff 
-	    && FAT32_Table[number * 4 + 3] == 0x0f)
+	if (FAT32_Table[PreviousBlockNumber * 4] == 0xff 
+	    && FAT32_Table[PreviousBlockNumber * 4 + 1] == 0xff 
+	    && FAT32_Table[PreviousBlockNumber * 4 + 2] == 0xff 
+	    && FAT32_Table[PreviousBlockNumber * 4 + 3] == 0x0f)
 	{
 		DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: PreviousBlockNumber: %d, PreviousBlockNumber: %llX\n",  __LINE__, PreviousBlockNumber, 0x0fffffff);
 		return 0x0fffffff;
 	}
 	
-	return FAT32_Table[number  * 4] + (UINT32)FAT32_Table[number * 4 + 1] * 16 * 16 + (UINT32)FAT32_Table[number * 4 + 2] * 16 * 16 * 16 * 16 + (UINT32)FAT32_Table[number * 4 + 3] * 16 * 16 * 16 * 16 * 16 * 16;	
+	return FAT32_Table[PreviousBlockNumber  * 4] + (UINT32)FAT32_Table[PreviousBlockNumber * 4 + 1] * 16 * 16 + (UINT32)FAT32_Table[PreviousBlockNumber * 4 + 2] * 16 * 16 * 16 * 16 + (UINT32)FAT32_Table[PreviousBlockNumber * 4 + 3] * 16 * 16 * 16 * 16 * 16 * 16;	
 }
 
 EFI_STATUS ChineseCharArrayInit()
