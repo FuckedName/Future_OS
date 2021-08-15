@@ -1987,7 +1987,7 @@ EFI_STATUS L1_FILE_FAT32_FirstSelectorAnalysis(UINT8 *p, MasterBootRecordSwitche
 
 
 // analysis a partition 
-EFI_STATUS RootPathAnalysisFSM1(UINT16 DeviceID)
+EFI_STATUS L2_FILE_FAT32_FirstSelectorHandle(UINT16 DeviceID)
 {
     L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d DeviceID: %d\n", __LINE__, DeviceID);
     //printf( "RootPathAnalysis\n" );
@@ -2233,7 +2233,7 @@ L2_STORE_PartitionItemsPrint(UINT16 Index)
 
 	if (FileSystemType == FILE_SYSTEM_FAT32)
 	{
-		RootPathAnalysisFSM1(Index);
+		L2_FILE_FAT32_FirstSelectorHandle(Index);
 		UINT16 valid_count = 0;
 
 		
