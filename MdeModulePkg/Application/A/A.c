@@ -1,3 +1,5 @@
+#define Note ""
+
 /** //by renqihong
 
 ToDo:
@@ -13,25 +15,29 @@ ToDo:
 	e.semaphoe
 	etc.
 6. My Computer window(disk partition)  
-==> finish partly
-==> read partitions root path items need to save to cache, for fastly get next time, and can reduce disk io...
+	==> finish partly
+	==> read partitions root path items need to save to cache, for fastly get next time, and can reduce disk io...
 7. Setting window(select file, delete file, modify file) ==> 0%
 8. Memory Simple Management 
-==> can get memory information, but it looks like something wrong.
-==> get memory information successfully.
+	==> can get memory information, but it looks like something wrong.
+	==> get memory information successfully.
 9. Multi Windows, button click event. ==> 10%
 10. Application. ==>10%
 11. How to Automated Testing? ==>0%
 12. Graphics run slowly. ===> need to fix the bug.
 13. Desk wallpaper display successfully..
 14. Need to rule naming, about function name, variable name, struct name, and etc.
-    a.
+    a.function name ruled
     b.
     c.
     d.
     e.
 
 
+current problems:
+	1. display NTFS file system root path items system will go die...
+	2. display FAT32 file system root path items almost ok, display format not very beautiful.
+	3. keyboard input not ok.
 
 **/
 
