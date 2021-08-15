@@ -925,7 +925,7 @@ typedef struct
 
 // 小端模式
 // byte转int  
-UINT64 BytesToInt8(UINT8 *bytes)
+UINT64 L1_NETWORK_8BytesToUINT64(UINT8 *bytes)
 {
     UINT64 s = bytes[0];
     s += ((UINT64)bytes[1]) << 8;
@@ -940,7 +940,7 @@ UINT64 BytesToInt8(UINT8 *bytes)
     return s;
 }
 
-UINT32 BytesToInt4(UINT8 *bytes)
+UINT32 L1_NETWORK_4BytesToUINT32(UINT8 *bytes)
 {
     UINT32 Result = bytes[0] & 0xFF;
     Result |= (bytes[1] << 8 & 0xFF00);
@@ -949,16 +949,16 @@ UINT32 BytesToInt4(UINT8 *bytes)
     return Result;
 }
 
-UINT16 BytesToInt3(UINT8 *bytes)
+UINT32 L1_NETWORK_3BytesToUINT32(UINT8 *bytes)
 {
 	//INFO_SELF("%x %x %x\n", bytes[0], bytes[1], bytes[2]);
-	UINT16 Result = bytes[0] & 0xFF;
+	UINT32 Result = bytes[0] & 0xFF;
     Result |= (bytes[1] << 8 & 0xFF00);
     Result |= ((bytes[2] << 16) & 0xFF0000);
 	return Result;
 }
 
-UINT16 BytesToInt2(UINT8 *bytes)
+UINT16 L1_NETWORK_2BytesToUINT16(UINT8 *bytes)
 {
     UINT16 Result = bytes[0] & 0xFF;
     Result |= (bytes[1] << 8 & 0xFF00);
@@ -966,7 +966,7 @@ UINT16 BytesToInt2(UINT8 *bytes)
 }
 
 
-void CopyColorIntoBuffer(UINT8 *pBuffer, EFI_GRAPHICS_OUTPUT_BLT_PIXEL color, UINT16 x0, UINT16 y0, UINT16 AreaWidth)
+void L1_MEMORY_CopyColor1(UINT8 *pBuffer, EFI_GRAPHICS_OUTPUT_BLT_PIXEL color, UINT16 x0, UINT16 y0, UINT16 AreaWidth)
 {
     pBuffer[y0 * AreaWidth * 4 + x0 * 4]     = color.Blue;
     pBuffer[y0 * AreaWidth * 4 + x0 * 4 + 1] = color.Green;
@@ -975,7 +975,7 @@ void CopyColorIntoBuffer(UINT8 *pBuffer, EFI_GRAPHICS_OUTPUT_BLT_PIXEL color, UI
 
 }
 
-void CopyColorIntoBuffer2(UINT8 *pBuffer, EFI_GRAPHICS_OUTPUT_BLT_PIXEL color, UINT16 x0, UINT16 y0)
+void L1_MEMORY_CopyColor2(UINT8 *pBuffer, EFI_GRAPHICS_OUTPUT_BLT_PIXEL color, UINT16 x0, UINT16 y0)
 {
     pBuffer[y0 * 8 * 4 + x0 * 4]     = color.Blue;
     pBuffer[y0 * 8 * 4 + x0 * 4 + 1] = color.Green;
@@ -983,7 +983,7 @@ void CopyColorIntoBuffer2(UINT8 *pBuffer, EFI_GRAPHICS_OUTPUT_BLT_PIXEL color, U
     pBuffer[y0 * 8 * 4 + x0 * 4 + 3] = color.Reserved;
 }
 
-void CopyColorIntoBuffer3(UINT8 *pBuffer, EFI_GRAPHICS_OUTPUT_BLT_PIXEL color, UINT16 x0, UINT16 y0, UINT8 AreaWidth)
+void L1_MEMORY_CopyColor3(UINT8 *pBuffer, EFI_GRAPHICS_OUTPUT_BLT_PIXEL color, UINT16 x0, UINT16 y0, UINT8 AreaWidth)
 {
     pBuffer[y0 * AreaWidth * 4 + x0 * 4]     = color.Blue;
     pBuffer[y0 * AreaWidth * 4 + x0 * 4 + 1] = color.Green;
@@ -991,24 +991,24 @@ void CopyColorIntoBuffer3(UINT8 *pBuffer, EFI_GRAPHICS_OUTPUT_BLT_PIXEL color, U
     pBuffer[y0 * AreaWidth * 4 + x0 * 4 + 3] = color.Reserved;
 }
 
-INT32 Math_ABS(INT32 v)
+INT32 L1_MATH_ABS(INT32 v)
 {
 	return (v < 0) ? -v : v;
 }
 
-EFI_STATUS LineDrawIntoBuffer(UINT8 *pBuffer,
+EFI_STATUS L2_GRAPHICS_LineDraw(UINT8 *pBuffer,
         IN UINTN x0, UINTN y0, UINTN x1, UINTN y1, 
         IN UINTN BorderWidth,
         IN EFI_GRAPHICS_OUTPUT_BLT_PIXEL BorderColor, UINT16 AreaWidth)
 {
-    INT32 dx  = Math_ABS((int)(x1 - x0));
+    INT32 dx  = L1_MATH_ABS((int)(x1 - x0));
     INT32 sx  = x0 < x1 ? 1 : -1;
-    INT32 dy  = Math_ABS((int)(y1-y0)), sy = y0 < y1 ? 1 : -1;
+    INT32 dy  = L1_MATH_ABS((int)(y1-y0)), sy = y0 < y1 ? 1 : -1;
     INT32 err = ( dx > dy ? dx : -dy) / 2, e2;
     
     for(;;)
     {    
-        CopyColorIntoBuffer(pBuffer, BorderColor, x0, y0, AreaWidth);
+        L1_MEMORY_CopyColor1(pBuffer, BorderColor, x0, y0, AreaWidth);
         
         if (x0==x1 && y0==y1) break;
     
@@ -1023,7 +1023,7 @@ EFI_STATUS LineDrawIntoBuffer(UINT8 *pBuffer,
 
 
 // draw rectangle borders
-void RectangleDrawIntoBuffer(UINT8 *pBuffer,
+void L2_GRAPHICS_RectangleDraw(UINT8 *pBuffer,
         IN UINTN x0, UINTN y0, UINTN x1, UINTN y1, 
         IN UINTN BorderWidth,
         IN EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color, UINT16 AreaWidth)
@@ -1034,15 +1034,15 @@ void RectangleDrawIntoBuffer(UINT8 *pBuffer,
 		return ;
 	}
 	
-    LineDrawIntoBuffer(pBuffer, x0, y0, x0, y1, 1, Color, AreaWidth);
-    LineDrawIntoBuffer(pBuffer, x0, y0, x1, y0, 1, Color, AreaWidth);
-    LineDrawIntoBuffer(pBuffer, x0, y1, x1, y1, 1, Color, AreaWidth);
-    LineDrawIntoBuffer(pBuffer, x1, y0, x1, y1, 1, Color, AreaWidth);
+    L2_GRAPHICS_LineDraw(pBuffer, x0, y0, x0, y1, 1, Color, AreaWidth);
+    L2_GRAPHICS_LineDraw(pBuffer, x0, y0, x1, y0, 1, Color, AreaWidth);
+    L2_GRAPHICS_LineDraw(pBuffer, x0, y1, x1, y1, 1, Color, AreaWidth);
+    L2_GRAPHICS_LineDraw(pBuffer, x1, y0, x1, y1, 1, Color, AreaWidth);
 
 }
 
 
-VOID GraphicsCopy(UINT8 *pDest, UINT8 *pSource, 
+VOID L2_GRAPHICS_Copy(UINT8 *pDest, UINT8 *pSource, 
 						   UINT16 DestWidth, UINT16 DestHeight, 
 						   UINT16 SourceWidth, UINT16 SourceHeight, 
 					       UINT16 StartX, UINT16 StartY)
@@ -1061,12 +1061,12 @@ VOID GraphicsCopy(UINT8 *pDest, UINT8 *pSource,
 }
 
 // Draw 8 X 16 point
-EFI_STATUS Draw8_16IntoBuffer(UINT8 *pBuffer,UINT8 d,
+EFI_STATUS L2_GRAPHICS_ChineseHalfDra2(UINT8 *pBuffer,UINT8 d,
         IN UINTN x0, UINTN y0,
         UINT8 width,
         IN EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color, UINT16 AreaWidth)
 {
-    //DebugPrint1(10, 10, "%X %X %X %X", x0, y0, AreaWidth);
+    //L2_DEBUG_Print1(10, 10, "%X %X %X %X", x0, y0, AreaWidth);
     if (NULL == pBuffer)
     {
     	DEBUG ((EFI_D_INFO, "pBuffer is NULL\n"));
@@ -1074,35 +1074,35 @@ EFI_STATUS Draw8_16IntoBuffer(UINT8 *pBuffer,UINT8 d,
     }
         
     if ((d & 0x80) != 0) 
-        CopyColorIntoBuffer(pBuffer, Color, x0 + 0, y0, AreaWidth ); 
+        L1_MEMORY_CopyColor1(pBuffer, Color, x0 + 0, y0, AreaWidth ); 
     
     if ((d & 0x40) != 0) 
-        CopyColorIntoBuffer(pBuffer, Color, x0 + 1, y0, AreaWidth );
+        L1_MEMORY_CopyColor1(pBuffer, Color, x0 + 1, y0, AreaWidth );
     
     if ((d & 0x20) != 0) 
-        CopyColorIntoBuffer(pBuffer, Color, x0 + 2, y0, AreaWidth );
+        L1_MEMORY_CopyColor1(pBuffer, Color, x0 + 2, y0, AreaWidth );
     
     if ((d & 0x10) != 0) 
-        CopyColorIntoBuffer(pBuffer, Color, x0 + 3, y0, AreaWidth );
+        L1_MEMORY_CopyColor1(pBuffer, Color, x0 + 3, y0, AreaWidth );
     
     if ((d & 0x08) != 0) 
-        CopyColorIntoBuffer(pBuffer, Color, x0 + 4, y0, AreaWidth );
+        L1_MEMORY_CopyColor1(pBuffer, Color, x0 + 4, y0, AreaWidth );
     
     if ((d & 0x04) != 0) 
-        CopyColorIntoBuffer(pBuffer, Color, x0 + 5, y0, AreaWidth );
+        L1_MEMORY_CopyColor1(pBuffer, Color, x0 + 5, y0, AreaWidth );
     
     if ((d & 0x02) != 0) 
-        CopyColorIntoBuffer(pBuffer, Color, x0 + 6, y0, AreaWidth );
+        L1_MEMORY_CopyColor1(pBuffer, Color, x0 + 6, y0, AreaWidth );
     
     if ((d & 0x01) != 0) 
-        CopyColorIntoBuffer(pBuffer, Color, x0 + 7, y0, AreaWidth );
+        L1_MEMORY_CopyColor1(pBuffer, Color, x0 + 7, y0, AreaWidth );
 
 
 
     return EFI_SUCCESS;
 }
 
-EFI_STATUS DrawAsciiCharUseBuffer(UINT8 *pBufferDest,
+EFI_STATUS L2_GRAPHICS_AsciiCharDraw(UINT8 *pBufferDest,
         IN UINTN x0, UINTN y0, UINT8 c,
         IN EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color)
 {
@@ -1123,32 +1123,32 @@ EFI_STATUS DrawAsciiCharUseBuffer(UINT8 *pBufferDest,
 		d = sASCII[c][i];
 		
 		if ((d & 0x80) != 0) 
-		    CopyColorIntoBuffer2(pBuffer, Color, 0, i); 
+		    L1_MEMORY_CopyColor2(pBuffer, Color, 0, i); 
 		
 		if ((d & 0x40) != 0) 
-            CopyColorIntoBuffer2(pBuffer, Color, 1, i);
+            L1_MEMORY_CopyColor2(pBuffer, Color, 1, i);
 		
 		if ((d & 0x20) != 0) 
-		    CopyColorIntoBuffer2(pBuffer, Color, 2, i);
+		    L1_MEMORY_CopyColor2(pBuffer, Color, 2, i);
 		
 		if ((d & 0x10) != 0) 
-		    CopyColorIntoBuffer2(pBuffer, Color, 3, i);
+		    L1_MEMORY_CopyColor2(pBuffer, Color, 3, i);
 		
 		if ((d & 0x08) != 0) 
-		    CopyColorIntoBuffer2(pBuffer, Color, 4, i);
+		    L1_MEMORY_CopyColor2(pBuffer, Color, 4, i);
 		
 		if ((d & 0x04) != 0) 
-		    CopyColorIntoBuffer2(pBuffer, Color, 5, i);
+		    L1_MEMORY_CopyColor2(pBuffer, Color, 5, i);
 		
 		if ((d & 0x02) != 0) 
-		    CopyColorIntoBuffer2(pBuffer, Color, 6, i);
+		    L1_MEMORY_CopyColor2(pBuffer, Color, 6, i);
 		
 		if ((d & 0x01) != 0) 
-		    CopyColorIntoBuffer2(pBuffer, Color, 7, i);
+		    L1_MEMORY_CopyColor2(pBuffer, Color, 7, i);
 		
 	}
 
-	GraphicsCopy(pBufferDest, pBuffer, ScreenWidth, ScreenHeight, 8, 16, x0, y0);
+	L2_GRAPHICS_Copy(pBufferDest, pBuffer, ScreenWidth, ScreenHeight, 8, 16, x0, y0);
 	
 	/*
     GraphicsOutput->Blt(GraphicsOutput, 
@@ -1163,12 +1163,12 @@ EFI_STATUS DrawAsciiCharUseBuffer(UINT8 *pBufferDest,
 }
 
 
-EFI_STATUS DrawChineseCharIntoBuffer2(UINT8 *pBuffer,
+EFI_STATUS L2_GRAPHICS_ChineseCharDraw2(UINT8 *pBuffer,
         IN UINTN x0, UINTN y0, UINT32 offset,
         IN EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color , UINT16 AreaWidth)
 {
     INT8 i;
-    //DebugPrint1(10, 10, "%X %X %X %X", x0, y0, offset, AreaWidth);
+    //L2_DEBUG_Print1(10, 10, "%X %X %X %X", x0, y0, offset, AreaWidth);
     //DEBUG ((EFI_D_INFO, "%X %X %X %X", x0, y0, offset, AreaWidth));
 
 	if (NULL == pBuffer)
@@ -1185,8 +1185,8 @@ EFI_STATUS DrawChineseCharIntoBuffer2(UINT8 *pBuffer,
     
 	for(i = 0; i < 32; i += 2)
 	{
-        Draw8_16IntoBuffer(pBuffer, sChineseChar[offset * 32 + i ],     x0,     y0 + i / 2, 1, Color, AreaWidth);		        
-		 Draw8_16IntoBuffer(pBuffer, sChineseChar[offset * 32 + i + 1],  x0 + 8, y0 + i / 2, 1, Color, AreaWidth);		
+        L2_GRAPHICS_ChineseHalfDra2(pBuffer, sChineseChar[offset * 32 + i ],     x0,     y0 + i / 2, 1, Color, AreaWidth);		        
+		 L2_GRAPHICS_ChineseHalfDra2(pBuffer, sChineseChar[offset * 32 + i + 1],  x0 + 8, y0 + i / 2, 1, Color, AreaWidth);		
 	}
 	
     //DEBUG ((EFI_D_INFO, "\n"));
@@ -1195,7 +1195,7 @@ EFI_STATUS DrawChineseCharIntoBuffer2(UINT8 *pBuffer,
 }
 
 
-VOID StringMaker (UINT16 x, UINT16 y,
+VOID L2_STRING_Maker (UINT16 x, UINT16 y,
   IN  CONST CHAR8   *Format,
   IN  VA_LIST       VaList
   )
@@ -1243,12 +1243,12 @@ VOID StringMaker (UINT16 x, UINT16 y,
 	}
 	*/
     for (i = 0; i < sizeof(AsciiBuffer) /sizeof(CHAR8); i++)
-        DrawAsciiCharUseBuffer(pDeskBuffer, x + i * 8, y, AsciiBuffer[i], Color);
+        L2_GRAPHICS_AsciiCharDraw(pDeskBuffer, x + i * 8, y, AsciiBuffer[i], Color);
 
 }
 
 
-EFI_STATUS DrawAsciiCharUseBuffer2(UINT8 *pBufferDest,
+EFI_STATUS L2_GRAPHICS_AsciiCharDraw2(UINT8 *pBufferDest,
         IN UINTN x0, UINTN y0, UINT8 c,
         IN EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color)
 {
@@ -1269,32 +1269,32 @@ EFI_STATUS DrawAsciiCharUseBuffer2(UINT8 *pBufferDest,
 		d = sASCII[c][i];
 		
 		if ((d & 0x80) != 0) 
-		    CopyColorIntoBuffer2(pBuffer, Color, 0, i); 
+		    L1_MEMORY_CopyColor2(pBuffer, Color, 0, i); 
 		
 		if ((d & 0x40) != 0) 
-            CopyColorIntoBuffer2(pBuffer, Color, 1, i);
+            L1_MEMORY_CopyColor2(pBuffer, Color, 1, i);
 		
 		if ((d & 0x20) != 0) 
-		    CopyColorIntoBuffer2(pBuffer, Color, 2, i);
+		    L1_MEMORY_CopyColor2(pBuffer, Color, 2, i);
 		
 		if ((d & 0x10) != 0) 
-		    CopyColorIntoBuffer2(pBuffer, Color, 3, i);
+		    L1_MEMORY_CopyColor2(pBuffer, Color, 3, i);
 		
 		if ((d & 0x08) != 0) 
-		    CopyColorIntoBuffer2(pBuffer, Color, 4, i);
+		    L1_MEMORY_CopyColor2(pBuffer, Color, 4, i);
 		
 		if ((d & 0x04) != 0) 
-		    CopyColorIntoBuffer2(pBuffer, Color, 5, i);
+		    L1_MEMORY_CopyColor2(pBuffer, Color, 5, i);
 		
 		if ((d & 0x02) != 0) 
-		    CopyColorIntoBuffer2(pBuffer, Color, 6, i);
+		    L1_MEMORY_CopyColor2(pBuffer, Color, 6, i);
 		
 		if ((d & 0x01) != 0) 
-		    CopyColorIntoBuffer2(pBuffer, Color, 7, i);
+		    L1_MEMORY_CopyColor2(pBuffer, Color, 7, i);
 		
 	}
 
-	GraphicsCopy(pBufferDest, pBuffer, MyComputerWidth, ScreenHeight, 8, 16, x0, y0);
+	L2_GRAPHICS_Copy(pBufferDest, pBuffer, MyComputerWidth, ScreenHeight, 8, 16, x0, y0);
 	
 	/*
     GraphicsOutput->Blt(GraphicsOutput, 
@@ -1310,7 +1310,7 @@ EFI_STATUS DrawAsciiCharUseBuffer2(UINT8 *pBufferDest,
 
 
 
-VOID StringMaker2 (UINT16 x, UINT16 y, UINT8 *pBuffer,
+VOID L2_STRING_Maker2 (UINT16 x, UINT16 y, UINT8 *pBuffer,
   IN  CONST CHAR8   *Format,
   IN  VA_LIST       VaList
   )
@@ -1331,13 +1331,13 @@ VOID StringMaker2 (UINT16 x, UINT16 y, UINT8 *pBuffer,
     AsciiVSPrint (AsciiBuffer, sizeof (AsciiBuffer), Format, VaList);
 			
     for (i = 0; i < sizeof(AsciiBuffer) /sizeof(CHAR8); i++)
-        DrawAsciiCharUseBuffer2(pBuffer, x + i * 8, y, AsciiBuffer[i], Color);
+        L2_GRAPHICS_AsciiCharDraw2(pBuffer, x + i * 8, y, AsciiBuffer[i], Color);
 
 }
 
 
 /* Display a string */
-VOID EFIAPI DebugPrint1 (UINT16 x, UINT16 y,  IN  CONST CHAR8  *Format, ...)
+VOID EFIAPI L2_DEBUG_Print1 (UINT16 x, UINT16 y,  IN  CONST CHAR8  *Format, ...)
 {
 	if (y > ScreenHeight - 16 || x > ScreenWidth - 8)
 		return;
@@ -1347,51 +1347,48 @@ VOID EFIAPI DebugPrint1 (UINT16 x, UINT16 y,  IN  CONST CHAR8  *Format, ...)
 
 	VA_LIST         VaList;
 	VA_START (VaList, Format);
-	StringMaker(x, y, Format, VaList);
+	L2_STRING_Maker(x, y, Format, VaList);
 	VA_END (VaList);
 }
 
 /* Display a string */
-VOID EFIAPI DebugPrint2 (UINT16 x, UINT16 y, UINT8 *pBuffer, IN  CONST CHAR8  *Format, ...)
+VOID EFIAPI L2_DEBUG_Print2 (UINT16 x, UINT16 y, UINT8 *pBuffer, IN  CONST CHAR8  *Format, ...)
 {
 	if (y > MyComputerHeight - 16 || x > MyComputerWidth - 8)
 		return;
 
 	VA_LIST         VaList;
 	VA_START (VaList, Format);
-	StringMaker2(x, y, pBuffer, Format, VaList);
+	L2_STRING_Maker2(x, y, pBuffer, Format, VaList);
 	VA_END (VaList);
 }
 
-
-EFI_STATUS StrCmpSelf(UINT8 *p1, UINT8 *p2, UINT16 length)
+EFI_STATUS L1_STRING_Compare(UINT8 *p1, UINT8 *p2, UINT16 length)
 {
-	DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: StrCmpSelf\n", __LINE__);
+	L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: StrCmpSelf\n", __LINE__);
 	
 	for (int i = 0; i < length; i++)
 	{
-		DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%02X %02X ", p1[i], p2[i]);
+		L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%02X %02X ", p1[i], p2[i]);
 		if (p1[i] != p2[i])
 			return -1;
 	}
 	return EFI_SUCCESS;
 }
 
-
-
-EFI_STATUS RootPathAnalysis(UINT8 *p)
+EFI_STATUS L1_FILE_RootPathAnalysis(UINT8 *p)
 {
 	memcpy(&pItems, p, DISK_BUFFER_SIZE);
 	UINT16 valid_count = 0;
 	
-	DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: .: %d\n", __LINE__, ReadFileName[7]);
+	L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: .: %d\n", __LINE__, ReadFileName[7]);
 
 	//display filing file and subpath. 
 	for (int i = 0; i < 30; i++)
 		if (pItems[i].FileName[0] != 0xE5 && (pItems[i].Attribute[0] == 0x20 
 		    || pItems[i].Attribute[0] == 0x10))
        {
-        	DebugPrint1(DISK_MBR_X, 16 * 37 + (valid_count) * 16, "%d FileName:%2c%2c%2c%2c%2c%2c%2c%2c ExtensionName:%2c%2c%2c StartCluster:%02X%02X%02X%02X FileLength: %02X%02X%02X%02X Attribute: %02X    ", __LINE__,
+        	L2_DEBUG_Print1(DISK_MBR_X, 16 * 37 + (valid_count) * 16, "%d FileName:%2c%2c%2c%2c%2c%2c%2c%2c ExtensionName:%2c%2c%2c StartCluster:%02X%02X%02X%02X FileLength: %02X%02X%02X%02X Attribute: %02X    ", __LINE__,
                                             pItems[i].FileName[0], pItems[i].FileName[1], pItems[i].FileName[2], pItems[i].FileName[3], pItems[i].FileName[4], pItems[i].FileName[5], pItems[i].FileName[6], pItems[i].FileName[7],
                                             pItems[i].ExtensionName[0], pItems[i].ExtensionName[1],pItems[i].ExtensionName[2],
                                             pItems[i].StartClusterHigh2B[0], pItems[i].StartClusterHigh2B[1],
@@ -1422,14 +1419,14 @@ EFI_STATUS RootPathAnalysis(UINT8 *p)
 				count2++;
 			}
 
-			DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: FileName: %a\n", __LINE__, FileName);
-			DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: ReadFileName: %a\n", __LINE__, ReadFileName);
+			L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: FileName: %a\n", __LINE__, FileName);
+			L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: ReadFileName: %a\n", __LINE__, ReadFileName);
 
 			//for (int j = 0; j < 5; j++)
-			//	DebugPrint1(j * 3 * 8, 16 * 40 + valid_count * 16, "%02X ", pItems[i].FileName[j]);
-			if (StrCmpSelf(FileName, ReadFileName, ReadFileNameLength) == EFI_SUCCESS)			
+			//	L2_DEBUG_Print1(j * 3 * 8, 16 * 40 + valid_count * 16, "%02X ", pItems[i].FileName[j]);
+			if (L1_STRING_Compare(FileName, ReadFileName, ReadFileNameLength) == EFI_SUCCESS)			
 			{
-	        	DebugPrint1(DISK_MBR_X, 16 * 30 + (valid_count) * 16 + 4 * 16, "%d FileName:%2c%2c%2c%2c%2c%2c%2c%2c ExtensionName:%2c%2c%2c StartCluster:%02X%02X%02X%02X FileLength: %02X%02X%02X%02X Attribute: %02X    ",  __LINE__,
+	        	L2_DEBUG_Print1(DISK_MBR_X, 16 * 30 + (valid_count) * 16 + 4 * 16, "%d FileName:%2c%2c%2c%2c%2c%2c%2c%2c ExtensionName:%2c%2c%2c StartCluster:%02X%02X%02X%02X FileLength: %02X%02X%02X%02X Attribute: %02X    ",  __LINE__,
                                 pItems[i].FileName[0], pItems[i].FileName[1], pItems[i].FileName[2], pItems[i].FileName[3], pItems[i].FileName[4], pItems[i].FileName[5], pItems[i].FileName[6], pItems[i].FileName[7],
                                 pItems[i].ExtensionName[0], pItems[i].ExtensionName[1],pItems[i].ExtensionName[2],
                                 pItems[i].StartClusterHigh2B[0], pItems[i].StartClusterHigh2B[1],
@@ -1440,13 +1437,13 @@ EFI_STATUS RootPathAnalysis(UINT8 *p)
               FileBlockStart = (UINT32)pItems[i].StartClusterHigh2B[0] * 16 * 16 * 16 * 16 + (UINT32)pItems[i].StartClusterHigh2B[1] * 16 * 16 * 16 * 16 * 16 * 16 + pItems[i].StartClusterLow2B[0] + (UINT32)pItems[i].StartClusterLow2B[1] * 16 * 16;
               FileLength = pItems[i].FileLength[0] + (UINT32)pItems[i].FileLength[1] * 16 * 16 + (UINT32)pItems[i].FileLength[2] * 16 * 16 * 16 * 16 + (UINT32)pItems[i].FileLength[3] * 16 * 16 * 16 * 16 * 16 * 16;
 
-              DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: FileBlockStart: %d FileLength: %ld\n", __LINE__, FileBlockStart, FileLength);
+              L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: FileBlockStart: %d FileLength: %ld\n", __LINE__, FileBlockStart, FileLength);
 			}
 		}
 
 }
 
-EFI_STATUS RootPathAnalysis1(UINT8 *p)
+EFI_STATUS L1_FILE_RootPathAnalysis1(UINT8 *p)
 {
 	memcpy(&pItems, p, DISK_BUFFER_SIZE);
 	UINT16 valid_count = 0;
@@ -1456,7 +1453,7 @@ EFI_STATUS RootPathAnalysis1(UINT8 *p)
 		//if (pItems[i].FileName[0] != 0xE5 && (pItems[i].Attribute[0] == 0x20 
 		//    || pItems[i].Attribute[0] == 0x10))
        {
-        	DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d FileName:%2c%2c%2c%2c%2c%2c%2c%2c ExtensionName:%2c%2c%2c StartCluster:%02X%02X%02X%02X FileLength: %02X%02X%02X%02X Attribute: %02X    ",  __LINE__,
+        	L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d FileName:%2c%2c%2c%2c%2c%2c%2c%2c ExtensionName:%2c%2c%2c StartCluster:%02X%02X%02X%02X FileLength: %02X%02X%02X%02X Attribute: %02X    ",  __LINE__,
                                             pItems[i].FileName[0], pItems[i].FileName[1], pItems[i].FileName[2], pItems[i].FileName[3], pItems[i].FileName[4], pItems[i].FileName[5], pItems[i].FileName[6], pItems[i].FileName[7],
                                             pItems[i].ExtensionName[0], pItems[i].ExtensionName[1],pItems[i].ExtensionName[2],
                                             pItems[i].StartClusterHigh2B[0], pItems[i].StartClusterHigh2B[1],
@@ -1468,7 +1465,7 @@ EFI_STATUS RootPathAnalysis1(UINT8 *p)
 		}
 }
 
-UINTN strlen1(char *String)
+UINTN L1_STRING_Length(char *String)
 {
     UINTN  Length;
     for (Length = 0; *String != '\0'; String++, Length++) ;
@@ -1479,11 +1476,11 @@ UINTN strlen1(char *String)
 
 
 // Analysis attribut A0 of $Root
-EFI_STATUS  DollarRootA0DatarunAnalysis(UINT8 *p)
+EFI_STATUS  L2_FILE_NTFS_DollarRootA0DatarunAnalysis(UINT8 *p)
 {
-    DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: string length: %d\n", __LINE__,  strlen1(p));
+    L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: string length: %d\n", __LINE__,  L1_STRING_Length(p));
     UINT16 i = 0;
-    UINT16 length = strlen1(p);
+    UINT16 length = L1_STRING_Length(p);
     UINT8 occupyCluster = 0;
     UINT16 offset = 0;
 
@@ -1492,7 +1489,7 @@ EFI_STATUS  DollarRootA0DatarunAnalysis(UINT8 *p)
     {
         int  offsetLength  = p[i] >> 4;
         int  occupyClusterLength = p[i] & 0x0f;
-    	 DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: occupyClusterLength: %d offsetLength: %d\n", __LINE__,  occupyClusterLength, offsetLength);
+    	 L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: occupyClusterLength: %d offsetLength: %d\n", __LINE__,  occupyClusterLength, offsetLength);
         
         i++;
         if (occupyClusterLength == 1)
@@ -1507,10 +1504,10 @@ EFI_STATUS  DollarRootA0DatarunAnalysis(UINT8 *p)
             size[0] = p[i];
             size[1] = p[i + 1];
             size[2] = p[i + 2];
-            offset = BytesToInt3(size);
+            offset = L1_NETWORK_3BytesToUINT32(size);
         }
         A0Indexes[Index].Offset = offset;
-        DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d offset:%d \n", __LINE__, offset);
+        L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d offset:%d \n", __LINE__, offset);
         i += offsetLength;
         Index++;
         //INFO_SELF(" i: %d\n", i);
@@ -1520,7 +1517,7 @@ EFI_STATUS  DollarRootA0DatarunAnalysis(UINT8 *p)
 
 // Find $Root file from all MFT(may be 15 file,)
 // pBuffer store all MFT
-EFI_STATUS  MFTDollarRootFileAnalysisBuffer(UINT8 *pBuffer)
+EFI_STATUS  L2_FILE_NTFS_MFTDollarRootFileAnalysis(UINT8 *pBuffer)
 {
 	UINT8 *p = NULL;
 	UINT8 pItem[200] = {0};
@@ -1528,7 +1525,7 @@ EFI_STATUS  MFTDollarRootFileAnalysisBuffer(UINT8 *pBuffer)
 	p = (UINT8 *)AllocateZeroPool(DISK_BUFFER_SIZE * 2);
 	if (p == NULL)
 	{
-		DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: p == NULL \n", __LINE__);
+		L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: p == NULL \n", __LINE__);
 		return EFI_SUCCESS;
 	}
 
@@ -1543,13 +1540,13 @@ EFI_STATUS  MFTDollarRootFileAnalysisBuffer(UINT8 *pBuffer)
 		for (int j = 0; j < 512; j++)
 	    {
 		   //%02X: 8 * 3, 
-	      //DebugPrint1(DISK_READ_BUFFER_X + (j % 16) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 16), "%02X ", p[j] & 0xff);
+	      //L2_DEBUG_Print1(DISK_READ_BUFFER_X + (j % 16) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 16), "%02X ", p[j] & 0xff);
 	    }
 	//}
 	
 	// File header length
-	UINT16 AttributeOffset = BytesToInt2(((FILE_HEADER *)p)->AttributeOffset);
-	DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: AttributeOffset:%X \n", __LINE__, AttributeOffset);
+	UINT16 AttributeOffset = L1_NETWORK_2BytesToUINT16(((FILE_HEADER *)p)->AttributeOffset);
+	L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: AttributeOffset:%X \n", __LINE__, AttributeOffset);
 
 	// location of a0 attribute may be in front of 10 
 	for (int i = 0; i < 10; i++)
@@ -1558,15 +1555,15 @@ EFI_STATUS  MFTDollarRootFileAnalysisBuffer(UINT8 *pBuffer)
 		for (int i = 0; i < 4; i++)
 			size[i] = p[AttributeOffset + 4 + i];
 		//INFO_SELF("%02X%02X%02X%02X\n", size[0], size[1], size[2], size[3]);
-		UINT16 AttributeSize = BytesToInt4(size);
+		UINT16 AttributeSize = L1_NETWORK_4BytesToUINT32(size);
 		
 		for (int i = 0; i < AttributeSize; i++)
 			pItem[i] = p[AttributeOffset + i];
 		
 		UINT16  NameSize = ((CommonAttributeHeader *)pItem)->NameSize;		
 		
-		UINT16  NameOffset = BytesToInt2(((CommonAttributeHeader *)pItem)->NameOffset);
-		DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Type[0]: %02X AttributeSize: %02X NameSize: %02X NameOffset: %02X\n", __LINE__, 
+		UINT16  NameOffset = L1_NETWORK_2BytesToUINT16(((CommonAttributeHeader *)pItem)->NameOffset);
+		L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Type[0]: %02X AttributeSize: %02X NameSize: %02X NameOffset: %02X\n", __LINE__, 
 															((CommonAttributeHeader *)pItem)->Type[0],
 															AttributeSize,
 															NameSize,
@@ -1577,22 +1574,22 @@ EFI_STATUS  MFTDollarRootFileAnalysisBuffer(UINT8 *pBuffer)
 		 	UINT16 DataRunsSize = AttributeSize - NameOffset - NameSize * 2;
 		 	if (DataRunsSize > 100 || DataRunsSize < 0)
 		 	{
-				DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: DataRunsSize illegal.", __LINE__);
+				L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: DataRunsSize illegal.", __LINE__);
 				return ;
 		 	}
 		 	UINT8 DataRuns[20] = {0};
-		 	DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: A0 attribute has been found: ", __LINE__);
+		 	L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: A0 attribute has been found: ", __LINE__);
 		 	for (int i = NameOffset; i < NameOffset + NameSize * 2; i++)
-		 		DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%02X ", pItem[i] & 0xff);
+		 		L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%02X ", pItem[i] & 0xff);
 
 		 	int j = 0;
 		 	for (int i = NameOffset + NameSize * 2; i < AttributeSize; i++)
 		 	{	 		
 		 		DataRuns[j] = pItem[i] & 0xff;
-		 		DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%02X ", DataRuns[j] & 0xff);	
+		 		L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%02X ", DataRuns[j] & 0xff);	
 		 		j++;
 		 	}
-		 	DollarRootA0DatarunAnalysis(DataRuns);
+		 	L2_FILE_NTFS_DollarRootA0DatarunAnalysis(DataRuns);
 		 	break;
 		 }
 		 
@@ -1600,7 +1597,7 @@ EFI_STATUS  MFTDollarRootFileAnalysisBuffer(UINT8 *pBuffer)
 	}
 }
 
-EFI_STATUS  MFTIndexItemsBufferAnalysis(UINT8 *pBuffer)
+EFI_STATUS  L2_FILE_NTFS_MFTIndexItemsAnalysis(UINT8 *pBuffer)
 {
 	UINT8 *p = NULL;
 	
@@ -1608,7 +1605,7 @@ EFI_STATUS  MFTIndexItemsBufferAnalysis(UINT8 *pBuffer)
 
 	if (NULL == p)
 	{
-		DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d NULL == p\n", __LINE__);
+		L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d NULL == p\n", __LINE__);
 		return EFI_SUCCESS;
 	}
 	
@@ -1617,28 +1614,28 @@ EFI_STATUS  MFTIndexItemsBufferAnalysis(UINT8 *pBuffer)
 		p[i] = pBuffer[i];
 
 	//IndexEntryOffset:索引项的偏移 相对于当前位置
-	DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d IndexEntryOffset: %llu IndexEntrySize: %llu\n", __LINE__, 
-																     BytesToInt4(((INDEX_HEADER *)p)->IndexEntryOffset),
-																     BytesToInt4(((INDEX_HEADER *)p)->IndexEntrySize));
+	L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d IndexEntryOffset: %llu IndexEntrySize: %llu\n", __LINE__, 
+																     L1_NETWORK_4BytesToUINT32(((INDEX_HEADER *)p)->IndexEntryOffset),
+																     L1_NETWORK_4BytesToUINT32(((INDEX_HEADER *)p)->IndexEntrySize));
 
 	// 相对于当前位置 need to add size before this Byte.
-	UINT8 length = BytesToInt4(((INDEX_HEADER *)p)->IndexEntryOffset) + 24;
+	UINT8 length = L1_NETWORK_4BytesToUINT32(((INDEX_HEADER *)p)->IndexEntryOffset) + 24;
     UINT8 pItem[200] = {0};
     UINT16 index = length;
 
 	for (UINT8 i = 0; ; i++)
 	{    
-		 if (index >= BytesToInt4(((INDEX_HEADER *)p)->IndexEntrySize))
+		 if (index >= L1_NETWORK_4BytesToUINT32(((INDEX_HEADER *)p)->IndexEntrySize))
 			break;
 			
-		 //DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%s index: %d\n", __LINE__,  index);  
+		 //L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%s index: %d\n", __LINE__,  index);  
 		 UINT16 length2 = pBuffer[index + 8] + pBuffer[index + 9] * 16;
 		 
         for (int i = 0; i < length2; i++)
             pItem[i] = pBuffer[index + i];
             
 		 UINT8 FileNameSize =	 ((INDEX_ITEM *)pItem)->FileNameSize;
-		 //DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d attribut length2: %d FileNameSize: %d\n", __LINE__, 
+		 //L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d attribut length2: %d FileNameSize: %d\n", __LINE__, 
 		//														     length2,
 		//														     FileNameSize);    
 		 UINT8 attributeName[20];																     
@@ -1646,21 +1643,21 @@ EFI_STATUS  MFTIndexItemsBufferAnalysis(UINT8 *pBuffer)
 		 {
 		 	attributeName[i] = pItem[82 + 2 * i];
 		 }
-		 DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: attributeName: %a\n", __LINE__, attributeName);
-		 //DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%s attributeName: %a\n", __LINE__,  attributeName);  
+		 L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: attributeName: %a\n", __LINE__, attributeName);
+		 //L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%s attributeName: %a\n", __LINE__,  attributeName);  
 		 index += length2;
 	}
 }
 
 
-long long Multi_Self(long x, long y)
+long long L1_MATH_Multi(long x, long y)
 {
 	return x * y;
 }
 
 // string transform into long long
 long long
-strtollSelf(const char * nptr, char ** endptr, int base)
+L1_MATH_StringToLongLong(const char * nptr, char ** endptr, int base)
 {
   const char *pEnd;
   long long   Result = 0;
@@ -1675,11 +1672,11 @@ strtollSelf(const char * nptr, char ** endptr, int base)
   ++nptr;
   DEBUG ((EFI_D_INFO, "line:%d device->StartSectorNumber: %a base: %d \n", __LINE__, nptr, base));
 
-  while( isalnumSelf(*nptr) && ((temp = Digit2ValSelf(*nptr)) < base)) 
+  while( L1_STRING_IsAllNumber(*nptr) && ((temp = L1_MATH_DigitToInteger(*nptr)) < base)) 
   {
     DEBUG ((EFI_D_INFO, "line:%d temp: %d, Result: %d \n", __LINE__, temp, Result));
     Previous = Result;
-    Result = Multi_Self (Result, base) + (long long int)temp;
+    Result = L1_MATH_Multi (Result, base) + (long long int)temp;
     if( Result <= Previous) 
     {   // Detect Overflow
       if(Negative) 
@@ -1714,11 +1711,11 @@ strtollSelf(const char * nptr, char ** endptr, int base)
 }
 
 
-void TextDevicePathAnalysisCHAR16(CHAR16 *p, DEVICE_PARAMETER *device, UINTN count1)
+void L2_STORE_TextDevicePathAnalysis(CHAR16 *p, DEVICE_PARAMETER *device, UINTN count1)
 {
     int length = StrLen(p);
     int i = 0;
-    //DebugPrint1(0, 11 * 16, "line: %d string: %s, length: %d\n", __LINE__, p, length);
+    //L2_DEBUG_Print1(0, 11 * 16, "line: %d string: %s, length: %d\n", __LINE__, p, length);
     for (i = 0; i < length - 3; i++)
     { 
         //USB
@@ -1803,7 +1800,7 @@ void TextDevicePathAnalysisCHAR16(CHAR16 *p, DEVICE_PARAMETER *device, UINTN cou
     //puts(temp);
     DEBUG ((EFI_D_INFO, "line:%d device->StartSectorNumber: %a \n", __LINE__, temp));
     //printf("line:%d start: %d\n", __LINE__, strtol(temp));
-    device->StartSectorNumber = strtollSelf(temp, NULL, 10);
+    device->StartSectorNumber = L1_MATH_StringToLongLong(temp, NULL, 10);
     //putchar('\n');
     
     j = 0;
@@ -1816,14 +1813,14 @@ void TextDevicePathAnalysisCHAR16(CHAR16 *p, DEVICE_PARAMETER *device, UINTN cou
     temp[j] = '\0';
     //puts(temp);
     //printf("line:%d end: %d\n", __LINE__, strtol(temp));
-    device->SectorCount = strtollSelf(temp, NULL, 10);;
+    device->SectorCount = L1_MATH_StringToLongLong(temp, NULL, 10);;
     DEBUG ((EFI_D_INFO, "line:%d device->SectorCount: %a \n", __LINE__, temp));
     //putchar('\n');
     
-    //DebugPrint1(0, 11 * 16, "line: %d string: %s, length: %d\n",       __LINE__, p, strlen(p));
+    //L2_DEBUG_Print1(0, 11 * 16, "line: %d string: %s, length: %d\n",       __LINE__, p, strlen(p));
 
     // second display
-    DebugPrint1(TEXT_DEVICE_PATH_X, TEXT_DEVICE_PATH_Y + 16 * (4 * count1 + 1), "%d: i: %d Start: %d Count: %d  DeviceType: %d PartitionType: %d PartitionID: %d\n",        
+    L2_DEBUG_Print1(TEXT_DEVICE_PATH_X, TEXT_DEVICE_PATH_Y + 16 * (4 * count1 + 1), "%d: i: %d Start: %d Count: %d  DeviceType: %d PartitionType: %d PartitionID: %d\n",        
     							__LINE__, 
     							count1,
     							device->StartSectorNumber,
@@ -1841,15 +1838,15 @@ void TextDevicePathAnalysisCHAR16(CHAR16 *p, DEVICE_PARAMETER *device, UINTN cou
 }
 
 //Note: ReadSize will be multi with 512
-EFI_STATUS ReadDataFromPartition(UINT8 deviceID, UINT64 StartSectorNumber, UINT16 ReadSize, UINT8 *pBuffer)
+EFI_STATUS L1_STORE_READ(UINT8 deviceID, UINT64 StartSectorNumber, UINT16 ReadSize, UINT8 *pBuffer)
 {
 	if (StartSectorNumber > device[deviceID].SectorCount)
 	{
-		DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: deviceID: %d StartSectorNumber: %ld ReadSize: %d\n", __LINE__, deviceID, StartSectorNumber, ReadSize);
+		L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: deviceID: %d StartSectorNumber: %ld ReadSize: %d\n", __LINE__, deviceID, StartSectorNumber, ReadSize);
 		return -1;
 	}
 
-	//DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: deviceID: %d StartSectorNumber: %ld ReadSize: %d\n", __LINE__, deviceID, StartSectorNumber, ReadSize);
+	//L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: deviceID: %d StartSectorNumber: %ld ReadSize: %d\n", __LINE__, deviceID, StartSectorNumber, ReadSize);
 	EFI_STATUS Status;
     UINTN NumHandles;
     EFI_BLOCK_IO_PROTOCOL *BlockIo;
@@ -1859,128 +1856,101 @@ EFI_STATUS ReadDataFromPartition(UINT8 deviceID, UINT64 StartSectorNumber, UINT1
     Status = gBS->LocateHandleBuffer(ByProtocol, &gEfiDiskIoProtocolGuid, NULL, &NumHandles, &ControllerHandle);
     if (EFI_ERROR(Status))
     {
-        DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);	    
+        L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);	    
         return Status;
     }
 
  	Status = gBS->HandleProtocol(ControllerHandle[deviceID], &gEfiBlockIoProtocolGuid, (VOID * *) &BlockIo );   
     if (EFI_ERROR(Status))
     {
-		DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
+		L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
 		return Status;
     }
     
     Status = gBS->HandleProtocol( ControllerHandle[deviceID], &gEfiDiskIoProtocolGuid, (VOID * *) &DiskIo );     
     if (EFI_ERROR(Status))
     {
-		DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
+		L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
 		return Status;
     }
 
    	Status = DiskIo->ReadDisk(DiskIo, BlockIo->Media->MediaId, DISK_BUFFER_SIZE * (StartSectorNumber), DISK_BUFFER_SIZE * ReadSize, pBuffer);
  	if (EFI_ERROR(Status))
  	{
-		DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X sector_count:%ld\n", __LINE__, Status, sector_count);
+		L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X sector_count:%ld\n", __LINE__, Status, sector_count);
 		return Status;
  	}
  	
 	for (int j = 0; j < 250; j++)
 	{
-		DebugPrint1(DISK_READ_BUFFER_X + (j % 16) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 16), "%02X ", pBuffer[j] & 0xff);
+		L2_DEBUG_Print1(DISK_READ_BUFFER_X + (j % 16) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 16), "%02X ", pBuffer[j] & 0xff);
 	}
 	//INFO_SELF("\n");
-    //DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
+    //L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
     return EFI_SUCCESS;
 }
 
 // NTFS Main File Table items analysis
-EFI_STATUS MFTReadFromPartition(UINT16 DeviceID)
+EFI_STATUS L2_NTFS_MFTRead(UINT16 DeviceID)
 {
-    DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d DeviceID: %d\n", __LINE__, DeviceID);
+    L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d DeviceID: %d\n", __LINE__, DeviceID);
     //printf( "RootPathAnalysis\n" );
     DEBUG ((EFI_D_INFO, "PartitionUSBRead!!\r\n"));
     EFI_STATUS Status ;
     EFI_HANDLE *ControllerHandle = NULL;
         
-    Status = ReadDataFromPartition(DeviceID, sector_count + 5 *2, 2, BufferMFT); 
+    Status = L1_STORE_READ(DeviceID, sector_count + 5 *2, 2, BufferMFT); 
     if (EFI_ERROR(Status))
     {
-    	DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d Status: %X\n", __LINE__, Status);
+    	L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d Status: %X\n", __LINE__, Status);
     	return Status;
     }
     
 	 for (int j = 0; j < 250; j++)
 	 {
-		DebugPrint1(DISK_READ_BUFFER_X + (j % 16) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 16), "%02X ", BufferMFT[j] & 0xff);
+		L2_DEBUG_Print1(DISK_READ_BUFFER_X + (j % 16) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 16), "%02X ", BufferMFT[j] & 0xff);
 	 }	
 
  	//Analysis MFT of NTFS File System..
- 	MFTDollarRootFileAnalysisBuffer(BufferMFT);
+ 	L2_FILE_NTFS_MFTDollarRootFileAnalysis(BufferMFT);
  	//MFTDollarRootAnalysisBuffer(BufferMFTDollarRoot);	
 
 	// data area start from 1824, HZK16 file start from 	FileBlockStart	block, so need to convert into sector by multi 8, block start number is 2 	
 	// next state is to read FAT table
  	sector_count = MBRSwitched.ReservedSelector;
- 	DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: sector_count:%ld FileLength: %d MBRSwitched.ReservedSelector:%ld\n",  __LINE__, sector_count, FileLength, MBRSwitched.ReservedSelector);
+ 	L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: sector_count:%ld FileLength: %d MBRSwitched.ReservedSelector:%ld\n",  __LINE__, sector_count, FileLength, MBRSwitched.ReservedSelector);
       
     return EFI_SUCCESS;
 }
 
-
-// analysis a partition 
-EFI_STATUS RootPathAnalysisFSM1(UINT16 DeviceID)
+EFI_STATUS L2_FILE_NTFS_RootPathItemsRead(UINT8 i)
 {
-    DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d DeviceID: %d\n", __LINE__, DeviceID);
-    //printf( "RootPathAnalysis\n" );
-    EFI_STATUS Status ;
-    UINT8 Buffer1[DISK_BUFFER_SIZE];
-    
-    Status = ReadDataFromPartition(DeviceID, sector_count, 1, Buffer1); 
-	if (EFI_ERROR(Status))
-    {
-    	DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d Status: %X\n", __LINE__, Status);
-    	return Status;
-    }
-    
- 	//When get root path data sector start number, we can get content of root path.
- 	RootPathAnalysis1(Buffer1);	
-
-	// data area start from 1824, HZK16 file start from 	FileBlockStart	block, so need to convert into sector by multi 8, block start number is 2 	
-	// next state is to read FAT table
- 	sector_count = MBRSwitched.ReservedSelector;
- 	DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: sector_count:%ld FileLength: %d MBRSwitched.ReservedSelector:%ld\n",  __LINE__, sector_count, FileLength, MBRSwitched.ReservedSelector);
-
-    return EFI_SUCCESS;
-}
-
-EFI_STATUS NTFSRootPathIndexItemsRead(UINT8 i)
-{
-	DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d DeviceType: %d, SectorCount: %lld\n", __LINE__, i);
+	L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d DeviceType: %d, SectorCount: %lld\n", __LINE__, i);
     EFI_STATUS Status ;
     UINT8 BufferBlock[DISK_BLOCK_BUFFER_SIZE];
 
 	UINT8 k = 0;
 	UINT16 lastOffset = 0;
 	
-	DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Offset:%ld OccupyCluster:%ld\n",  __LINE__, 
+	L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Offset:%ld OccupyCluster:%ld\n",  __LINE__, 
 																	 (A0Indexes[k].Offset + lastOffset) * 8, 
 																	 A0Indexes[k].OccupyCluster * 8);
 	// cluster need to multi with 8 then it is sector.
-   Status = ReadDataFromPartition(i, (A0Indexes[k].Offset + lastOffset) * 8 , A0Indexes[k].OccupyCluster * 8, BufferBlock);
+   Status = L1_STORE_READ(i, (A0Indexes[k].Offset + lastOffset) * 8 , A0Indexes[k].OccupyCluster * 8, BufferBlock);
     if (EFI_ERROR(Status))
     {
-        DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d Status: %X\n", __LINE__, Status);
+        L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d Status: %X\n", __LINE__, Status);
         return Status;
     }
 
-	MFTIndexItemsBufferAnalysis(BufferBlock);	
+	L2_FILE_NTFS_MFTIndexItemsAnalysis(BufferBlock);	
 	
  	lastOffset = A0Indexes[k].Offset;
 	
     return EFI_SUCCESS;
 }
 
-EFI_STATUS BufferAnalysis(UINT8 *p, MasterBootRecordSwitched *pMBRSwitched)
+EFI_STATUS L1_FILE_FAT32_FirstSelectorAnalysis(UINT8 *p, MasterBootRecordSwitched *pMBRSwitched)
 {
 	MasterBootRecord *pMBR;
 	
@@ -1989,27 +1959,7 @@ EFI_STATUS BufferAnalysis(UINT8 *p, MasterBootRecordSwitched *pMBRSwitched)
 
 	// 大端字节序：低位字节在高地址，高位字节低地址上。这是人类读写数值的方法。
     // 小端字节序：与上面相反。低位字节在低地址，高位字节在高地址。
-	/*DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "ReservedSelector:%02X%02X SectorsPerFat:%02X%02X%02X%02X BootPathStartCluster:%02X%02X%02X%02X NumFATS: %X", 
-	                                    pMBR->ReservedSelector[0], pMBR->ReservedSelector[1], 
-	                                    pMBR->SectorsPerFat[0], pMBR->SectorsPerFat[1], pMBR->SectorsPerFat[2], pMBR->SectorsPerFat[3],
-	                                    pMBR->BootPathStartCluster[0], pMBR->BootPathStartCluster[1], pMBR->BootPathStartCluster[2], pMBR->BootPathStartCluster[3],
-	                                    pMBR->NumFATS[0]);
-	*/
-	Transfer(pMBR, pMBRSwitched);
-
-	FreePool(pMBR);
-}
-
-EFI_STATUS FirstSelectorAnalysis(UINT8 *p, MasterBootRecordSwitched *pMBRSwitched)
-{
-	MasterBootRecord *pMBR;
-	
-	pMBR = (MasterBootRecord *)AllocateZeroPool(DISK_BUFFER_SIZE);
-	memcpy(pMBR, p, DISK_BUFFER_SIZE);
-
-	// 大端字节序：低位字节在高地址，高位字节低地址上。这是人类读写数值的方法。
-    // 小端字节序：与上面相反。低位字节在低地址，高位字节在高地址。
-	DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d ReservedSelector:%02X%02X SectorsPerFat:%02X%02X%02X%02X BootPathStartCluster:%02X%02X%02X%02X NumFATS: %X", 
+	L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d ReservedSelector:%02X%02X SectorsPerFat:%02X%02X%02X%02X BootPathStartCluster:%02X%02X%02X%02X NumFATS: %X", 
 	                                    __LINE__,
 	                                    pMBR->ReservedSelector[0], pMBR->ReservedSelector[1], 
 	                                    pMBR->SectorsPerFat[0], pMBR->SectorsPerFat[1], pMBR->SectorsPerFat[2], pMBR->SectorsPerFat[3],
@@ -2017,20 +1967,20 @@ EFI_STATUS FirstSelectorAnalysis(UINT8 *p, MasterBootRecordSwitched *pMBRSwitche
 	                                    pMBR->NumFATS[0]);
 
 	
-	Transfer(pMBR, pMBRSwitched);
+	L2_FILE_Transfer(pMBR, pMBRSwitched);
 
 	FreePool(pMBR);
 }
 
-VOID TransferNTFS(DOLLAR_BOOT *pSource, DollarBootSwitched *pDest)
+VOID L1_FILE_NTFS_DollerRootTransfer(DOLLAR_BOOT *pSource, DollarBootSwitched *pDest)
 {
-    pDest->BitsOfSector = BytesToInt2(pSource->BitsOfSector);
+    pDest->BitsOfSector = L1_NETWORK_2BytesToUINT16(pSource->BitsOfSector);
     pDest->SectorOfCluster = (UINT16)pSource->SectorOfCluster;
-    pDest->AllSectorCount = BytesToInt8(pSource->AllSectorCount) + 1;
-    pDest->MFT_StartCluster = BytesToInt8(pSource->MFT_StartCluster);
-    pDest->MFT_MirrStartCluster = BytesToInt8(pSource->MFT_MirrStartCluster);
+    pDest->AllSectorCount = L1_NETWORK_8BytesToUINT64(pSource->AllSectorCount) + 1;
+    pDest->MFT_StartCluster = L1_NETWORK_8BytesToUINT64(pSource->MFT_StartCluster);
+    pDest->MFT_MirrStartCluster = L1_NETWORK_8BytesToUINT64(pSource->MFT_MirrStartCluster);
     
-	DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d BitsOfSector:%ld SectorOfCluster:%d AllSectorCount: %llu MFT_StartCluster:%llu MFT_MirrStartCluster:%llu", __LINE__,
+	L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d BitsOfSector:%ld SectorOfCluster:%d AllSectorCount: %llu MFT_StartCluster:%llu MFT_MirrStartCluster:%llu", __LINE__,
 											    pDest->BitsOfSector,
 											    pDest->SectorOfCluster,
 											    pDest->AllSectorCount,
@@ -2039,7 +1989,7 @@ VOID TransferNTFS(DOLLAR_BOOT *pSource, DollarBootSwitched *pDest)
 }
 
 
-EFI_STATUS FirstSelectorAnalysisNTFS(UINT8 *p, DollarBootSwitched *pNTFSBootSwitched)
+EFI_STATUS L2_FILE_NTFS_FirstSelectorAnalysis(UINT8 *p, DollarBootSwitched *pNTFSBootSwitched)
 {
     DOLLAR_BOOT *pDollarBoot;
     
@@ -2048,7 +1998,7 @@ EFI_STATUS FirstSelectorAnalysisNTFS(UINT8 *p, DollarBootSwitched *pNTFSBootSwit
 
     // 大端字节序：低位字节在高地址，高位字节低地址上。这是人类读写数值的方法。
     // 小端字节序：与上面相反。低位字节在低地址，高位字节在高地址。
-    DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d OEM:%c%c%c%c%c%c%c%c, BitsOfSector:%02X%02X SectorOfCluster:%02X ReservedSelector:%02X%02X Description: %X, size: %d", 
+    L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d OEM:%c%c%c%c%c%c%c%c, BitsOfSector:%02X%02X SectorOfCluster:%02X ReservedSelector:%02X%02X Description: %X, size: %d", 
                         											  __LINE__,
                         											  pDollarBoot->OEM[0],
                         											  pDollarBoot->OEM[1],
@@ -2066,7 +2016,7 @@ EFI_STATUS FirstSelectorAnalysisNTFS(UINT8 *p, DollarBootSwitched *pNTFSBootSwit
                                         						  pDollarBoot->Description,
                                         						  sizeof(pDollarBoot->OEM) / sizeof(pDollarBoot->OEM[0]));
                                         						  
-    DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d AllSectorCount:%02X%02X%02X%02X%02X%02X%02X%02X, MFT_StartCluster:%02X%02X%02X%02X%02X%02X%02X%02X MFT_MirrStartCluster:%02X%02X%02X%02X%02X%02X%02X%02X ClusterPerMFT:%02X%02X%02X%02X ClusterPerIndex: %02X%02X%02X%02X", 
+    L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d AllSectorCount:%02X%02X%02X%02X%02X%02X%02X%02X, MFT_StartCluster:%02X%02X%02X%02X%02X%02X%02X%02X MFT_MirrStartCluster:%02X%02X%02X%02X%02X%02X%02X%02X ClusterPerMFT:%02X%02X%02X%02X ClusterPerIndex: %02X%02X%02X%02X", 
                         											  __LINE__,                        											  
                                         						  pDollarBoot->AllSectorCount[0], 
                                         						  pDollarBoot->AllSectorCount[1], 
@@ -2101,54 +2051,52 @@ EFI_STATUS FirstSelectorAnalysisNTFS(UINT8 *p, DollarBootSwitched *pNTFSBootSwit
                                         						  pDollarBoot->ClusterPerIndex[2], 
                                         						  pDollarBoot->ClusterPerIndex[3]);
 
-    TransferNTFS(pDollarBoot, pNTFSBootSwitched);
+    L1_FILE_NTFS_DollerRootTransfer(pDollarBoot, pNTFSBootSwitched);
 
     FreePool(pDollarBoot);
 
 }
 
-
-
 // all partitions analysis
-EFI_STATUS PartitionAnalysisFSM1(UINT16 DeviceID)
+EFI_STATUS L2_STORE_PartitionAnalysis2(UINT16 DeviceID)
 {    
-    DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d DeviceID: %d\n", __LINE__, DeviceID);
+    L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d DeviceID: %d\n", __LINE__, DeviceID);
     EFI_STATUS Status;
     UINT8 Buffer1[DISK_BUFFER_SIZE] = {0};
 
     sector_count = 0;
 
-	Status = ReadDataFromPartition(DeviceID, sector_count, 1, Buffer1 );    
+	Status = L1_STORE_READ(DeviceID, sector_count, 1, Buffer1 );    
     if (EFI_ERROR(Status))
     {
-        DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d Status: %X\n", __LINE__, Status);
+        L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d Status: %X\n", __LINE__, Status);
         return Status;
     }
 
 	// FAT32 file system
 	if (Buffer1[0x52] == 'F' && Buffer1[0x53] == 'A' && Buffer1[0x54] == 'T' && Buffer1[0x55] == '3' && Buffer1[0x56] == '2')	
  	{				 	
- 		DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: FAT32\n",  __LINE__);
+ 		L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: FAT32\n",  __LINE__);
  		// analysis data area of patition
-	 	FirstSelectorAnalysis(Buffer1, &MBRSwitched); 
+	 	L1_FILE_FAT32_FirstSelectorAnalysis(Buffer1, &MBRSwitched); 
 
 	 	// data sector number start include: reserved selector, fat sectors(usually is 2: fat1 and fat2), and file system boot path start cluster(usually is 2, data block start number is 2)
 	 	sector_count = MBRSwitched.ReservedSelector + MBRSwitched.SectorsPerFat * MBRSwitched.NumFATS + MBRSwitched.BootPathStartCluster - 2;
 	 	BlockSize = MBRSwitched.SectorOfCluster * 512;
-   		DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: sector_count:%ld BlockSize: %d\n",  __LINE__, sector_count, BlockSize);
+   		L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: sector_count:%ld BlockSize: %d\n",  __LINE__, sector_count, BlockSize);
    		return FILE_SYSTEM_FAT32;
 	}
    	// NTFS
    	else if (Buffer1[3] == 'N' && Buffer1[4] == 'T' && Buffer1[5] == 'F' && Buffer1[6] == 'S')
    	{
-		FirstSelectorAnalysisNTFS(Buffer1, &NTFSBootSwitched);
+		L2_FILE_NTFS_FirstSelectorAnalysis(Buffer1, &NTFSBootSwitched);
 		sector_count = NTFSBootSwitched.MFT_StartCluster * 8;
-   		DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: NTFS sector_count:%llu\n",  __LINE__, sector_count);
+   		L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: NTFS sector_count:%llu\n",  __LINE__, sector_count);
    		return FILE_SYSTEM_NTFS;
    	}
    	else
    	{
-   		DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: \n",  __LINE__);
+   		L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: \n",  __LINE__);
    		return FILE_SYSTEM_OTHER;
    	}               	
 
@@ -2156,16 +2104,69 @@ EFI_STATUS PartitionAnalysisFSM1(UINT16 DeviceID)
 
 }
 
-DisplayItemsOfPartition(UINT16 Index)
+// all partitions analysis
+EFI_STATUS L2_STORE_PartitionAnalysis()
+{    
+    L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d PartitionAnalysisFSM\n", __LINE__);
+    EFI_STATUS Status ;
+    UINTN i;
+    EFI_HANDLE *ControllerHandle = NULL;
+    EFI_DEVICE_PATH_TO_TEXT_PROTOCOL *DevPathToText;
+    
+    Status = gBS->LocateProtocol (&gEfiDevicePathToTextProtocolGuid, NULL, (VOID **) &DevPathToText);
+    //L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
+    if (EFI_ERROR(Status))
+    {
+    	 DEBUG ((EFI_D_INFO, "LocateProtocol1 error: %x\n", Status));    	 
+    	 L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
+        return Status;
+    }
+   
+    Status = gBS->LocateHandleBuffer(ByProtocol, &gEfiDiskIoProtocolGuid, NULL, &PartitionCount, &ControllerHandle);
+    //L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
+    if (EFI_ERROR(Status))
+    {
+        L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);	    
+        return EFI_SUCCESS;
+    }
+
+    for (i = 0; i < PartitionCount; i++)
+    {
+    	//L2_DEBUG_Print1(350, 16 * 6, "%d: %x\n", __LINE__, Status);
+        EFI_DEVICE_PATH_PROTOCOL *DiskDevicePath;
+        Status = gBS->OpenProtocol(ControllerHandle[i],
+                                   &gEfiDevicePathProtocolGuid,
+                                   (VOID **)&DiskDevicePath,
+                                   gImageHandle, 
+                                   NULL,
+                                   EFI_OPEN_PROTOCOL_GET_PROTOCOL);
+        //L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
+        if (EFI_ERROR(Status))
+        {
+            L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
+            return Status;
+        }
+
+        CHAR16 *TextDevicePath = DevPathToText->ConvertDevicePathToText(DiskDevicePath, TRUE, TRUE);
+		 L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X Partition: %s\n", __LINE__, Status, TextDevicePath);
+		 L2_STORE_TextDevicePathAnalysis(TextDevicePath, &device[i], i);
+    	            
+        if (TextDevicePath) gBS->FreePool(TextDevicePath);		 
+    }
+    return EFI_SUCCESS;
+}
+
+
+L2_STORE_PartitionItemsPrint(UINT16 Index)
 {
-	DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: \n",  __LINE__);
+	L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: \n",  __LINE__);
 	// this code may be have some problems, because my USB file system is FAT32, my Disk file system is NTFS.
 	// others use this code must be careful...
-	UINT8 FileSystemType = PartitionAnalysisFSM1(Index);
+	UINT8 FileSystemType = L2_STORE_PartitionAnalysis2(Index);
 
 	if (FileSystemType == FILE_SYSTEM_FAT32)
 	{
-		RootPathAnalysisFSM1(Index);
+		L1_FILE_RootPathAnalysis1(Index);
 		UINT16 valid_count = 0;
 
 		
@@ -2173,10 +2174,10 @@ DisplayItemsOfPartition(UINT16 Index)
 			//if (pItems[i].FileName[0] != 0xE5 && (pItems[i].Attribute[0] == 0x20 
 			//    || pItems[i].Attribute[0] == 0x10))
 	       {
-	        	DebugPrint2(0, 8 * 16 + (valid_count) * 16, pMyComputerBuffer, "%d %2c%2c%2c%2c%2c%2c%2c%2c.%2c%2c%2c FileLength: %d Attribute: %02X    ", __LINE__,
+	        	L2_DEBUG_Print2(0, 8 * 16 + (valid_count) * 16, pMyComputerBuffer, "%d %2c%2c%2c%2c%2c%2c%2c%2c.%2c%2c%2c FileLength: %d Attribute: %02X    ", __LINE__,
 	                                            pItems[i].FileName[0], pItems[i].FileName[1], pItems[i].FileName[2], pItems[i].FileName[3], pItems[i].FileName[4], pItems[i].FileName[5], pItems[i].FileName[6], pItems[i].FileName[7],
 	                                            pItems[i].ExtensionName[0], pItems[i].ExtensionName[1],pItems[i].ExtensionName[2],
-	                                            BytesToInt4(pItems[i].FileLength),
+	                                            L1_NETWORK_4BytesToUINT32(pItems[i].FileLength),
 	                                            pItems[i].Attribute[0]);
 				
 				valid_count++;
@@ -2185,9 +2186,9 @@ DisplayItemsOfPartition(UINT16 Index)
 	}
 	else if (FileSystemType == FILE_SYSTEM_NTFS)
 	{
-		MFTReadFromPartition(Index);
-    	MFTDollarRootFileAnalysisBuffer(BufferMFT);			
-	    NTFSRootPathIndexItemsRead(Index);
+		L2_NTFS_MFTRead(Index);
+    	L2_FILE_NTFS_MFTDollarRootFileAnalysis(BufferMFT);			
+	    L2_FILE_NTFS_RootPathItemsRead(Index);
 	}
 	else if (FileSystemType == FILE_SYSTEM_OTHER)
 	{
@@ -2195,9 +2196,9 @@ DisplayItemsOfPartition(UINT16 Index)
 	}
 }
 
-VOID GraphicsLayerCompute(int iMouseX, int iMouseY, UINT8 MouseClickFlag)
+VOID L2_GRAPHICS_LayerCompute(int iMouseX, int iMouseY, UINT8 MouseClickFlag)
 {
-	/*DebugPrint1(DISPLAY_X, DISPLAY_Y, "%d: pDeskDisplayBuffer: %X pDeskBuffer: %X ScreenWidth: %d ScreenHeight: %d pMouseBuffer: %X\n", __LINE__, 
+	/*L2_DEBUG_Print1(DISPLAY_X, DISPLAY_Y, "%d: pDeskDisplayBuffer: %X pDeskBuffer: %X ScreenWidth: %d ScreenHeight: %d pMouseBuffer: %X\n", __LINE__, 
 																pDeskDisplayBuffer,
 																pDeskBuffer,
 																ScreenWidth,
@@ -2205,10 +2206,10 @@ VOID GraphicsLayerCompute(int iMouseX, int iMouseY, UINT8 MouseClickFlag)
 																pMouseBuffer);
 	*/
 	//desk 
-	GraphicsCopy(pDeskDisplayBuffer, pDeskBuffer, ScreenWidth, ScreenHeight, ScreenWidth, ScreenHeight, 0, 0);
-    //DebugPrint1(DISPLAY_X, DISPLAY_Y, "%d: GraphicsLayerCompute\n", __LINE__);
+	L2_GRAPHICS_Copy(pDeskDisplayBuffer, pDeskBuffer, ScreenWidth, ScreenHeight, ScreenWidth, ScreenHeight, 0, 0);
+    //L2_DEBUG_Print1(DISPLAY_X, DISPLAY_Y, "%d: GraphicsLayerCompute\n", __LINE__);
 
-	GraphicsCopy(pDeskDisplayBuffer, pMyComputerBuffer, ScreenWidth, ScreenHeight, MyComputerWidth, MyComputerHeight, MyComputerPositionX, MyComputerPositionY);
+	L2_GRAPHICS_Copy(pDeskDisplayBuffer, pMyComputerBuffer, ScreenWidth, ScreenHeight, MyComputerWidth, MyComputerHeight, MyComputerPositionX, MyComputerPositionY);
 
 	//my computer
 	if (MouseClickFlag == 1 && pDeskDisplayBuffer[(iMouseY * ScreenWidth + iMouseX) * 4 + 3] == GRAPHICS_LAYER_MY_COMPUTER)
@@ -2216,23 +2217,23 @@ VOID GraphicsLayerCompute(int iMouseX, int iMouseY, UINT8 MouseClickFlag)
 		MyComputerPositionX += x_move * 3;
 		MyComputerPositionY += y_move * 3;
 		
-	//	GraphicsCopy(pDeskDisplayBuffer, pMyComputerBuffer, ScreenWidth, ScreenHeight, MyComputerWidth, MyComputerHeight, MyComputerPositionX, MyComputerPositionX);
+	//	L2_GRAPHICS_Copy(pDeskDisplayBuffer, pMyComputerBuffer, ScreenWidth, ScreenHeight, MyComputerWidth, MyComputerHeight, MyComputerPositionX, MyComputerPositionX);
 	}
 	x_move = 0;
 	y_move = 0;
 	// display graphics layer id mouse over, for mouse click event.
-	//DebugPrint1(DISPLAY_X, DISPLAY_Y, "%d: Graphics Layer id: %d ", __LINE__, pDeskDisplayBuffer[(iMouseY * ScreenWidth + iMouseX) * 4 + 3]);
+	//L2_DEBUG_Print1(DISPLAY_X, DISPLAY_Y, "%d: Graphics Layer id: %d ", __LINE__, pDeskDisplayBuffer[(iMouseY * ScreenWidth + iMouseX) * 4 + 3]);
 	
 	int i, j;
 
-	GraphicsLayerMouseMove();
+	L2_MOUSE_Move();
     
     // init mouse buffer with cursor
-	DrawChineseCharIntoBuffer2(pMouseBuffer, 0, 0, 11 * 94 + 42, MouseColor, 16);
-    //DebugPrint1(DISPLAY_X, DISPLAY_Y, "%d: GraphicsLayerCompute\n", __LINE__);
+	L2_GRAPHICS_ChineseCharDraw2(pMouseBuffer, 0, 0, 11 * 94 + 42, MouseColor, 16);
+    //L2_DEBUG_Print1(DISPLAY_X, DISPLAY_Y, "%d: GraphicsLayerCompute\n", __LINE__);
 
-	GraphicsCopy(pDeskDisplayBuffer, pMouseBuffer, ScreenWidth, ScreenHeight, 16, 16, iMouseX, iMouseY);
-    //DebugPrint1(DISPLAY_X, DISPLAY_Y, "%d: GraphicsLayerCompute\n", __LINE__);
+	L2_GRAPHICS_Copy(pDeskDisplayBuffer, pMouseBuffer, ScreenWidth, ScreenHeight, 16, 16, iMouseX, iMouseY);
+    //L2_DEBUG_Print1(DISPLAY_X, DISPLAY_Y, "%d: GraphicsLayerCompute\n", __LINE__);
 
    GraphicsOutput->Blt(GraphicsOutput, 
 			            (EFI_GRAPHICS_OUTPUT_BLT_PIXEL *) pDeskDisplayBuffer,
@@ -2242,9 +2243,9 @@ VOID GraphicsLayerCompute(int iMouseX, int iMouseY, UINT8 MouseClickFlag)
 			            ScreenWidth, ScreenHeight, 0);
 }
 
-MouseMoveoverResponse()
+L2_MOUSE_Moveover()
 {
- 	//DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: iMouseX: %d iMouseY: %d \n",  __LINE__, iMouseX, iMouseY);
+ 	//L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: iMouseX: %d iMouseY: %d \n",  __LINE__, iMouseX, iMouseY);
 	EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
 	Color.Red = 0xff;
 	Color.Green= 0xff;
@@ -2254,14 +2255,14 @@ MouseMoveoverResponse()
     if (iMouseX >= 0 && iMouseX <= 16 + 16 * 2
         && iMouseY >= ScreenHeight - 21 && iMouseY <= ScreenHeight)
     {   
-    	//DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: iMouseX: %d iMouseY: %d \n",  __LINE__, iMouseX, iMouseY);
-		RectangleDrawIntoBuffer(pMouseSelectedBuffer, 0,  0, 31, 15, 1,  Color, 32);
+    	//L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: iMouseX: %d iMouseY: %d \n",  __LINE__, iMouseX, iMouseY);
+		L2_GRAPHICS_RectangleDraw(pMouseSelectedBuffer, 0,  0, 31, 15, 1,  Color, 32);
     	//MenuButtonClickResponse();
     	Color.Red   = 0xFF;
 	    Color.Green = 0xFF;
 	    Color.Blue	= 0xFF;
-	    //RectangleFillIntoBuffer(pDeskBuffer, 3,     ScreenHeight - 21, 13,     ScreenHeight - 11, 1, Color);
-    	GraphicsCopy(pDeskDisplayBuffer, pMouseSelectedBuffer, ScreenWidth, ScreenHeight, 32, 16, 3, ScreenHeight - 21);
+	    //L1_MEMORY_RectangleFill(pDeskBuffer, 3,     ScreenHeight - 21, 13,     ScreenHeight - 11, 1, Color);
+    	L2_GRAPHICS_Copy(pDeskDisplayBuffer, pMouseSelectedBuffer, ScreenWidth, ScreenHeight, 32, 16, 3, ScreenHeight - 21);
     }
     
 	// this is draw a rectangle when mouse move on disk partition in my computer window
@@ -2276,18 +2277,18 @@ MouseMoveoverResponse()
 				break;
 			}
 			
-			RectangleDrawIntoBuffer(pMouseSelectedBuffer, 0,  0, 31, 15, 1,  Color, 32);
+			L2_GRAPHICS_RectangleDraw(pMouseSelectedBuffer, 0,  0, 31, 15, 1,  Color, 32);
 
 			// need to save result into cache, for next time to read, reduce disk operation
-			DisplayItemsOfPartition(i);
+			L2_STORE_PartitionItemsPrint(i);
 			PreviousItem = i;
-	       GraphicsCopy(pDeskDisplayBuffer, pMouseSelectedBuffer, ScreenWidth, ScreenHeight, 32, 16, MyComputerPositionX + 50, MyComputerPositionY  + i * (16 + 2) + 16 * 2);	
+	       L2_GRAPHICS_Copy(pDeskDisplayBuffer, pMouseSelectedBuffer, ScreenWidth, ScreenHeight, 32, 16, MyComputerPositionX + 50, MyComputerPositionY  + i * (16 + 2) + 16 * 2);	
 		}
 	}
 
 }
 
-MouseClickResponse()
+L2_MOUSE_Click()
 {
     //my computer
     if (MouseClickFlag == 1 && pDeskDisplayBuffer[(iMouseY * ScreenWidth + iMouseX) * 4 + 3] == GRAPHICS_LAYER_MY_COMPUTER)
@@ -2295,14 +2296,14 @@ MouseClickResponse()
         MyComputerPositionX += x_move * 3;
         MyComputerPositionY += y_move * 3;
         
-    //  GraphicsCopy(pDeskDisplayBuffer, pMyComputerBuffer, ScreenWidth, ScreenHeight, MyComputerWidth, MyComputerHeight, MyComputerPositionX, MyComputerPositionX);
+    //  L2_GRAPHICS_Copy(pDeskDisplayBuffer, pMyComputerBuffer, ScreenWidth, ScreenHeight, MyComputerWidth, MyComputerHeight, MyComputerPositionX, MyComputerPositionX);
     }
     x_move = 0;
     y_move = 0;
 
 }
 
-MenuButtonClickResponse()
+L2_MOUSE_MenuButtonClick()
 {    
 	EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
 	Color.Red = 0xff;
@@ -2316,14 +2317,14 @@ MenuButtonClickResponse()
             pMouseSelectedBuffer[(i * 32 + j) * 4 + 2] = pDeskDisplayBuffer[((MyComputerPositionX + 50 + i) * ScreenWidth +  MyComputerPositionY  + i * (16 + 2) + 16 * 2 + j) * 4 + 2];            
         }
     }
-     //RectangleFillIntoBuffer(UINT8 * pBuffer,IN UINTN x0,UINTN y0,UINTN x1,UINTN y1,IN UINTN BorderWidth,IN EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color)
+     //L1_MEMORY_RectangleFill(UINT8 * pBuffer,IN UINTN x0,UINTN y0,UINTN x1,UINTN y1,IN UINTN BorderWidth,IN EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color)
     
-    //RectangleFillIntoBuffer(pMouseSelectedBuffer, 0,  0, 32, 16, 1,  Color);
+    //L1_MEMORY_RectangleFill(pMouseSelectedBuffer, 0,  0, 32, 16, 1,  Color);
 
     // Draw a red rectangle when mouse move over left down (like menu button)
-    RectangleDrawIntoBuffer(pMouseSelectedBuffer, 0,  0, 31, 15, 1,  Color, 32);
+    L2_GRAPHICS_RectangleDraw(pMouseSelectedBuffer, 0,  0, 31, 15, 1,  Color, 32);
 
-    //DebugPrint1(DISPLAY_X, DISPLAY_Y, "%d: GraphicsLayerCompute\n", __LINE__);
+    //L2_DEBUG_Print1(DISPLAY_X, DISPLAY_Y, "%d: GraphicsLayerCompute\n", __LINE__);
 
     if (MouseClickFlag == 1)
     {
@@ -2339,27 +2340,27 @@ MenuButtonClickResponse()
                     pClickMenuBuffer[(i * 16 + j) * 4 + 1] = 0x33;
                     pClickMenuBuffer[(i * 16 + j) * 4 + 2] = 0x33;
                 }
-            GraphicsCopy(pDeskDisplayBuffer, pClickMenuBuffer, ScreenWidth, ScreenHeight, 16, 16, 0, ScreenHeight - 22 - 16);
+            L2_GRAPHICS_Copy(pDeskDisplayBuffer, pClickMenuBuffer, ScreenWidth, ScreenHeight, 16, 16, 0, ScreenHeight - 22 - 16);
         }
     }
     
-    GraphicsCopy(pDeskDisplayBuffer, pMouseSelectedBuffer, ScreenWidth, ScreenHeight, 32, 16, 15, ScreenHeight - 22); 
+    L2_GRAPHICS_Copy(pDeskDisplayBuffer, pMouseSelectedBuffer, ScreenWidth, ScreenHeight, 32, 16, 15, ScreenHeight - 22); 
 }
 
-VOID GraphicsLayerMouseMove()
+VOID L2_MOUSE_Move()
 {	
-    //DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: GraphicsLayerMouseMove\n",  __LINE__);
+    //L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: GraphicsLayerMouseMove\n",  __LINE__);
 	
 	// display graphics layer id mouse over, for mouse click event.
-	//DebugPrint1(DISPLAY_X, DISPLAY_Y, "%d: Graphics Layer id: %d ", __LINE__, pDeskDisplayBuffer[(iMouseY * ScreenWidth + iMouseX) * 4 + 3]);
+	//L2_DEBUG_Print1(DISPLAY_X, DISPLAY_Y, "%d: Graphics Layer id: %d ", __LINE__, pDeskDisplayBuffer[(iMouseY * ScreenWidth + iMouseX) * 4 + 3]);
 	
-	MouseClickResponse();
+	L2_MOUSE_Click();
     
-	MouseMoveoverResponse();
+	L2_MOUSE_Moveover();
 }
 
 
-EFI_STATUS DrawAsciiCharIntoBuffer(UINT8 *pBuffer,
+EFI_STATUS L2_GRAPHICS_AsciiCharDraw3(UINT8 *pBuffer,
         IN UINTN x0, UINTN y0,UINT8 c,
         IN EFI_GRAPHICS_OUTPUT_BLT_PIXEL BorderColor, UINT16 AreaWidth)
 {
@@ -2376,28 +2377,28 @@ EFI_STATUS DrawAsciiCharIntoBuffer(UINT8 *pBuffer,
 		d = sASCII[c][i];
 		
 		if ((d & 0x80) != 0) 
-		    CopyColorIntoBuffer(pBuffer, BorderColor, x0 + 0, y0 + i, AreaWidth); 
+		    L1_MEMORY_CopyColor1(pBuffer, BorderColor, x0 + 0, y0 + i, AreaWidth); 
 		
 		if ((d & 0x40) != 0) 
-            CopyColorIntoBuffer(pBuffer, BorderColor, x0 + 1, y0 + i, AreaWidth);
+            L1_MEMORY_CopyColor1(pBuffer, BorderColor, x0 + 1, y0 + i, AreaWidth);
 		
 		if ((d & 0x20) != 0) 
-		    CopyColorIntoBuffer(pBuffer, BorderColor, x0 + 2, y0 + i, AreaWidth);
+		    L1_MEMORY_CopyColor1(pBuffer, BorderColor, x0 + 2, y0 + i, AreaWidth);
 		
 		if ((d & 0x10) != 0) 
-		    CopyColorIntoBuffer(pBuffer, BorderColor, x0 + 3, y0 + i, AreaWidth);
+		    L1_MEMORY_CopyColor1(pBuffer, BorderColor, x0 + 3, y0 + i, AreaWidth);
 		
 		if ((d & 0x08) != 0) 
-		    CopyColorIntoBuffer(pBuffer, BorderColor, x0 + 4, y0 + i, AreaWidth);
+		    L1_MEMORY_CopyColor1(pBuffer, BorderColor, x0 + 4, y0 + i, AreaWidth);
 		
 		if ((d & 0x04) != 0) 
-		    CopyColorIntoBuffer(pBuffer, BorderColor, x0 + 5, y0 + i, AreaWidth);
+		    L1_MEMORY_CopyColor1(pBuffer, BorderColor, x0 + 5, y0 + i, AreaWidth);
 		
 		if ((d & 0x02) != 0) 
-		    CopyColorIntoBuffer(pBuffer, BorderColor, x0 + 6, y0 + i, AreaWidth);
+		    L1_MEMORY_CopyColor1(pBuffer, BorderColor, x0 + 6, y0 + i, AreaWidth);
 		
 		if ((d & 0x01) != 0) 
-		    CopyColorIntoBuffer(pBuffer, BorderColor, x0 + 7, y0 + i, AreaWidth);
+		    L1_MEMORY_CopyColor1(pBuffer, BorderColor, x0 + 7, y0 + i, AreaWidth);
 		
 	}
 	
@@ -2405,34 +2406,34 @@ EFI_STATUS DrawAsciiCharIntoBuffer(UINT8 *pBuffer,
 }
 
 // Draw 8 X 16 point
-EFI_STATUS Draw8_16IntoBufferWithWidth(UINT8 *pBuffer,UINT8 d,
+EFI_STATUS L2_GRAPHICS_ChineseHalfDraw(UINT8 *pBuffer,UINT8 d,
         IN UINTN x0, UINTN y0,
         UINT8 width,
         IN EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color, UINT8 fontWidth)
 {
     if ((d & 0x80) != 0) 
-        CopyColorIntoBuffer3(pBuffer, Color, x0 + 0, y0, fontWidth); 
+        L1_MEMORY_CopyColor3(pBuffer, Color, x0 + 0, y0, fontWidth); 
     
     if ((d & 0x40) != 0) 
-        CopyColorIntoBuffer3(pBuffer, Color, x0 + 1, y0, fontWidth );
+        L1_MEMORY_CopyColor3(pBuffer, Color, x0 + 1, y0, fontWidth );
     
     if ((d & 0x20) != 0) 
-        CopyColorIntoBuffer3(pBuffer, Color, x0 + 2, y0, fontWidth );
+        L1_MEMORY_CopyColor3(pBuffer, Color, x0 + 2, y0, fontWidth );
     
     if ((d & 0x10) != 0) 
-        CopyColorIntoBuffer3(pBuffer, Color, x0 + 3, y0, fontWidth );
+        L1_MEMORY_CopyColor3(pBuffer, Color, x0 + 3, y0, fontWidth );
     
     if ((d & 0x08) != 0) 
-        CopyColorIntoBuffer3(pBuffer, Color, x0 + 4, y0, fontWidth );
+        L1_MEMORY_CopyColor3(pBuffer, Color, x0 + 4, y0, fontWidth );
     
     if ((d & 0x04) != 0) 
-        CopyColorIntoBuffer3(pBuffer, Color, x0 + 5, y0, fontWidth );
+        L1_MEMORY_CopyColor3(pBuffer, Color, x0 + 5, y0, fontWidth );
     
     if ((d & 0x02) != 0) 
-        CopyColorIntoBuffer3(pBuffer, Color, x0 + 6, y0, fontWidth );
+        L1_MEMORY_CopyColor3(pBuffer, Color, x0 + 6, y0, fontWidth );
     
     if ((d & 0x01) != 0) 
-        CopyColorIntoBuffer3(pBuffer, Color, x0 + 7, y0, fontWidth );
+        L1_MEMORY_CopyColor3(pBuffer, Color, x0 + 7, y0, fontWidth );
 
 
     return EFI_SUCCESS;
@@ -2440,7 +2441,7 @@ EFI_STATUS Draw8_16IntoBufferWithWidth(UINT8 *pBuffer,UINT8 d,
 
 
 //http://quwei.911cha.com/
-EFI_STATUS DrawChineseCharIntoBuffer(UINT8 *pBuffer,
+EFI_STATUS L2_GRAPHICS_DrawChineseCharIntoBuffer(UINT8 *pBuffer,
         IN UINTN x0, UINTN y0,UINT8 offset,
         IN EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color , UINT16 AreaWidth)
 {
@@ -2453,14 +2454,14 @@ EFI_STATUS DrawChineseCharIntoBuffer(UINT8 *pBuffer,
     
 	for(i = 0; i < 32; i += 2)
 	{
-        Draw8_16IntoBuffer(pBuffer, sChinese[offset][i],     x0,     y0 + i / 2, 1, Color, AreaWidth);		        
-		Draw8_16IntoBuffer(pBuffer, sChinese[offset][i + 1], x0 + 8, y0 + i / 2, 1, Color, AreaWidth);		
+        L2_GRAPHICS_ChineseHalfDra2(pBuffer, sChinese[offset][i],     x0,     y0 + i / 2, 1, Color, AreaWidth);		        
+		L2_GRAPHICS_ChineseHalfDra2(pBuffer, sChinese[offset][i + 1], x0 + 8, y0 + i / 2, 1, Color, AreaWidth);		
 	}
 	
     return EFI_SUCCESS;
 }
 
-EFI_STATUS DrawChineseCharUseBuffer(UINT8 *pBuffer,
+EFI_STATUS L2_GRAPHICS_ChineseCharDraw(UINT8 *pBuffer,
         IN UINTN x0, UINTN y0,UINT8 *c, UINT8 count,
         IN EFI_GRAPHICS_OUTPUT_BLT_PIXEL FontColor, UINT16 AreaWidth)
 {
@@ -2481,8 +2482,8 @@ EFI_STATUS DrawChineseCharUseBuffer(UINT8 *pBuffer,
     {
         for(i = 0; i < 32; i += 2)
         {
-            Draw8_16IntoBufferWithWidth(pBuffer, sChinese[j][i],     x0,     y0 + i / 2, 1, FontColor, AreaWidth);                
-            Draw8_16IntoBufferWithWidth(pBuffer, sChinese[j][i + 1], x0 + 8, y0 + i / 2, 1, FontColor, AreaWidth);        
+            L2_GRAPHICS_ChineseHalfDraw(pBuffer, sChinese[j][i],     x0,     y0 + i / 2, 1, FontColor, AreaWidth);                
+            L2_GRAPHICS_ChineseHalfDraw(pBuffer, sChinese[j][i + 1], x0 + 8, y0 + i / 2, 1, FontColor, AreaWidth);        
         }
         x0 += 16;
     }
@@ -2491,7 +2492,7 @@ EFI_STATUS DrawChineseCharUseBuffer(UINT8 *pBuffer,
 }
 
 // fill into rectangle
-void RectangleFillIntoBuffer(UINT8 *pBuffer,
+void L1_MEMORY_RectangleFill(UINT8 *pBuffer,
         IN UINTN x0, UINTN y0, UINTN x1, UINTN y1, 
         IN UINTN BorderWidth,
         IN EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color)
@@ -2518,7 +2519,7 @@ void RectangleFillIntoBuffer(UINT8 *pBuffer,
 
 }
 
-int isspaceSelf (int c)
+int L1_STRING_IsSpace (int c)
 {
   //
   // <space> ::= [ ]
@@ -2526,7 +2527,7 @@ int isspaceSelf (int c)
   return ((c) == ' ') || ((c) == '\t') || ((c) == '\r') || ((c) == '\n') || ((c) == '\v')  || ((c) == '\f');
 }
 
-int isalnumSelf (int c)
+int L1_STRING_IsAllNumber (int c)
 {
   //
   // <alnum> ::= [0-9] | [a-z] | [A-Z]
@@ -2538,7 +2539,7 @@ int isalnumSelf (int c)
 
 
 int
-toupperSelf(
+L1_STRING_ToUpper(
   IN  int c
   )
 {
@@ -2549,25 +2550,25 @@ toupperSelf(
 }
 
 int
-Digit2ValSelf( int c)
+L1_MATH_DigitToInteger( int c)
 {
   if (((c >= 'a') && (c <= 'z')) || ((c >= 'A') && (c <= 'Z'))) {  /* If c is one of [A-Za-z]... */
-    c = toupperSelf(c) - 7;   // Adjust so 'A' is ('9' + 1)
+    c = L1_STRING_ToUpper(c) - 7;   // Adjust so 'A' is ('9' + 1)
   }
   return c - '0';   // Value returned is between 0 and 35, inclusive.
 }
 
-Network()
+L2_NETWORK_Init()
 {}
 
-VOID Transfer(MasterBootRecord *pSource, MasterBootRecordSwitched *pDest)
+VOID L2_FILE_Transfer(MasterBootRecord *pSource, MasterBootRecordSwitched *pDest)
 {
     pDest->ReservedSelector = pSource->ReservedSelector[0] + pSource->ReservedSelector[1] * 16 * 16;
     pDest->SectorsPerFat    = (UINT16)pSource->SectorsPerFat[0] + (UINT16)(pSource->SectorsPerFat[1]) * 16 * 16 + pSource->SectorsPerFat[2] * 16 * 16 * 16 * 16 + pSource->SectorsPerFat[3] * 16 * 16 * 16 * 16 * 16 * 16;
     pDest->BootPathStartCluster = (UINT16)pSource->BootPathStartCluster[0] + pSource->BootPathStartCluster[1] * 16 * 16 + pSource->BootPathStartCluster[2] * 16 * 16 * 16 * 16, pSource->BootPathStartCluster[3] * 16 * 16 * 16 * 16 * 16 * 16;
     pDest->NumFATS      = pSource->NumFATS[0];
     pDest->SectorOfCluster = pSource->SectorOfCluster[0];
-	DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "ReservedSelector:%d SectorsPerFat:%d BootPathStartCluster: %d NumFATS:%d SectorOfCluster:%d", 
+	L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "ReservedSelector:%d SectorsPerFat:%d BootPathStartCluster: %d NumFATS:%d SectorOfCluster:%d", 
 											    pDest->ReservedSelector,
 											    pDest->SectorsPerFat,
 											    pDest->BootPathStartCluster,
@@ -2575,65 +2576,10 @@ VOID Transfer(MasterBootRecord *pSource, MasterBootRecordSwitched *pDest)
 											    pDest->SectorOfCluster);
 }
 
-
 // all partitions analysis
-EFI_STATUS PartitionAnalysis()
+EFI_STATUS L2_STORE_PartitionAnalysisFSM()
 {    
-    DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d PartitionAnalysisFSM\n", __LINE__);
-    EFI_STATUS Status ;
-    UINTN i;
-    EFI_HANDLE *ControllerHandle = NULL;
-    EFI_DEVICE_PATH_TO_TEXT_PROTOCOL *DevPathToText;
-    
-    Status = gBS->LocateProtocol (&gEfiDevicePathToTextProtocolGuid, NULL, (VOID **) &DevPathToText);
-    //DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
-    if (EFI_ERROR(Status))
-    {
-    	 DEBUG ((EFI_D_INFO, "LocateProtocol1 error: %x\n", Status));    	 
-    	 DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
-        return Status;
-    }
-   
-    Status = gBS->LocateHandleBuffer(ByProtocol, &gEfiDiskIoProtocolGuid, NULL, &PartitionCount, &ControllerHandle);
-    //DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
-    if (EFI_ERROR(Status))
-    {
-        DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);	    
-        return EFI_SUCCESS;
-    }
-
-    for (i = 0; i < PartitionCount; i++)
-    {
-    	//DebugPrint1(350, 16 * 6, "%d: %x\n", __LINE__, Status);
-        EFI_DEVICE_PATH_PROTOCOL *DiskDevicePath;
-        Status = gBS->OpenProtocol(ControllerHandle[i],
-                                   &gEfiDevicePathProtocolGuid,
-                                   (VOID **)&DiskDevicePath,
-                                   gImageHandle, 
-                                   NULL,
-                                   EFI_OPEN_PROTOCOL_GET_PROTOCOL);
-        //DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
-        if (EFI_ERROR(Status))
-        {
-            DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
-            return Status;
-        }
-
-        CHAR16 *TextDevicePath = DevPathToText->ConvertDevicePathToText(DiskDevicePath, TRUE, TRUE);
-		 DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X Partition: %s\n", __LINE__, Status, TextDevicePath);
-		 TextDevicePathAnalysisCHAR16(TextDevicePath, &device[i], i);
-    	            
-        if (TextDevicePath) gBS->FreePool(TextDevicePath);		 
-    }
-    return EFI_SUCCESS;
-}
-
-
-
-// all partitions analysis
-EFI_STATUS PartitionAnalysisFSM()
-{    
-    DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d PartitionAnalysisFSM\n", __LINE__);
+    L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d PartitionAnalysisFSM\n", __LINE__);
     EFI_STATUS Status ;
     UINT8 Buffer1[DISK_BUFFER_SIZE];
     
@@ -2641,18 +2587,18 @@ EFI_STATUS PartitionAnalysisFSM()
 	{
 		if (device[i].DeviceType == 1 && device[i].SectorCount == 915551)
 		{
-        	 Status = ReadDataFromPartition(i, sector_count, 1, Buffer1); 
+        	 Status = L1_STORE_READ(i, sector_count, 1, Buffer1); 
 			 if ( EFI_SUCCESS == Status )
             {
-	            DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
+	            L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
 				  
 			 	  // analysis data area of patition
-			 	  FirstSelectorAnalysis(Buffer1, &MBRSwitched); 
+			 	  L1_FILE_FAT32_FirstSelectorAnalysis(Buffer1, &MBRSwitched); 
 
 			 	  // data sector number start include: reserved selector, fat sectors(usually is 2: fat1 and fat2), and file system boot path start cluster(usually is 2, data block start number is 2)
 			 	  sector_count = MBRSwitched.ReservedSelector + MBRSwitched.SectorsPerFat * MBRSwitched.NumFATS + MBRSwitched.BootPathStartCluster - 2;
 			 	  BlockSize = MBRSwitched.SectorOfCluster * 512;
-	       		  DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: sector_count:%ld BlockSize: %d\n",  __LINE__, sector_count, BlockSize);
+	       		  L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: sector_count:%ld BlockSize: %d\n",  __LINE__, sector_count, BlockSize);
 		     }        	 
             break;
 		 }       
@@ -2662,9 +2608,9 @@ EFI_STATUS PartitionAnalysisFSM()
 }
 
 // analysis a partition 
-EFI_STATUS RootPathAnalysisFSM()
+EFI_STATUS L2_STORE_RootPathAnalysisFSM()
 {
-    DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d RootPathAnalysisFSM\n", __LINE__);
+    L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d RootPathAnalysisFSM\n", __LINE__);
     EFI_STATUS Status ;
     UINT8 Buffer1[DISK_BUFFER_SIZE];
     
@@ -2672,18 +2618,18 @@ EFI_STATUS RootPathAnalysisFSM()
     {
         if (device[i].DeviceType == 1 && device[i].SectorCount == 915551)
         {
-            Status = ReadDataFromPartition(i, sector_count, 1, Buffer1); 
+            Status = L1_STORE_READ(i, sector_count, 1, Buffer1); 
             if ( EFI_SUCCESS == Status )
             {
-                 //DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X\n", __LINE__, Status);
+                 //L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X\n", __LINE__, Status);
                   
                   //When get root path data sector start number, we can get content of root path.
-				 	RootPathAnalysis(Buffer1);	
+				 	L1_FILE_RootPathAnalysis(Buffer1);	
 
 					// data area start from 1824, HZK16 file start from 	FileBlockStart	block, so need to convert into sector by multi 8, block start number is 2 	
 					// next state is to read FAT table
 				 	sector_count = MBRSwitched.ReservedSelector;
-				 	//DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: sector_count:%ld FileLength: %d MBRSwitched.ReservedSelector:%ld\n",  __LINE__, sector_count, FileLength, MBRSwitched.ReservedSelector);
+				 	//L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: sector_count:%ld FileLength: %d MBRSwitched.ReservedSelector:%ld\n",  __LINE__, sector_count, FileLength, MBRSwitched.ReservedSelector);
              }           
             break;
          }       
@@ -2693,9 +2639,9 @@ EFI_STATUS RootPathAnalysisFSM()
 }
 
 // 
-EFI_STATUS GetFatTableFSM()
+EFI_STATUS L2_STORE_GetFatTableFSM()
 {    
-    //DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d GetFatTableFSM\n", __LINE__);
+    //L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d GetFatTableFSM\n", __LINE__);
     EFI_STATUS Status ;
     if (NULL != FAT32_Table)
     {
@@ -2714,22 +2660,22 @@ EFI_STATUS GetFatTableFSM()
         {
         	 //start block need to recompute depends on file block start number 
         	 //FileBlockStart;
-        	 DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d MBRSwitched.SectorsPerFat: %d\n", __LINE__, MBRSwitched.SectorsPerFat);
+        	 L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d MBRSwitched.SectorsPerFat: %d\n", __LINE__, MBRSwitched.SectorsPerFat);
             
              // 512 = 16 * 32 = 4 item * 32
             FAT32_Table = (UINT8 *)AllocateZeroPool(DISK_BUFFER_SIZE * MBRSwitched.SectorsPerFat);
              if (NULL == FAT32_Table)
              {
-                 DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: NULL == FAT32_Table\n", __LINE__);                             
+                 L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: NULL == FAT32_Table\n", __LINE__);                             
              }             
         	 
-            Status = ReadDataFromPartition(i, sector_count,  MBRSwitched.SectorsPerFat, FAT32_Table); 
+            Status = L1_STORE_READ(i, sector_count,  MBRSwitched.SectorsPerFat, FAT32_Table); 
             if ( EFI_SUCCESS == Status )
             {
                 //CopyMem(FAT32_Table, Buffer1, DISK_BUFFER_SIZE * MBRSwitched.SectorsPerFat);
 				  for (int j = 0; j < 250; j++)
 				  {
-				  		//DebugPrint1(DISK_READ_BUFFER_X + (j % 16) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 16), "%02X ", Buffer1[j] & 0xff);
+				  		//L2_DEBUG_Print1(DISK_READ_BUFFER_X + (j % 16) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 16), "%02X ", Buffer1[j] & 0xff);
 				  }
 
 				  // start sector of file
@@ -2737,7 +2683,7 @@ EFI_STATUS GetFatTableFSM()
 
 				  // for FAT32_Table get next block number
 				  PreviousBlockNumber = FileBlockStart;
-				  //DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: sector_count:%ld FileLength: %d PreviousBlockNumber: %d\n",  __LINE__, sector_count, FileLength, PreviousBlockNumber);
+				  //L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: sector_count:%ld FileLength: %d PreviousBlockNumber: %d\n",  __LINE__, sector_count, FileLength, PreviousBlockNumber);
              }           
             break;
          }       
@@ -2746,16 +2692,16 @@ EFI_STATUS GetFatTableFSM()
     return EFI_SUCCESS;
 }
 
-UINT32 GetNextBlockNumber()
+UINT32 L2_FILE_GetNextBlockNumber()
 {
-	DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: PreviousBlockNumber: %d\n",  __LINE__, PreviousBlockNumber);
+	L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: PreviousBlockNumber: %d\n",  __LINE__, PreviousBlockNumber);
 	
 	if (FAT32_Table[PreviousBlockNumber * 4] == 0xff 
 	    && FAT32_Table[PreviousBlockNumber * 4 + 1] == 0xff 
 	    && FAT32_Table[PreviousBlockNumber * 4 + 2] == 0xff 
 	    && FAT32_Table[PreviousBlockNumber * 4 + 3] == 0x0f)
 	{
-		DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: PreviousBlockNumber: %d, PreviousBlockNumber: %llX\n",  __LINE__, PreviousBlockNumber, 0x0fffffff);
+		L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: PreviousBlockNumber: %d, PreviousBlockNumber: %llX\n",  __LINE__, PreviousBlockNumber, 0x0fffffff);
 		return 0x0fffffff;
 	}
 	
@@ -2764,16 +2710,16 @@ UINT32 GetNextBlockNumber()
 
 EFI_STATUS ChineseCharArrayInit()
 {
-	//DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: ChineseCharArrayInit\n",  __LINE__);
+	//L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: ChineseCharArrayInit\n",  __LINE__);
 	DEBUG ((EFI_D_INFO, "%d ChineseCharArrayInit\n", __LINE__));
     // 87 line, 96 Chinese char each line, 32 Char each Chinese char
 	
     
-    //DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: ChineseCharArrayInit finished...\n",  __LINE__);
+    //L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: ChineseCharArrayInit finished...\n",  __LINE__);
 	return EFI_SUCCESS;
 }
 
-void *memcopy(UINT8 *dest, const UINT8 *src, UINT8 count)
+void *L1_MEMORY_Copy(UINT8 *dest, const UINT8 *src, UINT8 count)
 {
 	UINT8 *d;
 	const UINT8 *s;
@@ -2787,9 +2733,9 @@ void *memcopy(UINT8 *dest, const UINT8 *src, UINT8 count)
 }
 //https://blog.csdn.net/goodwillyang/article/details/45559925
 
-EFI_STATUS ReadFileFSM()
+EFI_STATUS L2_STORE_ReadFileFSM()
 {    
-    DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d ReadFileFSM: PartitionCount: %d FileLength: %d\n", __LINE__, PartitionCount, FileLength);
+    L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d ReadFileFSM: PartitionCount: %d FileLength: %d\n", __LINE__, PartitionCount, FileLength);
     //DEBUG ((EFI_D_INFO, "PartitionUSBRead!!\r\n"));
     EFI_STATUS Status ;
     UINT8 BufferBlock[DISK_BLOCK_BUFFER_SIZE];
@@ -2802,16 +2748,16 @@ EFI_STATUS ReadFileFSM()
     	    // Read file content from FAT32(USB), minimum unit is block
     	    for (UINT16 k = 0; k < FileLength / (512 * 8); k++)
     	 	{
-        	 	Status = ReadDataFromPartition(i, sector_count, 8, BufferBlock); 
+        	 	Status = L1_STORE_READ(i, sector_count, 8, BufferBlock); 
 				if (EFI_ERROR(Status))
 			    {
-			    	DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d Status: %X\n", __LINE__, Status);
+			    	L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d Status: %X\n", __LINE__, Status);
 			    	return Status;
 			    }        	 	
 				
 			     ChineseCharArrayInit();
 			     
-                //DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: HZK16FileReadCount: %d DISK_BLOCK_BUFFER_SIZE: %d\n", __LINE__, HZK16FileReadCount, DISK_BLOCK_BUFFER_SIZE);
+                //L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: HZK16FileReadCount: %d DISK_BLOCK_BUFFER_SIZE: %d\n", __LINE__, HZK16FileReadCount, DISK_BLOCK_BUFFER_SIZE);
 
 				  //Copy buffer to ChineseBuffer
 				  if (pReadFileDestBuffer != NULL)
@@ -2822,14 +2768,14 @@ EFI_STATUS ReadFileFSM()
 				  
 				  for (int j = 0; j < 250; j++)
 				  {
-				  		//DebugPrint1(DISK_READ_BUFFER_X + (j % 32) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 32), "%02X ", BufferBlock[j] & 0xff);
+				  		//L2_DEBUG_Print1(DISK_READ_BUFFER_X + (j % 32) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 32), "%02X ", BufferBlock[j] & 0xff);
 				  }
 				  
 				  FileReadCount++;
-				  UINT32 NextBlockNumber = GetNextBlockNumber();
+				  UINT32 NextBlockNumber = L2_FILE_GetNextBlockNumber();
 		 	 	  sector_count = MBRSwitched.ReservedSelector + MBRSwitched.SectorsPerFat * MBRSwitched.NumFATS + MBRSwitched.BootPathStartCluster - 2 + (NextBlockNumber - 2) * 8;
 		 	 	  PreviousBlockNumber = NextBlockNumber;
-		 	 	  DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: NextBlockNumber: %llu\n",  __LINE__, NextBlockNumber);
+		 	 	  L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: NextBlockNumber: %llu\n",  __LINE__, NextBlockNumber);
 			 }
 			 
 			break;
@@ -2842,23 +2788,23 @@ EFI_STATUS ReadFileFSM()
 
 STATE_TRANS StatusTransitionTable[] =
 {
-	{ INIT_STATE,                READ_PATITION_EVENT,   GET_PARTITION_INFO_STATE, PartitionAnalysisFSM},
-	{ GET_PARTITION_INFO_STATE,  READ_ROOT_PATH_EVENT,  GET_ROOT_PATH_INFO_STATE, RootPathAnalysisFSM},
-	{ GET_ROOT_PATH_INFO_STATE,  READ_FAT_TABLE_EVENT,  GET_FAT_TABLE_STATE,      GetFatTableFSM},
-	{ GET_FAT_TABLE_STATE,       READ_FILE_EVENT,       READ_FILE_STATE,          ReadFileFSM},
-	{ READ_FILE_STATE,           READ_FILE_EVENT,       READ_FILE_STATE,          ReadFileFSM },
+	{ INIT_STATE,                READ_PATITION_EVENT,   GET_PARTITION_INFO_STATE, L2_STORE_PartitionAnalysisFSM},
+	{ GET_PARTITION_INFO_STATE,  READ_ROOT_PATH_EVENT,  GET_ROOT_PATH_INFO_STATE, L2_STORE_RootPathAnalysisFSM},
+	{ GET_ROOT_PATH_INFO_STATE,  READ_FAT_TABLE_EVENT,  GET_FAT_TABLE_STATE,      L2_STORE_PartitionAnalysisFSM},
+	{ GET_FAT_TABLE_STATE,       READ_FILE_EVENT,       READ_FILE_STATE,          L2_STORE_ReadFileFSM},
+	{ READ_FILE_STATE,           READ_FILE_EVENT,       READ_FILE_STATE,          L2_STORE_ReadFileFSM },
 };
 
-int FileReadFSM(EVENT event)
+int L2_STORE_FileRead(EVENT event)
 {
     EFI_STATUS Status;
     
 	if (FileReadCount > FileLength / (512 * 8))
 	{
-		DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
+		L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
 		return;
 	}
-	DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: FileReadFSM current event: %d, NextState: %d table event:%d table NextState: %d\n", 
+	L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: FileReadFSM current event: %d, NextState: %d table event:%d table NextState: %d\n", 
 							  __LINE__, 
                             event, 
                             NextState,
@@ -2867,28 +2813,28 @@ int FileReadFSM(EVENT event)
     
 	if ( event == StatusTransitionTable[NextState].event )
 	{
-		DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
+		L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
 		StatusTransitionTable[NextState].pFunc();
 		NextState = StatusTransitionTable[NextState].NextState;
 	}
 	else  
 	{
-		DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
+		L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
 		NextState = INIT_STATE;
 	}
 
-	DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
+	L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
 	StatusErrorCount++;
 }
 
 
-VOID EFIAPI TimeSlice(
+VOID EFIAPI L2_TIMER_Slice(
 	IN EFI_EVENT Event,
 	IN VOID           *Context
 	)
 {
-    //DebugPrint1(0, 5 * 16, "%d TimeSlice %x %lu \n", __LINE__, Context, *((UINT32 *)Context));
-    //DebugPrint1(0, 6 * 16, "%d TimerSliceCount: %lu \n", __LINE__, TimerSliceCount);
+    //L2_DEBUG_Print1(0, 5 * 16, "%d TimeSlice %x %lu \n", __LINE__, Context, *((UINT32 *)Context));
+    //L2_DEBUG_Print1(0, 6 * 16, "%d TimerSliceCount: %lu \n", __LINE__, TimerSliceCount);
     //Print(L"%lu\n", *((UINT32 *)Context));
     if (TimerSliceCount % 2 == 0)
        gBS->SignalEvent (MultiTaskTriggerGroup1Event);
@@ -2903,7 +2849,7 @@ VOID EFIAPI TimeSlice(
 	return;
 }
 
-EFI_STATUS MouseInit()
+EFI_STATUS L2_MOUSE_Init()
 {
 	EFI_STATUS                         Status;
 	EFI_HANDLE                         *PointerHandleBuffer = NULL;
@@ -2941,7 +2887,7 @@ EFI_STATUS MouseInit()
 }
 
 
-float MemoryParameterGet2()
+float L2_MEMORY_GETs()
 {  
 	EFI_STATUS                           Status;
 	UINT8                                TmpMemoryMap[1];
@@ -2968,7 +2914,7 @@ float MemoryParameterGet2()
 			                    &MapKey,
 			                    &DescriptorSize,
 			                    &DescriptorVersion);
-	//DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);			
+	//L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);			
 	DEBUG ((EFI_D_INFO, "%d:  Status:%X \n", __LINE__, Status));
     ASSERT (Status == EFI_BUFFER_TOO_SMALL);
     //
@@ -2979,7 +2925,7 @@ float MemoryParameterGet2()
 			                    MemoryMapSize,
 			                    (VOID **) &MemoryMap);
     ASSERT_EFI_ERROR (Status);
-    //DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
+    //L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
     	
 	DEBUG ((EFI_D_INFO, "%d:  Status:%X \n", __LINE__, Status));
     //
@@ -2991,7 +2937,7 @@ float MemoryParameterGet2()
 			                    &DescriptorSize,
 			                    &DescriptorVersion);
     ASSERT_EFI_ERROR (Status);
-    //DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
+    //L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
     	
 	DEBUG ((EFI_D_INFO, "%d:  Status:%X \n", __LINE__, Status));
     
@@ -3003,7 +2949,7 @@ float MemoryParameterGet2()
     for (Index = 0; Index < (MemoryMapSize / DescriptorSize); Index++) 
     {
     	E820Type = 0;
-      //DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Index:%X \n", __LINE__, Index);
+      //L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Index:%X \n", __LINE__, Index);
       	
 	  //DEBUG ((EFI_D_INFO, "%d:  Status:%X \n", __LINE__, Status));
     
@@ -3060,7 +3006,7 @@ float MemoryParameterGet2()
 		        continue;		  
       }
     
-      	/*DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: %d: E820Type:%X Start:%X Number:%X End: %X\n", __LINE__, 
+      	/*L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: %d: E820Type:%X Start:%X Number:%X End: %X\n", __LINE__, 
       	  																	Index,
       	  																	E820Type, 
       	  																	MemoryMap->PhysicalStart, 
@@ -3078,7 +3024,7 @@ float MemoryParameterGet2()
 		MemoryMap = (EFI_MEMORY_DESCRIPTOR *)((UINTN)MemoryMap + DescriptorSize);
     }
 
-    DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: %d: (MemoryMapSize / DescriptorSize):%X MemoryClassifySize[0]:%d %d %d %d %d %d \n", __LINE__,
+    L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: %d: (MemoryMapSize / DescriptorSize):%X MemoryClassifySize[0]:%d %d %d %d %d %d \n", __LINE__,
     																		    Index,
                                                                         (MemoryMapSize / DescriptorSize),
                                                                         MemoryClassifySize[0],
@@ -3091,7 +3037,7 @@ float MemoryParameterGet2()
 	return  MemoryClassifySize[3];                                                                    
 }
 
-char *float2str(float val, int precision, char *buf)
+char *L1_STRING_FloatToString(float val, int precision, char *buf)
 {
     char *cur, *end;
     float temp = 0;
@@ -3125,9 +3071,9 @@ char *float2str(float val, int precision, char *buf)
 
 
 
-EFI_STATUS WindowCreateUseBuffer(UINT8 *pBuffer, UINT8 *pParent, UINT16 Width, UINT16 Height, UINT16 Type, CHAR8 *pWindowTitle)
+EFI_STATUS L3_WINDOW_Create(UINT8 *pBuffer, UINT8 *pParent, UINT16 Width, UINT16 Height, UINT16 Type, CHAR8 *pWindowTitle)
 {	
-    DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Width: %d \n", __LINE__, Width);
+    L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Width: %d \n", __LINE__, Width);
 	
 	UINT16 i, j;
 
@@ -3145,10 +3091,10 @@ EFI_STATUS WindowCreateUseBuffer(UINT8 *pBuffer, UINT8 *pParent, UINT16 Width, U
 	Color.Reserved = GRAPHICS_LAYER_MY_COMPUTER;
 
     // wo de dian nao
-    DrawChineseCharIntoBuffer2(pBuffer, 3, 6,          (46 - 1 ) * 94 + 50 - 1, Color, Width);    
-    DrawChineseCharIntoBuffer2(pBuffer, 3 + 16 , 6,     (21 - 1) * 94 + 36 - 1, Color, Width);
-    DrawChineseCharIntoBuffer2(pBuffer, 3 + 16 * 2, 6, (21 - 1) * 94 + 71 - 1, Color, Width);
-    DrawChineseCharIntoBuffer2(pBuffer, 3 + 16 * 3, 6, (36 - 1) * 94 + 52 - 1, Color, Width);
+    L2_GRAPHICS_ChineseCharDraw2(pBuffer, 3, 6,          (46 - 1 ) * 94 + 50 - 1, Color, Width);    
+    L2_GRAPHICS_ChineseCharDraw2(pBuffer, 3 + 16 , 6,     (21 - 1) * 94 + 36 - 1, Color, Width);
+    L2_GRAPHICS_ChineseCharDraw2(pBuffer, 3 + 16 * 2, 6, (21 - 1) * 94 + 71 - 1, Color, Width);
+    L2_GRAPHICS_ChineseCharDraw2(pBuffer, 3 + 16 * 3, 6, (36 - 1) * 94 + 52 - 1, Color, Width);
 
     // The Left of Window
 	for (i = 23; i < Height; i++)
@@ -3187,24 +3133,24 @@ EFI_STATUS WindowCreateUseBuffer(UINT8 *pBuffer, UINT8 *pParent, UINT16 Width, U
 		if (device[i].DeviceType == 2)
 		{
 			//
-			DrawChineseCharIntoBuffer2(pBuffer, x, y,          (20 - 1 ) * 94 + 37 - 1, Color, Width); 
+			L2_GRAPHICS_ChineseCharDraw2(pBuffer, x, y,          (20 - 1 ) * 94 + 37 - 1, Color, Width); 
 			x += 16;
 		}
 		else
 		{
 			// U pan
-			DrawChineseCharIntoBuffer2(pBuffer, x, y,          (51 - 1 ) * 94 + 37 - 1, Color, Width); 
+			L2_GRAPHICS_ChineseCharDraw2(pBuffer, x, y,          (51 - 1 ) * 94 + 37 - 1, Color, Width); 
 			x += 16;
 		}	
 		//pan
-		DrawChineseCharIntoBuffer2(pBuffer, x, y,          (37 - 1 ) * 94 + 44 - 1, Color, Width); 
+		L2_GRAPHICS_ChineseCharDraw2(pBuffer, x, y,          (37 - 1 ) * 94 + 44 - 1, Color, Width); 
 		x += 16;
 
 		//  2354 分 3988 区
-		DrawChineseCharIntoBuffer2(pBuffer, x, y,          (23 - 1 ) * 94 + 54 - 1, Color, Width);    
+		L2_GRAPHICS_ChineseCharDraw2(pBuffer, x, y,          (23 - 1 ) * 94 + 54 - 1, Color, Width);    
 		x += 16;
 		
-		DrawChineseCharIntoBuffer2(pBuffer, x, y,          (39 - 1 ) * 94 + 88 - 1, Color, Width);   
+		L2_GRAPHICS_ChineseCharDraw2(pBuffer, x, y,          (39 - 1 ) * 94 + 88 - 1, Color, Width);   
 		x += 16;
 
 		// 5027
@@ -3215,17 +3161,17 @@ EFI_STATUS WindowCreateUseBuffer(UINT8 *pBuffer, UINT8 *pParent, UINT16 Width, U
 		// 三
 		if (device[i].PartitionID == 1)
 		{
-			DrawChineseCharIntoBuffer2(pBuffer, x, y,          (50 - 1 ) * 94 + 27 - 1, Color, Width);   
+			L2_GRAPHICS_ChineseCharDraw2(pBuffer, x, y,          (50 - 1 ) * 94 + 27 - 1, Color, Width);   
 			x += 16;
 		}
 		else if (device[i].PartitionID == 2)
 		{
-			DrawChineseCharIntoBuffer2(pBuffer, x, y,          (22 - 1 ) * 94 + 94 - 1, Color, Width);   
+			L2_GRAPHICS_ChineseCharDraw2(pBuffer, x, y,          (22 - 1 ) * 94 + 94 - 1, Color, Width);   
 			x += 16;
 		}
 		else if (device[i].PartitionID == 3)
 		{
-			DrawChineseCharIntoBuffer2(pBuffer, x, y,          (40 - 1 ) * 94 + 93 - 1, Color, Width);   
+			L2_GRAPHICS_ChineseCharDraw2(pBuffer, x, y,          (40 - 1 ) * 94 + 93 - 1, Color, Width);   
 			x += 16;
 		}
 		
@@ -3242,14 +3188,14 @@ EFI_STATUS WindowCreateUseBuffer(UINT8 *pBuffer, UINT8 *pParent, UINT16 Width, U
 		//大
 		//4801
 		//小
-		DrawChineseCharIntoBuffer2(pBuffer, x, y,          (20 - 1 ) * 94 + 83 - 1, Color, Width);  
+		L2_GRAPHICS_ChineseCharDraw2(pBuffer, x, y,          (20 - 1 ) * 94 + 83 - 1, Color, Width);  
 		x += 16;
 		
-		DrawChineseCharIntoBuffer2(pBuffer, x, y,          (48 - 1 ) * 94 + 1 - 1, Color, Width);  
+		L2_GRAPHICS_ChineseCharDraw2(pBuffer, x, y,          (48 - 1 ) * 94 + 1 - 1, Color, Width);  
 		x += 16;
 
 		//CHAR16 s[4] = L"大";
-		DebugPrint2(x, y, pBuffer, "%d%a", size, sizePostfix);
+		L2_DEBUG_Print2(x, y, pBuffer, "%d%a", size, sizePostfix);
 
 	}
 	
@@ -3261,31 +3207,31 @@ EFI_STATUS WindowCreateUseBuffer(UINT8 *pBuffer, UINT8 *pParent, UINT16 Width, U
 	//内
 	//2070
 	//存
-	DrawChineseCharIntoBuffer2(pBuffer, x, y,          (36 - 1 ) * 94 + 58 - 1, Color, Width);  
+	L2_GRAPHICS_ChineseCharDraw2(pBuffer, x, y,          (36 - 1 ) * 94 + 58 - 1, Color, Width);  
 	x += 16;
 	
-	DrawChineseCharIntoBuffer2(pBuffer, x, y,          (20 - 1 ) * 94 + 70 - 1, Color, Width);  
+	L2_GRAPHICS_ChineseCharDraw2(pBuffer, x, y,          (20 - 1 ) * 94 + 70 - 1, Color, Width);  
 	x += 16;
 	
 	// Get memory infomation
 	//x = 0;
 	// Note: the other class memory can not use
-	float size = (float)MemoryParameterGet2();
+	float size = (float)L2_MEMORY_GETs();
 	size = size * 4;
 	size = size / (1024 * 1024);
 	CHAR8 buf[7] = {0};
-	DebugPrint2(x, y, pBuffer, "%a", float2str(size, 3, buf));
+	L2_DEBUG_Print2(x, y, pBuffer, "%a", L1_STRING_FloatToString(size, 3, buf));
 	x += 5 * 8;
 
 	//g
-	DrawChineseCharIntoBuffer2(pBuffer, x, y,          (28 - 1 ) * 94 + 10 - 1, Color, Width);  
+	L2_GRAPHICS_ChineseCharDraw2(pBuffer, x, y,          (28 - 1 ) * 94 + 10 - 1, Color, Width);  
 	x += 16;
 	return EFI_SUCCESS;
 }
 
 
 
-VOID MyComputerWindow(UINT16 StartX, UINT16 StartY)
+VOID L3_APPLICATION_MyComputerWindow(UINT16 StartX, UINT16 StartY)
 {
 	UINT8 *pParent;
 	UINT16 Type;
@@ -3298,20 +3244,20 @@ VOID MyComputerWindow(UINT16 StartX, UINT16 StartY)
 		return;
 	}
 	
-    DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: MyComputerWidth: %d \n", __LINE__, MyComputerWidth);
-	WindowCreateUseBuffer(pMyComputerBuffer, pParent, MyComputerWidth, MyComputerHeight, Type, pWindowTitle);
+    L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: MyComputerWidth: %d \n", __LINE__, MyComputerWidth);
+	L3_WINDOW_Create(pMyComputerBuffer, pParent, MyComputerWidth, MyComputerHeight, Type, pWindowTitle);
 }
 
-EFI_STATUS ReadFileSelf(UINT8 *FileName, UINT8 NameLength, UINT8 *pBuffer)
+EFI_STATUS L3_APPLICATION_ReadFile(UINT8 *FileName, UINT8 NameLength, UINT8 *pBuffer)
 {
-	DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: FileName: %a \n", __LINE__, FileName);
+	L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: FileName: %a \n", __LINE__, FileName);
 	if (pBuffer == NULL)
 	{
-		DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d:  \n", __LINE__);
+		L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d:  \n", __LINE__);
 		return -1;
 	}
 	
-	memcopy(ReadFileName, FileName, NameLength);
+	L1_MEMORY_Copy(ReadFileName, FileName, NameLength);
 	pReadFileDestBuffer = pBuffer;
 	ReadFileNameLength = NameLength;
 
@@ -3324,9 +3270,9 @@ EFI_STATUS ReadFileSelf(UINT8 *FileName, UINT8 NameLength, UINT8 *pBuffer)
 
 	for (int i = 0; i < 5; i++)
     {
-    	DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: i: %d \n", __LINE__, i);
+    	L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: i: %d \n", __LINE__, i);
 		DEBUG ((EFI_D_INFO, "%d HandleEnterPressed FSM_Event: %d\n", __LINE__, READ_FILE_FSM_Event));
-	    FileReadFSM(READ_FILE_FSM_Event++);
+	    L2_STORE_FileRead(READ_FILE_FSM_Event++);
 
 	    if (READ_FILE_EVENT <= READ_FILE_FSM_Event)
 	    	READ_FILE_FSM_Event = READ_FILE_EVENT;
@@ -3336,7 +3282,7 @@ EFI_STATUS ReadFileSelf(UINT8 *FileName, UINT8 NameLength, UINT8 *pBuffer)
 }
 
 
-EFIAPI HandleEnterPressed()
+EFIAPI L2_KEYBOARD_KeyPressed()
 {
 	DEBUG ((EFI_D_INFO, "%d HandleEnterPressed\n", __LINE__));
 	
@@ -3351,7 +3297,7 @@ EFIAPI HandleEnterPressed()
 STATIC
 VOID
 EFIAPI
-HandleKeyboardEvent (
+L2_KEYBOARD_Event (
   IN EFI_EVENT Event,
   IN VOID      *Context
   )
@@ -3384,7 +3330,7 @@ HandleKeyboardEvent (
 						                );    
     if(EFI_ERROR (Status))
         return ;
-    //DebugPrint1(DISPLAY_X, DISPLAY_Y, "%d:HandleKeyboardEvent \n", __LINE__);
+    //L2_DEBUG_Print1(DISPLAY_X, DISPLAY_Y, "%d:HandleKeyboardEvent \n", __LINE__);
     for (HandleIndex = 0; HandleIndex < HandleCount; HandleIndex++) 
     {
 		Status = gBS->HandleProtocol (Handles[HandleIndex], &gEfiSimpleTextInputExProtocolGuid, (VOID **) &SimpleEx);
@@ -3421,7 +3367,7 @@ HandleKeyboardEvent (
                    display_sector_number = 0;                     
                }
                
-               DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: uniChar: %d display_sector_number: %d \n", __LINE__, uniChar, display_sector_number);
+               L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: uniChar: %d display_sector_number: %d \n", __LINE__, uniChar, display_sector_number);
                
 
 			    // Enter pressed
@@ -3429,13 +3375,13 @@ HandleKeyboardEvent (
 		     	 {
 		        	keyboard_input_count = 0;
 		        	memset(pKeyboardInputBuffer, '\0', KEYBOARD_BUFFER_LENGTH);
-		     	 	//DebugPrint1(DISPLAY_KEYBOARD_X, DISPLAY_KEYBOARD_Y, "%a keyboard_input_count: %04d enter pressed", pKeyboardInputBuffer, keyboard_input_count);
+		     	 	//L2_DEBUG_Print1(DISPLAY_KEYBOARD_X, DISPLAY_KEYBOARD_Y, "%a keyboard_input_count: %04d enter pressed", pKeyboardInputBuffer, keyboard_input_count);
 
-		     	 	HandleEnterPressed();
+		     	 	L2_KEYBOARD_KeyPressed();
 		     	 }
 		     	 else
 		     	 {
-		     	 	DebugPrint1(DISPLAY_KEYBOARD_X, DISPLAY_KEYBOARD_Y, "%a keyboard_input_count: %04d ", pKeyboardInputBuffer, keyboard_input_count);
+		     	 	L2_DEBUG_Print1(DISPLAY_KEYBOARD_X, DISPLAY_KEYBOARD_Y, "%a keyboard_input_count: %04d ", pKeyboardInputBuffer, keyboard_input_count);
 		     	 }
 			}
 		}    
@@ -3443,12 +3389,12 @@ HandleKeyboardEvent (
 	
 	 //DrawAsciiCharUseBuffer(pDeskBuffer, DISPLAY_KEYBOARD_X, DISPLAY_KEYBOARD_Y, uniChar, Color);
 	 
-	 GraphicsLayerCompute(iMouseX, iMouseY, 0);
+	 L2_GRAPHICS_LayerCompute(iMouseX, iMouseY, 0);
 }
 
  // iMouseX: left top
  // iMouseY: left top
- VOID HandleMouseRightClick(int iMouseX, int iMouseY)
+ VOID L2_GRAPHICS_RightClickMenu(int iMouseX, int iMouseY)
  {
      INT16 i;    
      UINT16 width = 100;
@@ -3484,10 +3430,10 @@ HandleKeyboardEvent (
 STATIC
 VOID
 EFIAPI
-HandleMouseEvent (IN EFI_EVENT Event, IN VOID *Context)
+L2_MOUSE_Event (IN EFI_EVENT Event, IN VOID *Context)
 {
 	mouse_count++;
-	//DebugPrint1(DISPLAY_X, DISPLAY_Y, "%d: HandleMouseEvent\n", __LINE__);
+	//L2_DEBUG_Print1(DISPLAY_X, DISPLAY_Y, "%d: HandleMouseEvent\n", __LINE__);
     EFI_STATUS Status;
 	UINTN Index;
 	EFI_SIMPLE_POINTER_STATE State;
@@ -3529,7 +3475,7 @@ HandleMouseEvent (IN EFI_EVENT Event, IN VOID *Context)
     }
 
     //DEBUG ((EFI_D_INFO, "X: %X, Y: %X ", x_move, y_move));
-    DebugPrint1(DISPLAY_MOUSE_X, DISPLAY_MOUSE_Y, "X: %04d, Y: %04d Increment X: %X Y: %X", iMouseX, iMouseY, x_move, y_move );
+    L2_DEBUG_Print1(DISPLAY_MOUSE_X, DISPLAY_MOUSE_Y, "X: %04d, Y: %04d Increment X: %X Y: %X", iMouseX, iMouseY, x_move, y_move );
     
     iMouseX = iMouseX + x_move * 3;
     iMouseY = iMouseY + y_move * 3; 
@@ -3551,7 +3497,7 @@ HandleMouseEvent (IN EFI_EVENT Event, IN VOID *Context)
     {
         DEBUG ((EFI_D_INFO, "Left button clicked\n"));
         
-	    HandleMouseRightClick(iMouseX, iMouseY);
+	    L2_GRAPHICS_RightClickMenu(iMouseX, iMouseY);
 
 		if (MouseClickFlag == 0)
 		    MouseClickFlag = 1;
@@ -3565,13 +3511,13 @@ HandleMouseEvent (IN EFI_EVENT Event, IN VOID *Context)
         DEBUG ((EFI_D_INFO, "Right button clicked\n"));
 	    //DrawAsciiCharUseBuffer(GraphicsOutput, 20 + process2_i * 8 + 16, 60, 'R', Color);
 
-	    HandleMouseRightClick(iMouseX, iMouseY);
+	    L2_GRAPHICS_RightClickMenu(iMouseX, iMouseY);
 	    
 	    MouseClickFlag = 2;
     }
-    //DebugPrint1(DISPLAY_X, DISPLAY_Y, "%d: HandleMouseEvent\n", __LINE__);
+    //L2_DEBUG_Print1(DISPLAY_X, DISPLAY_Y, "%d: HandleMouseEvent\n", __LINE__);
     //DEBUG ((EFI_D_INFO, "\n"));
-    GraphicsLayerMouseMove();
+    L2_MOUSE_Move();
 	
 	gBS->WaitForEvent( 1, &gMouse->WaitForInput, &Index );
 }
@@ -3580,22 +3526,7 @@ HandleMouseEvent (IN EFI_EVENT Event, IN VOID *Context)
 STATIC
 VOID
 EFIAPI
-SystemParameterRead (
-  IN EFI_EVENT Event,
-  IN VOID      *Context
-  )
-{	
-	parameter_count++;
-	//DebugPrint1(DISPLAY_X, DISPLAY_Y, "%d: SystemParameterRead\n", __LINE__);
-	//ShellServiceRead();
-	//MemoryParameterGet();
-}
-
-// display system date & time
-STATIC
-VOID
-EFIAPI
-DisplaySystemDateTime (
+L2_TIMER_Print (
   IN EFI_EVENT Event,
   IN VOID      *Context
   )
@@ -3604,10 +3535,10 @@ DisplaySystemDateTime (
 	date_time_count++;
 	gRT->GetTime(&et, NULL);
 	
-	DebugPrint1(DISPLAY_DESK_DATE_TIME_X, DISPLAY_DESK_DATE_TIME_Y, "%04d-%02d-%02d %02d:%02d:%02d", 
+	L2_DEBUG_Print1(DISPLAY_DESK_DATE_TIME_X, DISPLAY_DESK_DATE_TIME_Y, "%04d-%02d-%02d %02d:%02d:%02d", 
 				  et.Year, et.Month, et.Day, et.Hour, et.Minute, et.Second);
 	
-   DebugPrint1(DISPLAY_DESK_HEIGHT_WEIGHT_X, DISPLAY_DESK_HEIGHT_WEIGHT_Y, "%d ScreenWidth:%d, ScreenHeight:%d\n", __LINE__, ScreenWidth, ScreenHeight);
+   L2_DEBUG_Print1(DISPLAY_DESK_HEIGHT_WEIGHT_X, DISPLAY_DESK_HEIGHT_WEIGHT_Y, "%d ScreenWidth:%d, ScreenHeight:%d\n", __LINE__, ScreenWidth, ScreenHeight);
    /*
    GraphicsOutput->Blt(GraphicsOutput, 
 			            (EFI_GRAPHICS_OUTPUT_BLT_PIXEL *) pDateTimeBuffer,
@@ -3617,7 +3548,7 @@ DisplaySystemDateTime (
 			            8 * 50, 16, 0);*/
 }
 
-EFI_STATUS MultiProcessInit ()
+EFI_STATUS L2_COMMON_MultiProcessInit ()
 {
     UINT16 i;
 
@@ -3627,13 +3558,13 @@ EFI_STATUS MultiProcessInit ()
     // task group for display date time
 	EFI_GUID gMultiProcessGroup2Guid  = { 0x0579257E, 0x1843, 0x45FB, { 0x83, 0x9D, 0x6B, 0x79, 0x09, 0x38, 0x29, 0xAA } };
 	
-	//DrawChineseCharIntoBuffer2(pMouseBuffer, 0, 0, 11 * 94 + 42, Color, 16);
+	//L2_GRAPHICS_ChineseCharDraw2(pMouseBuffer, 0, 0, 11 * 94 + 42, Color, 16);
 	
     //DrawChineseCharIntoBuffer(pMouseBuffer, 0, 0, 0, Color, 16);
     
-    EFI_EVENT_NOTIFY       TaskProcessesGroup1[] = {HandleKeyboardEvent, HandleMouseEvent};
+    EFI_EVENT_NOTIFY       TaskProcessesGroup1[] = {L2_KEYBOARD_Event, L2_MOUSE_Event};
 
-    EFI_EVENT_NOTIFY       TaskProcessesGroup2[] = {DisplaySystemDateTime};
+    EFI_EVENT_NOTIFY       TaskProcessesGroup2[] = {L2_TIMER_Print};
 
     for (i = 0; i < sizeof(TaskProcessesGroup1) / sizeof(EFI_EVENT_NOTIFY); i++)
     {
@@ -3664,7 +3595,7 @@ EFI_STATUS MultiProcessInit ()
 // https://blog.csdn.net/longsonssss/article/details/80221513
 
 
-EFI_STATUS SystemTimeIntervalInit()
+EFI_STATUS L2_TIMER_IntervalInit()
 {
     EFI_STATUS	Status;
 	EFI_HANDLE	TimerOne	= NULL;
@@ -3681,7 +3612,7 @@ EFI_STATUS SystemTimeIntervalInit()
 
 	Status = gBS->CreateEvent(EVT_NOTIFY_SIGNAL | EVT_TIMER,
                        		TPL_CALLBACK,
-                       		TimeSlice,
+                       		L2_TIMER_Slice,
                        		(VOID *)TimerCount,
                        		&TimerOne);
 
@@ -3704,9 +3635,9 @@ EFI_STATUS SystemTimeIntervalInit()
 	while (1)
 	{
 		*TimerCount = *TimerCount + 1;
-		//DebugPrint1(DISPLAY_X, DISPLAY_Y, "%d: SystemTimeIntervalInit while\n", __LINE__);
+		//L2_DEBUG_Print1(DISPLAY_X, DISPLAY_Y, "%d: SystemTimeIntervalInit while\n", __LINE__);
 		//if (*TimerCount % 1000000 == 0)
-	       //DebugPrint1(0, 4 * 16, "%d: while (1) p:%x %lu \n", __LINE__, TimerCount, *TimerCount);
+	       //L2_DEBUG_Print1(0, 4 * 16, "%d: while (1) p:%x %lu \n", __LINE__, TimerCount, *TimerCount);
 	}
 	
 	gBS->SetTimer( TimerOne, TimerCancel, 0 );
@@ -3716,7 +3647,7 @@ EFI_STATUS SystemTimeIntervalInit()
 }
 
 
-EFI_STATUS ScreenInit()
+EFI_STATUS L2_GRAPHICS_ScreenInit()
 {
 	EFI_STATUS status = 0;
 	//UINT32 i = 0;
@@ -3741,9 +3672,9 @@ EFI_STATUS ScreenInit()
 	}
 	*/
 	StatusErrorCount = 0;
-    DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: FAT32\n",  __LINE__);
+    L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: FAT32\n",  __LINE__);
 
-  	status = ReadFileSelf("ZHUFENG BMP", 11, pDeskWallpaperBuffer);
+  	status = L3_APPLICATION_ReadFile("ZHUFENG BMP", 11, pDeskWallpaperBuffer);
 	if (EFI_ERROR(status))
 	{
 		INFO_SELF(L"ReadFileSelf error.\r\n");
@@ -3752,7 +3683,7 @@ EFI_STATUS ScreenInit()
 
    for (int j = 0; j < 250; j++)
    {
-       DebugPrint1(DISK_READ_BUFFER_X + (j % 16) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 16), "%02X ", pDeskWallpaperBuffer[j] & 0xff);
+       L2_DEBUG_Print1(DISK_READ_BUFFER_X + (j % 16) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 16), "%02X ", pDeskWallpaperBuffer[j] & 0xff);
    }
 	
   	
@@ -3769,78 +3700,78 @@ EFI_STATUS ScreenInit()
     Color.Green = 0x84;
     Color.Blue	= 0x84;
     Color.Reserved = GRAPHICS_LAYER_DESK;
-    RectangleFillIntoBuffer(pDeskBuffer, 0,     0,      x -  1, y - 29, 1, Color);
+    L1_MEMORY_RectangleFill(pDeskBuffer, 0,     0,      x -  1, y - 29, 1, Color);
     
     */
     
     Color.Red   = 0xC6;
     Color.Green = 0xC6;
     Color.Blue	= 0xC6;
-    RectangleFillIntoBuffer(pDeskBuffer, 0,     y - 28, x -  1, y - 28, 1, Color);
+    L1_MEMORY_RectangleFill(pDeskBuffer, 0,     y - 28, x -  1, y - 28, 1, Color);
 
     Color.Red   = 0xFF;
     Color.Green = 0xFF;
     Color.Blue	= 0xFF;
-    RectangleFillIntoBuffer(pDeskBuffer, 0,     y - 27, x -  1, y - 27, 1, Color);
+    L1_MEMORY_RectangleFill(pDeskBuffer, 0,     y - 27, x -  1, y - 27, 1, Color);
     
     Color.Red   = 0xC6;
     Color.Green = 0xC6;
     Color.Blue	= 0xC6;
-    RectangleFillIntoBuffer(pDeskBuffer, 0,     y - 26, x -  1, y -  1, 1, Color);
+    L1_MEMORY_RectangleFill(pDeskBuffer, 0,     y - 26, x -  1, y -  1, 1, Color);
   	
     Color.Red   = 0xFF;
     Color.Green = 0xFF;
     Color.Blue	= 0xFF;
-    RectangleFillIntoBuffer(pDeskBuffer, 3,     y - 24, 59,     y - 24, 1, Color);
-    RectangleFillIntoBuffer(pDeskBuffer, 2,     y - 24, 59,     y - 4, 1, Color);
+    L1_MEMORY_RectangleFill(pDeskBuffer, 3,     y - 24, 59,     y - 24, 1, Color);
+    L1_MEMORY_RectangleFill(pDeskBuffer, 2,     y - 24, 59,     y - 4, 1, Color);
 
     Color.Red   = 0x84;
     Color.Green = 0x84;
     Color.Blue	= 0x84;
-    RectangleFillIntoBuffer(pDeskBuffer, 3,     y -  4, 59,     y -  4, 1, Color);
-    RectangleFillIntoBuffer(pDeskBuffer, 59,     y - 23, 59,     y -  5, 1, Color);
+    L1_MEMORY_RectangleFill(pDeskBuffer, 3,     y -  4, 59,     y -  4, 1, Color);
+    L1_MEMORY_RectangleFill(pDeskBuffer, 59,     y - 23, 59,     y -  5, 1, Color);
 
     
     Color.Red   = 0x00;
     Color.Green = 0x00;
     Color.Blue	= 0x00;
-    RectangleFillIntoBuffer(pDeskBuffer, 2,     y -  3, 59,     y -  3, 1, Color);
-    RectangleFillIntoBuffer(pDeskBuffer, 60,    y - 24, 60,     y -  3, 1, Color);
+    L1_MEMORY_RectangleFill(pDeskBuffer, 2,     y -  3, 59,     y -  3, 1, Color);
+    L1_MEMORY_RectangleFill(pDeskBuffer, 60,    y - 24, 60,     y -  3, 1, Color);
 
     Color.Red   = 0x84;
     Color.Green = 0x84;
     Color.Blue	= 0x84;
-    RectangleFillIntoBuffer(pDeskBuffer, x - 163, y - 24, x -  4, y - 24, 1, Color);
-    RectangleFillIntoBuffer(pDeskBuffer, x - 163, y - 23, x - 47, y -  4, 1, Color);
+    L1_MEMORY_RectangleFill(pDeskBuffer, x - 163, y - 24, x -  4, y - 24, 1, Color);
+    L1_MEMORY_RectangleFill(pDeskBuffer, x - 163, y - 23, x - 47, y -  4, 1, Color);
     
     Color.Red   = 0xFF;
     Color.Green = 0xFF;
     Color.Blue	= 0xFF;
-    RectangleFillIntoBuffer(pDeskBuffer, x - 163,    y - 3, x - 4,     y - 3, 1, Color);
-    RectangleFillIntoBuffer(pDeskBuffer, x - 3,     y - 24, x - 3,     y - 3, 1, Color);
+    L1_MEMORY_RectangleFill(pDeskBuffer, x - 163,    y - 3, x - 4,     y - 3, 1, Color);
+    L1_MEMORY_RectangleFill(pDeskBuffer, x - 3,     y - 24, x - 3,     y - 3, 1, Color);
 
         /*
     Color.Red   = 0xFF;
     Color.Green = 0xFF;
     Color.Blue	= 0xFF;
-    RectangleFillIntoBuffer(pDeskBuffer, 0, 100, 100, 200, 1, Color);
+    L1_MEMORY_RectangleFill(pDeskBuffer, 0, 100, 100, 200, 1, Color);
     
     Color.Red   = 0x00;
     Color.Green = 0x00;
     Color.Blue	= 0xFF;
-    RectangleFillIntoBuffer(pDeskBuffer, 0, 200, 100, 400, 1, Color);
+    L1_MEMORY_RectangleFill(pDeskBuffer, 0, 200, 100, 400, 1, Color);
 
     
     Color.Red   = 0x00;
     Color.Green = 0xFF;
     Color.Blue	= 0x00;
-    RectangleFillIntoBuffer(pDeskBuffer, 0, 300, 100, 400, 1, Color);
+    L1_MEMORY_RectangleFill(pDeskBuffer, 0, 300, 100, 400, 1, Color);
     
     
     Color.Red   = 0xFF;
     Color.Green = 0x00;
     Color.Blue	= 0x00;
-    RectangleFillIntoBuffer(pDeskBuffer, 0, 400, 100, 500, 1, Color);
+    L1_MEMORY_RectangleFill(pDeskBuffer, 0, 400, 100, 500, 1, Color);
     
     Color.Red  = 0xFF;
     Color.Green = 0x00;
@@ -3862,11 +3793,11 @@ EFI_STATUS ScreenInit()
     Color.Green = 0x00;
     Color.Blue	 = 0x00;
 
-    DrawChineseCharIntoBuffer2(pDeskBuffer,  16, ScreenHeight - 21,     (18 - 1) * 94 + 43 - 1, Color, ScreenWidth);
-    DrawChineseCharIntoBuffer2(pDeskBuffer,  16 * 2, ScreenHeight - 21, (21 - 1) * 94 + 05 - 1, Color, ScreenWidth);
+    L2_GRAPHICS_ChineseCharDraw2(pDeskBuffer,  16, ScreenHeight - 21,     (18 - 1) * 94 + 43 - 1, Color, ScreenWidth);
+    L2_GRAPHICS_ChineseCharDraw2(pDeskBuffer,  16 * 2, ScreenHeight - 21, (21 - 1) * 94 + 05 - 1, Color, ScreenWidth);
     
-    //DrawChineseCharIntoBuffer2(pDeskBuffer,  16, ScreenHeight - 21,     (18 - 1) * 94 + 43 - 1, Color, ScreenWidth);
-    //DrawChineseCharIntoBuffer2(pDeskBuffer,  16 * 2, ScreenHeight - 21, (21 - 1) * 94 + 05 - 1, Color, ScreenWidth);
+    //L2_GRAPHICS_ChineseCharDraw2(pDeskBuffer,  16, ScreenHeight - 21,     (18 - 1) * 94 + 43 - 1, Color, ScreenWidth);
+    //L2_GRAPHICS_ChineseCharDraw2(pDeskBuffer,  16 * 2, ScreenHeight - 21, (21 - 1) * 94 + 05 - 1, Color, ScreenWidth);
 
 /**/
     //Display ASCII Char
@@ -3888,7 +3819,7 @@ EFI_STATUS ScreenInit()
     return EFI_SUCCESS;
 }
 
-EFI_STATUS ParametersInitial()
+EFI_STATUS L2_COMMON_Initial()
 {
     EFI_STATUS	Status;
 	
@@ -3950,7 +3881,7 @@ EFI_STATUS ParametersInitial()
 	if (NULL == sChineseChar)
     {
         DEBUG ((EFI_D_INFO, "ChineseCharArrayInit AllocateZeroPool Failed: %x!\n "));
-        DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: ChineseCharArrayInit AllocateZeroPool failed\n",  __LINE__);
+        L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: ChineseCharArrayInit AllocateZeroPool failed\n",  __LINE__);
         return -1;
     }		
     
@@ -3970,11 +3901,11 @@ EFI_STATUS ParametersInitial()
 	return EFI_SUCCESS;
 }
 
-EFI_STATUS InitChineseChar()
+EFI_STATUS L2_GRAPHICS_ChineseCharInit()
 {
-    DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d:  \n", __LINE__);
+    L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d:  \n", __LINE__);
 
-	ReadFileSelf("HZK16", 5, sChineseChar);
+	L3_APPLICATION_ReadFile("HZK16", 5, sChineseChar);
 }
 
 EFI_STATUS
@@ -3997,36 +3928,27 @@ Main (
     ScreenWidth  = GraphicsOutput->Mode->Info->HorizontalResolution;
     ScreenHeight = GraphicsOutput->Mode->Info->VerticalResolution;
 
-    INFO_SELF(L"\r\n");
 
-    ParametersInitial();
+    L2_COMMON_Initial();
                 
-    INFO_SELF(L"\r\n");
-	MouseInit();
-    
-    INFO_SELF(L"\r\n");
-    
+	L2_MOUSE_Init();
+        
 	// get partitions from api
-	PartitionAnalysis();
+	L2_STORE_PartitionAnalysis();
 	
-	INFO_SELF(L"\r\n");
-    MultiProcessInit();
+    L2_COMMON_MultiProcessInit();
     
-    INFO_SELF(L"\r\n");
-    InitChineseChar();
+    L2_GRAPHICS_ChineseCharInit();
     
-    INFO_SELF(L"\r\n");
-    ScreenInit();
+    L2_GRAPHICS_ScreenInit();
     
-    INFO_SELF(L"\r\n");
-    MyComputerWindow(100, 100);
+    L3_APPLICATION_MyComputerWindow(100, 100);
     
-    INFO_SELF(L"\r\n");
-    SystemTimeIntervalInit();	
+    L2_TIMER_IntervalInit();	
 
     //GraphicsLayerCompute(iMouseX, iMouseY, 0);
 	
-	//DebugPrint1(100, 100, "%d %d\n", __LINE__, Status);
+	//L2_DEBUG_Print1(100, 100, "%d %d\n", __LINE__, Status);
 	
     return EFI_SUCCESS;
 }
