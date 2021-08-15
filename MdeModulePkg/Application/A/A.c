@@ -1649,6 +1649,45 @@ EFI_STATUS  L2_FILE_NTFS_MFTIndexItemsAnalysis(UINT8 *pBuffer)
 	}
 }
 
+int L1_STRING_IsSpace (int c)
+{
+  //
+  // <space> ::= [ ]
+  //
+  return ((c) == ' ') || ((c) == '\t') || ((c) == '\r') || ((c) == '\n') || ((c) == '\v')  || ((c) == '\f');
+}
+
+int L1_STRING_IsAllNumber (int c)
+{
+  //
+  // <alnum> ::= [0-9] | [a-z] | [A-Z]
+  //
+  return ((('0' <= (c)) && ((c) <= '9')) ||
+          (('a' <= (c)) && ((c) <= 'z')) ||
+          (('A' <= (c)) && ((c) <= 'Z')));
+}
+
+
+int
+L1_STRING_ToUpper(
+  IN  int c
+  )
+{
+  if ( (c >= 'a') && (c <= 'z') ) {
+    c = c - ('a' - 'A');
+  }
+  return c;
+}
+
+int
+L1_MATH_DigitToInteger( int c)
+{
+  if (((c >= 'a') && (c <= 'z')) || ((c >= 'A') && (c <= 'Z'))) {  /* If c is one of [A-Za-z]... */
+    c = L1_STRING_ToUpper(c) - 7;   // Adjust so 'A' is ('9' + 1)
+  }
+  return c - '0';   // Value returned is between 0 and 35, inclusive.
+}
+
 
 long long L1_MATH_Multi(long x, long y)
 {
@@ -1923,6 +1962,55 @@ EFI_STATUS L2_NTFS_MFTRead(UINT16 DeviceID)
     return EFI_SUCCESS;
 }
 
+
+EFI_STATUS L1_FILE_FAT32_FirstSelectorAnalysis(UINT8 *p, MasterBootRecordSwitched *pMBRSwitched)
+{
+	MasterBootRecord *pMBR;
+	
+	pMBR = (MasterBootRecord *)AllocateZeroPool(DISK_BUFFER_SIZE);
+	memcpy(pMBR, p, DISK_BUFFER_SIZE);
+
+	// 大端字节序：低位字节在高地址，高位字节低地址上。这是人类读写数值的方法。
+    // 小端字节序：与上面相反。低位字节在低地址，高位字节在高地址。
+	L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d ReservedSelector:%02X%02X SectorsPerFat:%02X%02X%02X%02X BootPathStartCluster:%02X%02X%02X%02X NumFATS: %X", 
+	                                    __LINE__,
+	                                    pMBR->ReservedSelector[0], pMBR->ReservedSelector[1], 
+	                                    pMBR->SectorsPerFat[0], pMBR->SectorsPerFat[1], pMBR->SectorsPerFat[2], pMBR->SectorsPerFat[3],
+	                                    pMBR->BootPathStartCluster[0], pMBR->BootPathStartCluster[1], pMBR->BootPathStartCluster[2], pMBR->BootPathStartCluster[3],
+	                                    pMBR->NumFATS[0]);
+
+	
+	L2_FILE_Transfer(pMBR, pMBRSwitched);
+
+	FreePool(pMBR);
+}
+
+
+// analysis a partition 
+EFI_STATUS RootPathAnalysisFSM1(UINT16 DeviceID)
+{
+    L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d DeviceID: %d\n", __LINE__, DeviceID);
+    //printf( "RootPathAnalysis\n" );
+    EFI_STATUS Status ;
+    UINT8 Buffer1[DISK_BUFFER_SIZE];
+    
+    Status = L1_STORE_READ(DeviceID, sector_count, 1, Buffer1); 
+	if (EFI_ERROR(Status))
+    {
+    	L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d Status: %X\n", __LINE__, Status);
+    	return Status;
+    }
+    
+ 	//When get root path data sector start number, we can get content of root path.
+ 	L1_FILE_FAT32_FirstSelectorAnalysis(Buffer1, &MBRSwitched);	
+
+	// data area start from 1824, HZK16 file start from 	FileBlockStart	block, so need to convert into sector by multi 8, block start number is 2 	
+	// next state is to read FAT table
+ 	sector_count = MBRSwitched.ReservedSelector;
+ 	L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: sector_count:%ld FileLength: %d MBRSwitched.ReservedSelector:%ld\n",  __LINE__, sector_count, FileLength, MBRSwitched.ReservedSelector);
+
+    return EFI_SUCCESS;
+}
 EFI_STATUS L2_FILE_NTFS_RootPathItemsRead(UINT8 i)
 {
 	L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d DeviceType: %d, SectorCount: %lld\n", __LINE__, i);
@@ -1950,27 +2038,6 @@ EFI_STATUS L2_FILE_NTFS_RootPathItemsRead(UINT8 i)
     return EFI_SUCCESS;
 }
 
-EFI_STATUS L1_FILE_FAT32_FirstSelectorAnalysis(UINT8 *p, MasterBootRecordSwitched *pMBRSwitched)
-{
-	MasterBootRecord *pMBR;
-	
-	pMBR = (MasterBootRecord *)AllocateZeroPool(DISK_BUFFER_SIZE);
-	memcpy(pMBR, p, DISK_BUFFER_SIZE);
-
-	// 大端字节序：低位字节在高地址，高位字节低地址上。这是人类读写数值的方法。
-    // 小端字节序：与上面相反。低位字节在低地址，高位字节在高地址。
-	L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d ReservedSelector:%02X%02X SectorsPerFat:%02X%02X%02X%02X BootPathStartCluster:%02X%02X%02X%02X NumFATS: %X", 
-	                                    __LINE__,
-	                                    pMBR->ReservedSelector[0], pMBR->ReservedSelector[1], 
-	                                    pMBR->SectorsPerFat[0], pMBR->SectorsPerFat[1], pMBR->SectorsPerFat[2], pMBR->SectorsPerFat[3],
-	                                    pMBR->BootPathStartCluster[0], pMBR->BootPathStartCluster[1], pMBR->BootPathStartCluster[2], pMBR->BootPathStartCluster[3],
-	                                    pMBR->NumFATS[0]);
-
-	
-	L2_FILE_Transfer(pMBR, pMBRSwitched);
-
-	FreePool(pMBR);
-}
 
 VOID L1_FILE_NTFS_DollerRootTransfer(DOLLAR_BOOT *pSource, DollarBootSwitched *pDest)
 {
@@ -2166,7 +2233,7 @@ L2_STORE_PartitionItemsPrint(UINT16 Index)
 
 	if (FileSystemType == FILE_SYSTEM_FAT32)
 	{
-		L1_FILE_RootPathAnalysis1(Index);
+		RootPathAnalysisFSM1(Index);
 		UINT16 valid_count = 0;
 
 		
@@ -2519,44 +2586,6 @@ void L1_MEMORY_RectangleFill(UINT8 *pBuffer,
 
 }
 
-int L1_STRING_IsSpace (int c)
-{
-  //
-  // <space> ::= [ ]
-  //
-  return ((c) == ' ') || ((c) == '\t') || ((c) == '\r') || ((c) == '\n') || ((c) == '\v')  || ((c) == '\f');
-}
-
-int L1_STRING_IsAllNumber (int c)
-{
-  //
-  // <alnum> ::= [0-9] | [a-z] | [A-Z]
-  //
-  return ((('0' <= (c)) && ((c) <= '9')) ||
-          (('a' <= (c)) && ((c) <= 'z')) ||
-          (('A' <= (c)) && ((c) <= 'Z')));
-}
-
-
-int
-L1_STRING_ToUpper(
-  IN  int c
-  )
-{
-  if ( (c >= 'a') && (c <= 'z') ) {
-    c = c - ('a' - 'A');
-  }
-  return c;
-}
-
-int
-L1_MATH_DigitToInteger( int c)
-{
-  if (((c >= 'a') && (c <= 'z')) || ((c >= 'A') && (c <= 'Z'))) {  /* If c is one of [A-Za-z]... */
-    c = L1_STRING_ToUpper(c) - 7;   // Adjust so 'A' is ('9' + 1)
-  }
-  return c - '0';   // Value returned is between 0 and 35, inclusive.
-}
 
 L2_NETWORK_Init()
 {}
