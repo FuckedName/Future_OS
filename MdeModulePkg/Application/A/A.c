@@ -1,12 +1,7 @@
-/** @file
-  FrontPage routines to handle the callbacks and browser calls
+/** //by renqihong
 
-Copyright (c) 2004 - 2017, Intel Corporation. All rights reserved.<BR>
-(C) Copyright 2018 Hewlett Packard Enterprise Development LP<BR>
-SPDX-License-Identifier: BSD-2-Clause-Patent
 ToDo:
-
-1. ReadFileFromPath; OK
+1. Read File From Path; OK====> optimize point: when blocks get from FAT table are continuous, can read from disk once, it can reduce, disk io.
 2. Fix trigger event with mouse and keyboard; OK
 3. NetWork connect baidu.com; ==> driver not found
 4. File System Simple Management; ==> current can read and write, Sub directory read,NTFS almost ok.
@@ -17,13 +12,19 @@ ToDo:
 	d.PCB
 	e.semaphoe
 	etc.
-6. My Computer window(disk partition)  ==> finish partly
+6. My Computer window(disk partition)  
+==> finish partly
+==> read partitions root path items need to save to cache, for fastly get next time, and can reduce disk io...
 7. Setting window(select file, delete file, modify file) ==> 0%
-8. Memory Simple Management ==> can get memory infomation, but it looks like something wrong.
+8. Memory Simple Management 
+==> can get memory information, but it looks like something wrong.
+==> get memory information successfully.
 9. Multi Windows, button click event. ==> 10%
 10. Application. ==>10%
 11. How to Automated Testing? ==>0%
 12. Graphics run slowly. ===> need to fix the bug.
+13. Desk wallpaper display successfully..
+14. Need to rule naming, about function name, variable name, struct name, and etc.
 **/
 
 #include <stdio.h>
@@ -551,7 +552,7 @@ typedef struct {
 
 DISK_HANDLE_TASK  disk_handle_task;
 
-UINT8 *FAT32_Table;
+UINT8 *FAT32_Table = NULL;
 
 UINT8 *sChineseChar = NULL;
 UINT8 *pWallPaperBuffer = NULL;
@@ -2221,16 +2222,6 @@ VOID GraphicsLayerCompute(int iMouseX, int iMouseY, UINT8 MouseClickFlag)
 	
 	int i, j;
 
-	//16, ScreenHeight - 21, For event trigger
-
-    EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;  
-    
-    //DEBUG ((EFI_D_INFO, "Line: %d\n", __LINE__));
-
-    Color.Red   = 0xff;
-    Color.Green = 0x00;
-    Color.Blue	  = 0x00;
-
 	GraphicsLayerMouseMove();
     
     // init mouse buffer with cursor
@@ -2732,7 +2723,16 @@ EFI_STATUS GetFatTableFSM()
 {    
     //DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d GetFatTableFSM\n", __LINE__);
     EFI_STATUS Status ;
-    UINT8 Buffer1[DISK_BUFFER_SIZE * MBRSwitched.SectorsPerFat];
+    if (NULL != FAT32_Table)
+    {
+        // start sector of file
+        sector_count = MBRSwitched.ReservedSelector + MBRSwitched.SectorsPerFat * MBRSwitched.NumFATS + MBRSwitched.BootPathStartCluster - 2 + (FileBlockStart - 2) * 8;
+        
+        // for FAT32_Table get next block number
+        PreviousBlockNumber = FileBlockStart;
+
+        return EFI_SUCCESS;
+    }
     
     for (int i = 0; i < PartitionCount; i++)
     {
@@ -2741,17 +2741,18 @@ EFI_STATUS GetFatTableFSM()
         	 //start block need to recompute depends on file block start number 
         	 //FileBlockStart;
         	 DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d MBRSwitched.SectorsPerFat: %d\n", __LINE__, MBRSwitched.SectorsPerFat);
-            Status = ReadDataFromPartition(i, sector_count,  MBRSwitched.SectorsPerFat, Buffer1); 
+            
+             // 512 = 16 * 32 = 4 item * 32
+            FAT32_Table = (UINT8 *)AllocateZeroPool(DISK_BUFFER_SIZE * MBRSwitched.SectorsPerFat);
+             if (NULL == FAT32_Table)
+             {
+                 DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: NULL == FAT32_Table\n", __LINE__);                             
+             }             
+        	 
+            Status = ReadDataFromPartition(i, sector_count,  MBRSwitched.SectorsPerFat, FAT32_Table); 
             if ( EFI_SUCCESS == Status )
             {
-            	  // 512 = 16 * 32 = 4 item * 32
-                 FAT32_Table = (UINT8 *)AllocateZeroPool(DISK_BUFFER_SIZE * MBRSwitched.SectorsPerFat);
-				  if (NULL == FAT32_Table)
-				  {
-					  DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: NULL == FAT32_Table\n", __LINE__);						  	  
-				  }
-            	  
-                CopyMem(FAT32_Table, Buffer1, DISK_BUFFER_SIZE * MBRSwitched.SectorsPerFat);
+                //CopyMem(FAT32_Table, Buffer1, DISK_BUFFER_SIZE * MBRSwitched.SectorsPerFat);
 				  for (int j = 0; j < 250; j++)
 				  {
 				  		//DebugPrint1(DISK_READ_BUFFER_X + (j % 16) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 16), "%02X ", Buffer1[j] & 0xff);
