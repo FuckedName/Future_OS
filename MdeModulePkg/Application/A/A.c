@@ -3829,6 +3829,8 @@ EFI_STATUS ScreenInit()
     Color.Reserved = GRAPHICS_LAYER_DESK;
     RectangleFillIntoBuffer(pDeskBuffer, 0,     0,      x -  1, y - 29, 1, Color);
     
+    */
+    
     Color.Red   = 0xC6;
     Color.Green = 0xC6;
     Color.Blue	= 0xC6;
@@ -3874,7 +3876,7 @@ EFI_STATUS ScreenInit()
     Color.Blue	= 0xFF;
     RectangleFillIntoBuffer(pDeskBuffer, x - 163,    y - 3, x - 4,     y - 3, 1, Color);
     RectangleFillIntoBuffer(pDeskBuffer, x - 3,     y - 24, x - 3,     y - 3, 1, Color);
-    */
+
         /*
     Color.Red   = 0xFF;
     Color.Green = 0xFF;
