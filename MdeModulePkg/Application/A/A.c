@@ -25,6 +25,14 @@ ToDo:
 12. Graphics run slowly. ===> need to fix the bug.
 13. Desk wallpaper display successfully..
 14. Need to rule naming, about function name, variable name, struct name, and etc.
+    a.
+    b.
+    c.
+    d.
+    e.
+
+
+
 **/
 
 #include <stdio.h>
@@ -102,12 +110,16 @@ UINT16 keyboard_count = 0;
 UINT16 mouse_count = 0;
 UINT16 parameter_count = 0;
 
+int keyboard_input_count = 0;
+
+#define KEYBOARD_BUFFER_LENGTH (30) 
+char pKeyboardInputBuffer[KEYBOARD_BUFFER_LENGTH] = {0};
+
 #define INFO_SELF(...)   \
 			do {   \
 				  Print(L"%d %a %a: ",__LINE__, __FILE__, __FUNCTION__);  \
 			     Print(__VA_ARGS__); \
 			}while(0);
-
 
 //Line 0
 #define DISPLAY_DESK_HEIGHT_WEIGHT_X (date_time_count % 30) 
@@ -116,11 +128,6 @@ UINT16 parameter_count = 0;
 //Line 1
 #define DISPLAY_MOUSE_X (0) 
 #define DISPLAY_MOUSE_Y (16 * 1)
-
-#define KEYBOARD_BUFFER_LENGTH (30) 
-
-int keyboard_input_count = 0;
-char pKeyboardInputBuffer[KEYBOARD_BUFFER_LENGTH] = {0};
 
 //Line 2
 #define DISPLAY_KEYBOARD_X (0) 
@@ -139,7 +146,6 @@ char pKeyboardInputBuffer[KEYBOARD_BUFFER_LENGTH] = {0};
 #define DISK_READ_Y (16 * 19)
 
 // Line 22
-
 #define DISK_READ_BUFFER_X (0) 
 #define DISK_READ_BUFFER_Y (6 * 56)
 
@@ -171,18 +177,22 @@ char pKeyboardInputBuffer[KEYBOARD_BUFFER_LENGTH] = {0};
 #define LLONG_MIN  (((INT64) -9223372036854775807LL) - 1)
 #define LLONG_MAX   ((INT64)0x7FFFFFFFFFFFFFFFULL)
 
-
-UINT16 StatusErrorCount = 0;
-// For exception returned status 
-#define DISPLAY_ERROR_STATUS_X (ScreenWidth * 2 / 4) 
-#define DISPLAY_ERROR_STATUS_Y (16 * (StatusErrorCount++ % 61) )
-
-
-UINT16 DisplayCount = 0;
 // For exception returned status 
 #define DISPLAY_X (0) 
 #define DISPLAY_Y (16 * (2 + DisplayCount++ % 52) )
 
+// For exception returned status 
+#define DISPLAY_ERROR_STATUS_X (ScreenWidth * 2 / 4) 
+#define DISPLAY_ERROR_STATUS_Y (16 * (StatusErrorCount++ % 61) )
+
+#define FILE_SYSTEM_OTHER   0xff
+#define FILE_SYSTEM_FAT32  1
+#define FILE_SYSTEM_NTFS   2
+
+extern EFI_SIMPLE_FILE_SYSTEM_PROTOCOL *gSimpleFileSystem; 
+
+UINT16 StatusErrorCount = 0;
+UINT16 DisplayCount = 0;
 UINTN PartitionCount = 0;
 
 CHAR8 x_move = 0;
@@ -191,12 +201,16 @@ CHAR8 y_move = 0;
 UINT16 DebugPrintX = 0;
 UINT16 DebugPrintY = 0; 
 
+UINT8 MouseClickFlag = 0;
+INT8 DisplayRootItemsFlag = 0;
+UINT8 PreviousItem = -1;
+
+
 CHAR8    AsciiBuffer[0x100] = {0};
+
 
 EFI_GRAPHICS_OUTPUT_PROTOCOL       *GraphicsOutput = NULL;
 EFI_SIMPLE_POINTER_PROTOCOL        *gMouse;
-
-extern EFI_SIMPLE_FILE_SYSTEM_PROTOCOL *gSimpleFileSystem; 
 
 
 EFI_HANDLE *handle;
@@ -217,346 +231,17 @@ UINT16 FileReadCount = 0;
 
 UINT8 *pDeskWallpaperBuffer = NULL;
 
+EFI_EVENT MultiTaskTriggerGroup1Event;
+EFI_EVENT MultiTaskTriggerGroup2Event;
 
-typedef enum
-{
-	GRAPHICS_LAYER_DESK = 0,
-	GRAPHICS_LAYER_MY_COMPUTER
-}GRAPHICS_LAYER_ID;
-
-
-struct efi_info_self {
-	UINT32 efi_loader_signature;
-	UINT32 efi_systab;
-	UINT32 efi_memdesc_size;
-	UINT32 efi_memdesc_version;
-	UINT32 efi_memmap;
-	UINT32 efi_memmap_size;
-	UINT32 efi_systab_hi;
-	UINT32 efi_memmap_hi;
-};
-
-struct e820_entry_self {
-	UINT64 addr;		/* start of memory segment */
-	UINT64 size;		/* size of memory segment */
-	UINT32 type;		/* type of memory segment */
-};
-
-
-typedef struct
-{
-	UINT16 DeviceType; // 0 Disk, 1: USB, 2: Sata;
-	UINT16 PartitionType; // 0 MBR, 1 GPT;
-	UINT16 PartitionID; // a physics device consist of Several parts like c: d: e:
-	UINT16 PartitionGUID; // like FA458FD2-4FF7-44D8-B542-BA560A5990B3
-	UINT16 DeviceSquenceID; //0025384961B47ECD
-	char Signare[50]; // MBR:0x077410A0
-	long long StartSectorNumber; //0x194000
-	long long SectorCount; //0xC93060
-}DEVICE_PARAMETER;
-
-/*
-    struct for FAT32 file system
-*/
-
-typedef struct
-{
-	UINT8 JMP[3] ; // 0x00 3 跳转指令（跳过开头一段区域）
-	UINT8 OEM[8] ; // 0x03 8 OEM名称常见值是MSDOS5.0.
-	UINT8 BitsOfSector[2] ; // 0x0b 2 每个扇区的字节数。取值只能是以下几种：512，1024，2048或是4096。设为512会取得最好的兼容性
-	UINT8 SectorOfCluster[1] ; // 0x0d 1 每簇扇区数。 其值必须中2的整数次方，同时还要保证每簇的字节数不能超过32K
-	UINT8 ReservedSelector[2] ; // 0x0e 2 保留扇区数（包括启动扇区）此域不能为0，FAT12/FAT16必须为1，FAT32的典型值取为32
-	UINT8 NumFATS[1] ; // 0x10 1 文件分配表数目。 NumFATS，任何FAT格式都建议为2
-	UINT8 RootPathRecords[2] ; // 0x11 2 最大根目录条目个数, 0 for fat32, 512 for fat16
-	UINT8 AllSectors[2] ; // 0x13 2 总扇区数（如果是0，就使用偏移0x20处的4字节值）0 for fat32
-	UINT8 Description[1] ; // 0x15 1 介质描述 0xF8 单面、每面80磁道、每磁道9扇区
-	UINT8 xxx1[2] ; // 0x16 2 每个文件分配表的扇区（FAT16）,0 for fat32
-	UINT8 xxx2[2] ; // 0x18 2 每磁道的扇区, 0x003f
-	UINT8 xxx3[2] ; // 0x1a 2 磁头数，0xff
-	UINT8 xxx4[4] ; // 0x1c 4 隐藏扇区, 与MBR中地址0x1C6开始的4个字节数值相等
-	UINT8 SectorCounts[4] ; // 0x20 4 总扇区数（如果超过65535使用此地址，小于65536参见偏移0x13，对FAT32，此域必须是非0）
-	UINT8 SectorsPerFat[4] ; // Sectors count each FAT use
-	UINT8 Fat32Flag[2] ; // 0x28 2 Flags (FAT32特有)
-	UINT8 FatVersion[2] ; // 0x2a 2 版本号 (FAT32特有)
-	UINT8 BootPathStartCluster[4] ; // 0x2c 4 根目录起始簇 (FAT32)，一般为2
-	UINT8 ClusterName[11] ; // 0x2b 11 卷标（非FAT32）
-	UINT8 BootStrap[2] ; // 0x30 2 FSInfo 扇区 (FAT32) bootstrap
-	UINT8 BootSectorBackup[2] ; // 0x32 2 启动扇区备份 (FAT32)如果不为0，表示在保留区中引导记录的备数据所占的扇区数，通常为6同时不建议使用6以外的其他数值
-	UINT8 Reserved[2] ; // 0x34 2 保留未使用 (FAT32) 此域用0填充
-	UINT8 FileSystemType[8] ; // 0x36 8 FAT文件系统类型（如FAT、FAT12、FAT16）含"FAT"就是PBR,否则就是MBR
-	UINT8 SelfBootCode[2] ; // 0x3e 2 操作系统自引导代码
-	UINT8 DeviceNumber[1] ; // 0x40 1 BIOS设备代号 (FAT32)
-	UINT8 NoUse[1] ; // 0x41 1 未使用 (FAT32)
-	UINT8 Flag[1] ; // 0x42 1 标记 (FAT32)
-	UINT8 SequeenNumber[4] ; // 0x43 4 卷序号 (FAT32)
-	UINT8 juanbiao[11] ; // 0x47 11 卷标（FAT32）
-	UINT8 TypeOfFileSystem[8] ; // 0x52 8 FAT文件系统类型（FAT32）
-	UINT8 BootAssembleCode[338]; // code
-	UINT8 Partition1[16] ; // 0x1be 64 partitions table, DOS_PART_TBL_OFFSET
-	UINT8 Partition2[16] ; // 0X1BE ~0X1CD 16 talbe entry for Partition 1
-	UINT8 Partition3[16] ; // 0X1CE ~0X1DD 16 talbe entry for Partition 2
-	UINT8 Partition4[16] ; // 0X1DE ~0X1ED 16 talbe entry for Partition 3
-	UINT8 EndFlag[2] ; // 0x1FE 2 扇区结束符（0x55 0xAA） 结束标志：MBR的结束标志与DBR，EBR的结束标志相同。
-}MasterBootRecord;
-
-/*
-    struct for NTFS file system
-*/
-
-//
-// first sector of partition
-typedef struct
-{
-	UINT8 JMP[3] ; // 0x00 3 跳转指令（跳过开头一段区域）
-	UINT8 OEM[8] ; // 0x03 8 OEM名称常见值是MSDOS5.0, NTFS.
-
-	// 0x0B
-	UINT8 BitsOfSector[2];        //  0x0200　　扇区大小，512B
-	UINT8 SectorOfCluster;            //  0x08　　  每簇扇区数，4KB
-	UINT8 ReservedSelector[2];            // 　　　　　　保留扇区
-	UINT8 NoUse01[5];            //
-	
-	// 0x15
-	UINT8 Description;            //  0xF8     
-	
-	// 磁盘介质 -- 硬盘
-	UINT8 NoUse02[2];            //
-	
-	// 0x18
-	UINT8 SectorPerTrack[2];     // 　0x003F 　每道扇区数 63
-	UINT8 Headers[2];           //　 0x00FF  磁头数
-	UINT8 SectorsHide[4];          // 　0x3F　　隐藏扇区
-	UINT8 NoUse03[8];           //
-	
-	// 0x28
-	UINT8 AllSectorCount[8];        // 卷总扇区数, 高位在前, 低位在后
-	
-	// 0x30
-	UINT8 MFT_StartCluster[8];      // MFT 起始簇
-	UINT8 MFT_MirrStartCluster[8];  // MTF 备份 MFTMirr 位置
-	
-	//0x40
-	UINT8 ClusterPerMFT[4];    // 每记录簇数 0xF6
-	UINT8 ClusterPerIndex[4];    // 每索引簇数
-	
-	//0x48
-	UINT8 SerialNumber[8];    // 卷序列号
-	UINT8 CheckSum[8];    // 校验和
-	UINT8 EndFlag[2];    // 0x1FE 2 扇区结束符（0x55 0xAA） 结束标志：MBR的结束标志与DBR，EBR的结束标志相同。
-}DOLLAR_BOOT;
-
-
-typedef struct 
-{
-	UINT16 BitsOfSector;
-	UINT16 SectorOfCluster;	
-	UINT64 AllSectorCount;
-	UINT64 MFT_StartCluster;
-	UINT64 MFT_MirrStartCluster;
-}DollarBootSwitched;
-
-
-// MFT记录了整个卷的所有文件 (包括MFT本身、数据文件、文件夹等等) 信息，包括空间占用，文件基本属性，文件位置索引，创建时
-// MFT 的第一项记录$MFT描述的是主分区表MFT本身，它的编号为0，MFT项的头部都是如下结构：
-typedef struct {
-	 UINT8    mark[4];             // "FILE" 标志 
-	 UINT8    UsnOffset[2];        // 更新序列号偏移 　　　　30 00
-	 UINT8    usnSize[2];          // 更新序列数组大小+1 　 03 00
-	 UINT8    LSN[8];              // 日志文件序列号(每次记录修改后改变)  58 8E 0F 34 00 00 00 00
-	// 0x10
-	 UINT8    SN[2];               // 序列号 随主文件表记录重用次数而增加
-	 UINT8    linkNum[2];          // 硬连接数 (多少目录指向该文件) 01 00
-	 UINT8    firstAttr[2];        // 第一个属性的偏移　　38 00
-	 UINT8    flags[2];            // 0已删除 1正常文件 2已删除目录 3目录正使用
-	// 0x18
-	 UINT8    MftUseLen[4];        // 记录有效长度   　A8 01 00 00
-	 UINT8    maxLen[4];            // 记录占用长度 　 00 04 00 00
-	// 0x20
-	 UINT8    baseRecordNum[8];     // 索引基本记录, 如果是基本记录则为0
-	 UINT8    nextAttrId[2];        // 下一属性Id　　07 00
-	 UINT8    border[2];            //
-	 UINT8    xpRecordNum[4];       // 用于xp, 记录号
-	// 0x30
-	 UINT8    USN[8];                 // 更新序列号(2B) 和 更新序列数组
-}MFT_HEADER;
-
-/*
-	MFT 是由一条条 MFT 项(记录)所组成的，而且每项大小是固定的(一般为1KB = 2 * 512)，MFT保留了前16项用于特殊文件记录，称为元数据，
-	元数据在磁盘上是物理连续的，编号为0~15；如果$MFT的偏移为0x0C0000000, 那么下一项的偏移就是0x0C0000400，在下一项就是
-	0x0C0000800等等；
-*/
-
-//------------------  属性头通用结构 ----
-typedef struct  //所有偏移量均为相对于属性类型 Type 的偏移量
-{
-	 UINT8 Type[4];           // 属性类型 0x10, 0x20, 0x30, 0x40,...,0xF0,0x100
-	 UINT8 Length[4];         // 属性的长度
-	 UINT8 NonResidentFiag;   // 是否是非常驻属性，l 为非常驻属性，0 为常驻属性 00
-	 UINT8 NameLength;        // 属性名称长度，如果无属性名称，该值为 00
-	 UINT8 ContentOffset[2];  // 属性内容的偏移量  18 00
-	 UINT8 CompressedFiag[2]; // 该文件记录表示的文件数据是否被压缩过 00 00
-	 UINT8 Identify[2];       // 识别标志  00 00
-	//--- 0ffset: 0x10 ---
-	//--------  常驻属性和非常驻属性的公共部分 ----
-	union CCommon
-	{
-	
-		//---- 如果该属性为 常驻 属性时使用该结构 ----
-		struct CResident
-		{
-			 UINT8 StreamLength[4];        // 属性值的长度, 即属性具体内容的长度。"48 00 00 00"
-			 UINT8 StreamOffset[2];        // 属性值起始偏移量  "18 00"
-			 UINT8 IndexFiag[2];           // 属性是否被索引项所索引，索引项是一个索引(如目录)的基本组成  00 00
-		};
-		
-		//------- 如果该属性为 非常驻 属性时使用该结构 ----
-		struct CNonResident
-		{
-			 UINT8 StartVCN[8];            // 起始的 VCN 值(虚拟簇号：在一个文件中的内部簇编号,0起）
-			 UINT8 LastVCN[8];             // 最后的 VCN 值
-			 UINT8 RunListOffset[2];       // 运行列表的偏移量
-			 UINT8 CompressEngineIndex[2]; // 压缩引擎的索引值，指压缩时使用的具体引擎。
-			 UINT8 Reserved[4];
-			 UINT8 StreamAiiocSize[8];     // 为属性值分配的空间 ，单位为B，压缩文件分配值小于实际值
-			 UINT8 StreamRealSize[8];      // 属性值实际使用的空间，单位为B
-			 UINT8 StreamCompressedSize[8]; // 属性值经过压缩后的大小, 如未压缩, 其值为实际值
-		};
-	};
-}NTFSAttribute;
-
-struct Value0x10
-{
-    UINT8 fileCreateTime[8];    // 文件创建时间
-    UINT8 fileChangeTime[8];    // 文件修改时间
-    UINT8 MFTChangeTime[8];     // MFT修改时间
-    UINT8 fileLatVisited[8];    // 文件最后访问时间
-    UINT8 tranAtrribute[4];     // 文件传统属性
-    UINT8 otherInfo[28];        // 版本，所有者，配额，安全等等信息(详细略)
-    UINT8 updataNum[8];         // 文件更新序列号
-};
-
-typedef struct 
-{
-	UINT16 ReservedSelector;
-	UINT16 SectorsPerFat;	
-	UINT16 BootPathStartCluster;
-	UINT16 NumFATS;
-	UINT16 SectorOfCluster;
-}MasterBootRecordSwitched;
-
-typedef struct 
-{
-	UINT8 FileName[8];
-	UINT8 ExtensionName[3];
-
-	// 00000000(Read/Write)
-    // 00000001(ReadOnly)
-    // 00000010(Hide)
-    // 00000100(System)
-    // 00001000(Volume name)
-    // 00010000(Sub path)
-    // 00100000(FILING: guidang)
-	UINT8 Attribute[1];  // if 0x0FH then Long path structor
-	UINT8 Reserved[1];
-	UINT8 CreateTimeLow[1];
-	UINT8 CreateTimeHigh[2];
-	UINT8 CreateDate[2];
-	UINT8 LatestVisitedDate[2];
-	UINT8 StartClusterHigh2B[2];
-	UINT8 LatestModiedTime[2];
-	UINT8 LatestModiedDate[2];
-	UINT8 StartClusterLow2B[2]; //*
-	UINT8 FileLength[4];
-}FAT32_ROOTPATH_SHORT_FILE_ITEM;
-
-typedef struct 
-{
-	UINT8 Reserved[1];
-	UINT8 CreateTimeLow[1];
-	UINT8 CreateTimeHigh[2];
-	UINT8 CreateDate[2];
-	UINT8 LatestVisitedDate[2];
-	UINT8 StartClusterHigh2B[2];
-	UINT8 LatestModiedTime[2];
-	UINT8 LatestModiedDate[2];
-	UINT8 StartClusterLow2B[2]; //*
-	UINT8 FileLength[4];
-}FAT32_ROOTPATH_SHORT_FILE_ITEMSwitched;
-
-
-typedef struct 
-{
-	UINT8 FileName[8];
-	UINT8 ExtensionName[3];
-	UINT8 Attribute[1];  // if 0x0FH then Long path structor
-	UINT8 Reserved[1];
-	UINT8 CreateTimeLow[1];
-	UINT8 CreateTimeHigh[2];
-	UINT8 CreateDate[2];
-	UINT8 LatestVisitedDate[2];
-	UINT8 StartClusterHigh2B[2];
-	UINT8 LatestModiedTime[2];
-	UINT8 LatestModiedDate[2];
-	UINT8 StartClusterLow2B[2]; //*
-	UINT8 FileLength[4];
-}FAT32_ROOTPATH_LONG_FILE_ITEM;
-
-
-typedef struct 
-{
-	UINT16 ReservedSelector;
-	UINT16 SectorsPerFat;	
-	UINT16 BootPathStartCluster;
-	UINT16 NumFATS;
-}ROOT_PATH;
-
-/*目录项首字节含义*/
-enum DirFirstChar
-{
-	DirUnUsed            = 0x00,        /*本表项没有使用*/
-	DirCharE5            = 0x05,        /*首字符为0xe5*/
-	DirisSubDir          = 0x2e,        /*是一个子目录 .,..为父目录*/
-	DirFileisDeleted     = 0xe5        /*文件已删除*/
-};
-
-
-typedef struct {
-  UINTN               Signature;
-  EFI_FILE_PROTOCOL   Handle;
-  UINT64              Position;
-  BOOLEAN             ReadOnly;
-  LIST_ENTRY          Tasks;                  // List of all FAT_TASKs
-  LIST_ENTRY          Link;                   // Link to other IFiles
-} FAT_IFILE;
-
-
-typedef struct {
-  UINTN               Signature;
-  EFI_FILE_IO_TOKEN   *FileIoToken;
-  FAT_IFILE           *IFile;
-  LIST_ENTRY          Subtasks;               // List of all FAT_SUBTASKs
-  LIST_ENTRY          Link;                   // Link to other FAT_TASKs
-} FAT_TASK;
-
-
-typedef struct {
-  UINTN               Signature;
-  EFI_DISK_IO2_TOKEN  DiskIo2Token;
-  FAT_TASK            *Task;
-  BOOLEAN             Write;
-  UINT64              Offset;
-  VOID                *Buffer;
-  UINTN               BufferSize;
-  LIST_ENTRY          Link;
-} DISK_HANDLE_TASK;
-
-DISK_HANDLE_TASK  disk_handle_task;
+int Nodei = 0;
 
 UINT8 *FAT32_Table = NULL;
 
 UINT8 *sChineseChar = NULL;
 UINT8 *pWallPaperBuffer = NULL;
 //UINT8 sChineseChar[267616];
+
 
 static UINTN ScreenWidth, ScreenHeight;  
 UINT16 MyComputerWidth = 16 * 50;
@@ -573,100 +258,16 @@ UINT32 BlockSize = 0;
 UINT32 FileLength = 0;
 UINT32 PreviousBlockNumber = 0;
 
-
-DEVICE_PARAMETER device[10] = {0};
-
-
+UINT8 BufferMFT[DISK_BUFFER_SIZE * 2];
 
 int iMouseX = 0;
 int iMouseY = 0;
 
-#pragma  pack(1)
-typedef struct     //这个结构体就是对上面那个图做一个封装。
-{
-    //bmp header
-    UINT8  Signatue[2] ;   // B  M
-    UINT8 FileSize[4] ;     //文件大小
-    UINT8 Reserv1[2] ; 
-    UINT8 Reserv2[2] ; 
-    UINT8 FileOffset[4] ;   //文件头偏移量
-
-    //DIB header
-    UINT8 DIBHeaderSize[4] ; //DIB头大小
-    UINT8 ImageWidth[4]   ;  //文件宽度
-    UINT8 ImageHight[4]   ;  //文件高度
-    UINT8 Planes[2]       ; 
-    UINT8 BPP[2]          ;  //每个相素点的位数
-    UINT8 Compression[4]  ; 
-    UINT8 ImageSize[4]    ;  //图文件大小
-    UINT8 XPPM[4] ; 
-    UINT8 YPPM[4] ; 
-    UINT8 CCT[4] ; 
-    UINT8 ICC[4] ;          
-}BMP_HEADER;
-#pragma  pack()
-
-
 EFI_GRAPHICS_OUTPUT_BLT_PIXEL MouseColor;
 
-typedef struct 
-{
-	UINT16 ButtonStartX;
-	UINT16 ButtonStartY;
-	UINT16 Width;
-	UINT16 Height;
-	UINT16 Type;  // Big, Small, 
-}BUTTON;
+UINT32 TimerSliceCount = 0;
 
-
-typedef struct 
-{
-	UINT8 *pBuffer;
-	UINT16 Width;
-	UINT16 Height;
-	UINT16 LastWidth;  // for switch between maximize and normal
-	UINT16 LastHeight; // for switch between maximize and normal
-	UINT16 CurrentX;   // new input text start with x
-	UINT16 CurrentY;   // new input text start with y
-	UINT16 TextStartX; // text start with x
-	UINT16 TextStartY; // text start with y
-	UINT16 WindowStartX; // Window left-top
-	UINT16 WindowStartY; // Window left-top
-	UINT16 Type;  // Big, Small, 
-	
-	UINT16 NextState; // maximize; minimize; other
-	CHAR8 pTitle[50];
-	BUTTON *pButtons;
-} WINDOW;
-
-
-// we need a FSM（Finite State Machine）to Read content of file
-
-// init -> partition analysised -> root path analysised -> read fat table -> start read file -> reading a file -> read finished
-typedef enum
-{
-	INIT_STATE = 0,
-	GET_PARTITION_INFO_STATE,
-	GET_ROOT_PATH_INFO_STATE,
-	GET_FAT_TABLE_STATE,
-	READ_FILE_STATE,
-}STATE;
-
-typedef enum
-{
-	READ_PATITION_EVENT = 0,
-	READ_ROOT_PATH_EVENT,
-	READ_FAT_TABLE_EVENT,
-	READ_FILE_EVENT,
-}EVENT;
-
-typedef struct
-{
-	STATE	       CurrentState;
-	EVENT	       event;
-	STATE	       NextState;
-	EFI_STATUS    (*pFunc)(); 
-}STATE_TRANS;
+int display_sector_number = 0;
 
 const UINT8 sASCII[][16] =
 {   
@@ -824,6 +425,503 @@ const UINT8 sChinese[][32] =
 	 0x00,0x00,0x00,0xFE,0x02,0x02,0x02,0x00,0x00,0x00,0x00,0x7F,0x40,0x40,0x40,0x00},
 };
 
+typedef enum
+{
+	GRAPHICS_LAYER_DESK = 0,
+	GRAPHICS_LAYER_MY_COMPUTER,
+	GRAPHICS_LAYER_MOUSE
+}GRAPHICS_LAYER_ID;
+
+// Index Header
+typedef struct {
+    UINT8 Flag[4]; //固定值 "INDX"
+    UINT8 USNOffset[2];//更新序列号偏移
+    UINT8 USNSize[2];//更新序列号和更新数组大小
+    UINT8 LogSequenceNumber[8]; // 日志文件序列号(LSN)
+    UINT8 IndexCacheVCN[8];//本索引缓冲区在索引分配中的VCN
+    UINT8 IndexEntryOffset[4];//索引项的偏移 相对于当前位置
+    UINT8 IndexEntrySize[4];//索引项的大小
+    UINT8 IndexEntryAllocSize[4];//索引项分配的大小
+    UINT8 HasLeafNode;//置一 表示有子节点
+    UINT8 Fill[3];//填充
+    UINT8 USN[2];//更新序列号
+    UINT8 USNArray[0];//更新序列数组
+}INDEX_HEADER;
+
+typedef struct {
+     UINT8 MFTReferNumber[8];//文件的MFT参考号
+     UINT8 IndexEntrySize[2];//索引项的大小
+     UINT8 FileNameAttriBodySize[2];//文件名属性体的大小
+     UINT8 IndexFlag[2];//索引标志
+     UINT8 Fill[2];//填充
+     UINT8 FatherDirMFTReferNumber[8];//父目录MFT文件参考号
+     UINT8 CreatTime[8];//文件创建时间 8
+     UINT8 AlterTime[8];//文件最后修改时间
+     UINT8 MFTChgTime[8];//文件记录最后修改时间
+     UINT8 ReadTime[8];//文件最后访问时间
+     UINT8 FileAllocSize[8];//文件分配大小
+     UINT8 FileRealSize[8];//文件实际大小
+     UINT8 FileFlag[8];//文件标志
+     UINT8 FileNameSize;//文件名长度
+     UINT8 FileNamespace;//文件命名空间
+     UINT8 FileNameAndFill[0];//文件名和填充
+}INDEX_ITEM;
+
+typedef struct{
+	UINT32 efi_loader_signature;
+	UINT32 efi_systab;
+	UINT32 efi_memdesc_size;
+	UINT32 efi_memdesc_version;
+	UINT32 efi_memmap;
+	UINT32 efi_memmap_size;
+	UINT32 efi_systab_hi;
+	UINT32 efi_memmap_hi;
+}efi_info_self;
+
+typedef struct
+{
+	UINT64 addr;		/* start of memory segment */
+	UINT64 size;		/* size of memory segment */
+	UINT32 type;		/* type of memory segment */
+}e820_entry_self;
+
+
+typedef struct
+{
+	UINT16 DeviceType; // 0 Disk, 1: USB, 2: Sata;
+	UINT16 PartitionType; // 0 MBR, 1 GPT;
+	UINT16 PartitionID; // a physics device consist of Several parts like c: d: e:
+	UINT16 PartitionGUID; // like FA458FD2-4FF7-44D8-B542-BA560A5990B3
+	UINT16 DeviceSquenceID; //0025384961B47ECD
+	char Signare[50]; // MBR:0x077410A0
+	long long StartSectorNumber; //0x194000
+	long long SectorCount; //0xC93060
+}DEVICE_PARAMETER;
+
+DEVICE_PARAMETER device[10] = {0};
+
+/*
+    struct for FAT32 file system
+*/
+
+typedef struct
+{
+	UINT8 JMP[3] ; // 0x00 3 跳转指令（跳过开头一段区域）
+	UINT8 OEM[8] ; // 0x03 8 OEM名称常见值是MSDOS5.0.
+	UINT8 BitsOfSector[2] ; // 0x0b 2 每个扇区的字节数。取值只能是以下几种：512，1024，2048或是4096。设为512会取得最好的兼容性
+	UINT8 SectorOfCluster[1] ; // 0x0d 1 每簇扇区数。 其值必须中2的整数次方，同时还要保证每簇的字节数不能超过32K
+	UINT8 ReservedSelector[2] ; // 0x0e 2 保留扇区数（包括启动扇区）此域不能为0，FAT12/FAT16必须为1，FAT32的典型值取为32
+	UINT8 NumFATS[1] ; // 0x10 1 文件分配表数目。 NumFATS，任何FAT格式都建议为2
+	UINT8 RootPathRecords[2] ; // 0x11 2 最大根目录条目个数, 0 for fat32, 512 for fat16
+	UINT8 AllSectors[2] ; // 0x13 2 总扇区数（如果是0，就使用偏移0x20处的4字节值）0 for fat32
+	UINT8 Description[1] ; // 0x15 1 介质描述 0xF8 单面、每面80磁道、每磁道9扇区
+	UINT8 xxx1[2] ; // 0x16 2 每个文件分配表的扇区（FAT16）,0 for fat32
+	UINT8 xxx2[2] ; // 0x18 2 每磁道的扇区, 0x003f
+	UINT8 xxx3[2] ; // 0x1a 2 磁头数，0xff
+	UINT8 xxx4[4] ; // 0x1c 4 隐藏扇区, 与MBR中地址0x1C6开始的4个字节数值相等
+	UINT8 SectorCounts[4] ; // 0x20 4 总扇区数（如果超过65535使用此地址，小于65536参见偏移0x13，对FAT32，此域必须是非0）
+	UINT8 SectorsPerFat[4] ; // Sectors count each FAT use
+	UINT8 Fat32Flag[2] ; // 0x28 2 Flags (FAT32特有)
+	UINT8 FatVersion[2] ; // 0x2a 2 版本号 (FAT32特有)
+	UINT8 BootPathStartCluster[4] ; // 0x2c 4 根目录起始簇 (FAT32)，一般为2
+	UINT8 ClusterName[11] ; // 0x2b 11 卷标（非FAT32）
+	UINT8 BootStrap[2] ; // 0x30 2 FSInfo 扇区 (FAT32) bootstrap
+	UINT8 BootSectorBackup[2] ; // 0x32 2 启动扇区备份 (FAT32)如果不为0，表示在保留区中引导记录的备数据所占的扇区数，通常为6同时不建议使用6以外的其他数值
+	UINT8 Reserved[2] ; // 0x34 2 保留未使用 (FAT32) 此域用0填充
+	UINT8 FileSystemType[8] ; // 0x36 8 FAT文件系统类型（如FAT、FAT12、FAT16）含"FAT"就是PBR,否则就是MBR
+	UINT8 SelfBootCode[2] ; // 0x3e 2 操作系统自引导代码
+	UINT8 DeviceNumber[1] ; // 0x40 1 BIOS设备代号 (FAT32)
+	UINT8 NoUse[1] ; // 0x41 1 未使用 (FAT32)
+	UINT8 Flag[1] ; // 0x42 1 标记 (FAT32)
+	UINT8 SequeenNumber[4] ; // 0x43 4 卷序号 (FAT32)
+	UINT8 juanbiao[11] ; // 0x47 11 卷标（FAT32）
+	UINT8 TypeOfFileSystem[8] ; // 0x52 8 FAT文件系统类型（FAT32）
+	UINT8 BootAssembleCode[338]; // code
+	UINT8 Partition1[16] ; // 0x1be 64 partitions table, DOS_PART_TBL_OFFSET
+	UINT8 Partition2[16] ; // 0X1BE ~0X1CD 16 talbe entry for Partition 1
+	UINT8 Partition3[16] ; // 0X1CE ~0X1DD 16 talbe entry for Partition 2
+	UINT8 Partition4[16] ; // 0X1DE ~0X1ED 16 talbe entry for Partition 3
+	UINT8 EndFlag[2] ; // 0x1FE 2 扇区结束符（0x55 0xAA） 结束标志：MBR的结束标志与DBR，EBR的结束标志相同。
+}MasterBootRecord;
+
+/*
+    struct for NTFS file system
+*/
+
+//
+// first sector of partition
+typedef struct
+{
+	UINT8 JMP[3] ; // 0x00 3 跳转指令（跳过开头一段区域）
+	UINT8 OEM[8] ; // 0x03 8 OEM名称常见值是MSDOS5.0, NTFS.
+
+	// 0x0B
+	UINT8 BitsOfSector[2];        //  0x0200　　扇区大小，512B
+	UINT8 SectorOfCluster;            //  0x08　　  每簇扇区数，4KB
+	UINT8 ReservedSelector[2];            // 　　　　　　保留扇区
+	UINT8 NoUse01[5];            //
+	
+	// 0x15
+	UINT8 Description;            //  0xF8     
+	
+	// 磁盘介质 -- 硬盘
+	UINT8 NoUse02[2];            //
+	
+	// 0x18
+	UINT8 SectorPerTrack[2];     // 　0x003F 　每道扇区数 63
+	UINT8 Headers[2];           //　 0x00FF  磁头数
+	UINT8 SectorsHide[4];          // 　0x3F　　隐藏扇区
+	UINT8 NoUse03[8];           //
+	
+	// 0x28
+	UINT8 AllSectorCount[8];        // 卷总扇区数, 高位在前, 低位在后
+	
+	// 0x30
+	UINT8 MFT_StartCluster[8];      // MFT 起始簇
+	UINT8 MFT_MirrStartCluster[8];  // MTF 备份 MFTMirr 位置
+	
+	//0x40
+	UINT8 ClusterPerMFT[4];    // 每记录簇数 0xF6
+	UINT8 ClusterPerIndex[4];    // 每索引簇数
+	
+	//0x48
+	UINT8 SerialNumber[8];    // 卷序列号
+	UINT8 CheckSum[8];    // 校验和
+	UINT8 EndFlag[2];    // 0x1FE 2 扇区结束符（0x55 0xAA） 结束标志：MBR的结束标志与DBR，EBR的结束标志相同。
+}DOLLAR_BOOT;
+
+// 文件记录头
+typedef struct
+{
+	/*+0x00*/ UINT8 Type[4];    // 固定值'FILE'
+	/*+0x04*/ UINT8 USNOffset[2]; // 更新序列号偏移, 与操作系统有关
+	/*+0x06*/ UINT8 USNCount[2]; // 固定列表大小Size in words of Update Sequence Number & Array (S)
+	/*+0x08*/ UINT8 Lsn[8]; // 日志文件序列号(LSN)
+	/*+0x10*/ UINT8 SequenceNumber[2]; // 序列号(用于记录文件被反复使用的次数)
+	/*+0x12*/ UINT8 LinkCount[2];// 硬连接数
+	/*+0x14*/ UINT8 AttributeOffset[2]; // 第一个属性偏移
+	/*+0x16*/ UINT8 Flags[2];// flags, 00表示删除文件,01表示正常文件,02表示删除目录,03表示正常目录
+	/*+0x18*/ UINT8 BytesInUse[4]; // 文件记录实时大小(字节) 当前MFT表项长度,到FFFFFF的长度+4
+	/*+0x1C*/ UINT8 BytesAllocated[4]; // 文件记录分配大小(字节)
+	/*+0x20*/ UINT8 BaseFileRecord[8]; // = 0 基础文件记录 File reference to the base FILE record
+	/*+0x28*/ UINT8 NextAttributeNumber[2]; // 下一个自由ID号
+	/*+0x2A*/ UINT8 Pading[2]; // 边界
+	/*+0x2C*/ UINT8 MFTRecordNumber[4]; // windows xp中使用,本MFT记录号
+	/*+0x30*/ UINT8 USN[2]; // 更新序列号
+	/*+0x32*/ UINT8 UpdateArray[0]; // 更新数组
+ } FILE_HEADER, *pFILE_HEADER; 
+
+typedef struct  
+{
+	UINT8 Type[4];   //属性类型
+	UINT8 Size[4];   //属性头和属性体的总长度
+	UINT8 ResidentFlag; //是否是常驻属性（0常驻 1非常驻）
+	UINT8 NameSize;   //属性名的长度
+	UINT8 NameOffset[2]; //属性名的偏移 相对于属性头
+	UINT8 Flags[2]; //标志（0x0001压缩 0x4000加密 0x8000稀疏）
+	UINT8 Id[2]; //属性唯一ID
+}CommonAttributeHeader;
+
+typedef struct 
+{
+	UINT8 OccupyCluster;
+	UINT64 Offset; //Please Note: The first item is start offset, and next item is relative offset....
+}IndexInformation;
+
+// Index of A0 attribute
+IndexInformation A0Indexes[10] = {0};
+
+typedef struct 
+{
+	UINT16 BitsOfSector;
+	UINT16 SectorOfCluster;	
+	UINT64 AllSectorCount;
+	UINT64 MFT_StartCluster;
+	UINT64 MFT_MirrStartCluster;
+}DollarBootSwitched;
+
+
+// MFT记录了整个卷的所有文件 (包括MFT本身、数据文件、文件夹等等) 信息，包括空间占用，文件基本属性，文件位置索引，创建时
+// MFT 的第一项记录$MFT描述的是主分区表MFT本身，它的编号为0，MFT项的头部都是如下结构：
+typedef struct {
+	 UINT8    mark[4];             // "FILE" 标志 
+	 UINT8    UsnOffset[2];        // 更新序列号偏移 　　　　30 00
+	 UINT8    usnSize[2];          // 更新序列数组大小+1 　 03 00
+	 UINT8    LSN[8];              // 日志文件序列号(每次记录修改后改变)  58 8E 0F 34 00 00 00 00
+	// 0x10
+	 UINT8    SN[2];               // 序列号 随主文件表记录重用次数而增加
+	 UINT8    linkNum[2];          // 硬连接数 (多少目录指向该文件) 01 00
+	 UINT8    firstAttr[2];        // 第一个属性的偏移　　38 00
+	 UINT8    flags[2];            // 0已删除 1正常文件 2已删除目录 3目录正使用
+	// 0x18
+	 UINT8    MftUseLen[4];        // 记录有效长度   　A8 01 00 00
+	 UINT8    maxLen[4];            // 记录占用长度 　 00 04 00 00
+	// 0x20
+	 UINT8    baseRecordNum[8];     // 索引基本记录, 如果是基本记录则为0
+	 UINT8    nextAttrId[2];        // 下一属性Id　　07 00
+	 UINT8    border[2];            //
+	 UINT8    xpRecordNum[4];       // 用于xp, 记录号
+	// 0x30
+	 UINT8    USN[8];                 // 更新序列号(2B) 和 更新序列数组
+}MFT_HEADER;
+
+/*
+	MFT 是由一条条 MFT 项(记录)所组成的，而且每项大小是固定的(一般为1KB = 2 * 512)，MFT保留了前16项用于特殊文件记录，称为元数据，
+	元数据在磁盘上是物理连续的，编号为0~15；如果$MFT的偏移为0x0C0000000, 那么下一项的偏移就是0x0C0000400，在下一项就是
+	0x0C0000800等等；
+*/
+
+//------------------  属性头通用结构 ----
+typedef struct  //所有偏移量均为相对于属性类型 Type 的偏移量
+{
+	 UINT8 Type[4];           // 属性类型 0x10, 0x20, 0x30, 0x40,...,0xF0,0x100
+	 UINT8 Length[4];         // 属性的长度
+	 UINT8 NonResidentFiag;   // 是否是非常驻属性，l 为非常驻属性，0 为常驻属性 00
+	 UINT8 NameLength;        // 属性名称长度，如果无属性名称，该值为 00
+	 UINT8 ContentOffset[2];  // 属性内容的偏移量  18 00
+	 UINT8 CompressedFiag[2]; // 该文件记录表示的文件数据是否被压缩过 00 00
+	 UINT8 Identify[2];       // 识别标志  00 00
+	//--- 0ffset: 0x10 ---
+	//--------  常驻属性和非常驻属性的公共部分 ----
+	union CCommon
+	{
+	
+		//---- 如果该属性为 常驻 属性时使用该结构 ----
+		struct CResident
+		{
+			 UINT8 StreamLength[4];        // 属性值的长度, 即属性具体内容的长度。"48 00 00 00"
+			 UINT8 StreamOffset[2];        // 属性值起始偏移量  "18 00"
+			 UINT8 IndexFiag[2];           // 属性是否被索引项所索引，索引项是一个索引(如目录)的基本组成  00 00
+		};
+		
+		//------- 如果该属性为 非常驻 属性时使用该结构 ----
+		struct CNonResident
+		{
+			 UINT8 StartVCN[8];            // 起始的 VCN 值(虚拟簇号：在一个文件中的内部簇编号,0起）
+			 UINT8 LastVCN[8];             // 最后的 VCN 值
+			 UINT8 RunListOffset[2];       // 运行列表的偏移量
+			 UINT8 CompressEngineIndex[2]; // 压缩引擎的索引值，指压缩时使用的具体引擎。
+			 UINT8 Reserved[4];
+			 UINT8 StreamAiiocSize[8];     // 为属性值分配的空间 ，单位为B，压缩文件分配值小于实际值
+			 UINT8 StreamRealSize[8];      // 属性值实际使用的空间，单位为B
+			 UINT8 StreamCompressedSize[8]; // 属性值经过压缩后的大小, 如未压缩, 其值为实际值
+		};
+	};
+}NTFSAttribute;
+
+typedef struct 
+{
+    UINT8 fileCreateTime[8];    // 文件创建时间
+    UINT8 fileChangeTime[8];    // 文件修改时间
+    UINT8 MFTChangeTime[8];     // MFT修改时间
+    UINT8 fileLatVisited[8];    // 文件最后访问时间
+    UINT8 tranAtrribute[4];     // 文件传统属性
+    UINT8 otherInfo[28];        // 版本，所有者，配额，安全等等信息(详细略)
+    UINT8 updataNum[8];         // 文件更新序列号
+}Value0x10;
+
+typedef struct 
+{
+	UINT16 ReservedSelector;
+	UINT16 SectorsPerFat;	
+	UINT16 BootPathStartCluster;
+	UINT16 NumFATS;
+	UINT16 SectorOfCluster;
+}MasterBootRecordSwitched;
+
+MasterBootRecordSwitched MBRSwitched;
+DollarBootSwitched NTFSBootSwitched;
+
+typedef struct 
+{
+	UINT8 FileName[8];
+	UINT8 ExtensionName[3];
+
+	// 00000000(Read/Write)
+    // 00000001(ReadOnly)
+    // 00000010(Hide)
+    // 00000100(System)
+    // 00001000(Volume name)
+    // 00010000(Sub path)
+    // 00100000(FILING: guidang)
+	UINT8 Attribute[1];  // if 0x0FH then Long path structor
+	UINT8 Reserved[1];
+	UINT8 CreateTimeLow[1];
+	UINT8 CreateTimeHigh[2];
+	UINT8 CreateDate[2];
+	UINT8 LatestVisitedDate[2];
+	UINT8 StartClusterHigh2B[2];
+	UINT8 LatestModiedTime[2];
+	UINT8 LatestModiedDate[2];
+	UINT8 StartClusterLow2B[2]; //*
+	UINT8 FileLength[4];
+}FAT32_ROOTPATH_SHORT_FILE_ITEM;
+
+FAT32_ROOTPATH_SHORT_FILE_ITEM pItems[32];
+
+typedef struct 
+{
+	UINT8 Reserved[1];
+	UINT8 CreateTimeLow[1];
+	UINT8 CreateTimeHigh[2];
+	UINT8 CreateDate[2];
+	UINT8 LatestVisitedDate[2];
+	UINT8 StartClusterHigh2B[2];
+	UINT8 LatestModiedTime[2];
+	UINT8 LatestModiedDate[2];
+	UINT8 StartClusterLow2B[2]; //*
+	UINT8 FileLength[4];
+}FAT32_ROOTPATH_SHORT_FILE_ITEMSwitched;
+
+
+typedef struct 
+{
+	UINT8 FileName[8];
+	UINT8 ExtensionName[3];
+	UINT8 Attribute[1];  // if 0x0FH then Long path structor
+	UINT8 Reserved[1];
+	UINT8 CreateTimeLow[1];
+	UINT8 CreateTimeHigh[2];
+	UINT8 CreateDate[2];
+	UINT8 LatestVisitedDate[2];
+	UINT8 StartClusterHigh2B[2];
+	UINT8 LatestModiedTime[2];
+	UINT8 LatestModiedDate[2];
+	UINT8 StartClusterLow2B[2]; //*
+	UINT8 FileLength[4];
+}FAT32_ROOTPATH_LONG_FILE_ITEM;
+
+typedef struct 
+{
+	UINT16 ReservedSelector;
+	UINT16 SectorsPerFat;	
+	UINT16 BootPathStartCluster;
+	UINT16 NumFATS;
+}ROOT_PATH;
+
+/*目录项首字节含义*/
+typedef enum
+{
+	DirUnUsed            = 0x00,        /*本表项没有使用*/
+	DirCharE5            = 0x05,        /*首字符为0xe5*/
+	DirisSubDir          = 0x2e,        /*是一个子目录 .,..为父目录*/
+	DirFileisDeleted     = 0xe5        /*文件已删除*/
+}DirFirstChar;
+
+typedef struct {
+  UINTN               Signature;
+  EFI_FILE_PROTOCOL   Handle;
+  UINT64              Position;
+  BOOLEAN             ReadOnly;
+  LIST_ENTRY          Tasks;                  // List of all FAT_TASKs
+  LIST_ENTRY          Link;                   // Link to other IFiles
+} FAT_IFILE;
+
+typedef struct {
+  UINTN               Signature;
+  EFI_FILE_IO_TOKEN   *FileIoToken;
+  FAT_IFILE           *IFile;
+  LIST_ENTRY          Subtasks;               // List of all FAT_SUBTASKs
+  LIST_ENTRY          Link;                   // Link to other FAT_TASKs
+} FAT_TASK;
+
+typedef struct {
+  UINTN               Signature;
+  EFI_DISK_IO2_TOKEN  DiskIo2Token;
+  FAT_TASK            *Task;
+  BOOLEAN             Write;
+  UINT64              Offset;
+  VOID                *Buffer;
+  UINTN               BufferSize;
+  LIST_ENTRY          Link;
+} DISK_HANDLE_TASK;
+
+DISK_HANDLE_TASK  disk_handle_task;
+
+#pragma  pack(1)
+typedef struct     //这个结构体就是对上面那个图做一个封装。
+{
+    //bmp header
+    UINT8  Signatue[2] ;   // B  M
+    UINT8 FileSize[4] ;     //文件大小
+    UINT8 Reserv1[2] ; 
+    UINT8 Reserv2[2] ; 
+    UINT8 FileOffset[4] ;   //文件头偏移量
+
+    //DIB header
+    UINT8 DIBHeaderSize[4] ; //DIB头大小
+    UINT8 ImageWidth[4]   ;  //文件宽度
+    UINT8 ImageHight[4]   ;  //文件高度
+    UINT8 Planes[2]       ; 
+    UINT8 BPP[2]          ;  //每个相素点的位数
+    UINT8 Compression[4]  ; 
+    UINT8 ImageSize[4]    ;  //图文件大小
+    UINT8 XPPM[4] ; 
+    UINT8 YPPM[4] ; 
+    UINT8 CCT[4] ; 
+    UINT8 ICC[4] ;          
+}BMP_HEADER;
+#pragma  pack()
+
+typedef struct 
+{
+	UINT16 ButtonStartX;
+	UINT16 ButtonStartY;
+	UINT16 Width;
+	UINT16 Height;
+	UINT16 Type;  // Big, Small, 
+}BUTTON;
+
+typedef struct 
+{
+	UINT8 *pBuffer;
+	UINT16 Width;
+	UINT16 Height;
+	UINT16 LastWidth;  // for switch between maximize and normal
+	UINT16 LastHeight; // for switch between maximize and normal
+	UINT16 CurrentX;   // new input text start with x
+	UINT16 CurrentY;   // new input text start with y
+	UINT16 TextStartX; // text start with x
+	UINT16 TextStartY; // text start with y
+	UINT16 WindowStartX; // Window left-top
+	UINT16 WindowStartY; // Window left-top
+	UINT16 Type;  // Big, Small, 
+	
+	UINT16 NextState; // maximize; minimize; other
+	CHAR8 pTitle[50];
+	BUTTON *pButtons;
+} WINDOW;
+
+// init -> partition analysised -> root path analysised -> read fat table -> start read file -> reading a file -> read finished
+typedef enum 
+{
+	INIT_STATE = 0,
+	GET_PARTITION_INFO_STATE,
+	GET_ROOT_PATH_INFO_STATE,
+	GET_FAT_TABLE_STATE,
+	READ_FILE_STATE,
+}STATE;
+
+STATE	NextState = INIT_STATE;
+
+typedef enum 
+{
+	READ_PATITION_EVENT = 0,
+	READ_ROOT_PATH_EVENT,
+	READ_FAT_TABLE_EVENT,
+	READ_FILE_EVENT,
+}EVENT;
+
+int READ_FILE_FSM_Event = READ_PATITION_EVENT;
+
+typedef struct
+{
+	STATE	       CurrentState;
+	EVENT	       event;
+	STATE	       NextState;
+	EFI_STATUS    (*pFunc)(); 
+}STATE_TRANS;
+
 
 // 小端模式
 // byte转int  
@@ -849,6 +947,15 @@ UINT32 BytesToInt4(UINT8 *bytes)
     Result |= ((bytes[2] << 16) & 0xFF0000);
     Result |= ((bytes[3] << 24) & 0xFF000000);
     return Result;
+}
+
+UINT16 BytesToInt3(UINT8 *bytes)
+{
+	//INFO_SELF("%x %x %x\n", bytes[0], bytes[1], bytes[2]);
+	UINT16 Result = bytes[0] & 0xFF;
+    Result |= (bytes[1] << 8 & 0xFF00);
+    Result |= ((bytes[2] << 16) & 0xFF0000);
+	return Result;
 }
 
 UINT16 BytesToInt2(UINT8 *bytes)
@@ -894,7 +1001,6 @@ EFI_STATUS LineDrawIntoBuffer(UINT8 *pBuffer,
         IN UINTN BorderWidth,
         IN EFI_GRAPHICS_OUTPUT_BLT_PIXEL BorderColor, UINT16 AreaWidth)
 {
-
     INT32 dx  = Math_ABS((int)(x1 - x0));
     INT32 sx  = x0 < x1 ? 1 : -1;
     INT32 dy  = Math_ABS((int)(y1-y0)), sy = y0 < y1 ? 1 : -1;
@@ -1272,7 +1378,6 @@ EFI_STATUS StrCmpSelf(UINT8 *p1, UINT8 *p2, UINT16 length)
 }
 
 
-FAT32_ROOTPATH_SHORT_FILE_ITEM pItems[32];
 
 EFI_STATUS RootPathAnalysis(UINT8 *p)
 {
@@ -1363,58 +1468,6 @@ EFI_STATUS RootPathAnalysis1(UINT8 *p)
 		}
 }
 
-
-MasterBootRecordSwitched MBRSwitched;
-DollarBootSwitched NTFSBootSwitched;
-
-// 文件记录头
-typedef struct
-{
-	/*+0x00*/ UINT8 Type[4];    // 固定值'FILE'
-	/*+0x04*/ UINT8 USNOffset[2]; // 更新序列号偏移, 与操作系统有关
-	/*+0x06*/ UINT8 USNCount[2]; // 固定列表大小Size in words of Update Sequence Number & Array (S)
-	/*+0x08*/ UINT8 Lsn[8]; // 日志文件序列号(LSN)
-	/*+0x10*/ UINT8 SequenceNumber[2]; // 序列号(用于记录文件被反复使用的次数)
-	/*+0x12*/ UINT8 LinkCount[2];// 硬连接数
-	/*+0x14*/ UINT8 AttributeOffset[2]; // 第一个属性偏移
-	/*+0x16*/ UINT8 Flags[2];// flags, 00表示删除文件,01表示正常文件,02表示删除目录,03表示正常目录
-	/*+0x18*/ UINT8 BytesInUse[4]; // 文件记录实时大小(字节) 当前MFT表项长度,到FFFFFF的长度+4
-	/*+0x1C*/ UINT8 BytesAllocated[4]; // 文件记录分配大小(字节)
-	/*+0x20*/ UINT8 BaseFileRecord[8]; // = 0 基础文件记录 File reference to the base FILE record
-	/*+0x28*/ UINT8 NextAttributeNumber[2]; // 下一个自由ID号
-	/*+0x2A*/ UINT8 Pading[2]; // 边界
-	/*+0x2C*/ UINT8 MFTRecordNumber[4]; // windows xp中使用,本MFT记录号
-	/*+0x30*/ UINT8 USN[2]; // 更新序列号
-	/*+0x32*/ UINT8 UpdateArray[0]; // 更新数组
- } FILE_HEADER, *pFILE_HEADER; 
-
-typedef struct  
-{
-	UINT8 Type[4];   //属性类型
-	UINT8 Size[4];   //属性头和属性体的总长度
-	UINT8 ResidentFlag; //是否是常驻属性（0常驻 1非常驻）
-	UINT8 NameSize;   //属性名的长度
-	UINT8 NameOffset[2]; //属性名的偏移 相对于属性头
-	UINT8 Flags[2]; //标志（0x0001压缩 0x4000加密 0x8000稀疏）
-	UINT8 Id[2]; //属性唯一ID
-}CommonAttributeHeader;
-
-int display_sector_number = 0;
-typedef struct 
-{
-	UINT8 OccupyCluster;
-	UINT64 Offset; //Please Note: The first item is start offset, and next item is relative offset....
-}IndexInformation;
-
-UINT16 BytesToInt3(UINT8 *bytes)
-{
-	//INFO_SELF("%x %x %x\n", bytes[0], bytes[1], bytes[2]);
-	UINT16 Result = bytes[0] & 0xFF;
-    Result |= (bytes[1] << 8 & 0xFF00);
-    Result |= ((bytes[2] << 16) & 0xFF0000);
-	return Result;
-}
-
 UINTN strlen1(char *String)
 {
     UINTN  Length;
@@ -1424,8 +1477,6 @@ UINTN strlen1(char *String)
 }
 
 
-// Index of A0 attribute
-IndexInformation A0Indexes[10] = {0};
 
 // Analysis attribut A0 of $Root
 EFI_STATUS  DollarRootA0DatarunAnalysis(UINT8 *p)
@@ -1549,43 +1600,6 @@ EFI_STATUS  MFTDollarRootFileAnalysisBuffer(UINT8 *pBuffer)
 	}
 }
 
-
-// Index Header
-typedef struct {
-    UINT8 Flag[4]; //固定值 "INDX"
-    UINT8 USNOffset[2];//更新序列号偏移
-    UINT8 USNSize[2];//更新序列号和更新数组大小
-    UINT8 LogSequenceNumber[8]; // 日志文件序列号(LSN)
-    UINT8 IndexCacheVCN[8];//本索引缓冲区在索引分配中的VCN
-    UINT8 IndexEntryOffset[4];//索引项的偏移 相对于当前位置
-    UINT8 IndexEntrySize[4];//索引项的大小
-    UINT8 IndexEntryAllocSize[4];//索引项分配的大小
-    UINT8 HasLeafNode;//置一 表示有子节点
-    UINT8 Fill[3];//填充
-    UINT8 USN[2];//更新序列号
-    UINT8 USNArray[0];//更新序列数组
-}INDEX_HEADER;
-
-typedef struct {
-     UINT8 MFTReferNumber[8];//文件的MFT参考号
-     UINT8 IndexEntrySize[2];//索引项的大小
-     UINT8 FileNameAttriBodySize[2];//文件名属性体的大小
-     UINT8 IndexFlag[2];//索引标志
-     UINT8 Fill[2];//填充
-     UINT8 FatherDirMFTReferNumber[8];//父目录MFT文件参考号
-     UINT8 CreatTime[8];//文件创建时间 8
-     UINT8 AlterTime[8];//文件最后修改时间
-     UINT8 MFTChgTime[8];//文件记录最后修改时间
-     UINT8 ReadTime[8];//文件最后访问时间
-     UINT8 FileAllocSize[8];//文件分配大小
-     UINT8 FileRealSize[8];//文件实际大小
-     UINT8 FileFlag[8];//文件标志
-     UINT8 FileNameSize;//文件名长度
-     UINT8 FileNamespace;//文件命名空间
-     UINT8 FileNameAndFill[0];//文件名和填充
-}INDEX_ITEM;
-
-
 EFI_STATUS  MFTIndexItemsBufferAnalysis(UINT8 *pBuffer)
 {
 	UINT8 *p = NULL;
@@ -1639,7 +1653,7 @@ EFI_STATUS  MFTIndexItemsBufferAnalysis(UINT8 *pBuffer)
 }
 
 
-long long Multi(long x, long y)
+long long Multi_Self(long x, long y)
 {
 	return x * y;
 }
@@ -1665,7 +1679,7 @@ strtollSelf(const char * nptr, char ** endptr, int base)
   {
     DEBUG ((EFI_D_INFO, "line:%d temp: %d, Result: %d \n", __LINE__, temp, Result));
     Previous = Result;
-    Result = Multi (Result, base) + (long long int)temp;
+    Result = Multi_Self (Result, base) + (long long int)temp;
     if( Result <= Previous) 
     {   // Detect Overflow
       if(Negative) 
@@ -1878,11 +1892,6 @@ EFI_STATUS ReadDataFromPartition(UINT8 deviceID, UINT64 StartSectorNumber, UINT1
     //DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
     return EFI_SUCCESS;
 }
-
-
-
-
-UINT8 BufferMFT[DISK_BUFFER_SIZE * 2];
 
 // NTFS Main File Table items analysis
 EFI_STATUS MFTReadFromPartition(UINT16 DeviceID)
@@ -2098,9 +2107,6 @@ EFI_STATUS FirstSelectorAnalysisNTFS(UINT8 *p, DollarBootSwitched *pNTFSBootSwit
 
 }
 
-#define FILE_SYSTEM_OTHER   0xff
-#define FILE_SYSTEM_FAT32  1
-#define FILE_SYSTEM_NTFS   2
 
 
 // all partitions analysis
@@ -2189,9 +2195,6 @@ DisplayItemsOfPartition(UINT16 Index)
 	}
 }
 
-UINT8 MouseClickFlag = 0;
-INT8 DisplayRootItemsFlag = 0;
-UINT8 PreviousItem = -1;
 VOID GraphicsLayerCompute(int iMouseX, int iMouseY, UINT8 MouseClickFlag)
 {
 	/*DebugPrint1(DISPLAY_X, DISPLAY_Y, "%d: pDeskDisplayBuffer: %X pDeskBuffer: %X ScreenWidth: %d ScreenHeight: %d pMouseBuffer: %X\n", __LINE__, 
@@ -2457,8 +2460,6 @@ EFI_STATUS DrawChineseCharIntoBuffer(UINT8 *pBuffer,
     return EFI_SUCCESS;
 }
 
-
-
 EFI_STATUS DrawChineseCharUseBuffer(UINT8 *pBuffer,
         IN UINTN x0, UINTN y0,UINT8 *c, UINT8 count,
         IN EFI_GRAPHICS_OUTPUT_BLT_PIXEL FontColor, UINT16 AreaWidth)
@@ -2517,31 +2518,6 @@ void RectangleFillIntoBuffer(UINT8 *pBuffer,
 
 }
 
-EFI_EVENT MultiTaskTriggerGroup1Event;
-EFI_EVENT MultiTaskTriggerGroup2Event;
-
-int Nodei = 0;
-EFI_STATUS PrintNode(EFI_DEVICE_PATH_PROTOCOL *Node)
-{    
-    //DebugPrint1(350 + 700, 16 * (Nodei + 10), "%d:Nodei:%d (%d, %d)\n", __LINE__, Nodei, Node->Type, Node->SubType);
-    //Nodei++;
-    return 0;
-}
-
-EFI_DEVICE_PATH_PROTOCOL *WalkthroughDevicePath(EFI_DEVICE_PATH_PROTOCOL *DevPath,
-                                                EFI_STATUS (* CallBack)(EFI_DEVICE_PATH_PROTOCOL*))
-{
-    EFI_DEVICE_PATH_PROTOCOL *pDevPath = DevPath;
-
-    while(! IsDevicePathEnd(pDevPath))
-    {
-        CallBack(pDevPath);
-        pDevPath = NextDevicePathNode(pDevPath);
-    }
-
-    return pDevPath;
-}
-
 int isspaceSelf (int c)
 {
   //
@@ -2571,8 +2547,6 @@ toupperSelf(
   }
   return c;
 }
-
-
 
 int
 Digit2ValSelf( int c)
@@ -2875,8 +2849,6 @@ STATE_TRANS StatusTransitionTable[] =
 	{ READ_FILE_STATE,           READ_FILE_EVENT,       READ_FILE_STATE,          ReadFileFSM },
 };
 
-STATE	NextState = INIT_STATE;
-
 int FileReadFSM(EVENT event)
 {
     EFI_STATUS Status;
@@ -2909,7 +2881,7 @@ int FileReadFSM(EVENT event)
 	StatusErrorCount++;
 }
 
-UINT32 TimerSliceCount = 0;
+
 VOID EFIAPI TimeSlice(
 	IN EFI_EVENT Event,
 	IN VOID           *Context
@@ -3330,36 +3302,6 @@ VOID MyComputerWindow(UINT16 StartX, UINT16 StartY)
 	WindowCreateUseBuffer(pMyComputerBuffer, pParent, MyComputerWidth, MyComputerHeight, Type, pWindowTitle);
 }
 
-VOID EFIAPI DecToChar1( UINT8* CharBuff, UINT8 I )
-{
-	CharBuff[0]	= ( (I / 16) > 9) ? ('A' + (I / 16) - 10) : ('0' + (I / 16) );
-	CharBuff[1]	= ( (I % 16) > 9) ? ('A' + (I % 16) - 10) : ('0' + (I % 16) );
-}
-
-VOID EFIAPI DecToCharBuffer1( UINT8* Buffin, UINTN len, UINT8* Buffout )
-{
-	UINTN i = 0;
-
-	for ( i = 0; i < len; ++i )
-	{
-		DecToChar1( Buffout + i * 4, Buffin[i] );
-		if ( (i + 1) % 16 == 0 )
-		{
-			*(Buffout + i * 4 + 2)	= '\r';
-			*(Buffout + i * 4 + 3)	= '\n';
-		}
-		else  
-		{
-			*(Buffout + i * 4 + 2)	= ' ';
-			*(Buffout + i * 4 + 3)	= ' ';
-		}
-	}
-}
- 
-int FSM_Event = READ_PATITION_EVENT;
-
-int flag = 0;
-
 EFI_STATUS ReadFileSelf(UINT8 *FileName, UINT8 NameLength, UINT8 *pBuffer)
 {
 	DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: FileName: %a \n", __LINE__, FileName);
@@ -3378,16 +3320,16 @@ EFI_STATUS ReadFileSelf(UINT8 *FileName, UINT8 NameLength, UINT8 *pBuffer)
 	PreviousBlockNumber = 0;
 	FileBlockStart = 0;
 	NextState = INIT_STATE;
-	FSM_Event = 0;
+	READ_FILE_FSM_Event = 0;
 
 	for (int i = 0; i < 5; i++)
     {
     	DebugPrint1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: i: %d \n", __LINE__, i);
-		DEBUG ((EFI_D_INFO, "%d HandleEnterPressed FSM_Event: %d\n", __LINE__, FSM_Event));
-	    FileReadFSM(FSM_Event++);
+		DEBUG ((EFI_D_INFO, "%d HandleEnterPressed FSM_Event: %d\n", __LINE__, READ_FILE_FSM_Event));
+	    FileReadFSM(READ_FILE_FSM_Event++);
 
-	    if (READ_FILE_EVENT <= FSM_Event)
-	    	FSM_Event = READ_FILE_EVENT;
+	    if (READ_FILE_EVENT <= READ_FILE_FSM_Event)
+	    	READ_FILE_FSM_Event = READ_FILE_EVENT;
 	}
 
 	
@@ -3946,17 +3888,6 @@ EFI_STATUS ScreenInit()
     return EFI_SUCCESS;
 }
 
-VOID
-EFIAPI
-DiskHandleComplete (
-  IN  EFI_EVENT                Event,
-  IN  VOID                     *Context
-  )
-{	
-    DebugPrint1(DISK_READ_X, DISK_READ_Y, "line:%d DiskHandleComplete \n",  __LINE__);	
-    gBS->SignalEvent(disk_handle_task.DiskIo2Token.Event);
-}
-
 EFI_STATUS ParametersInitial()
 {
     EFI_STATUS	Status;
@@ -4038,8 +3969,6 @@ EFI_STATUS ParametersInitial()
 
 	return EFI_SUCCESS;
 }
-
-
 
 EFI_STATUS InitChineseChar()
 {
