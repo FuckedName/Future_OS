@@ -169,11 +169,6 @@ char pKeyboardInputBuffer[KEYBOARD_BUFFER_LENGTH] = {0};
 #define DISK_MFT_BUFFER_SIZE (512 * 2 * 15)
 #define EXBYTE 4
 
-#define FILE_SYSTEM_OTHER   0xff
-#define FILE_SYSTEM_FAT32  1
-#define FILE_SYSTEM_NTFS   2
-
-
 #define E820_RAM		1
 #define E820_RESERVED		2
 #define E820_ACPI		3
@@ -1382,6 +1377,30 @@ EFI_STATUS L1_STRING_Compare(UINT8 *p1, UINT8 *p2, UINT16 length)
 	return EFI_SUCCESS;
 }
 
+void L1_FILE_NameGet(UINT8 deviceID,UINT8 *FileName)
+{    
+    int count = 0;
+    while (pItems[deviceID].FileName[count] != 0)
+    {
+        FileName[count] = pItems[deviceID].FileName[count];
+        count++;
+    }
+    
+    if (pItems[deviceID].ExtensionName[0] != 0)
+    {
+        FileName[count] = ' ';
+        count++;
+    }
+    int count2 = 0;
+    while (pItems[deviceID].ExtensionName[count2] != 0)
+    {
+        FileName[count] = pItems[deviceID].ExtensionName[count2];
+        count++;
+        count2++;
+    }
+
+}
+
 EFI_STATUS L1_FILE_RootPathAnalysis(UINT8 *p)
 {
 	memcpy(&pItems, p, DISK_BUFFER_SIZE);
@@ -1403,28 +1422,9 @@ EFI_STATUS L1_FILE_RootPathAnalysis(UINT8 *p)
                                             pItems[i].Attribute[0]);
 			
 			valid_count++;
-
-			UINT8 FileName[12] = {0};
-			int count = 0;
-			while (pItems[i].FileName[count] != 0)
-			{
-				FileName[count] = pItems[i].FileName[count];
-				count++;
-			}
-
-			if (pItems[i].ExtensionName[0] != 0)
-			{
-				FileName[count] = ' ';
-				count++;
-			}
-			int count2 = 0;
-			while (pItems[i].ExtensionName[count2] != 0)
-			{
-				FileName[count] = pItems[i].ExtensionName[count2];
-				count++;
-				count2++;
-			}
-
+			
+		    UINT8 FileName[12] = {0};
+		    L1_FILE_NameGet(i, FileName);
 			L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: FileName: %a\n", __LINE__, FileName);
 			L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: ReadFileName: %a\n", __LINE__, ReadFileName);
 
@@ -2242,19 +2242,20 @@ L2_STORE_PartitionItemsPrint(UINT16 Index)
 		L2_FILE_FAT32_FirstSelectorHandle(Index);
 		UINT16 valid_count = 0;
 
-		
 		for (UINT16 i = 0; i < 32; i++)
-			//if (pItems[i].FileName[0] != 0xE5 && (pItems[i].Attribute[0] == 0x20 
-			//    || pItems[i].Attribute[0] == 0x10))
-	       {
-	        	L2_DEBUG_Print2(0, 8 * 16 + (valid_count) * 16, pMyComputerBuffer, "%d %2c%2c%2c%2c%2c%2c%2c%2c.%2c%2c%2c FileLength: %d Attribute: %02X    ", __LINE__,
-	                                            pItems[i].FileName[0], pItems[i].FileName[1], pItems[i].FileName[2], pItems[i].FileName[3], pItems[i].FileName[4], pItems[i].FileName[5], pItems[i].FileName[6], pItems[i].FileName[7],
-	                                            pItems[i].ExtensionName[0], pItems[i].ExtensionName[1],pItems[i].ExtensionName[2],
-	                                            L1_NETWORK_4BytesToUINT32(pItems[i].FileLength),
-	                                            pItems[i].Attribute[0]);
-				
-				valid_count++;
-			}
+	    {       
+	    	if (pItems[i].FileName[0] == 0)
+	    		break;
+	    		
+	    	char name[12] = {0};
+           L1_FILE_NameGet(i, name);
+           
+        	L2_DEBUG_Print2(16 * 50 / 3 + 32, 2 * 16 + (valid_count) * 16, pMyComputerBuffer, "%a Size: %d Attribute: %02X",
+                                            name,
+                                            L1_NETWORK_4BytesToUINT32(pItems[i].FileLength),
+                                            pItems[i].Attribute[0]);			
+			valid_count++;
+		}
 		
 	}
 	else if (FileSystemType == FILE_SYSTEM_NTFS)
@@ -3240,7 +3241,31 @@ EFI_STATUS L3_WINDOW_Create(UINT8 *pBuffer, UINT8 *pParent, UINT16 Width, UINT16
 
 		char sizePostfix2[3] = "GB";
 		L2_DEBUG_Print2(x, y, pBuffer, "%d%a", size, sizePostfix2);
+		x += 16;
 
+		x += 64;
+
+		char type[10] = "OTHER";   
+		UINT8 FileSystemType = L2_STORE_PartitionAnalysis2(i);
+		if (FILE_SYSTEM_FAT32 == FileSystemType)
+		{
+			type[0] = 'F';
+			type[1] = 'A';
+			type[2] = 'T';
+			type[3] = '3';
+			type[4] = '2';
+		}
+		else if(FILE_SYSTEM_NTFS == FileSystemType) 
+		{	
+			type[0] = 'N';
+			type[1] = 'T';
+			type[2] = 'F';
+			type[3] = 'S';
+			type[4] = '\0';
+		}
+
+		L2_DEBUG_Print2(x, y, pBuffer, "%a", type);
+		
 	}
 	
 	y += 16;
