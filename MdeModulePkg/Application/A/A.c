@@ -189,7 +189,7 @@ char pKeyboardInputBuffer[KEYBOARD_BUFFER_LENGTH] = {0};
 
 // For exception returned status 
 #define DISPLAY_ERROR_STATUS_X (ScreenWidth * 2 / 4) 
-#define DISPLAY_ERROR_STATUS_Y (16 * (StatusErrorCount++ % 61) )
+#define DISPLAY_ERROR_STATUS_Y (16 * (StatusErrorCount++ % 65) )
 
 #define FILE_SYSTEM_OTHER   0xff
 #define FILE_SYSTEM_FAT32  1
@@ -2931,13 +2931,6 @@ float L2_MEMORY_GETs()
 	UINT32                               DescriptorVersion;
 	UINTN                                MemoryMapSize;
 	EFI_MEMORY_DESCRIPTOR                *MemoryMap;
-	EFI_MEMORY_DESCRIPTOR                *MemoryMapPtr;
-	UINTN                                Index;
-	struct efi_info_self                  *Efi;
-	struct e820_entry_self               *LastE820;
-	struct e820_entry_self               *E820;
-	UINTN                                E820EntryCount;
-	EFI_PHYSICAL_ADDRESS                 LastEndAddr;
 	UINTN MemoryClassifySize[6] = {0};
     
     //
@@ -2976,12 +2969,12 @@ float L2_MEMORY_GETs()
     	
 	DEBUG ((EFI_D_INFO, "%d:  Status:%X \n", __LINE__, Status));
     
-    LastE820 = NULL;
-    E820EntryCount = 0;
-    LastEndAddr = 0;
-    MemoryMapPtr = MemoryMap;
+    EFI_PHYSICAL_ADDRESS lastPhysicalEnd = 0;
+    UINTN ContinuousMemoryPages = 0;
+    UINTN ContinuousMemoryStart = 0;
+    UINTN MemoryAllSize = 0;
     UINTN E820Type = 0;
-    for (Index = 0; Index < (MemoryMapSize / DescriptorSize); Index++) 
+    for (UINT16 Index = 0; Index < (MemoryMapSize / DescriptorSize); Index++) 
     {
     	E820Type = 0;
       //L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Index:%X \n", __LINE__, Index);
@@ -3024,6 +3017,31 @@ float L2_MEMORY_GETs()
 	      case EfiConventionalMemory:
 		        E820Type = E820_RAM; // Random access memory
 		        MemoryClassifySize[3] += MemoryMap->NumberOfPages;
+           	 /*L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Index: %d: Start: %X Pages:%X End: %X\n", __LINE__, 
+                                                                            Index,
+                                                                            MemoryMap->PhysicalStart, 
+                                                                            MemoryMap->NumberOfPages,
+                                                                            MemoryMap->PhysicalStart + MemoryMap->NumberOfPages * 4 * 1024);
+               */                                                             
+		        if (lastPhysicalEnd != MemoryMap->PhysicalStart)
+               {
+					L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Start: %X: Pages:%X End: %X\n", __LINE__, 
+                                                                                ContinuousMemoryStart, 
+                                                                                ContinuousMemoryPages,
+                                                                                ContinuousMemoryStart + ContinuousMemoryPages * 4 * 1024);
+		
+					/*
+               	L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Start: %X: Pages:%X End: %X\n", __LINE__, 
+                                                                                MemoryMap->PhysicalStart, 
+                                                                                ContinuousMemoryPages,
+                                                                                ContinuousMemoryStart + ContinuousMemoryPages * 4 * 1024);
+					*/
+					MemoryAllSize += ContinuousMemoryPages;
+					ContinuousMemoryPages = 0;    
+					ContinuousMemoryStart = MemoryMap->PhysicalStart;
+				}
+				 ContinuousMemoryPages += MemoryMap->NumberOfPages;
+               lastPhysicalEnd = MemoryMap->PhysicalStart + MemoryMap->NumberOfPages * 4 * 1024;
 		        break;
 	    
 	      case EfiACPIMemoryNVS:	   // // Address space reserved for use by the firmware.
@@ -3040,16 +3058,7 @@ float L2_MEMORY_GETs()
 				   DEBUG ((EFI_D_INFO, "%d:  Invalid EFI memory descriptor type (0x%x)!\n", __LINE__, MemoryMap->Type));
 		        continue;		  
       }
-    
-      	/*L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: %d: E820Type:%X Start:%X Number:%X End: %X\n", __LINE__, 
-      	  																	Index,
-      	  																	E820Type, 
-      	  																	MemoryMap->PhysicalStart, 
-      	  																	MemoryMap->NumberOfPages,
-      	  																	MemoryMap->PhysicalStart + MemoryMap->NumberOfPages * 4 * 1024);
-
-		*/
-		DEBUG ((EFI_D_INFO, "%d: E820Type:%X Start:%X Number:%X\n", __LINE__, 
+      DEBUG ((EFI_D_INFO, "%d: E820Type:%X Start:%X Number:%X\n", __LINE__, 
       	  																	E820Type, 
       	  																	MemoryMap->PhysicalStart, 
       	  																	MemoryMap->NumberOfPages));
@@ -3058,16 +3067,24 @@ float L2_MEMORY_GETs()
 		//
 		MemoryMap = (EFI_MEMORY_DESCRIPTOR *)((UINTN)MemoryMap + DescriptorSize);
     }
+    
+    MemoryAllSize += ContinuousMemoryPages;
+    
+    L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Start: %X: Pages:%X End: %X\n", __LINE__, 
+                                                                ContinuousMemoryStart, 
+                                                                ContinuousMemoryPages,
+                                                                ContinuousMemoryStart + ContinuousMemoryPages * 4 * 1024);
+    
 
-    L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: %d: (MemoryMapSize / DescriptorSize):%X MemoryClassifySize[0]:%d %d %d %d %d %d \n", __LINE__,
-    																		    Index,
-                                                                        (MemoryMapSize / DescriptorSize),
+    L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d:  (MemoryMapSize / DescriptorSize):%X MemoryClassifySize[0]:%d %d %d %d %d %d MemoryAllSize: %d\n", __LINE__,
+    																		    (MemoryMapSize / DescriptorSize),
                                                                         MemoryClassifySize[0],
                                                                         MemoryClassifySize[1],
                                                                         MemoryClassifySize[2],
                                                                         MemoryClassifySize[3],
                                                                         MemoryClassifySize[4],
-                                                                        MemoryClassifySize[5]
+                                                                        MemoryClassifySize[5],
+                                                                        MemoryAllSize
                                                                         );
 	return  MemoryClassifySize[3];                                                                    
 }
@@ -3229,8 +3246,8 @@ EFI_STATUS L3_WINDOW_Create(UINT8 *pBuffer, UINT8 *pParent, UINT16 Width, UINT16
 		L2_GRAPHICS_ChineseCharDraw2(pBuffer, x, y,          (48 - 1 ) * 94 + 1 - 1, Color, Width);  
 		x += 16;
 
-		//CHAR16 s[4] = L"´ó";
-		L2_DEBUG_Print2(x, y, pBuffer, "%d%a", size, sizePostfix);
+		char sizePostfix2[3] = "GB";
+		L2_DEBUG_Print2(x, y, pBuffer, "%d%a", size, sizePostfix2);
 
 	}
 	
