@@ -2743,17 +2743,6 @@ UINT32 L2_FILE_GetNextBlockNumber()
 	return FAT32_Table[PreviousBlockNumber  * 4] + (UINT32)FAT32_Table[PreviousBlockNumber * 4 + 1] * 16 * 16 + (UINT32)FAT32_Table[PreviousBlockNumber * 4 + 2] * 16 * 16 * 16 * 16 + (UINT32)FAT32_Table[PreviousBlockNumber * 4 + 3] * 16 * 16 * 16 * 16 * 16 * 16;	
 }
 
-EFI_STATUS ChineseCharArrayInit()
-{
-	//L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: ChineseCharArrayInit\n",  __LINE__);
-	DEBUG ((EFI_D_INFO, "%d ChineseCharArrayInit\n", __LINE__));
-    // 87 line, 96 Chinese char each line, 32 Char each Chinese char
-	
-    
-    //L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: ChineseCharArrayInit finished...\n",  __LINE__);
-	return EFI_SUCCESS;
-}
-
 void *L1_MEMORY_Copy(UINT8 *dest, const UINT8 *src, UINT8 count)
 {
 	UINT8 *d;
@@ -2789,9 +2778,7 @@ EFI_STATUS L2_STORE_ReadFileFSM()
 			    	L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d Status: %X\n", __LINE__, Status);
 			    	return Status;
 			    }        	 	
-				
-			     ChineseCharArrayInit();
-			     
+							     
                 //L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: HZK16FileReadCount: %d DISK_BLOCK_BUFFER_SIZE: %d\n", __LINE__, HZK16FileReadCount, DISK_BLOCK_BUFFER_SIZE);
 
 				  //Copy buffer to ChineseBuffer
@@ -2972,6 +2959,7 @@ float L2_MEMORY_GETs()
     EFI_PHYSICAL_ADDRESS lastPhysicalEnd = 0;
     UINTN ContinuousMemoryPages = 0;
     UINTN ContinuousMemoryStart = 0;
+    UINTN ContinuousVirtualMemoryStart = 0;
     UINTN MemoryAllSize = 0;
     UINTN E820Type = 0;
     for (UINT16 Index = 0; Index < (MemoryMapSize / DescriptorSize); Index++) 
@@ -3025,20 +3013,23 @@ float L2_MEMORY_GETs()
                */                                                             
 		        if (lastPhysicalEnd != MemoryMap->PhysicalStart)
                {
-					L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Start: %X: Pages:%X End: %X\n", __LINE__, 
-                                                                                ContinuousMemoryStart, 
+      				/*  DEBUG ((EFI_D_INFO, "%d: E820Type:%X Start:%X Virtual Start:%X Number:%X\n", __LINE__, 
+                                                                                ContinuousMemoryStart,
+                                                                                ContinuousVirtualMemoryStart,
                                                                                 ContinuousMemoryPages,
                                                                                 ContinuousMemoryStart + ContinuousMemoryPages * 4 * 1024);
 		
-					/*
-               	L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Start: %X: Pages:%X End: %X\n", __LINE__, 
-                                                                                MemoryMap->PhysicalStart, 
+					*/
+               	L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Start: %X  Virtual Start:%X: Pages:%X End: %X\n", __LINE__, 
+                                                                                MemoryMap->PhysicalStart,
+                                                                                ContinuousVirtualMemoryStart,
                                                                                 ContinuousMemoryPages,
                                                                                 ContinuousMemoryStart + ContinuousMemoryPages * 4 * 1024);
-					*/
+					
 					MemoryAllSize += ContinuousMemoryPages;
 					ContinuousMemoryPages = 0;    
 					ContinuousMemoryStart = MemoryMap->PhysicalStart;
+					ContinuousVirtualMemoryStart = MemoryMap->VirtualStart;
 				}
 				 ContinuousMemoryPages += MemoryMap->NumberOfPages;
                lastPhysicalEnd = MemoryMap->PhysicalStart + MemoryMap->NumberOfPages * 4 * 1024;
@@ -3058,9 +3049,10 @@ float L2_MEMORY_GETs()
 				   DEBUG ((EFI_D_INFO, "%d:  Invalid EFI memory descriptor type (0x%x)!\n", __LINE__, MemoryMap->Type));
 		        continue;		  
       }
-      DEBUG ((EFI_D_INFO, "%d: E820Type:%X Start:%X Number:%X\n", __LINE__, 
+      DEBUG ((EFI_D_INFO, "%d: E820Type:%X Start:%X Virtual Start:%X Number:%X\n", __LINE__, 
       	  																	E820Type, 
       	  																	MemoryMap->PhysicalStart, 
+      	  																	MemoryMap->VirtualStart, 
       	  																	MemoryMap->NumberOfPages));
 		//
 		// Get next item
@@ -3272,12 +3264,10 @@ EFI_STATUS L3_WINDOW_Create(UINT8 *pBuffer, UINT8 *pParent, UINT16 Width, UINT16
 	size = size * 4;
 	size = size / (1024 * 1024);
 	CHAR8 buf[7] = {0};
-	L2_DEBUG_Print2(x, y, pBuffer, "%a", L1_STRING_FloatToString(size, 3, buf));
+	char sizePostfix2[3] = "GB";
+	L2_DEBUG_Print2(x, y, pBuffer, "%a%a", L1_STRING_FloatToString(size, 3, buf), sizePostfix2);
 	x += 5 * 8;
 
-	//g
-	L2_GRAPHICS_ChineseCharDraw2(pBuffer, x, y,          (28 - 1 ) * 94 + 10 - 1, Color, Width);  
-	x += 16;
 	return EFI_SUCCESS;
 }
 
