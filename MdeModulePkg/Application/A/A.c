@@ -450,7 +450,7 @@ typedef struct {
 }INDEX_HEADER;
 
 typedef struct {
-     UINT8 MFTReferNumber[8];//文件的MFT参考号
+     UINT8 MFTReferNumber[8];//文件的MFT参考号, first 6 Bytes * 2 + MFT table sector = file sector 
      UINT8 IndexEntrySize[2];//索引项的大小
      UINT8 FileNameAttriBodySize[2];//文件名属性体的大小
      UINT8 IndexFlag[2];//索引标志
@@ -936,6 +936,19 @@ UINT64 L1_NETWORK_8BytesToUINT64(UINT8 *bytes)
     s += ((UINT64)bytes[5]) << 40;
     s += ((UINT64)bytes[6]) << 48;
     s += ((UINT64)bytes[7]) << 56;
+    //printf("%llu\n",  s );
+
+    return s;
+}
+
+UINT64 L1_NETWORK_6BytesToUINT64(UINT8 *bytes)
+{
+    UINT64 s = bytes[0];
+    s += ((UINT64)bytes[1]) << 8;
+    s += ((UINT64)bytes[2]) << 16;
+    s += ((UINT64)bytes[3]) << 24;
+    s += ((UINT64)bytes[4]) << 32;
+    s += ((UINT64)bytes[5]) << 40;
     //printf("%llu\n",  s );
 
     return s;
@@ -1479,8 +1492,6 @@ UINTN L1_STRING_Length(char *String)
     return Length;
 }
 
-
-
 // Analysis attribut A0 of $Root
 EFI_STATUS  L2_FILE_NTFS_DollarRootA0DatarunAnalysis(UINT8 *p)
 {
@@ -1555,18 +1566,24 @@ EFI_STATUS  L2_FILE_NTFS_MFTDollarRootFileAnalysis(UINT8 *pBuffer)
 	L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: AttributeOffset:%X \n", __LINE__, AttributeOffset);
 
 	// location of a0 attribute may be in front of 10 
+	// ofcourse mybe some bugs...
 	for (int i = 0; i < 10; i++)
 	{
 		UINT8 size[4];
+
+		// get Attribute size
 		for (int i = 0; i < 4; i++)
 			size[i] = p[AttributeOffset + 4 + i];
+			
 		//INFO_SELF("%02X%02X%02X%02X\n", size[0], size[1], size[2], size[3]);
 		UINT16 AttributeSize = L1_NETWORK_4BytesToUINT32(size);
-		
+
+		// Copy attribute to buffer
 		for (int i = 0; i < AttributeSize; i++)
 			pItem[i] = p[AttributeOffset + i];
-		
-		UINT16  NameSize = ((CommonAttributeHeader *)pItem)->NameSize;		
+
+		// after buffer copied, we can get information in item
+		UINT16  NameSize = ((CommonAttributeHeader *)pItem)->NameSize;
 		
 		UINT16  NameOffset = L1_NETWORK_2BytesToUINT16(((CommonAttributeHeader *)pItem)->NameOffset);
 		L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Type[0]: %02X AttributeSize: %02X NameSize: %02X NameOffset: %02X\n", __LINE__, 
@@ -1574,9 +1591,12 @@ EFI_STATUS  L2_FILE_NTFS_MFTDollarRootFileAnalysis(UINT8 *pBuffer)
 															AttributeSize,
 															NameSize,
 															NameOffset);   
-							
+															
+		 //A0 attribute is very important for us to analysis root path items(file or folder)
+		 // ofcourse the other parameter of attribut can analysis, if you want
 		 if (0xA0 == ((CommonAttributeHeader *)pItem)->Type[0])
 		 {
+		 	// every name char use two bytes.
 		 	UINT16 DataRunsSize = AttributeSize - NameOffset - NameSize * 2;
 		 	if (DataRunsSize > 100 || DataRunsSize < 0)
 		 	{
@@ -1589,6 +1609,8 @@ EFI_STATUS  L2_FILE_NTFS_MFTDollarRootFileAnalysis(UINT8 *pBuffer)
 		 		L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%02X ", pItem[i] & 0xff);
 
 		 	int j = 0;
+
+		 	//get data runs
 		 	for (int i = NameOffset + NameSize * 2; i < AttributeSize; i++)
 		 	{	 		
 		 		DataRuns[j] = pItem[i] & 0xff;
@@ -1599,7 +1621,7 @@ EFI_STATUS  L2_FILE_NTFS_MFTDollarRootFileAnalysis(UINT8 *pBuffer)
 		 	break;
 		 }
 		 
-		AttributeOffset +=AttributeSize;
+		AttributeOffset += AttributeSize;
 	}
 }
 
@@ -1641,6 +1663,7 @@ EFI_STATUS  L2_FILE_NTFS_MFTIndexItemsAnalysis(UINT8 *pBuffer)
             pItem[i] = pBuffer[index + i];
             
 		 UINT8 FileNameSize =	 ((INDEX_ITEM *)pItem)->FileNameSize;
+		 UINT8 FileContentRelativeSector =	 L1_NETWORK_6BytesToUINT64(((INDEX_ITEM *)pItem)->MFTReferNumber);
 		 //L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d attribut length2: %d FileNameSize: %d\n", __LINE__, 
 		//														     length2,
 		//														     FileNameSize);    
@@ -1649,7 +1672,7 @@ EFI_STATUS  L2_FILE_NTFS_MFTIndexItemsAnalysis(UINT8 *pBuffer)
 		 {
 		 	attributeName[i] = pItem[82 + 2 * i];
 		 }
-		 L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: attributeName: %a\n", __LINE__, attributeName);
+		 L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: attributeName: %a, FileContentRelativeSector: %llu\n", __LINE__, attributeName, FileContentRelativeSector);
 		 //L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%s attributeName: %a\n", __LINE__,  attributeName);  
 		 index += length2;
 	}
@@ -1936,15 +1959,25 @@ EFI_STATUS L1_STORE_READ(UINT8 deviceID, UINT64 StartSectorNumber, UINT16 ReadSi
 }
 
 // NTFS Main File Table items analysis
-EFI_STATUS L2_NTFS_MFTRead(UINT16 DeviceID)
+// MFT_Item_ID: 0 $MFT
+/*             1 $MFTMirr
+				 2 $LogFile
+				 3 $Volume
+				 4 $AttrDef
+               5 $ROOT
+               etc 
+*/
+EFI_STATUS L2_FILE_NTFS_MFT_Item_Read(UINT16 DeviceID, UINT16 MFT_Item_ID)
 {
     L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d DeviceID: %d\n", __LINE__, DeviceID);
     //printf( "RootPathAnalysis\n" );
     DEBUG ((EFI_D_INFO, "PartitionUSBRead!!\r\n"));
     EFI_STATUS Status ;
     EFI_HANDLE *ControllerHandle = NULL;
-        
-    Status = L1_STORE_READ(DeviceID, sector_count + 5 *2, 2, BufferMFT); 
+
+    //sector_count is MFT start sector, 5 * 2 means $ROOT sector...
+    //every MFT Item use 2 sector .
+    Status = L1_STORE_READ(DeviceID, sector_count + MFT_Item_ID * 2, 2, BufferMFT); 
     if (EFI_ERROR(Status))
     {
     	L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d Status: %X\n", __LINE__, Status);
@@ -1957,19 +1990,19 @@ EFI_STATUS L2_NTFS_MFTRead(UINT16 DeviceID)
 	 }	
 
  	//Analysis MFT of NTFS File System..
- 	L2_FILE_NTFS_MFTDollarRootFileAnalysis(BufferMFT);
+ 	//L2_FILE_NTFS_MFTDollarRootFileAnalysis(BufferMFT);
  	//MFTDollarRootAnalysisBuffer(BufferMFTDollarRoot);	
 
 	// data area start from 1824, HZK16 file start from 	FileBlockStart	block, so need to convert into sector by multi 8, block start number is 2 	
 	// next state is to read FAT table
- 	sector_count = MBRSwitched.ReservedSelector;
+ 	// sector_count = MBRSwitched.ReservedSelector;
  	L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: sector_count:%ld FileLength: %d MBRSwitched.ReservedSelector:%ld\n",  __LINE__, sector_count, FileLength, MBRSwitched.ReservedSelector);
       
     return EFI_SUCCESS;
 }
 
 
-EFI_STATUS L1_FILE_FAT32_FirstSelectorAnalysis(UINT8 *p, MasterBootRecordSwitched *pMBRSwitched)
+EFI_STATUS L1_FILE_FAT32_DataSectorAnalysis(UINT8 *p, MasterBootRecordSwitched *pMBRSwitched)
 {
 	MasterBootRecord *pMBR;
 	
@@ -1993,7 +2026,7 @@ EFI_STATUS L1_FILE_FAT32_FirstSelectorAnalysis(UINT8 *p, MasterBootRecordSwitche
 
 
 // analysis a partition 
-EFI_STATUS L2_FILE_FAT32_FirstSelectorHandle(UINT16 DeviceID)
+EFI_STATUS L2_FILE_FAT32_DataSectorHandle(UINT16 DeviceID)
 {
     L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d DeviceID: %d\n", __LINE__, DeviceID);
     //printf( "RootPathAnalysis\n" );
@@ -2008,7 +2041,7 @@ EFI_STATUS L2_FILE_FAT32_FirstSelectorHandle(UINT16 DeviceID)
     }
     
  	//When get root path data sector start number, we can get content of root path.
- 	L1_FILE_FAT32_FirstSelectorAnalysis(Buffer1, &MBRSwitched);	
+ 	L1_FILE_FAT32_DataSectorAnalysis(Buffer1, &MBRSwitched);	
 
 	// data area start from 1824, HZK16 file start from 	FileBlockStart	block, so need to convert into sector by multi 8, block start number is 2 	
 	// next state is to read FAT table
@@ -2131,7 +2164,7 @@ EFI_STATUS L2_FILE_NTFS_FirstSelectorAnalysis(UINT8 *p, DollarBootSwitched *pNTF
 }
 
 // all partitions analysis
-EFI_STATUS L2_STORE_PartitionAnalysis2(UINT16 DeviceID)
+EFI_STATUS L2_FILE_PartitionTypeAnalysis(UINT16 DeviceID)
 {    
     L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d DeviceID: %d\n", __LINE__, DeviceID);
     EFI_STATUS Status;
@@ -2151,7 +2184,7 @@ EFI_STATUS L2_STORE_PartitionAnalysis2(UINT16 DeviceID)
  	{				 	
  		L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: FAT32\n",  __LINE__);
  		// analysis data area of patition
-	 	L1_FILE_FAT32_FirstSelectorAnalysis(Buffer1, &MBRSwitched); 
+	 	L1_FILE_FAT32_DataSectorAnalysis(Buffer1, &MBRSwitched); 
 
 	 	// data sector number start include: reserved selector, fat sectors(usually is 2: fat1 and fat2), and file system boot path start cluster(usually is 2, data block start number is 2)
 	 	sector_count = MBRSwitched.ReservedSelector + MBRSwitched.SectorsPerFat * MBRSwitched.NumFATS + MBRSwitched.BootPathStartCluster - 2;
@@ -2167,6 +2200,7 @@ EFI_STATUS L2_STORE_PartitionAnalysis2(UINT16 DeviceID)
    		L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: NTFS sector_count:%llu\n",  __LINE__, sector_count);
    		return FILE_SYSTEM_NTFS;
    	}
+   	// the other file system can add at this place
    	else
    	{
    		L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: \n",  __LINE__);
@@ -2233,13 +2267,14 @@ EFI_STATUS L2_STORE_PartitionAnalysis()
 L2_STORE_PartitionItemsPrint(UINT16 Index)
 {
 	L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: \n",  __LINE__);
+	
 	// this code may be have some problems, because my USB file system is FAT32, my Disk file system is NTFS.
 	// others use this code must be careful...
-	UINT8 FileSystemType = L2_STORE_PartitionAnalysis2(Index);
+	UINT8 FileSystemType = L2_FILE_PartitionTypeAnalysis(Index);
 
 	if (FileSystemType == FILE_SYSTEM_FAT32)
 	{
-		L2_FILE_FAT32_FirstSelectorHandle(Index);
+		L2_FILE_FAT32_DataSectorHandle(Index);
 		UINT16 valid_count = 0;
 
 		for (UINT16 i = 0; i < 32; i++)
@@ -2248,20 +2283,43 @@ L2_STORE_PartitionItemsPrint(UINT16 Index)
 	    		break;
 	    		
 	    	char name[12] = {0};
+	    	char ItemType[10] = "OTHER";
            L1_FILE_NameGet(i, name);
-           
-        	L2_DEBUG_Print2(16 * 50 / 3 + 32, 2 * 16 + (valid_count) * 16, pMyComputerBuffer, "%a Size: %d Attribute: %02X",
+
+           if (pItems[i].Attribute[0] == 0x10)
+           {
+           	ItemType[0] = 'F';
+           	ItemType[1] = 'o';
+           	ItemType[2] = 'l';
+           	ItemType[3] = 'd';
+           	ItemType[4] = 'e';
+           	ItemType[5] = 'r';
+           	ItemType[6] = '\0';
+           }
+           else if (pItems[i].Attribute[0] == 0x20)
+           {
+           	ItemType[0] = 'F';
+           	ItemType[1] = 'i';
+           	ItemType[2] = 'l';
+           	ItemType[3] = 'e';
+           	ItemType[4] = '\0';
+           }
+        	L2_DEBUG_Print2(16 * 50 / 3 + 32, 2 * 16 + (valid_count) * 16, pMyComputerBuffer, "%a %a %d Bytes",
+												ItemType,
                                             name,
-                                            L1_NETWORK_4BytesToUINT32(pItems[i].FileLength),
-                                            pItems[i].Attribute[0]);			
+                                            L1_NETWORK_4BytesToUINT32(pItems[i].FileLength));			
 			valid_count++;
-		}
-		
+		}		
 	}
 	else if (FileSystemType == FILE_SYSTEM_NTFS)
 	{
-		L2_NTFS_MFTRead(Index);
-    	L2_FILE_NTFS_MFTDollarRootFileAnalysis(BufferMFT);			
+		// get MFT $ROOT item. 
+		L2_FILE_NTFS_MFT_Item_Read(Index, 5);
+
+		// get data runs
+    	L2_FILE_NTFS_MFTDollarRootFileAnalysis(BufferMFT);		
+
+    	// use data run get root path item index
 	    L2_FILE_NTFS_RootPathItemsRead(Index);
 	}
 	else if (FileSystemType == FILE_SYSTEM_OTHER)
@@ -2597,6 +2655,7 @@ void L1_MEMORY_RectangleFill(UINT8 *pBuffer,
 L2_NETWORK_Init()
 {}
 
+
 VOID L2_FILE_Transfer(MasterBootRecord *pSource, MasterBootRecordSwitched *pDest)
 {
     pDest->ReservedSelector = pSource->ReservedSelector[0] + pSource->ReservedSelector[1] * 16 * 16;
@@ -2604,6 +2663,10 @@ VOID L2_FILE_Transfer(MasterBootRecord *pSource, MasterBootRecordSwitched *pDest
     pDest->BootPathStartCluster = (UINT16)pSource->BootPathStartCluster[0] + pSource->BootPathStartCluster[1] * 16 * 16 + pSource->BootPathStartCluster[2] * 16 * 16 * 16 * 16, pSource->BootPathStartCluster[3] * 16 * 16 * 16 * 16 * 16 * 16;
     pDest->NumFATS      = pSource->NumFATS[0];
     pDest->SectorOfCluster = pSource->SectorOfCluster[0];
+
+	//Todo: the other parameters can compute like above too
+	//Current only get parameters we need to use
+    
 	L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "ReservedSelector:%d SectorsPerFat:%d BootPathStartCluster: %d NumFATS:%d SectorOfCluster:%d", 
 											    pDest->ReservedSelector,
 											    pDest->SectorsPerFat,
@@ -2629,7 +2692,7 @@ EFI_STATUS L2_STORE_PartitionAnalysisFSM()
 	            L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
 				  
 			 	  // analysis data area of patition
-			 	  L1_FILE_FAT32_FirstSelectorAnalysis(Buffer1, &MBRSwitched); 
+			 	  L1_FILE_FAT32_DataSectorAnalysis(Buffer1, &MBRSwitched); 
 
 			 	  // data sector number start include: reserved selector, fat sectors(usually is 2: fat1 and fat2), and file system boot path start cluster(usually is 2, data block start number is 2)
 			 	  sector_count = MBRSwitched.ReservedSelector + MBRSwitched.SectorsPerFat * MBRSwitched.NumFATS + MBRSwitched.BootPathStartCluster - 2;
@@ -2963,7 +3026,9 @@ float L2_MEMORY_GETs()
     UINTN ContinuousVirtualMemoryStart = 0;
     UINTN MemoryAllSize = 0;
     UINTN E820Type = 0;
-    for (UINT16 Index = 0; Index < (MemoryMapSize / DescriptorSize); Index++) 
+
+    //for (UINT16 Index = 0; Index < (MemoryMapSize / DescriptorSize); Index++) 
+    for (UINT16 Index = 0; Index < 20; Index++) 
     {
     	E820Type = 0;
       //L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Index:%X \n", __LINE__, Index);
@@ -3246,7 +3311,7 @@ EFI_STATUS L3_WINDOW_Create(UINT8 *pBuffer, UINT8 *pParent, UINT16 Width, UINT16
 		x += 64;
 
 		char type[10] = "OTHER";   
-		UINT8 FileSystemType = L2_STORE_PartitionAnalysis2(i);
+		UINT8 FileSystemType = L2_FILE_PartitionTypeAnalysis(i);
 		if (FILE_SYSTEM_FAT32 == FileSystemType)
 		{
 			type[0] = 'F';
