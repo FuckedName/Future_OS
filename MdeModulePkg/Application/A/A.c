@@ -190,6 +190,10 @@ char pKeyboardInputBuffer[KEYBOARD_BUFFER_LENGTH] = {0};
 #define FILE_SYSTEM_FAT32  1
 #define FILE_SYSTEM_NTFS   2
 
+#define MOUSE_NO_CLICKED 0
+#define MOUSE_LEFT_CLICKED 1
+#define MOUSE_RIGHT_CLICKED 2
+
 extern EFI_SIMPLE_FILE_SYSTEM_PROTOCOL *gSimpleFileSystem; 
 
 UINT16 StatusErrorCount = 0;
@@ -239,6 +243,8 @@ int Nodei = 0;
 
 UINT8 *FAT32_Table = NULL;
 
+UINT8 *pStartMenuBuffer = NULL;
+
 UINT8 *sChineseChar = NULL;
 UINT8 *pWallPaperBuffer = NULL;
 //UINT8 sChineseChar[267616];
@@ -252,6 +258,11 @@ UINT16 MyComputerPositionY = 160;
 UINT16 MouseClickWindowWidth = 300;
 UINT16 MouseClickWindowHeight = 400;
 
+
+UINT16 StartMenuWidth = 16 * 10;
+UINT16 StartMenuHeight = 16 * 20;
+UINT16 StartMenuPositionX;
+UINT16 StartMenuPositionY;
 
 UINT64 sector_count = 0;
 UINT32 FileBlockStart = 0;
@@ -2395,6 +2406,13 @@ L2_MOUSE_Moveover()
 	    Color.Blue	= 0xFF;
 	    //L1_MEMORY_RectangleFill(pDeskBuffer, 3,     ScreenHeight - 21, 13,     ScreenHeight - 11, 1, Color);
     	L2_GRAPHICS_Copy(pDeskDisplayBuffer, pMouseSelectedBuffer, ScreenWidth, ScreenHeight, 32, 16, 3, ScreenHeight - 21);
+
+		
+    	if (MouseClickFlag == MOUSE_LEFT_CLICKED)
+    	{			
+    		L2_GRAPHICS_Copy(pDeskDisplayBuffer, pStartMenuBuffer, ScreenWidth, ScreenHeight, StartMenuWidth, StartMenuHeight, StartMenuPositionX, StartMenuPositionY);
+    	}
+    	
     }
     
 	// this is draw a rectangle when mouse move on disk partition in my computer window
@@ -3027,8 +3045,8 @@ float L2_MEMORY_GETs()
     UINTN MemoryAllSize = 0;
     UINTN E820Type = 0;
 
-    //for (UINT16 Index = 0; Index < (MemoryMapSize / DescriptorSize); Index++) 
-    for (UINT16 Index = 0; Index < 20; Index++) 
+    for (UINT16 Index = 0; Index < (MemoryMapSize / DescriptorSize); Index++) 
+    //for (UINT16 Index = 0; Index < 20; Index++) 
     {
     	E820Type = 0;
       //L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Index:%X \n", __LINE__, Index);
@@ -3071,12 +3089,12 @@ float L2_MEMORY_GETs()
 	      case EfiConventionalMemory:
 		        E820Type = E820_RAM; // Random access memory
 		        MemoryClassifySize[3] += MemoryMap->NumberOfPages;
-           	 /*L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Index: %d: Start: %X Pages:%X End: %X\n", __LINE__, 
+           	 L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Index: %d: Start: %X Pages:%X End: %X\n", __LINE__, 
                                                                             Index,
                                                                             MemoryMap->PhysicalStart, 
                                                                             MemoryMap->NumberOfPages,
                                                                             MemoryMap->PhysicalStart + MemoryMap->NumberOfPages * 4 * 1024);
-               */                                                             
+               /**/                                                             
 		        if (lastPhysicalEnd != MemoryMap->PhysicalStart)
                {
       				/*  DEBUG ((EFI_D_INFO, "%d: E820Type:%X Start:%X Virtual Start:%X Number:%X\n", __LINE__, 
@@ -3631,10 +3649,10 @@ L2_MOUSE_Event (IN EFI_EVENT Event, IN VOID *Context)
         
 	    L2_GRAPHICS_RightClickMenu(iMouseX, iMouseY);
 
-		if (MouseClickFlag == 0)
-		    MouseClickFlag = 1;
-		else if (MouseClickFlag == 1)
-			MouseClickFlag = 0;
+		if (MouseClickFlag == MOUSE_NO_CLICKED)
+		    MouseClickFlag = MOUSE_LEFT_CLICKED;
+		else if (MouseClickFlag == MOUSE_LEFT_CLICKED)
+			MouseClickFlag = MOUSE_NO_CLICKED;
 	    //DrawAsciiCharUseBuffer(GraphicsOutput, 20 + process2_i * 8 + 16, 60, 'E', Color);  
     }
     
@@ -4017,6 +4035,14 @@ EFI_STATUS L2_COMMON_Initial()
         return -1;
     }		
     
+	pStartMenuBuffer = (UINT8 *)AllocateZeroPool(StartMenuWidth * StartMenuHeight * 4);
+	if (NULL == pStartMenuBuffer)
+    {
+        DEBUG ((EFI_D_INFO, "ChineseCharArrayInit pStartMenuBuffer Failed: %x!\n "));
+        L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: pStartMenuBuffer AllocateZeroPool failed\n",  __LINE__);
+        return -1;
+    }	
+    
 	MouseColor.Blue  = 0xff;
     MouseColor.Red   = 0xff;
     MouseColor.Green = 0xff;
@@ -4026,6 +4052,9 @@ EFI_STATUS L2_COMMON_Initial()
 
 	FileReadCount = 0;
 	FAT32_Table = NULL;
+    
+    StartMenuPositionX = 0;
+    StartMenuPositionY = ScreenHeight - 16 * 20 - 21;
 
 	
     INFO_SELF(L"\r\n");
