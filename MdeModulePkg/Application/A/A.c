@@ -208,6 +208,8 @@ UINT16 DebugPrintY = 0;
 
 UINT8 MouseClickFlag = 0;
 INT8 DisplayRootItemsFlag = 0;
+INT8 DisplayMyComputerFlag = 0;
+INT8 DisplayStartMenuFlag = 0;
 UINT8 PreviousItem = -1;
 
 
@@ -2352,7 +2354,8 @@ VOID L2_GRAPHICS_LayerCompute(int iMouseX, int iMouseY, UINT8 MouseClickFlag)
 	L2_GRAPHICS_Copy(pDeskDisplayBuffer, pDeskBuffer, ScreenWidth, ScreenHeight, ScreenWidth, ScreenHeight, 0, 0);
     //L2_DEBUG_Print1(DISPLAY_X, DISPLAY_Y, "%d: GraphicsLayerCompute\n", __LINE__);
 
-	L2_GRAPHICS_Copy(pDeskDisplayBuffer, pMyComputerBuffer, ScreenWidth, ScreenHeight, MyComputerWidth, MyComputerHeight, MyComputerPositionX, MyComputerPositionY);
+	if (DisplayMyComputerFlag)
+		L2_GRAPHICS_Copy(pDeskDisplayBuffer, pMyComputerBuffer, ScreenWidth, ScreenHeight, MyComputerWidth, MyComputerHeight, MyComputerPositionX, MyComputerPositionY);
 
 	//my computer
 	if (MouseClickFlag == 1 && pDeskDisplayBuffer[(iMouseY * ScreenWidth + iMouseX) * 4 + 3] == GRAPHICS_LAYER_MY_COMPUTER)
@@ -2407,15 +2410,43 @@ L2_MOUSE_Moveover()
 	    //L1_MEMORY_RectangleFill(pDeskBuffer, 3,     ScreenHeight - 21, 13,     ScreenHeight - 11, 1, Color);
     	L2_GRAPHICS_Copy(pDeskDisplayBuffer, pMouseSelectedBuffer, ScreenWidth, ScreenHeight, 32, 16, 3, ScreenHeight - 21);
 
-		
-    	if (MouseClickFlag == MOUSE_LEFT_CLICKED)
-    	{			
-    		L2_GRAPHICS_Copy(pDeskDisplayBuffer, pStartMenuBuffer, ScreenWidth, ScreenHeight, StartMenuWidth, StartMenuHeight, StartMenuPositionX, StartMenuPositionY);
-    	}
-    	
+		if (MouseClickFlag == MOUSE_LEFT_CLICKED)
+			DisplayStartMenuFlag = 1;			
     }
     
+    if (DisplayStartMenuFlag == 1)
+    {           
+        int x = 3, y = 6;
+        Color.Red   = 0xff;
+        Color.Green = 0xff;
+        Color.Blue   = 0x00;
+        L2_GRAPHICS_ChineseCharDraw2(pStartMenuBuffer, 3 , 6,     (46 - 1 ) * 94 + 50 - 1, Color, StartMenuWidth);    
+        x += 16;
+        
+        L2_GRAPHICS_ChineseCharDraw2(pStartMenuBuffer, x , y,     (21 - 1) * 94 + 36 - 1, Color, StartMenuWidth);
+        x += 16;
+        
+        L2_GRAPHICS_ChineseCharDraw2(pStartMenuBuffer, x , y,     (21 - 1) * 94 + 71 - 1, Color, StartMenuWidth);
+        x += 16;
+        
+        L2_GRAPHICS_ChineseCharDraw2(pStartMenuBuffer, x , y,     (36 - 1) * 94 + 52 - 1, Color, StartMenuWidth);   
+        x += 16;
+            
+        L2_GRAPHICS_Copy(pDeskDisplayBuffer, pStartMenuBuffer, ScreenWidth, ScreenHeight, StartMenuWidth, StartMenuHeight, StartMenuPositionX, StartMenuPositionY);
+    }
+
+
+	if (MouseClickFlag == MOUSE_LEFT_CLICKED && DisplayStartMenuFlag == 1 
+		 && iMouseX >= 3 + StartMenuPositionX && iMouseX <= 3 + 4 * 16  + StartMenuPositionX  
+		 && iMouseY >= 3 + StartMenuPositionY && iMouseY <= 3 + StartMenuPositionY + 16)
+	{
+		DisplayMyComputerFlag = 1;
+	}
+	
 	// this is draw a rectangle when mouse move on disk partition in my computer window
+	if (DisplayMyComputerFlag == 0)
+		return;
+		
 	for (UINT16 i = 0; i < PartitionCount; i++)
 	{		
 		if (iMouseX >= MyComputerPositionX + 50 && iMouseX <= MyComputerPositionX + 50 + 16 * 6
@@ -4054,7 +4085,7 @@ EFI_STATUS L2_COMMON_Initial()
 	FAT32_Table = NULL;
     
     StartMenuPositionX = 0;
-    StartMenuPositionY = ScreenHeight - 16 * 20 - 21;
+    StartMenuPositionY = ScreenHeight - 16 * 20 - 25;
 
 	
     INFO_SELF(L"\r\n");
