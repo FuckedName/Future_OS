@@ -2411,9 +2411,14 @@ L2_MOUSE_Moveover()
     	L2_GRAPHICS_Copy(pDeskDisplayBuffer, pMouseSelectedBuffer, ScreenWidth, ScreenHeight, 32, 16, 3, ScreenHeight - 21);
 
 		if (MouseClickFlag == MOUSE_LEFT_CLICKED)
-			DisplayStartMenuFlag = 1;			
+		{
+			DisplayStartMenuFlag = 1;	
+			MouseClickFlag = MOUSE_NO_CLICKED;
+		}
+		
     }
-    
+
+	// display menu area
     if (DisplayStartMenuFlag == 1)
     {           
         int x = 3, y = 6;
@@ -2435,7 +2440,7 @@ L2_MOUSE_Moveover()
         L2_GRAPHICS_Copy(pDeskDisplayBuffer, pStartMenuBuffer, ScreenWidth, ScreenHeight, StartMenuWidth, StartMenuHeight, StartMenuPositionX, StartMenuPositionY);
     }
 
-
+	// Display my computer window
 	if (MouseClickFlag == MOUSE_LEFT_CLICKED && DisplayStartMenuFlag == 1 
 		 && iMouseX >= 3 + StartMenuPositionX && iMouseX <= 3 + 4 * 16  + StartMenuPositionX  
 		 && iMouseY >= 3 + StartMenuPositionY && iMouseY <= 3 + StartMenuPositionY + 16)
@@ -2446,7 +2451,19 @@ L2_MOUSE_Moveover()
 	// this is draw a rectangle when mouse move on disk partition in my computer window
 	if (DisplayMyComputerFlag == 0)
 		return;
-		
+
+	// Hide My computer window
+	if (DisplayMyComputerFlag == 1 && iMouseX >= MyComputerPositionX + MyComputerWidth - 20 && iMouseX <=  MyComputerPositionX + MyComputerWidth - 4 
+			&& iMouseY >= MyComputerPositionY + 0 && iMouseY <= MyComputerPositionY + 16 && MouseClickFlag == MOUSE_LEFT_CLICKED)
+	{
+        Color.Red   = 0xff;
+        Color.Green = 0x00;
+        Color.Blue   = 0x00;
+		L2_GRAPHICS_RectangleDraw(pMouseSelectedBuffer, 0,  0, 31, 15, 1,  Color, 32);
+		DisplayMyComputerFlag = 0;
+		L2_GRAPHICS_Copy(pDeskDisplayBuffer, pMouseSelectedBuffer, ScreenWidth, ScreenHeight, 32, 16,MyComputerPositionX + MyComputerWidth - 20, MyComputerPositionY);			
+	}
+	
 	for (UINT16 i = 0; i < PartitionCount; i++)
 	{		
 		if (iMouseX >= MyComputerPositionX + 50 && iMouseX <= MyComputerPositionX + 50 + 16 * 6
@@ -3254,6 +3271,10 @@ EFI_STATUS L3_WINDOW_Create(UINT8 *pBuffer, UINT8 *pParent, UINT16 Width, UINT16
     L2_GRAPHICS_ChineseCharDraw2(pBuffer, 3 + 16 , 6,     (21 - 1) * 94 + 36 - 1, Color, Width);
     L2_GRAPHICS_ChineseCharDraw2(pBuffer, 3 + 16 * 2, 6, (21 - 1) * 94 + 71 - 1, Color, Width);
     L2_GRAPHICS_ChineseCharDraw2(pBuffer, 3 + 16 * 3, 6, (36 - 1) * 94 + 52 - 1, Color, Width);
+
+    L2_GRAPHICS_ChineseCharDraw2(pBuffer, MyComputerWidth - 3 * 16 - 3, 6, (12 - 1) * 94 + 58 - 1, Color, Width);
+    L2_GRAPHICS_ChineseCharDraw2(pBuffer, MyComputerWidth - 2 * 16 - 3, 6, (01 - 1) * 94 + 85 - 1, Color, Width);
+    L2_GRAPHICS_ChineseCharDraw2(pBuffer, MyComputerWidth - 1 * 16 - 3, 6, (14 - 1) * 94 + 21 - 1, Color, Width);
 
     // The Left of Window
 	for (i = 23; i < Height; i++)
