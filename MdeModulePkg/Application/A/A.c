@@ -209,6 +209,7 @@ UINT16 DebugPrintY = 0;
 UINT8 MouseClickFlag = 0;
 INT8 DisplayRootItemsFlag = 0;
 INT8 DisplayMyComputerFlag = 0;
+INT8 DisplaySystemSettingWindowFlag = 0;
 INT8 DisplayStartMenuFlag = 0;
 UINT8 PreviousItem = -1;
 
@@ -246,6 +247,7 @@ int Nodei = 0;
 UINT8 *FAT32_Table = NULL;
 
 UINT8 *pStartMenuBuffer = NULL;
+UINT8 *pSystemSettingWindowBuffer = NULL;
 
 UINT8 *sChineseChar = NULL;
 UINT8 *pWallPaperBuffer = NULL;
@@ -260,6 +262,10 @@ UINT16 MyComputerPositionY = 160;
 UINT16 MouseClickWindowWidth = 300;
 UINT16 MouseClickWindowHeight = 400;
 
+UINT16 SystemSettingWindowWidth = 16 * 10;
+UINT16 SystemSettingWindowHeight = 16 * 10;
+UINT16 SystemSettingWindowPositionX;
+UINT16 SystemSettingWindowPositionY;
 
 UINT16 StartMenuWidth = 16 * 10;
 UINT16 StartMenuHeight = 16 * 20;
@@ -442,6 +448,8 @@ const UINT8 sChinese[][32] =
 typedef enum
 {
 	GRAPHICS_LAYER_DESK = 0,
+	GRAPHICS_LAYER_START_MENU,
+	GRAPHICS_LAYER_SYSTEM_CONFIG_WINDOW,
 	GRAPHICS_LAYER_MY_COMPUTER,
 	GRAPHICS_LAYER_MOUSE
 }GRAPHICS_LAYER_ID;
@@ -2026,6 +2034,7 @@ EFI_STATUS L1_FILE_FAT32_DataSectorAnalysis(UINT8 *p, MasterBootRecordSwitched *
 
 	// 大端字节序：低位字节在高地址，高位字节低地址上。这是人类读写数值的方法。
     // 小端字节序：与上面相反。低位字节在低地址，高位字节在高地址。
+/*
 	L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d ReservedSelector:%02X%02X SectorsPerFat:%02X%02X%02X%02X BootPathStartCluster:%02X%02X%02X%02X NumFATS: %X", 
 	                                    __LINE__,
 	                                    pMBR->ReservedSelector[0], pMBR->ReservedSelector[1], 
@@ -2033,7 +2042,7 @@ EFI_STATUS L1_FILE_FAT32_DataSectorAnalysis(UINT8 *p, MasterBootRecordSwitched *
 	                                    pMBR->BootPathStartCluster[0], pMBR->BootPathStartCluster[1], pMBR->BootPathStartCluster[2], pMBR->BootPathStartCluster[3],
 	                                    pMBR->NumFATS[0]);
 
-	
+	*/
 	L2_FILE_Transfer(pMBR, pMBRSwitched);
 
 	FreePool(pMBR);
@@ -2043,7 +2052,7 @@ EFI_STATUS L1_FILE_FAT32_DataSectorAnalysis(UINT8 *p, MasterBootRecordSwitched *
 // analysis a partition 
 EFI_STATUS L2_FILE_FAT32_DataSectorHandle(UINT16 DeviceID)
 {
-    L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d DeviceID: %d\n", __LINE__, DeviceID);
+    //L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d DeviceID: %d\n", __LINE__, DeviceID);
     //printf( "RootPathAnalysis\n" );
     EFI_STATUS Status ;
     UINT8 Buffer1[DISK_BUFFER_SIZE];
@@ -2067,16 +2076,17 @@ EFI_STATUS L2_FILE_FAT32_DataSectorHandle(UINT16 DeviceID)
 }
 EFI_STATUS L2_FILE_NTFS_RootPathItemsRead(UINT8 i)
 {
-	L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d DeviceType: %d, SectorCount: %lld\n", __LINE__, i);
+	//L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d DeviceType: %d, SectorCount: %lld\n", __LINE__, i);
     EFI_STATUS Status ;
     UINT8 BufferBlock[DISK_BLOCK_BUFFER_SIZE];
 
 	UINT8 k = 0;
 	UINT16 lastOffset = 0;
-	
+	/*
 	L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Offset:%ld OccupyCluster:%ld\n",  __LINE__, 
 																	 (A0Indexes[k].Offset + lastOffset) * 8, 
 																	 A0Indexes[k].OccupyCluster * 8);
+	*/
 	// cluster need to multi with 8 then it is sector.
    Status = L1_STORE_READ(i, (A0Indexes[k].Offset + lastOffset) * 8 , A0Indexes[k].OccupyCluster * 8, BufferBlock);
     if (EFI_ERROR(Status))
@@ -2101,12 +2111,14 @@ VOID L1_FILE_NTFS_DollerRootTransfer(DOLLAR_BOOT *pSource, DollarBootSwitched *p
     pDest->MFT_StartCluster = L1_NETWORK_8BytesToUINT64(pSource->MFT_StartCluster);
     pDest->MFT_MirrStartCluster = L1_NETWORK_8BytesToUINT64(pSource->MFT_MirrStartCluster);
     
+	/*
 	L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d BitsOfSector:%ld SectorOfCluster:%d AllSectorCount: %llu MFT_StartCluster:%llu MFT_MirrStartCluster:%llu", __LINE__,
 											    pDest->BitsOfSector,
 											    pDest->SectorOfCluster,
 											    pDest->AllSectorCount,
 											    pDest->MFT_StartCluster,
 											    pDest->MFT_MirrStartCluster);
+	*/
 }
 
 
@@ -2119,7 +2131,8 @@ EFI_STATUS L2_FILE_NTFS_FirstSelectorAnalysis(UINT8 *p, DollarBootSwitched *pNTF
 
     // 大端字节序：低位字节在高地址，高位字节低地址上。这是人类读写数值的方法。
     // 小端字节序：与上面相反。低位字节在低地址，高位字节在高地址。
-    L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d OEM:%c%c%c%c%c%c%c%c, BitsOfSector:%02X%02X SectorOfCluster:%02X ReservedSelector:%02X%02X Description: %X, size: %d", 
+	/*
+	L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d OEM:%c%c%c%c%c%c%c%c, BitsOfSector:%02X%02X SectorOfCluster:%02X ReservedSelector:%02X%02X Description: %X, size: %d", 
                         											  __LINE__,
                         											  pDollarBoot->OEM[0],
                         											  pDollarBoot->OEM[1],
@@ -2171,7 +2184,7 @@ EFI_STATUS L2_FILE_NTFS_FirstSelectorAnalysis(UINT8 *p, DollarBootSwitched *pNTF
                                         						  pDollarBoot->ClusterPerIndex[1], 
                                         						  pDollarBoot->ClusterPerIndex[2], 
                                         						  pDollarBoot->ClusterPerIndex[3]);
-
+	*/
     L1_FILE_NTFS_DollerRootTransfer(pDollarBoot, pNTFSBootSwitched);
 
     FreePool(pDollarBoot);
@@ -2181,7 +2194,7 @@ EFI_STATUS L2_FILE_NTFS_FirstSelectorAnalysis(UINT8 *p, DollarBootSwitched *pNTF
 // all partitions analysis
 EFI_STATUS L2_FILE_PartitionTypeAnalysis(UINT16 DeviceID)
 {    
-    L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d DeviceID: %d\n", __LINE__, DeviceID);
+    //L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d DeviceID: %d\n", __LINE__, DeviceID);
     EFI_STATUS Status;
     UINT8 Buffer1[DISK_BUFFER_SIZE] = {0};
 
@@ -2197,14 +2210,14 @@ EFI_STATUS L2_FILE_PartitionTypeAnalysis(UINT16 DeviceID)
 	// FAT32 file system
 	if (Buffer1[0x52] == 'F' && Buffer1[0x53] == 'A' && Buffer1[0x54] == 'T' && Buffer1[0x55] == '3' && Buffer1[0x56] == '2')	
  	{				 	
- 		L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: FAT32\n",  __LINE__);
+ 		//L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: FAT32\n",  __LINE__);
  		// analysis data area of patition
 	 	L1_FILE_FAT32_DataSectorAnalysis(Buffer1, &MBRSwitched); 
 
 	 	// data sector number start include: reserved selector, fat sectors(usually is 2: fat1 and fat2), and file system boot path start cluster(usually is 2, data block start number is 2)
 	 	sector_count = MBRSwitched.ReservedSelector + MBRSwitched.SectorsPerFat * MBRSwitched.NumFATS + MBRSwitched.BootPathStartCluster - 2;
 	 	BlockSize = MBRSwitched.SectorOfCluster * 512;
-   		L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: sector_count:%ld BlockSize: %d\n",  __LINE__, sector_count, BlockSize);
+   		//L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: sector_count:%ld BlockSize: %d\n",  __LINE__, sector_count, BlockSize);
    		return FILE_SYSTEM_FAT32;
 	}
    	// NTFS
@@ -2212,13 +2225,13 @@ EFI_STATUS L2_FILE_PartitionTypeAnalysis(UINT16 DeviceID)
    	{
 		L2_FILE_NTFS_FirstSelectorAnalysis(Buffer1, &NTFSBootSwitched);
 		sector_count = NTFSBootSwitched.MFT_StartCluster * 8;
-   		L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: NTFS sector_count:%llu\n",  __LINE__, sector_count);
+   		//L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: NTFS sector_count:%llu\n",  __LINE__, sector_count);
    		return FILE_SYSTEM_NTFS;
    	}
    	// the other file system can add at this place
    	else
    	{
-   		L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: \n",  __LINE__);
+   		//L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: \n",  __LINE__);
    		return FILE_SYSTEM_OTHER;
    	}               	
 
@@ -2229,7 +2242,7 @@ EFI_STATUS L2_FILE_PartitionTypeAnalysis(UINT16 DeviceID)
 // all partitions analysis
 EFI_STATUS L2_STORE_PartitionAnalysis()
 {    
-    L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d PartitionAnalysisFSM\n", __LINE__);
+    //L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d PartitionAnalysisFSM\n", __LINE__);
     EFI_STATUS Status ;
     UINTN i;
     EFI_HANDLE *ControllerHandle = NULL;
@@ -2281,7 +2294,7 @@ EFI_STATUS L2_STORE_PartitionAnalysis()
 
 L2_STORE_PartitionItemsPrint(UINT16 Index)
 {
-	L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: \n",  __LINE__);
+	//L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: \n",  __LINE__);
 	
 	// this code may be have some problems, because my USB file system is FAT32, my Disk file system is NTFS.
 	// others use this code must be careful...
@@ -2359,6 +2372,12 @@ VOID L2_GRAPHICS_LayerCompute(int iMouseX, int iMouseY, UINT8 MouseClickFlag)
 	if (DisplayMyComputerFlag)
 		L2_GRAPHICS_Copy(pDeskDisplayBuffer, pMyComputerBuffer, ScreenWidth, ScreenHeight, MyComputerWidth, MyComputerHeight, MyComputerPositionX, MyComputerPositionY);
 
+	if (DisplaySystemSettingWindowFlag)
+		L2_GRAPHICS_Copy(pDeskDisplayBuffer, pSystemSettingWindowBuffer, ScreenWidth, ScreenHeight, SystemSettingWindowWidth, SystemSettingWindowHeight, SystemSettingWindowPositionX, SystemSettingWindowPositionY);
+
+	if (DisplayStartMenuFlag)
+		L2_GRAPHICS_Copy(pDeskDisplayBuffer, pStartMenuBuffer, ScreenWidth, ScreenHeight, StartMenuWidth, StartMenuHeight, StartMenuPositionX, StartMenuPositionY);
+
 	//my computer
 	if (MouseClickFlag == 1 && pDeskDisplayBuffer[(iMouseY * ScreenWidth + iMouseX) * 4 + 3] == GRAPHICS_LAYER_MY_COMPUTER)
 	{
@@ -2424,53 +2443,64 @@ typedef struct
 	EFI_STATUS    						(*pFunc)(); 
 }START_MENU_STATE_TRANSFORM;
 
+START_MENU_STATE StartMenuNextState = CLICK_INIT_STATE;
 
 UINT16 L2_MOUSE_ClickEventGet()
-{
-	if ( MouseClickFlag != MOUSE_LEFT_CLICKED)
-	{
-		return;
-	}
+{	
+	//L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: iMouseX: %d iMouseY: %d MouseClickFlag: %d\n", __LINE__, iMouseX, iMouseY, MouseClickFlag);
 
 	//start button
     if (iMouseX >= 0 && iMouseX <= 16 + 16 * 2
         && iMouseY >= ScreenHeight - 21 && iMouseY <= ScreenHeight)
     {
+    	L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: START_MENU_CLICKED_EVENT\n", __LINE__);
     	return START_MENU_CLICKED_EVENT;
     }
 
 	// Display my computer window
-	if (MouseClickFlag == MOUSE_LEFT_CLICKED && DisplayStartMenuFlag == 1 
-		 && iMouseX >= 3 + StartMenuPositionX && iMouseX <= 3 + 4 * 16  + StartMenuPositionX  
+	if (iMouseX >= 3 + StartMenuPositionX && iMouseX <= 3 + 4 * 16  + StartMenuPositionX  
 		 && iMouseY >= 3 + StartMenuPositionY && iMouseY <= 3 + StartMenuPositionY + 16)
 	{
+    	L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: MY_COMPUTER_CLICKED_EVENT\n", __LINE__);
 		return MY_COMPUTER_CLICKED_EVENT;
 	}
 
-	// Hide My computer window
-	if (DisplayMyComputerFlag == 1 && iMouseX >= MyComputerPositionX + MyComputerWidth - 20 && iMouseX <=  MyComputerPositionX + MyComputerWidth - 4 
-			&& iMouseY >= MyComputerPositionY + 0 && iMouseY <= MyComputerPositionY + 16 && MouseClickFlag == MOUSE_LEFT_CLICKED)
+	// Display Setting window
+	if (iMouseX >= 3 + StartMenuPositionX && iMouseX <= 3 + 4 * 16  + StartMenuPositionX  
+		 && iMouseY >= 3 + StartMenuPositionY + 16 && iMouseY <= 3 + StartMenuPositionY + 16 * 2)
 	{
-		return MY_COMPUTER_CLOSE_CLICKED_EVENT;
-		DisplayMyComputerFlag = 0;
+    	L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: SETTING_CLICKED_EVENT\n", __LINE__);
+		return SETTING_CLICKED_EVENT;
 	}
+
+	// Hide My computer window
+	if (iMouseX >= MyComputerPositionX + MyComputerWidth - 20 && iMouseX <=  MyComputerPositionX + MyComputerWidth - 4 
+			&& iMouseY >= MyComputerPositionY + 0 && iMouseY <= MyComputerPositionY + 16)
+	{
+    	L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: MY_COMPUTER_CLOSE_CLICKED_EVENT\n", __LINE__);
+		return MY_COMPUTER_CLOSE_CLICKED_EVENT;
+	}
+	
+	//DisplayMyComputerFlag = 0;
+	DisplaySystemSettingWindowFlag = 0;
+	DisplayStartMenuFlag = 0;
+	
+	StartMenuNextState = CLICK_INIT_STATE;
+
+	return START_MENU_INIT_CLICKED_EVENT;
+
 }
-
-
-typedef struct 
-{
-
-}MOUSE_OPERATION;
-
 
 L2_MOUSE_SettingClicked()
-{
-
+{	
+	L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d L2_MOUSE_SettingClicked\n", __LINE__);
+	DisplaySystemSettingWindowFlag = 1;
+	
 }
 
-
 L2_MOUSE_MyComputerClicked()
-{	
+{		
+	L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d L2_MOUSE_MyComputerClicked\n", __LINE__);
 	EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
 	Color.Red = 0xff;
 	Color.Green= 0x00;
@@ -2502,6 +2532,7 @@ L2_MOUSE_MyComputerClicked()
 
 L2_MOUSE_MENU_Clicked()
 {
+	L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d L2_MOUSE_MENU_Clicked\n", __LINE__);
 	EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
 	Color.Red	= 0xff;
 	Color.Green = 0x00;
@@ -2514,40 +2545,16 @@ L2_MOUSE_MENU_Clicked()
 	Color.Blue	= 0xFF;
 	//L1_MEMORY_RectangleFill(pDeskBuffer, 3,	  ScreenHeight - 21, 13,	 ScreenHeight - 11, 1, Color);
 	L2_GRAPHICS_Copy(pDeskDisplayBuffer, pMouseSelectedBuffer, ScreenWidth, ScreenHeight, 32, 16, 3, ScreenHeight - 21);
-
-	if (MouseClickFlag == MOUSE_LEFT_CLICKED)
-	{
-		DisplayStartMenuFlag = 1;	
-		MouseClickFlag = MOUSE_NO_CLICKED;
-	}
-	
-	// display menu area
-	if (DisplayStartMenuFlag == 1)
-	{			
-		int x = 3, y = 6;
-		Color.Red	= 0xff;
-		Color.Green = 0xff;
-		Color.Blue	 = 0x00;
-		L2_GRAPHICS_ChineseCharDraw2(pStartMenuBuffer, 3 , 6,	  (46 - 1 ) * 94 + 50 - 1, Color, StartMenuWidth);	  
-		x += 16;
 		
-		L2_GRAPHICS_ChineseCharDraw2(pStartMenuBuffer, x , y,	  (21 - 1) * 94 + 36 - 1, Color, StartMenuWidth);
-		x += 16;
-		
-		L2_GRAPHICS_ChineseCharDraw2(pStartMenuBuffer, x , y,	  (21 - 1) * 94 + 71 - 1, Color, StartMenuWidth);
-		x += 16;
-		
-		L2_GRAPHICS_ChineseCharDraw2(pStartMenuBuffer, x , y,	  (36 - 1) * 94 + 52 - 1, Color, StartMenuWidth);	
-		x += 16;
-			
-		L2_GRAPHICS_Copy(pDeskDisplayBuffer, pStartMenuBuffer, ScreenWidth, ScreenHeight, StartMenuWidth, StartMenuHeight, StartMenuPositionX, StartMenuPositionY);
-	}
+	//L2_GRAPHICS_Copy(pDeskDisplayBuffer, pStartMenuBuffer, ScreenWidth, ScreenHeight, StartMenuWidth, StartMenuHeight, StartMenuPositionX, StartMenuPositionY);
+	DisplayStartMenuFlag = 1;
 
 }
 
 
 L2_MOUSE_MyComputerCloseClicked()
 {
+	L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d L2_MOUSE_MyComputerCloseClicked\n", __LINE__);
 	DisplayMyComputerFlag = 1;
 }
 
@@ -2615,13 +2622,12 @@ L2_MOUSE_MenuButtonClick()
 START_MENU_STATE_TRANSFORM StartMenuStateTransformTable[] =
 {
 	{CLICK_INIT_STATE,          START_MENU_CLICKED_EVENT,    		MENU_CLICKED_STATE,             L2_MOUSE_MENU_Clicked},
-	{MENU_CLICKED_STATE,  		SETTING_CLICKED_EVENT,  			SETTING_CLICKED_STATE,          L2_MOUSE_SettingClicked},
 	{MENU_CLICKED_STATE,  		MY_COMPUTER_CLICKED_EVENT,  	 	MY_COMPUTER_CLICKED_STATE,      L2_MOUSE_MyComputerClicked},
+	{MENU_CLICKED_STATE,  		SETTING_CLICKED_EVENT,  			SETTING_CLICKED_STATE,          L2_MOUSE_SettingClicked},
 	{MY_COMPUTER_CLICKED_STATE, MY_COMPUTER_CLOSE_CLICKED_EVENT,  	CLICK_INIT_STATE,      			L2_MOUSE_MyComputerCloseClicked},
 };
 
 
-START_MENU_STATE	StartMenuNextState = CLICK_INIT_STATE;
 START_MENU_CURRENT_EVENT	StartMenuClickEvent = START_MENU_INIT_CLICKED_EVENT;
 
 L2_MOUSE_Moveover()
@@ -2631,22 +2637,36 @@ L2_MOUSE_Moveover()
 	Color.Red = 0xff;
 	Color.Green= 0xff;
 	Color.Blue= 0x00;
+	
+	if ( MouseClickFlag != MOUSE_LEFT_CLICKED)
+	{
+		return;
+	}
 
 	StartMenuClickEvent = L2_MOUSE_ClickEventGet();
+	
+	if (START_MENU_INIT_CLICKED_EVENT == StartMenuClickEvent)
+		return;
+	
+	L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: StartMenuClickEvent: %d \n", __LINE__, StartMenuClickEvent);
+		
+	MouseClickFlag = MOUSE_NO_CLICKED;
 	EFI_STATUS Status;
-
-	if ( StartMenuClickEvent == StartMenuStateTransformTable[StartMenuNextState].event )
+		
+	for (int i = 0; i <  sizeof(StartMenuStateTransformTable)/sizeof(StartMenuStateTransformTable[0]); i++ )
 	{
-		L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
-		StartMenuStateTransformTable[StartMenuNextState].pFunc();
-		StartMenuNextState = StartMenuStateTransformTable[StartMenuNextState].NextState;
+		L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: StartMenuStateTransformTable[i].CurrentState: %d\n", __LINE__, StartMenuStateTransformTable[i].CurrentState);
+		//L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: i: %d\n", __LINE__, i);
+		if (StartMenuStateTransformTable[i].CurrentState == StartMenuNextState 
+			&& StartMenuClickEvent == StartMenuStateTransformTable[i].event )
+		{
+			StartMenuStateTransformTable[i].pFunc();
+			StartMenuNextState = StartMenuStateTransformTable[i].NextState;
+			L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: StartMenuClickEvent: %d StartMenuNextState: %d\n", __LINE__, StartMenuClickEvent, StartMenuNextState);
+			break;
+		}	
 	}
-	else  
-	{
-		L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
-		StartMenuNextState = INIT_STATE;
-	}	
-
+	
 }
 
 
@@ -3242,12 +3262,12 @@ float L2_MEMORY_GETs()
 	      case EfiConventionalMemory:
 		        E820Type = E820_RAM; // Random access memory
 		        MemoryClassifySize[3] += MemoryMap->NumberOfPages;
-           	 L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Index: %d: Start: %X Pages:%X End: %X\n", __LINE__, 
+           	 /*L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Index: %d: Start: %X Pages:%X End: %X\n", __LINE__, 
                                                                             Index,
                                                                             MemoryMap->PhysicalStart, 
                                                                             MemoryMap->NumberOfPages,
                                                                             MemoryMap->PhysicalStart + MemoryMap->NumberOfPages * 4 * 1024);
-               /**/                                                             
+               */                                                             
 		        if (lastPhysicalEnd != MemoryMap->PhysicalStart)
                {
       				/*  DEBUG ((EFI_D_INFO, "%d: E820Type:%X Start:%X Virtual Start:%X Number:%X\n", __LINE__, 
@@ -3805,11 +3825,9 @@ L2_MOUSE_Event (IN EFI_EVENT Event, IN VOID *Context)
         DEBUG ((EFI_D_INFO, "Left button clicked\n"));
         
 	    L2_GRAPHICS_RightClickMenu(iMouseX, iMouseY);
-
-		if (MouseClickFlag == MOUSE_NO_CLICKED)
-		    MouseClickFlag = MOUSE_LEFT_CLICKED;
-		else if (MouseClickFlag == MOUSE_LEFT_CLICKED)
-			MouseClickFlag = MOUSE_NO_CLICKED;
+		
+		MouseClickFlag = (MouseClickFlag == MOUSE_NO_CLICKED) ? MOUSE_LEFT_CLICKED : MOUSE_NO_CLICKED;
+		
 	    //DrawAsciiCharUseBuffer(GraphicsOutput, 20 + process2_i * 8 + 16, 60, 'E', Color);  
     }
     
@@ -3951,6 +3969,45 @@ EFI_STATUS L2_TIMER_IntervalInit()
 	gBS->CloseEvent( TimerOne );    
 
 	return EFI_SUCCESS;
+}
+
+
+EFI_STATUS L2_GRAPHICS_StartMenuInit()
+{
+	EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
+	
+	int x = 3, y = 6;
+	Color.Red	= 0xff;
+	Color.Green = 0x00;
+	Color.Blue	= 0x00;
+
+	//我的电脑
+	L2_GRAPHICS_ChineseCharDraw2(pStartMenuBuffer, x , y,	  (46 - 1 ) * 94 + 50 - 1, Color, StartMenuWidth);	  
+	x += 16;
+	
+	L2_GRAPHICS_ChineseCharDraw2(pStartMenuBuffer, x , y,	  (21 - 1) * 94 + 36 - 1, Color, StartMenuWidth);
+	x += 16;
+	
+	L2_GRAPHICS_ChineseCharDraw2(pStartMenuBuffer, x , y,	  (21 - 1) * 94 + 71 - 1, Color, StartMenuWidth);
+	x += 16;
+	
+	L2_GRAPHICS_ChineseCharDraw2(pStartMenuBuffer, x , y,	  (36 - 1) * 94 + 52 - 1, Color, StartMenuWidth);	
+
+	//系统设置
+	x = 3;
+	y += 16;
+	L2_GRAPHICS_ChineseCharDraw2(pStartMenuBuffer, x , y,	  (47 - 1 ) * 94 + 21 - 1, Color, StartMenuWidth);	  
+	x += 16;
+	
+	L2_GRAPHICS_ChineseCharDraw2(pStartMenuBuffer, x , y,	  (45 - 1) * 94 + 19 - 1, Color, StartMenuWidth);
+	x += 16;
+	
+	L2_GRAPHICS_ChineseCharDraw2(pStartMenuBuffer, x , y,	  (41 - 1) * 94 + 72 - 1, Color, StartMenuWidth);
+	x += 16;
+	
+	L2_GRAPHICS_ChineseCharDraw2(pStartMenuBuffer, x , y,	  (54 - 1) * 94 + 35 - 1, Color, StartMenuWidth);	
+	
+
 }
 
 
@@ -4204,6 +4261,32 @@ EFI_STATUS L2_COMMON_Initial()
     MouseColor.Red   = 0xff;
     MouseColor.Green = 0xff;
 
+	for (int i = 0; i < StartMenuHeight; i++)
+		for (int j = 0; j < StartMenuWidth; j++)
+		{
+			pStartMenuBuffer[(i * StartMenuWidth + j) * 4 + 0] = 237;
+			pStartMenuBuffer[(i * StartMenuWidth + j) * 4 + 1] = 234;
+			pStartMenuBuffer[(i * StartMenuWidth + j) * 4 + 2] = 231;
+			pStartMenuBuffer[(i * StartMenuWidth + j) * 4 + 3] = GRAPHICS_LAYER_START_MENU;
+		}
+
+	pSystemSettingWindowBuffer = (UINT8 *)AllocateZeroPool(SystemSettingWindowWidth * SystemSettingWindowHeight * 4);
+	if (NULL == pSystemSettingWindowBuffer)
+    {
+        DEBUG ((EFI_D_INFO, "ChineseCharArrayInit pStartMenuBuffer Failed: %x!\n "));
+        L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: pStartMenuBuffer AllocateZeroPool failed\n",  __LINE__);
+        return -1;
+    }	
+	
+	for (int i = 0; i < SystemSettingWindowHeight; i++)
+		for (int j = 0; j < SystemSettingWindowWidth; j++)
+		{
+			pSystemSettingWindowBuffer[(i * SystemSettingWindowWidth + j) * 4 + 0] = 237;
+			pSystemSettingWindowBuffer[(i * SystemSettingWindowWidth + j) * 4 + 1] = 234;
+			pSystemSettingWindowBuffer[(i * SystemSettingWindowWidth + j) * 4 + 2] = 231;
+			pSystemSettingWindowBuffer[(i * SystemSettingWindowWidth + j) * 4 + 3] = GRAPHICS_LAYER_SYSTEM_CONFIG_WINDOW;
+		}
+	
 	iMouseX = ScreenWidth / 2;
 	iMouseY = ScreenHeight / 2;
 
@@ -4211,9 +4294,11 @@ EFI_STATUS L2_COMMON_Initial()
 	FAT32_Table = NULL;
     
     StartMenuPositionX = 0;
-    StartMenuPositionY = ScreenHeight - 16 * 20 - 25;
+    StartMenuPositionY = ScreenHeight - StartMenuHeight - 25;
 
-	
+	SystemSettingWindowPositionX = StartMenuWidth;
+	SystemSettingWindowPositionY = StartMenuPositionY + 16;
+
     INFO_SELF(L"\r\n");
 
 	return EFI_SUCCESS;
@@ -4259,6 +4344,8 @@ Main (
     L2_GRAPHICS_ChineseCharInit();
     
     L2_GRAPHICS_ScreenInit();
+	
+    L2_GRAPHICS_StartMenuInit();
     
     L3_APPLICATION_MyComputerWindow(100, 100);
     
