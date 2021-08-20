@@ -8,7 +8,7 @@ CONF_PATH: /home/x/git/edk22/Conf
 using prebuilt tools
 /home/x/git/edk22/BaseTools/BinWrappers/PosixLike/build: 行 6: -m：未找到命令
 Build environment: Linux-5.8.0-63-generic-x86_64-with-Ubuntu-20.10-groovy
-Build start time: 11:50:55, Aug.19 2021
+Build start time: 11:18:05, Aug.20 2021
 
 WORKSPACE        = /home/x/git/edk22
 EDK_TOOLS_PATH   = /home/x/git/edk22/BaseTools
@@ -16,13 +16,13 @@ CONF_PATH        = /home/x/git/edk22/Conf
 PYTHON_COMMAND   = /usr/bin/python3.8
 
 
-Architecture(s)  = X64
 
-Processing meta-data .Build target     = DEBUG
+Processing meta-data .Architecture(s)  = X64
+Build target     = DEBUG
 Toolchain        = GCC5
 
 Active Platform          = /home/x/git/edk22/EmulatorPkg/EmulatorPkg.dsc
-...filename:
+....filename:
 filename:
 filename:
 filename:
@@ -47,8 +47,8 @@ filename:
  done!
 Building ... /home/x/git/edk22/EmulatorPkg/Library/PeiEmuPeCoffGetEntryPointLib/PeiEmuPeCoffGetEntryPointLib.inf [X64]
 Building ... /home/x/git/edk22/MdePkg/Library/BaseDebugLibSerialPort/BaseDebugLibSerialPort.inf [X64]
-Building ... /home/x/git/edk22/EmulatorPkg/Library/PeiEmuSerialPortLib/PeiEmuSerialPortLib.inf [X64]
 make: 对“tbuild”无需做任何事。
+Building ... /home/x/git/edk22/EmulatorPkg/Library/PeiEmuSerialPortLib/PeiEmuSerialPortLib.inf [X64]
 make: 对“tbuild”无需做任何事。
 make: 对“tbuild”无需做任何事。
 Building ... /home/x/git/edk22/MdePkg/Library/BasePrintLib/BasePrintLib.inf [X64]
@@ -61,34 +61,32 @@ make: 对“tbuild”无需做任何事。
 Building ... /home/x/git/edk22/MdePkg/Library/BaseMemoryLib/BaseMemoryLib.inf [X64]
 make: 对“tbuild”无需做任何事。
 Building ... /home/x/git/edk22/MdePkg/Library/BaseLib/BaseLib.inf [X64]
-make: 对“tbuild”无需做任何事。
 Building ... /home/x/git/edk22/MdePkg/Library/BasePcdLibNull/BasePcdLibNull.inf [X64]
+make: 对“tbuild”无需做任何事。
 make: 对“tbuild”无需做任何事。
 Building ... /home/x/git/edk22/MdePkg/Library/RegisterFilterLibNull/RegisterFilterLibNull.inf [X64]
 make: 对“tbuild”无需做任何事。
-Building ... /home/x/git/edk22/MdeModulePkg/Library/DxeCapsuleLibNull/DxeCapsuleLibNull.inf [X64]
 Building ... /home/x/git/edk22/MdePkg/Library/UefiRuntimeLib/UefiRuntimeLib.inf [X64]
-make: 对“tbuild”无需做任何事。
-make: 对“tbuild”无需做任何事。
-make: 对“tbuild”无需做任何事。
 Building ... /home/x/git/edk22/MdeModulePkg/Library/LzmaCustomDecompressLib/LzmaCustomDecompressLib.inf [X64]
+make: 对“tbuild”无需做任何事。
+make: 对“tbuild”无需做任何事。
+make: 对“tbuild”无需做任何事。
 Building ... /home/x/git/edk22/MdeModulePkg/Library/DxeCrc32GuidedSectionExtractLib/DxeCrc32GuidedSectionExtractLib.inf [X64]
 make: 对“tbuild”无需做任何事。
 Building ... /home/x/git/edk22/MdeModulePkg/Library/CpuExceptionHandlerLibNull/CpuExceptionHandlerLibNull.inf [X64]
-make: 对“tbuild”无需做任何事。
-make: 对“tbuild”无需做任何事。
 Building ... /home/x/git/edk22/MdePkg/Library/DxeExtractGuidedSectionLib/DxeExtractGuidedSectionLib.inf [X64]
 make: 对“tbuild”无需做任何事。
 Building ... /home/x/git/edk22/MdeModulePkg/Library/DxeCoreMemoryAllocationLib/DxeCoreMemoryAllocationLib.inf [X64]
+make: 对“tbuild”无需做任何事。
 Building ... /home/x/git/edk22/MdePkg/Library/DxeCoreHobLib/DxeCoreHobLib.inf [X64]
 make: 对“tbuild”无需做任何事。
 Building ... /home/x/git/edk22/MdePkg/Library/DxeCoreEntryPoint/DxeCoreEntryPoint.inf [X64]
 make: 对“tbuild”无需做任何事。
 Building ... /home/x/git/edk22/EmulatorPkg/Library/DxeEmuStdErrSerialPortLib/DxeEmuStdErrSerialPortLib.inf [X64]
 make: 对“tbuild”无需做任何事。
+make: 对“tbuild”无需做任何事。
 Building ... /home/x/git/edk22/ShellPkg/Library/UefiShellNetwork1CommandsLib/UefiShellNetwork1CommandsLib.inf [X64]
 Building ... /home/x/git/edk22/ShellPkg/Library/UefiShellInstall1CommandsLib/UefiShellInstall1CommandsLib.inf [X64]
-make: 对“tbuild”无需做任何事。
 make: 对“tbuild”无需做任何事。
 Building ... /home/x/git/edk22/ShellPkg/Library/UefiShellDebug1CommandsLib/UefiShellDebug1CommandsLib.inf [X64]
 make: 对“tbuild”无需做任何事。
@@ -98,12 +96,12 @@ make: 对“tbuild”无需做任何事。
 make: 对“tbuild”无需做任何事。
 make: 对“tbuild”无需做任何事。
 Building ... /home/x/git/edk22/ShellPkg/Library/UefiShellLevel1CommandsLib/UefiShellLevel1CommandsLib.inf [X64]
-make: 对“tbuild”无需做任何事。
 Building ... /home/x/git/edk22/ShellPkg/Library/UefiShellLevel2CommandsLib/UefiShellLevel2CommandsLib.inf [X64]
+make: 对“tbuild”无需做任何事。
 Building ... /home/x/git/edk22/ShellPkg/Library/UefiShellBcfgCommandLib/UefiShellBcfgCommandLib.inf [X64]
 make: 对“tbuild”无需做任何事。
-Building ... /home/x/git/edk22/MdePkg/Library/BaseIoLibIntrinsic/BaseIoLibIntrinsic.inf [X64]
 make: 对“tbuild”无需做任何事。
+Building ... /home/x/git/edk22/MdePkg/Library/BaseIoLibIntrinsic/BaseIoLibIntrinsic.inf [X64]
 Building ... /home/x/git/edk22/ShellPkg/Library/UefiShellCommandLib/UefiShellCommandLib.inf [X64]
 make: 对“tbuild”无需做任何事。
 Building ... /home/x/git/edk22/ShellPkg/Library/UefiHandleParsingLib/UefiHandleParsingLib.inf [X64]
@@ -126,8 +124,8 @@ Building ... /home/x/git/edk22/MdePkg/Library/BaseUefiDecompressLib/BaseUefiDeco
 make: 对“tbuild”无需做任何事。
 Building ... /home/x/git/edk22/MdePkg/Library/PeiExtractGuidedSectionLib/PeiExtractGuidedSectionLib.inf [X64]
 make: 对“tbuild”无需做任何事。
-Building ... /home/x/git/edk22/EmulatorPkg/Library/KeyMapLibNull/KeyMapLibNull.inf [X64]
 make: 对“tbuild”无需做任何事。
+Building ... /home/x/git/edk22/EmulatorPkg/Library/KeyMapLibNull/KeyMapLibNull.inf [X64]
 Building ... /home/x/git/edk22/EmulatorPkg/Library/DxeEmuPeCoffExtraActionLib/DxeEmuPeCoffExtraActionLib.inf [X64]
 make: 对“tbuild”无需做任何事。
 Building ... /home/x/git/edk22/EmulatorPkg/Library/DxeEmuSerialPortLib/DxeEmuSerialPortLib.inf [X64]
@@ -140,8 +138,8 @@ Building ... /home/x/git/edk22/EmulatorPkg/Library/ThunkPpiList/ThunkPpiList.inf
 make: 对“tbuild”无需做任何事。
 Building ... /home/x/git/edk22/MdePkg/Library/BasePeCoffExtraActionLibNull/BasePeCoffExtraActionLibNull.inf [X64]
 make: 对“tbuild”无需做任何事。
-Building ... /home/x/git/edk22/MdePkg/Library/BaseDebugLibNull/BaseDebugLibNull.inf [X64]
 make: 对“tbuild”无需做任何事。
+Building ... /home/x/git/edk22/MdePkg/Library/BaseDebugLibNull/BaseDebugLibNull.inf [X64]
 Building ... /home/x/git/edk22/EmulatorPkg/Library/PlatformBmLib/PlatformBmLib.inf [X64]
 make: 对“tbuild”无需做任何事。
 Building ... /home/x/git/edk22/MdeModulePkg/Library/UefiBootManagerLib/UefiBootManagerLib.inf [X64]
@@ -154,14 +152,14 @@ Building ... /home/x/git/edk22/NetworkPkg/Library/DxeUdpIoLib/DxeUdpIoLib.inf [X
 make: 对“tbuild”无需做任何事。
 Building ... /home/x/git/edk22/MdePkg/Library/BasePeCoffGetEntryPointLib/BasePeCoffGetEntryPointLib.inf [X64]
 make: 对“tbuild”无需做任何事。
-make: 对“tbuild”无需做任何事。
 Building ... /home/x/git/edk22/MdePkg/Library/UefiApplicationEntryPoint/UefiApplicationEntryPoint.inf [X64]
+make: 对“tbuild”无需做任何事。
 Building ... /home/x/git/edk22/ShellPkg/Library/UefiShellLib/UefiShellLib.inf [X64]
 make: 对“tbuild”无需做任何事。
 Building ... /home/x/git/edk22/MdeModulePkg/Library/BaseSortLib/BaseSortLib.inf [X64]
 make: 对“tbuild”无需做任何事。
-make: 对“tbuild”无需做任何事。
 Building ... /home/x/git/edk22/MdePkg/Library/UefiFileHandleLib/UefiFileHandleLib.inf [X64]
+make: 对“tbuild”无需做任何事。
 Building ... /home/x/git/edk22/MdeModulePkg/Library/CustomizedDisplayLib/CustomizedDisplayLib.inf [X64]
 make: 对“tbuild”无需做任何事。
 Building ... /home/x/git/edk22/NetworkPkg/Library/DxeIpIoLib/DxeIpIoLib.inf [X64]
@@ -174,8 +172,8 @@ Building ... /home/x/git/edk22/MdePkg/Library/DxeServicesLib/DxeServicesLib.inf 
 make: 对“tbuild”无需做任何事。
 Building ... /home/x/git/edk22/MdePkg/Library/DxeHobLib/DxeHobLib.inf [X64]
 make: 对“tbuild”无需做任何事。
-Building ... /home/x/git/edk22/MdePkg/Library/PeimEntryPoint/PeimEntryPoint.inf [X64]
 make: 对“tbuild”无需做任何事。
+Building ... /home/x/git/edk22/MdePkg/Library/PeimEntryPoint/PeimEntryPoint.inf [X64]
 Building ... /home/x/git/edk22/MdePkg/Library/PeiPcdLib/PeiPcdLib.inf [X64]
 make: 对“tbuild”无需做任何事。
 Building ... /home/x/git/edk22/MdePkg/Library/UefiScsiLib/UefiScsiLib.inf [X64]
@@ -233,8 +231,8 @@ Building ... /home/x/git/edk22/MdeModulePkg/Universal/FaultTolerantWriteDxe/Faul
 Building ... /home/x/git/edk22/MdeModulePkg/Universal/MemoryTest/NullMemoryTestDxe/NullMemoryTestDxe.inf [X64]
 Building ... /home/x/git/edk22/ShellPkg/DynamicCommand/TftpDynamicCommand/TftpDynamicCommand.inf [X64]
 make: 对“tbuild”无需做任何事。
-make: 对“tbuild”无需做任何事。
 Building ... /home/x/git/edk22/MdeModulePkg/Universal/Disk/DiskIoDxe/DiskIoDxe.inf [X64]
+make: 对“tbuild”无需做任何事。
 Building ... /home/x/git/edk22/MdeModulePkg/Universal/LoadFileOnFv2/LoadFileOnFv2.inf [X64]
 make: 对“tbuild”无需做任何事。
 Building ... /home/x/git/edk22/NetworkPkg/UefiPxeBcDxe/UefiPxeBcDxe.inf [X64]
@@ -245,12 +243,12 @@ Building ... /home/x/git/edk22/MdeModulePkg/Universal/Console/ConSplitterDxe/Con
 make: 对“tbuild”无需做任何事。
 make: 对“tbuild”无需做任何事。
 Building ... /home/x/git/edk22/NetworkPkg/MnpDxe/MnpDxe.inf [X64]
-Building ... /home/x/git/edk22/EmulatorPkg/EmuSnpDxe/EmuSnpDxe.inf [X64]
 make: 对“tbuild”无需做任何事。
+Building ... /home/x/git/edk22/EmulatorPkg/EmuSnpDxe/EmuSnpDxe.inf [X64]
 Building ... /home/x/git/edk22/MdeModulePkg/Library/VarCheckUefiLib/VarCheckUefiLib.inf [X64]
 make: 对“tbuild”无需做任何事。
-make: 对“tbuild”无需做任何事。
 Building ... /home/x/git/edk22/MdeModulePkg/Library/VariablePolicyHelperLib/VariablePolicyHelperLib.inf [X64]
+make: 对“tbuild”无需做任何事。
 make: 对“tbuild”无需做任何事。
 Building ... /home/x/git/edk22/MdeModulePkg/Library/VariablePolicyLib/VariablePolicyLibRuntimeDxe.inf [X64]
 make: 对“tbuild”无需做任何事。
@@ -269,17 +267,19 @@ Building ... /home/x/git/edk22/EmulatorPkg/EmuThunkDxe/EmuThunk.inf [X64]
 make: 对“tbuild”无需做任何事。
 make: 对“tbuild”无需做任何事。
 Building ... /home/x/git/edk22/MdeModulePkg/Universal/SmbiosDxe/SmbiosDxe.inf [X64]
-make: 对“tbuild”无需做任何事。
 Building ... /home/x/git/edk22/MdePkg/Library/BaseSynchronizationLib/BaseSynchronizationLib.inf [X64]
+make: 对“tbuild”无需做任何事。
 Building ... /home/x/git/edk22/NetworkPkg/DpcDxe/DpcDxe.inf [X64]
 make: 对“tbuild”无需做任何事。
 make: 对“tbuild”无需做任何事。
 Building ... /home/x/git/edk22/EmulatorPkg/Library/DxeTimerLib/DxeTimerLib.inf [X64]
-Building ... /home/x/git/edk22/MdeModulePkg/Bus/Scsi/ScsiDiskDxe/ScsiDiskDxe.inf [X64]
 make: 对“tbuild”无需做任何事。
+Building ... /home/x/git/edk22/MdeModulePkg/Bus/Scsi/ScsiDiskDxe/ScsiDiskDxe.inf [X64]
 make: 对“tbuild”无需做任何事。
 Building ... /home/x/git/edk22/EmulatorPkg/FvbServicesRuntimeDxe/FvbServicesRuntimeDxe.inf [X64]
 Building ... /home/x/git/edk22/NetworkPkg/Mtftp4Dxe/Mtftp4Dxe.inf [X64]
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/git/edk22/MdeModulePkg/Universal/StatusCodeHandler/Pei/StatusCodeHandlerPei.inf [X64]
 make: 对“tbuild”无需做任何事。
 Building ... /home/x/git/edk22/EmulatorPkg/ResetRuntimeDxe/Reset.inf [X64]
 make: 对“tbuild”无需做任何事。
@@ -289,12 +289,12 @@ Building ... /home/x/git/edk22/EmulatorPkg/EmuBlockIoDxe/EmuBlockIoDxe.inf [X64]
 make: 对“tbuild”无需做任何事。
 Building ... /home/x/git/edk22/MdeModulePkg/Universal/Disk/UnicodeCollation/EnglishDxe/EnglishDxe.inf [X64]
 make: 对“tbuild”无需做任何事。
-Building ... /home/x/git/edk22/MdeModulePkg/Universal/CapsuleRuntimeDxe/CapsuleRuntimeDxe.inf [X64]
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/git/edk22/MdeModulePkg/Library/DxeCapsuleLibNull/DxeCapsuleLibNull.inf [X64]
 make: 对“tbuild”无需做任何事。
 Building ... /home/x/git/edk22/MdeModulePkg/Application/Hello/Hello.inf [X64]
 make: 对“tbuild”无需做任何事。
 Building ... /home/x/git/edk22/MdeModulePkg/Universal/MonotonicCounterRuntimeDxe/MonotonicCounterRuntimeDxe.inf [X64]
-make: 对“tbuild”无需做任何事。
 Building ... /home/x/git/edk22/EmulatorPkg/RealTimeClockRuntimeDxe/RealTimeClock.inf [X64]
 make: 对“tbuild”无需做任何事。
 Building ... /home/x/git/edk22/MdeModulePkg/Core/Dxe/DxeMain.inf [X64]
@@ -303,32 +303,35 @@ Building ... /home/x/git/edk22/MdeModulePkg/Bus/Pci/PciBusDxe/PciBusDxe.inf [X64
 make: 对“tbuild”无需做任何事。
 Building ... /home/x/git/edk22/ShellPkg/Application/Shell/Shell.inf [X64]
 make: 对“tbuild”无需做任何事。
-Building ... /home/x/git/edk22/MdeModulePkg/Universal/PrintDxe/PrintDxe.inf [X64]
 make: 对“tbuild”无需做任何事。
+Building ... /home/x/git/edk22/MdeModulePkg/Universal/PrintDxe/PrintDxe.inf [X64]
 Trim --Vfr-Uni-Offset -o /home/x/git/edk22/Build/EmulatorX64/DEBUG_GCC5/FV/Ffs/7C04A583-9E3E-4f1c-AD65-E05268D0B4D1Shell/Shell.offset --ModuleName=Shell --DebugDir=/home/x/git/edk22/Build/EmulatorX64/DEBUG_GCC5/X64/ShellPkg/Application/Shell/Shell/DEBUG
 make: 对“tbuild”无需做任何事。
 Building ... /home/x/git/edk22/MdeModulePkg/Universal/DevicePathDxe/DevicePathDxe.inf [X64]
-make: 对“tbuild”无需做任何事。
 Building ... /home/x/git/edk22/EmulatorPkg/CpuRuntimeDxe/Cpu.inf [X64]
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/git/edk22/EmulatorPkg/FlashMapPei/FlashMapPei.inf [X64]
+make: 对“tbuild”无需做任何事。
 Building ... /home/x/git/edk22/MdeModulePkg/Application/A/A.inf [X64]
 make: 对“tbuild”无需做任何事。
 Building ... /home/x/git/edk22/EmulatorPkg/TimerDxe/Timer.inf [X64]
-"gcc" -MMD -MF /home/x/git/edk22/Build/EmulatorX64/DEBUG_GCC5/X64/MdeModulePkg/Application/A/A/OUTPUT/A.obj.deps -g -Os -fshort-wchar -fno-builtin -fno-strict-aliasing -Wno-array-bounds -include AutoGen.h -fno-common -ffunction-sections -fdata-sections -DSTRING_ARRAY_NAME=AStrings -m64 -fno-stack-protector "-DEFIAPI=__attribute__((ms_abi))" -maccumulate-outgoing-args -mno-red-zone -Wno-address -mcmodel=small -fpie -fno-asynchronous-unwind-tables -Wno-address -flto -DUSING_LTO -Os -D DISABLE_NEW_DEPRECATED_INTERFACES -c -o /home/x/git/edk22/Build/EmulatorX64/DEBUG_GCC5/X64/MdeModulePkg/Application/A/A/OUTPUT/./A.obj -I/home/x/git/edk22/MdeModulePkg/Application/A -I/home/x/git/edk22/Build/EmulatorX64/DEBUG_GCC5/X64/MdeModulePkg/Application/A/A/DEBUG -I/home/x/git/edk22/MdePkg -I/home/x/git/edk22/MdePkg/Include -I/home/x/git/edk22/MdePkg/Test/UnitTest/Include -I/home/x/git/edk22/MdePkg/Include/X64 -I/home/x/git/edk22/MdeModulePkg -I/home/x/git/edk22/MdeModulePkg/Include -I/home/x/git/edk22/MdeModulePkg/Library/BrotliCustomDecompressLib/brotli/c/include -I/home/x/git/edk22/ShellPkg -I/home/x/git/edk22/ShellPkg/Include /home/x/git/edk22/MdeModulePkg/Application/A/A.c
 make: 对“tbuild”无需做任何事。
-Building ... /home/x/git/edk22/EmulatorPkg/EmuGopDxe/EmuGopDxe.inf [X64]
+Building ... /home/x/git/edk22/MdeModulePkg/Core/DxeIplPeim/DxeIpl.inf [X64]
+"gcc" -MMD -MF /home/x/git/edk22/Build/EmulatorX64/DEBUG_GCC5/X64/MdeModulePkg/Application/A/A/OUTPUT/A.obj.deps -g -Os -fshort-wchar -fno-builtin -fno-strict-aliasing -Wno-array-bounds -include AutoGen.h -fno-common -ffunction-sections -fdata-sections -DSTRING_ARRAY_NAME=AStrings -m64 -fno-stack-protector "-DEFIAPI=__attribute__((ms_abi))" -maccumulate-outgoing-args -mno-red-zone -Wno-address -mcmodel=small -fpie -fno-asynchronous-unwind-tables -Wno-address -flto -DUSING_LTO -Os -D DISABLE_NEW_DEPRECATED_INTERFACES -c -o /home/x/git/edk22/Build/EmulatorX64/DEBUG_GCC5/X64/MdeModulePkg/Application/A/A/OUTPUT/./A.obj -I/home/x/git/edk22/MdeModulePkg/Application/A -I/home/x/git/edk22/Build/EmulatorX64/DEBUG_GCC5/X64/MdeModulePkg/Application/A/A/DEBUG -I/home/x/git/edk22/MdePkg -I/home/x/git/edk22/MdePkg/Include -I/home/x/git/edk22/MdePkg/Test/UnitTest/Include -I/home/x/git/edk22/MdePkg/Include/X64 -I/home/x/git/edk22/MdeModulePkg -I/home/x/git/edk22/MdeModulePkg/Include -I/home/x/git/edk22/MdeModulePkg/Library/BrotliCustomDecompressLib/brotli/c/include -I/home/x/git/edk22/ShellPkg -I/home/x/git/edk22/ShellPkg/Include /home/x/git/edk22/MdeModulePkg/Application/A/A.c
 test -e /home/x/git/edk22/Build/EmulatorX64/DEBUG_GCC5/FV/Ffs/7C04A583-9E3E-4f1c-AD65-E05268D0B4D1Shell/Shell.offset && GenSec -s EFI_SECTION_RAW -o /home/x/git/edk22/Build/EmulatorX64/DEBUG_GCC5/FV/Ffs/7C04A583-9E3E-4f1c-AD65-E05268D0B4D1Shell/ShellOffset.raw /home/x/git/edk22/Build/EmulatorX64/DEBUG_GCC5/FV/Ffs/7C04A583-9E3E-4f1c-AD65-E05268D0B4D1Shell/Shell.offset
 make: [GNUmakefile:467：/home/x/git/edk22/Build/EmulatorX64/DEBUG_GCC5/FV/Ffs/7C04A583-9E3E-4f1c-AD65-E05268D0B4D1Shell/ShellOffset.raw] 错误 1 (已忽略）
 GenFfs -t EFI_FV_FILETYPE_APPLICATION -g 7C04A583-9E3E-4f1c-AD65-E05268D0B4D1 -o /home/x/git/edk22/Build/EmulatorX64/DEBUG_GCC5/FV/Ffs/7C04A583-9E3E-4f1c-AD65-E05268D0B4D1Shell/7C04A583-9E3E-4f1c-AD65-E05268D0B4D1.ffs -oi /home/x/git/edk22/Build/EmulatorX64/DEBUG_GCC5/FV/Ffs/7C04A583-9E3E-4f1c-AD65-E05268D0B4D1Shell/7C04A583-9E3E-4f1c-AD65-E05268D0B4D1SEC1.com -oi /home/x/git/edk22/Build/EmulatorX64/DEBUG_GCC5/FV/Ffs/7C04A583-9E3E-4f1c-AD65-E05268D0B4D1Shell/ShellOffset.raw
-Building ... /home/x/git/edk22/MdeModulePkg/Core/RuntimeDxe/RuntimeDxe.inf [X64]
+Building ... /home/x/git/edk22/EmulatorPkg/EmuGopDxe/EmuGopDxe.inf [X64]
 make: 对“tbuild”无需做任何事。
+Building ... /home/x/git/edk22/MdeModulePkg/Universal/FaultTolerantWritePei/FaultTolerantWritePei.inf [X64]
+make: 对“tbuild”无需做任何事。
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/git/edk22/MdeModulePkg/Core/RuntimeDxe/RuntimeDxe.inf [X64]
 Building ... /home/x/git/edk22/MdeModulePkg/Universal/Console/ConPlatformDxe/ConPlatformDxe.inf [X64]
 make: 对“tbuild”无需做任何事。
 Building ... /home/x/git/edk22/NetworkPkg/Ip4Dxe/Ip4Dxe.inf [X64]
-make: 对“tbuild”无需做任何事。
-Building ... /home/x/git/edk22/NetworkPkg/TcpDxe/TcpDxe.inf [X64]
 /home/x/git/edk22/MdeModulePkg/Application/A/A.c:709:4: warning: declaration does not declare anything
   709 |   };
-Trim --Vfr-Uni-Offset -o /home/x/git/edk22/Build/EmulatorX64/DEBUG_GCC5/FV/Ffs/9FB1A1F3-3B71-4324-B39A-745CBB015FFFIp4Dxe/Ip4Dxe.offset --ModuleName=Ip4Dxe --DebugDir=/home/x/git/edk22/Build/EmulatorX64/DEBUG_GCC5/X64/NetworkPkg/Ip4Dxe/Ip4Dxe/DEBUG
       |    ^
 /home/x/git/edk22/MdeModulePkg/Application/A/A.c:722:4: warning: declaration does not declare anything
   722 |   };
@@ -337,149 +340,185 @@ Trim --Vfr-Uni-Offset -o /home/x/git/edk22/Build/EmulatorX64/DEBUG_GCC5/FV/Ffs/9
   723 |  };
       |   ^
 /home/x/git/edk22/MdeModulePkg/Application/A/A.c: In function ‘L2_GRAPHICS_AsciiCharDraw’:
-/home/x/git/edk22/MdeModulePkg/Application/A/A.c:1141:3: warning: ‘return’ with no value, in function returning non-void
- 1141 |   return;
+/home/x/git/edk22/MdeModulePkg/Application/A/A.c:1143:3: warning: ‘return’ with no value, in function returning non-void
+ 1143 |   return;
       |   ^~~~~~
-/home/x/git/edk22/MdeModulePkg/Application/A/A.c:1132:12: note: declared here
- 1132 | EFI_STATUS L2_GRAPHICS_AsciiCharDraw(UINT8 *pBufferDest,
+/home/x/git/edk22/MdeModulePkg/Application/A/A.c:1134:12: note: declared here
+ 1134 | EFI_STATUS L2_GRAPHICS_AsciiCharDraw(UINT8 *pBufferDest,
       |            ^~~~~~~~~~~~~~~~~~~~~~~~~
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/git/edk22/NetworkPkg/TcpDxe/TcpDxe.inf [X64]
 /home/x/git/edk22/MdeModulePkg/Application/A/A.c: In function ‘L2_GRAPHICS_AsciiCharDraw2’:
-/home/x/git/edk22/MdeModulePkg/Application/A/A.c:1287:3: warning: ‘return’ with no value, in function returning non-void
- 1287 |   return;
+/home/x/git/edk22/MdeModulePkg/Application/A/A.c:1289:3: warning: ‘return’ with no value, in function returning non-void
+ 1289 |   return;
       |   ^~~~~~
-/home/x/git/edk22/MdeModulePkg/Application/A/A.c:1278:12: note: declared here
- 1278 | EFI_STATUS L2_GRAPHICS_AsciiCharDraw2(UINT8 *pBufferDest,
+/home/x/git/edk22/MdeModulePkg/Application/A/A.c:1280:12: note: declared here
+ 1280 | EFI_STATUS L2_GRAPHICS_AsciiCharDraw2(UINT8 *pBufferDest,
       |            ^~~~~~~~~~~~~~~~~~~~~~~~~~
 /home/x/git/edk22/MdeModulePkg/Application/A/A.c: In function ‘L2_FILE_NTFS_MFTDollarRootFileAnalysis’:
-/home/x/git/edk22/MdeModulePkg/Application/A/A.c:1617:5: warning: ‘return’ with no value, in function returning non-void
- 1617 |     return ;
+/home/x/git/edk22/MdeModulePkg/Application/A/A.c:1619:5: warning: ‘return’ with no value, in function returning non-void
+ 1619 |     return ;
       |     ^~~~~~
-/home/x/git/edk22/MdeModulePkg/Application/A/A.c:1550:13: note: declared here
- 1550 | EFI_STATUS  L2_FILE_NTFS_MFTDollarRootFileAnalysis(UINT8 *pBuffer)
+/home/x/git/edk22/MdeModulePkg/Application/A/A.c:1552:13: note: declared here
+ 1552 | EFI_STATUS  L2_FILE_NTFS_MFTDollarRootFileAnalysis(UINT8 *pBuffer)
       |             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 /home/x/git/edk22/MdeModulePkg/Application/A/A.c: In function ‘L1_FILE_FAT32_DataSectorAnalysis’:
-/home/x/git/edk22/MdeModulePkg/Application/A/A.c:2035:2: warning: implicit declaration of function ‘L2_FILE_Transfer’ [-Wimplicit-function-declaration]
- 2035 |  L2_FILE_Transfer(pMBR, pMBRSwitched);
+/home/x/git/edk22/MdeModulePkg/Application/A/A.c:2037:2: warning: implicit declaration of function ‘L2_FILE_Transfer’ [-Wimplicit-function-declaration]
+ 2037 |  L2_FILE_Transfer(pMBR, pMBRSwitched);
       |  ^~~~~~~~~~~~~~~~
 /home/x/git/edk22/MdeModulePkg/Application/A/A.c: At top level:
-/home/x/git/edk22/MdeModulePkg/Application/A/A.c:2280:1: warning: return type defaults to ‘int’ [-Wimplicit-int]
- 2280 | L2_STORE_PartitionItemsPrint(UINT16 Index)
+/home/x/git/edk22/MdeModulePkg/Application/A/A.c:2282:1: warning: return type defaults to ‘int’ [-Wimplicit-int]
+ 2282 | L2_STORE_PartitionItemsPrint(UINT16 Index)
       | ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
 /home/x/git/edk22/MdeModulePkg/Application/A/A.c: In function ‘L2_STORE_PartitionItemsPrint’:
-/home/x/git/edk22/MdeModulePkg/Application/A/A.c:2340:3: warning: ‘return’ with no value, in function returning non-void
- 2340 |   return;
+/home/x/git/edk22/MdeModulePkg/Application/A/A.c:2342:3: warning: ‘return’ with no value, in function returning non-void
+ 2342 |   return;
       |   ^~~~~~
-/home/x/git/edk22/MdeModulePkg/Application/A/A.c:2280:1: note: declared here
- 2280 | L2_STORE_PartitionItemsPrint(UINT16 Index)
+/home/x/git/edk22/MdeModulePkg/Application/A/A.c:2282:1: note: declared here
+ 2282 | L2_STORE_PartitionItemsPrint(UINT16 Index)
       | ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
 /home/x/git/edk22/MdeModulePkg/Application/A/A.c: In function ‘L2_GRAPHICS_LayerCompute’:
-/home/x/git/edk22/MdeModulePkg/Application/A/A.c:2375:2: warning: implicit declaration of function ‘L2_MOUSE_Move’ [-Wimplicit-function-declaration]
- 2375 |  L2_MOUSE_Move();
+/home/x/git/edk22/MdeModulePkg/Application/A/A.c:2377:2: warning: implicit declaration of function ‘L2_MOUSE_Move’ [-Wimplicit-function-declaration]
+ 2377 |  L2_MOUSE_Move();
       |  ^~~~~~~~~~~~~
-/home/x/git/edk22/MdeModulePkg/Application/A/A.c: At top level:
-/home/x/git/edk22/MdeModulePkg/Application/A/A.c:2392:1: warning: return type defaults to ‘int’ [-Wimplicit-int]
- 2392 | L2_MOUSE_Moveover()
-      | ^~~~~~~~~~~~~~~~~
-/home/x/git/edk22/MdeModulePkg/Application/A/A.c: In function ‘L2_MOUSE_Moveover’:
-/home/x/git/edk22/MdeModulePkg/Application/A/A.c:2453:3: warning: ‘return’ with no value, in function returning non-void
- 2453 |   return;
+/home/x/git/edk22/MdeModulePkg/Application/A/A.c: In function ‘L2_MOUSE_ClickEventGet’:
+/home/x/git/edk22/MdeModulePkg/Application/A/A.c:2432:3: warning: ‘return’ with no value, in function returning non-void
+ 2432 |   return;
       |   ^~~~~~
-/home/x/git/edk22/MdeModulePkg/Application/A/A.c:2392:1: note: declared here
- 2392 | L2_MOUSE_Moveover()
-      | ^~~~~~~~~~~~~~~~~
+/home/x/git/edk22/MdeModulePkg/Application/A/A.c:2428:8: note: declared here
+ 2428 | UINT16 L2_MOUSE_ClickEventGet()
+      |        ^~~~~~~~~~~~~~~~~~~~~~
 /home/x/git/edk22/MdeModulePkg/Application/A/A.c: At top level:
-/home/x/git/edk22/MdeModulePkg/Application/A/A.c:2489:1: warning: return type defaults to ‘int’ [-Wimplicit-int]
- 2489 | L2_MOUSE_Click()
+/home/x/git/edk22/MdeModulePkg/Application/A/A.c:2466:1: warning: return type defaults to ‘int’ [-Wimplicit-int]
+ 2466 | L2_MOUSE_SettingClicked()
+      | ^~~~~~~~~~~~~~~~~~~~~~~
+Trim --Vfr-Uni-Offset -o /home/x/git/edk22/Build/EmulatorX64/DEBUG_GCC5/FV/Ffs/9FB1A1F3-3B71-4324-B39A-745CBB015FFFIp4Dxe/Ip4Dxe.offset --ModuleName=Ip4Dxe --DebugDir=/home/x/git/edk22/Build/EmulatorX64/DEBUG_GCC5/X64/NetworkPkg/Ip4Dxe/Ip4Dxe/DEBUG
+/home/x/git/edk22/MdeModulePkg/Application/A/A.c:2472:1: warning: return type defaults to ‘int’ [-Wimplicit-int]
+ 2472 | L2_MOUSE_MyComputerClicked()
+      | ^~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/x/git/edk22/MdeModulePkg/Application/A/A.c:2503:1: warning: return type defaults to ‘int’ [-Wimplicit-int]
+ 2503 | L2_MOUSE_MENU_Clicked()
+      | ^~~~~~~~~~~~~~~~~~~~~
+/home/x/git/edk22/MdeModulePkg/Application/A/A.c:2549:1: warning: return type defaults to ‘int’ [-Wimplicit-int]
+ 2549 | L2_MOUSE_MyComputerCloseClicked()
+      | ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/x/git/edk22/MdeModulePkg/Application/A/A.c:2555:1: warning: return type defaults to ‘int’ [-Wimplicit-int]
+ 2555 | L2_MOUSE_Click()
       | ^~~~~~~~~~~~~~
-/home/x/git/edk22/MdeModulePkg/Application/A/A.c:2504:1: warning: return type defaults to ‘int’ [-Wimplicit-int]
- 2504 | L2_MOUSE_MenuButtonClick()
+/home/x/git/edk22/MdeModulePkg/Application/A/A.c:2570:1: warning: return type defaults to ‘int’ [-Wimplicit-int]
+ 2570 | L2_MOUSE_MenuButtonClick()
       | ^~~~~~~~~~~~~~~~~~~~~~~~
-/home/x/git/edk22/MdeModulePkg/Application/A/A.c:2548:6: warning: conflicting types for ‘L2_MOUSE_Move’
- 2548 | VOID L2_MOUSE_Move()
+/home/x/git/edk22/MdeModulePkg/Application/A/A.c:2617:93: warning: initialization of ‘EFI_STATUS (*)()’ {aka ‘long long unsigned int (*)()’} from incompatible pointer type ‘int (*)()’ [-Wincompatible-pointer-types]
+ 2617 |  {CLICK_INIT_STATE,          START_MENU_CLICKED_EVENT,      MENU_CLICKED_STATE,             L2_MOUSE_MENU_Clicked},
+      |                                                                                             ^~~~~~~~~~~~~~~~~~~~~
+/home/x/git/edk22/MdeModulePkg/Application/A/A.c:2617:93: note: (near initialization for ‘StartMenuStateTransformTable[0].pFunc’)
+/home/x/git/edk22/MdeModulePkg/Application/A/A.c:2618:85: warning: initialization of ‘EFI_STATUS (*)()’ {aka ‘long long unsigned int (*)()’} from incompatible pointer type ‘int (*)()’ [-Wincompatible-pointer-types]
+ 2618 |  {MENU_CLICKED_STATE,    SETTING_CLICKED_EVENT,     SETTING_CLICKED_STATE,          L2_MOUSE_SettingClicked},
+      |                                                                                     ^~~~~~~~~~~~~~~~~~~~~~~
+/home/x/git/edk22/MdeModulePkg/Application/A/A.c:2618:85: note: (near initialization for ‘StartMenuStateTransformTable[1].pFunc’)
+/home/x/git/edk22/MdeModulePkg/Application/A/A.c:2619:89: warning: initialization of ‘EFI_STATUS (*)()’ {aka ‘long long unsigned int (*)()’} from incompatible pointer type ‘int (*)()’ [-Wincompatible-pointer-types]
+ 2619 |  {MENU_CLICKED_STATE,    MY_COMPUTER_CLICKED_EVENT,     MY_COMPUTER_CLICKED_STATE,      L2_MOUSE_MyComputerClicked},
+      |                                                                                         ^~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/x/git/edk22/MdeModulePkg/Application/A/A.c:2619:89: note: (near initialization for ‘StartMenuStateTransformTable[2].pFunc’)
+/home/x/git/edk22/MdeModulePkg/Application/A/A.c:2620:91: warning: initialization of ‘EFI_STATUS (*)()’ {aka ‘long long unsigned int (*)()’} from incompatible pointer type ‘int (*)()’ [-Wincompatible-pointer-types]
+ 2620 |  {MY_COMPUTER_CLICKED_STATE, MY_COMPUTER_CLOSE_CLICKED_EVENT,   CLICK_INIT_STATE,         L2_MOUSE_MyComputerCloseClicked},
+      |                                                                                           ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/home/x/git/edk22/MdeModulePkg/Application/A/A.c:2620:91: note: (near initialization for ‘StartMenuStateTransformTable[3].pFunc’)
+/home/x/git/edk22/MdeModulePkg/Application/A/A.c:2627:1: warning: return type defaults to ‘int’ [-Wimplicit-int]
+ 2627 | L2_MOUSE_Moveover()
+      | ^~~~~~~~~~~~~~~~~
+/home/x/git/edk22/MdeModulePkg/Application/A/A.c:2653:6: warning: conflicting types for ‘L2_MOUSE_Move’
+ 2653 | VOID L2_MOUSE_Move()
       |      ^~~~~~~~~~~~~
-make: 对“tbuild”无需做任何事。
-/home/x/git/edk22/MdeModulePkg/Application/A/A.c:2375:2: note: previous implicit declaration of ‘L2_MOUSE_Move’ was here
- 2375 |  L2_MOUSE_Move();
+/home/x/git/edk22/MdeModulePkg/Application/A/A.c:2377:2: note: previous implicit declaration of ‘L2_MOUSE_Move’ was here
+ 2377 |  L2_MOUSE_Move();
       |  ^~~~~~~~~~~~~
 /home/x/git/edk22/MdeModulePkg/Application/A/A.c: In function ‘L2_GRAPHICS_AsciiCharDraw3’:
-/home/x/git/edk22/MdeModulePkg/Application/A/A.c:2570:3: warning: ‘return’ with no value, in function returning non-void
- 2570 |   return;
+/home/x/git/edk22/MdeModulePkg/Application/A/A.c:2675:3: warning: ‘return’ with no value, in function returning non-void
+ 2675 |   return;
       |   ^~~~~~
-/home/x/git/edk22/MdeModulePkg/Application/A/A.c:2561:12: note: declared here
- 2561 | EFI_STATUS L2_GRAPHICS_AsciiCharDraw3(UINT8 *pBuffer,
+/home/x/git/edk22/MdeModulePkg/Application/A/A.c:2666:12: note: declared here
+ 2666 | EFI_STATUS L2_GRAPHICS_AsciiCharDraw3(UINT8 *pBuffer,
       |            ^~~~~~~~~~~~~~~~~~~~~~~~~~
 /home/x/git/edk22/MdeModulePkg/Application/A/A.c: At top level:
-/home/x/git/edk22/MdeModulePkg/Application/A/A.c:2721:1: warning: return type defaults to ‘int’ [-Wimplicit-int]
- 2721 | L2_NETWORK_Init()
+/home/x/git/edk22/MdeModulePkg/Application/A/A.c:2826:1: warning: return type defaults to ‘int’ [-Wimplicit-int]
+ 2826 | L2_NETWORK_Init()
       | ^~~~~~~~~~~~~~~
-/home/x/git/edk22/MdeModulePkg/Application/A/A.c:2725:6: warning: conflicting types for ‘L2_FILE_Transfer’
- 2725 | VOID L2_FILE_Transfer(MasterBootRecord *pSource, MasterBootRecordSwitched *pDest)
+/home/x/git/edk22/MdeModulePkg/Application/A/A.c:2830:6: warning: conflicting types for ‘L2_FILE_Transfer’
+ 2830 | VOID L2_FILE_Transfer(MasterBootRecord *pSource, MasterBootRecordSwitched *pDest)
       |      ^~~~~~~~~~~~~~~~
-/home/x/git/edk22/MdeModulePkg/Application/A/A.c:2035:2: note: previous implicit declaration of ‘L2_FILE_Transfer’ was here
- 2035 |  L2_FILE_Transfer(pMBR, pMBRSwitched);
+/home/x/git/edk22/MdeModulePkg/Application/A/A.c:2037:2: note: previous implicit declaration of ‘L2_FILE_Transfer’ was here
+ 2037 |  L2_FILE_Transfer(pMBR, pMBRSwitched);
       |  ^~~~~~~~~~~~~~~~
 /home/x/git/edk22/MdeModulePkg/Application/A/A.c: In function ‘L2_STORE_FileRead’:
-/home/x/git/edk22/MdeModulePkg/Application/A/A.c:2957:3: warning: ‘return’ with no value, in function returning non-void
- 2957 |   return;
+make: 对“tbuild”无需做任何事。
+/home/x/git/edk22/MdeModulePkg/Application/A/A.c:3062:3: warning: ‘return’ with no value, in function returning non-void
+ 3062 |   return;
       |   ^~~~~~
-/home/x/git/edk22/MdeModulePkg/Application/A/A.c:2950:5: note: declared here
- 2950 | int L2_STORE_FileRead(EVENT event)
+/home/x/git/edk22/MdeModulePkg/Application/A/A.c:3055:5: note: declared here
+ 3055 | int L2_STORE_FileRead(EVENT event)
       |     ^~~~~~~~~~~~~~~~~
 /home/x/git/edk22/MdeModulePkg/Application/A/A.c: In function ‘L1_STRING_FloatToString’:
-/home/x/git/edk22/MdeModulePkg/Application/A/A.c:3226:3: warning: ‘return’ with no value, in function returning non-void
- 3226 |   return;
+/home/x/git/edk22/MdeModulePkg/Application/A/A.c:3331:3: warning: ‘return’ with no value, in function returning non-void
+ 3331 |   return;
       |   ^~~~~~
-/home/x/git/edk22/MdeModulePkg/Application/A/A.c:3216:7: note: declared here
- 3216 | char *L1_STRING_FloatToString(float val, int precision, char *buf)
+/home/x/git/edk22/MdeModulePkg/Application/A/A.c:3321:7: note: declared here
+ 3321 | char *L1_STRING_FloatToString(float val, int precision, char *buf)
       |       ^~~~~~~~~~~~~~~~~~~~~~~
 /home/x/git/edk22/MdeModulePkg/Application/A/A.c: At top level:
-/home/x/git/edk22/MdeModulePkg/Application/A/A.c:3487:8: warning: return type defaults to ‘int’ [-Wimplicit-int]
- 3487 | EFIAPI L2_KEYBOARD_KeyPressed()
+/home/x/git/edk22/MdeModulePkg/Application/A/A.c:3592:8: warning: return type defaults to ‘int’ [-Wimplicit-int]
+ 3592 | EFIAPI L2_KEYBOARD_KeyPressed()
       |        ^~~~~~~~~~~~~~~~~~~~~~
 /home/x/git/edk22/MdeModulePkg/Application/A/A.c: In function ‘L2_TIMER_IntervalInit’:
-/home/x/git/edk22/MdeModulePkg/Application/A/A.c:3812:3: warning: ‘return’ with no value, in function returning non-void
- 3812 |   return;
+/home/x/git/edk22/MdeModulePkg/Application/A/A.c:3917:3: warning: ‘return’ with no value, in function returning non-void
+ 3917 |   return;
       |   ^~~~~~
-/home/x/git/edk22/MdeModulePkg/Application/A/A.c:3800:12: note: declared here
- 3800 | EFI_STATUS L2_TIMER_IntervalInit()
+/home/x/git/edk22/MdeModulePkg/Application/A/A.c:3905:12: note: declared here
+ 3905 | EFI_STATUS L2_TIMER_IntervalInit()
       |            ^~~~~~~~~~~~~~~~~~~~~
 /home/x/git/edk22/MdeModulePkg/Application/A/A.c: In function ‘L2_GRAPHICS_ScreenInit’:
-/home/x/git/edk22/MdeModulePkg/Application/A/A.c:3883:5: warning: ‘return’ with no value, in function returning non-void
-Building ... /home/x/git/edk22/MdeModulePkg/Application/BootManagerMenuApp/BootManagerMenuApp.inf [X64]
- 3883 |     return;
+/home/x/git/edk22/MdeModulePkg/Application/A/A.c:3988:5: warning: ‘return’ with no value, in function returning non-void
+ 3988 |     return;
       |     ^~~~~~
-/home/x/git/edk22/MdeModulePkg/Application/A/A.c:3852:12: note: declared here
- 3852 | EFI_STATUS L2_GRAPHICS_ScreenInit()
+/home/x/git/edk22/MdeModulePkg/Application/A/A.c:3957:12: note: declared here
+ 3957 | EFI_STATUS L2_GRAPHICS_ScreenInit()
       |            ^~~~~~~~~~~~~~~~~~~~~~
+Building ... /home/x/git/edk22/MdeModulePkg/Application/BootManagerMenuApp/BootManagerMenuApp.inf [X64]
 Trim --Vfr-Uni-Offset -o /home/x/git/edk22/Build/EmulatorX64/DEBUG_GCC5/FV/Ffs/EEC25BDC-67F2-4D95-B1D5-F81B2039D11DBootManagerMenuApp/BootManagerMenuApp.offset --ModuleName=BootManagerMenuApp --DebugDir=/home/x/git/edk22/Build/EmulatorX64/DEBUG_GCC5/X64/MdeModulePkg/Application/BootManagerMenuApp/BootManagerMenuApp/DEBUG
 test -e /home/x/git/edk22/Build/EmulatorX64/DEBUG_GCC5/FV/Ffs/9FB1A1F3-3B71-4324-B39A-745CBB015FFFIp4Dxe/Ip4Dxe.offset && GenSec -s EFI_SECTION_RAW -o /home/x/git/edk22/Build/EmulatorX64/DEBUG_GCC5/FV/Ffs/9FB1A1F3-3B71-4324-B39A-745CBB015FFFIp4Dxe/Ip4DxeOffset.raw /home/x/git/edk22/Build/EmulatorX64/DEBUG_GCC5/FV/Ffs/9FB1A1F3-3B71-4324-B39A-745CBB015FFFIp4Dxe/Ip4Dxe.offset
 make: [GNUmakefile:463：/home/x/git/edk22/Build/EmulatorX64/DEBUG_GCC5/FV/Ffs/9FB1A1F3-3B71-4324-B39A-745CBB015FFFIp4Dxe/Ip4DxeOffset.raw] 错误 1 (已忽略）
 GenFfs -t EFI_FV_FILETYPE_DRIVER -g 9FB1A1F3-3B71-4324-B39A-745CBB015FFF -o /home/x/git/edk22/Build/EmulatorX64/DEBUG_GCC5/FV/Ffs/9FB1A1F3-3B71-4324-B39A-745CBB015FFFIp4Dxe/9FB1A1F3-3B71-4324-B39A-745CBB015FFF.ffs -oi /home/x/git/edk22/Build/EmulatorX64/DEBUG_GCC5/FV/Ffs/9FB1A1F3-3B71-4324-B39A-745CBB015FFFIp4Dxe/Ip4DxeOffset.raw -oi /home/x/git/edk22/Build/EmulatorX64/DEBUG_GCC5/FV/Ffs/9FB1A1F3-3B71-4324-B39A-745CBB015FFFIp4Dxe/9FB1A1F3-3B71-4324-B39A-745CBB015FFFSEC2.com
+Building ... /home/x/git/edk22/MdeModulePkg/Universal/Variable/Pei/VariablePei.inf [X64]
+make: 对“tbuild”无需做任何事。
 Building ... /home/x/git/edk22/MdeModulePkg/Universal/WatchdogTimerDxe/WatchdogTimer.inf [X64]
 make: 对“tbuild”无需做任何事。
 Building ... /home/x/git/edk22/MdeModulePkg/Universal/SerialDxe/SerialDxe.inf [X64]
 make: 对“tbuild”无需做任何事。
-Building ... /home/x/git/edk22/FatPkg/EnhancedFatDxe/Fat.inf [X64]
+Building ... /home/x/git/edk22/EmulatorPkg/FirmwareVolumePei/FirmwareVolumePei.inf [X64]
 test -e /home/x/git/edk22/Build/EmulatorX64/DEBUG_GCC5/FV/Ffs/EEC25BDC-67F2-4D95-B1D5-F81B2039D11DBootManagerMenuApp/BootManagerMenuApp.offset && GenSec -s EFI_SECTION_RAW -o /home/x/git/edk22/Build/EmulatorX64/DEBUG_GCC5/FV/Ffs/EEC25BDC-67F2-4D95-B1D5-F81B2039D11DBootManagerMenuApp/BootManagerMenuAppOffset.raw /home/x/git/edk22/Build/EmulatorX64/DEBUG_GCC5/FV/Ffs/EEC25BDC-67F2-4D95-B1D5-F81B2039D11DBootManagerMenuApp/BootManagerMenuApp.offset
 make: [GNUmakefile:388：/home/x/git/edk22/Build/EmulatorX64/DEBUG_GCC5/FV/Ffs/EEC25BDC-67F2-4D95-B1D5-F81B2039D11DBootManagerMenuApp/BootManagerMenuAppOffset.raw] 错误 1 (已忽略）
 GenFfs -t EFI_FV_FILETYPE_APPLICATION -g EEC25BDC-67F2-4D95-B1D5-F81B2039D11D -o /home/x/git/edk22/Build/EmulatorX64/DEBUG_GCC5/FV/Ffs/EEC25BDC-67F2-4D95-B1D5-F81B2039D11DBootManagerMenuApp/EEC25BDC-67F2-4D95-B1D5-F81B2039D11D.ffs -oi /home/x/git/edk22/Build/EmulatorX64/DEBUG_GCC5/FV/Ffs/EEC25BDC-67F2-4D95-B1D5-F81B2039D11DBootManagerMenuApp/EEC25BDC-67F2-4D95-B1D5-F81B2039D11DSEC1.com -oi /home/x/git/edk22/Build/EmulatorX64/DEBUG_GCC5/FV/Ffs/EEC25BDC-67F2-4D95-B1D5-F81B2039D11DBootManagerMenuApp/BootManagerMenuAppOffset.raw
-Building ... /home/x/git/edk22/EmulatorPkg/Unix/Host/Host.inf [X64]
+Building ... /home/x/git/edk22/FatPkg/EnhancedFatDxe/Fat.inf [X64]
 make: 对“tbuild”无需做任何事。
-Building ... /home/x/git/edk22/MdeModulePkg/Universal/BdsDxe/BdsDxe.inf [X64]
+Building ... /home/x/git/edk22/EmulatorPkg/Unix/Host/Host.inf [X64]
 "gcc" -flto -o /home/x/git/edk22/Build/EmulatorX64/DEBUG_GCC5/X64/Host -m64 -L/usr/X11R6/lib -Wl,--start-group,@/home/x/git/edk22/Build/EmulatorX64/DEBUG_GCC5/X64/EmulatorPkg/Unix/Host/Host/OUTPUT/static_library_files.lst,--end-group -lpthread -ldl -lXext -lX11
 make: 对“tbuild”无需做任何事。
-Building ... /home/x/git/edk22/NetworkPkg/Dhcp4Dxe/Dhcp4Dxe.inf [X64]
+Building ... /home/x/git/edk22/MdeModulePkg/Universal/BdsDxe/BdsDxe.inf [X64]
 make: 对“tbuild”无需做任何事。
-Building ... /home/x/git/edk22/MdeModulePkg/Application/EchoTcp4/EchoTcp4.inf [X64]
+Building ... /home/x/git/edk22/NetworkPkg/Dhcp4Dxe/Dhcp4Dxe.inf [X64]
 rm -f /home/x/git/edk22/Build/EmulatorX64/DEBUG_GCC5/X64/MdeModulePkg/Application/A/A/OUTPUT/A.lib
 "gcc-ar" cr /home/x/git/edk22/Build/EmulatorX64/DEBUG_GCC5/X64/MdeModulePkg/Application/A/A/OUTPUT/A.lib  @/home/x/git/edk22/Build/EmulatorX64/DEBUG_GCC5/X64/MdeModulePkg/Application/A/A/OUTPUT/object_files.lst
+make: 对“tbuild”无需做任何事。
 "gcc" -o /home/x/git/edk22/Build/EmulatorX64/DEBUG_GCC5/X64/MdeModulePkg/Application/A/A/DEBUG/A.dll -nostdlib -Wl,-n,-q,--gc-sections -z common-page-size=0x40 -Wl,--entry,_ModuleEntryPoint -u _ModuleEntryPoint -Wl,-Map,/home/x/git/edk22/Build/EmulatorX64/DEBUG_GCC5/X64/MdeModulePkg/Application/A/A/DEBUG/A.map,--whole-archive -Wl,-melf_x86_64,--oformat=elf64-x86-64,-pie -flto -Os -Wl,--start-group,@/home/x/git/edk22/Build/EmulatorX64/DEBUG_GCC5/X64/MdeModulePkg/Application/A/A/OUTPUT/static_library_files.lst,--end-group -g -Os -fshort-wchar -fno-builtin -fno-strict-aliasing -Wno-array-bounds -include AutoGen.h -fno-common -ffunction-sections -fdata-sections -DSTRING_ARRAY_NAME=AStrings -m64 -fno-stack-protector "-DEFIAPI=__attribute__((ms_abi))" -maccumulate-outgoing-args -mno-red-zone -Wno-address -mcmodel=small -fpie -fno-asynchronous-unwind-tables -Wno-address -flto -DUSING_LTO -Os -D DISABLE_NEW_DEPRECATED_INTERFACES -Wl,--defsym=PECOFF_HEADER_SIZE=0x228 -Wl,--script=/home/x/git/edk22/BaseTools/Scripts/GccBase.lds -Wno-error
+Building ... /home/x/git/edk22/MdeModulePkg/Application/EchoTcp4/EchoTcp4.inf [X64]
 make: 对“tbuild”无需做任何事。
 Building ... /home/x/git/edk22/NetworkPkg/VlanConfigDxe/VlanConfigDxe.inf [X64]
 Trim --Vfr-Uni-Offset -o /home/x/git/edk22/Build/EmulatorX64/DEBUG_GCC5/FV/Ffs/E4F61863-FE2C-4b56-A8F4-08519BC439DFVlanConfigDxe/VlanConfigDxe.offset --ModuleName=VlanConfigDxe --DebugDir=/home/x/git/edk22/Build/EmulatorX64/DEBUG_GCC5/X64/NetworkPkg/VlanConfigDxe/VlanConfigDxe/DEBUG
 test -e /home/x/git/edk22/Build/EmulatorX64/DEBUG_GCC5/FV/Ffs/E4F61863-FE2C-4b56-A8F4-08519BC439DFVlanConfigDxe/VlanConfigDxe.offset && GenSec -s EFI_SECTION_RAW -o /home/x/git/edk22/Build/EmulatorX64/DEBUG_GCC5/FV/Ffs/E4F61863-FE2C-4b56-A8F4-08519BC439DFVlanConfigDxe/VlanConfigDxeOffset.raw /home/x/git/edk22/Build/EmulatorX64/DEBUG_GCC5/FV/Ffs/E4F61863-FE2C-4b56-A8F4-08519BC439DFVlanConfigDxe/VlanConfigDxe.offset
 make: [GNUmakefile:391：/home/x/git/edk22/Build/EmulatorX64/DEBUG_GCC5/FV/Ffs/E4F61863-FE2C-4b56-A8F4-08519BC439DFVlanConfigDxe/VlanConfigDxeOffset.raw] 错误 1 (已忽略）
 GenFfs -t EFI_FV_FILETYPE_DRIVER -g E4F61863-FE2C-4b56-A8F4-08519BC439DF -o /home/x/git/edk22/Build/EmulatorX64/DEBUG_GCC5/FV/Ffs/E4F61863-FE2C-4b56-A8F4-08519BC439DFVlanConfigDxe/E4F61863-FE2C-4b56-A8F4-08519BC439DF.ffs -oi /home/x/git/edk22/Build/EmulatorX64/DEBUG_GCC5/FV/Ffs/E4F61863-FE2C-4b56-A8F4-08519BC439DFVlanConfigDxe/VlanConfigDxeOffset.raw -oi /home/x/git/edk22/Build/EmulatorX64/DEBUG_GCC5/FV/Ffs/E4F61863-FE2C-4b56-A8F4-08519BC439DFVlanConfigDxe/E4F61863-FE2C-4b56-A8F4-08519BC439DFSEC2.com
+Building ... /home/x/git/edk22/MdeModulePkg/Universal/PCD/Pei/Pcd.inf [X64]
+make: 对“tbuild”无需做任何事。
 Building ... /home/x/git/edk22/EmulatorPkg/EmuBusDriverDxe/EmuBusDriverDxe.inf [X64]
 make: 对“tbuild”无需做任何事。
 Building ... /home/x/git/edk22/EmulatorPkg/EmuSimpleFileSystemDxe/EmuSimpleFileSystemDxe.inf [X64]
@@ -495,13 +534,21 @@ Building ... /home/x/git/edk22/NetworkPkg/Udp4Dxe/Udp4Dxe.inf [X64]
 make: 对“tbuild”无需做任何事。
 Building ... /home/x/git/edk22/MdeModulePkg/Universal/SecurityStubDxe/SecurityStubDxe.inf [X64]
 make: 对“tbuild”无需做任何事。
+Building ... /home/x/git/edk22/MdeModulePkg/Universal/ReportStatusCodeRouter/Pei/ReportStatusCodeRouterPei.inf [X64]
+make: 对“tbuild”无需做任何事。
 Building ... /home/x/git/edk22/EmulatorPkg/PlatformSmbiosDxe/PlatformSmbiosDxe.inf [X64]
 make: 对“tbuild”无需做任何事。
 Building ... /home/x/git/edk22/MdeModulePkg/Universal/Console/GraphicsConsoleDxe/GraphicsConsoleDxe.inf [X64]
 make: 对“tbuild”无需做任何事。
 Building ... /home/x/git/edk22/MdeModulePkg/Universal/Disk/PartitionDxe/PartitionDxe.inf [X64]
 make: 对“tbuild”无需做任何事。
+Building ... /home/x/git/edk22/EmulatorPkg/ThunkPpiToProtocolPei/ThunkPpiToProtocolPei.inf [X64]
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/git/edk22/EmulatorPkg/AutoScanPei/AutoScanPei.inf [X64]
+make: 对“tbuild”无需做任何事。
 Building ... /home/x/git/edk22/MdeModulePkg/Universal/PCD/Dxe/Pcd.inf [X64]
+make: 对“tbuild”无需做任何事。
+Building ... /home/x/git/edk22/EmulatorPkg/BootModePei/BootModePei.inf [X64]
 make: 对“tbuild”无需做任何事。
 Building ... /home/x/git/edk22/MdeModulePkg/Universal/Console/TerminalDxe/TerminalDxe.inf [X64]
 make: 对“tbuild”无需做任何事。
@@ -516,6 +563,8 @@ make: [GNUmakefile:388：/home/x/git/edk22/Build/EmulatorX64/DEBUG_GCC5/FV/Ffs/F
 GenFfs -t EFI_FV_FILETYPE_DRIVER -g FE3542FE-C1D3-4EF8-657C-8048606FF671 -o /home/x/git/edk22/Build/EmulatorX64/DEBUG_GCC5/FV/Ffs/FE3542FE-C1D3-4EF8-657C-8048606FF671DriverSample/FE3542FE-C1D3-4EF8-657C-8048606FF671.ffs -oi /home/x/git/edk22/Build/EmulatorX64/DEBUG_GCC5/FV/Ffs/FE3542FE-C1D3-4EF8-657C-8048606FF671DriverSample/FE3542FE-C1D3-4EF8-657C-8048606FF671SEC1.1.dpx -oi /home/x/git/edk22/Build/EmulatorX64/DEBUG_GCC5/FV/Ffs/FE3542FE-C1D3-4EF8-657C-8048606FF671DriverSample/DriverSampleOffset.raw -oi /home/x/git/edk22/Build/EmulatorX64/DEBUG_GCC5/FV/Ffs/FE3542FE-C1D3-4EF8-657C-8048606FF671DriverSample/FE3542FE-C1D3-4EF8-657C-8048606FF671SEC2.com
 Building ... /home/x/git/edk22/NetworkPkg/ArpDxe/ArpDxe.inf [X64]
 make: 对“tbuild”无需做任何事。
+Building ... /home/x/git/edk22/MdeModulePkg/Core/Pei/PeiMain.inf [X64]
+make: 对“tbuild”无需做任何事。
 Building ... /home/x/git/edk22/EmulatorPkg/Sec/Sec.inf [X64]
 make: 对“tbuild”无需做任何事。
 Building ... /home/x/git/edk22/MdeModulePkg/Universal/Variable/RuntimeDxe/VariableRuntimeDxe.inf [X64]
@@ -524,29 +573,7 @@ Building ... /home/x/git/edk22/MdeModulePkg/Universal/ReportStatusCodeRouter/Run
 make: 对“tbuild”无需做任何事。
 Building ... /home/x/git/edk22/MdeModulePkg/Universal/Metronome/Metronome.inf [X64]
 make: 对“tbuild”无需做任何事。
-Building ... /home/x/git/edk22/MdeModulePkg/Universal/StatusCodeHandler/Pei/StatusCodeHandlerPei.inf [X64]
-make: 对“tbuild”无需做任何事。
-Building ... /home/x/git/edk22/EmulatorPkg/FlashMapPei/FlashMapPei.inf [X64]
-make: 对“tbuild”无需做任何事。
-Building ... /home/x/git/edk22/MdeModulePkg/Core/DxeIplPeim/DxeIpl.inf [X64]
-make: 对“tbuild”无需做任何事。
-Building ... /home/x/git/edk22/MdeModulePkg/Universal/FaultTolerantWritePei/FaultTolerantWritePei.inf [X64]
-make: 对“tbuild”无需做任何事。
-Building ... /home/x/git/edk22/MdeModulePkg/Universal/Variable/Pei/VariablePei.inf [X64]
-make: 对“tbuild”无需做任何事。
-Building ... /home/x/git/edk22/EmulatorPkg/FirmwareVolumePei/FirmwareVolumePei.inf [X64]
-make: 对“tbuild”无需做任何事。
-Building ... /home/x/git/edk22/MdeModulePkg/Universal/PCD/Pei/Pcd.inf [X64]
-make: 对“tbuild”无需做任何事。
-Building ... /home/x/git/edk22/MdeModulePkg/Universal/ReportStatusCodeRouter/Pei/ReportStatusCodeRouterPei.inf [X64]
-make: 对“tbuild”无需做任何事。
-Building ... /home/x/git/edk22/EmulatorPkg/ThunkPpiToProtocolPei/ThunkPpiToProtocolPei.inf [X64]
-make: 对“tbuild”无需做任何事。
-Building ... /home/x/git/edk22/EmulatorPkg/AutoScanPei/AutoScanPei.inf [X64]
-make: 对“tbuild”无需做任何事。
-Building ... /home/x/git/edk22/EmulatorPkg/BootModePei/BootModePei.inf [X64]
-make: 对“tbuild”无需做任何事。
-Building ... /home/x/git/edk22/MdeModulePkg/Core/Pei/PeiMain.inf [X64]
+Building ... /home/x/git/edk22/MdeModulePkg/Universal/CapsuleRuntimeDxe/CapsuleRuntimeDxe.inf [X64]
 make: 对“tbuild”无需做任何事。
 "objcopy"  /home/x/git/edk22/Build/EmulatorX64/DEBUG_GCC5/X64/MdeModulePkg/Application/A/A/DEBUG/A.dll
 cp -f /home/x/git/edk22/Build/EmulatorX64/DEBUG_GCC5/X64/MdeModulePkg/Application/A/A/DEBUG/A.dll /home/x/git/edk22/Build/EmulatorX64/DEBUG_GCC5/X64/MdeModulePkg/Application/A/A/DEBUG/A.debug
@@ -588,9 +615,9 @@ Generate Region at Offset 0x590000
 GUID cross reference file can be found at /home/x/git/edk22/Build/EmulatorX64/DEBUG_GCC5/FV/Guid.xref
 
 FV Space Information
-FVRECOVERY [29%Full] 5767168 (0x580000) total, 1690824 (0x19ccc8) used, 4076344 (0x3e3338) free
+FVRECOVERY [29%Full] 5767168 (0x580000) total, 1691080 (0x19cdc8) used, 4076088 (0x3e3238) free
 
 - Done -
-Build end time: 11:51:08, Aug.19 2021
-Build total time: 00:00:13
+Build end time: 11:18:20, Aug.20 2021
+Build total time: 00:00:14
 

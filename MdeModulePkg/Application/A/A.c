@@ -937,6 +937,8 @@ typedef struct
 }STATE_TRANS;
 
 
+
+
 // 小端模式
 // byte转int  
 UINT64 L1_NETWORK_8BytesToUINT64(UINT8 *bytes)
@@ -2389,55 +2391,52 @@ VOID L2_GRAPHICS_LayerCompute(int iMouseX, int iMouseY, UINT8 MouseClickFlag)
 			            ScreenWidth, ScreenHeight, 0);
 }
 
-L2_MOUSE_Moveover()
+typedef enum 
 {
- 	//L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: iMouseX: %d iMouseY: %d \n",  __LINE__, iMouseX, iMouseY);
-	EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
-	Color.Red = 0xff;
-	Color.Green= 0xff;
-	Color.Blue= 0x00;
-	
+	START_MENU_CLICKED = 0,
+	MY_COMPUTER_MENU_CLICKED,
+	SETTING_MENU_CLICKED
+}BUTTON_CLICKED_ID;
+
+typedef enum 
+{
+	START_MENU_INIT_CLICKED_EVENT = 0,
+	START_MENU_CLICKED_EVENT,
+	MY_COMPUTER_CLICKED_EVENT,
+	SETTING_CLICKED_EVENT,
+	MY_COMPUTER_CLOSE_CLICKED_EVENT,
+	MAX_CLICKED_EVENT
+}START_MENU_CURRENT_EVENT;
+
+typedef enum 
+{
+	CLICK_INIT_STATE = 0,
+	MENU_CLICKED_STATE,
+	MY_COMPUTER_CLICKED_STATE,
+	SETTING_CLICKED_STATE
+}START_MENU_STATE;
+
+typedef struct
+{
+	START_MENU_STATE	       			CurrentState;
+	START_MENU_CURRENT_EVENT	        event;
+	START_MENU_STATE	       			NextState;
+	EFI_STATUS    						(*pFunc)(); 
+}START_MENU_STATE_TRANSFORM;
+
+
+UINT16 L2_MOUSE_ClickEventGet()
+{
+	if ( MouseClickFlag != MOUSE_LEFT_CLICKED)
+	{
+		return;
+	}
+
 	//start button
     if (iMouseX >= 0 && iMouseX <= 16 + 16 * 2
         && iMouseY >= ScreenHeight - 21 && iMouseY <= ScreenHeight)
-    {   
-    	//L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: iMouseX: %d iMouseY: %d \n",  __LINE__, iMouseX, iMouseY);
-		L2_GRAPHICS_RectangleDraw(pMouseSelectedBuffer, 0,  0, 31, 15, 1,  Color, 32);
-    	//MenuButtonClickResponse();
-    	Color.Red   = 0xFF;
-	    Color.Green = 0xFF;
-	    Color.Blue	= 0xFF;
-	    //L1_MEMORY_RectangleFill(pDeskBuffer, 3,     ScreenHeight - 21, 13,     ScreenHeight - 11, 1, Color);
-    	L2_GRAPHICS_Copy(pDeskDisplayBuffer, pMouseSelectedBuffer, ScreenWidth, ScreenHeight, 32, 16, 3, ScreenHeight - 21);
-
-		if (MouseClickFlag == MOUSE_LEFT_CLICKED)
-		{
-			DisplayStartMenuFlag = 1;	
-			MouseClickFlag = MOUSE_NO_CLICKED;
-		}
-		
-    }
-
-	// display menu area
-    if (DisplayStartMenuFlag == 1)
-    {           
-        int x = 3, y = 6;
-        Color.Red   = 0xff;
-        Color.Green = 0xff;
-        Color.Blue   = 0x00;
-        L2_GRAPHICS_ChineseCharDraw2(pStartMenuBuffer, 3 , 6,     (46 - 1 ) * 94 + 50 - 1, Color, StartMenuWidth);    
-        x += 16;
-        
-        L2_GRAPHICS_ChineseCharDraw2(pStartMenuBuffer, x , y,     (21 - 1) * 94 + 36 - 1, Color, StartMenuWidth);
-        x += 16;
-        
-        L2_GRAPHICS_ChineseCharDraw2(pStartMenuBuffer, x , y,     (21 - 1) * 94 + 71 - 1, Color, StartMenuWidth);
-        x += 16;
-        
-        L2_GRAPHICS_ChineseCharDraw2(pStartMenuBuffer, x , y,     (36 - 1) * 94 + 52 - 1, Color, StartMenuWidth);   
-        x += 16;
-            
-        L2_GRAPHICS_Copy(pDeskDisplayBuffer, pStartMenuBuffer, ScreenWidth, ScreenHeight, StartMenuWidth, StartMenuHeight, StartMenuPositionX, StartMenuPositionY);
+    {
+    	return START_MENU_CLICKED_EVENT;
     }
 
 	// Display my computer window
@@ -2445,24 +2444,39 @@ L2_MOUSE_Moveover()
 		 && iMouseX >= 3 + StartMenuPositionX && iMouseX <= 3 + 4 * 16  + StartMenuPositionX  
 		 && iMouseY >= 3 + StartMenuPositionY && iMouseY <= 3 + StartMenuPositionY + 16)
 	{
-		DisplayMyComputerFlag = 1;
+		return MY_COMPUTER_CLICKED_EVENT;
 	}
-	
-	// this is draw a rectangle when mouse move on disk partition in my computer window
-	if (DisplayMyComputerFlag == 0)
-		return;
 
 	// Hide My computer window
 	if (DisplayMyComputerFlag == 1 && iMouseX >= MyComputerPositionX + MyComputerWidth - 20 && iMouseX <=  MyComputerPositionX + MyComputerWidth - 4 
 			&& iMouseY >= MyComputerPositionY + 0 && iMouseY <= MyComputerPositionY + 16 && MouseClickFlag == MOUSE_LEFT_CLICKED)
 	{
-        Color.Red   = 0xff;
-        Color.Green = 0x00;
-        Color.Blue   = 0x00;
-		L2_GRAPHICS_RectangleDraw(pMouseSelectedBuffer, 0,  0, 31, 15, 1,  Color, 32);
+		return MY_COMPUTER_CLOSE_CLICKED_EVENT;
 		DisplayMyComputerFlag = 0;
-		L2_GRAPHICS_Copy(pDeskDisplayBuffer, pMouseSelectedBuffer, ScreenWidth, ScreenHeight, 32, 16,MyComputerPositionX + MyComputerWidth - 20, MyComputerPositionY);			
 	}
+}
+
+
+typedef struct 
+{
+
+}MOUSE_OPERATION;
+
+
+L2_MOUSE_SettingClicked()
+{
+
+}
+
+
+L2_MOUSE_MyComputerClicked()
+{	
+	EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
+	Color.Red = 0xff;
+	Color.Green= 0x00;
+	Color.Blue= 0x00;
+
+	DisplayMyComputerFlag = 1;
 	
 	for (UINT16 i = 0; i < PartitionCount; i++)
 	{		
@@ -2483,8 +2497,60 @@ L2_MOUSE_Moveover()
 	       L2_GRAPHICS_Copy(pDeskDisplayBuffer, pMouseSelectedBuffer, ScreenWidth, ScreenHeight, 32, 16, MyComputerPositionX + 50, MyComputerPositionY  + i * (16 + 2) + 16 * 2);	
 		}
 	}
+}
+
+
+L2_MOUSE_MENU_Clicked()
+{
+	EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
+	Color.Red	= 0xff;
+	Color.Green = 0x00;
+	Color.Blue	 = 0x00;
+	//L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: iMouseX: %d iMouseY: %d \n",  __LINE__, iMouseX, iMouseY);
+	L2_GRAPHICS_RectangleDraw(pMouseSelectedBuffer, 0,	0, 31, 15, 1,  Color, 32);
+	//MenuButtonClickResponse();
+	Color.Red	= 0xFF;
+	Color.Green = 0xFF;
+	Color.Blue	= 0xFF;
+	//L1_MEMORY_RectangleFill(pDeskBuffer, 3,	  ScreenHeight - 21, 13,	 ScreenHeight - 11, 1, Color);
+	L2_GRAPHICS_Copy(pDeskDisplayBuffer, pMouseSelectedBuffer, ScreenWidth, ScreenHeight, 32, 16, 3, ScreenHeight - 21);
+
+	if (MouseClickFlag == MOUSE_LEFT_CLICKED)
+	{
+		DisplayStartMenuFlag = 1;	
+		MouseClickFlag = MOUSE_NO_CLICKED;
+	}
+	
+	// display menu area
+	if (DisplayStartMenuFlag == 1)
+	{			
+		int x = 3, y = 6;
+		Color.Red	= 0xff;
+		Color.Green = 0xff;
+		Color.Blue	 = 0x00;
+		L2_GRAPHICS_ChineseCharDraw2(pStartMenuBuffer, 3 , 6,	  (46 - 1 ) * 94 + 50 - 1, Color, StartMenuWidth);	  
+		x += 16;
+		
+		L2_GRAPHICS_ChineseCharDraw2(pStartMenuBuffer, x , y,	  (21 - 1) * 94 + 36 - 1, Color, StartMenuWidth);
+		x += 16;
+		
+		L2_GRAPHICS_ChineseCharDraw2(pStartMenuBuffer, x , y,	  (21 - 1) * 94 + 71 - 1, Color, StartMenuWidth);
+		x += 16;
+		
+		L2_GRAPHICS_ChineseCharDraw2(pStartMenuBuffer, x , y,	  (36 - 1) * 94 + 52 - 1, Color, StartMenuWidth);	
+		x += 16;
+			
+		L2_GRAPHICS_Copy(pDeskDisplayBuffer, pStartMenuBuffer, ScreenWidth, ScreenHeight, StartMenuWidth, StartMenuHeight, StartMenuPositionX, StartMenuPositionY);
+	}
 
 }
+
+
+L2_MOUSE_MyComputerCloseClicked()
+{
+	DisplayMyComputerFlag = 1;
+}
+
 
 L2_MOUSE_Click()
 {
@@ -2544,6 +2610,45 @@ L2_MOUSE_MenuButtonClick()
     
     L2_GRAPHICS_Copy(pDeskDisplayBuffer, pMouseSelectedBuffer, ScreenWidth, ScreenHeight, 32, 16, 15, ScreenHeight - 22); 
 }
+
+
+START_MENU_STATE_TRANSFORM StartMenuStateTransformTable[] =
+{
+	{CLICK_INIT_STATE,          START_MENU_CLICKED_EVENT,    		MENU_CLICKED_STATE,             L2_MOUSE_MENU_Clicked},
+	{MENU_CLICKED_STATE,  		SETTING_CLICKED_EVENT,  			SETTING_CLICKED_STATE,          L2_MOUSE_SettingClicked},
+	{MENU_CLICKED_STATE,  		MY_COMPUTER_CLICKED_EVENT,  	 	MY_COMPUTER_CLICKED_STATE,      L2_MOUSE_MyComputerClicked},
+	{MY_COMPUTER_CLICKED_STATE, MY_COMPUTER_CLOSE_CLICKED_EVENT,  	CLICK_INIT_STATE,      			L2_MOUSE_MyComputerCloseClicked},
+};
+
+
+START_MENU_STATE	StartMenuNextState = CLICK_INIT_STATE;
+START_MENU_CURRENT_EVENT	StartMenuClickEvent = START_MENU_INIT_CLICKED_EVENT;
+
+L2_MOUSE_Moveover()
+{
+ 	//L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: iMouseX: %d iMouseY: %d \n",  __LINE__, iMouseX, iMouseY);
+	EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
+	Color.Red = 0xff;
+	Color.Green= 0xff;
+	Color.Blue= 0x00;
+
+	StartMenuClickEvent = L2_MOUSE_ClickEventGet();
+	EFI_STATUS Status;
+
+	if ( StartMenuClickEvent == StartMenuStateTransformTable[StartMenuNextState].event )
+	{
+		L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
+		StartMenuStateTransformTable[StartMenuNextState].pFunc();
+		StartMenuNextState = StartMenuStateTransformTable[StartMenuNextState].NextState;
+	}
+	else  
+	{
+		L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
+		StartMenuNextState = INIT_STATE;
+	}	
+
+}
+
 
 VOID L2_MOUSE_Move()
 {	
