@@ -4377,8 +4377,8 @@ EFI_STATUS L2_GRAPHICS_SystemSettingInit()
 	EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
 	
 	int x = 3, y = 6;
-	Color.Red	= 0x00;
-	Color.Green = 0xff;
+	Color.Red	= 0xff;
+	Color.Green = 0x00;
 	Color.Blue	= 0x00;
 
 	//±≥æ∞…Ë÷√
