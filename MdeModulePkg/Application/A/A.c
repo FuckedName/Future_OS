@@ -947,21 +947,24 @@ typedef struct
 //refer from EFI_MEMORY_DESCRIPTOR
 typedef struct 
 {
-  ///
-  /// Physical address of the first byte in the memory region. PhysicalStart must be
-  /// aligned on a 4 KiB boundary, and must not be above 0xfffffffffffff000. Type
-  /// EFI_PHYSICAL_ADDRESS is defined in the AllocatePages() function description
-  ///
-  EFI_PHYSICAL_ADDRESS  PhysicalStart;
-  ///
-  /// NumberOfPagesNumber of 4 KiB pages in the memory region.
-  /// NumberOfPages must not be 0, and must not be any value
-  /// that would represent a memory page with a start address,
-  /// either physical or virtual, above 0xfffffffffffff000.
-  ///
-  UINT64                NumberOfPages;
+	///
+	/// Physical address of the first byte in the memory region. PhysicalStart must be
+	/// aligned on a 4 KiB boundary, and must not be above 0xfffffffffffff000. Type
+	/// EFI_PHYSICAL_ADDRESS is defined in the AllocatePages() function description
+	///
+	EFI_PHYSICAL_ADDRESS  PhysicalStart;
+	///
+	/// NumberOfPagesNumber of 4 KiB pages in the memory region.
+	/// NumberOfPages must not be 0, and must not be any value
+	/// that would represent a memory page with a start address,
+	/// either physical or virtual, above 0xfffffffffffff000.
+	///
+	UINT64                NumberOfPages;
 
-  BOOLEAN *pUseFlag;
+	// Memory use flag page id 
+	// no use: 0
+	//    use: 1
+	BOOLEAN *pUseFlag;
 }MEMORY_CONTINUOUS;
 
 typedef struct {
@@ -3449,6 +3452,7 @@ EFI_STATUS L2_MEMORY_MapInitial()
 {
 	MEMORY_INFORMATION MemoryInformationTemp;
 
+	// Sort by pages
 	for (UINT16 i = 0; i < MemoryInformation.MemorySliceCount; i++)
 	{
 		for (UINT16 j = 0; j < MemoryInformation.MemorySliceCount - i; j++)
@@ -3468,6 +3472,7 @@ EFI_STATUS L2_MEMORY_MapInitial()
 		}
 	}
 
+	// Initial 
 	for (UINT16 i = 0; i < MemoryInformation.MemorySliceCount; i++)
 	{
 		UINT64 PhysicalStart = MemoryInformation.MemoryContinuous[i].PhysicalStart;
@@ -3478,6 +3483,13 @@ EFI_STATUS L2_MEMORY_MapInitial()
 										NumberOfPages,
 										PhysicalStart +NumberOfPages * 4 * 1024);
 	}
+
+	// want to use Link to save Memory information
+	// 1. Sort by avaliable pages number
+	// 2. After allocate new memory,  the link can resort
+	// 3. After free allocated memory, the link can resort
+	// 4. when allocate memory, can allocate almost match with request
+	// 5. maybe more and more fragment, after allocates and frees.
 }
 
 float L2_MEMORY_Allocate(UINT32 size)
