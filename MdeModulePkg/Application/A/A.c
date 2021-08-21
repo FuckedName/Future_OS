@@ -945,6 +945,26 @@ typedef struct
 }STATE_TRANS;
 
 
+typedef struct {
+  ///
+  /// Physical address of the first byte in the memory region. PhysicalStart must be
+  /// aligned on a 4 KiB boundary, and must not be above 0xfffffffffffff000. Type
+  /// EFI_PHYSICAL_ADDRESS is defined in the AllocatePages() function description
+  ///
+  EFI_PHYSICAL_ADDRESS  PhysicalStart;
+  ///
+  /// NumberOfPagesNumber of 4 KiB pages in the memory region.
+  /// NumberOfPages must not be 0, and must not be any value
+  /// that would represent a memory page with a start address,
+  /// either physical or virtual, above 0xfffffffffffff000.
+  ///
+  UINT64                NumberOfPages;
+}MEMORY_CONTINUOUS;
+
+typedef struct {
+	UINT16 MemorySliceCount;
+  	MEMORY_CONTINUOUS MemoryContinuous[10];
+}MEMORY_INFORMATION;
 
 
 // Ð¡¶ËÄ£Ê½
@@ -1251,7 +1271,7 @@ VOID L2_STRING_Maker (UINT16 x, UINT16 y,
 
 	// Note this api do not supported ("%f", float)
     AsciiVSPrint (AsciiBuffer, sizeof (AsciiBuffer), Format, VaList);
-	/*
+	
 	if (StatusErrorCount % 61 == 0)
 	{
 		for (int j = 0; j < ScreenHeight - 25; j++)
@@ -1265,7 +1285,7 @@ VOID L2_STRING_Maker (UINT16 x, UINT16 y,
 		}		
 	}
 	
-	
+	/*
 	if (DisplayCount % 52 == 0)
 	{
 		for (int j = 2; j < 54 * 16; j++)
@@ -2555,7 +2575,7 @@ L2_MOUSE_MENU_Clicked()
 L2_MOUSE_MyComputerCloseClicked()
 {
 	L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d L2_MOUSE_MyComputerCloseClicked\n", __LINE__);
-	DisplayMyComputerFlag = 1;
+	DisplayMyComputerFlag = 0;
 }
 
 
@@ -2660,8 +2680,10 @@ L2_MOUSE_Moveover()
 		if (StartMenuStateTransformTable[i].CurrentState == StartMenuNextState 
 			&& StartMenuClickEvent == StartMenuStateTransformTable[i].event )
 		{
-			StartMenuStateTransformTable[i].pFunc();
 			StartMenuNextState = StartMenuStateTransformTable[i].NextState;
+
+			// need to check the return value after function runs..... 
+			StartMenuStateTransformTable[i].pFunc();
 			L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: StartMenuClickEvent: %d StartMenuNextState: %d\n", __LINE__, StartMenuClickEvent, StartMenuNextState);
 			break;
 		}	
@@ -2847,6 +2869,12 @@ L2_NETWORK_Init()
 {}
 
 
+L2_NETWORK_DriverSend()
+{}
+
+L2_NETWORK_DriverReceive()
+{}
+
 VOID L2_FILE_Transfer(MasterBootRecord *pSource, MasterBootRecordSwitched *pDest)
 {
     pDest->ReservedSelector = pSource->ReservedSelector[0] + pSource->ReservedSelector[1] * 16 * 16;
@@ -2997,6 +3025,64 @@ UINT32 L2_FILE_GetNextBlockNumber()
 	
 	return FAT32_Table[PreviousBlockNumber  * 4] + (UINT32)FAT32_Table[PreviousBlockNumber * 4 + 1] * 16 * 16 + (UINT32)FAT32_Table[PreviousBlockNumber * 4 + 2] * 16 * 16 * 16 * 16 + (UINT32)FAT32_Table[PreviousBlockNumber * 4 + 3] * 16 * 16 * 16 * 16 * 16 * 16;	
 }
+
+//InternalMemSetMem
+void L1_MEMORY_SetValue(UINT8 *pBuffer, UINT32 Length, UINT8 Value)
+{
+	//
+  // Declare the local variables that actually move the data elements as
+  // volatile to prevent the optimizer from replacing this function with
+  // the intrinsic memset()
+  //
+  volatile UINT8                    *Pointer8;
+  volatile UINT32                   *Pointer32;
+  volatile UINT64                   *Pointer64;
+  UINT32                            Value32;
+  UINT64                            Value64;
+
+  if ((((UINTN)pBuffer & 0x7) == 0) && (Length >= 8)) 
+  {
+    // Generate the 64bit value
+    Value32 = (Value << 24) | (Value << 16) | (Value << 8) | Value;
+    Value64 = LShiftU64 (Value32, 32) | Value32;
+
+    Pointer64 = (UINT64*)pBuffer;
+    while (Length >= 8) 
+	{
+      *(Pointer64++) = Value64;
+      Length -= 8;
+    }
+
+    // Finish with bytes if needed
+    Pointer8 = (UINT8*)Pointer64;
+  } 
+  else if ((((UINTN)pBuffer & 0x3) == 0) && (Length >= 4)) 
+  {
+    // Generate the 32bit value
+    Value32 = (Value << 24) | (Value << 16) | (Value << 8) | Value;
+
+    Pointer32 = (UINT32*)pBuffer;
+    while (Length >= 4) 
+	{
+      *(Pointer32++) = Value32;
+      Length -= 4;
+    }
+
+    // Finish with bytes if needed
+    Pointer8 = (UINT8*)Pointer32;
+  } 
+  else 
+  {
+    Pointer8 = (UINT8*)pBuffer;
+  }
+  
+  while (Length-- > 0) 
+  {
+    *(Pointer8++) = Value;
+  }
+  return pBuffer;
+}
+
 
 void *L1_MEMORY_Copy(UINT8 *dest, const UINT8 *src, UINT8 count)
 {
@@ -3164,6 +3250,35 @@ EFI_STATUS L2_MOUSE_Init()
 }
 
 
+MEMORY_INFORMATION MemoryInformation = {0};
+
+
+float L2_MEMORY_MapInitial()
+{
+	for (UINT16 i = 0; i < MemoryInformation.MemorySliceCount; i++)
+	{
+		UINT64 PhysicalStart = MemoryInformation.MemoryContinuous[i].PhysicalStart;
+		UINT64 NumberOfPages = MemoryInformation.MemoryContinuous[i].NumberOfPages;
+	
+		L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: i: %d Start: %X Pages: %d End: %X \n", __LINE__, i, 
+										PhysicalStart, 
+										NumberOfPages,
+										PhysicalStart +NumberOfPages * 4 * 1024);
+	}
+}
+
+float L2_MEMORY_Allocate(UINT32 size)
+{  }
+
+float L2_MEMORY_Free(UINT32 *p)
+{  }
+
+float L2_MEMORY_UseRecords(UINT32 *p)
+{  }
+
+float L2_MEMORY_Remainings()
+{  }
+
 float L2_MEMORY_GETs()
 {  
 	EFI_STATUS                           Status;
@@ -3174,7 +3289,9 @@ float L2_MEMORY_GETs()
 	UINTN                                MemoryMapSize;
 	EFI_MEMORY_DESCRIPTOR                *MemoryMap;
 	UINTN MemoryClassifySize[6] = {0};
-    
+
+	L1_MEMORY_SetValue(&MemoryInformation, sizeof(MemoryInformation), 0);
+	
     //
     // Get System MemoryMapSize
     //
@@ -3218,7 +3335,9 @@ float L2_MEMORY_GETs()
     UINTN MemoryAllSize = 0;
     UINTN E820Type = 0;
 
+	//
     for (UINT16 Index = 0; Index < (MemoryMapSize / DescriptorSize); Index++) 
+    //for (UINT16 Index = 0; Index < (MemoryMapSize / DescriptorSize) - 1; Index++) 	
     //for (UINT16 Index = 0; Index < 20; Index++) 
     {
     	E820Type = 0;
@@ -3262,12 +3381,13 @@ float L2_MEMORY_GETs()
 	      case EfiConventionalMemory:
 		        E820Type = E820_RAM; // Random access memory
 		        MemoryClassifySize[3] += MemoryMap->NumberOfPages;
-           	 /*L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Index: %d: Start: %X Pages:%X End: %X\n", __LINE__, 
+           	    L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Index: %d: Start: %X Pages:%X End: %X Type: %d \n", __LINE__, 
                                                                             Index,
                                                                             MemoryMap->PhysicalStart, 
                                                                             MemoryMap->NumberOfPages,
-                                                                            MemoryMap->PhysicalStart + MemoryMap->NumberOfPages * 4 * 1024);
-               */                                                             
+                                                                            MemoryMap->PhysicalStart + MemoryMap->NumberOfPages * 4 * 1024,
+                                                                            MemoryMap->Type);
+                                                                            
 		        if (lastPhysicalEnd != MemoryMap->PhysicalStart)
                {
       				/*  DEBUG ((EFI_D_INFO, "%d: E820Type:%X Start:%X Virtual Start:%X Number:%X\n", __LINE__, 
@@ -3277,12 +3397,18 @@ float L2_MEMORY_GETs()
                                                                                 ContinuousMemoryStart + ContinuousMemoryPages * 4 * 1024);
 		
 					*/
-               	L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Start: %X  Virtual Start:%X: Pages:%X End: %X\n", __LINE__, 
+
+					MemoryInformation.MemoryContinuous[MemoryInformation.MemorySliceCount].PhysicalStart = ContinuousMemoryStart;
+					MemoryInformation.MemoryContinuous[MemoryInformation.MemorySliceCount].NumberOfPages = ContinuousMemoryPages;
+					MemoryInformation.MemorySliceCount++;
+					
+	               	/*
+	               	L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Start: %X  Virtual Start:%X: Pages:%X End: %X\n", __LINE__, 
                                                                                 MemoryMap->PhysicalStart,
                                                                                 ContinuousVirtualMemoryStart,
                                                                                 ContinuousMemoryPages,
                                                                                 ContinuousMemoryStart + ContinuousMemoryPages * 4 * 1024);
-					
+					*/
 					MemoryAllSize += ContinuousMemoryPages;
 					ContinuousMemoryPages = 0;    
 					ContinuousMemoryStart = MemoryMap->PhysicalStart;
@@ -3318,13 +3444,17 @@ float L2_MEMORY_GETs()
     }
     
     MemoryAllSize += ContinuousMemoryPages;
+
+	MemoryInformation.MemoryContinuous[MemoryInformation.MemorySliceCount].PhysicalStart = ContinuousMemoryStart;
+	MemoryInformation.MemoryContinuous[MemoryInformation.MemorySliceCount].NumberOfPages = ContinuousMemoryPages;
+	MemoryInformation.MemorySliceCount++;
     
-    L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Start: %X: Pages:%X End: %X\n", __LINE__, 
+    /*L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Start: %X: Pages:%X End: %X\n", __LINE__, 
                                                                 ContinuousMemoryStart, 
                                                                 ContinuousMemoryPages,
                                                                 ContinuousMemoryStart + ContinuousMemoryPages * 4 * 1024);
     
-
+	*/
     L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d:  (MemoryMapSize / DescriptorSize):%X MemoryClassifySize[0]:%d %d %d %d %d %d MemoryAllSize: %d\n", __LINE__,
     																		    (MemoryMapSize / DescriptorSize),
                                                                         MemoryClassifySize[0],
@@ -3336,6 +3466,12 @@ float L2_MEMORY_GETs()
                                                                         MemoryAllSize
                                                                         );
 	return  MemoryClassifySize[3];                                                                    
+}
+
+float L2_MEMORY_Initial()
+{
+	L2_MEMORY_GETs();
+	L2_MEMORY_MapInitial();
 }
 
 char *L1_STRING_FloatToString(float val, int precision, char *buf)
@@ -4333,7 +4469,7 @@ Main (
 
 
     L2_COMMON_Initial();
-                
+	
 	L2_MOUSE_Init();
         
 	// get partitions from api
@@ -4349,8 +4485,10 @@ Main (
     
     L3_APPLICATION_MyComputerWindow(100, 100);
     
+	L2_MEMORY_Initial();
+	
     L2_TIMER_IntervalInit();	
-
+	
     //GraphicsLayerCompute(iMouseX, iMouseY, 0);
 	
 	//L2_DEBUG_Print1(100, 100, "%d %d\n", __LINE__, Status);
