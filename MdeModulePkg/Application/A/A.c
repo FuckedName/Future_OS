@@ -944,8 +944,9 @@ typedef struct
 	EFI_STATUS    (*pFunc)(); 
 }STATE_TRANS;
 
-
-typedef struct {
+//refer from EFI_MEMORY_DESCRIPTOR
+typedef struct 
+{
   ///
   /// Physical address of the first byte in the memory region. PhysicalStart must be
   /// aligned on a 4 KiB boundary, and must not be above 0xfffffffffffff000. Type
@@ -959,6 +960,8 @@ typedef struct {
   /// either physical or virtual, above 0xfffffffffffff000.
   ///
   UINT64                NumberOfPages;
+
+  BOOLEAN *pUseFlag;
 }MEMORY_CONTINUOUS;
 
 typedef struct {
@@ -1075,6 +1078,26 @@ void L1_MEMORY_CopyColor3(UINT8 *pBuffer, EFI_GRAPHICS_OUTPUT_BLT_PIXEL color, U
     pBuffer[y0 * AreaWidth * 4 + x0 * 4 + 1] = color.Green;
     pBuffer[y0 * AreaWidth * 4 + x0 * 4 + 2] = color.Red;
     pBuffer[y0 * AreaWidth * 4 + x0 * 4 + 3] = color.Reserved;
+}
+
+//refer from https://www.cnblogs.com/onepixel/articles/7674659.html
+L1_SORT_Bubble(UINT8 *arr, UINT16 len)
+{	
+	for(UINT16 i = 0; i < len - 1; i++) 
+	{
+	   for(UINT16 j = 0; j < len - 1 - i; j++) 
+	   {
+	   		// 相邻元素两两对比
+		   if(arr[j] > arr[j+1]) 
+		   {	
+		   	   // 元素交换
+			   UINT16 temp = arr[j+1];		 
+			   arr[j+1] = arr[j];
+			   arr[j] = temp;
+		   }
+	   }
+    }
+
 }
 
 INT32 L1_MATH_ABS(INT32 v)
@@ -3422,9 +3445,29 @@ EFI_STATUS L2_MOUSE_Init()
 
 MEMORY_INFORMATION MemoryInformation = {0};
 
-
-float L2_MEMORY_MapInitial()
+EFI_STATUS L2_MEMORY_MapInitial()
 {
+	MEMORY_INFORMATION MemoryInformationTemp;
+
+	for (UINT16 i = 0; i < MemoryInformation.MemorySliceCount; i++)
+	{
+		for (UINT16 j = 0; j < MemoryInformation.MemorySliceCount - i; j++)
+		{		
+			if ( MemoryInformation.MemoryContinuous[j].NumberOfPages > MemoryInformation.MemoryContinuous[j + 1].NumberOfPages)
+			{
+				MEMORY_CONTINUOUS temp;
+				temp.NumberOfPages = MemoryInformation.MemoryContinuous[j + 1].NumberOfPages;
+				temp.PhysicalStart = MemoryInformation.MemoryContinuous[j + 1].PhysicalStart;
+				
+				MemoryInformation.MemoryContinuous[j + 1].NumberOfPages = MemoryInformation.MemoryContinuous[j].NumberOfPages;
+				MemoryInformation.MemoryContinuous[j + 1].PhysicalStart = MemoryInformation.MemoryContinuous[j].PhysicalStart;
+				
+				MemoryInformation.MemoryContinuous[j].NumberOfPages = temp.NumberOfPages;
+				MemoryInformation.MemoryContinuous[j].PhysicalStart = temp.PhysicalStart;
+			}
+		}
+	}
+
 	for (UINT16 i = 0; i < MemoryInformation.MemorySliceCount; i++)
 	{
 		UINT64 PhysicalStart = MemoryInformation.MemoryContinuous[i].PhysicalStart;
