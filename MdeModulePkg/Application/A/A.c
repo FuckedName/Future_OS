@@ -2444,6 +2444,8 @@ typedef enum
 	MY_COMPUTER_CLICKED_EVENT,
 	SETTING_CLICKED_EVENT,
 	MY_COMPUTER_CLOSE_CLICKED_EVENT,
+	WALLPAPER_SETTING_CLICKED_EVENT,
+	WALLPAPER_RESET_CLICKED_EVENT,
 	MAX_CLICKED_EVENT
 }START_MENU_CURRENT_EVENT;
 
@@ -2493,6 +2495,22 @@ UINT16 L2_MOUSE_ClickEventGet()
 		return SETTING_CLICKED_EVENT;
 	}
 
+	//Wall paper setting
+	if (iMouseX >= 3 + SystemSettingWindowPositionX && iMouseX <= 3 + 4 * 16  + SystemSettingWindowPositionX  
+		 && iMouseY >= 3 + SystemSettingWindowPositionX && iMouseY <= 3 + SystemSettingWindowPositionY + 16)
+	{
+    	L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: WALLPAPER_SETTING_CLICKED_EVENT\n", __LINE__);
+		return WALLPAPER_SETTING_CLICKED_EVENT;
+	}
+	
+	//Wall paper Reset
+	if (iMouseX >= 3 + SystemSettingWindowPositionX && iMouseX <= 3 + 4 * 16  + SystemSettingWindowPositionX  
+		 && iMouseY >= 3 + SystemSettingWindowPositionX + 16 && iMouseY <= 3 + SystemSettingWindowPositionY + 16 * 2)
+	{
+    	L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: WALLPAPER_RESET_CLICKED_EVENT\n", __LINE__);
+		return WALLPAPER_RESET_CLICKED_EVENT;
+	}
+
 	// Hide My computer window
 	if (iMouseX >= MyComputerPositionX + MyComputerWidth - 20 && iMouseX <=  MyComputerPositionX + MyComputerWidth - 4 
 			&& iMouseY >= MyComputerPositionY + 0 && iMouseY <= MyComputerPositionY + 16)
@@ -2517,6 +2535,39 @@ L2_MOUSE_SettingClicked()
 	DisplaySystemSettingWindowFlag = 1;
 	
 }
+
+
+
+L2_MOUSE_WallpaperSettingClicked()
+{	
+	L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d L2_MOUSE_WallpaperSettingClicked\n", __LINE__);
+	//DisplaySystemSettingWindowFlag = 1;
+	
+  	
+	for (int i = 0; i < ScreenHeight; i++)
+		for (int j = 0; j < ScreenWidth; j++)
+		{
+			// BMP 3bits, and desk buffer 4bits
+			pDeskBuffer[(i * ScreenWidth + j) * 4]     = 0x33;
+			pDeskBuffer[(i * ScreenWidth + j) * 4 + 1] = 0x33;
+			pDeskBuffer[(i * ScreenWidth + j) * 4 + 2] = 0x33;
+		}
+}
+
+L2_MOUSE_WallpaperResetClicked()
+{	
+	L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d L2_MOUSE_WallpaperResetClicked\n", __LINE__);
+	
+	for (int i = 0; i < ScreenHeight; i++)
+		for (int j = 0; j < ScreenWidth; j++)
+		{
+			// BMP 3bits, and desk buffer 4bits
+			pDeskBuffer[(i * ScreenWidth + j) * 4]     = pDeskWallpaperBuffer[0x36 + ((ScreenHeight - i) * 1920 + j) * 3 ];
+			pDeskBuffer[(i * ScreenWidth + j) * 4 + 1] = pDeskWallpaperBuffer[0x36 + ((ScreenHeight - i) * 1920 + j) * 3 + 1];
+			pDeskBuffer[(i * ScreenWidth + j) * 4 + 2] = pDeskWallpaperBuffer[0x36 + ((ScreenHeight - i) * 1920 + j) * 3 + 2];
+		}	
+}
+
 
 L2_MOUSE_MyComputerClicked()
 {		
@@ -2641,10 +2692,12 @@ L2_MOUSE_MenuButtonClick()
 
 START_MENU_STATE_TRANSFORM StartMenuStateTransformTable[] =
 {
-	{CLICK_INIT_STATE,          START_MENU_CLICKED_EVENT,    		MENU_CLICKED_STATE,             L2_MOUSE_MENU_Clicked},
-	{MENU_CLICKED_STATE,  		MY_COMPUTER_CLICKED_EVENT,  	 	MY_COMPUTER_CLICKED_STATE,      L2_MOUSE_MyComputerClicked},
-	{MENU_CLICKED_STATE,  		SETTING_CLICKED_EVENT,  			SETTING_CLICKED_STATE,          L2_MOUSE_SettingClicked},
-	{MY_COMPUTER_CLICKED_STATE, MY_COMPUTER_CLOSE_CLICKED_EVENT,  	CLICK_INIT_STATE,      			L2_MOUSE_MyComputerCloseClicked},
+	{CLICK_INIT_STATE,          	START_MENU_CLICKED_EVENT,    		MENU_CLICKED_STATE,             L2_MOUSE_MENU_Clicked},
+	{MENU_CLICKED_STATE,  			MY_COMPUTER_CLICKED_EVENT,  	 	MY_COMPUTER_CLICKED_STATE,      L2_MOUSE_MyComputerClicked},
+	{MENU_CLICKED_STATE,  			SETTING_CLICKED_EVENT,  			SETTING_CLICKED_STATE,          L2_MOUSE_SettingClicked},
+	{SETTING_CLICKED_STATE,  		WALLPAPER_SETTING_CLICKED_EVENT,  	CLICK_INIT_STATE,          		L2_MOUSE_WallpaperSettingClicked},
+	{SETTING_CLICKED_STATE,  		WALLPAPER_RESET_CLICKED_EVENT,  	CLICK_INIT_STATE,          		L2_MOUSE_WallpaperResetClicked},
+	{MY_COMPUTER_CLICKED_STATE,     MY_COMPUTER_CLOSE_CLICKED_EVENT,  	CLICK_INIT_STATE,      			L2_MOUSE_MyComputerCloseClicked},
 };
 
 
@@ -4147,6 +4200,47 @@ EFI_STATUS L2_GRAPHICS_StartMenuInit()
 }
 
 
+EFI_STATUS L2_GRAPHICS_SystemSettingInit()
+{
+	EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
+	
+	int x = 3, y = 6;
+	Color.Red	= 0x00;
+	Color.Green = 0xff;
+	Color.Blue	= 0x00;
+
+	//背景设置
+	//背	1719	景	3016	设	4172	置	5435
+	L2_GRAPHICS_ChineseCharDraw2(pSystemSettingWindowBuffer, x , y,	  (17 - 1) * 94 + 19 - 1, Color, SystemSettingWindowWidth);	  
+	x += 16;
+	
+	L2_GRAPHICS_ChineseCharDraw2(pSystemSettingWindowBuffer, x , y,	  (30 - 1) * 94 + 16 - 1, Color, SystemSettingWindowWidth);
+	x += 16;
+		
+	L2_GRAPHICS_ChineseCharDraw2(pSystemSettingWindowBuffer, x , y,	  (41 - 1) * 94 + 72 - 1, Color, SystemSettingWindowWidth);	
+	x += 16;
+	
+	L2_GRAPHICS_ChineseCharDraw2(pSystemSettingWindowBuffer, x , y,	  (54 - 1) * 94 + 35 - 1, Color, SystemSettingWindowWidth);
+	x += 16;
+
+	//背景还原
+ 	//还	2725	原	5213
+	x = 3;
+	y += 16;
+	L2_GRAPHICS_ChineseCharDraw2(pSystemSettingWindowBuffer, x , y,	  (17 - 1) * 94 + 19 - 1, Color, SystemSettingWindowWidth);	  
+	x += 16;
+	
+	L2_GRAPHICS_ChineseCharDraw2(pSystemSettingWindowBuffer, x , y,	  (30 - 1) * 94 + 16 - 1, Color, SystemSettingWindowWidth);
+	x += 16;
+	
+	L2_GRAPHICS_ChineseCharDraw2(pSystemSettingWindowBuffer, x , y,	  (27 - 1) * 94 + 25 - 1, Color, SystemSettingWindowWidth);
+	x += 16;
+	
+	L2_GRAPHICS_ChineseCharDraw2(pSystemSettingWindowBuffer, x , y,	  (52 - 1) * 94 + 13 - 1, Color, SystemSettingWindowWidth);
+	
+
+}
+
 EFI_STATUS L2_GRAPHICS_ScreenInit()
 {
 	EFI_STATUS status = 0;
@@ -4419,7 +4513,7 @@ EFI_STATUS L2_COMMON_Initial()
 		{
 			pSystemSettingWindowBuffer[(i * SystemSettingWindowWidth + j) * 4 + 0] = 237;
 			pSystemSettingWindowBuffer[(i * SystemSettingWindowWidth + j) * 4 + 1] = 234;
-			pSystemSettingWindowBuffer[(i * SystemSettingWindowWidth + j) * 4 + 2] = 231;
+			pSystemSettingWindowBuffer[(i * SystemSettingWindowWidth + j) * 4 + 2] = 0;
 			pSystemSettingWindowBuffer[(i * SystemSettingWindowWidth + j) * 4 + 3] = GRAPHICS_LAYER_SYSTEM_CONFIG_WINDOW;
 		}
 	
@@ -4482,6 +4576,8 @@ Main (
     L2_GRAPHICS_ScreenInit();
 	
     L2_GRAPHICS_StartMenuInit();
+
+	L2_GRAPHICS_SystemSettingInit();
     
     L3_APPLICATION_MyComputerWindow(100, 100);
     
