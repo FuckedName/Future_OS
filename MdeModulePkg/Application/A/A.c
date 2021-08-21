@@ -966,6 +966,35 @@ typedef struct {
   	MEMORY_CONTINUOUS MemoryContinuous[10];
 }MEMORY_INFORMATION;
 
+// fill into rectangle
+void L1_MEMORY_RectangleFill(UINT8 *pBuffer,
+        IN UINTN x0, UINTN y0, UINTN x1, UINTN y1, 
+        IN UINTN BorderWidth,
+        IN EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color)
+{    
+    if (NULL == pBuffer)
+	{
+		DEBUG ((EFI_D_INFO, "NULL == pBuffer"));
+		return ;
+	}
+	
+
+	UINT32 i = 0;
+	UINT32 j = 0;
+    for (j = y0; j <= y1; j++) 
+    {
+        for (i = x0; i <= x1; i++) 
+        {
+            pBuffer[(j * ScreenWidth + i) * 4]     =  Color.Blue; //Blue   
+            pBuffer[(j * ScreenWidth + i) * 4 + 1] =  Color.Green; //Green 
+            pBuffer[(j * ScreenWidth + i) * 4 + 2] =  Color.Red; //Red  
+            pBuffer[(j * ScreenWidth + i) * 4 + 3] =  Color.Reserved; //Red  
+        }
+    }
+
+}
+
+
 
 // 小端模式
 // byte转int  
@@ -2532,18 +2561,17 @@ UINT16 L2_MOUSE_ClickEventGet()
 L2_MOUSE_SettingClicked()
 {	
 	L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d L2_MOUSE_SettingClicked\n", __LINE__);
-	DisplaySystemSettingWindowFlag = 1;
-	
+	DisplaySystemSettingWindowFlag = 1;	
 }
-
-
 
 L2_MOUSE_WallpaperSettingClicked()
 {	
 	L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d L2_MOUSE_WallpaperSettingClicked\n", __LINE__);
 	//DisplaySystemSettingWindowFlag = 1;
-	
-  	
+	EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
+	UINT32 x = ScreenWidth;
+	UINT32 y = ScreenHeight;
+	  	
 	for (int i = 0; i < ScreenHeight; i++)
 		for (int j = 0; j < ScreenWidth; j++)
 		{
@@ -2552,11 +2580,67 @@ L2_MOUSE_WallpaperSettingClicked()
 			pDeskBuffer[(i * ScreenWidth + j) * 4 + 1] = 0x33;
 			pDeskBuffer[(i * ScreenWidth + j) * 4 + 2] = 0x33;
 		}
+
+	Color.Red   = 0xC6;
+    Color.Green = 0xC6;
+    Color.Blue	= 0xC6;
+    L1_MEMORY_RectangleFill(pDeskBuffer, 0,     y - 28, x -  1, y - 28, 1, Color);
+
+    Color.Red   = 0xFF;
+    Color.Green = 0xFF;
+    Color.Blue	= 0xFF;
+    L1_MEMORY_RectangleFill(pDeskBuffer, 0,     y - 27, x -  1, y - 27, 1, Color);
+    
+    Color.Red   = 0xC6;
+    Color.Green = 0xC6;
+    Color.Blue	= 0xC6;
+    L1_MEMORY_RectangleFill(pDeskBuffer, 0,     y - 26, x -  1, y -  1, 1, Color);
+  	
+    Color.Red   = 0xFF;
+    Color.Green = 0xFF;
+    Color.Blue	= 0xFF;
+    L1_MEMORY_RectangleFill(pDeskBuffer, 3,     y - 24, 59,     y - 24, 1, Color);
+    L1_MEMORY_RectangleFill(pDeskBuffer, 2,     y - 24, 59,     y - 4, 1, Color);
+
+    Color.Red   = 0x84;
+    Color.Green = 0x84;
+    Color.Blue	= 0x84;
+    L1_MEMORY_RectangleFill(pDeskBuffer, 3,     y -  4, 59,     y -  4, 1, Color);
+    L1_MEMORY_RectangleFill(pDeskBuffer, 59,     y - 23, 59,     y -  5, 1, Color);
+
+    
+    Color.Red   = 0x00;
+    Color.Green = 0x00;
+    Color.Blue	= 0x00;
+    L1_MEMORY_RectangleFill(pDeskBuffer, 2,     y -  3, 59,     y -  3, 1, Color);
+    L1_MEMORY_RectangleFill(pDeskBuffer, 60,    y - 24, 60,     y -  3, 1, Color);
+
+    Color.Red   = 0x84;
+    Color.Green = 0x84;
+    Color.Blue	= 0x84;
+    L1_MEMORY_RectangleFill(pDeskBuffer, x - 163, y - 24, x -  4, y - 24, 1, Color);
+    L1_MEMORY_RectangleFill(pDeskBuffer, x - 163, y - 23, x - 47, y -  4, 1, Color);
+    
+    Color.Red   = 0xFF;
+    Color.Green = 0xFF;
+    Color.Blue	= 0xFF;
+    L1_MEMORY_RectangleFill(pDeskBuffer, x - 163,    y - 3, x - 4,     y - 3, 1, Color);
+    L1_MEMORY_RectangleFill(pDeskBuffer, x - 3,     y - 24, x - 3,     y - 3, 1, Color);
+
+    Color.Red   = 0x00;
+    Color.Green = 0x00;
+    Color.Blue	 = 0x00;
+
+    L2_GRAPHICS_ChineseCharDraw2(pDeskBuffer,  16, ScreenHeight - 21,     (18 - 1) * 94 + 43 - 1, Color, ScreenWidth);
+    L2_GRAPHICS_ChineseCharDraw2(pDeskBuffer,  16 * 2, ScreenHeight - 21, (21 - 1) * 94 + 05 - 1, Color, ScreenWidth);		
 }
 
-L2_MOUSE_WallpaperResetClicked()
-{	
-	L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d L2_MOUSE_WallpaperResetClicked\n", __LINE__);
+
+EFI_STATUS L2_GRAPHICS_DeskInit()
+{
+    EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
+	UINT32 x = ScreenWidth;
+	UINT32 y = ScreenHeight;
 	
 	for (int i = 0; i < ScreenHeight; i++)
 		for (int j = 0; j < ScreenWidth; j++)
@@ -2565,7 +2649,69 @@ L2_MOUSE_WallpaperResetClicked()
 			pDeskBuffer[(i * ScreenWidth + j) * 4]     = pDeskWallpaperBuffer[0x36 + ((ScreenHeight - i) * 1920 + j) * 3 ];
 			pDeskBuffer[(i * ScreenWidth + j) * 4 + 1] = pDeskWallpaperBuffer[0x36 + ((ScreenHeight - i) * 1920 + j) * 3 + 1];
 			pDeskBuffer[(i * ScreenWidth + j) * 4 + 2] = pDeskWallpaperBuffer[0x36 + ((ScreenHeight - i) * 1920 + j) * 3 + 2];
-		}	
+		}
+		
+    
+    Color.Red   = 0xC6;
+    Color.Green = 0xC6;
+    Color.Blue	= 0xC6;
+    L1_MEMORY_RectangleFill(pDeskBuffer, 0,     y - 28, x -  1, y - 28, 1, Color);
+
+    Color.Red   = 0xFF;
+    Color.Green = 0xFF;
+    Color.Blue	= 0xFF;
+    L1_MEMORY_RectangleFill(pDeskBuffer, 0,     y - 27, x -  1, y - 27, 1, Color);
+    
+    Color.Red   = 0xC6;
+    Color.Green = 0xC6;
+    Color.Blue	= 0xC6;
+    L1_MEMORY_RectangleFill(pDeskBuffer, 0,     y - 26, x -  1, y -  1, 1, Color);
+  	
+    Color.Red   = 0xFF;
+    Color.Green = 0xFF;
+    Color.Blue	= 0xFF;
+    L1_MEMORY_RectangleFill(pDeskBuffer, 3,     y - 24, 59,     y - 24, 1, Color);
+    L1_MEMORY_RectangleFill(pDeskBuffer, 2,     y - 24, 59,     y - 4, 1, Color);
+
+    Color.Red   = 0x84;
+    Color.Green = 0x84;
+    Color.Blue	= 0x84;
+    L1_MEMORY_RectangleFill(pDeskBuffer, 3,     y -  4, 59,     y -  4, 1, Color);
+    L1_MEMORY_RectangleFill(pDeskBuffer, 59,     y - 23, 59,     y -  5, 1, Color);
+
+    
+    Color.Red   = 0x00;
+    Color.Green = 0x00;
+    Color.Blue	= 0x00;
+    L1_MEMORY_RectangleFill(pDeskBuffer, 2,     y -  3, 59,     y -  3, 1, Color);
+    L1_MEMORY_RectangleFill(pDeskBuffer, 60,    y - 24, 60,     y -  3, 1, Color);
+
+    Color.Red   = 0x84;
+    Color.Green = 0x84;
+    Color.Blue	= 0x84;
+    L1_MEMORY_RectangleFill(pDeskBuffer, x - 163, y - 24, x -  4, y - 24, 1, Color);
+    L1_MEMORY_RectangleFill(pDeskBuffer, x - 163, y - 23, x - 47, y -  4, 1, Color);
+    
+    Color.Red   = 0xFF;
+    Color.Green = 0xFF;
+    Color.Blue	= 0xFF;
+    L1_MEMORY_RectangleFill(pDeskBuffer, x - 163,    y - 3, x - 4,     y - 3, 1, Color);
+    L1_MEMORY_RectangleFill(pDeskBuffer, x - 3,     y - 24, x - 3,     y - 3, 1, Color);
+
+    Color.Red   = 0x00;
+    Color.Green = 0x00;
+    Color.Blue	 = 0x00;
+
+    L2_GRAPHICS_ChineseCharDraw2(pDeskBuffer,  16, ScreenHeight - 21,     (18 - 1) * 94 + 43 - 1, Color, ScreenWidth);
+    L2_GRAPHICS_ChineseCharDraw2(pDeskBuffer,  16 * 2, ScreenHeight - 21, (21 - 1) * 94 + 05 - 1, Color, ScreenWidth);
+}
+
+
+L2_MOUSE_WallpaperResetClicked()
+{	
+	L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d L2_MOUSE_WallpaperResetClicked\n", __LINE__);
+	
+	L2_GRAPHICS_DeskInit();
 }
 
 
@@ -2888,35 +3034,6 @@ EFI_STATUS L2_GRAPHICS_ChineseCharDraw(UINT8 *pBuffer,
 	
     return EFI_SUCCESS;
 }
-
-// fill into rectangle
-void L1_MEMORY_RectangleFill(UINT8 *pBuffer,
-        IN UINTN x0, UINTN y0, UINTN x1, UINTN y1, 
-        IN UINTN BorderWidth,
-        IN EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color)
-{    
-    if (NULL == pBuffer)
-	{
-		DEBUG ((EFI_D_INFO, "NULL == pBuffer"));
-		return ;
-	}
-	
-
-	UINT32 i = 0;
-	UINT32 j = 0;
-    for (j = y0; j <= y1; j++) 
-    {
-        for (i = x0; i <= x1; i++) 
-        {
-            pBuffer[(j * ScreenWidth + i) * 4]     =  Color.Blue; //Blue   
-            pBuffer[(j * ScreenWidth + i) * 4 + 1] =  Color.Green; //Green 
-            pBuffer[(j * ScreenWidth + i) * 4 + 2] =  Color.Red; //Red  
-            pBuffer[(j * ScreenWidth + i) * 4 + 3] =  Color.Reserved; //Red  
-        }
-    }
-
-}
-
 
 L2_NETWORK_Init()
 {}
@@ -4241,6 +4358,7 @@ EFI_STATUS L2_GRAPHICS_SystemSettingInit()
 
 }
 
+
 EFI_STATUS L2_GRAPHICS_ScreenInit()
 {
 	EFI_STATUS status = 0;
@@ -4281,123 +4399,7 @@ EFI_STATUS L2_GRAPHICS_ScreenInit()
    }
 	
   	
-	for (int i = 0; i < ScreenHeight; i++)
-		for (int j = 0; j < ScreenWidth; j++)
-		{
-			// BMP 3bits, and desk buffer 4bits
-			pDeskBuffer[(i * ScreenWidth + j) * 4]     = pDeskWallpaperBuffer[0x36 + ((ScreenHeight - i) * 1920 + j) * 3 ];
-			pDeskBuffer[(i * ScreenWidth + j) * 4 + 1] = pDeskWallpaperBuffer[0x36 + ((ScreenHeight - i) * 1920 + j) * 3 + 1];
-			pDeskBuffer[(i * ScreenWidth + j) * 4 + 2] = pDeskWallpaperBuffer[0x36 + ((ScreenHeight - i) * 1920 + j) * 3 + 2];
-		}
- 	/*
-    Color.Red   = 0x00;
-    Color.Green = 0x84;
-    Color.Blue	= 0x84;
-    Color.Reserved = GRAPHICS_LAYER_DESK;
-    L1_MEMORY_RectangleFill(pDeskBuffer, 0,     0,      x -  1, y - 29, 1, Color);
-    
-    */
-    
-    Color.Red   = 0xC6;
-    Color.Green = 0xC6;
-    Color.Blue	= 0xC6;
-    L1_MEMORY_RectangleFill(pDeskBuffer, 0,     y - 28, x -  1, y - 28, 1, Color);
-
-    Color.Red   = 0xFF;
-    Color.Green = 0xFF;
-    Color.Blue	= 0xFF;
-    L1_MEMORY_RectangleFill(pDeskBuffer, 0,     y - 27, x -  1, y - 27, 1, Color);
-    
-    Color.Red   = 0xC6;
-    Color.Green = 0xC6;
-    Color.Blue	= 0xC6;
-    L1_MEMORY_RectangleFill(pDeskBuffer, 0,     y - 26, x -  1, y -  1, 1, Color);
-  	
-    Color.Red   = 0xFF;
-    Color.Green = 0xFF;
-    Color.Blue	= 0xFF;
-    L1_MEMORY_RectangleFill(pDeskBuffer, 3,     y - 24, 59,     y - 24, 1, Color);
-    L1_MEMORY_RectangleFill(pDeskBuffer, 2,     y - 24, 59,     y - 4, 1, Color);
-
-    Color.Red   = 0x84;
-    Color.Green = 0x84;
-    Color.Blue	= 0x84;
-    L1_MEMORY_RectangleFill(pDeskBuffer, 3,     y -  4, 59,     y -  4, 1, Color);
-    L1_MEMORY_RectangleFill(pDeskBuffer, 59,     y - 23, 59,     y -  5, 1, Color);
-
-    
-    Color.Red   = 0x00;
-    Color.Green = 0x00;
-    Color.Blue	= 0x00;
-    L1_MEMORY_RectangleFill(pDeskBuffer, 2,     y -  3, 59,     y -  3, 1, Color);
-    L1_MEMORY_RectangleFill(pDeskBuffer, 60,    y - 24, 60,     y -  3, 1, Color);
-
-    Color.Red   = 0x84;
-    Color.Green = 0x84;
-    Color.Blue	= 0x84;
-    L1_MEMORY_RectangleFill(pDeskBuffer, x - 163, y - 24, x -  4, y - 24, 1, Color);
-    L1_MEMORY_RectangleFill(pDeskBuffer, x - 163, y - 23, x - 47, y -  4, 1, Color);
-    
-    Color.Red   = 0xFF;
-    Color.Green = 0xFF;
-    Color.Blue	= 0xFF;
-    L1_MEMORY_RectangleFill(pDeskBuffer, x - 163,    y - 3, x - 4,     y - 3, 1, Color);
-    L1_MEMORY_RectangleFill(pDeskBuffer, x - 3,     y - 24, x - 3,     y - 3, 1, Color);
-
-        /*
-    Color.Red   = 0xFF;
-    Color.Green = 0xFF;
-    Color.Blue	= 0xFF;
-    L1_MEMORY_RectangleFill(pDeskBuffer, 0, 100, 100, 200, 1, Color);
-    
-    Color.Red   = 0x00;
-    Color.Green = 0x00;
-    Color.Blue	= 0xFF;
-    L1_MEMORY_RectangleFill(pDeskBuffer, 0, 200, 100, 400, 1, Color);
-
-    
-    Color.Red   = 0x00;
-    Color.Green = 0xFF;
-    Color.Blue	= 0x00;
-    L1_MEMORY_RectangleFill(pDeskBuffer, 0, 300, 100, 400, 1, Color);
-    
-    
-    Color.Red   = 0xFF;
-    Color.Green = 0x00;
-    Color.Blue	= 0x00;
-    L1_MEMORY_RectangleFill(pDeskBuffer, 0, 400, 100, 500, 1, Color);
-    
-    Color.Red  = 0xFF;
-    Color.Green = 0x00;
-    Color.Blue	= 0xFF;
-
-    LineDrawIntoBuffer(pDeskBuffer, 0, 0, 100, 100, 2, Color, ScreenWidth);
-    LineDrawIntoBuffer(pDeskBuffer, 100, 0, 0, 100, 1, Color, ScreenWidth);
-
-    Color.Red  = 0xFF;
-    Color.Green = 0xFF;
-    Color.Blue	= 0xFF;
-
-    // Display "wo"    
-    //DrawChineseCharIntoBuffer(pDeskBuffer, 20, 20 + 16, 0, Color, ScreenWidth);
-    
-    */
-	
-    Color.Red   = 0x00;
-    Color.Green = 0x00;
-    Color.Blue	 = 0x00;
-
-    L2_GRAPHICS_ChineseCharDraw2(pDeskBuffer,  16, ScreenHeight - 21,     (18 - 1) * 94 + 43 - 1, Color, ScreenWidth);
-    L2_GRAPHICS_ChineseCharDraw2(pDeskBuffer,  16 * 2, ScreenHeight - 21, (21 - 1) * 94 + 05 - 1, Color, ScreenWidth);
-    
-    //L2_GRAPHICS_ChineseCharDraw2(pDeskBuffer,  16, ScreenHeight - 21,     (18 - 1) * 94 + 43 - 1, Color, ScreenWidth);
-    //L2_GRAPHICS_ChineseCharDraw2(pDeskBuffer,  16 * 2, ScreenHeight - 21, (21 - 1) * 94 + 05 - 1, Color, ScreenWidth);
-
-/**/
-    //Display ASCII Char
-    //count = 60;
-    //for (i = 40; i < 65 + 60; i++)
-    //    DrawAsciiCharIntoBuffer(pDeskBuffer, 20 + (i - 40) * 8, 20, i, Color);
+	L2_GRAPHICS_DeskInit();
 	
     GraphicsOutput->Blt(
                 GraphicsOutput, 
