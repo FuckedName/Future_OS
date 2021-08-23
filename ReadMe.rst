@@ -24,7 +24,7 @@ shell>fs3:回车
 5、运行A.efi
 shell>A.efi回车
 
-相关介绍视频地址：
+**相关介绍视频地址：**
 
 https://www.bilibili.com/video/BV17M4y1V7dh
 
@@ -38,15 +38,18 @@ https://www.bilibili.com/video/BV18M4y1L7wJ
 
 https://www.bilibili.com/video/BV1G64y1v7hy
 
-EDK2编译环境搭建、编译、在模拟器运行、在笔记本运行：
+
+**EDK2编译环境搭建、编译、在模拟器运行、在笔记本运行：**
 
 https://blog.csdn.net/r77683962/article/details/118640380?spm=1001.2014.3001.5501
 
-配套代码地址：https://gitee.com/dream-os/edk22/tree/edk2-stable202105-base
+**配套代码地址：**
+https://gitee.com/dream-os/edk22/tree/edk2-stable202105-base
 
-代码地址：https://gitee.com/dream-os/edk22/blob/edk2-stable202105-base/MdeModulePkg/Application/A/A.c
+**代码地址：**
+https://gitee.com/dream-os/edk22/blob/edk2-stable202105-base/MdeModulePkg/Application/A/A.c
 
-参考书籍:
+**参考书籍:**
 
 《30天自制操作系统》
 
