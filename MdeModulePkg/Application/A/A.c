@@ -4567,30 +4567,37 @@ EFI_STATUS L2_COMMON_Initial()
     EFI_STATUS	Status;
 	
     INFO_SELF(L"\r\n");
-    
+
+	/*
 	pDeskBuffer = (UINT8 *)AllocatePool(ScreenWidth * ScreenHeight * 4); 
 	if (NULL == pDeskBuffer)
 	{
 		DEBUG ((EFI_D_INFO, "ScreenInit AllocatePool pDeskBuffer NULL\n"));
 		return -1;
-	}
+	}*/
+
+	pDeskBuffer = 0x6ff0f000;
+	/*
 
 	pDeskDisplayBuffer = (UINT8 *)AllocatePool(ScreenWidth * ScreenHeight * 4); 
 	if (NULL == pDeskDisplayBuffer)
 	{
 		DEBUG ((EFI_D_INFO, "ScreenInit AllocatePool pDeskDisplayBuffer NULL\n"));
 		return -1;
-	}
+	}*/
+	pDeskDisplayBuffer = 0x6ff0f000 + 8294400;
 
     // BMP header size: 0x36
     UINT32 DeskWallpaperBufferSize = 1920 * 1080 * 3 + 0x36;
 	//bmp size, is so big
-	pDeskWallpaperBuffer = (UINT8 *)AllocatePool(DeskWallpaperBufferSize); 
+	/*pDeskWallpaperBuffer = (UINT8 *)AllocatePool(DeskWallpaperBufferSize); 
 	if (NULL == pDeskWallpaperBuffer)
 	{
 		DEBUG ((EFI_D_INFO, "ScreenInit AllocatePool pDeskDisplayBuffer NULL\n"));
 		return -1;
-	}
+	}*/
+
+	pDeskWallpaperBuffer =  0x6ff0f000 + 8294400 * 2;
 
 	pMouseClickBuffer = (UINT8 *)AllocatePool(MouseClickWindowWidth * MouseClickWindowHeight * 4); 
 	if (pMouseClickBuffer == NULL)
@@ -4698,6 +4705,8 @@ Main (
   )
 {
     EFI_STATUS  Status;    
+    
+	INFO_SELF(L"%X \r\n", Main);  
 
     Status = gBS->LocateProtocol(&gEfiGraphicsOutputProtocolGuid, NULL, (VOID **) &GraphicsOutput);    
     INFO_SELF(L"\r\n");    
@@ -4709,6 +4718,8 @@ Main (
     
     ScreenWidth  = GraphicsOutput->Mode->Info->HorizontalResolution;
     ScreenHeight = GraphicsOutput->Mode->Info->VerticalResolution;
+
+	INFO_SELF(L"%X \r\n", ScreenWidth);  
 
 
     L2_COMMON_Initial();
