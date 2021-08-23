@@ -2056,6 +2056,61 @@ EFI_STATUS L1_STORE_READ(UINT8 deviceID, UINT64 StartSectorNumber, UINT16 ReadSi
     return EFI_SUCCESS;
 }
 
+
+//Note: ReadSize will be multi with 512
+EFI_STATUS L1_STORE_Write(UINT8 deviceID, UINT64 StartSectorNumber, UINT16 WriteSize, UINT8 *pBuffer)
+{
+	if (StartSectorNumber > device[deviceID].SectorCount)
+	{
+		L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: deviceID: %d StartSectorNumber: %ld ReadSize: %d\n", __LINE__, deviceID, StartSectorNumber, WriteSize);
+		return -1;
+	}
+
+	//L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: deviceID: %d StartSectorNumber: %ld ReadSize: %d\n", __LINE__, deviceID, StartSectorNumber, ReadSize);
+	EFI_STATUS Status;
+    UINTN NumHandles;
+    EFI_BLOCK_IO_PROTOCOL *BlockIo;
+    EFI_DISK_IO_PROTOCOL *DiskIo;
+    EFI_HANDLE *ControllerHandle = NULL;
+    
+    Status = gBS->LocateHandleBuffer(ByProtocol, &gEfiDiskIoProtocolGuid, NULL, &NumHandles, &ControllerHandle);
+    if (EFI_ERROR(Status))
+    {
+        L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);	    
+        return Status;
+    }
+
+ 	Status = gBS->HandleProtocol(ControllerHandle[deviceID], &gEfiBlockIoProtocolGuid, (VOID * *) &BlockIo );   
+    if (EFI_ERROR(Status))
+    {
+		L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
+		return Status;
+    }
+    
+    Status = gBS->HandleProtocol( ControllerHandle[deviceID], &gEfiDiskIoProtocolGuid, (VOID * *) &DiskIo );     
+    if (EFI_ERROR(Status))
+    {
+		L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
+		return Status;
+    }
+
+   	Status = DiskIo->WriteDisk(DiskIo, BlockIo->Media->MediaId, DISK_BUFFER_SIZE * (StartSectorNumber), DISK_BUFFER_SIZE * WriteSize, pBuffer);
+ 	if (EFI_ERROR(Status))
+ 	{
+		L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X sector_count:%ld\n", __LINE__, Status, sector_count);
+		return Status;
+ 	}
+ 	
+	for (int j = 0; j < 250; j++)
+	{
+		L2_DEBUG_Print1(DISK_READ_BUFFER_X + (j % 16) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 16), "%02X ", pBuffer[j] & 0xff);
+	}
+	//INFO_SELF("\n");
+    //L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
+    return EFI_SUCCESS;
+}
+
+
 // NTFS Main File Table items analysis
 // MFT_Item_ID: 0 $MFT
 /*             1 $MFTMirr
@@ -3186,7 +3241,7 @@ EFI_STATUS L2_STORE_GetFatTableFSM()
             Status = L1_STORE_READ(i, sector_count,  MBRSwitched.SectorsPerFat, FAT32_Table); 
             if ( EFI_SUCCESS == Status )
             {
-                //CopyMem(FAT32_Table, Buffer1, DISK_BUFFER_SIZE * MBRSwitched.SectorsPerFat);
+                  //CopyMem(FAT32_Table, Buffer1, DISK_BUFFER_SIZE * MBRSwitched.SectorsPerFat);
 				  for (int j = 0; j < 250; j++)
 				  {
 				  		//L2_DEBUG_Print1(DISK_READ_BUFFER_X + (j % 16) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 16), "%02X ", Buffer1[j] & 0xff);
@@ -3314,8 +3369,19 @@ EFI_STATUS L2_STORE_ReadFileFSM()
 			    {
 			    	L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d Status: %X\n", __LINE__, Status);
 			    	return Status;
-			    }        	 	
-							     
+			    }        	
+
+				/*
+			    BufferBlock[0] = 0xff;
+			    BufferBlock[1] = 0xff;
+
+			    Status = L1_STORE_Write(i, sector_count, 8, BufferBlock); 
+				if (EFI_ERROR(Status))
+			    {
+			    	L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d Status: %X\n", __LINE__, Status);
+			    	return Status;
+			    }     
+				*/		     
                 //L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: HZK16FileReadCount: %d DISK_BLOCK_BUFFER_SIZE: %d\n", __LINE__, HZK16FileReadCount, DISK_BLOCK_BUFFER_SIZE);
 
 				  //Copy buffer to ChineseBuffer
@@ -3475,13 +3541,21 @@ EFI_STATUS L2_MEMORY_MapInitial()
 	// Initial 
 	for (UINT16 i = 0; i < MemoryInformation.MemorySliceCount; i++)
 	{
-		UINT64 PhysicalStart = MemoryInformation.MemoryContinuous[i].PhysicalStart;
-		UINT64 NumberOfPages = MemoryInformation.MemoryContinuous[i].NumberOfPages;
-	
+		UINT8 AddOne = (MemoryInformation.MemoryContinuous[i].NumberOfPages % 8 != 0) ? 1 : 0;
+
+		// Allocate memory page use flag. for memory allocate or free.
+		MemoryInformation.MemoryContinuous[i].pUseFlag = AllocateZeroPool(MemoryInformation.MemoryContinuous[i].NumberOfPages / 8 + AddOne);	
+		if (NULL == MemoryInformation.MemoryContinuous[i].pUseFlag)
+		{
+			L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: AllocateZeroPool failed \n", __LINE__);
+		}
+		
+		/* check sort above by pages whether success.
 		L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: i: %d Start: %X Pages: %d End: %X \n", __LINE__, i, 
 										PhysicalStart, 
 										NumberOfPages,
 										PhysicalStart +NumberOfPages * 4 * 1024);
+		*/										
 	}
 
 	// want to use Link to save Memory information
@@ -3492,8 +3566,26 @@ EFI_STATUS L2_MEMORY_MapInitial()
 	// 5. maybe more and more fragment, after allocates and frees.
 }
 
-float L2_MEMORY_Allocate(UINT32 size)
-{  }
+// size: the one unit size is Bytes 
+UINT8 *L2_MEMORY_Allocate(UINT32 size)
+{
+	// Allocate minimize unit is 4K
+	UINT32 pages = size / (512 * 8);
+	UINT8 AddOne = (size % (512 * 8) != 0) ? 1 : 0;
+	pages += AddOne;
+	UINT8 *pBuffer = NULL;
+
+	for (UINT16 i = 0; i < MemoryInformation.MemorySliceCount; i++)
+	{
+		if (pages <= MemoryInformation.MemoryContinuous[i].NumberOfPages)
+		{
+				
+			
+			
+			break;
+		}
+	}
+}
 
 float L2_MEMORY_Free(UINT32 *p)
 {  }
