@@ -2776,17 +2776,17 @@ EFI_STATUS L2_GRAPHICS_ButtonDraw2(UINT16 StartX, UINT16 StartY, UINT16 Width, U
     L1_MEMORY_RectangleFill(pDeskBuffer, StartX,  StartY, StartX + Width, StartY, 1, Color); //line top 
     L1_MEMORY_RectangleFill(pDeskBuffer, StartX,  StartY, StartX, StartY + Height,  1, Color); //line left
 
-    Color.Red   = 0x84;
-    Color.Green = 0x84;
-    Color.Blue	= 0x84;
+    Color.Red   = 214;
+    Color.Green = 211;
+    Color.Blue	= 206;
 	L1_MEMORY_RectangleFill(pDeskBuffer, StartX + 1, StartY + 1, StartX + Width, StartY + Height, 1, Color); // Area
 	
     // Black
     Color.Red   = 0x00;
     Color.Green = 0x00;
     Color.Blue	= 0x00;
-    L1_MEMORY_RectangleFill(pDeskBuffer, StartX,  StartY + Height + 1, StartX + Width, StartY + Height + 1, 1, Color); // line button
-    L1_MEMORY_RectangleFill(pDeskBuffer, StartX + Width + 1, StartY + 1 , StartX + Width + 1, StartY + Height + 1, 1, Color); // line right
+    L1_MEMORY_RectangleFill(pDeskBuffer, StartX,  StartY + Height + 1, StartX + Width, StartY + Height + 2, 1, Color); // line button
+    L1_MEMORY_RectangleFill(pDeskBuffer, StartX + Width + 1, StartY + 1 , StartX + Width + 2, StartY + Height + 1, 1, Color); // line right
 }
 
 
@@ -2828,9 +2828,11 @@ EFI_STATUS L2_GRAPHICS_DeskInit()
 	// Menu Button
 	L2_GRAPHICS_ButtonDraw();
 
-	L2_GRAPHICS_ButtonDraw2(16 * 6, ScreenHeight - 20, 16 * 4, 20);
+	L2_GRAPHICS_ButtonDraw2(16 * 6, ScreenHeight - 22, 16 * 4, 16);
 
-	L2_GRAPHICS_ButtonDraw2(16 * 12, ScreenHeight - 20, 16 * 4, 20);
+	L2_GRAPHICS_ButtonDraw2(16 * 11, ScreenHeight - 22, 16 * 4, 16);
+
+	L2_GRAPHICS_ButtonDraw2(16 * 16, ScreenHeight - 22, 16 * 4, 16);
 
     Color.Red   = 0x84;
     Color.Green = 0x84;
