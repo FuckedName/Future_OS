@@ -39,6 +39,20 @@ current problems:
 	2. display FAT32 file system root path items almost ok, display format not very beautiful.
 	3. keyboard input not ok.
 
+常用网址
+1、区位码查询 http://quwei.911cha.com/
+2、C语言代码格式化 http://web.chacuo.net/formatc
+
+注意事项
+1、存放EFI目录的分区一定要是FAT32格式
+2、存放EFI分区大小扇区数一定要替换宏STORE_EFI_PATH_PARTITION_SECTOR_COUNT
+3、桌面图片文件和HZK16文件一定要存放在这个分区的根目录
+4、
+5、
+
+常见问题
+1、SecureCRT不能连接LINUX UBUNTU，PING不通，需要把LINUX 网络断开重连下
+2、
 **/
 
 #include <stdio.h>
@@ -131,6 +145,9 @@ char pKeyboardInputBuffer[KEYBOARD_BUFFER_LENGTH] = {0};
 #define DISPLAY_DESK_HEIGHT_WEIGHT_X (date_time_count % 30) 
 #define DISPLAY_DESK_HEIGHT_WEIGHT_Y (0)
 
+#define STORE_EFI_PATH_PARTITION_SECTOR_COUNT 921564
+
+
 //Line 1
 #define DISPLAY_MOUSE_X (0) 
 #define DISPLAY_MOUSE_Y (16 * 1)
@@ -160,7 +177,7 @@ char pKeyboardInputBuffer[KEYBOARD_BUFFER_LENGTH] = {0};
 
 
 //last Line
-#define DISPLAY_DESK_DATE_TIME_X (ScreenWidth - 20 * 8) 
+#define DISPLAY_DESK_DATE_TIME_X (ScreenWidth - 22 * 8 - 16 * 3) 
 #define DISPLAY_DESK_DATE_TIME_Y (ScreenHeight - 21)
 
 
@@ -1488,6 +1505,7 @@ EFI_STATUS L1_STRING_Compare(UINT8 *p1, UINT8 *p2, UINT16 length)
 	return EFI_SUCCESS;
 }
 
+//delete blanks
 void L1_FILE_NameGet(UINT8 deviceID,UINT8 *FileName)
 {    
     int count = 0;
@@ -2716,6 +2734,62 @@ L2_MOUSE_WallpaperSettingClicked()
     L2_GRAPHICS_ChineseCharDraw2(pDeskBuffer,  16 * 2, ScreenHeight - 21, (21 - 1) * 94 + 05 - 1, Color, ScreenWidth);		
 }
 
+EFI_STATUS L2_GRAPHICS_ButtonDraw()
+{
+    EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
+	UINT32 x = ScreenWidth;
+	UINT32 y = ScreenHeight;
+	
+  	// Button
+  	// white
+    Color.Red   = 0xFF;
+    Color.Green = 0xFF;
+    Color.Blue	= 0xFF;
+    L1_MEMORY_RectangleFill(pDeskBuffer, 3,  y - 24, 59, y - 24, 1, Color); //line top (3,  y - 24) (59, y - 24)
+    L1_MEMORY_RectangleFill(pDeskBuffer, 2,  y - 24, 59, y - 4,  1, Color); //area center(2,  y - 24) (59, y - 4)
+
+    Color.Red   = 0x84;
+    Color.Green = 0x84;
+    Color.Blue	= 0x84;
+    L1_MEMORY_RectangleFill(pDeskBuffer, 3,  y -  4, 59, y -  4, 1, Color); // line button (3,  y -  4) (59, y -  4)
+    L1_MEMORY_RectangleFill(pDeskBuffer, 59, y - 23, 59, y -  5, 1, Color); // line right(59, y - 23) (59, y -  5)
+
+    // Black
+    Color.Red   = 0x00;
+    Color.Green = 0x00;
+    Color.Blue	= 0x00;
+    L1_MEMORY_RectangleFill(pDeskBuffer, 2,  y -  3, 59, y -  3, 1, Color); // line button(2,  y -  3) (59, y -  3)
+    L1_MEMORY_RectangleFill(pDeskBuffer, 60, y - 24, 60, y -  3, 1, Color); // line right(60, y - 24) (60, y -  3)
+}
+
+
+//											       16 * 4,        16 * 7,       16 * 4,        16 * 2
+EFI_STATUS L2_GRAPHICS_ButtonDraw2(UINT16 StartX, UINT16 StartY, UINT16 Width, UINT16 Height)
+{
+    EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
+	
+  	// Button
+  	// white
+    Color.Red   = 0xFF;
+    Color.Green = 0xFF;
+    Color.Blue	= 0xFF;
+    L1_MEMORY_RectangleFill(pDeskBuffer, StartX,  StartY, StartX + Width, StartY, 1, Color); //line top 
+    L1_MEMORY_RectangleFill(pDeskBuffer, StartX,  StartY, StartX, StartY + Height,  1, Color); //line left
+
+    Color.Red   = 0x84;
+    Color.Green = 0x84;
+    Color.Blue	= 0x84;
+	L1_MEMORY_RectangleFill(pDeskBuffer, StartX + 1, StartY + 1, StartX + Width, StartY + Height, 1, Color); // Area
+	
+    // Black
+    Color.Red   = 0x00;
+    Color.Green = 0x00;
+    Color.Blue	= 0x00;
+    L1_MEMORY_RectangleFill(pDeskBuffer, StartX,  StartY + Height + 1, StartX + Width, StartY + Height + 1, 1, Color); // line button
+    L1_MEMORY_RectangleFill(pDeskBuffer, StartX + Width + 1, StartY + 1 , StartX + Width + 1, StartY + Height + 1, 1, Color); // line right
+}
+
+
 
 EFI_STATUS L2_GRAPHICS_DeskInit()
 {
@@ -2732,57 +2806,50 @@ EFI_STATUS L2_GRAPHICS_DeskInit()
 			pDeskBuffer[(i * ScreenWidth + j) * 4 + 2] = pDeskWallpaperBuffer[0x36 + ((ScreenHeight - i) * 1920 + j) * 3 + 2];
 		}
 		
-    
-    Color.Red   = 0xC6;
-    Color.Green = 0xC6;
-    Color.Blue	= 0xC6;
-    L1_MEMORY_RectangleFill(pDeskBuffer, 0,     y - 28, x -  1, y - 28, 1, Color);
 
-    Color.Red   = 0xFF;
-    Color.Green = 0xFF;
-    Color.Blue	= 0xFF;
-    L1_MEMORY_RectangleFill(pDeskBuffer, 0,     y - 27, x -  1, y - 27, 1, Color);
-    
+    // line
     Color.Red   = 0xC6;
     Color.Green = 0xC6;
     Color.Blue	= 0xC6;
-    L1_MEMORY_RectangleFill(pDeskBuffer, 0,     y - 26, x -  1, y -  1, 1, Color);
-  	
+    L1_MEMORY_RectangleFill(pDeskBuffer, 0,     y - 28, x -  1, y - 28, 1, Color); // area top
+
+	// line
     Color.Red   = 0xFF;
     Color.Green = 0xFF;
     Color.Blue	= 0xFF;
-    L1_MEMORY_RectangleFill(pDeskBuffer, 3,     y - 24, 59,     y - 24, 1, Color);
-    L1_MEMORY_RectangleFill(pDeskBuffer, 2,     y - 24, 59,     y - 4, 1, Color);
+    L1_MEMORY_RectangleFill(pDeskBuffer, 0,     y - 27, x -  1, y - 27, 1, Color); // line top
+
+    // rectangle
+    Color.Red   = 0xC6;
+    Color.Green = 0xC6;
+    Color.Blue	= 0xC6;
+    L1_MEMORY_RectangleFill(pDeskBuffer, 0,     y - 26, x -  1, y -  1, 1, Color); // area task bar
+
+	// Menu Button
+	L2_GRAPHICS_ButtonDraw();
+
+	L2_GRAPHICS_ButtonDraw2(16 * 6, ScreenHeight - 20, 16 * 4, 20);
+
+	L2_GRAPHICS_ButtonDraw2(16 * 12, ScreenHeight - 20, 16 * 4, 20);
 
     Color.Red   = 0x84;
     Color.Green = 0x84;
     Color.Blue	= 0x84;
-    L1_MEMORY_RectangleFill(pDeskBuffer, 3,     y -  4, 59,     y -  4, 1, Color);
-    L1_MEMORY_RectangleFill(pDeskBuffer, 59,     y - 23, 59,     y -  5, 1, Color);
-
-    
-    Color.Red   = 0x00;
-    Color.Green = 0x00;
-    Color.Blue	= 0x00;
-    L1_MEMORY_RectangleFill(pDeskBuffer, 2,     y -  3, 59,     y -  3, 1, Color);
-    L1_MEMORY_RectangleFill(pDeskBuffer, 60,    y - 24, 60,     y -  3, 1, Color);
-
-    Color.Red   = 0x84;
-    Color.Green = 0x84;
-    Color.Blue	= 0x84;
-    L1_MEMORY_RectangleFill(pDeskBuffer, x - 163, y - 24, x -  4, y - 24, 1, Color);
-    L1_MEMORY_RectangleFill(pDeskBuffer, x - 163, y - 23, x - 47, y -  4, 1, Color);
+    L1_MEMORY_RectangleFill(pDeskBuffer, DISPLAY_DESK_DATE_TIME_X, y - 24, x -  4, y - 24, 1, Color); // line
+    //L1_MEMORY_RectangleFill(pDeskBuffer, DISPLAY_DESK_DATE_TIME_X, y - 23, x - 47, y -  4, 1, Color); // area
     
     Color.Red   = 0xFF;
     Color.Green = 0xFF;
     Color.Blue	= 0xFF;
-    L1_MEMORY_RectangleFill(pDeskBuffer, x - 163,    y - 3, x - 4,     y - 3, 1, Color);
-    L1_MEMORY_RectangleFill(pDeskBuffer, x - 3,     y - 24, x - 3,     y - 3, 1, Color);
+    L1_MEMORY_RectangleFill(pDeskBuffer, DISPLAY_DESK_DATE_TIME_X,    y - 3, x - 4,     y - 3, 1, Color); // line
+    L1_MEMORY_RectangleFill(pDeskBuffer, x - 3,     y - 24, x - 3,     y - 3, 1, Color); //line
 
+	//Black
     Color.Red   = 0x00;
     Color.Green = 0x00;
     Color.Blue	 = 0x00;
 
+	// menu chinese
     L2_GRAPHICS_ChineseCharDraw2(pDeskBuffer,  16, ScreenHeight - 21,     (18 - 1) * 94 + 43 - 1, Color, ScreenWidth);
     L2_GRAPHICS_ChineseCharDraw2(pDeskBuffer,  16 * 2, ScreenHeight - 21, (21 - 1) * 94 + 05 - 1, Color, ScreenWidth);
 }
@@ -3154,7 +3221,7 @@ EFI_STATUS L2_STORE_PartitionAnalysisFSM()
     
     for (int i = 0; i < PartitionCount; i++)
 	{
-		if (device[i].DeviceType == 1 && device[i].SectorCount == 915551)
+		if (device[i].DeviceType == 1 && device[i].SectorCount == STORE_EFI_PATH_PARTITION_SECTOR_COUNT)
 		{
         	 Status = L1_STORE_READ(i, sector_count, 1, Buffer1); 
 			 if ( EFI_SUCCESS == Status )
@@ -3185,7 +3252,7 @@ EFI_STATUS L2_STORE_RootPathAnalysisFSM()
     
     for (int i = 0; i < PartitionCount; i++)
     {
-        if (device[i].DeviceType == 1 && device[i].SectorCount == 915551)
+        if (device[i].DeviceType == 1 && device[i].SectorCount == STORE_EFI_PATH_PARTITION_SECTOR_COUNT)
         {
             Status = L1_STORE_READ(i, sector_count, 1, Buffer1); 
             if ( EFI_SUCCESS == Status )
@@ -3225,7 +3292,7 @@ EFI_STATUS L2_STORE_GetFatTableFSM()
     
     for (int i = 0; i < PartitionCount; i++)
     {
-        if (device[i].DeviceType == 1 && device[i].SectorCount == 915551)
+        if (device[i].DeviceType == 1 && device[i].SectorCount == STORE_EFI_PATH_PARTITION_SECTOR_COUNT)
         {
         	 //start block need to recompute depends on file block start number 
         	 //FileBlockStart;
@@ -3358,7 +3425,7 @@ EFI_STATUS L2_STORE_ReadFileFSM()
             
 	for (int i = 0; i < PartitionCount; i++)
 	{
-		if (device[i].DeviceType == 1 && device[i].SectorCount == 915551)
+		if (device[i].DeviceType == 1 && device[i].SectorCount == STORE_EFI_PATH_PARTITION_SECTOR_COUNT)
 		{
 			// read from USB by block(512 * 8)
     	    // Read file content from FAT32(USB), minimum unit is block
@@ -4300,6 +4367,64 @@ L2_MOUSE_Event (IN EFI_EVENT Event, IN VOID *Context)
 	gBS->WaitForEvent( 1, &gMouse->WaitForInput, &Index );
 }
 
+UINT8 L1_TIMER_DayOfWeek(int y, int m, int d)
+{
+	UINT8 T;
+	
+	if ( m < 3 )
+	{
+		m += 12;
+		y -= 1;
+	}
+	
+	return ( (d + 2 * m + 3 * (m + 1) / 5 + y + y / 4 - y / 100 + y / 400 + 1) % 7 + 7) % 7;
+	/*
+	if ( T == 0 )
+	{
+		printf( "Sunday\n" );
+		L1_MEMORY_Copy();
+	}
+	
+	if ( T == 1 )
+	{
+		printf( "Monday\n" );
+		L1_MEMORY_Copy();
+	}
+		
+	if ( T == 2 )
+	{
+		printf( "Tuesday\n" );
+		L1_MEMORY_Copy();
+	}
+		
+	if ( T == 3 )
+	{
+		printf( "Wednesday\n" );
+		L1_MEMORY_Copy();
+	}
+		
+	if ( T == 4 )
+	{
+		printf( "Thursday\n" );
+		L1_MEMORY_Copy();
+	}
+		
+	if ( T == 5 )
+	{
+		printf( "Friday\n" );
+		L1_MEMORY_Copy();
+	}
+		
+	if ( T == 6 )
+	{
+		printf( "Saturday\n" );
+		L1_MEMORY_Copy();
+	}*/
+		
+}
+
+
+
 // display system date & time
 STATIC
 VOID
@@ -4309,13 +4434,53 @@ L2_TIMER_Print (
   IN VOID      *Context
   )
 {	
-    EFI_TIME et;
+    EFI_TIME EFITime;
 	date_time_count++;
-	gRT->GetTime(&et, NULL);
+	gRT->GetTime(&EFITime, NULL);
+	EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
+	UINT16 x, y;
 	
-	L2_DEBUG_Print1(DISPLAY_DESK_DATE_TIME_X, DISPLAY_DESK_DATE_TIME_Y, "%04d-%02d-%02d %02d:%02d:%02d", 
-				  et.Year, et.Month, et.Day, et.Hour, et.Minute, et.Second);
+	Color.Blue = 0x00;
+	Color.Red = 0xFF;
+	Color.Green = 0x00;
+
+	x = DISPLAY_DESK_DATE_TIME_X;
+	y = DISPLAY_DESK_DATE_TIME_Y;
 	
+	L2_DEBUG_Print1(x, y, "%04d-%02d-%02d %02d:%02d:%02d ", 
+				  EFITime.Year, EFITime.Month, EFITime.Day, EFITime.Hour, EFITime.Minute, EFITime.Second);
+	//	星	4839	期	3858
+	x += 21 * 8 + 3;
+    L2_GRAPHICS_ChineseCharDraw2(pDeskBuffer, x, y,  (48 - 1) * 94 + 39 - 1, Color, ScreenWidth); 
+    
+	x += 16;
+    L2_GRAPHICS_ChineseCharDraw2(pDeskBuffer, x, y,  (38 - 1) * 94 + 58 - 1, Color, ScreenWidth);
+
+	x += 16;
+
+    UINT8 DayOfWeek = L1_TIMER_DayOfWeek(EFITime.Year, EFITime.Month, EFITime.Day);
+    if (0 == DayOfWeek)
+    {
+    	L2_GRAPHICS_ChineseCharDraw2(pDeskBuffer, x, y, (48 - 1 ) * 94 + 39 - 1, Color, ScreenWidth);    
+    }
+	UINT8 AreaCode = 0;
+	UINT8 BitCode = 0;
+	
+	// 日 4053 一 5027 二 2294 三 4093 四 4336 五 4669 六 3389
+    switch (DayOfWeek)
+    {
+    	case 0: AreaCode = 40; BitCode = 53; break;
+    	case 1: AreaCode = 50; BitCode = 27; break;
+    	case 2: AreaCode = 22; BitCode = 94; break;
+    	case 3: AreaCode = 40; BitCode = 93; break;
+    	case 4: AreaCode = 43; BitCode = 36; break;
+    	case 5: AreaCode = 46; BitCode = 69; break;
+    	case 6: AreaCode = 33; BitCode = 89; break;
+    	default: AreaCode = 16; BitCode = 01; break;
+    }
+
+    L2_GRAPHICS_ChineseCharDraw2(pDeskBuffer, x, y, (AreaCode - 1 ) * 94 + BitCode - 1, Color, ScreenWidth);
+    
    L2_DEBUG_Print1(DISPLAY_DESK_HEIGHT_WEIGHT_X, DISPLAY_DESK_HEIGHT_WEIGHT_Y, "%d ScreenWidth:%d, ScreenHeight:%d\n", __LINE__, ScreenWidth, ScreenHeight);
    /*
    GraphicsOutput->Blt(GraphicsOutput, 
@@ -4568,36 +4733,36 @@ EFI_STATUS L2_COMMON_Initial()
 	
     INFO_SELF(L"\r\n");
 
-	/*
+	
 	pDeskBuffer = (UINT8 *)AllocatePool(ScreenWidth * ScreenHeight * 4); 
 	if (NULL == pDeskBuffer)
 	{
 		DEBUG ((EFI_D_INFO, "ScreenInit AllocatePool pDeskBuffer NULL\n"));
 		return -1;
-	}*/
+	}/**/
 
-	pDeskBuffer = 0x6ff0f000;
-	/*
+	//pDeskBuffer = 0x6ff0f000;
+	
 
 	pDeskDisplayBuffer = (UINT8 *)AllocatePool(ScreenWidth * ScreenHeight * 4); 
 	if (NULL == pDeskDisplayBuffer)
 	{
 		DEBUG ((EFI_D_INFO, "ScreenInit AllocatePool pDeskDisplayBuffer NULL\n"));
 		return -1;
-	}*/
-	pDeskDisplayBuffer = 0x6ff0f000 + 8294400;
+	}/**/
+	//pDeskDisplayBuffer = 0x6ff0f000 + 8294400;
 
     // BMP header size: 0x36
     UINT32 DeskWallpaperBufferSize = 1920 * 1080 * 3 + 0x36;
 	//bmp size, is so big
-	/*pDeskWallpaperBuffer = (UINT8 *)AllocatePool(DeskWallpaperBufferSize); 
+	pDeskWallpaperBuffer = (UINT8 *)AllocatePool(DeskWallpaperBufferSize); 
 	if (NULL == pDeskWallpaperBuffer)
 	{
 		DEBUG ((EFI_D_INFO, "ScreenInit AllocatePool pDeskDisplayBuffer NULL\n"));
 		return -1;
-	}*/
+	}/**/
 
-	pDeskWallpaperBuffer =  0x6ff0f000 + 8294400 * 2;
+	//pDeskWallpaperBuffer =  0x6ff0f000 + 8294400 * 2;
 
 	pMouseClickBuffer = (UINT8 *)AllocatePool(MouseClickWindowWidth * MouseClickWindowHeight * 4); 
 	if (pMouseClickBuffer == NULL)
