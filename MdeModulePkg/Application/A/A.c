@@ -373,7 +373,7 @@ const UINT8 sASCII[][16] =
     {0x00,0x00,0x00,0x60,0x30,0x18,0x0C,0x06,0x0C,0x18,0x30,0x60,0x00,0x00,0x00,0x00},       //0x3E'>'
     {0x00,0x00,0x7C,0xC6,0xC6,0x0C,0x18,0x18,0x18,0x00,0x18,0x18,0x00,0x00,0x00,0x00},       //0x3F'?'
     {0x00,0x00,0x00,0x7C,0xC6,0xC6,0xDE,0xDE,0xDE,0xDC,0xC0,0x7C,0x00,0x00,0x00,0x00},       //0x40'@'
-    {0x00,0x00,0x10,0x38,0x6C,0xC6,0xC6,0xFE,0xC6,0xC6,0xC6,0xC6,0x00,0x00,0x00,0x00},       //0x41'A'
+    {0x00,0x00,0x10,0x38,0x6C,0xC6,0xC6,0xFE,0xC6,0xC6,0xC6,0xC6,0x00,0x00,0x00,0x00},       //0x41'A' //https://blog.csdn.net/czg13548930186/article/details/79861914
     {0x00,0x00,0xFC,0x66,0x66,0x66,0x7C,0x66,0x66,0x66,0x66,0xFC,0x00,0x00,0x00,0x00},       //0x42'B'
     {0x00,0x00,0x3C,0x66,0xC2,0xC0,0xC0,0xC0,0xC0,0xC2,0x66,0x3C,0x00,0x00,0x00,0x00},       //0x43'C'
     {0x00,0x00,0xF8,0x6C,0x66,0x66,0x66,0x66,0x66,0x66,0x6C,0xF8,0x00,0x00,0x00,0x00},       //0x44'D'
@@ -486,6 +486,12 @@ typedef struct {
     UINT8 USN[2];//更新序列号
     UINT8 USNArray[0];//更新序列数组
 }INDEX_HEADER;
+
+typedef enum
+{
+	MEMORY_TYPE_GRAPHICS,
+	MEMORY_TYPE_APPLICATION
+}MEMORY_TYPE;
 
 typedef struct {
      UINT8 MFTReferNumber[8];//文件的MFT参考号, first 6 Bytes * 2 + MFT table sector = file sector 
@@ -977,16 +983,20 @@ typedef struct
 	/// either physical or virtual, above 0xfffffffffffff000.
 	///
 	UINT64                NumberOfPages;
+	
+	UINT64                FreeNumberOfPages;
 
 	// Memory use flag page id 
 	// no use: 0
 	//    use: 1
-	BOOLEAN *pUseFlag;
+	UINT8 *pMapper;
 }MEMORY_CONTINUOUS;
 
 typedef struct {
 	UINT16 MemorySliceCount;
   	MEMORY_CONTINUOUS MemoryContinuous[10];
+  	UINT64 AllocatedInformation[20][2];
+  	UINT16 CurrentAllocatedCount;
 }MEMORY_INFORMATION;
 
 // fill into rectangle
@@ -1315,14 +1325,13 @@ EFI_STATUS L2_GRAPHICS_ChineseCharDraw2(UINT8 *pBuffer,
 	for(i = 0; i < 32; i += 2)
 	{
         L2_GRAPHICS_ChineseHalfDra2(pBuffer, sChineseChar[offset * 32 + i ],     x0,     y0 + i / 2, 1, Color, AreaWidth);		        
-		 L2_GRAPHICS_ChineseHalfDra2(pBuffer, sChineseChar[offset * 32 + i + 1],  x0 + 8, y0 + i / 2, 1, Color, AreaWidth);		
+		L2_GRAPHICS_ChineseHalfDra2(pBuffer, sChineseChar[offset * 32 + i + 1],  x0 + 8, y0 + i / 2, 1, Color, AreaWidth);		
 	}
 	
     //DEBUG ((EFI_D_INFO, "\n"));
 	
     return EFI_SUCCESS;
 }
-
 
 VOID L2_STRING_Maker (UINT16 x, UINT16 y,
   IN  CONST CHAR8   *Format,
@@ -1505,7 +1514,7 @@ EFI_STATUS L1_STRING_Compare(UINT8 *p1, UINT8 *p2, UINT16 length)
 	return EFI_SUCCESS;
 }
 
-//delete blanks
+//delete blanks of file name and file extension name
 void L1_FILE_NameGet(UINT8 deviceID,UINT8 *FileName)
 {    
     int count = 0;
@@ -2363,7 +2372,7 @@ EFI_STATUS L2_FILE_PartitionTypeAnalysis(UINT16 DeviceID)
 	 	L1_FILE_FAT32_DataSectorAnalysis(Buffer1, &MBRSwitched); 
 
 	 	// data sector number start include: reserved selector, fat sectors(usually is 2: fat1 and fat2), and file system boot path start cluster(usually is 2, data block start number is 2)
-	 	sector_count = MBRSwitched.ReservedSelector + MBRSwitched.SectorsPerFat * MBRSwitched.NumFATS + MBRSwitched.BootPathStartCluster - 2;
+	 	sector_count = MBRSwitched.ReservedSelector + MBRSwitched.SectorsPerFat * MBRSwitched.NumFATS + (MBRSwitched.BootPathStartCluster - 2) * 8;
 	 	BlockSize = MBRSwitched.SectorOfCluster * 512;
    		//L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: sector_count:%ld BlockSize: %d\n",  __LINE__, sector_count, BlockSize);
    		return FILE_SYSTEM_FAT32;
@@ -3234,7 +3243,7 @@ EFI_STATUS L2_STORE_PartitionAnalysisFSM()
 			 	  L1_FILE_FAT32_DataSectorAnalysis(Buffer1, &MBRSwitched); 
 
 			 	  // data sector number start include: reserved selector, fat sectors(usually is 2: fat1 and fat2), and file system boot path start cluster(usually is 2, data block start number is 2)
-			 	  sector_count = MBRSwitched.ReservedSelector + MBRSwitched.SectorsPerFat * MBRSwitched.NumFATS + MBRSwitched.BootPathStartCluster - 2;
+			 	  sector_count = MBRSwitched.ReservedSelector + MBRSwitched.SectorsPerFat * MBRSwitched.NumFATS + (MBRSwitched.BootPathStartCluster - 2) * 8;
 			 	  BlockSize = MBRSwitched.SectorOfCluster * 512;
 	       		  L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: sector_count:%ld BlockSize: %d\n",  __LINE__, sector_count, BlockSize);
 		     }        	 
@@ -3431,7 +3440,10 @@ EFI_STATUS L2_STORE_ReadFileFSM()
 		{
 			// read from USB by block(512 * 8)
     	    // Read file content from FAT32(USB), minimum unit is block
-    	    for (UINT16 k = 0; k < FileLength / (512 * 8); k++)
+
+			UINT8 AddOneFlag = (FileLength % (512 * 8)) == 0 ? 0 : 1;
+    	    
+    	    for (UINT16 k = 0; k < FileLength / (512 * 8) + AddOneFlag; k++)
     	 	{
         	 	Status = L1_STORE_READ(i, sector_count, 8, BufferBlock); 
 				if (EFI_ERROR(Status))
@@ -3587,6 +3599,12 @@ EFI_STATUS L2_MEMORY_MapInitial()
 {
 	MEMORY_INFORMATION MemoryInformationTemp;
 
+	MemoryInformation.CurrentAllocatedCount = 0;
+
+	INFO_SELF(L"%X \r\n", L2_MEMORY_MapInitial);  
+
+	L1_MEMORY_SetValue(&MemoryInformation.AllocatedInformation, sizeof(MemoryInformation.AllocatedInformation), 0);
+
 	// Sort by pages
 	for (UINT16 i = 0; i < MemoryInformation.MemorySliceCount; i++)
 	{
@@ -3613,14 +3631,17 @@ EFI_STATUS L2_MEMORY_MapInitial()
 		UINT8 AddOne = (MemoryInformation.MemoryContinuous[i].NumberOfPages % 8 != 0) ? 1 : 0;
 
 		// Allocate memory page use flag. for memory allocate or free.
-		MemoryInformation.MemoryContinuous[i].pUseFlag = AllocateZeroPool(MemoryInformation.MemoryContinuous[i].NumberOfPages / 8 + AddOne);	
-		if (NULL == MemoryInformation.MemoryContinuous[i].pUseFlag)
+		MemoryInformation.MemoryContinuous[i].pMapper = AllocateZeroPool(MemoryInformation.MemoryContinuous[i].NumberOfPages / 8 + AddOne);	
+		if (NULL == MemoryInformation.MemoryContinuous[i].pMapper)
 		{
-			L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: AllocateZeroPool failed \n", __LINE__);
+			//L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: AllocateZeroPool failed \n", __LINE__);
 		}
+		UINT64 PhysicalStart = MemoryInformation.MemoryContinuous[i].PhysicalStart;
+		UINT64 NumberOfPages = MemoryInformation.MemoryContinuous[i].NumberOfPages;
+		MemoryInformation.MemoryContinuous[i].FreeNumberOfPages = NumberOfPages;
 		
-		/* check sort above by pages whether success.
-		L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: i: %d Start: %X Pages: %d End: %X \n", __LINE__, i, 
+		// check sort above by pages whether success.
+		/*L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: i: %d Start: %X Pages: %d End: %X \n", __LINE__, i, 
 										PhysicalStart, 
 										NumberOfPages,
 										PhysicalStart +NumberOfPages * 4 * 1024);
@@ -3635,21 +3656,85 @@ EFI_STATUS L2_MEMORY_MapInitial()
 	// 5. maybe more and more fragment, after allocates and frees.
 }
 
-// size: the one unit size is Bytes 
-UINT8 *L2_MEMORY_Allocate(UINT32 size)
+UINT8 L1_BIT_Set(UINT8 *pMapper, UINT64 StartPageID, UINT64 Size)
 {
-	// Allocate minimize unit is 4K
-	UINT32 pages = size / (512 * 8);
-	UINT8 AddOne = (size % (512 * 8) != 0) ? 1 : 0;
-	pages += AddOne;
-	UINT8 *pBuffer = NULL;
+	
+}
 
-	for (UINT16 i = 0; i < MemoryInformation.MemorySliceCount; i++)
+// size: the one unit size is Bytes 
+UINT8 *L2_MEMORY_Allocate(char *pApplicationName, UINT16 type, UINT32 SizeRequired)
+{
+	INFO_SELF(L"L2_MEMORY_Allocate: %X SizeRequired:%X\r\n", L2_MEMORY_Allocate, SizeRequired);  
+	// Allocate minimize unit is 4K
+	UINT32 PagesRequired = SizeRequired / (512 * 8);
+	UINT8  AddOne = (SizeRequired % (512 * 8) != 0) ? 1 : 0;
+	
+	PagesRequired += AddOne;
+
+	INFO_SELF(L"L2_MEMORY_Allocate: %X PagesRequired: %d\r\n", L2_MEMORY_Allocate, PagesRequired);  
+
+	UINT64 i = 0;
+	UINT64 j = 0;
+	UINT64 k = 0;
+
+	UINT64 NumberOfPages;
+	UINT64 PhysicalStart;
+	UINT8 *pMapper;
+	UINT64 FreeNumberOfPages;
+
+	for (i = 0; i < MemoryInformation.MemorySliceCount; i++)
 	{
-		if (pages <= MemoryInformation.MemoryContinuous[i].NumberOfPages)
-		{
+		NumberOfPages 	  = MemoryInformation.MemoryContinuous[i].NumberOfPages;
+		PhysicalStart 	  = MemoryInformation.MemoryContinuous[i].PhysicalStart;
+		pMapper       	  = MemoryInformation.MemoryContinuous[i].pMapper;
+		FreeNumberOfPages = MemoryInformation.MemoryContinuous[i].FreeNumberOfPages;
+		INFO_SELF(L"i: %d, NumberOfPages: %llu, PhysicalStart: llu%, FreeNumberOfPages: llu% \r\n", i, NumberOfPages, PhysicalStart, FreeNumberOfPages); 
 				
+		//Free pages must more than required pages
+		if (PagesRequired >= FreeNumberOfPages)
+		{
+			continue;
+		}
+		
+		//all pages 
+		for (j = 0; j < NumberOfPages; j++)
+		{			
+			INFO_SELF(L"j: %d\r\n", j);  
+			//find first page is no use 
+			//mapper 0: no use, 1: using
+			if (pMapper[j] != 0)
+			{
+				INFO_SELF(L"j: %d\r\n", j);  
+				continue;
+			}
 			
+			// then check the next n - 1 pages
+			for (k = 1; k < PagesRequired; k++)
+			{
+				if (pMapper[j + k] != 0)
+				{
+					j += k;
+					break;
+				}
+			}
+			INFO_SELF(L"k: %llu\r\n", k); 
+
+			// found 
+			if (k == PagesRequired)
+			{
+				//pMapper[j / 8];
+				L1_BIT_Set(pMapper, PhysicalStart + j, PagesRequired);
+				
+				MemoryInformation.AllocatedInformation[MemoryInformation.CurrentAllocatedCount][0] = j;
+				MemoryInformation.AllocatedInformation[MemoryInformation.CurrentAllocatedCount][1] = PagesRequired;
+
+				MemoryInformation.CurrentAllocatedCount++;
+				
+				INFO_SELF(L"PhysicalStart: %X j: %d\r\n", PhysicalStart, j);  
+				
+				// start physical address
+				return PhysicalStart + j * 8 * 512;
+			}
 			
 			break;
 		}
@@ -3767,15 +3852,22 @@ float L2_MEMORY_GETs()
 	      case EfiConventionalMemory:
 		        E820Type = E820_RAM; // Random access memory
 		        MemoryClassifySize[3] += MemoryMap->NumberOfPages;
-           	    L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Index: %d: Start: %X Pages:%X End: %X Type: %d \n", __LINE__, 
+
+		        
+           	    /*L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Index: %d: Start: %X Pages:%X End: %X Type: %d \n", __LINE__, 
                                                                             Index,
                                                                             MemoryMap->PhysicalStart, 
                                                                             MemoryMap->NumberOfPages,
                                                                             MemoryMap->PhysicalStart + MemoryMap->NumberOfPages * 4 * 1024,
-                                                                            MemoryMap->Type);
+                                                                            MemoryMap->Type);*/
                                                                             
 		        if (lastPhysicalEnd != MemoryMap->PhysicalStart)
                {
+		        	INFO_SELF(L"Start: %X Virtual Start:%X: Pages:%X End: %X\n", MemoryMap->PhysicalStart,
+                                                                                ContinuousVirtualMemoryStart,
+                                                                                ContinuousMemoryPages,
+                                                                                ContinuousMemoryStart + ContinuousMemoryPages * 4 * 1024);
+                                                                                
       				/*  DEBUG ((EFI_D_INFO, "%d: E820Type:%X Start:%X Virtual Start:%X Number:%X\n", __LINE__, 
                                                                                 ContinuousMemoryStart,
                                                                                 ContinuousVirtualMemoryStart,
@@ -3818,6 +3910,7 @@ float L2_MEMORY_GETs()
 				   DEBUG ((EFI_D_INFO, "%d:  Invalid EFI memory descriptor type (0x%x)!\n", __LINE__, MemoryMap->Type));
 		        continue;		  
       }
+
       DEBUG ((EFI_D_INFO, "%d: E820Type:%X Start:%X Virtual Start:%X Number:%X\n", __LINE__, 
       	  																	E820Type, 
       	  																	MemoryMap->PhysicalStart, 
@@ -3834,13 +3927,18 @@ float L2_MEMORY_GETs()
 	MemoryInformation.MemoryContinuous[MemoryInformation.MemorySliceCount].PhysicalStart = ContinuousMemoryStart;
 	MemoryInformation.MemoryContinuous[MemoryInformation.MemorySliceCount].NumberOfPages = ContinuousMemoryPages;
 	MemoryInformation.MemorySliceCount++;
-    
+	  
+    INFO_SELF(L"Start: %X Virtual Start:%X: Pages:%X End: %X\n", MemoryMap->PhysicalStart,
+															  ContinuousVirtualMemoryStart,
+															  ContinuousMemoryPages,
+															  ContinuousMemoryStart + ContinuousMemoryPages * 4 * 1024);
+																  
     /*L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Start: %X: Pages:%X End: %X\n", __LINE__, 
                                                                 ContinuousMemoryStart, 
                                                                 ContinuousMemoryPages,
                                                                 ContinuousMemoryStart + ContinuousMemoryPages * 4 * 1024);
     
-	*/
+	
     L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d:  (MemoryMapSize / DescriptorSize):%X MemoryClassifySize[0]:%d %d %d %d %d %d MemoryAllSize: %d\n", __LINE__,
     																		    (MemoryMapSize / DescriptorSize),
                                                                         MemoryClassifySize[0],
@@ -3850,13 +3948,15 @@ float L2_MEMORY_GETs()
                                                                         MemoryClassifySize[4],
                                                                         MemoryClassifySize[5],
                                                                         MemoryAllSize
-                                                                        );
+                                                                        );*/
 	return  MemoryClassifySize[3];                                                                    
 }
 
+float MemorySize = 0;
+
 float L2_MEMORY_Initial()
 {
-	L2_MEMORY_GETs();
+	MemorySize = (float)L2_MEMORY_GETs();
 	L2_MEMORY_MapInitial();
 }
 
@@ -4067,12 +4167,11 @@ EFI_STATUS L3_WINDOW_Create(UINT8 *pBuffer, UINT8 *pParent, UINT16 Width, UINT16
 	// Get memory infomation
 	//x = 0;
 	// Note: the other class memory can not use
-	float size = (float)L2_MEMORY_GETs();
-	size = size * 4;
-	size = size / (1024 * 1024);
+	MemorySize = MemorySize * 4;
+	MemorySize = MemorySize / (1024 * 1024);
 	CHAR8 buf[7] = {0};
 	char sizePostfix2[3] = "GB";
-	L2_DEBUG_Print2(x, y, pBuffer, "%a%a", L1_STRING_FloatToString(size, 3, buf), sizePostfix2);
+	L2_DEBUG_Print2(x, y, pBuffer, "%a%a", L1_STRING_FloatToString(MemorySize, 3, buf), sizePostfix2);
 	x += 5 * 8;
 
 	return EFI_SUCCESS;
@@ -4736,12 +4835,14 @@ EFI_STATUS L2_COMMON_Initial()
     INFO_SELF(L"\r\n");
 
 	
-	pDeskBuffer = (UINT8 *)AllocatePool(ScreenWidth * ScreenHeight * 4); 
+	/*pDeskBuffer = (UINT8 *)AllocatePool(ScreenWidth * ScreenHeight * 4); 
 	if (NULL == pDeskBuffer)
 	{
 		DEBUG ((EFI_D_INFO, "ScreenInit AllocatePool pDeskBuffer NULL\n"));
 		return -1;
-	}/**/
+	}*/
+
+	pDeskBuffer = L2_MEMORY_Allocate("Desk Buffer", MEMORY_TYPE_GRAPHICS, ScreenWidth * ScreenHeight * 4);
 
 	//pDeskBuffer = 0x6ff0f000;
 	
@@ -4888,6 +4989,7 @@ Main (
 
 	INFO_SELF(L"%X \r\n", ScreenWidth);  
 
+	L2_MEMORY_Initial();
 
     L2_COMMON_Initial();
 	
@@ -4907,9 +5009,7 @@ Main (
 	L2_GRAPHICS_SystemSettingInit();
     
     L3_APPLICATION_MyComputerWindow(100, 100);
-    
-	L2_MEMORY_Initial();
-	
+    	
     L2_TIMER_IntervalInit();	
 	
     //GraphicsLayerCompute(iMouseX, iMouseY, 0);
@@ -4919,4 +5019,19 @@ Main (
     return EFI_SUCCESS;
 }
 
+
+/*
+
+一些参考资料
+区位码:http://witmax.cn/gb2312.html
+中文显示：
+https://blog.csdn.net/zenwanxin/article/details/8349124?utm_medium=distribute.pc_relevant.none-task-blog-2~default~baidujs_baidulandingword~default-0.control&spm=1001.2101.3001.4242
+
+英文显示：
+https://blog.csdn.net/czg13548930186/article/details/79861914
+
+区位码查询：http://quwei.911cha.com/
+
+
+*/
 
