@@ -240,7 +240,7 @@ EFI_SIMPLE_POINTER_PROTOCOL        *gMouse;
 
 EFI_HANDLE *handle;
 
-UINT8 *pDeskBuffer = NULL; //Desk layer: 1
+UINT8 *pDeskBuffer = NULL; //only Desk layer include wallpaper and button : 1
 UINT8 *pMyComputerBuffer = NULL; // MyComputer layer: 2
 UINT8 *pDeskDisplayBuffer = NULL; //desk display after multi graphicses layers compute
 UINT8 *pMouseSelectedBuffer = NULL;  // after mouse selected
@@ -3631,7 +3631,8 @@ EFI_STATUS L2_MEMORY_MapInitial()
 		UINT8 AddOne = (MemoryInformation.MemoryContinuous[i].NumberOfPages % 8 != 0) ? 1 : 0;
 
 		// Allocate memory page use flag. for memory allocate or free.
-		MemoryInformation.MemoryContinuous[i].pMapper = AllocateZeroPool(MemoryInformation.MemoryContinuous[i].NumberOfPages / 8 + AddOne);	
+		// Maybe use bit map, can save more memory
+		MemoryInformation.MemoryContinuous[i].pMapper = AllocateZeroPool(MemoryInformation.MemoryContinuous[i].NumberOfPages);	
 		if (NULL == MemoryInformation.MemoryContinuous[i].pMapper)
 		{
 			//L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: AllocateZeroPool failed \n", __LINE__);
@@ -3656,9 +3657,18 @@ EFI_STATUS L2_MEMORY_MapInitial()
 	// 5. maybe more and more fragment, after allocates and frees.
 }
 
+#define BitSet(x,y) x |= (0x01 << y)
+#define BitSlr(x,y) x &= ~(0x01 << y)
+#define BitReverse(x,y) x ^= (0x01 << y)
+#define BitGet(x,y)  ((x) >> (y) & 0x01)
+#define ByteSet(x)    x |= 0xff
+#define ByteClear(x)  x |= 0x00
+
+
 UINT8 L1_BIT_Set(UINT8 *pMapper, UINT64 StartPageID, UINT64 Size)
 {
-	
+	UINT8 AddOneFlag = (Size % 8 == 0) ? 0 : 1;
+	UINT32 ByteCount = Size / 8 + AddOneFlag;
 }
 
 // size: the one unit size is Bytes 
@@ -3699,12 +3709,12 @@ UINT8 *L2_MEMORY_Allocate(char *pApplicationName, UINT16 type, UINT32 SizeRequir
 		//all pages 
 		for (j = 0; j < NumberOfPages; j++)
 		{			
-			INFO_SELF(L"j: %d\r\n", j);  
+			//INFO_SELF(L"j: %d\r\n", j);  
 			//find first page is no use 
 			//mapper 0: no use, 1: using
 			if (pMapper[j] != 0)
 			{
-				INFO_SELF(L"j: %d\r\n", j);  
+				//INFO_SELF(L"j: %d\r\n", j);  
 				continue;
 			}
 			
@@ -3723,12 +3733,17 @@ UINT8 *L2_MEMORY_Allocate(char *pApplicationName, UINT16 type, UINT32 SizeRequir
 			if (k == PagesRequired)
 			{
 				//pMapper[j / 8];
-				L1_BIT_Set(pMapper, PhysicalStart + j, PagesRequired);
+				L1_BIT_Set(pMapper, j, PagesRequired);
+
+				for (UINT64 m = j; m < j + PagesRequired; m++)
+					pMapper[m] = 1;
 				
 				MemoryInformation.AllocatedInformation[MemoryInformation.CurrentAllocatedCount][0] = j;
 				MemoryInformation.AllocatedInformation[MemoryInformation.CurrentAllocatedCount][1] = PagesRequired;
 
 				MemoryInformation.CurrentAllocatedCount++;
+
+				MemoryInformation.MemoryContinuous[i].FreeNumberOfPages -= PagesRequired;
 				
 				INFO_SELF(L"PhysicalStart: %X j: %d\r\n", PhysicalStart, j);  
 				
@@ -4847,13 +4862,15 @@ EFI_STATUS L2_COMMON_Initial()
 	//pDeskBuffer = 0x6ff0f000;
 	
 
-	pDeskDisplayBuffer = (UINT8 *)AllocatePool(ScreenWidth * ScreenHeight * 4); 
+	/*pDeskDisplayBuffer = (UINT8 *)AllocatePool(ScreenWidth * ScreenHeight * 4); 
 	if (NULL == pDeskDisplayBuffer)
 	{
 		DEBUG ((EFI_D_INFO, "ScreenInit AllocatePool pDeskDisplayBuffer NULL\n"));
 		return -1;
-	}/**/
+	}*/
 	//pDeskDisplayBuffer = 0x6ff0f000 + 8294400;
+	
+	pDeskDisplayBuffer = L2_MEMORY_Allocate("Desk Display Buffer", MEMORY_TYPE_GRAPHICS, ScreenWidth * ScreenHeight * 4);
 
     // BMP header size: 0x36
     UINT32 DeskWallpaperBufferSize = 1920 * 1080 * 3 + 0x36;
