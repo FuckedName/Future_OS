@@ -3674,7 +3674,7 @@ UINT8 L1_BIT_Set(UINT8 *pMapper, UINT64 StartPageID, UINT64 Size)
 // size: the one unit size is Bytes 
 UINT8 *L2_MEMORY_Allocate(char *pApplicationName, UINT16 type, UINT32 SizeRequired)
 {
-	INFO_SELF(L"L2_MEMORY_Allocate: %X SizeRequired:%X\r\n", L2_MEMORY_Allocate, SizeRequired);  
+	INFO_SELF(L"Name:%s L2_MEMORY_Allocate: %X SizeRequired:%X\r\n", pApplicationName, L2_MEMORY_Allocate, SizeRequired);  
 	// Allocate minimize unit is 4K
 	UINT32 PagesRequired = SizeRequired / (512 * 8);
 	UINT8  AddOne = (SizeRequired % (512 * 8) != 0) ? 1 : 0;
@@ -3745,7 +3745,7 @@ UINT8 *L2_MEMORY_Allocate(char *pApplicationName, UINT16 type, UINT32 SizeRequir
 
 				MemoryInformation.MemoryContinuous[i].FreeNumberOfPages -= PagesRequired;
 				
-				INFO_SELF(L"PhysicalStart: %X j: %d\r\n", PhysicalStart, j);  
+				INFO_SELF(L"Allocate success: PhysicalStart: %X Start: %d Pages: %llu\r\n", PhysicalStart, j, PagesRequired);  
 				
 				// start physical address
 				return PhysicalStart + j * 8 * 512;
@@ -4873,14 +4873,16 @@ EFI_STATUS L2_COMMON_Initial()
 	pDeskDisplayBuffer = L2_MEMORY_Allocate("Desk Display Buffer", MEMORY_TYPE_GRAPHICS, ScreenWidth * ScreenHeight * 4);
 
     // BMP header size: 0x36
-    UINT32 DeskWallpaperBufferSize = 1920 * 1080 * 3 + 0x36;
+    //UINT32 DeskWallpaperBufferSize = 1920 * 1080 * 3 + 0x36;
 	//bmp size, is so big
-	pDeskWallpaperBuffer = (UINT8 *)AllocatePool(DeskWallpaperBufferSize); 
+	/*pDeskWallpaperBuffer = (UINT8 *)AllocatePool(DeskWallpaperBufferSize); 
 	if (NULL == pDeskWallpaperBuffer)
 	{
 		DEBUG ((EFI_D_INFO, "ScreenInit AllocatePool pDeskDisplayBuffer NULL\n"));
 		return -1;
-	}/**/
+	}*/
+
+	pDeskWallpaperBuffer = L2_MEMORY_Allocate("Desk Wall paper Buffer", MEMORY_TYPE_GRAPHICS, ScreenWidth * ScreenHeight * 3 +  + 0x36);
 
 	//pDeskWallpaperBuffer =  0x6ff0f000 + 8294400 * 2;
 
