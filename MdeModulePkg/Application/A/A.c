@@ -255,6 +255,7 @@ UINT8 ReadFileNameLength = 0;
 UINT16 FileReadCount = 0;
 
 UINT8 *pDeskWallpaperBuffer = NULL;
+UINT8 *pTestBuffer = NULL;
 
 EFI_EVENT MultiTaskTriggerGroup1Event;
 EFI_EVENT MultiTaskTriggerGroup2Event;
@@ -471,6 +472,16 @@ typedef enum
 	GRAPHICS_LAYER_MOUSE
 }GRAPHICS_LAYER_ID;
 
+typedef enum
+{
+	ALLOCATED_INFORMATION_DOMAIN_PHYSICAL_BLOCK_START = 0,
+	ALLOCATED_INFORMATION_DOMAIN_PAGE_START,
+	ALLOCATED_INFORMATION_DOMAIN_PAGE_COUNT,
+	ALLOCATED_INFORMATION_DOMAIN_PHYSICAL_BLOCK_ID,
+	ALLOCATED_INFORMATION_DOMAIN_MAX
+}MEMORY_ALLOCATED_INFORMATION_DOMAIN;
+
+
 // Index Header
 typedef struct {
     UINT8 Flag[4]; //¹Ì¶¨Öµ "INDX"
@@ -490,7 +501,8 @@ typedef struct {
 typedef enum
 {
 	MEMORY_TYPE_GRAPHICS,
-	MEMORY_TYPE_APPLICATION
+	MEMORY_TYPE_APPLICATION,
+	MEMORY_TYPE_TEST
 }MEMORY_TYPE;
 
 typedef struct {
@@ -995,7 +1007,7 @@ typedef struct
 typedef struct {
 	UINT16 MemorySliceCount;
   	MEMORY_CONTINUOUS MemoryContinuous[10];
-  	UINT64 AllocatedInformation[20][2];
+  	UINT64 AllocatedInformation[20][ALLOCATED_INFORMATION_DOMAIN_MAX];
   	UINT16 CurrentAllocatedCount;
 }MEMORY_INFORMATION;
 
@@ -3674,7 +3686,7 @@ UINT8 L1_BIT_Set(UINT8 *pMapper, UINT64 StartPageID, UINT64 Size)
 // size: the one unit size is Bytes 
 UINT8 *L2_MEMORY_Allocate(char *pApplicationName, UINT16 type, UINT32 SizeRequired)
 {
-	INFO_SELF(L"Name:%s L2_MEMORY_Allocate: %X SizeRequired:%X\r\n", pApplicationName, L2_MEMORY_Allocate, SizeRequired);  
+	INFO_SELF(L"Name:%a L2_MEMORY_Allocate: %X SizeRequired:%X\r\n", pApplicationName, L2_MEMORY_Allocate, SizeRequired);  
 	// Allocate minimize unit is 4K
 	UINT32 PagesRequired = SizeRequired / (512 * 8);
 	UINT8  AddOne = (SizeRequired % (512 * 8) != 0) ? 1 : 0;
@@ -3738,14 +3750,16 @@ UINT8 *L2_MEMORY_Allocate(char *pApplicationName, UINT16 type, UINT32 SizeRequir
 				for (UINT64 m = j; m < j + PagesRequired; m++)
 					pMapper[m] = 1;
 				
-				MemoryInformation.AllocatedInformation[MemoryInformation.CurrentAllocatedCount][0] = j;
-				MemoryInformation.AllocatedInformation[MemoryInformation.CurrentAllocatedCount][1] = PagesRequired;
+				MemoryInformation.AllocatedInformation[MemoryInformation.CurrentAllocatedCount][ALLOCATED_INFORMATION_DOMAIN_PHYSICAL_BLOCK_START] = PhysicalStart; // Continuous physical block start location
+				MemoryInformation.AllocatedInformation[MemoryInformation.CurrentAllocatedCount][ALLOCATED_INFORMATION_DOMAIN_PAGE_START] = j; // start block in Continuous physical block
+				MemoryInformation.AllocatedInformation[MemoryInformation.CurrentAllocatedCount][ALLOCATED_INFORMATION_DOMAIN_PAGE_COUNT] = PagesRequired; // memory block size
+				MemoryInformation.AllocatedInformation[MemoryInformation.CurrentAllocatedCount][ALLOCATED_INFORMATION_DOMAIN_PHYSICAL_BLOCK_ID] = i; // memory block size
 
 				MemoryInformation.CurrentAllocatedCount++;
 
 				MemoryInformation.MemoryContinuous[i].FreeNumberOfPages -= PagesRequired;
 				
-				INFO_SELF(L"Allocate success: PhysicalStart: %X Start: %d Pages: %llu\r\n", PhysicalStart, j, PagesRequired);  
+				INFO_SELF(L"Allocate success: PhysicalStart: %X Start Block: %d Pages: %llu Start Physical: %X\r\n", PhysicalStart, j, PagesRequired, PhysicalStart + j * 4 * 1024);  
 				
 				// start physical address
 				return PhysicalStart + j * 8 * 512;
@@ -3756,8 +3770,39 @@ UINT8 *L2_MEMORY_Allocate(char *pApplicationName, UINT16 type, UINT32 SizeRequir
 	}
 }
 
-float L2_MEMORY_Free(UINT32 *p)
-{  }
+EFI_STATUS L2_MEMORY_Free(UINT32 *p)
+{	
+	INFO_SELF(L"p: %X \r\n", p); 
+	
+	UINT64 PhysicalBlockStart;
+	UINT64 PageStart;
+	UINT64 Pages;
+	UINT64 BlockID;
+	UINT8 *pMapper;
+
+	for (UINT64 i = 0; i < MemoryInformation.CurrentAllocatedCount; i++)
+	{
+		PhysicalBlockStart = MemoryInformation.AllocatedInformation[i][ALLOCATED_INFORMATION_DOMAIN_PHYSICAL_BLOCK_START] ; // start location
+		PageStart          = MemoryInformation.AllocatedInformation[i][ALLOCATED_INFORMATION_DOMAIN_PAGE_START] ; // memory block size
+		Pages              = MemoryInformation.AllocatedInformation[i][ALLOCATED_INFORMATION_DOMAIN_PAGE_COUNT] ; 
+		BlockID            = MemoryInformation.AllocatedInformation[i][ALLOCATED_INFORMATION_DOMAIN_PHYSICAL_BLOCK_ID] ; 
+
+		INFO_SELF(L"PhysicalBlockStart: %X, PageStart:%llu, Pages: %llu, BlockID: %llu \r\n", PhysicalBlockStart, PageStart, Pages, BlockID); 
+
+		if (p == PhysicalBlockStart + PageStart * 8 * 512)
+		{			
+			INFO_SELF(L"PhysicalBlockStart: %X, PageStart:%llu, Pages: %llu, BlockID: %llu \r\n", PhysicalBlockStart, PageStart, Pages, BlockID); 
+			pMapper = MemoryInformation.MemoryContinuous[BlockID].pMapper;
+			for (UINT64 j = 0; j < Pages; j++)
+				pMapper[PageStart + j] = 0;	
+
+			p = NULL;
+			
+			break;
+		}
+	}
+
+}
 
 float L2_MEMORY_UseRecords(UINT32 *p)
 {  }
@@ -4882,9 +4927,18 @@ EFI_STATUS L2_COMMON_Initial()
 		return -1;
 	}*/
 
-	pDeskWallpaperBuffer = L2_MEMORY_Allocate("Desk Wall paper Buffer", MEMORY_TYPE_GRAPHICS, ScreenWidth * ScreenHeight * 3 +  + 0x36);
+	pDeskWallpaperBuffer = L2_MEMORY_Allocate("Desk Wall paper Buffer", MEMORY_TYPE_GRAPHICS, ScreenWidth * ScreenHeight * 3 + 0x36);
 
 	//pDeskWallpaperBuffer =  0x6ff0f000 + 8294400 * 2;
+
+
+	pTestBuffer = L2_MEMORY_Allocate("Test Buffer", MEMORY_TYPE_TEST, ScreenWidth * ScreenHeight * 4 * 4);
+
+	L2_MEMORY_Free(pTestBuffer);
+
+	pTestBuffer = L2_MEMORY_Allocate("Test Buffer", MEMORY_TYPE_TEST, ScreenWidth * ScreenHeight * 4 * 4);
+
+	L2_MEMORY_Free(pTestBuffer);
 
 	pMouseClickBuffer = (UINT8 *)AllocatePool(MouseClickWindowWidth * MouseClickWindowHeight * 4); 
 	if (pMouseClickBuffer == NULL)
