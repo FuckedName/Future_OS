@@ -257,6 +257,7 @@ UINT16 FileReadCount = 0;
 UINT8 *pDeskWallpaperBuffer = NULL;
 UINT8 *pTestBuffer = NULL;
 
+EFI_EVENT MultiTaskTriggerGroup0Event;
 EFI_EVENT MultiTaskTriggerGroup1Event;
 EFI_EVENT MultiTaskTriggerGroup2Event;
 
@@ -3545,6 +3546,19 @@ int L2_STORE_FileRead(EVENT event)
 	StatusErrorCount++;
 }
 
+VOID EFIAPI L2_TIMER_Slice0(
+	IN EFI_EVENT Event,
+	IN VOID           *Context
+	)
+{
+    //Print(L"%lu\n", *((UINT32 *)Context));
+    if (TimerSliceCount % 2 == 0)
+       gBS->SignalEvent (MultiTaskTriggerGroup0Event);
+    
+	TimerSliceCount++;
+	return;
+}
+
 
 VOID EFIAPI L2_TIMER_Slice(
 	IN EFI_EVENT Event,
@@ -4434,6 +4448,65 @@ L2_KEYBOARD_Event (
  
  }
 
+STATIC
+VOID
+EFIAPI
+L2_SYSTEM_Start (IN EFI_EVENT Event, IN VOID *Context)
+{
+
+    //如果不加下面这几行，则是直接显示内存信息，看起来有点像雪花
+	/*
+	for (int j = 0; j < ScreenHeight; j++)
+	{
+		for (int i = 0; i < ScreenWidth; i++)
+		{
+			pDeskBuffer[(j * ScreenWidth + i) * 4]	   = TimerSliceCount % 256;
+			pDeskBuffer[(j * ScreenWidth + i) * 4 + 1] = TimerSliceCount % 256;
+			pDeskBuffer[(j * ScreenWidth + i) * 4 + 2] = TimerSliceCount % 256;
+		}
+	}		
+	
+    GraphicsOutput->Blt(
+                GraphicsOutput, 
+                (EFI_GRAPHICS_OUTPUT_BLT_PIXEL *) pDeskBuffer,
+                EfiBltBufferToVideo,
+                0, 0, 
+                0, 0, 
+                ScreenWidth, ScreenHeight, 0);   
+	*/
+
+}
+
+
+STATIC
+VOID
+EFIAPI
+L2_MAIN_Start (IN EFI_EVENT Event, IN VOID *Context)
+{
+
+    //如果不加下面这几行，则是直接显示内存信息，看起来有点像雪花
+	
+	for (int j = 0; j < ScreenHeight; j++)
+	{
+		for (int i = 0; i < ScreenWidth; i++)
+		{
+			pDeskBuffer[(j * ScreenWidth + i) * 4]	   = TimerSliceCount % 256;
+			pDeskBuffer[(j * ScreenWidth + i) * 4 + 1] = TimerSliceCount % 256;
+			pDeskBuffer[(j * ScreenWidth + i) * 4 + 2] = TimerSliceCount % 256;
+		}
+	}		
+	/**/
+    GraphicsOutput->Blt(
+                GraphicsOutput, 
+                (EFI_GRAPHICS_OUTPUT_BLT_PIXEL *) pDeskBuffer,
+                EfiBltBufferToVideo,
+                0, 0, 
+                0, 0, 
+                ScreenWidth, ScreenHeight, 0);   
+
+}
+
+
 // for mouse move & click
 STATIC
 VOID
@@ -4652,6 +4725,31 @@ L2_TIMER_Print (
 			            8 * 50, 16, 0);*/
 }
 
+EFI_STATUS L2_COMMON_SingleProcessInit ()
+{
+    UINT16 i;
+
+    // task group for mouse keyboard
+	EFI_GUID gMultiProcessGroup1Guid  = { 0x0579257E, 0x1843, 0x45FB, { 0x83, 0x9D, 0x6B, 0x79, 0x09, 0x38, 0x29, 0xA9 } };
+		
+    EFI_EVENT_NOTIFY       TaskProcessesGroup1[] = {L2_SYSTEM_Start, L2_MAIN_Start};
+
+    for (i = 0; i < sizeof(TaskProcessesGroup1) / sizeof(EFI_EVENT_NOTIFY); i++)
+    {
+        gBS->CreateEventEx(
+                          EVT_NOTIFY_SIGNAL,
+                          TPL_NOTIFY,
+                          TaskProcessesGroup1[i],
+                          NULL,
+                          &gMultiProcessGroup1Guid,
+                          &MultiTaskTriggerGroup0Event
+                          );
+    }    
+
+    return EFI_SUCCESS;
+}
+
+
 EFI_STATUS L2_COMMON_MultiProcessInit ()
 {
     UINT16 i;
@@ -4666,7 +4764,7 @@ EFI_STATUS L2_COMMON_MultiProcessInit ()
 	
     //DrawChineseCharIntoBuffer(pMouseBuffer, 0, 0, 0, Color, 16);
     
-    EFI_EVENT_NOTIFY       TaskProcessesGroup1[] = {L2_KEYBOARD_Event, L2_MOUSE_Event};
+    EFI_EVENT_NOTIFY       TaskProcessesGroup1[] = {L2_KEYBOARD_Event, L2_MOUSE_Event, L2_SYSTEM_Start};
 
     EFI_EVENT_NOTIFY       TaskProcessesGroup2[] = {L2_TIMER_Print};
 
@@ -4697,6 +4795,58 @@ EFI_STATUS L2_COMMON_MultiProcessInit ()
     return EFI_SUCCESS;
 }
 // https://blog.csdn.net/longsonssss/article/details/80221513
+
+
+EFI_STATUS L2_TIMER_IntervalInit0()
+{
+    EFI_STATUS	Status;
+	EFI_HANDLE	TimerOne	= NULL;
+	static const UINTN TimeInterval = 20000;
+	
+	UINT32 *TimerCount;
+
+	TimerCount = (UINT32 *)AllocateZeroPool(4);
+	if (NULL == TimerCount)
+	{
+		DEBUG(( EFI_D_INFO, "%d, NULL == TimerCount \r\n", __LINE__));
+		return;
+	}
+
+	Status = gBS->CreateEvent(EVT_NOTIFY_SIGNAL | EVT_TIMER,
+                       		TPL_CALLBACK,
+                       		L2_TIMER_Slice0,
+                       		(VOID *)TimerCount,
+                       		&TimerOne);
+
+	if ( EFI_ERROR( Status ) )
+	{
+		DEBUG(( EFI_D_INFO, "Create Event Error! \r\n" ));
+		return(1);
+	}
+
+	Status = gBS->SetTimer(TimerOne,
+						  TimerPeriodic,
+						  MultU64x32( TimeInterval, 1)); // will multi 100, ns
+
+	if ( EFI_ERROR( Status ) )
+	{
+		DEBUG(( EFI_D_INFO, "Set Timer Error! \r\n" ));
+		return(2);
+	}
+
+	while (1)
+	{
+		*TimerCount = *TimerCount + 1;
+		//L2_DEBUG_Print1(DISPLAY_X, DISPLAY_Y, "%d: SystemTimeIntervalInit while\n", __LINE__);
+		//if (*TimerCount % 1000000 == 0)
+	       //L2_DEBUG_Print1(0, 4 * 16, "%d: while (1) p:%x %lu \n", __LINE__, TimerCount, *TimerCount);
+	}
+	
+	gBS->SetTimer( TimerOne, TimerCancel, 0 );
+	gBS->CloseEvent( TimerOne );    
+
+	return EFI_SUCCESS;
+}
 
 
 EFI_STATUS L2_TIMER_IntervalInit()
@@ -5059,13 +5209,39 @@ Main (
     
     ScreenWidth  = GraphicsOutput->Mode->Info->HorizontalResolution;
     ScreenHeight = GraphicsOutput->Mode->Info->VerticalResolution;
+    
 
 	INFO_SELF(L"%X \r\n", ScreenWidth);  
 
 	L2_MEMORY_Initial();
 
     L2_COMMON_Initial();
+
+    //如果不加下面这几行，则是直接显示内存信息，看起来有点像雪花
 	
+	for (int j = 0; j < ScreenHeight; j++)
+	{
+		for (int i = 0; i < ScreenWidth; i++)
+		{
+			pDeskBuffer[(j * ScreenWidth + i) * 4]	   = 0xff;
+			pDeskBuffer[(j * ScreenWidth + i) * 4 + 1] = 0x00;
+			pDeskBuffer[(j * ScreenWidth + i) * 4 + 2] = 0x00;
+		}
+	}		
+	/**/
+    GraphicsOutput->Blt(
+                GraphicsOutput, 
+                (EFI_GRAPHICS_OUTPUT_BLT_PIXEL *) pDeskBuffer,
+                EfiBltBufferToVideo,
+                0, 0, 
+                0, 0, 
+                ScreenWidth, ScreenHeight, 0);   
+
+	//本来想在这做一个起动画面，试了下，未成功，放弃了                	
+	//L2_COMMON_SingleProcessInit();
+
+	//L2_TIMER_IntervalInit0();
+
 	L2_MOUSE_Init();
         
 	// get partitions from api
