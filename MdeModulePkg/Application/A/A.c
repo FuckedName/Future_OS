@@ -274,7 +274,7 @@ UINT8 *pWallPaperBuffer = NULL;
 
 
 static UINTN ScreenWidth, ScreenHeight;  
-UINT16 MyComputerWidth = 16 * 50;
+UINT16 MyComputerWidth = 16 * 30;
 UINT16 MyComputerHeight = 16 * 40;
 UINT16 MyComputerPositionX = 700;
 UINT16 MyComputerPositionY = 160;
@@ -3043,6 +3043,12 @@ L2_MOUSE_Moveover()
 		
 	MouseClickFlag = MOUSE_NO_CLICKED;
 	EFI_STATUS Status;
+
+	if (StartMenuClickEvent == MY_COMPUTER_CLOSE_CLICKED_EVENT && DisplayMyComputerFlag == 1)
+	{
+		DisplayMyComputerFlag = 0;
+		return;
+	}
 		
 	for (int i = 0; i <  sizeof(StartMenuStateTransformTable)/sizeof(StartMenuStateTransformTable[0]); i++ )
 	{
@@ -3565,8 +3571,8 @@ VOID EFIAPI L2_TIMER_Slice(
 	IN VOID           *Context
 	)
 {
-    //L2_DEBUG_Print1(0, 5 * 16, "%d TimeSlice %x %lu \n", __LINE__, Context, *((UINT32 *)Context));
-    //L2_DEBUG_Print1(0, 6 * 16, "%d TimerSliceCount: %lu \n", __LINE__, TimerSliceCount);
+    L2_DEBUG_Print1(0, 5 * 16, "%d TimeSlice %x %lu \n", __LINE__, Context, *((UINT32 *)Context));
+    L2_DEBUG_Print1(0, 6 * 16, "%d TimerSliceCount: %lu \n", __LINE__, TimerSliceCount);
     //Print(L"%lu\n", *((UINT32 *)Context));
     if (TimerSliceCount % 2 == 0)
        gBS->SignalEvent (MultiTaskTriggerGroup1Event);
@@ -4177,10 +4183,13 @@ EFI_STATUS L3_WINDOW_Create(UINT8 *pBuffer, UINT8 *pParent, UINT16 Width, UINT16
 		}
 		
 		UINT32 size = (UINT32)device[i].SectorCount / 2; //K
+		
 		char sizePostfix[3] = "MB";
 		size /= 1024.0; //M
+    	L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: size: %llu \n", __LINE__, size);
 		if (size > 1024.0)
 		{
+    		L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: size: %llu \n", __LINE__, size);
 			size /= 1024;	
 			sizePostfix[0] = 'G';
 		}
@@ -4195,8 +4204,7 @@ EFI_STATUS L3_WINDOW_Create(UINT8 *pBuffer, UINT8 *pParent, UINT16 Width, UINT16
 		L2_GRAPHICS_ChineseCharDraw2(pBuffer, x, y,          (48 - 1 ) * 94 + 1 - 1, Color, Width);  
 		x += 16;
 
-		char sizePostfix2[3] = "GB";
-		L2_DEBUG_Print2(x, y, pBuffer, "%d%a", size, sizePostfix2);
+		L2_DEBUG_Print2(x, y, pBuffer, "%d%a", size, sizePostfix);
 		x += 16;
 
 		x += 64;
@@ -4857,6 +4865,7 @@ EFI_STATUS L2_TIMER_IntervalInit()
 	
 	UINT32 *TimerCount;
 
+	// initial with 0
 	TimerCount = (UINT32 *)AllocateZeroPool(4);
 	if (NULL == TimerCount)
 	{
@@ -4890,8 +4899,8 @@ EFI_STATUS L2_TIMER_IntervalInit()
 	{
 		*TimerCount = *TimerCount + 1;
 		//L2_DEBUG_Print1(DISPLAY_X, DISPLAY_Y, "%d: SystemTimeIntervalInit while\n", __LINE__);
-		//if (*TimerCount % 1000000 == 0)
-	       //L2_DEBUG_Print1(0, 4 * 16, "%d: while (1) p:%x %lu \n", __LINE__, TimerCount, *TimerCount);
+		if (*TimerCount % 1000000 == 0)
+	       L2_DEBUG_Print1(0, 4 * 16, "%d: while (1) p:%x %lu \n", __LINE__, TimerCount, *TimerCount);
 	}
 	
 	gBS->SetTimer( TimerOne, TimerCancel, 0 );
@@ -5244,7 +5253,7 @@ Main (
 
 	L2_MOUSE_Init();
         
-	// get partitions from api
+	// get partitions use api
 	L2_STORE_PartitionAnalysis();
 	
     L2_COMMON_MultiProcessInit();
