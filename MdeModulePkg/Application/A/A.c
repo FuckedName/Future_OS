@@ -243,7 +243,9 @@ EFI_HANDLE *handle;
 UINT8 *pDeskBuffer = NULL; //only Desk layer include wallpaper and button : 1
 UINT8 *pMyComputerBuffer = NULL; // MyComputer layer: 2
 UINT8 *pDeskDisplayBuffer = NULL; //desk display after multi graphicses layers compute
-UINT8 *pSystemIconBuffer = NULL; //desk display after multi graphicses layers compute
+//UINT8 *pSystemIconBuffer = NULL; //desk display after multi graphicses layers compute
+UINT8 *pSystemIconMyComputerBuffer = NULL; //desk display after multi graphicses layers compute
+UINT8 *pSystemIconMySettingBuffer = NULL; //desk display after multi graphicses layers compute
 UINT8 *pMouseSelectedBuffer = NULL;  // after mouse selected
 UINT8 *pMouseClickBuffer = NULL; // for mouse click 
 UINT8 *pDateTimeBuffer = NULL; //Mouse layer: 3
@@ -4950,19 +4952,25 @@ EFI_STATUS L2_GRAPHICS_DeskInit()
 		}
 	}
 	*/
-	for (int i = 0; i < 3; i++)
+	for (int j = 0; j < SYSTEM_ICON_HEIGHT; j++)
 	{
-		for (int j = 0; j < SYSTEM_ICON_HEIGHT; j++)
+		for (int k = 0; k < SYSTEM_ICON_LENGTH; k++)
 		{
-			for (int k = 0; k < SYSTEM_ICON_LENGTH; k++)
-			{
-				pDeskBuffer[ ((i * 320 + j) * ScreenWidth + k) * 4 ]	 = pSystemIconBuffer[ 0x36 + ((SYSTEM_ICON_HEIGHT - j) * SYSTEM_ICON_LENGTH + k) * 3 ];
-				pDeskBuffer[ ((i * 320 + j) * ScreenWidth + k) * 4 + 1 ] = pSystemIconBuffer[ 0x36 + ((SYSTEM_ICON_HEIGHT - j) * SYSTEM_ICON_LENGTH + k) * 3 + 1 ];
-				pDeskBuffer[ ((i * 320 + j) * ScreenWidth + k) * 4 + 2 ] = pSystemIconBuffer[ 0x36 + ((SYSTEM_ICON_HEIGHT - j) * SYSTEM_ICON_LENGTH + k) * 3 + 2 ];
-			}
+			pDeskBuffer[(j * ScreenWidth + k) * 4 ]	    = pSystemIconMyComputerBuffer[0x36 + ((SYSTEM_ICON_HEIGHT - j) * SYSTEM_ICON_LENGTH + k) * 3 ];
+			pDeskBuffer[(j * ScreenWidth + k) * 4 + 1 ] = pSystemIconMyComputerBuffer[0x36 + ((SYSTEM_ICON_HEIGHT - j) * SYSTEM_ICON_LENGTH + k) * 3 + 1 ];
+			pDeskBuffer[(j * ScreenWidth + k) * 4 + 2 ] = pSystemIconMyComputerBuffer[0x36 + ((SYSTEM_ICON_HEIGHT - j) * SYSTEM_ICON_LENGTH + k) * 3 + 2 ];
 		}
 	}
 	
+	for (int j = 0; j < SYSTEM_ICON_HEIGHT; j++)
+	{
+		for (int k = 0; k < SYSTEM_ICON_LENGTH; k++)
+		{
+			pDeskBuffer[((320 + j) * ScreenWidth + k) * 4 ]	    = pSystemIconMySettingBuffer[0x36 + ((SYSTEM_ICON_HEIGHT - j) * SYSTEM_ICON_LENGTH + k) * 3 ];
+			pDeskBuffer[((320 + j) * ScreenWidth + k) * 4 + 1 ] = pSystemIconMySettingBuffer[0x36 + ((SYSTEM_ICON_HEIGHT - j) * SYSTEM_ICON_LENGTH + k) * 3 + 1 ];
+			pDeskBuffer[((320 + j) * ScreenWidth + k) * 4 + 2 ] = pSystemIconMySettingBuffer[0x36 + ((SYSTEM_ICON_HEIGHT - j) * SYSTEM_ICON_LENGTH + k) * 3 + 2 ];
+		}
+	}
     // line
     Color.Red   = 0xC6;
     Color.Green = 0xC6;
@@ -5118,13 +5126,13 @@ EFI_STATUS L2_GRAPHICS_ScreenInit()
 		L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: ReadFileSelf error\n", __LINE__);
 	}
 	
-	Status = L3_APPLICATION_ReadFile("COMPUTERBMP", 11, pSystemIconBuffer);
+	Status = L3_APPLICATION_ReadFile("COMPUTERBMP", 11, pSystemIconMyComputerBuffer);
 	if (EFI_ERROR(Status))
 	{
 		L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: ReadFileSelf error\n", __LINE__);
 	}
 	
-	Status = L3_APPLICATION_ReadFile("SETTINGBMP", 10, pSystemIconBuffer[SYSTEM_ICON_SETTING * 384054]);
+	Status = L3_APPLICATION_ReadFile("SETTINGBMP", 10, pSystemIconMySettingBuffer);
 	if (EFI_ERROR(Status))
 	{
 		L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: ReadFileSelf error\n", __LINE__);
@@ -5238,7 +5246,9 @@ EFI_STATUS L2_COMMON_Initial()
 	pDeskWallpaperBuffer = L2_MEMORY_Allocate("Desk Wall paper Buffer", MEMORY_TYPE_GRAPHICS, ScreenWidth * ScreenHeight * 3 + 0x36);
 
 
-	pSystemIconBuffer = L2_MEMORY_Allocate("System icon Buffer", MEMORY_TYPE_GRAPHICS, 384054 * SYSTEM_ICON_MAX);
+	pSystemIconMyComputerBuffer = L2_MEMORY_Allocate("My Computer Buffer", MEMORY_TYPE_GRAPHICS, 384054);
+	
+	pSystemIconMySettingBuffer = L2_MEMORY_Allocate("My Setting Buffer", MEMORY_TYPE_GRAPHICS, 384054);
 
 	//pDeskWallpaperBuffer =  0x6ff0f000 + 8294400 * 2;
 
