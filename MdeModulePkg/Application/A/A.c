@@ -243,6 +243,7 @@ EFI_HANDLE *handle;
 UINT8 *pDeskBuffer = NULL; //only Desk layer include wallpaper and button : 1
 UINT8 *pMyComputerBuffer = NULL; // MyComputer layer: 2
 UINT8 *pDeskDisplayBuffer = NULL; //desk display after multi graphicses layers compute
+UINT8 *pSystemIconBuffer = NULL; //desk display after multi graphicses layers compute
 UINT8 *pMouseSelectedBuffer = NULL;  // after mouse selected
 UINT8 *pMouseClickBuffer = NULL; // for mouse click 
 UINT8 *pDateTimeBuffer = NULL; //Mouse layer: 3
@@ -3261,7 +3262,7 @@ EFI_STATUS L2_STORE_GetFatTableFSM()
 
 UINT32 L2_FILE_GetNextBlockNumber()
 {
-	L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: PreviousBlockNumber: %d\n",  __LINE__, PreviousBlockNumber);
+	//L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: PreviousBlockNumber: %d\n",  __LINE__, PreviousBlockNumber);
 
 	if (PreviousBlockNumber == 0)
 	{
@@ -3406,7 +3407,7 @@ EFI_STATUS L2_STORE_ReadFileFSM()
 				  UINT32 NextBlockNumber = L2_FILE_GetNextBlockNumber();
 		 	 	  sector_count = MBRSwitched.ReservedSelector + MBRSwitched.SectorsPerFat * MBRSwitched.NumFATS + MBRSwitched.BootPathStartCluster - 2 + (NextBlockNumber - 2) * 8;
 		 	 	  PreviousBlockNumber = NextBlockNumber;
-		 	 	  L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: NextBlockNumber: %llu\n",  __LINE__, NextBlockNumber);
+		 	 	  //L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: NextBlockNumber: %llu\n",  __LINE__, NextBlockNumber);
 			 }
 			 
 			break;
@@ -4217,15 +4218,20 @@ EFI_STATUS L3_APPLICATION_ReadFile(UINT8 *FileName, UINT8 NameLength, UINT8 *pBu
 	
 }
 
+UINT8 readflag = 0;
+
 
 EFIAPI L2_KEYBOARD_KeyPressed()
 {
 	DEBUG ((EFI_D_INFO, "%d HandleEnterPressed\n", __LINE__));
 	
 		
+    EFI_STATUS Status;
     //PartitionUSBReadSynchronous();
     //PartitionUSBReadAsynchronous();
-    
+
+	// char buffer[SYSTEM_ICON_LENGTH * SYSTEM_ICON_HEIGHT * 3 + 0x36] = {0};
+	
 	DEBUG ((EFI_D_INFO, "%d HandleEnterPressed\n", __LINE__));
 	return EFI_SUCCESS;
 }
@@ -4926,20 +4932,13 @@ EFI_STATUS L2_GRAPHICS_DeskInit()
 	
 	//
 	//status = L3_APPLICATION_ReadFile("RECYCLE BMP", 11, buffer);
-	/*status = L3_APPLICATION_ReadFile("COMPUTER BMP", 12, buffer);
-	if (EFI_ERROR(status))
-	{
-		L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: ReadFileSelf error\n", __LINE__);
-		INFO_SELF(L"ReadFileSelf error.\r\n");
-		return;
-	}
-	
+	/*
 	for (int j = 0; j < 250; j++)
 	{
 		L2_DEBUG_Print1(DISK_READ_BUFFER_X + (j % 16) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 16), "%02X ", buffer[j] & 0xff);
 	}
-	*/
-	/*
+	
+	
 	for (int i = 0; i < SYSTEM_ICON_MAX; i++)
 	{
 		for (int j = 0; j < SYSTEM_ICON_HEIGHT; j++)
@@ -4953,6 +4952,17 @@ EFI_STATUS L2_GRAPHICS_DeskInit()
 		}
 	}
 	*/
+
+	for (int j = 0; j < SYSTEM_ICON_HEIGHT; j++)
+	{
+		for (int k = 0; k < SYSTEM_ICON_LENGTH; k++)
+		{
+			pDeskBuffer[ ((j + 100) * ScreenWidth + k) * 4 ]	 = pSystemIconBuffer[0x36 + ((SYSTEM_ICON_HEIGHT - j) * SYSTEM_ICON_LENGTH + k) * 3 ];
+			pDeskBuffer[ ((j + 100) * ScreenWidth + k) * 4 + 1 ] = pSystemIconBuffer[0x36 + ((SYSTEM_ICON_HEIGHT - j) * SYSTEM_ICON_LENGTH + k) * 3 + 1 ];
+			pDeskBuffer[ ((j + 100) * ScreenWidth + k) * 4 + 2 ] = pSystemIconBuffer[0x36 + ((SYSTEM_ICON_HEIGHT - j) * SYSTEM_ICON_LENGTH + k) * 3 + 2 ];
+		}
+	}
+	
     // line
     Color.Red   = 0xC6;
     Color.Green = 0xC6;
@@ -5077,7 +5087,7 @@ L2_MOUSE_Moveover()
 
 EFI_STATUS L2_GRAPHICS_ScreenInit()
 {
-	EFI_STATUS status = 0;
+	EFI_STATUS Status = 0;
 	//UINT32 i = 0;
 	//UINT32 j = 0;
 	UINT32 x = ScreenWidth;
@@ -5102,12 +5112,20 @@ EFI_STATUS L2_GRAPHICS_ScreenInit()
 	StatusErrorCount = 0;
     L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: FAT32\n",  __LINE__);
 
-  	status = L3_APPLICATION_ReadFile("ZHUFENGBMP", 10, pDeskWallpaperBuffer);
-	if (EFI_ERROR(status))
+  	Status = L3_APPLICATION_ReadFile("ZHUFENGBMP", 10, pDeskWallpaperBuffer);
+	if (EFI_ERROR(Status))
 	{
 		INFO_SELF(L"ReadFileSelf error.\r\n");
   		return;
 	}
+	
+	Status = L3_APPLICATION_ReadFile("COMPUTERBMP", 11, pSystemIconBuffer);
+	if (EFI_ERROR(Status))
+	{
+		L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: ReadFileSelf error\n", __LINE__);
+		//INFO_SELF(L"ReadFileSelf error.\r\n");
+	}
+		
 	/*		
   	status = L3_APPLICATION_ReadFile("FOLDER BMP", 10, SystemIcon[SYSTEM_ICON_FOLDER]);
 	if (EFI_ERROR(status))
@@ -5194,6 +5212,9 @@ EFI_STATUS L2_COMMON_Initial()
 	}*/
 
 	pDeskWallpaperBuffer = L2_MEMORY_Allocate("Desk Wall paper Buffer", MEMORY_TYPE_GRAPHICS, ScreenWidth * ScreenHeight * 3 + 0x36);
+
+
+	pSystemIconBuffer = L2_MEMORY_Allocate("System icon Buffer", MEMORY_TYPE_GRAPHICS, 384054);
 
 	//pDeskWallpaperBuffer =  0x6ff0f000 + 8294400 * 2;
 
