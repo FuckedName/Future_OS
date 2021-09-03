@@ -201,7 +201,7 @@ char pKeyboardInputBuffer[KEYBOARD_BUFFER_LENGTH] = {0};
 
 // For exception returned status 
 #define DISPLAY_ERROR_STATUS_X (ScreenWidth * 2 / 4) 
-#define DISPLAY_ERROR_STATUS_Y (16 * (StatusErrorCount++ % 65) )
+#define DISPLAY_ERROR_STATUS_Y (16 * (StatusErrorCount++ % (ScreenHeight / 16 - 3)) )
 
 #define FILE_SYSTEM_OTHER   0xff
 #define FILE_SYSTEM_FAT32  1
@@ -269,7 +269,6 @@ UINT8 *pStartMenuBuffer = NULL;
 UINT8 *pSystemSettingWindowBuffer = NULL;
 
 UINT8 *sChineseChar = NULL;
-UINT8 *pWallPaperBuffer = NULL;
 //UINT8 sChineseChar[267616];
 
 
@@ -307,6 +306,20 @@ EFI_GRAPHICS_OUTPUT_BLT_PIXEL MouseColor;
 UINT32 TimerSliceCount = 0;
 
 int display_sector_number = 0;
+
+#define SYSTEM_ICON_LENGTH 400
+#define SYSTEM_ICON_HEIGHT 320
+
+typedef enum
+{
+	SYSTEM_ICON_MYCOMPUTER = 0,
+	SYSTEM_ICON_SETTING,
+	SYSTEM_ICON_RECYCLE,
+	SYSTEM_ICON_FOLDER,
+	SYSTEM_ICON_TEXT,
+	SYSTEM_ICON_MAX	
+}SYSTEM_ICON_320_400_BMP;
+
 
 const UINT8 sASCII[][16] =
 {   
@@ -1365,7 +1378,7 @@ VOID L2_STRING_Maker (UINT16 x, UINT16 y,
 
 	// Note this api do not supported ("%f", float)
     AsciiVSPrint (AsciiBuffer, sizeof (AsciiBuffer), Format, VaList);
-	
+	/*
 	if (StatusErrorCount % 61 == 0)
 	{
 		for (int j = 0; j < ScreenHeight - 25; j++)
@@ -1378,7 +1391,7 @@ VOID L2_STRING_Maker (UINT16 x, UINT16 y,
 			}
 		}		
 	}
-	
+	*/
 	/*
 	if (DisplayCount % 52 == 0)
 	{
@@ -1516,11 +1529,11 @@ VOID EFIAPI L2_DEBUG_Print2 (UINT16 x, UINT16 y, UINT8 *pBuffer, IN  CONST CHAR8
 
 EFI_STATUS L1_STRING_Compare(UINT8 *p1, UINT8 *p2, UINT16 length)
 {
-	L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: StrCmpSelf\n", __LINE__);
+	//L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: StrCmpSelf\n", __LINE__);
 	
 	for (int i = 0; i < length; i++)
 	{
-		L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%02X %02X ", p1[i], p2[i]);
+		//L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%02X %02X ", p1[i], p2[i]);
 		if (p1[i] != p2[i])
 			return -1;
 	}
@@ -1528,8 +1541,25 @@ EFI_STATUS L1_STRING_Compare(UINT8 *p1, UINT8 *p2, UINT16 length)
 }
 
 //delete blanks of file name and file extension name
-void L1_FILE_NameGet(UINT8 deviceID,UINT8 *FileName)
+void L1_FILE_NameGet2(UINT8 deviceID, UINT8 *FileName)
 {    
+    UINT8 s[12] = {0};
+    for (UINT8 i = 0; i < 11; i++)
+    {		
+    	s[i] = pItems[deviceID].FileName[i];
+    }
+	UINT8 j = 0;
+	for (UINT8 i = 0; i < 11; )
+	{
+		if (s[i] != 32)
+			FileName[j++] = s[i++];
+		else
+			i++;
+	}
+}
+
+void L1_FILE_NameGet(UINT8 deviceID, UINT8 *FileName)
+ {    
     int count = 0;
     while (pItems[deviceID].FileName[count] != 0)
     {
@@ -1550,7 +1580,7 @@ void L1_FILE_NameGet(UINT8 deviceID,UINT8 *FileName)
         count2++;
     }
 
-}
+ }
 
 EFI_STATUS L1_FILE_RootPathAnalysis(UINT8 *p)
 {
@@ -1574,14 +1604,17 @@ EFI_STATUS L1_FILE_RootPathAnalysis(UINT8 *p)
 			
 			valid_count++;
 			
-		    UINT8 FileName[12] = {0};
+		    UINT8 FileName[13] = {0};
+		    UINT8 FileName2[13] = {0};
 		    L1_FILE_NameGet(i, FileName);
+		    L1_FILE_NameGet2(i, FileName2);
 			L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: FileName: %a\n", __LINE__, FileName);
+			L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: FileName2: %a\n", __LINE__, FileName2);
 			L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: ReadFileName: %a\n", __LINE__, ReadFileName);
 
 			//for (int j = 0; j < 5; j++)
 			//	L2_DEBUG_Print1(j * 3 * 8, 16 * 40 + valid_count * 16, "%02X ", pItems[i].FileName[j]);
-			if (L1_STRING_Compare(FileName, ReadFileName, ReadFileNameLength) == EFI_SUCCESS)			
+			if (L1_STRING_Compare(FileName2, ReadFileName, ReadFileNameLength) == EFI_SUCCESS)
 			{
 	        	L2_DEBUG_Print1(DISK_MBR_X, 16 * 30 + (valid_count) * 16 + 4 * 16, "%d FileName:%2c%2c%2c%2c%2c%2c%2c%2c ExtensionName:%2c%2c%2c StartCluster:%02X%02X%02X%02X FileLength: %02X%02X%02X%02X Attribute: %02X    ",  __LINE__,
                                 pItems[i].FileName[0], pItems[i].FileName[1], pItems[i].FileName[2], pItems[i].FileName[3], pItems[i].FileName[4], pItems[i].FileName[5], pItems[i].FileName[6], pItems[i].FileName[7],
@@ -2089,7 +2122,7 @@ EFI_STATUS L1_STORE_READ(UINT8 deviceID, UINT64 StartSectorNumber, UINT16 ReadSi
  	
 	for (int j = 0; j < 250; j++)
 	{
-		L2_DEBUG_Print1(DISK_READ_BUFFER_X + (j % 16) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 16), "%02X ", pBuffer[j] & 0xff);
+		//L2_DEBUG_Print1(DISK_READ_BUFFER_X + (j % 16) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 16), "%02X ", pBuffer[j] & 0xff);
 	}
 	//INFO_SELF("\n");
     //L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
@@ -2143,7 +2176,7 @@ EFI_STATUS L1_STORE_Write(UINT8 deviceID, UINT64 StartSectorNumber, UINT16 Write
  	
 	for (int j = 0; j < 250; j++)
 	{
-		L2_DEBUG_Print1(DISK_READ_BUFFER_X + (j % 16) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 16), "%02X ", pBuffer[j] & 0xff);
+		//L2_DEBUG_Print1(DISK_READ_BUFFER_X + (j % 16) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 16), "%02X ", pBuffer[j] & 0xff);
 	}
 	//INFO_SELF("\n");
     //L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
@@ -2179,7 +2212,7 @@ EFI_STATUS L2_FILE_NTFS_MFT_Item_Read(UINT16 DeviceID, UINT16 MFT_Item_ID)
     
 	 for (int j = 0; j < 250; j++)
 	 {
-		L2_DEBUG_Print1(DISK_READ_BUFFER_X + (j % 16) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 16), "%02X ", BufferMFT[j] & 0xff);
+		//L2_DEBUG_Print1(DISK_READ_BUFFER_X + (j % 16) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 16), "%02X ", BufferMFT[j] & 0xff);
 	 }	
 
  	//Analysis MFT of NTFS File System..
@@ -2811,80 +2844,9 @@ EFI_STATUS L2_GRAPHICS_ButtonDraw2(UINT16 StartX, UINT16 StartY, UINT16 Width, U
     L1_MEMORY_RectangleFill(pDeskBuffer, StartX + Width + 1, StartY + 1 , StartX + Width + 2, StartY + Height + 1, 1, Color); // line right
 }
 
+// bmp format
+UINT8 SystemIcon[SYSTEM_ICON_MAX][SYSTEM_ICON_LENGTH * SYSTEM_ICON_HEIGHT * 3 + 0x36];
 
-
-EFI_STATUS L2_GRAPHICS_DeskInit()
-{
-    EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
-	UINT32 x = ScreenWidth;
-	UINT32 y = ScreenHeight;
-	
-	for (int i = 0; i < ScreenHeight; i++)
-		for (int j = 0; j < ScreenWidth; j++)
-		{
-			// BMP 3bits, and desk buffer 4bits
-			pDeskBuffer[(i * ScreenWidth + j) * 4]     = pDeskWallpaperBuffer[0x36 + ((ScreenHeight - i) * 1920 + j) * 3 ];
-			pDeskBuffer[(i * ScreenWidth + j) * 4 + 1] = pDeskWallpaperBuffer[0x36 + ((ScreenHeight - i) * 1920 + j) * 3 + 1];
-			pDeskBuffer[(i * ScreenWidth + j) * 4 + 2] = pDeskWallpaperBuffer[0x36 + ((ScreenHeight - i) * 1920 + j) * 3 + 2];
-		}
-		
-
-    // line
-    Color.Red   = 0xC6;
-    Color.Green = 0xC6;
-    Color.Blue	= 0xC6;
-    L1_MEMORY_RectangleFill(pDeskBuffer, 0,     y - 28, x -  1, y - 28, 1, Color); // area top
-
-	// line
-    Color.Red   = 0xFF;
-    Color.Green = 0xFF;
-    Color.Blue	= 0xFF;
-    L1_MEMORY_RectangleFill(pDeskBuffer, 0,     y - 27, x -  1, y - 27, 1, Color); // line top
-
-    // rectangle
-    Color.Red   = 0xC6;
-    Color.Green = 0xC6;
-    Color.Blue	= 0xC6;
-    L1_MEMORY_RectangleFill(pDeskBuffer, 0,     y - 26, x -  1, y -  1, 1, Color); // area task bar
-
-	// Menu Button
-	L2_GRAPHICS_ButtonDraw();
-
-	L2_GRAPHICS_ButtonDraw2(16 * 6, ScreenHeight - 22, 16 * 4, 16);
-
-	L2_GRAPHICS_ButtonDraw2(16 * 11, ScreenHeight - 22, 16 * 4, 16);
-
-	L2_GRAPHICS_ButtonDraw2(16 * 16, ScreenHeight - 22, 16 * 4, 16);
-
-    Color.Red   = 0x84;
-    Color.Green = 0x84;
-    Color.Blue	= 0x84;
-    L1_MEMORY_RectangleFill(pDeskBuffer, DISPLAY_DESK_DATE_TIME_X, y - 24, x -  4, y - 24, 1, Color); // line
-    //L1_MEMORY_RectangleFill(pDeskBuffer, DISPLAY_DESK_DATE_TIME_X, y - 23, x - 47, y -  4, 1, Color); // area
-    
-    Color.Red   = 0xFF;
-    Color.Green = 0xFF;
-    Color.Blue	= 0xFF;
-    L1_MEMORY_RectangleFill(pDeskBuffer, DISPLAY_DESK_DATE_TIME_X,    y - 3, x - 4,     y - 3, 1, Color); // line
-    L1_MEMORY_RectangleFill(pDeskBuffer, x - 3,     y - 24, x - 3,     y - 3, 1, Color); //line
-
-	//Black
-    Color.Red   = 0x00;
-    Color.Green = 0x00;
-    Color.Blue	 = 0x00;
-
-	// menu chinese
-    L2_GRAPHICS_ChineseCharDraw2(pDeskBuffer,  16, ScreenHeight - 21,     (18 - 1) * 94 + 43 - 1, Color, ScreenWidth);
-    L2_GRAPHICS_ChineseCharDraw2(pDeskBuffer,  16 * 2, ScreenHeight - 21, (21 - 1) * 94 + 05 - 1, Color, ScreenWidth);
-}
-
-
-L2_MOUSE_WallpaperResetClicked()
-{	
-	L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d L2_MOUSE_WallpaperResetClicked\n", __LINE__);
-	
-	L2_GRAPHICS_DeskInit();
-}
 
 
 L2_MOUSE_MyComputerClicked()
@@ -3005,67 +2967,6 @@ L2_MOUSE_MenuButtonClick()
     }
     
     L2_GRAPHICS_Copy(pDeskDisplayBuffer, pMouseSelectedBuffer, ScreenWidth, ScreenHeight, 32, 16, 15, ScreenHeight - 22); 
-}
-
-
-START_MENU_STATE_TRANSFORM StartMenuStateTransformTable[] =
-{
-	{CLICK_INIT_STATE,          	START_MENU_CLICKED_EVENT,    		MENU_CLICKED_STATE,             L2_MOUSE_MENU_Clicked},
-	{MENU_CLICKED_STATE,  			MY_COMPUTER_CLICKED_EVENT,  	 	MY_COMPUTER_CLICKED_STATE,      L2_MOUSE_MyComputerClicked},
-	{MENU_CLICKED_STATE,  			SETTING_CLICKED_EVENT,  			SETTING_CLICKED_STATE,          L2_MOUSE_SettingClicked},
-	{SETTING_CLICKED_STATE,  		WALLPAPER_SETTING_CLICKED_EVENT,  	CLICK_INIT_STATE,          		L2_MOUSE_WallpaperSettingClicked},
-	{SETTING_CLICKED_STATE,  		WALLPAPER_RESET_CLICKED_EVENT,  	CLICK_INIT_STATE,          		L2_MOUSE_WallpaperResetClicked},
-	{MY_COMPUTER_CLICKED_STATE,     MY_COMPUTER_CLOSE_CLICKED_EVENT,  	CLICK_INIT_STATE,      			L2_MOUSE_MyComputerCloseClicked},
-};
-
-
-START_MENU_CURRENT_EVENT	StartMenuClickEvent = START_MENU_INIT_CLICKED_EVENT;
-
-L2_MOUSE_Moveover()
-{
- 	//L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: iMouseX: %d iMouseY: %d \n",  __LINE__, iMouseX, iMouseY);
-	EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
-	Color.Red = 0xff;
-	Color.Green= 0xff;
-	Color.Blue= 0x00;
-	
-	if ( MouseClickFlag != MOUSE_LEFT_CLICKED)
-	{
-		return;
-	}
-
-	StartMenuClickEvent = L2_MOUSE_ClickEventGet();
-	
-	if (START_MENU_INIT_CLICKED_EVENT == StartMenuClickEvent)
-		return;
-	
-	L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: StartMenuClickEvent: %d \n", __LINE__, StartMenuClickEvent);
-		
-	MouseClickFlag = MOUSE_NO_CLICKED;
-	EFI_STATUS Status;
-
-	if (StartMenuClickEvent == MY_COMPUTER_CLOSE_CLICKED_EVENT && DisplayMyComputerFlag == 1)
-	{
-		DisplayMyComputerFlag = 0;
-		return;
-	}
-		
-	for (int i = 0; i <  sizeof(StartMenuStateTransformTable)/sizeof(StartMenuStateTransformTable[0]); i++ )
-	{
-		L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: StartMenuStateTransformTable[i].CurrentState: %d\n", __LINE__, StartMenuStateTransformTable[i].CurrentState);
-		//L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: i: %d\n", __LINE__, i);
-		if (StartMenuStateTransformTable[i].CurrentState == StartMenuNextState 
-			&& StartMenuClickEvent == StartMenuStateTransformTable[i].event )
-		{
-			StartMenuNextState = StartMenuStateTransformTable[i].NextState;
-
-			// need to check the return value after function runs..... 
-			StartMenuStateTransformTable[i].pFunc();
-			L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: StartMenuClickEvent: %d StartMenuNextState: %d\n", __LINE__, StartMenuClickEvent, StartMenuNextState);
-			break;
-		}	
-	}
-	
 }
 
 
@@ -3361,6 +3262,11 @@ EFI_STATUS L2_STORE_GetFatTableFSM()
 UINT32 L2_FILE_GetNextBlockNumber()
 {
 	L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: PreviousBlockNumber: %d\n",  __LINE__, PreviousBlockNumber);
+
+	if (PreviousBlockNumber == 0)
+	{
+		return 0x0fffffff;
+	}
 	
 	if (FAT32_Table[PreviousBlockNumber * 4] == 0xff 
 	    && FAT32_Table[PreviousBlockNumber * 4 + 1] == 0xff 
@@ -3448,7 +3354,7 @@ void *L1_MEMORY_Copy(UINT8 *dest, const UINT8 *src, UINT8 count)
 
 EFI_STATUS L2_STORE_ReadFileFSM()
 {    
-    L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d ReadFileFSM: PartitionCount: %d FileLength: %d\n", __LINE__, PartitionCount, FileLength);
+    L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d ReadFileFSM: PartitionCount: %d FileLength: %d sector_count: %llu\n", __LINE__, PartitionCount, FileLength, sector_count);
     //DEBUG ((EFI_D_INFO, "PartitionUSBRead!!\r\n"));
     EFI_STATUS Status ;
     UINT8 BufferBlock[DISK_BLOCK_BUFFER_SIZE];
@@ -4186,10 +4092,10 @@ EFI_STATUS L3_WINDOW_Create(UINT8 *pBuffer, UINT8 *pParent, UINT16 Width, UINT16
 		
 		char sizePostfix[3] = "MB";
 		size /= 1024.0; //M
-    	L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: size: %llu \n", __LINE__, size);
+    	//L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: size: %llu \n", __LINE__, size);
 		if (size > 1024.0)
 		{
-    		L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: size: %llu \n", __LINE__, size);
+    		//L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: size: %llu \n", __LINE__, size);
 			size /= 1024;	
 			sizePostfix[0] = 'G';
 		}
@@ -4899,8 +4805,8 @@ EFI_STATUS L2_TIMER_IntervalInit()
 	{
 		*TimerCount = *TimerCount + 1;
 		//L2_DEBUG_Print1(DISPLAY_X, DISPLAY_Y, "%d: SystemTimeIntervalInit while\n", __LINE__);
-		if (*TimerCount % 1000000 == 0)
-	       L2_DEBUG_Print1(0, 4 * 16, "%d: while (1) p:%x %lu \n", __LINE__, TimerCount, *TimerCount);
+		//if (*TimerCount % 1000000 == 0)
+	       L2_DEBUG_Print1(0, 4 * 16, "%d: L2_TIMER_IntervalInit p:%x %lu \n", __LINE__, TimerCount, *TimerCount);
 	}
 	
 	gBS->SetTimer( TimerOne, TimerCancel, 0 );
@@ -4990,6 +4896,184 @@ EFI_STATUS L2_GRAPHICS_SystemSettingInit()
 
 }
 
+EFI_STATUS L2_GRAPHICS_DeskInit()
+{
+	
+	EFI_STATUS status = 0;
+    EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
+	UINT32 x = ScreenWidth;
+	UINT32 y = ScreenHeight;
+	
+	for (int i = 0; i < ScreenHeight; i++)
+	{
+		for (int j = 0; j < ScreenWidth; j++)
+		{
+			// BMP 3bits, and desk buffer 4bits
+			pDeskBuffer[(i * ScreenWidth + j) * 4]     = pDeskWallpaperBuffer[0x36 + ((ScreenHeight - i) * 1920 + j) * 3 ];
+			pDeskBuffer[(i * ScreenWidth + j) * 4 + 1] = pDeskWallpaperBuffer[0x36 + ((ScreenHeight - i) * 1920 + j) * 3 + 1];
+			pDeskBuffer[(i * ScreenWidth + j) * 4 + 2] = pDeskWallpaperBuffer[0x36 + ((ScreenHeight - i) * 1920 + j) * 3 + 2];
+
+			//white
+			//pDeskBuffer[(i * ScreenWidth + j) * 4]     = 0xff;
+			//pDeskBuffer[(i * ScreenWidth + j) * 4 + 1] = 0xff;
+			//pDeskBuffer[(i * ScreenWidth + j) * 4 + 2] = 0xff;
+		}
+	}
+		
+	L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: COMPUTER BMP\n", __LINE__);
+
+	char buffer[SYSTEM_ICON_LENGTH * SYSTEM_ICON_HEIGHT * 3 + 0x36] = {0};
+	
+	//
+	//status = L3_APPLICATION_ReadFile("RECYCLE BMP", 11, buffer);
+	/*status = L3_APPLICATION_ReadFile("COMPUTER BMP", 12, buffer);
+	if (EFI_ERROR(status))
+	{
+		L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: ReadFileSelf error\n", __LINE__);
+		INFO_SELF(L"ReadFileSelf error.\r\n");
+		return;
+	}
+	
+	for (int j = 0; j < 250; j++)
+	{
+		L2_DEBUG_Print1(DISK_READ_BUFFER_X + (j % 16) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 16), "%02X ", buffer[j] & 0xff);
+	}
+	*/
+	/*
+	for (int i = 0; i < SYSTEM_ICON_MAX; i++)
+	{
+		for (int j = 0; j < SYSTEM_ICON_HEIGHT; j++)
+		{
+			for (int k = 0; k < SYSTEM_ICON_LENGTH; k++)
+			{
+				pDeskBuffer[(i + 16) * SYSTEM_ICON_HEIGHT * ScreenWidth * 4 + (j * ScreenWidth + k) * 4 ]     = buffer[0x36 + ((SYSTEM_ICON_HEIGHT - j) * SYSTEM_ICON_LENGTH + k) * 3 ];
+				pDeskBuffer[(i + 16) * SYSTEM_ICON_HEIGHT * ScreenWidth * 4 + (j * ScreenWidth + k) * 4 + 1 ] = buffer[0x36 + ((SYSTEM_ICON_HEIGHT - j) * SYSTEM_ICON_LENGTH + k) * 3 + 1 ];
+				pDeskBuffer[(i + 16) * SYSTEM_ICON_HEIGHT * ScreenWidth * 4 + (j * ScreenWidth + k) * 4 + 2 ] = buffer[0x36 + ((SYSTEM_ICON_HEIGHT - j) * SYSTEM_ICON_LENGTH + k) * 3 + 2 ];
+			}
+		}
+	}
+	*/
+    // line
+    Color.Red   = 0xC6;
+    Color.Green = 0xC6;
+    Color.Blue	= 0xC6;
+    L1_MEMORY_RectangleFill(pDeskBuffer, 0,     y - 28, x -  1, y - 28, 1, Color); // area top
+
+	// line
+    Color.Red   = 0xFF;
+    Color.Green = 0xFF;
+    Color.Blue	= 0xFF;
+    L1_MEMORY_RectangleFill(pDeskBuffer, 0,     y - 27, x -  1, y - 27, 1, Color); // line top
+
+    // rectangle
+    Color.Red   = 0xC6;
+    Color.Green = 0xC6;
+    Color.Blue	= 0xC6;
+    L1_MEMORY_RectangleFill(pDeskBuffer, 0,     y - 26, x -  1, y -  1, 1, Color); // area task bar
+
+	// Menu Button
+	L2_GRAPHICS_ButtonDraw();
+
+	L2_GRAPHICS_ButtonDraw2(16 * 6, ScreenHeight - 22, 16 * 4, 16);
+
+	L2_GRAPHICS_ButtonDraw2(16 * 11, ScreenHeight - 22, 16 * 4, 16);
+
+	L2_GRAPHICS_ButtonDraw2(16 * 16, ScreenHeight - 22, 16 * 4, 16);
+
+    Color.Red   = 0x84;
+    Color.Green = 0x84;
+    Color.Blue	= 0x84;
+    L1_MEMORY_RectangleFill(pDeskBuffer, DISPLAY_DESK_DATE_TIME_X, y - 24, x -  4, y - 24, 1, Color); // line
+    //L1_MEMORY_RectangleFill(pDeskBuffer, DISPLAY_DESK_DATE_TIME_X, y - 23, x - 47, y -  4, 1, Color); // area
+    
+    Color.Red   = 0xFF;
+    Color.Green = 0xFF;
+    Color.Blue	= 0xFF;
+    L1_MEMORY_RectangleFill(pDeskBuffer, DISPLAY_DESK_DATE_TIME_X,    y - 3, x - 4,     y - 3, 1, Color); // line
+    L1_MEMORY_RectangleFill(pDeskBuffer, x - 3,     y - 24, x - 3,     y - 3, 1, Color); //line
+
+	//Black
+    Color.Red   = 0x00;
+    Color.Green = 0x00;
+    Color.Blue	 = 0x00;
+
+	// menu chinese
+    L2_GRAPHICS_ChineseCharDraw2(pDeskBuffer,  16, ScreenHeight - 21,     (18 - 1) * 94 + 43 - 1, Color, ScreenWidth);
+    L2_GRAPHICS_ChineseCharDraw2(pDeskBuffer,  16 * 2, ScreenHeight - 21, (21 - 1) * 94 + 05 - 1, Color, ScreenWidth);
+}
+
+
+
+L2_MOUSE_WallpaperResetClicked()
+{	
+	L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d L2_MOUSE_WallpaperResetClicked\n", __LINE__);
+	
+	L2_GRAPHICS_DeskInit();
+}
+
+
+
+START_MENU_STATE_TRANSFORM StartMenuStateTransformTable[] =
+{
+	{CLICK_INIT_STATE,          	START_MENU_CLICKED_EVENT,    		MENU_CLICKED_STATE,             L2_MOUSE_MENU_Clicked},
+	{MENU_CLICKED_STATE,  			MY_COMPUTER_CLICKED_EVENT,  	 	MY_COMPUTER_CLICKED_STATE,      L2_MOUSE_MyComputerClicked},
+	{MENU_CLICKED_STATE,  			SETTING_CLICKED_EVENT,  			SETTING_CLICKED_STATE,          L2_MOUSE_SettingClicked},
+	{SETTING_CLICKED_STATE,  		WALLPAPER_SETTING_CLICKED_EVENT,  	CLICK_INIT_STATE,          		L2_MOUSE_WallpaperSettingClicked},
+	{SETTING_CLICKED_STATE,  		WALLPAPER_RESET_CLICKED_EVENT,  	CLICK_INIT_STATE,          		L2_MOUSE_WallpaperResetClicked},
+	{MY_COMPUTER_CLICKED_STATE,     MY_COMPUTER_CLOSE_CLICKED_EVENT,  	CLICK_INIT_STATE,      			L2_MOUSE_MyComputerCloseClicked},
+};
+
+
+START_MENU_CURRENT_EVENT	StartMenuClickEvent = START_MENU_INIT_CLICKED_EVENT;
+
+L2_MOUSE_Moveover()
+{
+ 	//L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: iMouseX: %d iMouseY: %d \n",  __LINE__, iMouseX, iMouseY);
+	EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
+	Color.Red = 0xff;
+	Color.Green= 0xff;
+	Color.Blue= 0x00;
+	
+	if ( MouseClickFlag != MOUSE_LEFT_CLICKED)
+	{
+		return;
+	}
+
+	StartMenuClickEvent = L2_MOUSE_ClickEventGet();
+	
+	if (START_MENU_INIT_CLICKED_EVENT == StartMenuClickEvent)
+		return;
+	
+	L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: StartMenuClickEvent: %d \n", __LINE__, StartMenuClickEvent);
+		
+	MouseClickFlag = MOUSE_NO_CLICKED;
+	EFI_STATUS Status;
+
+	if (StartMenuClickEvent == MY_COMPUTER_CLOSE_CLICKED_EVENT && DisplayMyComputerFlag == 1)
+	{
+		DisplayMyComputerFlag = 0;
+		return;
+	}
+		
+	for (int i = 0; i <  sizeof(StartMenuStateTransformTable)/sizeof(StartMenuStateTransformTable[0]); i++ )
+	{
+		L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: StartMenuStateTransformTable[i].CurrentState: %d\n", __LINE__, StartMenuStateTransformTable[i].CurrentState);
+		//L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: i: %d\n", __LINE__, i);
+		if (StartMenuStateTransformTable[i].CurrentState == StartMenuNextState 
+			&& StartMenuClickEvent == StartMenuStateTransformTable[i].event )
+		{
+			StartMenuNextState = StartMenuStateTransformTable[i].NextState;
+
+			// need to check the return value after function runs..... 
+			StartMenuStateTransformTable[i].pFunc();
+			L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: StartMenuClickEvent: %d StartMenuNextState: %d\n", __LINE__, StartMenuClickEvent, StartMenuNextState);
+			break;
+		}	
+	}
+	
+}
+
+
 
 EFI_STATUS L2_GRAPHICS_ScreenInit()
 {
@@ -5018,18 +5102,41 @@ EFI_STATUS L2_GRAPHICS_ScreenInit()
 	StatusErrorCount = 0;
     L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: FAT32\n",  __LINE__);
 
-  	status = L3_APPLICATION_ReadFile("ZHUFENG BMP", 11, pDeskWallpaperBuffer);
+  	status = L3_APPLICATION_ReadFile("ZHUFENGBMP", 10, pDeskWallpaperBuffer);
 	if (EFI_ERROR(status))
 	{
 		INFO_SELF(L"ReadFileSelf error.\r\n");
   		return;
 	}
-
-   for (int j = 0; j < 250; j++)
-   {
-       L2_DEBUG_Print1(DISK_READ_BUFFER_X + (j % 16) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 16), "%02X ", pDeskWallpaperBuffer[j] & 0xff);
-   }
+	/*		
+  	status = L3_APPLICATION_ReadFile("FOLDER BMP", 10, SystemIcon[SYSTEM_ICON_FOLDER]);
+	if (EFI_ERROR(status))
+	{
+		INFO_SELF(L"ReadFileSelf error.\r\n");
+  		return;
+	}
 	
+  	status = L3_APPLICATION_ReadFile("RECYCLE BMP", 11, SystemIcon[SYSTEM_ICON_RECYCLE]);
+	if (EFI_ERROR(status))
+	{
+		INFO_SELF(L"ReadFileSelf error.\r\n");
+  		return;
+	}
+	
+  	status = L3_APPLICATION_ReadFile("SETTING BMP", 11, SystemIcon[SYSTEM_ICON_SETTING]);
+	if (EFI_ERROR(status))
+	{
+		INFO_SELF(L"ReadFileSelf error.\r\n");
+  		return;
+	}
+	
+  	status = L3_APPLICATION_ReadFile("TEXT BMP", 8, SystemIcon[SYSTEM_ICON_TEXT]);
+	if (EFI_ERROR(status))
+	{
+		INFO_SELF(L"ReadFileSelf error.\r\n");
+  		return;
+	}
+	*/
   	
 	L2_GRAPHICS_DeskInit();
 	
@@ -5090,7 +5197,7 @@ EFI_STATUS L2_COMMON_Initial()
 
 	//pDeskWallpaperBuffer =  0x6ff0f000 + 8294400 * 2;
 
-
+	/*
 	pTestBuffer = L2_MEMORY_Allocate("Test Buffer", MEMORY_TYPE_TEST, ScreenWidth * ScreenHeight * 4 * 4);
 
 	L2_MEMORY_Free(pTestBuffer);
@@ -5098,7 +5205,8 @@ EFI_STATUS L2_COMMON_Initial()
 	pTestBuffer = L2_MEMORY_Allocate("Test Buffer", MEMORY_TYPE_TEST, ScreenWidth * ScreenHeight * 4 * 4);
 
 	L2_MEMORY_Free(pTestBuffer);
-
+	*/
+	
 	pMouseClickBuffer = (UINT8 *)AllocatePool(MouseClickWindowWidth * MouseClickWindowHeight * 4); 
 	if (pMouseClickBuffer == NULL)
 	{
@@ -5262,11 +5370,11 @@ Main (
     
     L2_GRAPHICS_ScreenInit();
 	
-    L2_GRAPHICS_StartMenuInit();
+    //L2_GRAPHICS_StartMenuInit();
 
-	L2_GRAPHICS_SystemSettingInit();
+	//L2_GRAPHICS_SystemSettingInit();
     
-    L3_APPLICATION_MyComputerWindow(100, 100);
+    //L3_APPLICATION_MyComputerWindow(100, 100);
     	
     L2_TIMER_IntervalInit();	
 	
