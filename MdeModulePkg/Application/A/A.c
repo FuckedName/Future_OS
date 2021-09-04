@@ -260,6 +260,9 @@ UINT8 *pMouseSelectedBuffer = NULL;  // after mouse selected
 UINT8 *pMouseClickBuffer = NULL; // for mouse click 
 UINT8 *pDateTimeBuffer = NULL; //Mouse layer: 3
 UINT8 *pMouseBuffer = NULL; //Mouse layer: 4
+UINT8 *pSystemIconTempBuffer = NULL;
+UINT8 *pSystemIconTempBuffer2 = NULL;
+
 
 // Read File 
 UINT8 ReadFileName[20];
@@ -320,7 +323,7 @@ UINT32 TimerSliceCount = 0;
 
 int display_sector_number = 0;
 
-#define SYSTEM_ICON_LENGTH 400
+#define SYSTEM_ICON_WIDTH 400
 #define SYSTEM_ICON_HEIGHT 320
 
 
@@ -2849,7 +2852,7 @@ EFI_STATUS L2_GRAPHICS_ButtonDraw2(UINT16 StartX, UINT16 StartY, UINT16 Width, U
 }
 
 // bmp format
-UINT8 SystemIcon[SYSTEM_ICON_MAX][SYSTEM_ICON_LENGTH * SYSTEM_ICON_HEIGHT * 3 + 0x36];
+UINT8 SystemIcon[SYSTEM_ICON_MAX][SYSTEM_ICON_WIDTH * SYSTEM_ICON_HEIGHT * 3 + 0x36];
 
 
 
@@ -4233,7 +4236,7 @@ EFIAPI L2_KEYBOARD_KeyPressed()
     //PartitionUSBReadSynchronous();
     //PartitionUSBReadAsynchronous();
 
-	// char buffer[SYSTEM_ICON_LENGTH * SYSTEM_ICON_HEIGHT * 3 + 0x36] = {0};
+	// char buffer[SYSTEM_ICON_WIDTH * SYSTEM_ICON_HEIGHT * 3 + 0x36] = {0};
 	
 	DEBUG ((EFI_D_INFO, "%d HandleEnterPressed\n", __LINE__));
 	return EFI_SUCCESS;
@@ -4905,6 +4908,57 @@ EFI_STATUS L2_GRAPHICS_SystemSettingInit()
 
 }
 
+double bilinear(double a, double blue, int uv, int u1v, int uv1, int u1v1)
+{
+	return (double) (uv*(1-a)*(1-blue)+u1v*a*(1-blue)+uv1*blue*(1-a)+u1v1*a*blue);
+}
+
+void zoomdata_bilinear(UINT8* pDest, int DestWidth, int DestHeight, UINT8* pSource, int SourceWidth, int SourceHeight )
+{
+    UINT8    *pDestTemp;
+    UINT8    *pSourceTemp;
+    UINT16    i, j;
+    pDestTemp    = pDest;
+    pSourceTemp  = pSource;
+
+
+    for ( i = 0; i < DestHeight; i++ )
+    {
+        for ( j = 0; j < DestWidth; j++ )
+        {
+            int    HeightRatio, WidthRatio;
+            double    u, v, red, green, blue;
+            v    = (i * SourceHeight) / (double) (DestHeight);
+            u    = (j * SourceWidth) / (double) (DestWidth);
+            HeightRatio    = (int) (v);
+            WidthRatio    = (int) (u);
+
+            blue = bilinear( u - WidthRatio, v - HeightRatio,
+                      pSourceTemp[HeightRatio * SourceWidth * 3 + WidthRatio * 3],
+                      pSourceTemp[HeightRatio * SourceWidth * 3 + (WidthRatio + 1) * 3],
+                      pSourceTemp[(HeightRatio + 1) * SourceWidth * 3 + WidthRatio * 3],
+                      pSourceTemp[(HeightRatio + 1) * SourceWidth * 3 + (WidthRatio + 1) * 3] );
+                      
+            green = bilinear( u - WidthRatio, v - HeightRatio,
+                      pSourceTemp[HeightRatio * SourceWidth * 3 + WidthRatio * 3 + 1],
+                      pSourceTemp[HeightRatio * SourceWidth * 3 + (WidthRatio + 1) * 3 + 1],
+                      pSourceTemp[(HeightRatio + 1) * SourceWidth * 3 + WidthRatio * 3 + 1],
+                      pSourceTemp[(HeightRatio + 1) * SourceWidth * 3 + (WidthRatio + 1) * 3 + 1] );
+                      
+            red = bilinear( u - WidthRatio, v - HeightRatio,
+                      pSourceTemp[HeightRatio * SourceWidth * 3 + WidthRatio * 3 + 2],
+                      pSourceTemp[HeightRatio * SourceWidth * 3 + (WidthRatio + 1) * 3 + 2],
+                      pSourceTemp[(HeightRatio + 1) * SourceWidth * 3 + WidthRatio * 3 + 2],
+                      pSourceTemp[(HeightRatio + 1) * SourceWidth * 3 + (WidthRatio + 1) * 3 + 2] );
+
+            pDestTemp[i * DestWidth * 3 + j * 3 + 2]    = red;
+            pDestTemp[i * DestWidth * 3 + j * 3 + 1]    = green;
+            pDestTemp[i * DestWidth * 3 + j * 3 + 0]    = blue;
+        }
+    }
+}
+
+
 EFI_STATUS L2_GRAPHICS_DeskInit()
 {
 	
@@ -4944,36 +4998,56 @@ EFI_STATUS L2_GRAPHICS_DeskInit()
 	{
 		for (int j = 0; j < SYSTEM_ICON_HEIGHT; j++)
 		{
-			for (int k = 0; k < SYSTEM_ICON_LENGTH; k++)
+			for (int k = 0; k < SYSTEM_ICON_WIDTH; k++)
 			{
-				pDeskBuffer[(i + 16) * SYSTEM_ICON_HEIGHT * ScreenWidth * 4 + (j * ScreenWidth + k) * 4 ]     = buffer[0x36 + ((SYSTEM_ICON_HEIGHT - j) * SYSTEM_ICON_LENGTH + k) * 3 ];
-				pDeskBuffer[(i + 16) * SYSTEM_ICON_HEIGHT * ScreenWidth * 4 + (j * ScreenWidth + k) * 4 + 1 ] = buffer[0x36 + ((SYSTEM_ICON_HEIGHT - j) * SYSTEM_ICON_LENGTH + k) * 3 + 1 ];
-				pDeskBuffer[(i + 16) * SYSTEM_ICON_HEIGHT * ScreenWidth * 4 + (j * ScreenWidth + k) * 4 + 2 ] = buffer[0x36 + ((SYSTEM_ICON_HEIGHT - j) * SYSTEM_ICON_LENGTH + k) * 3 + 2 ];
+				pDeskBuffer[(i + 16) * SYSTEM_ICON_HEIGHT * ScreenWidth * 4 + (j * ScreenWidth + k) * 4 ]     = buffer[0x36 + ((SYSTEM_ICON_HEIGHT - j) * SYSTEM_ICON_WIDTH + k) * 3 ];
+				pDeskBuffer[(i + 16) * SYSTEM_ICON_HEIGHT * ScreenWidth * 4 + (j * ScreenWidth + k) * 4 + 1 ] = buffer[0x36 + ((SYSTEM_ICON_HEIGHT - j) * SYSTEM_ICON_WIDTH + k) * 3 + 1 ];
+				pDeskBuffer[(i + 16) * SYSTEM_ICON_HEIGHT * ScreenWidth * 4 + (j * ScreenWidth + k) * 4 + 2 ] = buffer[0x36 + ((SYSTEM_ICON_HEIGHT - j) * SYSTEM_ICON_WIDTH + k) * 3 + 2 ];
 			}
 		}
 	}
 	
 	for (int j = 0; j < SYSTEM_ICON_HEIGHT; j++)
 	{
-		for (int k = 0; k < SYSTEM_ICON_LENGTH; k++)
+		for (int k = 0; k < SYSTEM_ICON_WIDTH; k++)
 		{
-			pDeskBuffer[(j * ScreenWidth + k) * 4 ]	    = pSystemIconBuffer[SYSTEM_ICON_MYCOMPUTER][0x36 + ((SYSTEM_ICON_HEIGHT - j) * SYSTEM_ICON_LENGTH + k) * 3 ];
-			pDeskBuffer[(j * ScreenWidth + k) * 4 + 1 ] = pSystemIconBuffer[SYSTEM_ICON_MYCOMPUTER][0x36 + ((SYSTEM_ICON_HEIGHT - j) * SYSTEM_ICON_LENGTH + k) * 3 + 1 ];
-			pDeskBuffer[(j * ScreenWidth + k) * 4 + 2 ] = pSystemIconBuffer[SYSTEM_ICON_MYCOMPUTER][0x36 + ((SYSTEM_ICON_HEIGHT - j) * SYSTEM_ICON_LENGTH + k) * 3 + 2 ];
+			pDeskBuffer[(j * ScreenWidth + k) * 4 ]	    = pSystemIconBuffer[SYSTEM_ICON_MYCOMPUTER][0x36 + ((SYSTEM_ICON_HEIGHT - j) * SYSTEM_ICON_WIDTH + k) * 3 ];
+			pDeskBuffer[(j * ScreenWidth + k) * 4 + 1 ] = pSystemIconBuffer[SYSTEM_ICON_MYCOMPUTER][0x36 + ((SYSTEM_ICON_HEIGHT - j) * SYSTEM_ICON_WIDTH + k) * 3 + 1 ];
+			pDeskBuffer[(j * ScreenWidth + k) * 4 + 2 ] = pSystemIconBuffer[SYSTEM_ICON_MYCOMPUTER][0x36 + ((SYSTEM_ICON_HEIGHT - j) * SYSTEM_ICON_WIDTH + k) * 3 + 2 ];
 		}
 	}*/
 	for (UINT8 i = 0; i < SYSTEM_ICON_MAX; i++)
 	{
 		for (int j = 0; j < SYSTEM_ICON_HEIGHT; j++)
 		{
-			for (int k = 0; k < SYSTEM_ICON_LENGTH; k++)
+			for (int k = 0; k < SYSTEM_ICON_WIDTH; k++)
 			{
-				pDeskBuffer[(j * ScreenWidth + 400 * i + k) * 4 ]	  = pSystemIconBuffer[i][0x36 + ((SYSTEM_ICON_HEIGHT - j) * SYSTEM_ICON_LENGTH + k) * 3 ];
-				pDeskBuffer[(j * ScreenWidth + 400 * i + k) * 4 + 1 ] = pSystemIconBuffer[i][0x36 + ((SYSTEM_ICON_HEIGHT - j) * SYSTEM_ICON_LENGTH + k) * 3 + 1 ];
-				pDeskBuffer[(j * ScreenWidth + 400 * i + k) * 4 + 2 ] = pSystemIconBuffer[i][0x36 + ((SYSTEM_ICON_HEIGHT - j) * SYSTEM_ICON_LENGTH + k) * 3 + 2 ];
+				pDeskBuffer[(j * ScreenWidth + 400 * i + k) * 4 ]	  = pSystemIconBuffer[i][0x36 + ((SYSTEM_ICON_HEIGHT - j) * SYSTEM_ICON_WIDTH + k) * 3 ];
+				pDeskBuffer[(j * ScreenWidth + 400 * i + k) * 4 + 1 ] = pSystemIconBuffer[i][0x36 + ((SYSTEM_ICON_HEIGHT - j) * SYSTEM_ICON_WIDTH + k) * 3 + 1 ];
+				pDeskBuffer[(j * ScreenWidth + 400 * i + k) * 4 + 2 ] = pSystemIconBuffer[i][0x36 + ((SYSTEM_ICON_HEIGHT - j) * SYSTEM_ICON_WIDTH + k) * 3 + 2 ];
 			}
 		}
 	}		
+
+	UINT16 HeightNew = SYSTEM_ICON_HEIGHT / 2;
+	UINT16 WidthNew = SYSTEM_ICON_WIDTH / 2;
+	//UINT8 *pSource = pSystemIconBuffer[0][0x36];
+
+	for (UINT32 i = 0; i < 384000; i++)
+		pSystemIconTempBuffer2[i] = pSystemIconBuffer[0][0x36 + i];
+
+	zoomdata_bilinear(pSystemIconTempBuffer, WidthNew, HeightNew, pSystemIconTempBuffer2, SYSTEM_ICON_WIDTH, SYSTEM_ICON_HEIGHT);
+	
+	for (int j = 0; j < HeightNew; j++)
+	{
+		for (int k = 0; k < WidthNew; k++)
+		{
+			pDeskBuffer[((400 + j) * ScreenWidth + 400 + k) * 4 ]	  = pSystemIconTempBuffer[((HeightNew - j) * WidthNew + k) * 3 ];
+			pDeskBuffer[((400 + j) * ScreenWidth + 400 + k) * 4 + 1 ] = pSystemIconTempBuffer[((HeightNew - j) * WidthNew + k) * 3 + 1 ];
+			pDeskBuffer[((400 + j) * ScreenWidth + 400 + k) * 4 + 2 ] = pSystemIconTempBuffer[((HeightNew - j) * WidthNew + k) * 3 + 2 ];
+		}
+	}
+	
     // line
     Color.Red   = 0xC6;
     Color.Green = 0xC6;
@@ -5250,6 +5324,8 @@ EFI_STATUS L2_COMMON_Initial()
 	for (UINT8 i = 0; i < SYSTEM_ICON_MAX; i++)
 		pSystemIconBuffer[i] = L2_MEMORY_Allocate("My Computer Buffer", MEMORY_TYPE_GRAPHICS, 384054);
 
+	pSystemIconTempBuffer = L2_MEMORY_Allocate("System Icon temp Buffer", MEMORY_TYPE_GRAPHICS, 384054);
+	pSystemIconTempBuffer2 = L2_MEMORY_Allocate("System Icon temp Buffer", MEMORY_TYPE_GRAPHICS, 384054);
 	//pDeskWallpaperBuffer =  0x6ff0f000 + 8294400 * 2;
 
 	/*
