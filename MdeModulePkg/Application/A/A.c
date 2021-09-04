@@ -240,10 +240,20 @@ EFI_SIMPLE_POINTER_PROTOCOL        *gMouse;
 
 EFI_HANDLE *handle;
 
+typedef enum
+{
+	SYSTEM_ICON_MYCOMPUTER = 0,
+	SYSTEM_ICON_SETTING,
+	SYSTEM_ICON_RECYCLE,
+	SYSTEM_ICON_FOLDER,
+	SYSTEM_ICON_TEXT,
+	SYSTEM_ICON_MAX	
+}SYSTEM_ICON_320_400_BMP;
+
 UINT8 *pDeskBuffer = NULL; //only Desk layer include wallpaper and button : 1
 UINT8 *pMyComputerBuffer = NULL; // MyComputer layer: 2
 UINT8 *pDeskDisplayBuffer = NULL; //desk display after multi graphicses layers compute
-//UINT8 *pSystemIconBuffer = NULL; //desk display after multi graphicses layers compute
+UINT8 *pSystemIconBuffer[SYSTEM_ICON_MAX]; //desk display after multi graphicses layers compute
 UINT8 *pSystemIconMyComputerBuffer = NULL; //desk display after multi graphicses layers compute
 UINT8 *pSystemIconMySettingBuffer = NULL; //desk display after multi graphicses layers compute
 UINT8 *pMouseSelectedBuffer = NULL;  // after mouse selected
@@ -313,15 +323,6 @@ int display_sector_number = 0;
 #define SYSTEM_ICON_LENGTH 400
 #define SYSTEM_ICON_HEIGHT 320
 
-typedef enum
-{
-	SYSTEM_ICON_MYCOMPUTER = 0,
-	SYSTEM_ICON_SETTING,
-	SYSTEM_ICON_RECYCLE,
-	SYSTEM_ICON_FOLDER,
-	SYSTEM_ICON_TEXT,
-	SYSTEM_ICON_MAX	
-}SYSTEM_ICON_320_400_BMP;
 
 
 const UINT8 sASCII[][16] =
@@ -4951,26 +4952,28 @@ EFI_STATUS L2_GRAPHICS_DeskInit()
 			}
 		}
 	}
-	*/
-	for (int j = 0; j < SYSTEM_ICON_HEIGHT; j++)
-	{
-		for (int k = 0; k < SYSTEM_ICON_LENGTH; k++)
-		{
-			pDeskBuffer[(j * ScreenWidth + k) * 4 ]	    = pSystemIconMyComputerBuffer[0x36 + ((SYSTEM_ICON_HEIGHT - j) * SYSTEM_ICON_LENGTH + k) * 3 ];
-			pDeskBuffer[(j * ScreenWidth + k) * 4 + 1 ] = pSystemIconMyComputerBuffer[0x36 + ((SYSTEM_ICON_HEIGHT - j) * SYSTEM_ICON_LENGTH + k) * 3 + 1 ];
-			pDeskBuffer[(j * ScreenWidth + k) * 4 + 2 ] = pSystemIconMyComputerBuffer[0x36 + ((SYSTEM_ICON_HEIGHT - j) * SYSTEM_ICON_LENGTH + k) * 3 + 2 ];
-		}
-	}
 	
 	for (int j = 0; j < SYSTEM_ICON_HEIGHT; j++)
 	{
 		for (int k = 0; k < SYSTEM_ICON_LENGTH; k++)
 		{
-			pDeskBuffer[((320 + j) * ScreenWidth + k) * 4 ]	    = pSystemIconMySettingBuffer[0x36 + ((SYSTEM_ICON_HEIGHT - j) * SYSTEM_ICON_LENGTH + k) * 3 ];
-			pDeskBuffer[((320 + j) * ScreenWidth + k) * 4 + 1 ] = pSystemIconMySettingBuffer[0x36 + ((SYSTEM_ICON_HEIGHT - j) * SYSTEM_ICON_LENGTH + k) * 3 + 1 ];
-			pDeskBuffer[((320 + j) * ScreenWidth + k) * 4 + 2 ] = pSystemIconMySettingBuffer[0x36 + ((SYSTEM_ICON_HEIGHT - j) * SYSTEM_ICON_LENGTH + k) * 3 + 2 ];
+			pDeskBuffer[(j * ScreenWidth + k) * 4 ]	    = pSystemIconBuffer[SYSTEM_ICON_MYCOMPUTER][0x36 + ((SYSTEM_ICON_HEIGHT - j) * SYSTEM_ICON_LENGTH + k) * 3 ];
+			pDeskBuffer[(j * ScreenWidth + k) * 4 + 1 ] = pSystemIconBuffer[SYSTEM_ICON_MYCOMPUTER][0x36 + ((SYSTEM_ICON_HEIGHT - j) * SYSTEM_ICON_LENGTH + k) * 3 + 1 ];
+			pDeskBuffer[(j * ScreenWidth + k) * 4 + 2 ] = pSystemIconBuffer[SYSTEM_ICON_MYCOMPUTER][0x36 + ((SYSTEM_ICON_HEIGHT - j) * SYSTEM_ICON_LENGTH + k) * 3 + 2 ];
 		}
-	}
+	}*/
+	for (UINT8 i = 0; i < SYSTEM_ICON_MAX; i++)
+	{
+		for (int j = 0; j < SYSTEM_ICON_HEIGHT; j++)
+		{
+			for (int k = 0; k < SYSTEM_ICON_LENGTH; k++)
+			{
+				pDeskBuffer[(j * ScreenWidth + 400 * i + k) * 4 ]	  = pSystemIconBuffer[i][0x36 + ((SYSTEM_ICON_HEIGHT - j) * SYSTEM_ICON_LENGTH + k) * 3 ];
+				pDeskBuffer[(j * ScreenWidth + 400 * i + k) * 4 + 1 ] = pSystemIconBuffer[i][0x36 + ((SYSTEM_ICON_HEIGHT - j) * SYSTEM_ICON_LENGTH + k) * 3 + 1 ];
+				pDeskBuffer[(j * ScreenWidth + 400 * i + k) * 4 + 2 ] = pSystemIconBuffer[i][0x36 + ((SYSTEM_ICON_HEIGHT - j) * SYSTEM_ICON_LENGTH + k) * 3 + 2 ];
+			}
+		}
+	}		
     // line
     Color.Red   = 0xC6;
     Color.Green = 0xC6;
@@ -5126,37 +5129,36 @@ EFI_STATUS L2_GRAPHICS_ScreenInit()
 		L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: ReadFileSelf error\n", __LINE__);
 	}
 	
-	Status = L3_APPLICATION_ReadFile("COMPUTERBMP", 11, pSystemIconMyComputerBuffer);
+	Status = L3_APPLICATION_ReadFile("COMPUTERBMP", 11, pSystemIconBuffer[SYSTEM_ICON_MYCOMPUTER]);
 	if (EFI_ERROR(Status))
 	{
 		L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: ReadFileSelf error\n", __LINE__);
 	}
 	
-	Status = L3_APPLICATION_ReadFile("SETTINGBMP", 10, pSystemIconMySettingBuffer);
+	Status = L3_APPLICATION_ReadFile("SETTINGBMP", 10, pSystemIconBuffer[SYSTEM_ICON_SETTING]);
 	if (EFI_ERROR(Status))
 	{
 		L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: ReadFileSelf error\n", __LINE__);
 	}
 
-	/*
-
-	Status = L3_APPLICATION_ReadFile("RECYCLEBMP", 10, pSystemIconBuffer[SYSTEM_ICON_RECYCLE * 384054]);
+	Status = L3_APPLICATION_ReadFile("RECYCLEBMP", 10, pSystemIconBuffer[SYSTEM_ICON_RECYCLE]);
 	if (EFI_ERROR(Status))
 	{
 		L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: ReadFileSelf error\n", __LINE__);
 	}
 
-	Status = L3_APPLICATION_ReadFile("FOLDERBMP", 9, pSystemIconBuffer[SYSTEM_ICON_FOLDER * 384054]);
+	Status = L3_APPLICATION_ReadFile("FOLDERBMP", 9, pSystemIconBuffer[SYSTEM_ICON_FOLDER]);
 	if (EFI_ERROR(Status))
 	{
 		L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: ReadFileSelf error\n", __LINE__);
 	}
 
-	Status = L3_APPLICATION_ReadFile("TEXTBMP", 7, pSystemIconBuffer[SYSTEM_ICON_TEXT * 384054]);
+	Status = L3_APPLICATION_ReadFile("TEXTBMP", 7, pSystemIconBuffer[SYSTEM_ICON_TEXT]);
 	if (EFI_ERROR(Status))
 	{
 		L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: ReadFileSelf error\n", __LINE__);
-	}*/
+	}
+	/**/
 	
 	/*		
   	status = L3_APPLICATION_ReadFile("FOLDER BMP", 10, SystemIcon[SYSTEM_ICON_FOLDER]);
@@ -5245,10 +5247,8 @@ EFI_STATUS L2_COMMON_Initial()
 
 	pDeskWallpaperBuffer = L2_MEMORY_Allocate("Desk Wall paper Buffer", MEMORY_TYPE_GRAPHICS, ScreenWidth * ScreenHeight * 3 + 0x36);
 
-
-	pSystemIconMyComputerBuffer = L2_MEMORY_Allocate("My Computer Buffer", MEMORY_TYPE_GRAPHICS, 384054);
-	
-	pSystemIconMySettingBuffer = L2_MEMORY_Allocate("My Setting Buffer", MEMORY_TYPE_GRAPHICS, 384054);
+	for (UINT8 i = 0; i < SYSTEM_ICON_MAX; i++)
+		pSystemIconBuffer[i] = L2_MEMORY_Allocate("My Computer Buffer", MEMORY_TYPE_GRAPHICS, 384054);
 
 	//pDeskWallpaperBuffer =  0x6ff0f000 + 8294400 * 2;
 
