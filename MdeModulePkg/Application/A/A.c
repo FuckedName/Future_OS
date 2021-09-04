@@ -1710,6 +1710,104 @@ EFI_STATUS  L2_FILE_NTFS_DollarRootA0DatarunAnalysis(UINT8 *p)
 
 }
 
+MEMORY_INFORMATION MemoryInformation = {0};
+
+
+UINT8 L1_BIT_Set(UINT8 *pMapper, UINT64 StartPageID, UINT64 Size)
+{
+	UINT8 AddOneFlag = (Size % 8 == 0) ? 0 : 1;
+	UINT32 ByteCount = Size / 8 + AddOneFlag;
+}
+
+
+// size: the one unit size is Bytes 
+UINT8 *L2_MEMORY_Allocate(char *pApplicationName, UINT16 type, UINT32 SizeRequired)
+{
+	INFO_SELF(L"Name:%a L2_MEMORY_Allocate: %X SizeRequired:%X\r\n", pApplicationName, L2_MEMORY_Allocate, SizeRequired);  
+	// Allocate minimize unit is 4K
+	UINT32 PagesRequired = SizeRequired / (512 * 8);
+	UINT8  AddOne = (SizeRequired % (512 * 8) != 0) ? 1 : 0;
+	
+	PagesRequired += AddOne;
+
+	INFO_SELF(L"L2_MEMORY_Allocate: %X PagesRequired: %d\r\n", L2_MEMORY_Allocate, PagesRequired);  
+
+	UINT64 i = 0;
+	UINT64 j = 0;
+	UINT64 k = 0;
+
+	UINT64 NumberOfPages;
+	UINT64 PhysicalStart;
+	UINT8 *pMapper;
+	UINT64 FreeNumberOfPages;
+
+	for (i = 0; i < MemoryInformation.MemorySliceCount; i++)
+	{
+		NumberOfPages 	  = MemoryInformation.MemoryContinuous[i].NumberOfPages;
+		PhysicalStart 	  = MemoryInformation.MemoryContinuous[i].PhysicalStart;
+		pMapper       	  = MemoryInformation.MemoryContinuous[i].pMapper;
+		FreeNumberOfPages = MemoryInformation.MemoryContinuous[i].FreeNumberOfPages;
+		INFO_SELF(L"i: %d, NumberOfPages: %llu, PhysicalStart: llu%, FreeNumberOfPages: llu% \r\n", i, NumberOfPages, PhysicalStart, FreeNumberOfPages); 
+				
+		//Free pages must more than required pages
+		if (PagesRequired >= FreeNumberOfPages)
+		{
+			continue;
+		}
+		
+		//all pages 
+		for (j = 0; j < NumberOfPages; j++)
+		{			
+			//INFO_SELF(L"j: %d\r\n", j);  
+			//find first page is no use 
+			//mapper 0: no use, 1: using
+			if (pMapper[j] != 0)
+			{
+				//INFO_SELF(L"j: %d\r\n", j);  
+				continue;
+			}
+			
+			// then check the next n - 1 pages
+			for (k = 1; k < PagesRequired; k++)
+			{
+				if (pMapper[j + k] != 0)
+				{
+					j += k;
+					break;
+				}
+			}
+			INFO_SELF(L"k: %llu\r\n", k); 
+
+			// found 
+			if (k == PagesRequired)
+			{
+				//pMapper[j / 8];
+				L1_BIT_Set(pMapper, j, PagesRequired);
+
+				for (UINT64 m = j; m < j + PagesRequired; m++)
+					pMapper[m] = 1;
+				
+				MemoryInformation.AllocatedInformation[MemoryInformation.CurrentAllocatedCount][ALLOCATED_INFORMATION_DOMAIN_PHYSICAL_BLOCK_START] = PhysicalStart; // Continuous physical block start location
+				MemoryInformation.AllocatedInformation[MemoryInformation.CurrentAllocatedCount][ALLOCATED_INFORMATION_DOMAIN_PAGE_START] = j; // start block in Continuous physical block
+				MemoryInformation.AllocatedInformation[MemoryInformation.CurrentAllocatedCount][ALLOCATED_INFORMATION_DOMAIN_PAGE_COUNT] = PagesRequired; // memory block size
+				MemoryInformation.AllocatedInformation[MemoryInformation.CurrentAllocatedCount][ALLOCATED_INFORMATION_DOMAIN_PHYSICAL_BLOCK_ID] = i; // memory block size
+
+				MemoryInformation.CurrentAllocatedCount++;
+
+				MemoryInformation.MemoryContinuous[i].FreeNumberOfPages -= PagesRequired;
+				
+				INFO_SELF(L"Allocate success: PhysicalStart: %X Start Block: %d Pages: %llu Start Physical: %X\r\n", PhysicalStart, j, PagesRequired, PhysicalStart + j * 4 * 1024);  
+				
+				// start physical address
+				return PhysicalStart + j * 8 * 512;
+			}
+			
+			break;
+		}
+	}
+}
+
+
 // Find $Root file from all MFT(may be 15 file,)
 // pBuffer store all MFT
 EFI_STATUS  L2_FILE_NTFS_MFTDollarRootFileAnalysis(UINT8 *pBuffer)
@@ -3538,7 +3636,6 @@ EFI_STATUS L2_MOUSE_Init()
 }
 
 
-MEMORY_INFORMATION MemoryInformation = {0};
 
 EFI_STATUS L2_MEMORY_MapInitial()
 {
@@ -3609,99 +3706,6 @@ EFI_STATUS L2_MEMORY_MapInitial()
 #define ByteSet(x)    x |= 0xff
 #define ByteClear(x)  x |= 0x00
 
-
-UINT8 L1_BIT_Set(UINT8 *pMapper, UINT64 StartPageID, UINT64 Size)
-{
-	UINT8 AddOneFlag = (Size % 8 == 0) ? 0 : 1;
-	UINT32 ByteCount = Size / 8 + AddOneFlag;
-}
-
-// size: the one unit size is Bytes 
-UINT8 *L2_MEMORY_Allocate(char *pApplicationName, UINT16 type, UINT32 SizeRequired)
-{
-	INFO_SELF(L"Name:%a L2_MEMORY_Allocate: %X SizeRequired:%X\r\n", pApplicationName, L2_MEMORY_Allocate, SizeRequired);  
-	// Allocate minimize unit is 4K
-	UINT32 PagesRequired = SizeRequired / (512 * 8);
-	UINT8  AddOne = (SizeRequired % (512 * 8) != 0) ? 1 : 0;
-	
-	PagesRequired += AddOne;
-
-	INFO_SELF(L"L2_MEMORY_Allocate: %X PagesRequired: %d\r\n", L2_MEMORY_Allocate, PagesRequired);  
-
-	UINT64 i = 0;
-	UINT64 j = 0;
-	UINT64 k = 0;
-
-	UINT64 NumberOfPages;
-	UINT64 PhysicalStart;
-	UINT8 *pMapper;
-	UINT64 FreeNumberOfPages;
-
-	for (i = 0; i < MemoryInformation.MemorySliceCount; i++)
-	{
-		NumberOfPages 	  = MemoryInformation.MemoryContinuous[i].NumberOfPages;
-		PhysicalStart 	  = MemoryInformation.MemoryContinuous[i].PhysicalStart;
-		pMapper       	  = MemoryInformation.MemoryContinuous[i].pMapper;
-		FreeNumberOfPages = MemoryInformation.MemoryContinuous[i].FreeNumberOfPages;
-		INFO_SELF(L"i: %d, NumberOfPages: %llu, PhysicalStart: llu%, FreeNumberOfPages: llu% \r\n", i, NumberOfPages, PhysicalStart, FreeNumberOfPages); 
-				
-		//Free pages must more than required pages
-		if (PagesRequired >= FreeNumberOfPages)
-		{
-			continue;
-		}
-		
-		//all pages 
-		for (j = 0; j < NumberOfPages; j++)
-		{			
-			//INFO_SELF(L"j: %d\r\n", j);  
-			//find first page is no use 
-			//mapper 0: no use, 1: using
-			if (pMapper[j] != 0)
-			{
-				//INFO_SELF(L"j: %d\r\n", j);  
-				continue;
-			}
-			
-			// then check the next n - 1 pages
-			for (k = 1; k < PagesRequired; k++)
-			{
-				if (pMapper[j + k] != 0)
-				{
-					j += k;
-					break;
-				}
-			}
-			INFO_SELF(L"k: %llu\r\n", k); 
-
-			// found 
-			if (k == PagesRequired)
-			{
-				//pMapper[j / 8];
-				L1_BIT_Set(pMapper, j, PagesRequired);
-
-				for (UINT64 m = j; m < j + PagesRequired; m++)
-					pMapper[m] = 1;
-				
-				MemoryInformation.AllocatedInformation[MemoryInformation.CurrentAllocatedCount][ALLOCATED_INFORMATION_DOMAIN_PHYSICAL_BLOCK_START] = PhysicalStart; // Continuous physical block start location
-				MemoryInformation.AllocatedInformation[MemoryInformation.CurrentAllocatedCount][ALLOCATED_INFORMATION_DOMAIN_PAGE_START] = j; // start block in Continuous physical block
-				MemoryInformation.AllocatedInformation[MemoryInformation.CurrentAllocatedCount][ALLOCATED_INFORMATION_DOMAIN_PAGE_COUNT] = PagesRequired; // memory block size
-				MemoryInformation.AllocatedInformation[MemoryInformation.CurrentAllocatedCount][ALLOCATED_INFORMATION_DOMAIN_PHYSICAL_BLOCK_ID] = i; // memory block size
-
-				MemoryInformation.CurrentAllocatedCount++;
-
-				MemoryInformation.MemoryContinuous[i].FreeNumberOfPages -= PagesRequired;
-				
-				INFO_SELF(L"Allocate success: PhysicalStart: %X Start Block: %d Pages: %llu Start Physical: %X\r\n", PhysicalStart, j, PagesRequired, PhysicalStart + j * 4 * 1024);  
-				
-				// start physical address
-				return PhysicalStart + j * 8 * 512;
-			}
-			
-			break;
-		}
-	}
-}
 
 EFI_STATUS L2_MEMORY_Free(UINT32 *p)
 {	
@@ -4908,12 +4912,12 @@ EFI_STATUS L2_GRAPHICS_SystemSettingInit()
 
 }
 
-double bilinear(double a, double blue, int uv, int u1v, int uv1, int u1v1)
+double L1_GRAPHICS_Bilinear(double a, double blue, int uv, int u1v, int uv1, int u1v1)
 {
 	return (double) (uv*(1-a)*(1-blue)+u1v*a*(1-blue)+uv1*blue*(1-a)+u1v1*a*blue);
 }
 
-void zoomdata_bilinear(UINT8* pDest, int DestWidth, int DestHeight, UINT8* pSource, int SourceWidth, int SourceHeight )
+void L1_GRAPHICS_ZoomImage(UINT8* pDest, int DestWidth, int DestHeight, UINT8* pSource, int SourceWidth, int SourceHeight )
 {
     UINT8    *pDestTemp;
     UINT8    *pSourceTemp;
@@ -4933,19 +4937,19 @@ void zoomdata_bilinear(UINT8* pDest, int DestWidth, int DestHeight, UINT8* pSour
             HeightRatio    = (int) (v);
             WidthRatio    = (int) (u);
 
-            blue = bilinear( u - WidthRatio, v - HeightRatio,
+            blue = L1_GRAPHICS_Bilinear( u - WidthRatio, v - HeightRatio,
                       pSourceTemp[HeightRatio * SourceWidth * 3 + WidthRatio * 3],
                       pSourceTemp[HeightRatio * SourceWidth * 3 + (WidthRatio + 1) * 3],
                       pSourceTemp[(HeightRatio + 1) * SourceWidth * 3 + WidthRatio * 3],
                       pSourceTemp[(HeightRatio + 1) * SourceWidth * 3 + (WidthRatio + 1) * 3] );
                       
-            green = bilinear( u - WidthRatio, v - HeightRatio,
+            green = L1_GRAPHICS_Bilinear( u - WidthRatio, v - HeightRatio,
                       pSourceTemp[HeightRatio * SourceWidth * 3 + WidthRatio * 3 + 1],
                       pSourceTemp[HeightRatio * SourceWidth * 3 + (WidthRatio + 1) * 3 + 1],
                       pSourceTemp[(HeightRatio + 1) * SourceWidth * 3 + WidthRatio * 3 + 1],
                       pSourceTemp[(HeightRatio + 1) * SourceWidth * 3 + (WidthRatio + 1) * 3 + 1] );
                       
-            red = bilinear( u - WidthRatio, v - HeightRatio,
+            red = L1_GRAPHICS_Bilinear( u - WidthRatio, v - HeightRatio,
                       pSourceTemp[HeightRatio * SourceWidth * 3 + WidthRatio * 3 + 2],
                       pSourceTemp[HeightRatio * SourceWidth * 3 + (WidthRatio + 1) * 3 + 2],
                       pSourceTemp[(HeightRatio + 1) * SourceWidth * 3 + WidthRatio * 3 + 2],
@@ -5036,7 +5040,7 @@ EFI_STATUS L2_GRAPHICS_DeskInit()
 	for (UINT32 i = 0; i < 384000; i++)
 		pSystemIconTempBuffer2[i] = pSystemIconBuffer[0][0x36 + i];
 
-	zoomdata_bilinear(pSystemIconTempBuffer, WidthNew, HeightNew, pSystemIconTempBuffer2, SYSTEM_ICON_WIDTH, SYSTEM_ICON_HEIGHT);
+	L1_GRAPHICS_ZoomImage(pSystemIconTempBuffer, WidthNew, HeightNew, pSystemIconTempBuffer2, SYSTEM_ICON_WIDTH, SYSTEM_ICON_HEIGHT);
 	
 	for (int j = 0; j < HeightNew; j++)
 	{
@@ -5338,26 +5342,26 @@ EFI_STATUS L2_COMMON_Initial()
 	L2_MEMORY_Free(pTestBuffer);
 	*/
 	
-	pMouseClickBuffer = (UINT8 *)AllocatePool(MouseClickWindowWidth * MouseClickWindowHeight * 4); 
+	pMouseClickBuffer = (UINT8 *)L2_MEMORY_Allocate("System Icon temp Buffer", MEMORY_TYPE_GRAPHICS, MouseClickWindowWidth * MouseClickWindowHeight * 4); 
 	if (pMouseClickBuffer == NULL)
 	{
 		return -1;
 	}   
 	
-	pDateTimeBuffer = (UINT8 *)AllocateZeroPool(8 * 16 * 50 * 4); 
+	pDateTimeBuffer = (UINT8 *)L2_MEMORY_Allocate("System Icon temp Buffer", MEMORY_TYPE_GRAPHICS, 8 * 16 * 50 * 4); 
 	if (pDateTimeBuffer == NULL)
 	{
 		return -1;
 	}   
 	
-    pMouseBuffer = (UINT8 *)AllocateZeroPool(16 * 16 * 4);
+    pMouseBuffer = (UINT8 *)L2_MEMORY_Allocate("System Icon temp Buffer", MEMORY_TYPE_GRAPHICS, 16 * 16 * 4);
     if (NULL == pMouseBuffer)
 	{
 		DEBUG ((EFI_D_INFO, "MultiProcessInit pMouseBuffer pDeskDisplayBuffer NULL\n"));
 		return -1;
 	}
 	
-	pMouseSelectedBuffer = (UINT8 *)AllocateZeroPool(16 * 16 * 2 * 4);
+	pMouseSelectedBuffer = (UINT8 *)L2_MEMORY_Allocate("System Icon temp Buffer", MEMORY_TYPE_GRAPHICS, 16 * 16 * 2 * 4);
     if (NULL == pMouseSelectedBuffer)
 	{
 		DEBUG ((EFI_D_INFO, "ScreenInit AllocatePool pDeskDisplayBuffer NULL\n"));
@@ -5366,7 +5370,7 @@ EFI_STATUS L2_COMMON_Initial()
 
 	UINT32 size = 267616;
     
-	sChineseChar = (UINT8 *)AllocateZeroPool(size);
+	sChineseChar = (UINT8 *)L2_MEMORY_Allocate("System Icon temp Buffer", MEMORY_TYPE_GRAPHICS, size);
 	if (NULL == sChineseChar)
     {
         DEBUG ((EFI_D_INFO, "ChineseCharArrayInit AllocateZeroPool Failed: %x!\n "));
@@ -5374,7 +5378,7 @@ EFI_STATUS L2_COMMON_Initial()
         return -1;
     }		
     
-	pStartMenuBuffer = (UINT8 *)AllocateZeroPool(StartMenuWidth * StartMenuHeight * 4);
+	pStartMenuBuffer = (UINT8 *)L2_MEMORY_Allocate("System Icon temp Buffer", MEMORY_TYPE_GRAPHICS, StartMenuWidth * StartMenuHeight * 4);
 	if (NULL == pStartMenuBuffer)
     {
         DEBUG ((EFI_D_INFO, "ChineseCharArrayInit pStartMenuBuffer Failed: %x!\n "));
@@ -5395,7 +5399,7 @@ EFI_STATUS L2_COMMON_Initial()
 			pStartMenuBuffer[(i * StartMenuWidth + j) * 4 + 3] = GRAPHICS_LAYER_START_MENU;
 		}
 
-	pSystemSettingWindowBuffer = (UINT8 *)AllocateZeroPool(SystemSettingWindowWidth * SystemSettingWindowHeight * 4);
+	pSystemSettingWindowBuffer = (UINT8 *)L2_MEMORY_Allocate("System Icon temp Buffer", MEMORY_TYPE_GRAPHICS, SystemSettingWindowWidth * SystemSettingWindowHeight * 4);
 	if (NULL == pSystemSettingWindowBuffer)
     {
         DEBUG ((EFI_D_INFO, "ChineseCharArrayInit pStartMenuBuffer Failed: %x!\n "));
