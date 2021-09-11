@@ -47,12 +47,6 @@ EFI_STATUS TCP4Test(UINT32 Ip32, UINT16 Port);
   @retval  Other     An error occurred.
 ***/
 
-#define INFO(...)   \
-				do {   \
-					 Print(L"[INFO  ]%a %a(Line %d): ", __FILE__,__FUNCTION__,__LINE__);  \
-				    Print(__VA_ARGS__); \
-				}while(0);
-
 EFI_STATUS
 EFIAPI
 mainEchoTcp4(

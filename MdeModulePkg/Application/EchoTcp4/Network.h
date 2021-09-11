@@ -11,6 +11,7 @@
 #include  <Library/ShellCEntryLib.h>
 #include  <Library/DebugLib.h>
 
+#include "Common.h"
 #include <Library/BaseMemoryLib.h>
 
 #include <Library/UefiBootServicesTableLib.h>
@@ -20,12 +21,6 @@
 #include <Protocol/ServiceBinding.h>
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/MemoryAllocationLib.h>
-
-#define INFO(...)   \
-				do {   \
-					 Print(L"[INFO  ]%a %a(Line %d): ", __FILE__,__FUNCTION__,__LINE__);  \
-				    Print(__VA_ARGS__); \
-				}while(0);
 
 #define MYIPV4(a,b,c,d) (a | b<<8 | c << 16 | d <<24)
 

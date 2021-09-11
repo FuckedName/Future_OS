@@ -44,7 +44,7 @@ EFI_STATUS InitTcp4SocketFd(INTN index)
 
     // 1 Create Configure data
     CurSocket->m_pTcp4ConfigData = (EFI_TCP4_CONFIG_DATA*)AllocatePool(sizeof(EFI_TCP4_CONFIG_DATA));
-	INFO(L"%x", CurSocket->m_pTcp4ConfigData);
+	INFO(L"%x\n", CurSocket->m_pTcp4ConfigData);
     if (NULL == CurSocket->m_pTcp4ConfigData)
     {
     	return;
@@ -53,7 +53,7 @@ EFI_STATUS InitTcp4SocketFd(INTN index)
     // 2 Create Connect Event
     // CurSocket->ConnectToken.CompletionToken.Status = EFI_ABORTED;
     Status = gBS->CreateEvent(EVT_NOTIFY_SIGNAL, TPL_CALLBACK, (EFI_EVENT_NOTIFY)NopNoify , (VOID*)&CurSocket->ConnectToken, &CurSocket->ConnectToken.CompletionToken.Event );
-    INFO(L"%d", Status);
+    INFO(L"%d\n", Status);
     
     if(EFI_ERROR(Status)) return Status;  
 
@@ -67,15 +67,15 @@ EFI_STATUS InitTcp4SocketFd(INTN index)
     }
     // CurSocket->SendToken.CompletionToken.Status  =EFI_ABORTED; 
     CurSocket->m_TransData = (EFI_TCP4_TRANSMIT_DATA*)AllocatePool(sizeof(EFI_TCP4_TRANSMIT_DATA));
-	INFO(L"%x", CurSocket->m_TransData);
+	INFO(L"%x\n", CurSocket->m_TransData);
 	
     // 4 Create Recv Event
     Status = gBS->CreateEvent(EVT_NOTIFY_WAIT, TPL_CALLBACK, (EFI_EVENT_NOTIFY)Tcp4RecvNotify , (VOID*)CurSocket, &CurSocket->RecvToken.CompletionToken.Event);
     // CurSocket->RecvToken.CompletionToken.Status  =EFI_ABORTED;
-    INFO(L"%d", Status);
+    INFO(L"%d\n", Status);
     
     CurSocket->m_RecvData = (EFI_TCP4_RECEIVE_DATA*) AllocatePool(sizeof(EFI_TCP4_RECEIVE_DATA));;
-    INFO(L"%x", CurSocket->m_RecvData);
+    INFO(L"%x\n", CurSocket->m_RecvData);
     if(EFI_ERROR(Status)) 
     {
         gST->ConOut->OutputString(gST->ConOut,L"Init: Create Recv Event fail!\n\r");
@@ -85,7 +85,7 @@ EFI_STATUS InitTcp4SocketFd(INTN index)
     // 5 Create Close Event
     // CurSocket->CloseToken.CompletionToken.Status = EFI_ABORTED;
     Status = gBS->CreateEvent(EVT_NOTIFY_SIGNAL, TPL_CALLBACK, (EFI_EVENT_NOTIFY)NopNoify , (VOID*)&CurSocket->CloseToken, &CurSocket->CloseToken.CompletionToken.Event );
-    INFO(L"%d", Status);
+    INFO(L"%d\n", Status);
     if(EFI_ERROR(Status))
     {
         gST->ConOut->OutputString(gST->ConOut,L"Init: Create Close Event fail!\n\r");
@@ -101,17 +101,17 @@ UINTN CreateTCP4Socket(VOID)
     MYTCP4SOCKET *CurSocket = NULL;
     INTN i;
     INTN MyFd = -1;
-	INFO(L"11");
+	INFO(L"11\n");
     for (i = 0; i < 32; i++)
     {
-		INFO(L"11");
+		INFO(L"11\n");
         if(TCP4SocketFd[i]==NULL)
         {
             CurSocket=(MYTCP4SOCKET *) AllocatePool(sizeof(MYTCP4SOCKET));
-            INFO(L"CurSocket: %x", CurSocket);
+            INFO(L"CurSocket: %x\n", CurSocket);
             if (CurSocket == NULL)
             {
-            	INFO(L"CurSocket == NULL");
+            	INFO(L"CurSocket == NULL\n");
             	return EFI_SUCCESS;
             }
             
@@ -128,13 +128,13 @@ UINTN CreateTCP4Socket(VOID)
     Status = gBS->LocateProtocol (&gEfiTcp4ServiceBindingProtocolGuid,
 							        NULL,
 							        (VOID **)&pTcpServiceBinding );
-	INFO(L"%d", Status);
+	INFO(L"%d\n", Status);
     if(EFI_ERROR(Status))
         return Status;
 
     Status = pTcpServiceBinding->CreateChild ( pTcpServiceBinding,
 										         &CurSocket->m_SocketHandle );
-    INFO(L"%d", Status);
+    INFO(L"%d\n", Status);
     if(EFI_ERROR(Status))
         return Status;
 
@@ -144,12 +144,12 @@ UINTN CreateTCP4Socket(VOID)
 							        gImageHandle,
 							        CurSocket->m_SocketHandle,
 							        EFI_OPEN_PROTOCOL_BY_HANDLE_PROTOCOL );
-    INFO(L"%d", Status);
+    INFO(L"%d\n", Status);
     if(EFI_ERROR(Status))
          return Status;
     InitTcp4SocketFd(MyFd);
     
-	INFO(L"%d", Status);
+	INFO(L"%d\n", Status);
     return MyFd;
 }
 

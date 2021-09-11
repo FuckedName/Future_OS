@@ -6,13 +6,6 @@
 #include "Common.h"
 
 
-#define INFO(...)   \
-				do {   \
-					 Print(L"[INFO  ]%a %a(Line %d): ", __FILE__,__FUNCTION__,__LINE__);  \
-				    Print(__VA_ARGS__); \
-				}while(0);
-
-
 EFI_SIMPLE_TEXT_INPUT_EX_PROTOCOL *gSimpleTextInputEx;
 EFI_GRAPHICS_OUTPUT_PROTOCOL       *gGraphicsOutput;
 EFI_PCI_ROOT_BRIDGE_IO_PROTOCOL   *gPCIRootBridgeIO;

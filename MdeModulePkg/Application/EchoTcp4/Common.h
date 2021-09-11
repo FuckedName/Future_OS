@@ -30,9 +30,10 @@
 
 #define INFO(...)   \
 				do {   \
-					 Print(L"[INFO  ]%a %a(Line %d): ", __FILE__,__FUNCTION__,__LINE__);  \
-				    Print(__VA_ARGS__); \
+					 Print(L"[INFO] %a %d: ", __FUNCTION__, __LINE__);  \
+				     Print(__VA_ARGS__); \
 				}while(0);
+
 
 
 #define S_TEXT_INPUT_EX  		0x0000000000000001
