@@ -1741,6 +1741,7 @@ L1_MEMORY_Memset(void *s, UINT8 c, UINT32 n)
   return s;
 }
 
+// memory: 1G->3G
 #define ALL_PAGE_COUNT 0x80000
 #define PHYSICAL_ADDRESS_START 0x40000000
 #define ALLOCATE_UNIT_SIZE (8 * 512)
@@ -1755,7 +1756,7 @@ UINT8 *L2_MEMORY_MapperInitial()
 
 	for (UINT64 temp = 0; temp < ALL_PAGE_COUNT; temp++)
 	{
-		pMapper[temp] = 0;
+		pMapper[temp] = 0; // no use
 	}
 }
 
@@ -4798,6 +4799,67 @@ EFI_STATUS L2_TIMER_IntervalInit0()
 	return EFI_SUCCESS;
 }
 
+EFI_STATUS L2_GRAPHICS_SayGoodBye()
+{
+	for (int i = 0; i < ScreenHeight; i++)
+	{
+		for (int j = 0; j < ScreenWidth; j++)
+		{
+			// BMP 3bits, and desk buffer 4bits
+			pDeskBuffer[(i * ScreenWidth + j) * 4]	   = 0x00;
+			pDeskBuffer[(i * ScreenWidth + j) * 4 + 1] = 0x00;
+			pDeskBuffer[(i * ScreenWidth + j) * 4 + 2] = 0x00;
+		}
+	}
+	
+	// 再	5257	见	2891	，	0312	欢	2722	迎	5113
+	// 下	4734	次	2046	回	2756	来	3220
+	// menu chinese
+	UINT16 x = ScreenWidth / 2;
+	UINT16 y = ScreenHeight / 2;
+	
+	EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
+	Color.Red   = 0x00;
+	Color.Green = 0x00;
+	Color.Blue  = 0xff;
+	
+	L2_GRAPHICS_ChineseCharDraw2(pDeskBuffer,  x, y, (52 - 1) * 94 + 57 - 1, Color, ScreenWidth);
+	x += 16;
+	
+	L2_GRAPHICS_ChineseCharDraw2(pDeskBuffer,  x, y, (28 - 1) * 94 + 91 - 1, Color, ScreenWidth);
+	x += 16;
+
+	L2_GRAPHICS_ChineseCharDraw2(pDeskBuffer,  x, y, (3 - 1) * 94 + 12 - 1, Color, ScreenWidth);
+	x += 16;
+
+	L2_GRAPHICS_ChineseCharDraw2(pDeskBuffer,  x, y, (27 - 1) * 94 + 22 - 1, Color, ScreenWidth);
+	x += 16;
+
+	L2_GRAPHICS_ChineseCharDraw2(pDeskBuffer,  x, y, (51 - 1) * 94 + 13 - 1, Color, ScreenWidth);
+	x += 16;
+
+	L2_GRAPHICS_ChineseCharDraw2(pDeskBuffer,  x, y, (47 - 1) * 94 + 34 - 1, Color, ScreenWidth);
+	x += 16;
+
+	L2_GRAPHICS_ChineseCharDraw2(pDeskBuffer,  x, y, (20 - 1) * 94 + 46 - 1, Color, ScreenWidth);
+	x += 16;
+
+	L2_GRAPHICS_ChineseCharDraw2(pDeskBuffer,  x, y, (27 - 1) * 94 + 56 - 1, Color, ScreenWidth);
+	x += 16;
+
+	L2_GRAPHICS_ChineseCharDraw2(pDeskBuffer,  x, y, (32 - 1) * 94 + 20 - 1, Color, ScreenWidth);
+	x += 16;
+
+	GraphicsOutput->Blt(
+				GraphicsOutput, 
+				(EFI_GRAPHICS_OUTPUT_BLT_PIXEL *) pDeskBuffer,
+				EfiBltBufferToVideo,
+				0, 0, 
+				0, 0, 
+				ScreenWidth, ScreenHeight, 0);	 
+
+}
+
 
 EFI_STATUS L2_TIMER_IntervalInit()
 {
@@ -4843,10 +4905,20 @@ EFI_STATUS L2_TIMER_IntervalInit()
 		//L2_DEBUG_Print1(DISPLAY_X, DISPLAY_Y, "%d: SystemTimeIntervalInit while\n", __LINE__);
 		//if (*TimerCount % 1000000 == 0)
 	       L2_DEBUG_Print1(0, 4 * 16, "%d: L2_TIMER_IntervalInit p:%x %lu \n", __LINE__, TimerCount, *TimerCount);
+
+		if (*TimerCount == 50000)
+		{			
+			L2_DEBUG_Print1(0, 4 * 16, "%d: L2_TIMER_IntervalInit p:%x %lu \n", __LINE__, TimerCount, *TimerCount);
+			gBS->SetTimer( TimerOne, TimerCancel, 0 );
+			gBS->CloseEvent( TimerOne );    
+
+			L2_GRAPHICS_SayGoodBye();
+			
+			return;
+		}
+			       
 	}
 	
-	gBS->SetTimer( TimerOne, TimerCancel, 0 );
-	gBS->CloseEvent( TimerOne );    
 
 	return EFI_SUCCESS;
 }
@@ -5504,7 +5576,12 @@ Main (
 /*
 
 一些参考资料
-区位码:http://witmax.cn/gb2312.html
+区位码:
+http://witmax.cn/gb2312.html
+
+汉字的区位码查询:
+http://quwei.911cha.com/
+
 中文显示：
 https://blog.csdn.net/zenwanxin/article/details/8349124?utm_medium=distribute.pc_relevant.none-task-blog-2~default~baidujs_baidulandingword~default-0.control&spm=1001.2101.3001.4242
 
@@ -5515,7 +5592,5 @@ https://blog.csdn.net/czg13548930186/article/details/79861914
 
 InitializeMemory
 InternalMemSetMem
-
-
 */
 
