@@ -1744,8 +1744,8 @@ L1_MEMORY_Memset(void *s, int c, UINT32 n)
 #define ALL_PAGE_COUNT 0x80000
 #define PHYSICAL_ADDRESS_START 0x40000000
 #define ALLOCATE_UNIT_SIZE (8 * 512)
-
 UINT64 FreeNumberOfPages = ALL_PAGE_COUNT;
+UINT64 SystemAllPagesAllocated = 0;
 
 UINT8 *pMapper = (UINT8 *)(PHYSICAL_ADDRESS_START);
 
@@ -1763,111 +1763,26 @@ UINT8 *L2_MEMORY_MapperInitial()
 UINT8 *L2_MEMORY_Allocate(char *pApplicationName, UINT16 type, UINT32 SizeRequired)
 {
 	// Allocate minimize unit is 4K
-	UINT32 PagesRequired = SizeRequired / (512 * 8);
-	UINT8  AddOne = (SizeRequired % (512 * 8) != 0) ? 1 : 0;
+	UINT32 PagesRequired = SizeRequired / (ALLOCATE_UNIT_SIZE);
+	UINT8  AddOne = (SizeRequired % (ALLOCATE_UNIT_SIZE) != 0) ? 1 : 0;
 	
 	PagesRequired += AddOne;
 
-	INFO_SELF(L"Name: %a SizeRequired: 0x%X PagesRequired: 0x%X L2_MEMORY_Allocate: 0x%X\r\n", pApplicationName, SizeRequired, PagesRequired, L2_MEMORY_Allocate);  
+	INFO_SELF(L"Name: %a, SizeRequired: 0x%X, PagesRequired: 0x%X \r\n", pApplicationName, SizeRequired, PagesRequired);  
 
-	UINT64 i = 0;
 	UINT64 j = 0;
 	UINT64 k = 0;
-	UINT8 *p = NULL;
-	UINT64 SystemAllPagesAllocated = 0;
-	UINT16 CurrentAllocatedCount = 0;
-
-	UINT64 NumberOfPages;
 
 	//use 2G memory, page size: 1024 * 4B, Mapper use size: 2 * 1024 * 1024 * 1024 / (1024 * 4 ) =  524288 = 0x80000
-	UINT8 *pData = (UINT8 *)(PHYSICAL_ADDRESS_START + ALL_PAGE_COUNT);
-	
-	UINT64 StartPageID = 0;
-	
+	UINT8 *pData = (UINT8 *)(PHYSICAL_ADDRESS_START + ALL_PAGE_COUNT);		
 	//all pages 
 	for (j = 0; j < ALL_PAGE_COUNT; j++)
 	{			
 		//INFO_SELF(L"j: %d\r\n", j);  
 		//find first page is no use 
 		//mapper 0: no use, 1: using
-		if (pMapper[j] != 0)
+		if (pMapper[j] == 0)
 		{
-			//INFO_SELF(L"j: %d\r\n", j);  
-			continue;
-		}
-
-		//INFO_SELF(L"j: %d pMapper[j]: %d\r\n", j, pMapper[j]);  
-
-		StartPageID = j;
-		
-		// then check the next n - 1 pages
-		for (k = 1; k < PagesRequired; k++)
-		{
-			if (pMapper[j + k] != 0)
-			{
-				j += k;
-				break;
-			}
-		}
-		
-		// found 
-		if (k == PagesRequired)
-		{
-			SystemAllPagesAllocated += k;
-			//INFO_SELF(L"k: %llu SystemAllPagesAllocated: %X \r\n", k, SystemAllPagesAllocated); 
-			
-			for (UINT64 m = StartPageID; m < PagesRequired; m++)
-				pMapper[m] = 1;
-
-			//for (j = 0; j < 5; j++)
-			//	INFO_SELF(L" %d\r\n", pMapper[j]);  
-			FreeNumberOfPages -= PagesRequired;
-			
-			INFO_SELF(L"Allocate success: PhysicalStart: 0x%X Start Pages: %llu PagesRequired: %llu Start Physical: 0x%X FreeNumberOfPages: 0x%X\r\n", 
-						pData, 
-						j, 
-						PagesRequired, 
-						pData + j * ALLOCATE_UNIT_SIZE, 
-						FreeNumberOfPages);  
-
-			L1_MEMORY_Memset(pData + j * ALLOCATE_UNIT_SIZE, 0, SizeRequired);
-			
-			INFO_SELF(L"\r\n");
-
-			// start physical address
-			return pData + j * ALLOCATE_UNIT_SIZE;
-		}
-		
-		break;
-	}
-
-	/*
-	for (i = 0; i < MemoryInformation.MemorySliceCount; i++)
-	{
-		NumberOfPages 	  = MemoryInformation.MemoryContinuous[i].NumberOfPages;
-		PhysicalStart 	  = MemoryInformation.MemoryContinuous[i].PhysicalStart;
-		pMapper       	  = MemoryInformation.MemoryContinuous[i].pMapper;
-		FreeNumberOfPages = MemoryInformation.MemoryContinuous[i].FreeNumberOfPages;
-		INFO_SELF(L"i: %d, NumberOfPages: %llu, PhysicalStart: X%, FreeNumberOfPages: %llu \r\n", i, NumberOfPages, PhysicalStart, FreeNumberOfPages); 
-				
-		//Free pages must more than required pages
-		if (PagesRequired >= FreeNumberOfPages)
-		{
-			continue;
-		}
-		
-		//all pages 
-		for (j = 0; j < NumberOfPages; j++)
-		{			
-			//INFO_SELF(L"j: %d\r\n", j);  
-			//find first page is no use 
-			//mapper 0: no use, 1: using
-			if (pMapper[j] != 0)
-			{
-				//INFO_SELF(L"j: %d\r\n", j);  
-				continue;
-			}
-			
 			// then check the next n - 1 pages
 			for (k = 1; k < PagesRequired; k++)
 			{
@@ -1877,37 +1792,36 @@ UINT8 *L2_MEMORY_Allocate(char *pApplicationName, UINT16 type, UINT32 SizeRequir
 					break;
 				}
 			}
-			SystemAllPagesAllocated += k;
-			INFO_SELF(L"k: %llu SystemAllPagesAllocated: %X \r\n", k, SystemAllPagesAllocated); 
 
 			// found 
-			if (k == PagesRequired)
+			if (k >= PagesRequired)
 			{
-				for (UINT64 m = j; m < j + PagesRequired; m++)
+				//INFO_SELF(L"k: %d \r\n", k);  
+				INFO_SELF(L"Found block j: 0x%X, k: 0x%X, SystemAllPagesAllocated: 0x%X \r\n", j, k, SystemAllPagesAllocated); 
+				SystemAllPagesAllocated += k;
+
+				// Update mapper array from j to j + PagesRequired - 1
+				for (UINT64 m = j; m < PagesRequired + j; m++)
 					pMapper[m] = 1;
+
+				FreeNumberOfPages -= PagesRequired;
 				
-				MemoryInformation.AllocatedInformation[MemoryInformation.CurrentAllocatedCount][ALLOCATED_INFORMATION_DOMAIN_PHYSICAL_BLOCK_START] = PhysicalStart; // Continuous physical block start location
-				MemoryInformation.AllocatedInformation[MemoryInformation.CurrentAllocatedCount][ALLOCATED_INFORMATION_DOMAIN_PAGE_START] = j; // start block in Continuous physical block
-				MemoryInformation.AllocatedInformation[MemoryInformation.CurrentAllocatedCount][ALLOCATED_INFORMATION_DOMAIN_PAGE_COUNT] = PagesRequired; // memory block size
-				MemoryInformation.AllocatedInformation[MemoryInformation.CurrentAllocatedCount][ALLOCATED_INFORMATION_DOMAIN_PHYSICAL_BLOCK_ID] = i; // memory block size
+				INFO_SELF(L"Allocate success: 0x%X, Start Page: 0x%X, PagesRequired: 0x%X, Start Physical: 0x%X, FreeNumberOfPages: 0x%X\r\n", 
+							pData, 
+							j, 
+							PagesRequired, 
+							pData + j * ALLOCATE_UNIT_SIZE, 
+							FreeNumberOfPages);  
 
-				MemoryInformation.CurrentAllocatedCount++;
-
-				MemoryInformation.MemoryContinuous[i].FreeNumberOfPages -= PagesRequired;
-				
-				INFO_SELF(L"Allocate success: PhysicalStart: %X Start Block: %llu Pages: %llu Start Physical: %X FreeNumberOfPages: %llu\r\n", PhysicalStart, j, PagesRequired, PhysicalStart + j * 4 * 1024, FreeNumberOfPages);  
-
-				L1_MEMORY_Memset(PhysicalStart + j * 8 * 512, 0, SizeRequired);
+				L1_MEMORY_Memset(pData + j * ALLOCATE_UNIT_SIZE, 0, SizeRequired);
 				
 				INFO_SELF(L"\r\n");
 
 				// start physical address
-				return PhysicalStart + j * 8 * 512;
+				return pData + j * ALLOCATE_UNIT_SIZE;
 			}
-			
-			break;
 		}
-	}*/
+	}
 }
 
 
@@ -5147,9 +5061,9 @@ EFI_STATUS L2_GRAPHICS_DeskInit()
 	{
 		for (int k = 0; k < WidthNew; k++)
 		{
-			pDeskBuffer[((400 + j) * ScreenWidth + 400 + k) * 4 ]	  = pSystemIconTempBuffer[((HeightNew - j) * WidthNew + k) * 3 ];
-			pDeskBuffer[((400 + j) * ScreenWidth + 400 + k) * 4 + 1 ] = pSystemIconTempBuffer[((HeightNew - j) * WidthNew + k) * 3 + 1 ];
-			pDeskBuffer[((400 + j) * ScreenWidth + 400 + k) * 4 + 2 ] = pSystemIconTempBuffer[((HeightNew - j) * WidthNew + k) * 3 + 2 ];
+			pDeskBuffer[((320 + j) * ScreenWidth + 400 + k) * 4 ]	  = pSystemIconTempBuffer[((HeightNew - j) * WidthNew + k) * 3 ];
+			pDeskBuffer[((320 + j) * ScreenWidth + 400 + k) * 4 + 1 ] = pSystemIconTempBuffer[((HeightNew - j) * WidthNew + k) * 3 + 1 ];
+			pDeskBuffer[((320 + j) * ScreenWidth + 400 + k) * 4 + 2 ] = pSystemIconTempBuffer[((HeightNew - j) * WidthNew + k) * 3 + 2 ];
 		}
 	}
 	
@@ -5273,33 +5187,10 @@ L2_MOUSE_Moveover()
 	
 }
 
-
-
 EFI_STATUS L2_GRAPHICS_ScreenInit()
 {
 	EFI_STATUS Status = 0;
-	//UINT32 i = 0;
-	//UINT32 j = 0;
-	UINT32 x = ScreenWidth;
-	UINT32 y = ScreenHeight;
-	//UINT8 p[100];
 	
-    EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
-/*
-	if (StatusErrorCount % 61 == 0)
-	{
-		for (int j = 0; j < ScreenHeight - 25; j++)
-		{
-			for (int i = 0; i < ScreenWidth; i++)
-			{
-				pDeskBuffer[(j * ScreenWidth + i) * 4]     = 0x84;
-				pDeskBuffer[(j * ScreenWidth + i) * 4 + 1] = 0x84;
-				pDeskBuffer[(j * ScreenWidth + i) * 4 + 2] = 0x00;
-			}
-		}		
-	}
-	*/
-	StatusErrorCount = 0;
     L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: FAT32\n",  __LINE__);
 
   	Status = L3_APPLICATION_ReadFile("ZHUFENGBMP", 10, pDeskWallpaperBuffer);
@@ -5337,37 +5228,6 @@ EFI_STATUS L2_GRAPHICS_ScreenInit()
 	{
 		L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: ReadFileSelf error\n", __LINE__);
 	}
-	/**/
-	
-	/*		
-  	status = L3_APPLICATION_ReadFile("FOLDER BMP", 10, SystemIcon[SYSTEM_ICON_FOLDER]);
-	if (EFI_ERROR(status))
-	{
-		INFO_SELF(L"ReadFileSelf error.\r\n");
-  		return;
-	}
-	
-  	status = L3_APPLICATION_ReadFile("RECYCLE BMP", 11, SystemIcon[SYSTEM_ICON_RECYCLE]);
-	if (EFI_ERROR(status))
-	{
-		INFO_SELF(L"ReadFileSelf error.\r\n");
-  		return;
-	}
-	
-  	status = L3_APPLICATION_ReadFile("SETTING BMP", 11, SystemIcon[SYSTEM_ICON_SETTING]);
-	if (EFI_ERROR(status))
-	{
-		INFO_SELF(L"ReadFileSelf error.\r\n");
-  		return;
-	}
-	
-  	status = L3_APPLICATION_ReadFile("TEXT BMP", 8, SystemIcon[SYSTEM_ICON_TEXT]);
-	if (EFI_ERROR(status))
-	{
-		INFO_SELF(L"ReadFileSelf error.\r\n");
-  		return;
-	}
-	*/
   	
 	L2_GRAPHICS_DeskInit();
 	
@@ -5393,61 +5253,19 @@ EFI_STATUS L2_COMMON_Initial()
 
     L2_MEMORY_MapperInitial();
 
-	
-	/*pDeskBuffer = (UINT8 *)AllocatePool(ScreenWidth * ScreenHeight * 4); 
-	if (NULL == pDeskBuffer)
-	{
-		DEBUG ((EFI_D_INFO, "ScreenInit AllocatePool pDeskBuffer NULL\n"));
-		return -1;
-	}*/
-
 	pDeskBuffer = L2_MEMORY_Allocate("Desk Buffer", MEMORY_TYPE_GRAPHICS, ScreenWidth * ScreenHeight * 4);
-
-	//pDeskBuffer = 0x6ff0f000;
-	
-
-	/*pDeskDisplayBuffer = (UINT8 *)AllocatePool(ScreenWidth * ScreenHeight * 4); 
-	if (NULL == pDeskDisplayBuffer)
-	{
-		DEBUG ((EFI_D_INFO, "ScreenInit AllocatePool pDeskDisplayBuffer NULL\n"));
-		return -1;
-	}*/
-	//pDeskDisplayBuffer = 0x6ff0f000 + 8294400;
 	
 	pDeskDisplayBuffer = L2_MEMORY_Allocate("Desk Display Buffer", MEMORY_TYPE_GRAPHICS, ScreenWidth * ScreenHeight * 4);
-
-    // BMP header size: 0x36
-    //UINT32 DeskWallpaperBufferSize = 1920 * 1080 * 3 + 0x36;
-	//bmp size, is so big
-	/*pDeskWallpaperBuffer = (UINT8 *)AllocatePool(DeskWallpaperBufferSize); 
-	if (NULL == pDeskWallpaperBuffer)
-	{
-		DEBUG ((EFI_D_INFO, "ScreenInit AllocatePool pDeskDisplayBuffer NULL\n"));
-		return -1;
-	}*/
-
-	// for test
-	//return;
 
 	pDeskWallpaperBuffer = L2_MEMORY_Allocate("Desk Wall paper Buffer", MEMORY_TYPE_GRAPHICS, ScreenWidth * ScreenHeight * 3 + 0x36);
 
 	for (UINT8 i = 0; i < SYSTEM_ICON_MAX; i++)
 		pSystemIconBuffer[i] = L2_MEMORY_Allocate("System Icon Buffer", MEMORY_TYPE_GRAPHICS, 384054);
 
+	
 	pSystemIconTempBuffer = L2_MEMORY_Allocate("System Icon temp Buffer", MEMORY_TYPE_GRAPHICS, 384054);
 	pSystemIconTempBuffer2 = L2_MEMORY_Allocate("System Icon temp2 Buffer", MEMORY_TYPE_GRAPHICS, 384054);
-	//pDeskWallpaperBuffer =  0x6ff0f000 + 8294400 * 2;
-
-	/*
-	pTestBuffer = L2_MEMORY_Allocate("Test Buffer", MEMORY_TYPE_TEST, ScreenWidth * ScreenHeight * 4 * 4);
-
-	L2_MEMORY_Free(pTestBuffer);
-
-	pTestBuffer = L2_MEMORY_Allocate("Test Buffer", MEMORY_TYPE_TEST, ScreenWidth * ScreenHeight * 4 * 4);
-
-	L2_MEMORY_Free(pTestBuffer);
-	*/
-	
+		
 	pMouseClickBuffer = (UINT8 *)L2_MEMORY_Allocate("Mouse Click Buffer", MEMORY_TYPE_GRAPHICS, MouseClickWindowWidth * MouseClickWindowHeight * 4); 
 	if (pMouseClickBuffer == NULL)
 	{
@@ -5580,9 +5398,12 @@ Main (
     
 	//INFO_SELF(L"%X \r\n", ScreenWidth);  
 
-	L2_MEMORY_Initial();
+	//L2_MEMORY_Initial();
 
     L2_COMMON_Initial();
+
+	//For locate bug
+	//return;
 
     //如果不加下面这几行，则是直接显示内存信息，看起来有点像雪花
 	
