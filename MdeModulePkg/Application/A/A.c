@@ -137,7 +137,7 @@ char pKeyboardInputBuffer[KEYBOARD_BUFFER_LENGTH] = {0};
 
 #define INFO_SELF(...)   \
 			do {   \
-				 Print(L"%d %a: ",__LINE__, __FUNCTION__);  \
+				 Print(L"%d ",__LINE__);  \
 			     Print(__VA_ARGS__); \
 			}while(0);
 			
@@ -1727,7 +1727,7 @@ UINT8 L1_BIT_Set(UINT8 *pMapper, UINT64 StartPageID, UINT64 Size)
 	UINT32 ByteCount = Size / 8 + AddOneFlag;
 }
 
-L1_MEMORY_Memset(void *s, int c, UINT32 n)
+L1_MEMORY_Memset(void *s, UINT8 c, UINT32 n)
 {
   UINT8 *d;
 
@@ -1735,7 +1735,7 @@ L1_MEMORY_Memset(void *s, int c, UINT32 n)
 
   while (n-- != 0) 
   {
-	*d++ = (UINT8 *)c;
+	*d++ = c;
   }
 
   return s;
@@ -1768,7 +1768,7 @@ UINT8 *L2_MEMORY_Allocate(char *pApplicationName, UINT16 type, UINT32 SizeRequir
 	
 	PagesRequired += AddOne;
 
-	INFO_SELF(L"Name: %a, SizeRequired: 0x%X, PagesRequired: 0x%X \r\n", pApplicationName, SizeRequired, PagesRequired);  
+	INFO_SELF(L"Name: %a, Size: 0x%X, Pages: 0x%X \r\n", pApplicationName, SizeRequired, PagesRequired);  
 
 	UINT64 j = 0;
 	UINT64 k = 0;
@@ -1797,7 +1797,7 @@ UINT8 *L2_MEMORY_Allocate(char *pApplicationName, UINT16 type, UINT32 SizeRequir
 			if (k >= PagesRequired)
 			{
 				//INFO_SELF(L"k: %d \r\n", k);  
-				INFO_SELF(L"Found block j: 0x%X, k: 0x%X, SystemAllPagesAllocated: 0x%X \r\n", j, k, SystemAllPagesAllocated); 
+				INFO_SELF(L"Block j: 0x%X, k: 0x%X, Allocated: 0x%X \r\n", j, k, SystemAllPagesAllocated); 
 				SystemAllPagesAllocated += k;
 
 				// Update mapper array from j to j + PagesRequired - 1
@@ -1806,7 +1806,7 @@ UINT8 *L2_MEMORY_Allocate(char *pApplicationName, UINT16 type, UINT32 SizeRequir
 
 				FreeNumberOfPages -= PagesRequired;
 				
-				INFO_SELF(L"Allocate success: 0x%X, Start Page: 0x%X, PagesRequired: 0x%X, Start Physical: 0x%X, FreeNumberOfPages: 0x%X\r\n", 
+				INFO_SELF(L"Success: 0x%X, Start: 0x%X, Required: 0x%X, Physical: 0x%X, Free: 0x%X\r\n", 
 							pData, 
 							j, 
 							PagesRequired, 
@@ -1821,6 +1821,11 @@ UINT8 *L2_MEMORY_Allocate(char *pApplicationName, UINT16 type, UINT32 SizeRequir
 				return pData + j * ALLOCATE_UNIT_SIZE;
 			}
 		}
+	}
+
+	if (ALL_PAGE_COUNT == j)
+	{
+		return NULL;
 	}
 }
 
@@ -5111,6 +5116,20 @@ EFI_STATUS L2_GRAPHICS_DeskInit()
     Color.Green = 0x00;
     Color.Blue	 = 0x00;
 
+    for (UINT16 i = 1; i < 10; i++)
+	{
+		for (UINT16 j = 1; j < 22; j++)
+		{
+			L2_GRAPHICS_ChineseCharDraw2(pDeskBuffer,  (16 + 2) * j, i * (16 + 2) + 322, (i - 1) * 94 + j - 1, Color, ScreenWidth);
+		}
+	}
+
+
+	for (int j = 0; j < 150; j++)
+	{
+		L2_DEBUG_Print1(DISK_READ_BUFFER_X + (j % 16) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 16), "%02X ", sChineseChar[j] & 0xff);
+	}
+
 	// menu chinese
     L2_GRAPHICS_ChineseCharDraw2(pDeskBuffer,  16, ScreenHeight - 21,     (18 - 1) * 94 + 43 - 1, Color, ScreenWidth);
     L2_GRAPHICS_ChineseCharDraw2(pDeskBuffer,  16 * 2, ScreenHeight - 21, (21 - 1) * 94 + 05 - 1, Color, ScreenWidth);
@@ -5228,6 +5247,12 @@ EFI_STATUS L2_GRAPHICS_ScreenInit()
 	{
 		L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: ReadFileSelf error\n", __LINE__);
 	}
+	
+	Status = L3_APPLICATION_ReadFile("HZK16", 5, sChineseChar);
+	if (EFI_ERROR(Status))
+	{
+		L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: ReadFileSelf error\n", __LINE__);
+	}
   	
 	L2_GRAPHICS_DeskInit();
 	
@@ -5258,6 +5283,18 @@ EFI_STATUS L2_COMMON_Initial()
 	pDeskDisplayBuffer = L2_MEMORY_Allocate("Desk Display Buffer", MEMORY_TYPE_GRAPHICS, ScreenWidth * ScreenHeight * 4);
 
 	pDeskWallpaperBuffer = L2_MEMORY_Allocate("Desk Wall paper Buffer", MEMORY_TYPE_GRAPHICS, ScreenWidth * ScreenHeight * 3 + 0x36);
+
+	UINT32 size = 267616;
+    
+	sChineseChar = (UINT8 *)L2_MEMORY_Allocate("Chinese Char Buffer", MEMORY_TYPE_GRAPHICS, size);
+	if (NULL == sChineseChar)
+    {
+        DEBUG ((EFI_D_INFO, "ChineseCharArrayInit AllocateZeroPool Failed: %x!\n "));
+        L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: ChineseCharArrayInit AllocateZeroPool failed\n",  __LINE__);
+        return -1;
+    }	
+
+    //return;
 
 	for (UINT8 i = 0; i < SYSTEM_ICON_MAX; i++)
 		pSystemIconBuffer[i] = L2_MEMORY_Allocate("System Icon Buffer", MEMORY_TYPE_GRAPHICS, 384054);
@@ -5291,16 +5328,6 @@ EFI_STATUS L2_COMMON_Initial()
 		DEBUG ((EFI_D_INFO, "ScreenInit AllocatePool pDeskDisplayBuffer NULL\n"));
 		return -1;
 	}
-
-	UINT32 size = 267616;
-    
-	sChineseChar = (UINT8 *)L2_MEMORY_Allocate("Chinese Char Buffer", MEMORY_TYPE_GRAPHICS, size);
-	if (NULL == sChineseChar)
-    {
-        DEBUG ((EFI_D_INFO, "ChineseCharArrayInit AllocateZeroPool Failed: %x!\n "));
-        L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: ChineseCharArrayInit AllocateZeroPool failed\n",  __LINE__);
-        return -1;
-    }		
     
 	pStartMenuBuffer = (UINT8 *)L2_MEMORY_Allocate("Start Menu Buffer", MEMORY_TYPE_GRAPHICS, StartMenuWidth * StartMenuHeight * 4);
 	if (NULL == pStartMenuBuffer)
@@ -5362,6 +5389,22 @@ EFI_STATUS L2_GRAPHICS_ChineseCharInit()
     L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d:  \n", __LINE__);
 
 	L3_APPLICATION_ReadFile("HZK16", 5, sChineseChar);
+	/*
+	for (int j = 0; j < 150; j++)
+	{
+		L2_DEBUG_Print1(DISK_READ_BUFFER_X + (j % 16) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 16), "%02X ", sChineseChar[j] & 0xff);
+	}
+
+    GraphicsOutput->Blt(
+                GraphicsOutput, 
+                (EFI_GRAPHICS_OUTPUT_BLT_PIXEL *) pDeskBuffer,
+                EfiBltBufferToVideo,
+                0, 0, 
+                0, 0, 
+                ScreenWidth, ScreenHeight, 0);   
+
+	*/
+	
 }
 
 char *p1;	
@@ -5437,15 +5480,16 @@ Main (
 	
     L2_COMMON_MultiProcessInit();
     
-    L2_GRAPHICS_ChineseCharInit();
+    //L2_GRAPHICS_ChineseCharInit();
     
+    //return;
     L2_GRAPHICS_ScreenInit();
 	
-    //L2_GRAPHICS_StartMenuInit();
+    L2_GRAPHICS_StartMenuInit();
 
-	//L2_GRAPHICS_SystemSettingInit();
+	L2_GRAPHICS_SystemSettingInit();
     
-    //L3_APPLICATION_MyComputerWindow(100, 100);
+    L3_APPLICATION_MyComputerWindow(100, 100);
     	
     L2_TIMER_IntervalInit();	
 	
