@@ -219,6 +219,8 @@ char pKeyboardInputBuffer[KEYBOARD_BUFFER_LENGTH] = {0};
 #define MOUSE_LEFT_CLICKED 1
 #define MOUSE_RIGHT_CLICKED 2
 
+#define SYSTEM_QUIT_FLAG FALSE
+
 extern EFI_SIMPLE_FILE_SYSTEM_PROTOCOL *gSimpleFileSystem; 
 
 UINT16 StatusErrorCount = 0;
@@ -235,6 +237,7 @@ UINT8 MouseClickFlag = 0;
 INT8 DisplayRootItemsFlag = 0;
 INT8 DisplayMyComputerFlag = 0;
 INT8 DisplaySystemSettingWindowFlag = 0;
+INT8 SystemQuitFlag = FALSE;
 INT8 DisplayStartMenuFlag = 0;
 UINT8 PreviousItem = -1;
 
@@ -2755,6 +2758,7 @@ typedef enum
 	MY_COMPUTER_CLICKED_EVENT,
 	SETTING_CLICKED_EVENT,
 	MY_COMPUTER_CLOSE_CLICKED_EVENT,
+	SYSTEM_QUIT_CLICKED_EVENT,
 	WALLPAPER_SETTING_CLICKED_EVENT,
 	WALLPAPER_RESET_CLICKED_EVENT,
 	MAX_CLICKED_EVENT
@@ -2765,8 +2769,18 @@ typedef enum
 	CLICK_INIT_STATE = 0,
 	MENU_CLICKED_STATE,
 	MY_COMPUTER_CLICKED_STATE,
-	SETTING_CLICKED_STATE
+	SETTING_CLICKED_STATE,
+	SYSTEM_QUIT_STATE
 }START_MENU_STATE;
+
+typedef enum 
+{
+	START_MENU_BUTTON_MY_COMPUTER = 0,
+	START_MENU_BUTTON_SYSTEM_SETTING,
+	START_MENU_BUTTON_SYSTEM_QUIT,
+	START_MENU_BUTTON_MAX
+}START_MENU_BUTTON_SEQUENCE;
+
 
 typedef struct
 {
@@ -2792,7 +2806,7 @@ UINT16 L2_MOUSE_ClickEventGet()
 
 	// Display my computer window
 	if (iMouseX >= 3 + StartMenuPositionX && iMouseX <= 3 + 4 * 16  + StartMenuPositionX  
-		 && iMouseY >= 3 + StartMenuPositionY && iMouseY <= 3 + StartMenuPositionY + 16)
+		 && iMouseY >= 3 + StartMenuPositionY + 16 * START_MENU_BUTTON_MY_COMPUTER && iMouseY <= 3 + StartMenuPositionY + 16 * (START_MENU_BUTTON_MY_COMPUTER + 1))
 	{
     	L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: MY_COMPUTER_CLICKED_EVENT\n", __LINE__);
 		return MY_COMPUTER_CLICKED_EVENT;
@@ -2800,10 +2814,18 @@ UINT16 L2_MOUSE_ClickEventGet()
 
 	// Display Setting window
 	if (iMouseX >= 3 + StartMenuPositionX && iMouseX <= 3 + 4 * 16  + StartMenuPositionX  
-		 && iMouseY >= 3 + StartMenuPositionY + 16 && iMouseY <= 3 + StartMenuPositionY + 16 * 2)
+		 && iMouseY >= 3 + StartMenuPositionY + 16 * START_MENU_BUTTON_SYSTEM_SETTING && iMouseY <= 3 + StartMenuPositionY + 16 * (START_MENU_BUTTON_SYSTEM_SETTING + 1))
 	{
     	L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: SETTING_CLICKED_EVENT\n", __LINE__);
 		return SETTING_CLICKED_EVENT;
+	}
+
+	// System quit button
+	if (iMouseX >= 3 + StartMenuPositionX && iMouseX <= 3 + 4 * 16  + StartMenuPositionX  
+		 && iMouseY >= 3 + StartMenuPositionY + 16 * START_MENU_BUTTON_SYSTEM_QUIT && iMouseY <= 3 + StartMenuPositionY + 16 * (START_MENU_BUTTON_SYSTEM_QUIT + 1))
+	{
+    	L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: SYSTEM_QUIT_CLICKED_EVENT\n", __LINE__);
+		return SYSTEM_QUIT_CLICKED_EVENT;
 	}
 
 	//Wall paper setting
@@ -2845,6 +2867,14 @@ L2_MOUSE_SettingClicked()
 	L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d L2_MOUSE_SettingClicked\n", __LINE__);
 	DisplaySystemSettingWindowFlag = 1;	
 }
+
+
+L2_MOUSE_SystemQuitClicked()
+{	
+	L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d L2_MOUSE_SystemQuitClicked\n", __LINE__);
+	SystemQuitFlag = TRUE;	
+}
+
 
 L2_MOUSE_WallpaperSettingClicked()
 {	
@@ -4806,7 +4836,7 @@ EFI_STATUS L2_GRAPHICS_SayGoodBye()
 		for (int j = 0; j < ScreenWidth; j++)
 		{
 			// BMP 3bits, and desk buffer 4bits
-			pDeskBuffer[(i * ScreenWidth + j) * 4]	   = 0x00;
+			pDeskBuffer[(i * ScreenWidth + j) * 4]	   = 0xff;
 			pDeskBuffer[(i * ScreenWidth + j) * 4 + 1] = 0x00;
 			pDeskBuffer[(i * ScreenWidth + j) * 4 + 2] = 0x00;
 		}
@@ -4819,8 +4849,8 @@ EFI_STATUS L2_GRAPHICS_SayGoodBye()
 	UINT16 y = ScreenHeight / 2;
 	
 	EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
-	Color.Red   = 0x00;
-	Color.Green = 0x00;
+	Color.Red   = 0xff;
+	Color.Green = 0xff;
 	Color.Blue  = 0xff;
 	
 	L2_GRAPHICS_ChineseCharDraw2(pDeskBuffer,  x, y, (52 - 1) * 94 + 57 - 1, Color, ScreenWidth);
@@ -4906,7 +4936,7 @@ EFI_STATUS L2_TIMER_IntervalInit()
 		//if (*TimerCount % 1000000 == 0)
 	       L2_DEBUG_Print1(0, 4 * 16, "%d: L2_TIMER_IntervalInit p:%x %lu \n", __LINE__, TimerCount, *TimerCount);
 
-		if (*TimerCount == 50000)
+		if (TRUE == SystemQuitFlag)
 		{			
 			L2_DEBUG_Print1(0, 4 * 16, "%d: L2_TIMER_IntervalInit p:%x %lu \n", __LINE__, TimerCount, *TimerCount);
 			gBS->SetTimer( TimerOne, TimerCancel, 0 );
@@ -4919,7 +4949,6 @@ EFI_STATUS L2_TIMER_IntervalInit()
 			       
 	}
 	
-
 	return EFI_SUCCESS;
 }
 
@@ -4958,6 +4987,22 @@ EFI_STATUS L2_GRAPHICS_StartMenuInit()
 	x += 16;
 	
 	L2_GRAPHICS_ChineseCharDraw2(pStartMenuBuffer, x , y,	  (54 - 1) * 94 + 35 - 1, Color, StartMenuWidth);	
+	
+
+	//系统退出
+	//退	4543	出	1986
+	x = 3;
+	y += 16;
+	L2_GRAPHICS_ChineseCharDraw2(pStartMenuBuffer, x , y,	  (47 - 1 ) * 94 + 21 - 1, Color, StartMenuWidth);	  
+	x += 16;
+	
+	L2_GRAPHICS_ChineseCharDraw2(pStartMenuBuffer, x , y,	  (45 - 1) * 94 + 19 - 1, Color, StartMenuWidth);
+	x += 16;
+	
+	L2_GRAPHICS_ChineseCharDraw2(pStartMenuBuffer, x , y,	  (45 - 1) * 94 + 43 - 1, Color, StartMenuWidth);
+	x += 16;
+	
+	L2_GRAPHICS_ChineseCharDraw2(pStartMenuBuffer, x , y,	  (19 - 1) * 94 + 86 - 1, Color, StartMenuWidth);	
 	
 
 }
@@ -5223,6 +5268,7 @@ START_MENU_STATE_TRANSFORM StartMenuStateTransformTable[] =
 	{CLICK_INIT_STATE,          	START_MENU_CLICKED_EVENT,    		MENU_CLICKED_STATE,             L2_MOUSE_MENU_Clicked},
 	{MENU_CLICKED_STATE,  			MY_COMPUTER_CLICKED_EVENT,  	 	MY_COMPUTER_CLICKED_STATE,      L2_MOUSE_MyComputerClicked},
 	{MENU_CLICKED_STATE,  			SETTING_CLICKED_EVENT,  			SETTING_CLICKED_STATE,          L2_MOUSE_SettingClicked},
+	{MENU_CLICKED_STATE,  			SYSTEM_QUIT_CLICKED_EVENT,  		SYSTEM_QUIT_STATE,          	L2_MOUSE_SystemQuitClicked},
 	{SETTING_CLICKED_STATE,  		WALLPAPER_SETTING_CLICKED_EVENT,  	CLICK_INIT_STATE,          		L2_MOUSE_WallpaperSettingClicked},
 	{SETTING_CLICKED_STATE,  		WALLPAPER_RESET_CLICKED_EVENT,  	CLICK_INIT_STATE,          		L2_MOUSE_WallpaperResetClicked},
 	{MY_COMPUTER_CLICKED_STATE,     MY_COMPUTER_CLOSE_CLICKED_EVENT,  	CLICK_INIT_STATE,      			L2_MOUSE_MyComputerCloseClicked},
