@@ -4943,7 +4943,7 @@ EFI_STATUS L2_TIMER_IntervalInit()
 			gBS->CloseEvent( TimerOne );    
 
 			L2_GRAPHICS_SayGoodBye();
-			
+			gRT->ResetSystem (EfiResetShutdown, EFI_SUCCESS, 0, NULL);
 			return;
 		}
 			       
