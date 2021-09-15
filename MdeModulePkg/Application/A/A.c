@@ -237,6 +237,7 @@ UINT8 MouseClickFlag = 0;
 INT8 DisplayRootItemsFlag = 0;
 INT8 DisplayMyComputerFlag = 0;
 INT8 DisplaySystemSettingWindowFlag = 0;
+INT8 DisplayMemoryInformationWindowFlag = 0;
 INT8 SystemQuitFlag = FALSE;
 INT8 DisplayStartMenuFlag = 0;
 UINT8 PreviousItem = -1;
@@ -263,6 +264,7 @@ typedef enum
 
 UINT8 *pDeskBuffer = NULL; //only Desk layer include wallpaper and button : 1
 UINT8 *pMyComputerBuffer = NULL; // MyComputer layer: 2
+UINT8 *pMemoryInformationBuffer = NULL; // MyComputer layer: 2
 UINT8 *pDeskDisplayBuffer = NULL; //desk display after multi graphicses layers compute
 UINT8 *pSystemIconBuffer[SYSTEM_ICON_MAX]; //desk display after multi graphicses layers compute
 UINT8 *pSystemIconMyComputerBuffer = NULL; //desk display after multi graphicses layers compute
@@ -304,6 +306,12 @@ UINT16 MyComputerWidth = 16 * 30;
 UINT16 MyComputerHeight = 16 * 40;
 UINT16 MyComputerPositionX = 700;
 UINT16 MyComputerPositionY = 160;
+
+UINT16 MemoryInformationWindowWidth = 16 * 30;
+UINT16 MemoryInformationWindowHeight = 16 * 40;
+UINT16 MemoryInformationWindowPositionX = 800;
+UINT16 MemoryInformationWindowPositionY = 160;
+
 UINT16 MouseClickWindowWidth = 300;
 UINT16 MouseClickWindowHeight = 400;
 
@@ -1827,7 +1835,7 @@ UINT8 *L2_MEMORY_Allocate(char *pApplicationName, UINT16 type, UINT32 SizeRequir
 		}
 	}
 
-	if (ALL_PAGE_COUNT == j)
+	if (ALL_PAGE_COUNT <= j)
 	{
 		return NULL;
 	}
@@ -2706,6 +2714,9 @@ VOID L2_GRAPHICS_LayerCompute(int iMouseX, int iMouseY, UINT8 MouseClickFlag)
 	if (DisplayMyComputerFlag)
 		L2_GRAPHICS_Copy(pDeskDisplayBuffer, pMyComputerBuffer, ScreenWidth, ScreenHeight, MyComputerWidth, MyComputerHeight, MyComputerPositionX, MyComputerPositionY);
 
+	if (DisplayMemoryInformationWindowFlag)
+		L2_GRAPHICS_Copy(pDeskDisplayBuffer, pMemoryInformationBuffer, ScreenWidth, ScreenHeight, MemoryInformationWindowWidth, MemoryInformationWindowHeight, MemoryInformationWindowPositionX, MemoryInformationWindowPositionY);
+
 	if (DisplaySystemSettingWindowFlag)
 		L2_GRAPHICS_Copy(pDeskDisplayBuffer, pSystemSettingWindowBuffer, ScreenWidth, ScreenHeight, SystemSettingWindowWidth, SystemSettingWindowHeight, SystemSettingWindowPositionX, SystemSettingWindowPositionY);
 
@@ -2757,6 +2768,7 @@ typedef enum
 	START_MENU_CLICKED_EVENT,
 	MY_COMPUTER_CLICKED_EVENT,
 	SETTING_CLICKED_EVENT,
+	MEMORY_INFORMATION_CLICKED_EVENT,
 	MY_COMPUTER_CLOSE_CLICKED_EVENT,
 	SYSTEM_QUIT_CLICKED_EVENT,
 	WALLPAPER_SETTING_CLICKED_EVENT,
@@ -2769,6 +2781,7 @@ typedef enum
 	CLICK_INIT_STATE = 0,
 	MENU_CLICKED_STATE,
 	MY_COMPUTER_CLICKED_STATE,
+	MEMORY_INFORMATION_CLICKED_STATE,
 	SETTING_CLICKED_STATE,
 	SYSTEM_QUIT_STATE
 }START_MENU_STATE;
@@ -2777,6 +2790,7 @@ typedef enum
 {
 	START_MENU_BUTTON_MY_COMPUTER = 0,
 	START_MENU_BUTTON_SYSTEM_SETTING,
+	START_MENU_BUTTON_MEMORY_INFORMATION,
 	START_MENU_BUTTON_SYSTEM_QUIT,
 	START_MENU_BUTTON_MAX
 }START_MENU_BUTTON_SEQUENCE;
@@ -2818,6 +2832,14 @@ UINT16 L2_MOUSE_ClickEventGet()
 	{
     	L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: SETTING_CLICKED_EVENT\n", __LINE__);
 		return SETTING_CLICKED_EVENT;
+	}
+
+	// Display Memory Information window
+	if (iMouseX >= 3 + StartMenuPositionX && iMouseX <= 3 + 4 * 16  + StartMenuPositionX  
+		 && iMouseY >= 3 + StartMenuPositionY + 16 * START_MENU_BUTTON_MEMORY_INFORMATION && iMouseY <= 3 + StartMenuPositionY + 16 * (START_MENU_BUTTON_MEMORY_INFORMATION + 1))
+	{
+    	L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: SETTING_CLICKED_EVENT\n", __LINE__);
+		return MEMORY_INFORMATION_CLICKED_EVENT;
 	}
 
 	// System quit button
@@ -2873,6 +2895,12 @@ L2_MOUSE_SystemQuitClicked()
 {	
 	L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d L2_MOUSE_SystemQuitClicked\n", __LINE__);
 	SystemQuitFlag = TRUE;	
+}
+
+L2_MOUSE_MemoryInformationClicked()
+{	
+	L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d L2_MOUSE_SystemQuitClicked\n", __LINE__);
+	DisplayMemoryInformationWindowFlag = TRUE;	
 }
 
 
@@ -4061,15 +4089,9 @@ EFI_STATUS L3_WINDOW_Create(UINT8 *pBuffer, UINT8 *pParent, UINT16 Width, UINT16
 	Color.Green = 0xff;
 	Color.Reserved = GRAPHICS_LAYER_MY_COMPUTER;
 
-    // wo de dian nao
-    L2_GRAPHICS_ChineseCharDraw2(pBuffer, 3, 6,          (46 - 1 ) * 94 + 50 - 1, Color, Width);    
-    L2_GRAPHICS_ChineseCharDraw2(pBuffer, 3 + 16 , 6,     (21 - 1) * 94 + 36 - 1, Color, Width);
-    L2_GRAPHICS_ChineseCharDraw2(pBuffer, 3 + 16 * 2, 6, (21 - 1) * 94 + 71 - 1, Color, Width);
-    L2_GRAPHICS_ChineseCharDraw2(pBuffer, 3 + 16 * 3, 6, (36 - 1) * 94 + 52 - 1, Color, Width);
-
-    L2_GRAPHICS_ChineseCharDraw2(pBuffer, MyComputerWidth - 3 * 16 - 3, 6, (12 - 1) * 94 + 58 - 1, Color, Width);
-    L2_GRAPHICS_ChineseCharDraw2(pBuffer, MyComputerWidth - 2 * 16 - 3, 6, (01 - 1) * 94 + 85 - 1, Color, Width);
-    L2_GRAPHICS_ChineseCharDraw2(pBuffer, MyComputerWidth - 1 * 16 - 3, 6, (14 - 1) * 94 + 21 - 1, Color, Width);
+    L2_GRAPHICS_ChineseCharDraw2(pBuffer, Width - 3 * 16 - 3, 6, (12 - 1) * 94 + 58 - 1, Color, Width);
+    L2_GRAPHICS_ChineseCharDraw2(pBuffer, Width - 2 * 16 - 3, 6, (01 - 1) * 94 + 85 - 1, Color, Width);
+    L2_GRAPHICS_ChineseCharDraw2(pBuffer, Width - 1 * 16 - 3, 6, (14 - 1) * 94 + 21 - 1, Color, Width);
 
     // The Left of Window
 	for (i = 23; i < Height; i++)
@@ -4095,6 +4117,35 @@ EFI_STATUS L3_WINDOW_Create(UINT8 *pBuffer, UINT8 *pParent, UINT16 Width, UINT16
 		}
 	}
 
+
+	return EFI_SUCCESS;
+}
+
+
+
+VOID L3_APPLICATION_MyComputerWindow(UINT16 StartX, UINT16 StartY)
+{
+	UINT8 *pParent;
+	UINT16 Type;
+	CHAR8 *pWindowTitle;
+    EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
+    
+	Color.Blue  = 0xff;
+	Color.Red   = 0xff;
+	Color.Green = 0xff;
+	Color.Reserved = GRAPHICS_LAYER_MY_COMPUTER;
+	
+    L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: MyComputerWidth: %d \n", __LINE__, MyComputerWidth);
+	L3_WINDOW_Create(pMyComputerBuffer, pParent, MyComputerWidth, MyComputerHeight, Type, pWindowTitle);
+
+	UINT8 *pBuffer = pMyComputerBuffer;
+	
+    // wo de dian nao
+    L2_GRAPHICS_ChineseCharDraw2(pMyComputerBuffer, 3, 6,          (46 - 1 ) * 94 + 50 - 1, Color, MyComputerWidth);    
+    L2_GRAPHICS_ChineseCharDraw2(pMyComputerBuffer, 3 + 16 , 6,     (21 - 1) * 94 + 36 - 1, Color, MyComputerWidth);
+    L2_GRAPHICS_ChineseCharDraw2(pMyComputerBuffer, 3 + 16 * 2, 6, (21 - 1) * 94 + 71 - 1, Color, MyComputerWidth);
+    L2_GRAPHICS_ChineseCharDraw2(pMyComputerBuffer, 3 + 16 * 3, 6, (36 - 1) * 94 + 52 - 1, Color, MyComputerWidth);
+	
 	Color.Blue  = 0x00;
 	Color.Red   = 0x00;
 	Color.Green = 0x00;
@@ -4108,24 +4159,24 @@ EFI_STATUS L3_WINDOW_Create(UINT8 *pBuffer, UINT8 *pParent, UINT16 Width, UINT16
 		if (device[i].DeviceType == 2)
 		{
 			//
-			L2_GRAPHICS_ChineseCharDraw2(pBuffer, x, y,          (20 - 1 ) * 94 + 37 - 1, Color, Width); 
+			L2_GRAPHICS_ChineseCharDraw2(pBuffer, x, y,          (20 - 1 ) * 94 + 37 - 1, Color, MyComputerWidth); 
 			x += 16;
 		}
 		else
 		{
 			// U pan
-			L2_GRAPHICS_ChineseCharDraw2(pBuffer, x, y,          (51 - 1 ) * 94 + 37 - 1, Color, Width); 
+			L2_GRAPHICS_ChineseCharDraw2(pBuffer, x, y,          (51 - 1 ) * 94 + 37 - 1, Color, MyComputerWidth); 
 			x += 16;
 		}	
 		//pan
-		L2_GRAPHICS_ChineseCharDraw2(pBuffer, x, y,          (37 - 1 ) * 94 + 44 - 1, Color, Width); 
+		L2_GRAPHICS_ChineseCharDraw2(pBuffer, x, y,          (37 - 1 ) * 94 + 44 - 1, Color, MyComputerWidth); 
 		x += 16;
 
 		//  2354 分 3988 区
-		L2_GRAPHICS_ChineseCharDraw2(pBuffer, x, y,          (23 - 1 ) * 94 + 54 - 1, Color, Width);    
+		L2_GRAPHICS_ChineseCharDraw2(pBuffer, x, y,          (23 - 1 ) * 94 + 54 - 1, Color, MyComputerWidth);    
 		x += 16;
 		
-		L2_GRAPHICS_ChineseCharDraw2(pBuffer, x, y,          (39 - 1 ) * 94 + 88 - 1, Color, Width);   
+		L2_GRAPHICS_ChineseCharDraw2(pBuffer, x, y,          (39 - 1 ) * 94 + 88 - 1, Color, MyComputerWidth);   
 		x += 16;
 
 		// 5027
@@ -4136,17 +4187,17 @@ EFI_STATUS L3_WINDOW_Create(UINT8 *pBuffer, UINT8 *pParent, UINT16 Width, UINT16
 		// 三
 		if (device[i].PartitionID == 1)
 		{
-			L2_GRAPHICS_ChineseCharDraw2(pBuffer, x, y,          (50 - 1 ) * 94 + 27 - 1, Color, Width);   
+			L2_GRAPHICS_ChineseCharDraw2(pBuffer, x, y,          (50 - 1 ) * 94 + 27 - 1, Color, MyComputerWidth);   
 			x += 16;
 		}
 		else if (device[i].PartitionID == 2)
 		{
-			L2_GRAPHICS_ChineseCharDraw2(pBuffer, x, y,          (22 - 1 ) * 94 + 94 - 1, Color, Width);   
+			L2_GRAPHICS_ChineseCharDraw2(pBuffer, x, y,          (22 - 1 ) * 94 + 94 - 1, Color, MyComputerWidth);   
 			x += 16;
 		}
 		else if (device[i].PartitionID == 3)
 		{
-			L2_GRAPHICS_ChineseCharDraw2(pBuffer, x, y,          (40 - 1 ) * 94 + 93 - 1, Color, Width);   
+			L2_GRAPHICS_ChineseCharDraw2(pBuffer, x, y,          (40 - 1 ) * 94 + 93 - 1, Color, MyComputerWidth);   
 			x += 16;
 		}
 		
@@ -4166,10 +4217,10 @@ EFI_STATUS L3_WINDOW_Create(UINT8 *pBuffer, UINT8 *pParent, UINT16 Width, UINT16
 		//大
 		//4801
 		//小
-		L2_GRAPHICS_ChineseCharDraw2(pBuffer, x, y,          (20 - 1 ) * 94 + 83 - 1, Color, Width);  
+		L2_GRAPHICS_ChineseCharDraw2(pBuffer, x, y,          (20 - 1 ) * 94 + 83 - 1, Color, MyComputerWidth);  
 		x += 16;
 		
-		L2_GRAPHICS_ChineseCharDraw2(pBuffer, x, y,          (48 - 1 ) * 94 + 1 - 1, Color, Width);  
+		L2_GRAPHICS_ChineseCharDraw2(pBuffer, x, y,          (48 - 1 ) * 94 + 1 - 1, Color, MyComputerWidth);  
 		x += 16;
 
 		L2_DEBUG_Print2(x, y, pBuffer, "%d%a", size, sizePostfix);
@@ -4208,10 +4259,10 @@ EFI_STATUS L3_WINDOW_Create(UINT8 *pBuffer, UINT8 *pParent, UINT16 Width, UINT16
 	//内
 	//2070
 	//存
-	L2_GRAPHICS_ChineseCharDraw2(pBuffer, x, y,          (36 - 1 ) * 94 + 58 - 1, Color, Width);  
+	L2_GRAPHICS_ChineseCharDraw2(pBuffer, x, y,          (36 - 1 ) * 94 + 58 - 1, Color, MyComputerWidth);  
 	x += 16;
 	
-	L2_GRAPHICS_ChineseCharDraw2(pBuffer, x, y,          (20 - 1 ) * 94 + 70 - 1, Color, Width);  
+	L2_GRAPHICS_ChineseCharDraw2(pBuffer, x, y,          (20 - 1 ) * 94 + 70 - 1, Color, MyComputerWidth);  
 	x += 16;
 	
 	// Get memory infomation
@@ -4223,28 +4274,100 @@ EFI_STATUS L3_WINDOW_Create(UINT8 *pBuffer, UINT8 *pParent, UINT16 Width, UINT16
 	char sizePostfix2[3] = "GB";
 	L2_DEBUG_Print2(x, y, pBuffer, "%a%a", L1_STRING_FloatToString(MemorySize, 3, buf), sizePostfix2);
 	x += 5 * 8;
+	
+}
 
+VOID L3_APPLICATION_MemoryInformationWindow(UINT16 StartX, UINT16 StartY)
+{
+	UINT8 *pParent;
+	UINT16 Type;
+	CHAR8 *pWindowTitle;
+	UINT16 i = 0;
+	UINT16 j = 0;
+	
+    L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: MemoryInformationWindowWidth: %d \n", __LINE__, MemoryInformationWindowWidth);
+	L3_WINDOW_Create(pMemoryInformationBuffer, pParent, MemoryInformationWindowWidth, MemoryInformationWindowHeight, Type, pWindowTitle);
+
+	UINT8 *pBuffer = pMemoryInformationBuffer;
+	UINT16 Width = MemoryInformationWindowWidth;
+	UINT16 Height = MemoryInformationWindowHeight;
+	
+	
+    EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
+    
+	Color.Blue  = 0xff;
+	Color.Red   = 0xff;
+	Color.Green = 0xff;
+	Color.Reserved = GRAPHICS_LAYER_MY_COMPUTER;
+	
+	//3658
+	//内
+	//2070
+	//存
+	//汉字	区位码	汉字	区位码
+	//详	4774	细	4724
+	UINT16 TitleX = 3;
+	UINT16 TitleY = 6;
+    // wo de dian nao
+    L2_GRAPHICS_ChineseCharDraw2(pBuffer, TitleX, TitleY, (36 - 1) * 94 + 58 - 1, Color, Width); 
+
+    TitleX += 16;
+    L2_GRAPHICS_ChineseCharDraw2(pBuffer, TitleX, TitleY, (20 - 1) * 94 + 70 - 1, Color, Width);
+    
+    TitleX += 16;
+    L2_GRAPHICS_ChineseCharDraw2(pBuffer, TitleX, TitleY, (47 - 1) * 94 + 74 - 1, Color, Width);
+    
+    TitleX += 16;
+    L2_GRAPHICS_ChineseCharDraw2(pBuffer, TitleX, TitleY, (47 - 1) * 94 + 24 - 1, Color, Width);
+
+    L2_GRAPHICS_ChineseCharDraw2(pBuffer, MyComputerWidth - 3 * 16 - 3, 6, (12 - 1) * 94 + 58 - 1, Color, Width);
+    L2_GRAPHICS_ChineseCharDraw2(pBuffer, MyComputerWidth - 2 * 16 - 3, 6, (01 - 1) * 94 + 85 - 1, Color, Width);
+    L2_GRAPHICS_ChineseCharDraw2(pBuffer, MyComputerWidth - 1 * 16 - 3, 6, (14 - 1) * 94 + 21 - 1, Color, Width);
+
+    // The Left of Window
+	for (i = 23; i < Height; i++)
+	{
+		for (j = 0; j < Width / 3; j++)
+		{
+			pBuffer[(i * Width + j) * 4] = 214;
+			pBuffer[(i * Width + j) * 4 + 1] = 211;
+			pBuffer[(i * Width + j) * 4 + 2] = 204;
+			pBuffer[(i * Width + j) * 4 + 3] = GRAPHICS_LAYER_MY_COMPUTER;
+		}
+	}
+
+	// The right of Window
+	for (i = 23; i < Height; i++)
+	{
+		for (j = Width / 3 - 1; j < Width; j++)
+		{
+			pBuffer[(i * Width + j) * 4] = 214;
+			pBuffer[(i * Width + j) * 4 + 1] = 211;
+			pBuffer[(i * Width + j) * 4 + 2] = 104;
+			pBuffer[(i * Width + j) * 4 + 3] = GRAPHICS_LAYER_MY_COMPUTER;
+		}
+	}
+	
+	int x = 0, y = 0;
+	
+	y += 16;
+	y += 16;
+	
+	x = 50;
+	//3658
+	//内
+	//2070
+	//存
+	L2_GRAPHICS_ChineseCharDraw2(pBuffer, x, y,          (36 - 1 ) * 94 + 58 - 1, Color, Width);  
+	x += 16;
+	
+	L2_GRAPHICS_ChineseCharDraw2(pBuffer, x, y,          (20 - 1 ) * 94 + 70 - 1, Color, Width);  
+	x += 16;
+	
 	return EFI_SUCCESS;
 }
 
 
-
-VOID L3_APPLICATION_MyComputerWindow(UINT16 StartX, UINT16 StartY)
-{
-	UINT8 *pParent;
-	UINT16 Type;
-	CHAR8 * pWindowTitle;
-
-	pMyComputerBuffer = (UINT8 *)AllocateZeroPool(MyComputerWidth * MyComputerHeight * 4); 
-	if (pMyComputerBuffer == NULL)
-	{
-		DEBUG ((EFI_D_INFO, "MyComputer , AllocateZeroPool failed... "));
-		return;
-	}
-	
-    L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: MyComputerWidth: %d \n", __LINE__, MyComputerWidth);
-	L3_WINDOW_Create(pMyComputerBuffer, pParent, MyComputerWidth, MyComputerHeight, Type, pWindowTitle);
-}
 
 EFI_STATUS L3_APPLICATION_ReadFile(UINT8 *FileName, UINT8 NameLength, UINT8 *pBuffer)
 {
@@ -4962,6 +5085,7 @@ EFI_STATUS L2_GRAPHICS_StartMenuInit()
 	Color.Green = 0x00;
 	Color.Blue	= 0x00;
 
+	//这边的序列需要跟START_MENU_BUTTON_SEQUENCE这个枚举定义的一致
 	//我的电脑
 	L2_GRAPHICS_ChineseCharDraw2(pStartMenuBuffer, x , y,	  (46 - 1 ) * 94 + 50 - 1, Color, StartMenuWidth);	  
 	x += 16;
@@ -4987,6 +5111,23 @@ EFI_STATUS L2_GRAPHICS_StartMenuInit()
 	x += 16;
 	
 	L2_GRAPHICS_ChineseCharDraw2(pStartMenuBuffer, x , y,	  (54 - 1) * 94 + 35 - 1, Color, StartMenuWidth);	
+	
+
+	//内存查看
+	//汉字	区位码	汉字	区位码	汉字	区位码	汉字	区位码
+	//内	3658	存		2070	查		1873	看		3120
+	x = 3;
+	y += 16;
+	L2_GRAPHICS_ChineseCharDraw2(pStartMenuBuffer, x , y,	  (36 - 1 ) * 94 + 58 - 1, Color, StartMenuWidth);	  
+	x += 16;
+	
+	L2_GRAPHICS_ChineseCharDraw2(pStartMenuBuffer, x , y,	  (20 - 1) * 94 + 70 - 1, Color, StartMenuWidth);
+	x += 16;
+	
+	L2_GRAPHICS_ChineseCharDraw2(pStartMenuBuffer, x , y,	  (18 - 1) * 94 + 73 - 1, Color, StartMenuWidth);
+	x += 16;
+	
+	L2_GRAPHICS_ChineseCharDraw2(pStartMenuBuffer, x , y,	  (31 - 1) * 94 + 20 - 1, Color, StartMenuWidth);	
 	
 
 	//系统退出
@@ -5265,13 +5406,14 @@ L2_MOUSE_WallpaperResetClicked()
 
 START_MENU_STATE_TRANSFORM StartMenuStateTransformTable[] =
 {
-	{CLICK_INIT_STATE,          	START_MENU_CLICKED_EVENT,    		MENU_CLICKED_STATE,             L2_MOUSE_MENU_Clicked},
-	{MENU_CLICKED_STATE,  			MY_COMPUTER_CLICKED_EVENT,  	 	MY_COMPUTER_CLICKED_STATE,      L2_MOUSE_MyComputerClicked},
-	{MENU_CLICKED_STATE,  			SETTING_CLICKED_EVENT,  			SETTING_CLICKED_STATE,          L2_MOUSE_SettingClicked},
-	{MENU_CLICKED_STATE,  			SYSTEM_QUIT_CLICKED_EVENT,  		SYSTEM_QUIT_STATE,          	L2_MOUSE_SystemQuitClicked},
-	{SETTING_CLICKED_STATE,  		WALLPAPER_SETTING_CLICKED_EVENT,  	CLICK_INIT_STATE,          		L2_MOUSE_WallpaperSettingClicked},
-	{SETTING_CLICKED_STATE,  		WALLPAPER_RESET_CLICKED_EVENT,  	CLICK_INIT_STATE,          		L2_MOUSE_WallpaperResetClicked},
-	{MY_COMPUTER_CLICKED_STATE,     MY_COMPUTER_CLOSE_CLICKED_EVENT,  	CLICK_INIT_STATE,      			L2_MOUSE_MyComputerCloseClicked},
+	{CLICK_INIT_STATE,          	START_MENU_CLICKED_EVENT,    		MENU_CLICKED_STATE,             	L2_MOUSE_MENU_Clicked},
+	{MENU_CLICKED_STATE,  			MY_COMPUTER_CLICKED_EVENT,  	 	MY_COMPUTER_CLICKED_STATE,      	L2_MOUSE_MyComputerClicked},
+	{MENU_CLICKED_STATE,  			SETTING_CLICKED_EVENT,  			SETTING_CLICKED_STATE,          	L2_MOUSE_SettingClicked},
+	{MENU_CLICKED_STATE,  			MEMORY_INFORMATION_CLICKED_EVENT,  	MEMORY_INFORMATION_CLICKED_STATE, 	L2_MOUSE_MemoryInformationClicked},
+	{MENU_CLICKED_STATE,  			SYSTEM_QUIT_CLICKED_EVENT,  		SYSTEM_QUIT_STATE,          		L2_MOUSE_SystemQuitClicked},
+	{SETTING_CLICKED_STATE,  		WALLPAPER_SETTING_CLICKED_EVENT,  	CLICK_INIT_STATE,          			L2_MOUSE_WallpaperSettingClicked},
+	{SETTING_CLICKED_STATE,  		WALLPAPER_RESET_CLICKED_EVENT,  	CLICK_INIT_STATE,          			L2_MOUSE_WallpaperResetClicked},
+	{MY_COMPUTER_CLICKED_STATE,     MY_COMPUTER_CLOSE_CLICKED_EVENT,  	CLICK_INIT_STATE,      				L2_MOUSE_MyComputerCloseClicked},
 };
 
 
@@ -5412,8 +5554,6 @@ EFI_STATUS L2_COMMON_Initial()
         return -1;
     }	
 
-    //return;
-
 	for (UINT8 i = 0; i < SYSTEM_ICON_MAX; i++)
 		pSystemIconBuffer[i] = L2_MEMORY_Allocate("System Icon Buffer", MEMORY_TYPE_GRAPHICS, 384054);
 
@@ -5426,6 +5566,12 @@ EFI_STATUS L2_COMMON_Initial()
 	{
 		return -1;
 	}   
+
+	pMemoryInformationBuffer = (UINT8 *)L2_MEMORY_Allocate("Date Time Buffer", MEMORY_TYPE_GRAPHICS, MemoryInformationWindowWidth * MemoryInformationWindowHeight * 4); 
+	if (pMemoryInformationBuffer == NULL)
+	{
+		return -1;
+	}  
 	
 	pDateTimeBuffer = (UINT8 *)L2_MEMORY_Allocate("Date Time Buffer", MEMORY_TYPE_GRAPHICS, 8 * 16 * 50 * 4); 
 	if (pDateTimeBuffer == NULL)
@@ -5454,6 +5600,13 @@ EFI_STATUS L2_COMMON_Initial()
         L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: pStartMenuBuffer AllocateZeroPool failed\n",  __LINE__);
         return -1;
     }	
+    
+	pMyComputerBuffer = (UINT8 *)L2_MEMORY_Allocate("My Computer Buffer", MEMORY_TYPE_GRAPHICS, MyComputerWidth * MyComputerHeight * 4); 
+	if (pMyComputerBuffer == NULL)
+	{
+		DEBUG ((EFI_D_INFO, "MyComputer , AllocateZeroPool failed... "));
+		return -1;
+	}
     
 	MouseColor.Blue  = 0xff;
     MouseColor.Red   = 0xff;
@@ -5609,6 +5762,8 @@ Main (
     
     L3_APPLICATION_MyComputerWindow(100, 100);
     	
+    L3_APPLICATION_MemoryInformationWindow(100, 100);
+    
     L2_TIMER_IntervalInit();	
 	
     //GraphicsLayerCompute(iMouseX, iMouseY, 0);
