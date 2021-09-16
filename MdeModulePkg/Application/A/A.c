@@ -1761,6 +1761,44 @@ UINT64 SystemAllPagesAllocated = 0;
 
 UINT8 *pMapper = (UINT8 *)(PHYSICAL_ADDRESS_START);
 
+typedef struct
+{
+	UINT8 ApplicationName[50];
+	UINT32 AllocatedSize;
+	UINT16 MemoryType;
+}MEMORY_ALLOCATED_ITEMS;
+
+typedef struct
+{
+	MEMORY_ALLOCATED_ITEMS items[100];
+	UINT32 AllocatedSliceCount;
+	UINT32 AllocatedSizeSum;
+	UINT32 AllocatedPageSum;
+}MEMORY_ALLOCATED_CURRENT;
+
+MEMORY_ALLOCATED_CURRENT MemoryAllocatedCurrent;
+
+void *L1_MEMORY_Copy(UINT8 *dest, const UINT8 *src, UINT8 count)
+{
+	UINT8 *d;
+	const UINT8 *s;
+
+	d = dest;
+	s = src;
+	while (count--)
+		*d++ = *s++;        
+	
+	return dest;
+}
+
+void L2_MEMORY_CountInitial()
+{
+	MemoryAllocatedCurrent.AllocatedSliceCount = 0;
+	MemoryAllocatedCurrent.AllocatedSizeSum = 0;
+	MemoryAllocatedCurrent.AllocatedPageSum = 0;
+
+	L1_MEMORY_SetValue(MemoryAllocatedCurrent, 0, sizeof(MemoryAllocatedCurrent));
+}
 
 UINT8 *L2_MEMORY_MapperInitial()
 {
@@ -1779,7 +1817,16 @@ UINT8 *L2_MEMORY_Allocate(char *pApplicationName, UINT16 type, UINT32 SizeRequir
 	UINT8  AddOne = (SizeRequired % (ALLOCATE_UNIT_SIZE) != 0) ? 1 : 0;
 	
 	PagesRequired += AddOne;
+	UINT16 currentCount= MemoryAllocatedCurrent.AllocatedSliceCount;
+	L1_MEMORY_Copy(MemoryAllocatedCurrent.items[currentCount].ApplicationName, pApplicationName, L1_STRING_Length(pApplicationName));
+	MemoryAllocatedCurrent.items[currentCount].AllocatedSize = SizeRequired;
+	MemoryAllocatedCurrent.items[currentCount].MemoryType = type;
 
+	MemoryAllocatedCurrent.AllocatedPageSum += PagesRequired;
+	MemoryAllocatedCurrent.AllocatedSizeSum += SizeRequired;
+	
+	MemoryAllocatedCurrent.AllocatedSliceCount++;
+	
 	INFO_SELF(L"Name: %a, Size: 0x%X, Pages: 0x%X \r\n", pApplicationName, SizeRequired, PagesRequired);  
 
 	UINT64 j = 0;
@@ -3524,18 +3571,6 @@ void L1_MEMORY_SetValue(UINT8 *pBuffer, UINT32 Length, UINT8 Value)
 }
 
 
-void *L1_MEMORY_Copy(UINT8 *dest, const UINT8 *src, UINT8 count)
-{
-	UINT8 *d;
-	const UINT8 *s;
-
-	d = dest;
-	s = src;
-	while (count--)
-		*d++ = *s++;        
-	
-	return dest;
-}
 //https://blog.csdn.net/goodwillyang/article/details/45559925
 
 EFI_STATUS L2_STORE_ReadFileFSM()
@@ -4363,6 +4398,25 @@ VOID L3_APPLICATION_MemoryInformationWindow(UINT16 StartX, UINT16 StartY)
 	
 	L2_GRAPHICS_ChineseCharDraw2(pBuffer, x, y,          (20 - 1 ) * 94 + 70 - 1, Color, Width);  
 	x += 16;
+		
+	y += 16;
+	x = 3;
+	L2_DEBUG_Print2(x, y, pBuffer, "AllocatedPageSum: %llu", MemoryAllocatedCurrent.AllocatedPageSum);
+	
+	y += 16;
+	L2_DEBUG_Print2(x, y, pBuffer, "AllocatedSizeSum: %llu", MemoryAllocatedCurrent.AllocatedSizeSum);
+	
+	y += 16;
+	L2_DEBUG_Print2(x, y, pBuffer, "AllocatedSliceCount: %llu", MemoryAllocatedCurrent.AllocatedSliceCount);
+
+	for (UINT16 i = 0; i < MemoryAllocatedCurrent.AllocatedSliceCount; i++)
+	{		
+		y += 16;
+		L2_DEBUG_Print2(x, y, pBuffer, "Name: %a, Size: %llu, Type: %d", 
+										MemoryAllocatedCurrent.items[i].ApplicationName,
+										MemoryAllocatedCurrent.items[i].AllocatedSize,
+										MemoryAllocatedCurrent.items[i].MemoryType);
+	}
 	
 	return EFI_SUCCESS;
 }
@@ -5051,23 +5105,30 @@ EFI_STATUS L2_TIMER_IntervalInit()
 		DEBUG(( EFI_D_INFO, "Set Timer Error! \r\n" ));
 		return(2);
 	}
-
+	UINT32 QuitTimerCount = 0;
 	while (1)
 	{
 		*TimerCount = *TimerCount + 1;
 		//L2_DEBUG_Print1(DISPLAY_X, DISPLAY_Y, "%d: SystemTimeIntervalInit while\n", __LINE__);
 		//if (*TimerCount % 1000000 == 0)
-	       L2_DEBUG_Print1(0, 4 * 16, "%d: L2_TIMER_IntervalInit p:%x %lu \n", __LINE__, TimerCount, *TimerCount);
+	    L2_DEBUG_Print1(0, 3 * 16, "%d: L2_TIMER_IntervalInit p:%x %lu %llu\n", __LINE__, TimerCount, *TimerCount, QuitTimerCount);
 
 		if (TRUE == SystemQuitFlag)
-		{			
-			L2_DEBUG_Print1(0, 4 * 16, "%d: L2_TIMER_IntervalInit p:%x %lu \n", __LINE__, TimerCount, *TimerCount);
-			gBS->SetTimer( TimerOne, TimerCancel, 0 );
-			gBS->CloseEvent( TimerOne );    
+		{	
+			if (QuitTimerCount == 0)
+			{	
+				QuitTimerCount = *TimerCount;				
+				L2_GRAPHICS_SayGoodBye();
+			}
+		}
+		
 
-			L2_GRAPHICS_SayGoodBye();
-			gRT->ResetSystem (EfiResetShutdown, EFI_SUCCESS, 0, NULL);
-			return;
+		if ((TRUE == SystemQuitFlag) && (*TimerCount - QuitTimerCount >= 3000))
+		{
+			L2_DEBUG_Print1(0, 3 * 16, "%d: L2_TIMER_IntervalInit p:%x %lu \n", __LINE__, TimerCount, *TimerCount);  
+			gBS->SetTimer( TimerOne, TimerCancel, 0 );
+			gBS->CloseEvent( TimerOne );  
+			gRT->ResetSystem (EfiResetShutdown, EFI_SUCCESS, 0, NULL);	
 		}
 			       
 	}
@@ -5530,13 +5591,15 @@ EFI_STATUS L2_GRAPHICS_ScreenInit()
     return EFI_SUCCESS;
 }
 
-EFI_STATUS L2_COMMON_Initial()
+EFI_STATUS L2_COMMON_MemoryAllocate()
 {
     EFI_STATUS	Status;
 	
     INFO_SELF(L"\r\n");
 
     L2_MEMORY_MapperInitial();
+    
+    L2_MEMORY_CountInitial();
 
 	pDeskBuffer = L2_MEMORY_Allocate("Desk Buffer", MEMORY_TYPE_GRAPHICS, ScreenWidth * ScreenHeight * 4);
 	
@@ -5714,7 +5777,7 @@ Main (
 
 	//L2_MEMORY_Initial();
 
-    L2_COMMON_Initial();
+    L2_COMMON_MemoryAllocate();
 
 	//For locate bug
 	//return;
