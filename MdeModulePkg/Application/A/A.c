@@ -17,6 +17,7 @@ ToDo:
 6. My Computer window(disk partition)  
     ==> finish partly
     ==> read partitions root path items need to save to cache, for fastly get next time, and can reduce disk io...
+    ==> partition volumn name
 7. Setting window(select file, delete file, modify file) ==> 0%
 8. Memory Simple Management 
     ==> can get memory information, but it looks like something wrong.
@@ -236,6 +237,7 @@ UINT16 DebugPrintY = 0;
 UINT8 MouseClickFlag = 0;
 INT8 DisplayRootItemsFlag = 0;
 INT8 DisplayMyComputerFlag = 0;
+INT8 DisplaySystemLogWindowFlag = 0;
 INT8 DisplaySystemSettingWindowFlag = 0;
 INT8 DisplayMemoryInformationWindowFlag = 0;
 INT8 SystemQuitFlag = FALSE;
@@ -264,6 +266,7 @@ typedef enum
 
 UINT8 *pDeskBuffer = NULL; //only Desk layer include wallpaper and button : 1
 UINT8 *pMyComputerBuffer = NULL; // MyComputer layer: 2
+UINT8 *pSystemLogWindowBuffer = NULL; // MyComputer layer: 2
 UINT8 *pMemoryInformationBuffer = NULL; // MyComputer layer: 2
 UINT8 *pDeskDisplayBuffer = NULL; //desk display after multi graphicses layers compute
 UINT8 *pSystemIconBuffer[SYSTEM_ICON_MAX]; //desk display after multi graphicses layers compute
@@ -304,13 +307,20 @@ UINT8 *sChineseChar = NULL;
 static UINTN ScreenWidth, ScreenHeight;  
 UINT16 MyComputerWidth = 16 * 30;
 UINT16 MyComputerHeight = 16 * 40;
-UINT16 MyComputerPositionX = 700;
-UINT16 MyComputerPositionY = 160;
+UINT16 MyComputerPositionX = 300;
+UINT16 MyComputerPositionY = 300;
+
+
+UINT16 SystemLogWindowWidth = 16 * 30;
+UINT16 SystemLogWindowHeight = 16 * 40;
+UINT16 SystemLogWindowPositionX = 160;
+UINT16 SystemLogWindowPositionY = 160;
+
 
 UINT16 MemoryInformationWindowWidth = 16 * 30;
 UINT16 MemoryInformationWindowHeight = 16 * 40;
-UINT16 MemoryInformationWindowPositionX = 800;
-UINT16 MemoryInformationWindowPositionY = 160;
+UINT16 MemoryInformationWindowPositionX = 200;
+UINT16 MemoryInformationWindowPositionY = 200;
 
 UINT16 MouseClickWindowWidth = 300;
 UINT16 MouseClickWindowHeight = 400;
@@ -2642,7 +2652,7 @@ EFI_STATUS L2_STORE_PartitionAnalysis()
     //L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
     if (EFI_ERROR(Status))
     {
-         DEBUG ((EFI_D_INFO, "LocateProtocol1 error: %x\n", Status));        
+         DEBUG ((EFI_D_INFO, "LocateProtocol1 error: %x\n", Status));
          L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
         return Status;
     }
@@ -2774,6 +2784,9 @@ VOID L2_GRAPHICS_LayerCompute(int iMouseX, int iMouseY, UINT8 MouseClickFlag)
     if (DisplayMyComputerFlag)
         L2_GRAPHICS_Copy(pDeskDisplayBuffer, pMyComputerBuffer, ScreenWidth, ScreenHeight, MyComputerWidth, MyComputerHeight, MyComputerPositionX, MyComputerPositionY);
 
+    if (DisplaySystemLogWindowFlag)
+        L2_GRAPHICS_Copy(pDeskDisplayBuffer, pSystemLogWindowBuffer, ScreenWidth, ScreenHeight, SystemLogWindowWidth, SystemLogWindowHeight, SystemLogWindowPositionX, SystemLogWindowPositionY);
+
     if (DisplayMemoryInformationWindowFlag)
         L2_GRAPHICS_Copy(pDeskDisplayBuffer, pMemoryInformationBuffer, ScreenWidth, ScreenHeight, MemoryInformationWindowWidth, MemoryInformationWindowHeight, MemoryInformationWindowPositionX, MemoryInformationWindowPositionY);
 
@@ -2830,6 +2843,10 @@ typedef enum
     SETTING_CLICKED_EVENT,
     MEMORY_INFORMATION_CLICKED_EVENT,
     MY_COMPUTER_CLOSE_CLICKED_EVENT,
+    SYSTEM_LOG_CLOSE_CLICKED_EVENT,
+    MEMORY_INFORMATION_CLOSE_CLICKED_EVENT,
+    SYSTEM_SETTING_CLOSE_CLICKED_EVENT,
+    SYSTEM_LOG_CLICKED_EVENT,
     SYSTEM_QUIT_CLICKED_EVENT,
     WALLPAPER_SETTING_CLICKED_EVENT,
     WALLPAPER_RESET_CLICKED_EVENT,
@@ -2843,6 +2860,7 @@ typedef enum
     MY_COMPUTER_CLICKED_STATE,
     MEMORY_INFORMATION_CLICKED_STATE,
     SETTING_CLICKED_STATE,
+    SYSTEM_LOG_STATE,
     SYSTEM_QUIT_STATE
 }START_MENU_STATE;
 
@@ -2851,6 +2869,7 @@ typedef enum
     START_MENU_BUTTON_MY_COMPUTER = 0,
     START_MENU_BUTTON_SYSTEM_SETTING,
     START_MENU_BUTTON_MEMORY_INFORMATION,
+    START_MENU_BUTTON_SYSTEM_LOG,
     START_MENU_BUTTON_SYSTEM_QUIT,
     START_MENU_BUTTON_MAX
 }START_MENU_BUTTON_SEQUENCE;
@@ -2901,6 +2920,14 @@ UINT16 L2_MOUSE_ClickEventGet()
         L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: SETTING_CLICKED_EVENT\n", __LINE__);
         return MEMORY_INFORMATION_CLICKED_EVENT;
     }
+    
+    // System quit button
+    if (iMouseX >= 3 + StartMenuPositionX && iMouseX <= 3 + 4 * 16  + StartMenuPositionX  
+         && iMouseY >= 3 + StartMenuPositionY + 16 * START_MENU_BUTTON_SYSTEM_LOG && iMouseY <= 3 + StartMenuPositionY + 16 * (START_MENU_BUTTON_SYSTEM_LOG + 1))
+    {
+        L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: SYSTEM_QUIT_CLICKED_EVENT\n", __LINE__);
+        return SYSTEM_LOG_CLICKED_EVENT;
+    }
 
     // System quit button
     if (iMouseX >= 3 + StartMenuPositionX && iMouseX <= 3 + 4 * 16  + StartMenuPositionX  
@@ -2933,6 +2960,31 @@ UINT16 L2_MOUSE_ClickEventGet()
         L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: MY_COMPUTER_CLOSE_CLICKED_EVENT\n", __LINE__);
         return MY_COMPUTER_CLOSE_CLICKED_EVENT;
     }
+
+    // Hide System Log window
+    if (iMouseX >= SystemLogWindowPositionX + SystemLogWindowWidth - 20 && iMouseX <=  SystemLogWindowPositionX + SystemLogWindowWidth - 4 
+            && iMouseY >= SystemLogWindowPositionY+ 0 && iMouseY <= SystemLogWindowPositionY + 16)
+    {
+        L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: SYSTEM_LOG_CLOSE_CLICKED_EVENT\n", __LINE__);
+        return SYSTEM_LOG_CLOSE_CLICKED_EVENT;
+    }
+    
+    // Hide Memory Information window
+    if (iMouseX >= MemoryInformationWindowPositionX + MemoryInformationWindowWidth - 20 && iMouseX <=  MemoryInformationWindowPositionX + MemoryInformationWindowWidth - 4 
+            && iMouseY >= MemoryInformationWindowPositionY+ 0 && iMouseY <= MemoryInformationWindowPositionY + 16)
+    {
+        L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: MEMORY_INFORMATION_CLOSE_CLICKED_EVENT\n", __LINE__);
+        return MEMORY_INFORMATION_CLOSE_CLICKED_EVENT;
+    }
+
+
+    // Hide Memory Information window
+    if (iMouseX >= SystemSettingWindowPositionX + SystemSettingWindowWidth - 20 && iMouseX <=  SystemSettingWindowPositionX + SystemSettingWindowWidth - 4 
+            && iMouseY >= SystemSettingWindowPositionY+ 0 && iMouseY <= SystemSettingWindowPositionY + 16)
+    {
+        L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: MEMORY_INFORMATION_CLOSE_CLICKED_EVENT\n", __LINE__);
+        return SYSTEM_SETTING_CLOSE_CLICKED_EVENT;
+    }
     
     //DisplayMyComputerFlag = 0;
     DisplaySystemSettingWindowFlag = 0;
@@ -2961,6 +3013,12 @@ L2_MOUSE_MemoryInformationClicked()
 {   
     L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d L2_MOUSE_SystemQuitClicked\n", __LINE__);
     DisplayMemoryInformationWindowFlag = TRUE;  
+}
+
+L2_MOUSE_SystemLogClicked()
+{   
+    L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d L2_MOUSE_SystemQuitClicked\n", __LINE__);
+    DisplaySystemLogWindowFlag = TRUE;  
 }
 
 
@@ -4276,7 +4334,7 @@ VOID L3_APPLICATION_MyComputerWindow(UINT16 StartX, UINT16 StartY)
 
         x += 64;
 
-        char type[10] = "OTHER";   
+        char type[10] = "OTHER";
         UINT8 FileSystemType = L2_FILE_PartitionTypeAnalysis(i);
         if (FILE_SYSTEM_FAT32 == FileSystemType)
         {
@@ -4285,6 +4343,7 @@ VOID L3_APPLICATION_MyComputerWindow(UINT16 StartX, UINT16 StartY)
             type[2] = 'T';
             type[3] = '3';
             type[4] = '2';
+            type[5] = '\0';
         }
         else if(FILE_SYSTEM_NTFS == FileSystemType) 
         {   
@@ -4339,7 +4398,9 @@ VOID L3_APPLICATION_MemoryInformationWindow(UINT16 StartX, UINT16 StartY)
     UINT8 *pBuffer = pMemoryInformationBuffer;
     UINT16 Width = MemoryInformationWindowWidth;
     UINT16 Height = MemoryInformationWindowHeight;
-    
+
+    MemoryInformationWindowPositionX = StartX;
+    MemoryInformationWindowPositionY = StartY;
     
     EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
     
@@ -4434,6 +4495,96 @@ VOID L3_APPLICATION_MemoryInformationWindow(UINT16 StartX, UINT16 StartY)
     return EFI_SUCCESS;
 }
 
+
+VOID L3_APPLICATION_SystemLogWindow(UINT16 StartX, UINT16 StartY)
+{
+    UINT8 *pParent;
+    UINT16 Type;
+    CHAR8 *pWindowTitle;
+    UINT16 i = 0;
+    UINT16 j = 0;
+    
+    L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: SystemLogWindow: %d \n", __LINE__, SystemLogWindowWidth);
+    L3_WINDOW_Create(pSystemLogWindowBuffer, pParent, SystemLogWindowWidth, SystemLogWindowHeight, Type, pWindowTitle);
+
+    UINT8 *pBuffer = pSystemLogWindowBuffer;
+    UINT16 Width = SystemLogWindowWidth;
+    UINT16 Height = SystemLogWindowHeight;
+
+    SystemLogWindowPositionX = StartX;
+    SystemLogWindowPositionY= StartY;
+    
+    
+    EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
+    
+    Color.Blue  = 0xff;
+    Color.Red   = 0xff;
+    Color.Green = 0xff;
+    Color.Reserved = GRAPHICS_LAYER_MY_COMPUTER;
+    
+    //汉字	区位码	汉字	区位码	汉字	区位码	汉字	区位码
+    //系	4721	统	4519	日	4053	志	5430
+    UINT16 TitleX = 3;
+    UINT16 TitleY = 6;
+    // wo de dian nao
+    L2_GRAPHICS_ChineseCharDraw2(pBuffer, TitleX, TitleY, (47 - 1) * 94 + 21 - 1, Color, Width); 
+
+    TitleX += 16;
+    L2_GRAPHICS_ChineseCharDraw2(pBuffer, TitleX, TitleY, (45 - 1) * 94 + 19 - 1, Color, Width);
+    
+    TitleX += 16;
+    L2_GRAPHICS_ChineseCharDraw2(pBuffer, TitleX, TitleY, (40 - 1) * 94 + 53 - 1, Color, Width);
+    
+    TitleX += 16;
+    L2_GRAPHICS_ChineseCharDraw2(pBuffer, TitleX, TitleY, (54 - 1) * 94 + 30 - 1, Color, Width);
+
+    L2_GRAPHICS_ChineseCharDraw2(pBuffer, Width - 3 * 16 - 3, 6, (12 - 1) * 94 + 58 - 1, Color, Width);
+    L2_GRAPHICS_ChineseCharDraw2(pBuffer, Width - 2 * 16 - 3, 6, (01 - 1) * 94 + 85 - 1, Color, Width);
+    L2_GRAPHICS_ChineseCharDraw2(pBuffer, Width - 1 * 16 - 3, 6, (14 - 1) * 94 + 21 - 1, Color, Width);
+
+    // The Left of Window
+    for (i = 23; i < Height; i++)
+    {
+        for (j = 0; j < Width / 3; j++)
+        {
+            pBuffer[(i * Width + j) * 4] = 214;
+            pBuffer[(i * Width + j) * 4 + 1] = 211;
+            pBuffer[(i * Width + j) * 4 + 2] = 204;
+            pBuffer[(i * Width + j) * 4 + 3] = GRAPHICS_LAYER_MY_COMPUTER;
+        }
+    }
+
+    // The right of Window
+    for (i = 23; i < Height; i++)
+    {
+        for (j = Width / 3 - 1; j < Width; j++)
+        {
+            pBuffer[(i * Width + j) * 4] = 214;
+            pBuffer[(i * Width + j) * 4 + 1] = 211;
+            pBuffer[(i * Width + j) * 4 + 2] = 104;
+            pBuffer[(i * Width + j) * 4 + 3] = GRAPHICS_LAYER_MY_COMPUTER;
+        }
+    }
+    
+    int x = 0, y = 0;
+    
+    y += 16;
+    y += 16;
+    
+    x = 50;
+    //3658
+    //内
+    //2070
+    //存
+    L2_GRAPHICS_ChineseCharDraw2(pBuffer, x, y,          (36 - 1 ) * 94 + 58 - 1, Color, Width);  
+    x += 16;
+    
+    L2_GRAPHICS_ChineseCharDraw2(pBuffer, x, y,          (20 - 1 ) * 94 + 70 - 1, Color, Width);  
+    x += 16;
+        
+    
+    return EFI_SUCCESS;
+}
 
 
 EFI_STATUS L3_APPLICATION_ReadFile(UINT8 *FileName, UINT8 NameLength, UINT8 *pBuffer)
@@ -5229,7 +5380,22 @@ EFI_STATUS L2_GRAPHICS_StartMenuInit()
     
     L2_GRAPHICS_ChineseCharDraw2(pStartMenuBuffer, x , y,     (31 - 1) * 94 + 20 - 1, Color, StartMenuWidth);   
     
-
+    //系统日志
+    //汉字	区位码	汉字	区位码	汉字	区位码	汉字	区位码
+    //系	4721	统	4519	日	4053	志	5430
+    x = 3;
+    y += 16;
+    L2_GRAPHICS_ChineseCharDraw2(pStartMenuBuffer, x , y,     (47 - 1 ) * 94 + 21 - 1, Color, StartMenuWidth);    
+    x += 16;
+    
+    L2_GRAPHICS_ChineseCharDraw2(pStartMenuBuffer, x , y,     (45 - 1) * 94 + 19 - 1, Color, StartMenuWidth);
+    x += 16;
+    
+    L2_GRAPHICS_ChineseCharDraw2(pStartMenuBuffer, x , y,     (40 - 1) * 94 + 53 - 1, Color, StartMenuWidth);
+    x += 16;
+    
+    L2_GRAPHICS_ChineseCharDraw2(pStartMenuBuffer, x , y,     (54 - 1) * 94 + 30 - 1, Color, StartMenuWidth);   
+    
     //系统退出
     //退 4543    出   1986
     x = 3;
@@ -5244,8 +5410,6 @@ EFI_STATUS L2_GRAPHICS_StartMenuInit()
     x += 16;
     
     L2_GRAPHICS_ChineseCharDraw2(pStartMenuBuffer, x , y,     (19 - 1) * 94 + 86 - 1, Color, StartMenuWidth);   
-    
-
 }
 
 
@@ -5510,6 +5674,7 @@ START_MENU_STATE_TRANSFORM StartMenuStateTransformTable[] =
     {MENU_CLICKED_STATE,            MY_COMPUTER_CLICKED_EVENT,          MY_COMPUTER_CLICKED_STATE,          L2_MOUSE_MyComputerClicked},
     {MENU_CLICKED_STATE,            SETTING_CLICKED_EVENT,              SETTING_CLICKED_STATE,              L2_MOUSE_SettingClicked},
     {MENU_CLICKED_STATE,            MEMORY_INFORMATION_CLICKED_EVENT,   MEMORY_INFORMATION_CLICKED_STATE,   L2_MOUSE_MemoryInformationClicked},
+    {MENU_CLICKED_STATE,            SYSTEM_LOG_CLICKED_EVENT,           SYSTEM_LOG_STATE,                   L2_MOUSE_SystemLogClicked},
     {MENU_CLICKED_STATE,            SYSTEM_QUIT_CLICKED_EVENT,          SYSTEM_QUIT_STATE,                  L2_MOUSE_SystemQuitClicked},
     {SETTING_CLICKED_STATE,         WALLPAPER_SETTING_CLICKED_EVENT,    CLICK_INIT_STATE,                   L2_MOUSE_WallpaperSettingClicked},
     {SETTING_CLICKED_STATE,         WALLPAPER_RESET_CLICKED_EVENT,      CLICK_INIT_STATE,                   L2_MOUSE_WallpaperResetClicked},
@@ -5545,6 +5710,24 @@ L2_MOUSE_Moveover()
     if (StartMenuClickEvent == MY_COMPUTER_CLOSE_CLICKED_EVENT && DisplayMyComputerFlag == 1)
     {
         DisplayMyComputerFlag = 0;
+        return;
+    }
+
+    if (StartMenuClickEvent == SYSTEM_LOG_CLOSE_CLICKED_EVENT && DisplaySystemLogWindowFlag == 1)
+    {
+        DisplaySystemLogWindowFlag = 0;
+        return;
+    }
+
+    if (StartMenuClickEvent == SYSTEM_SETTING_CLOSE_CLICKED_EVENT && DisplaySystemSettingWindowFlag == 1)
+    {
+        DisplaySystemSettingWindowFlag = 0;
+        return;
+    }
+
+    if (StartMenuClickEvent == MEMORY_INFORMATION_CLOSE_CLICKED_EVENT && DisplayMemoryInformationWindowFlag == 1)
+    {
+        DisplayMemoryInformationWindowFlag = 0;
         return;
     }
         
@@ -5708,6 +5891,13 @@ EFI_STATUS L2_COMMON_MemoryAllocate()
     {
         DEBUG ((EFI_D_INFO, "MyComputer , AllocateZeroPool failed... "));
         return -1;
+    }       
+    
+    pSystemLogWindowBuffer = (UINT8 *)L2_MEMORY_Allocate("System Log Window Buffer", MEMORY_TYPE_GRAPHICS, SystemLogWindowWidth * SystemLogWindowHeight * 4);
+    if (pSystemLogWindowBuffer == NULL)
+    {
+        DEBUG ((EFI_D_INFO, "pSystemLogWindowBuffer , AllocateZeroPool failed... "));
+        return -1;
     }
     
     MouseColor.Blue  = 0xff;
@@ -5864,6 +6054,8 @@ Main (
     
     L3_APPLICATION_MyComputerWindow(100, 100);
         
+    L3_APPLICATION_SystemLogWindow(100, 100);
+    
     L3_APPLICATION_MemoryInformationWindow(100, 100);
     
     L2_TIMER_IntervalInit();    
@@ -5896,4 +6088,3 @@ https://blog.csdn.net/czg13548930186/article/details/79861914
 InitializeMemory
 InternalMemSetMem
 */
-
