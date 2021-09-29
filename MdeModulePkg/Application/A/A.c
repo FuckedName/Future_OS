@@ -310,12 +310,10 @@ UINT16 MyComputerHeight = 16 * 40;
 UINT16 MyComputerPositionX = 300;
 UINT16 MyComputerPositionY = 300;
 
-
 UINT16 SystemLogWindowWidth = 16 * 30;
 UINT16 SystemLogWindowHeight = 16 * 40;
 UINT16 SystemLogWindowPositionX = 160;
 UINT16 SystemLogWindowPositionY = 160;
-
 
 UINT16 MemoryInformationWindowWidth = 16 * 30;
 UINT16 MemoryInformationWindowHeight = 16 * 40;
@@ -6054,9 +6052,9 @@ Main (
     
     L3_APPLICATION_MyComputerWindow(100, 100);
         
-    L3_APPLICATION_SystemLogWindow(100, 100);
+    L3_APPLICATION_SystemLogWindow(140, 140);
     
-    L3_APPLICATION_MemoryInformationWindow(100, 100);
+    L3_APPLICATION_MemoryInformationWindow(200, 200);
     
     L2_TIMER_IntervalInit();    
     
