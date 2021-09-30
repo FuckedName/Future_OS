@@ -212,6 +212,9 @@ char pKeyboardInputBuffer[KEYBOARD_BUFFER_LENGTH] = {0};
 #define DISPLAY_ERROR_STATUS_X (ScreenWidth * 2 / 4) 
 #define DISPLAY_ERROR_STATUS_Y (16 * (StatusErrorCount++ % (ScreenHeight / 16 - 3)) )
 
+#define DISPLAY_LOG_ERROR_STATUS_X (4) 
+#define DISPLAY_LOG_ERROR_STATUS_Y (16 * (LogStatusErrorCount++ % (ScreenHeight / 16 - 3)) )
+
 #define FILE_SYSTEM_OTHER   0xff
 #define FILE_SYSTEM_FAT32  1
 #define FILE_SYSTEM_NTFS   2
@@ -223,6 +226,8 @@ char pKeyboardInputBuffer[KEYBOARD_BUFFER_LENGTH] = {0};
 #define SYSTEM_QUIT_FLAG FALSE
 
 extern EFI_SIMPLE_FILE_SYSTEM_PROTOCOL *gSimpleFileSystem; 
+
+UINT16 LogStatusErrorCount = 0;
 
 UINT16 StatusErrorCount = 0;
 UINT16 DisplayCount = 0;
@@ -353,7 +358,14 @@ int display_sector_number = 0;
 #define SYSTEM_ICON_WIDTH 400
 #define SYSTEM_ICON_HEIGHT 320
 
+typedef struct
+{
+    UINT8 *pBuffer;
+    UINT16 BufferWidth;
+    UINT16 BufferHeight;
+}GRAPHICS_LAYER_FOR_DISPLAY;
 
+GRAPHICS_LAYER_FOR_DISPLAY LogLayer;
 
 const UINT8 sASCII[][16] =
 {   
@@ -1550,12 +1562,6 @@ VOID EFIAPI L2_DEBUG_Print1 (UINT16 x, UINT16 y,  IN  CONST CHAR8  *Format, ...)
     VA_END (VaList);
 }
 
-typedef struct
-{
-    UINT8 *pBuffer;
-    UINT16 BufferWidth;
-    UINT16 BufferHeight;
-}GRAPHICS_LAYER_FOR_DISPLAY;
 
 /* Display a string */
 VOID EFIAPI L2_DEBUG_Print2 (UINT16 x, UINT16 y, UINT8 *pBuffer, IN  CONST CHAR8  *Format, ...)
@@ -1584,11 +1590,11 @@ VOID EFIAPI L2_DEBUG_Print3 (UINT16 x, UINT16 y, GRAPHICS_LAYER_FOR_DISPLAY laye
 
 EFI_STATUS L1_STRING_Compare(UINT8 *p1, UINT8 *p2, UINT16 length)
 {
-    //L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: StrCmpSelf\n", __LINE__);
+    //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: StrCmpSelf\n", __LINE__);
     
     for (int i = 0; i < length; i++)
     {
-        //L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%02X %02X ", p1[i], p2[i]);
+        //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%02X %02X ", p1[i], p2[i]);
         if (p1[i] != p2[i])
             return -1;
     }
@@ -1642,7 +1648,7 @@ EFI_STATUS L1_FILE_RootPathAnalysis(UINT8 *p)
     memcpy(&pItems, p, DISK_BUFFER_SIZE);
     UINT16 valid_count = 0;
     
-    L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: .: %d\n", __LINE__, ReadFileName[7]);
+    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: .: %d\n", __LINE__, ReadFileName[7]);
 
     //display filing file and subpath. 
     for (int i = 0; i < 30; i++)
@@ -1663,9 +1669,9 @@ EFI_STATUS L1_FILE_RootPathAnalysis(UINT8 *p)
             UINT8 FileName2[13] = {0};
             L1_FILE_NameGet(i, FileName);
             L1_FILE_NameGet2(i, FileName2);
-            L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: FileName: %a\n", __LINE__, FileName);
-            L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: FileName2: %a\n", __LINE__, FileName2);
-            L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: ReadFileName: %a\n", __LINE__, ReadFileName);
+            L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: FileName: %a\n", __LINE__, FileName);
+            L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: FileName2: %a\n", __LINE__, FileName2);
+            L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: ReadFileName: %a\n", __LINE__, ReadFileName);
 
             //for (int j = 0; j < 5; j++)
             //  L2_DEBUG_Print1(j * 3 * 8, 16 * 40 + valid_count * 16, "%02X ", pItems[i].FileName[j]);
@@ -1682,7 +1688,7 @@ EFI_STATUS L1_FILE_RootPathAnalysis(UINT8 *p)
               FileBlockStart = (UINT32)pItems[i].StartClusterHigh2B[0] * 16 * 16 * 16 * 16 + (UINT32)pItems[i].StartClusterHigh2B[1] * 16 * 16 * 16 * 16 * 16 * 16 + pItems[i].StartClusterLow2B[0] + (UINT32)pItems[i].StartClusterLow2B[1] * 16 * 16;
               FileLength = pItems[i].FileLength[0] + (UINT32)pItems[i].FileLength[1] * 16 * 16 + (UINT32)pItems[i].FileLength[2] * 16 * 16 * 16 * 16 + (UINT32)pItems[i].FileLength[3] * 16 * 16 * 16 * 16 * 16 * 16;
 
-              L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: FileBlockStart: %d FileLength: %ld\n", __LINE__, FileBlockStart, FileLength);
+              L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: FileBlockStart: %d FileLength: %ld\n", __LINE__, FileBlockStart, FileLength);
             }
         }
 
@@ -1698,7 +1704,7 @@ EFI_STATUS L1_FILE_RootPathAnalysis1(UINT8 *p)
         //if (pItems[i].FileName[0] != 0xE5 && (pItems[i].Attribute[0] == 0x20 
         //    || pItems[i].Attribute[0] == 0x10))
        {
-            L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d FileName:%2c%2c%2c%2c%2c%2c%2c%2c ExtensionName:%2c%2c%2c StartCluster:%02X%02X%02X%02X FileLength: %02X%02X%02X%02X Attribute: %02X    ",  __LINE__,
+            L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d FileName:%2c%2c%2c%2c%2c%2c%2c%2c ExtensionName:%2c%2c%2c StartCluster:%02X%02X%02X%02X FileLength: %02X%02X%02X%02X Attribute: %02X    ",  __LINE__,
                                             pItems[i].FileName[0], pItems[i].FileName[1], pItems[i].FileName[2], pItems[i].FileName[3], pItems[i].FileName[4], pItems[i].FileName[5], pItems[i].FileName[6], pItems[i].FileName[7],
                                             pItems[i].ExtensionName[0], pItems[i].ExtensionName[1],pItems[i].ExtensionName[2],
                                             pItems[i].StartClusterHigh2B[0], pItems[i].StartClusterHigh2B[1],
@@ -1721,7 +1727,7 @@ UINTN L1_STRING_Length(char *String)
 // Analysis attribut A0 of $Root
 EFI_STATUS  L2_FILE_NTFS_DollarRootA0DatarunAnalysis(UINT8 *p)
 {
-    L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: string length: %d\n", __LINE__,  L1_STRING_Length(p));
+    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: string length: %d\n", __LINE__,  L1_STRING_Length(p));
     UINT16 i = 0;
     UINT16 length = L1_STRING_Length(p);
     UINT8 occupyCluster = 0;
@@ -1732,7 +1738,7 @@ EFI_STATUS  L2_FILE_NTFS_DollarRootA0DatarunAnalysis(UINT8 *p)
     {
         int  offsetLength  = p[i] >> 4;
         int  occupyClusterLength = p[i] & 0x0f;
-         L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: occupyClusterLength: %d offsetLength: %d\n", __LINE__,  occupyClusterLength, offsetLength);
+         L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: occupyClusterLength: %d offsetLength: %d\n", __LINE__,  occupyClusterLength, offsetLength);
         
         i++;
         if (occupyClusterLength == 1)
@@ -1750,7 +1756,7 @@ EFI_STATUS  L2_FILE_NTFS_DollarRootA0DatarunAnalysis(UINT8 *p)
             offset = L1_NETWORK_3BytesToUINT32(size);
         }
         A0Indexes[Index].Offset = offset;
-        L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d offset:%d \n", __LINE__, offset);
+        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d offset:%d \n", __LINE__, offset);
         i += offsetLength;
         Index++;
         //INFO_SELF(" i: %d\n", i);
@@ -1928,7 +1934,7 @@ EFI_STATUS  L2_FILE_NTFS_MFTDollarRootFileAnalysis(UINT8 *pBuffer)
     p = (UINT8 *)AllocateZeroPool(DISK_BUFFER_SIZE * 2);
     if (p == NULL)
     {
-        L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: p == NULL \n", __LINE__);
+        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: p == NULL \n", __LINE__);
         return EFI_SUCCESS;
     }
 
@@ -1949,7 +1955,7 @@ EFI_STATUS  L2_FILE_NTFS_MFTDollarRootFileAnalysis(UINT8 *pBuffer)
     
     // File header length
     UINT16 AttributeOffset = L1_NETWORK_2BytesToUINT16(((FILE_HEADER *)p)->AttributeOffset);
-    L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: AttributeOffset:%X \n", __LINE__, AttributeOffset);
+    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: AttributeOffset:%X \n", __LINE__, AttributeOffset);
 
     // location of a0 attribute may be in front of 10 
     // ofcourse mybe some bugs...
@@ -1972,7 +1978,7 @@ EFI_STATUS  L2_FILE_NTFS_MFTDollarRootFileAnalysis(UINT8 *pBuffer)
         UINT16  NameSize = ((CommonAttributeHeader *)pItem)->NameSize;
         
         UINT16  NameOffset = L1_NETWORK_2BytesToUINT16(((CommonAttributeHeader *)pItem)->NameOffset);
-        L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Type[0]: %02X AttributeSize: %02X NameSize: %02X NameOffset: %02X\n", __LINE__, 
+        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: Type[0]: %02X AttributeSize: %02X NameSize: %02X NameOffset: %02X\n", __LINE__, 
                                                             ((CommonAttributeHeader *)pItem)->Type[0],
                                                             AttributeSize,
                                                             NameSize,
@@ -1986,13 +1992,13 @@ EFI_STATUS  L2_FILE_NTFS_MFTDollarRootFileAnalysis(UINT8 *pBuffer)
             UINT16 DataRunsSize = AttributeSize - NameOffset - NameSize * 2;
             if (DataRunsSize > 100 || DataRunsSize < 0)
             {
-                L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: DataRunsSize illegal.", __LINE__);
+                L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: DataRunsSize illegal.", __LINE__);
                 return ;
             }
             UINT8 DataRuns[20] = {0};
-            L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: A0 attribute has been found: ", __LINE__);
+            L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: A0 attribute has been found: ", __LINE__);
             for (int i = NameOffset; i < NameOffset + NameSize * 2; i++)
-                L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%02X ", pItem[i] & 0xff);
+                L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%02X ", pItem[i] & 0xff);
 
             int j = 0;
 
@@ -2000,7 +2006,7 @@ EFI_STATUS  L2_FILE_NTFS_MFTDollarRootFileAnalysis(UINT8 *pBuffer)
             for (int i = NameOffset + NameSize * 2; i < AttributeSize; i++)
             {           
                 DataRuns[j] = pItem[i] & 0xff;
-                L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%02X ", DataRuns[j] & 0xff);   
+                L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%02X ", DataRuns[j] & 0xff);   
                 j++;
             }
             L2_FILE_NTFS_DollarRootA0DatarunAnalysis(DataRuns);
@@ -2019,7 +2025,7 @@ EFI_STATUS  L2_FILE_NTFS_MFTIndexItemsAnalysis(UINT8 *pBuffer)
 
     if (NULL == p)
     {
-        L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d NULL == p\n", __LINE__);
+        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d NULL == p\n", __LINE__);
         return EFI_SUCCESS;
     }
     
@@ -2028,7 +2034,7 @@ EFI_STATUS  L2_FILE_NTFS_MFTIndexItemsAnalysis(UINT8 *pBuffer)
         p[i] = pBuffer[i];
 
     //IndexEntryOffset:索引项的偏移 相对于当前位置
-    L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d IndexEntryOffset: %llu IndexEntrySize: %llu\n", __LINE__, 
+    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d IndexEntryOffset: %llu IndexEntrySize: %llu\n", __LINE__, 
                                                                      L1_NETWORK_4BytesToUINT32(((INDEX_HEADER *)p)->IndexEntryOffset),
                                                                      L1_NETWORK_4BytesToUINT32(((INDEX_HEADER *)p)->IndexEntrySize));
 
@@ -2042,7 +2048,7 @@ EFI_STATUS  L2_FILE_NTFS_MFTIndexItemsAnalysis(UINT8 *pBuffer)
          if (index >= L1_NETWORK_4BytesToUINT32(((INDEX_HEADER *)p)->IndexEntrySize))
             break;
             
-         //L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%s index: %d\n", __LINE__,  index);  
+         //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%s index: %d\n", __LINE__,  index);  
          UINT16 length2 = pBuffer[index + 8] + pBuffer[index + 9] * 16;
          
         for (int i = 0; i < length2; i++)
@@ -2050,7 +2056,7 @@ EFI_STATUS  L2_FILE_NTFS_MFTIndexItemsAnalysis(UINT8 *pBuffer)
             
          UINT8 FileNameSize =    ((INDEX_ITEM *)pItem)->FileNameSize;
          UINT8 FileContentRelativeSector =   L1_NETWORK_6BytesToUINT64(((INDEX_ITEM *)pItem)->MFTReferNumber);
-         //L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d attribut length2: %d FileNameSize: %d\n", __LINE__, 
+         //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d attribut length2: %d FileNameSize: %d\n", __LINE__, 
         //                                                           length2,
         //                                                           FileNameSize);    
          UINT8 attributeName[20];                                                                    
@@ -2058,8 +2064,8 @@ EFI_STATUS  L2_FILE_NTFS_MFTIndexItemsAnalysis(UINT8 *pBuffer)
          {
             attributeName[i] = pItem[82 + 2 * i];
          }
-         L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: attributeName: %a, FileContentRelativeSector: %llu\n", __LINE__, attributeName, FileContentRelativeSector);
-         //L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%s attributeName: %a\n", __LINE__,  attributeName);  
+         L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: attributeName: %a, FileContentRelativeSector: %llu\n", __LINE__, attributeName, FileContentRelativeSector);
+         //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%s attributeName: %a\n", __LINE__,  attributeName);  
          index += length2;
     }
 }
@@ -2296,11 +2302,11 @@ EFI_STATUS L1_STORE_READ(UINT8 deviceID, UINT64 StartSectorNumber, UINT16 ReadSi
 {
     if (StartSectorNumber > device[deviceID].SectorCount)
     {
-        L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: deviceID: %d StartSectorNumber: %ld ReadSize: %d\n", __LINE__, deviceID, StartSectorNumber, ReadSize);
+        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: deviceID: %d StartSectorNumber: %ld ReadSize: %d\n", __LINE__, deviceID, StartSectorNumber, ReadSize);
         return -1;
     }
 
-    //L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: deviceID: %d StartSectorNumber: %ld ReadSize: %d\n", __LINE__, deviceID, StartSectorNumber, ReadSize);
+    //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: deviceID: %d StartSectorNumber: %ld ReadSize: %d\n", __LINE__, deviceID, StartSectorNumber, ReadSize);
     EFI_STATUS Status;
     UINTN NumHandles;
     EFI_BLOCK_IO_PROTOCOL *BlockIo;
@@ -2310,28 +2316,28 @@ EFI_STATUS L1_STORE_READ(UINT8 deviceID, UINT64 StartSectorNumber, UINT16 ReadSi
     Status = gBS->LocateHandleBuffer(ByProtocol, &gEfiDiskIoProtocolGuid, NULL, &NumHandles, &ControllerHandle);
     if (EFI_ERROR(Status))
     {
-        L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);      
+        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: Status:%X \n", __LINE__, Status);      
         return Status;
     }
 
     Status = gBS->HandleProtocol(ControllerHandle[deviceID], &gEfiBlockIoProtocolGuid, (VOID * *) &BlockIo );   
     if (EFI_ERROR(Status))
     {
-        L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
+        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: Status:%X \n", __LINE__, Status);
         return Status;
     }
     
     Status = gBS->HandleProtocol( ControllerHandle[deviceID], &gEfiDiskIoProtocolGuid, (VOID * *) &DiskIo );     
     if (EFI_ERROR(Status))
     {
-        L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
+        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: Status:%X \n", __LINE__, Status);
         return Status;
     }
 
     Status = DiskIo->ReadDisk(DiskIo, BlockIo->Media->MediaId, DISK_BUFFER_SIZE * (StartSectorNumber), DISK_BUFFER_SIZE * ReadSize, pBuffer);
     if (EFI_ERROR(Status))
     {
-        L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X sector_count:%ld\n", __LINE__, Status, sector_count);
+        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: Status:%X sector_count:%ld\n", __LINE__, Status, sector_count);
         return Status;
     }
     
@@ -2340,7 +2346,7 @@ EFI_STATUS L1_STORE_READ(UINT8 deviceID, UINT64 StartSectorNumber, UINT16 ReadSi
         //L2_DEBUG_Print1(DISK_READ_BUFFER_X + (j % 16) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 16), "%02X ", pBuffer[j] & 0xff);
     }
     //INFO_SELF("\n");
-    //L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
+    //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: Status:%X \n", __LINE__, Status);
     return EFI_SUCCESS;
 }
 
@@ -2350,11 +2356,11 @@ EFI_STATUS L1_STORE_Write(UINT8 deviceID, UINT64 StartSectorNumber, UINT16 Write
 {
     if (StartSectorNumber > device[deviceID].SectorCount)
     {
-        L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: deviceID: %d StartSectorNumber: %ld ReadSize: %d\n", __LINE__, deviceID, StartSectorNumber, WriteSize);
+        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: deviceID: %d StartSectorNumber: %ld ReadSize: %d\n", __LINE__, deviceID, StartSectorNumber, WriteSize);
         return -1;
     }
 
-    //L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: deviceID: %d StartSectorNumber: %ld ReadSize: %d\n", __LINE__, deviceID, StartSectorNumber, ReadSize);
+    //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: deviceID: %d StartSectorNumber: %ld ReadSize: %d\n", __LINE__, deviceID, StartSectorNumber, ReadSize);
     EFI_STATUS Status;
     UINTN NumHandles;
     EFI_BLOCK_IO_PROTOCOL *BlockIo;
@@ -2364,28 +2370,28 @@ EFI_STATUS L1_STORE_Write(UINT8 deviceID, UINT64 StartSectorNumber, UINT16 Write
     Status = gBS->LocateHandleBuffer(ByProtocol, &gEfiDiskIoProtocolGuid, NULL, &NumHandles, &ControllerHandle);
     if (EFI_ERROR(Status))
     {
-        L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);      
+        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: Status:%X \n", __LINE__, Status);      
         return Status;
     }
 
     Status = gBS->HandleProtocol(ControllerHandle[deviceID], &gEfiBlockIoProtocolGuid, (VOID * *) &BlockIo );   
     if (EFI_ERROR(Status))
     {
-        L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
+        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: Status:%X \n", __LINE__, Status);
         return Status;
     }
     
     Status = gBS->HandleProtocol( ControllerHandle[deviceID], &gEfiDiskIoProtocolGuid, (VOID * *) &DiskIo );     
     if (EFI_ERROR(Status))
     {
-        L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
+        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: Status:%X \n", __LINE__, Status);
         return Status;
     }
 
     Status = DiskIo->WriteDisk(DiskIo, BlockIo->Media->MediaId, DISK_BUFFER_SIZE * (StartSectorNumber), DISK_BUFFER_SIZE * WriteSize, pBuffer);
     if (EFI_ERROR(Status))
     {
-        L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X sector_count:%ld\n", __LINE__, Status, sector_count);
+        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: Status:%X sector_count:%ld\n", __LINE__, Status, sector_count);
         return Status;
     }
     
@@ -2394,7 +2400,7 @@ EFI_STATUS L1_STORE_Write(UINT8 deviceID, UINT64 StartSectorNumber, UINT16 Write
         //L2_DEBUG_Print1(DISK_READ_BUFFER_X + (j % 16) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 16), "%02X ", pBuffer[j] & 0xff);
     }
     //INFO_SELF("\n");
-    //L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
+    //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: Status:%X \n", __LINE__, Status);
     return EFI_SUCCESS;
 }
 
@@ -2410,7 +2416,7 @@ EFI_STATUS L1_STORE_Write(UINT8 deviceID, UINT64 StartSectorNumber, UINT16 Write
 */
 EFI_STATUS L2_FILE_NTFS_MFT_Item_Read(UINT16 DeviceID, UINT16 MFT_Item_ID)
 {
-    L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d DeviceID: %d\n", __LINE__, DeviceID);
+    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d DeviceID: %d\n", __LINE__, DeviceID);
     //printf( "RootPathAnalysis\n" );
     DEBUG ((EFI_D_INFO, "PartitionUSBRead!!\r\n"));
     EFI_STATUS Status ;
@@ -2421,7 +2427,7 @@ EFI_STATUS L2_FILE_NTFS_MFT_Item_Read(UINT16 DeviceID, UINT16 MFT_Item_ID)
     Status = L1_STORE_READ(DeviceID, sector_count + MFT_Item_ID * 2, 2, BufferMFT); 
     if (EFI_ERROR(Status))
     {
-        L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d Status: %X\n", __LINE__, Status);
+        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d Status: %X\n", __LINE__, Status);
         return Status;
     }
     
@@ -2437,7 +2443,7 @@ EFI_STATUS L2_FILE_NTFS_MFT_Item_Read(UINT16 DeviceID, UINT16 MFT_Item_ID)
     // data area start from 1824, HZK16 file start from     FileBlockStart  block, so need to convert into sector by multi 8, block start number is 2   
     // next state is to read FAT table
     // sector_count = MBRSwitched.ReservedSelector;
-    L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: sector_count:%ld FileLength: %d MBRSwitched.ReservedSelector:%ld\n",  __LINE__, sector_count, FileLength, MBRSwitched.ReservedSelector);
+    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: sector_count:%ld FileLength: %d MBRSwitched.ReservedSelector:%ld\n",  __LINE__, sector_count, FileLength, MBRSwitched.ReservedSelector);
       
     return EFI_SUCCESS;
 }
@@ -2453,7 +2459,7 @@ EFI_STATUS L1_FILE_FAT32_DataSectorAnalysis(UINT8 *p, MasterBootRecordSwitched *
     // 大端字节序：低位字节在高地址，高位字节低地址上。这是人类读写数值的方法。
     // 小端字节序：与上面相反。低位字节在低地址，高位字节在高地址。
 /*
-    L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d ReservedSelector:%02X%02X SectorsPerFat:%02X%02X%02X%02X BootPathStartCluster:%02X%02X%02X%02X NumFATS: %X", 
+    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d ReservedSelector:%02X%02X SectorsPerFat:%02X%02X%02X%02X BootPathStartCluster:%02X%02X%02X%02X NumFATS: %X", 
                                         __LINE__,
                                         pMBR->ReservedSelector[0], pMBR->ReservedSelector[1], 
                                         pMBR->SectorsPerFat[0], pMBR->SectorsPerFat[1], pMBR->SectorsPerFat[2], pMBR->SectorsPerFat[3],
@@ -2470,7 +2476,7 @@ EFI_STATUS L1_FILE_FAT32_DataSectorAnalysis(UINT8 *p, MasterBootRecordSwitched *
 // analysis a partition 
 EFI_STATUS L2_FILE_FAT32_DataSectorHandle(UINT16 DeviceID)
 {
-    //L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d DeviceID: %d\n", __LINE__, DeviceID);
+    //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d DeviceID: %d\n", __LINE__, DeviceID);
     //printf( "RootPathAnalysis\n" );
     EFI_STATUS Status ;
     UINT8 Buffer1[DISK_BUFFER_SIZE];
@@ -2478,7 +2484,7 @@ EFI_STATUS L2_FILE_FAT32_DataSectorHandle(UINT16 DeviceID)
     Status = L1_STORE_READ(DeviceID, sector_count, 1, Buffer1); 
     if (EFI_ERROR(Status))
     {
-        L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d Status: %X\n", __LINE__, Status);
+        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d Status: %X\n", __LINE__, Status);
         return Status;
     }
     
@@ -2488,20 +2494,20 @@ EFI_STATUS L2_FILE_FAT32_DataSectorHandle(UINT16 DeviceID)
     // data area start from 1824, HZK16 file start from     FileBlockStart  block, so need to convert into sector by multi 8, block start number is 2   
     // next state is to read FAT table
     sector_count = MBRSwitched.ReservedSelector;
-    L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: sector_count:%ld FileLength: %d MBRSwitched.ReservedSelector:%ld\n",  __LINE__, sector_count, FileLength, MBRSwitched.ReservedSelector);
+    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: sector_count:%ld FileLength: %d MBRSwitched.ReservedSelector:%ld\n",  __LINE__, sector_count, FileLength, MBRSwitched.ReservedSelector);
 
     return EFI_SUCCESS;
 }
 EFI_STATUS L2_FILE_NTFS_RootPathItemsRead(UINT8 i)
 {
-    //L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d DeviceType: %d, SectorCount: %lld\n", __LINE__, i);
+    //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d DeviceType: %d, SectorCount: %lld\n", __LINE__, i);
     EFI_STATUS Status ;
     UINT8 BufferBlock[DISK_BLOCK_BUFFER_SIZE];
 
     UINT8 k = 0;
     UINT16 lastOffset = 0;
     /*
-    L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Offset:%ld OccupyCluster:%ld\n",  __LINE__, 
+    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: Offset:%ld OccupyCluster:%ld\n",  __LINE__, 
                                                                      (A0Indexes[k].Offset + lastOffset) * 8, 
                                                                      A0Indexes[k].OccupyCluster * 8);
     */
@@ -2509,7 +2515,7 @@ EFI_STATUS L2_FILE_NTFS_RootPathItemsRead(UINT8 i)
    Status = L1_STORE_READ(i, (A0Indexes[k].Offset + lastOffset) * 8 , A0Indexes[k].OccupyCluster * 8, BufferBlock);
     if (EFI_ERROR(Status))
     {
-        L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d Status: %X\n", __LINE__, Status);
+        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d Status: %X\n", __LINE__, Status);
         return Status;
     }
 
@@ -2530,7 +2536,7 @@ VOID L1_FILE_NTFS_DollerRootTransfer(DOLLAR_BOOT *pSource, DollarBootSwitched *p
     pDest->MFT_MirrStartCluster = L1_NETWORK_8BytesToUINT64(pSource->MFT_MirrStartCluster);
     
     /*
-    L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d BitsOfSector:%ld SectorOfCluster:%d AllSectorCount: %llu MFT_StartCluster:%llu MFT_MirrStartCluster:%llu", __LINE__,
+    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d BitsOfSector:%ld SectorOfCluster:%d AllSectorCount: %llu MFT_StartCluster:%llu MFT_MirrStartCluster:%llu", __LINE__,
                                                 pDest->BitsOfSector,
                                                 pDest->SectorOfCluster,
                                                 pDest->AllSectorCount,
@@ -2550,7 +2556,7 @@ EFI_STATUS L2_FILE_NTFS_FirstSelectorAnalysis(UINT8 *p, DollarBootSwitched *pNTF
     // 大端字节序：低位字节在高地址，高位字节低地址上。这是人类读写数值的方法。
     // 小端字节序：与上面相反。低位字节在低地址，高位字节在高地址。
     /*
-    L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d OEM:%c%c%c%c%c%c%c%c, BitsOfSector:%02X%02X SectorOfCluster:%02X ReservedSelector:%02X%02X Description: %X, size: %d", 
+    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d OEM:%c%c%c%c%c%c%c%c, BitsOfSector:%02X%02X SectorOfCluster:%02X ReservedSelector:%02X%02X Description: %X, size: %d", 
                                                                       __LINE__,
                                                                       pDollarBoot->OEM[0],
                                                                       pDollarBoot->OEM[1],
@@ -2568,7 +2574,7 @@ EFI_STATUS L2_FILE_NTFS_FirstSelectorAnalysis(UINT8 *p, DollarBootSwitched *pNTF
                                                                   pDollarBoot->Description,
                                                                   sizeof(pDollarBoot->OEM) / sizeof(pDollarBoot->OEM[0]));
                                                                   
-    L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d AllSectorCount:%02X%02X%02X%02X%02X%02X%02X%02X, MFT_StartCluster:%02X%02X%02X%02X%02X%02X%02X%02X MFT_MirrStartCluster:%02X%02X%02X%02X%02X%02X%02X%02X ClusterPerMFT:%02X%02X%02X%02X ClusterPerIndex: %02X%02X%02X%02X", 
+    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d AllSectorCount:%02X%02X%02X%02X%02X%02X%02X%02X, MFT_StartCluster:%02X%02X%02X%02X%02X%02X%02X%02X MFT_MirrStartCluster:%02X%02X%02X%02X%02X%02X%02X%02X ClusterPerMFT:%02X%02X%02X%02X ClusterPerIndex: %02X%02X%02X%02X", 
                                                                       __LINE__,                                                                   
                                                                   pDollarBoot->AllSectorCount[0], 
                                                                   pDollarBoot->AllSectorCount[1], 
@@ -2612,7 +2618,7 @@ EFI_STATUS L2_FILE_NTFS_FirstSelectorAnalysis(UINT8 *p, DollarBootSwitched *pNTF
 // all partitions analysis
 EFI_STATUS L2_FILE_PartitionTypeAnalysis(UINT16 DeviceID)
 {    
-    //L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d DeviceID: %d\n", __LINE__, DeviceID);
+    //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d DeviceID: %d\n", __LINE__, DeviceID);
     EFI_STATUS Status;
     UINT8 Buffer1[DISK_BUFFER_SIZE] = {0};
 
@@ -2621,21 +2627,21 @@ EFI_STATUS L2_FILE_PartitionTypeAnalysis(UINT16 DeviceID)
     Status = L1_STORE_READ(DeviceID, sector_count, 1, Buffer1 );    
     if (EFI_ERROR(Status))
     {
-        L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d Status: %X\n", __LINE__, Status);
+        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d Status: %X\n", __LINE__, Status);
         return Status;
     }
 
     // FAT32 file system
     if (Buffer1[0x52] == 'F' && Buffer1[0x53] == 'A' && Buffer1[0x54] == 'T' && Buffer1[0x55] == '3' && Buffer1[0x56] == '2')   
     {                   
-        //L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: FAT32\n",  __LINE__);
+        //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: FAT32\n",  __LINE__);
         // analysis data area of patition
         L1_FILE_FAT32_DataSectorAnalysis(Buffer1, &MBRSwitched); 
 
         // data sector number start include: reserved selector, fat sectors(usually is 2: fat1 and fat2), and file system boot path start cluster(usually is 2, data block start number is 2)
         sector_count = MBRSwitched.ReservedSelector + MBRSwitched.SectorsPerFat * MBRSwitched.NumFATS + (MBRSwitched.BootPathStartCluster - 2) * 8;
         BlockSize = MBRSwitched.SectorOfCluster * 512;
-        //L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: sector_count:%ld BlockSize: %d\n",  __LINE__, sector_count, BlockSize);
+        //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: sector_count:%ld BlockSize: %d\n",  __LINE__, sector_count, BlockSize);
         return FILE_SYSTEM_FAT32;
     }
     // NTFS
@@ -2643,13 +2649,13 @@ EFI_STATUS L2_FILE_PartitionTypeAnalysis(UINT16 DeviceID)
     {
         L2_FILE_NTFS_FirstSelectorAnalysis(Buffer1, &NTFSBootSwitched);
         sector_count = NTFSBootSwitched.MFT_StartCluster * 8;
-        //L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: NTFS sector_count:%llu\n",  __LINE__, sector_count);
+        //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: NTFS sector_count:%llu\n",  __LINE__, sector_count);
         return FILE_SYSTEM_NTFS;
     }
     // the other file system can add at this place
     else
     {
-        //L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: \n",  __LINE__);
+        //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: \n",  __LINE__);
         return FILE_SYSTEM_OTHER;
     }                   
 
@@ -2660,26 +2666,26 @@ EFI_STATUS L2_FILE_PartitionTypeAnalysis(UINT16 DeviceID)
 // all partitions analysis
 EFI_STATUS L2_STORE_PartitionAnalysis()
 {    
-    //L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d PartitionAnalysisFSM\n", __LINE__);
+    //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d PartitionAnalysisFSM\n", __LINE__);
     EFI_STATUS Status ;
     UINTN i;
     EFI_HANDLE *ControllerHandle = NULL;
     EFI_DEVICE_PATH_TO_TEXT_PROTOCOL *DevPathToText;
     
     Status = gBS->LocateProtocol (&gEfiDevicePathToTextProtocolGuid, NULL, (VOID **) &DevPathToText);
-    //L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
+    //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: Status:%X \n", __LINE__, Status);
     if (EFI_ERROR(Status))
     {
          DEBUG ((EFI_D_INFO, "LocateProtocol1 error: %x\n", Status));
-         L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
+         L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: Status:%X \n", __LINE__, Status);
         return Status;
     }
    
     Status = gBS->LocateHandleBuffer(ByProtocol, &gEfiDiskIoProtocolGuid, NULL, &PartitionCount, &ControllerHandle);
-    //L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
+    //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: Status:%X \n", __LINE__, Status);
     if (EFI_ERROR(Status))
     {
-        L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);      
+        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: Status:%X \n", __LINE__, Status);      
         return EFI_SUCCESS;
     }
 
@@ -2693,15 +2699,15 @@ EFI_STATUS L2_STORE_PartitionAnalysis()
                                    gImageHandle, 
                                    NULL,
                                    EFI_OPEN_PROTOCOL_GET_PROTOCOL);
-        //L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
+        //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: Status:%X \n", __LINE__, Status);
         if (EFI_ERROR(Status))
         {
-            L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
+            L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: Status:%X \n", __LINE__, Status);
             return Status;
         }
 
         CHAR16 *TextDevicePath = DevPathToText->ConvertDevicePathToText(DiskDevicePath, TRUE, TRUE);
-         L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X Partition: %s\n", __LINE__, Status, TextDevicePath);
+         L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: Status:%X Partition: %s\n", __LINE__, Status, TextDevicePath);
          L2_STORE_TextDevicePathAnalysis(TextDevicePath, &device[i], i);
                     
         if (TextDevicePath) gBS->FreePool(TextDevicePath);       
@@ -2712,7 +2718,7 @@ EFI_STATUS L2_STORE_PartitionAnalysis()
 
 L2_STORE_PartitionItemsPrint(UINT16 Index)
 {
-    //L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: \n",  __LINE__);
+    //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: \n",  __LINE__);
     
     // this code may be have some problems, because my USB file system is FAT32, my Disk file system is NTFS.
     // others use this code must be careful...
@@ -2905,13 +2911,13 @@ START_MENU_STATE StartMenuNextState = CLICK_INIT_STATE;
 
 UINT16 L2_MOUSE_ClickEventGet()
 {   
-    //L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: iMouseX: %d iMouseY: %d MouseClickFlag: %d\n", __LINE__, iMouseX, iMouseY, MouseClickFlag);
+    //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: iMouseX: %d iMouseY: %d MouseClickFlag: %d\n", __LINE__, iMouseX, iMouseY, MouseClickFlag);
 
     //start button
     if (iMouseX >= 0 && iMouseX <= 16 + 16 * 2
         && iMouseY >= ScreenHeight - 21 && iMouseY <= ScreenHeight)
     {
-        L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: START_MENU_CLICKED_EVENT\n", __LINE__);
+        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: START_MENU_CLICKED_EVENT\n", __LINE__);
         return START_MENU_CLICKED_EVENT;
     }
 
@@ -2919,7 +2925,7 @@ UINT16 L2_MOUSE_ClickEventGet()
     if (iMouseX >= 3 + StartMenuPositionX && iMouseX <= 3 + 4 * 16  + StartMenuPositionX  
          && iMouseY >= 3 + StartMenuPositionY + 16 * START_MENU_BUTTON_MY_COMPUTER && iMouseY <= 3 + StartMenuPositionY + 16 * (START_MENU_BUTTON_MY_COMPUTER + 1))
     {
-        L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: MY_COMPUTER_CLICKED_EVENT\n", __LINE__);
+        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: MY_COMPUTER_CLICKED_EVENT\n", __LINE__);
         return MY_COMPUTER_CLICKED_EVENT;
     }
 
@@ -2927,7 +2933,7 @@ UINT16 L2_MOUSE_ClickEventGet()
     if (iMouseX >= 3 + StartMenuPositionX && iMouseX <= 3 + 4 * 16  + StartMenuPositionX  
          && iMouseY >= 3 + StartMenuPositionY + 16 * START_MENU_BUTTON_SYSTEM_SETTING && iMouseY <= 3 + StartMenuPositionY + 16 * (START_MENU_BUTTON_SYSTEM_SETTING + 1))
     {
-        L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: SETTING_CLICKED_EVENT\n", __LINE__);
+        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: SETTING_CLICKED_EVENT\n", __LINE__);
         return SETTING_CLICKED_EVENT;
     }
 
@@ -2935,7 +2941,7 @@ UINT16 L2_MOUSE_ClickEventGet()
     if (iMouseX >= 3 + StartMenuPositionX && iMouseX <= 3 + 4 * 16  + StartMenuPositionX  
          && iMouseY >= 3 + StartMenuPositionY + 16 * START_MENU_BUTTON_MEMORY_INFORMATION && iMouseY <= 3 + StartMenuPositionY + 16 * (START_MENU_BUTTON_MEMORY_INFORMATION + 1))
     {
-        L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: SETTING_CLICKED_EVENT\n", __LINE__);
+        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: SETTING_CLICKED_EVENT\n", __LINE__);
         return MEMORY_INFORMATION_CLICKED_EVENT;
     }
     
@@ -2943,7 +2949,7 @@ UINT16 L2_MOUSE_ClickEventGet()
     if (iMouseX >= 3 + StartMenuPositionX && iMouseX <= 3 + 4 * 16  + StartMenuPositionX  
          && iMouseY >= 3 + StartMenuPositionY + 16 * START_MENU_BUTTON_SYSTEM_LOG && iMouseY <= 3 + StartMenuPositionY + 16 * (START_MENU_BUTTON_SYSTEM_LOG + 1))
     {
-        L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: SYSTEM_QUIT_CLICKED_EVENT\n", __LINE__);
+        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: SYSTEM_QUIT_CLICKED_EVENT\n", __LINE__);
         return SYSTEM_LOG_CLICKED_EVENT;
     }
 
@@ -2951,7 +2957,7 @@ UINT16 L2_MOUSE_ClickEventGet()
     if (iMouseX >= 3 + StartMenuPositionX && iMouseX <= 3 + 4 * 16  + StartMenuPositionX  
          && iMouseY >= 3 + StartMenuPositionY + 16 * START_MENU_BUTTON_SYSTEM_QUIT && iMouseY <= 3 + StartMenuPositionY + 16 * (START_MENU_BUTTON_SYSTEM_QUIT + 1))
     {
-        L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: SYSTEM_QUIT_CLICKED_EVENT\n", __LINE__);
+        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: SYSTEM_QUIT_CLICKED_EVENT\n", __LINE__);
         return SYSTEM_QUIT_CLICKED_EVENT;
     }
 
@@ -2959,7 +2965,7 @@ UINT16 L2_MOUSE_ClickEventGet()
     if (iMouseX >= 3 + SystemSettingWindowPositionX && iMouseX <= 3 + 4 * 16  + SystemSettingWindowPositionX  
          && iMouseY >= 3 + SystemSettingWindowPositionX && iMouseY <= 3 + SystemSettingWindowPositionY + 16)
     {
-        L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: WALLPAPER_SETTING_CLICKED_EVENT\n", __LINE__);
+        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: WALLPAPER_SETTING_CLICKED_EVENT\n", __LINE__);
         return WALLPAPER_SETTING_CLICKED_EVENT;
     }
     
@@ -2967,7 +2973,7 @@ UINT16 L2_MOUSE_ClickEventGet()
     if (iMouseX >= 3 + SystemSettingWindowPositionX && iMouseX <= 3 + 4 * 16  + SystemSettingWindowPositionX  
          && iMouseY >= 3 + SystemSettingWindowPositionX + 16 && iMouseY <= 3 + SystemSettingWindowPositionY + 16 * 2)
     {
-        L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: WALLPAPER_RESET_CLICKED_EVENT\n", __LINE__);
+        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: WALLPAPER_RESET_CLICKED_EVENT\n", __LINE__);
         return WALLPAPER_RESET_CLICKED_EVENT;
     }
 
@@ -2975,7 +2981,7 @@ UINT16 L2_MOUSE_ClickEventGet()
     if (iMouseX >= MyComputerPositionX + MyComputerWidth - 20 && iMouseX <=  MyComputerPositionX + MyComputerWidth - 4 
             && iMouseY >= MyComputerPositionY + 0 && iMouseY <= MyComputerPositionY + 16)
     {
-        L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: MY_COMPUTER_CLOSE_CLICKED_EVENT\n", __LINE__);
+        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: MY_COMPUTER_CLOSE_CLICKED_EVENT\n", __LINE__);
         return MY_COMPUTER_CLOSE_CLICKED_EVENT;
     }
 
@@ -2983,7 +2989,7 @@ UINT16 L2_MOUSE_ClickEventGet()
     if (iMouseX >= SystemLogWindowPositionX + SystemLogWindowWidth - 20 && iMouseX <=  SystemLogWindowPositionX + SystemLogWindowWidth - 4 
             && iMouseY >= SystemLogWindowPositionY+ 0 && iMouseY <= SystemLogWindowPositionY + 16)
     {
-        L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: SYSTEM_LOG_CLOSE_CLICKED_EVENT\n", __LINE__);
+        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: SYSTEM_LOG_CLOSE_CLICKED_EVENT\n", __LINE__);
         return SYSTEM_LOG_CLOSE_CLICKED_EVENT;
     }
     
@@ -2991,7 +2997,7 @@ UINT16 L2_MOUSE_ClickEventGet()
     if (iMouseX >= MemoryInformationWindowPositionX + MemoryInformationWindowWidth - 20 && iMouseX <=  MemoryInformationWindowPositionX + MemoryInformationWindowWidth - 4 
             && iMouseY >= MemoryInformationWindowPositionY+ 0 && iMouseY <= MemoryInformationWindowPositionY + 16)
     {
-        L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: MEMORY_INFORMATION_CLOSE_CLICKED_EVENT\n", __LINE__);
+        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: MEMORY_INFORMATION_CLOSE_CLICKED_EVENT\n", __LINE__);
         return MEMORY_INFORMATION_CLOSE_CLICKED_EVENT;
     }
 
@@ -3000,7 +3006,7 @@ UINT16 L2_MOUSE_ClickEventGet()
     if (iMouseX >= SystemSettingWindowPositionX + SystemSettingWindowWidth - 20 && iMouseX <=  SystemSettingWindowPositionX + SystemSettingWindowWidth - 4 
             && iMouseY >= SystemSettingWindowPositionY+ 0 && iMouseY <= SystemSettingWindowPositionY + 16)
     {
-        L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: MEMORY_INFORMATION_CLOSE_CLICKED_EVENT\n", __LINE__);
+        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: MEMORY_INFORMATION_CLOSE_CLICKED_EVENT\n", __LINE__);
         return SYSTEM_SETTING_CLOSE_CLICKED_EVENT;
     }
     
@@ -3016,33 +3022,33 @@ UINT16 L2_MOUSE_ClickEventGet()
 
 L2_MOUSE_SettingClicked()
 {   
-    L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d L2_MOUSE_SettingClicked\n", __LINE__);
+    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d L2_MOUSE_SettingClicked\n", __LINE__);
     DisplaySystemSettingWindowFlag = 1; 
 }
 
 
 L2_MOUSE_SystemQuitClicked()
 {   
-    L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d L2_MOUSE_SystemQuitClicked\n", __LINE__);
+    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d L2_MOUSE_SystemQuitClicked\n", __LINE__);
     SystemQuitFlag = TRUE;  
 }
 
 L2_MOUSE_MemoryInformationClicked()
 {   
-    L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d L2_MOUSE_SystemQuitClicked\n", __LINE__);
+    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d L2_MOUSE_SystemQuitClicked\n", __LINE__);
     DisplayMemoryInformationWindowFlag = TRUE;  
 }
 
 L2_MOUSE_SystemLogClicked()
 {   
-    L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d L2_MOUSE_SystemQuitClicked\n", __LINE__);
+    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d L2_MOUSE_SystemQuitClicked\n", __LINE__);
     DisplaySystemLogWindowFlag = TRUE;  
 }
 
 
 L2_MOUSE_WallpaperSettingClicked()
 {   
-    L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d L2_MOUSE_WallpaperSettingClicked\n", __LINE__);
+    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d L2_MOUSE_WallpaperSettingClicked\n", __LINE__);
     //DisplaySystemSettingWindowFlag = 1;
     EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
     UINT32 x = ScreenWidth;
@@ -3173,7 +3179,7 @@ UINT8 SystemIcon[SYSTEM_ICON_MAX][SYSTEM_ICON_WIDTH * SYSTEM_ICON_HEIGHT * 3 + 0
 
 L2_MOUSE_MyComputerClicked()
 {       
-    L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d L2_MOUSE_MyComputerClicked\n", __LINE__);
+    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d L2_MOUSE_MyComputerClicked\n", __LINE__);
     EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
     Color.Red = 0xff;
     Color.Green= 0x00;
@@ -3205,12 +3211,12 @@ L2_MOUSE_MyComputerClicked()
 
 L2_MOUSE_MENU_Clicked()
 {
-    L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d L2_MOUSE_MENU_Clicked\n", __LINE__);
+    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d L2_MOUSE_MENU_Clicked\n", __LINE__);
     EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
     Color.Red   = 0xff;
     Color.Green = 0x00;
     Color.Blue   = 0x00;
-    //L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: iMouseX: %d iMouseY: %d \n",  __LINE__, iMouseX, iMouseY);
+    //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: iMouseX: %d iMouseY: %d \n",  __LINE__, iMouseX, iMouseY);
     L2_GRAPHICS_RectangleDraw(pMouseSelectedBuffer, 0,  0, 31, 15, 1,  Color, 32);
     //MenuButtonClickResponse();
     Color.Red   = 0xFF;
@@ -3227,7 +3233,7 @@ L2_MOUSE_MENU_Clicked()
 
 L2_MOUSE_MyComputerCloseClicked()
 {
-    L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d L2_MOUSE_MyComputerCloseClicked\n", __LINE__);
+    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d L2_MOUSE_MyComputerCloseClicked\n", __LINE__);
     DisplayMyComputerFlag = 0;
 }
 
@@ -3294,7 +3300,7 @@ L2_MOUSE_MenuButtonClick()
 
 VOID L2_MOUSE_Move()
 {   
-    //L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: GraphicsLayerMouseMove\n",  __LINE__);
+    //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: GraphicsLayerMouseMove\n",  __LINE__);
     
     // display graphics layer id mouse over, for mouse click event.
     //L2_DEBUG_Print1(DISPLAY_X, DISPLAY_Y, "%d: Graphics Layer id: %d ", __LINE__, pDeskDisplayBuffer[(iMouseY * ScreenWidth + iMouseX) * 4 + 3]);
@@ -3457,7 +3463,7 @@ VOID L2_FILE_Transfer(MasterBootRecord *pSource, MasterBootRecordSwitched *pDest
     //Todo: the other parameters can compute like above too
     //Current only get parameters we need to use
     
-    L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "ReservedSelector:%d SectorsPerFat:%d BootPathStartCluster: %d NumFATS:%d SectorOfCluster:%d", 
+    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "ReservedSelector:%d SectorsPerFat:%d BootPathStartCluster: %d NumFATS:%d SectorOfCluster:%d", 
                                                 pDest->ReservedSelector,
                                                 pDest->SectorsPerFat,
                                                 pDest->BootPathStartCluster,
@@ -3468,7 +3474,7 @@ VOID L2_FILE_Transfer(MasterBootRecord *pSource, MasterBootRecordSwitched *pDest
 // all partitions analysis
 EFI_STATUS L2_STORE_PartitionAnalysisFSM()
 {    
-    L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d PartitionAnalysisFSM\n", __LINE__);
+    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d PartitionAnalysisFSM\n", __LINE__);
     EFI_STATUS Status ;
     UINT8 Buffer1[DISK_BUFFER_SIZE];
     
@@ -3479,7 +3485,7 @@ EFI_STATUS L2_STORE_PartitionAnalysisFSM()
              Status = L1_STORE_READ(i, sector_count, 1, Buffer1); 
              if ( EFI_SUCCESS == Status )
             {
-                L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
+                L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: Status:%X \n", __LINE__, Status);
                   
                   // analysis data area of patition
                   L1_FILE_FAT32_DataSectorAnalysis(Buffer1, &MBRSwitched); 
@@ -3487,7 +3493,7 @@ EFI_STATUS L2_STORE_PartitionAnalysisFSM()
                   // data sector number start include: reserved selector, fat sectors(usually is 2: fat1 and fat2), and file system boot path start cluster(usually is 2, data block start number is 2)
                   sector_count = MBRSwitched.ReservedSelector + MBRSwitched.SectorsPerFat * MBRSwitched.NumFATS + (MBRSwitched.BootPathStartCluster - 2) * 8;
                   BlockSize = MBRSwitched.SectorOfCluster * 512;
-                  L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: sector_count:%ld BlockSize: %d\n",  __LINE__, sector_count, BlockSize);
+                  L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: sector_count:%ld BlockSize: %d\n",  __LINE__, sector_count, BlockSize);
              }           
             break;
          }       
@@ -3499,7 +3505,7 @@ EFI_STATUS L2_STORE_PartitionAnalysisFSM()
 // analysis a partition 
 EFI_STATUS L2_STORE_RootPathAnalysisFSM()
 {
-    L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d RootPathAnalysisFSM\n", __LINE__);
+    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d RootPathAnalysisFSM\n", __LINE__);
     EFI_STATUS Status ;
     UINT8 Buffer1[DISK_BUFFER_SIZE];
     
@@ -3510,7 +3516,7 @@ EFI_STATUS L2_STORE_RootPathAnalysisFSM()
             Status = L1_STORE_READ(i, sector_count, 1, Buffer1); 
             if ( EFI_SUCCESS == Status )
             {
-                 //L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X\n", __LINE__, Status);
+                 //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: Status:%X\n", __LINE__, Status);
                   
                   //When get root path data sector start number, we can get content of root path.
                     L1_FILE_RootPathAnalysis(Buffer1);  
@@ -3518,7 +3524,7 @@ EFI_STATUS L2_STORE_RootPathAnalysisFSM()
                     // data area start from 1824, HZK16 file start from     FileBlockStart  block, so need to convert into sector by multi 8, block start number is 2   
                     // next state is to read FAT table
                     sector_count = MBRSwitched.ReservedSelector;
-                    //L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: sector_count:%ld FileLength: %d MBRSwitched.ReservedSelector:%ld\n",  __LINE__, sector_count, FileLength, MBRSwitched.ReservedSelector);
+                    //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: sector_count:%ld FileLength: %d MBRSwitched.ReservedSelector:%ld\n",  __LINE__, sector_count, FileLength, MBRSwitched.ReservedSelector);
              }           
             break;
          }       
@@ -3530,7 +3536,7 @@ EFI_STATUS L2_STORE_RootPathAnalysisFSM()
 // 
 EFI_STATUS L2_STORE_GetFatTableFSM()
 {    
-    //L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d GetFatTableFSM\n", __LINE__);
+    //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d GetFatTableFSM\n", __LINE__);
     EFI_STATUS Status ;
     if (NULL != FAT32_Table)
     {
@@ -3549,13 +3555,13 @@ EFI_STATUS L2_STORE_GetFatTableFSM()
         {
              //start block need to recompute depends on file block start number 
              //FileBlockStart;
-             L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d MBRSwitched.SectorsPerFat: %d\n", __LINE__, MBRSwitched.SectorsPerFat);
+             L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d MBRSwitched.SectorsPerFat: %d\n", __LINE__, MBRSwitched.SectorsPerFat);
             
              // 512 = 16 * 32 = 4 item * 32
             FAT32_Table = (UINT8 *)AllocateZeroPool(DISK_BUFFER_SIZE * MBRSwitched.SectorsPerFat);
              if (NULL == FAT32_Table)
              {
-                 L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: NULL == FAT32_Table\n", __LINE__);                             
+                 L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: NULL == FAT32_Table\n", __LINE__);                             
              }             
              
             Status = L1_STORE_READ(i, sector_count,  MBRSwitched.SectorsPerFat, FAT32_Table); 
@@ -3572,7 +3578,7 @@ EFI_STATUS L2_STORE_GetFatTableFSM()
 
                   // for FAT32_Table get next block number
                   PreviousBlockNumber = FileBlockStart;
-                  //L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: sector_count:%ld FileLength: %d PreviousBlockNumber: %d\n",  __LINE__, sector_count, FileLength, PreviousBlockNumber);
+                  //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: sector_count:%ld FileLength: %d PreviousBlockNumber: %d\n",  __LINE__, sector_count, FileLength, PreviousBlockNumber);
              }           
             break;
          }       
@@ -3583,7 +3589,7 @@ EFI_STATUS L2_STORE_GetFatTableFSM()
 
 UINT32 L2_FILE_GetNextBlockNumber()
 {
-    //L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: PreviousBlockNumber: %d\n",  __LINE__, PreviousBlockNumber);
+    //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: PreviousBlockNumber: %d\n",  __LINE__, PreviousBlockNumber);
 
     if (PreviousBlockNumber == 0)
     {
@@ -3595,7 +3601,7 @@ UINT32 L2_FILE_GetNextBlockNumber()
         && FAT32_Table[PreviousBlockNumber * 4 + 2] == 0xff 
         && FAT32_Table[PreviousBlockNumber * 4 + 3] == 0x0f)
     {
-        L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: PreviousBlockNumber: %d, PreviousBlockNumber: %llX\n",  __LINE__, PreviousBlockNumber, 0x0fffffff);
+        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: PreviousBlockNumber: %d, PreviousBlockNumber: %llX\n",  __LINE__, PreviousBlockNumber, 0x0fffffff);
         return 0x0fffffff;
     }
     
@@ -3664,7 +3670,7 @@ void L1_MEMORY_SetValue(UINT8 *pBuffer, UINT32 Length, UINT8 Value)
 
 EFI_STATUS L2_STORE_ReadFileFSM()
 {    
-    L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d ReadFileFSM: PartitionCount: %d FileLength: %d sector_count: %llu\n", __LINE__, PartitionCount, FileLength, sector_count);
+    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d ReadFileFSM: PartitionCount: %d FileLength: %d sector_count: %llu\n", __LINE__, PartitionCount, FileLength, sector_count);
     //DEBUG ((EFI_D_INFO, "PartitionUSBRead!!\r\n"));
     EFI_STATUS Status ;
     UINT8 BufferBlock[DISK_BLOCK_BUFFER_SIZE];
@@ -3683,7 +3689,7 @@ EFI_STATUS L2_STORE_ReadFileFSM()
                 Status = L1_STORE_READ(i, sector_count, 8, BufferBlock); 
                 if (EFI_ERROR(Status))
                 {
-                    L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d Status: %X\n", __LINE__, Status);
+                    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d Status: %X\n", __LINE__, Status);
                     return Status;
                 }           
 
@@ -3694,11 +3700,11 @@ EFI_STATUS L2_STORE_ReadFileFSM()
                 Status = L1_STORE_Write(i, sector_count, 8, BufferBlock); 
                 if (EFI_ERROR(Status))
                 {
-                    L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d Status: %X\n", __LINE__, Status);
+                    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d Status: %X\n", __LINE__, Status);
                     return Status;
                 }     
                 */           
-                //L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: HZK16FileReadCount: %d DISK_BLOCK_BUFFER_SIZE: %d\n", __LINE__, HZK16FileReadCount, DISK_BLOCK_BUFFER_SIZE);
+                //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: HZK16FileReadCount: %d DISK_BLOCK_BUFFER_SIZE: %d\n", __LINE__, HZK16FileReadCount, DISK_BLOCK_BUFFER_SIZE);
 
                   //Copy buffer to ChineseBuffer
                   if (pReadFileDestBuffer != NULL)
@@ -3716,7 +3722,7 @@ EFI_STATUS L2_STORE_ReadFileFSM()
                   UINT32 NextBlockNumber = L2_FILE_GetNextBlockNumber();
                   sector_count = MBRSwitched.ReservedSelector + MBRSwitched.SectorsPerFat * MBRSwitched.NumFATS + MBRSwitched.BootPathStartCluster - 2 + (NextBlockNumber - 2) * 8;
                   PreviousBlockNumber = NextBlockNumber;
-                  //L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: NextBlockNumber: %llu\n",  __LINE__, NextBlockNumber);
+                  //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: NextBlockNumber: %llu\n",  __LINE__, NextBlockNumber);
              }
              
             break;
@@ -3742,10 +3748,10 @@ int L2_STORE_FileRead(EVENT event)
     
     if (FileReadCount > FileLength / (512 * 8))
     {
-        L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
+        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: Status:%X \n", __LINE__, Status);
         return;
     }
-    L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: FileReadFSM current event: %d, NextState: %d table event:%d table NextState: %d\n", 
+    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: FileReadFSM current event: %d, NextState: %d table event:%d table NextState: %d\n", 
                               __LINE__, 
                             event, 
                             NextState,
@@ -3754,17 +3760,17 @@ int L2_STORE_FileRead(EVENT event)
     
     if ( event == StatusTransitionTable[NextState].event )
     {
-        L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
+        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: Status:%X \n", __LINE__, Status);
         StatusTransitionTable[NextState].pFunc();
         NextState = StatusTransitionTable[NextState].NextState;
     }
     else  
     {
-        L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
+        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: Status:%X \n", __LINE__, Status);
         NextState = INIT_STATE;
     }
 
-    L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
+    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: Status:%X \n", __LINE__, Status);
     StatusErrorCount++;
 }
 
@@ -3882,14 +3888,14 @@ EFI_STATUS L2_MEMORY_MapInitial()
         MemoryInformation.MemoryContinuous[i].pMapper = AllocateZeroPool(MemoryInformation.MemoryContinuous[i].NumberOfPages);  
         if (NULL == MemoryInformation.MemoryContinuous[i].pMapper)
         {
-            //L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: AllocateZeroPool failed \n", __LINE__);
+            //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: AllocateZeroPool failed \n", __LINE__);
         }
         UINT64 PhysicalStart = MemoryInformation.MemoryContinuous[i].PhysicalStart;
         UINT64 NumberOfPages = MemoryInformation.MemoryContinuous[i].NumberOfPages;
         MemoryInformation.MemoryContinuous[i].FreeNumberOfPages = NumberOfPages;
         
         // check sort above by pages whether success.
-        L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: i: %d Start: %X Pages: %d End: %X \n", __LINE__, i, 
+        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: i: %d Start: %X Pages: %d End: %X \n", __LINE__, i, 
                                         PhysicalStart, 
                                         NumberOfPages,
                                         PhysicalStart +NumberOfPages * 4 * 1024);
@@ -3974,7 +3980,7 @@ float L2_MEMORY_GETs()
                                 &MapKey,
                                 &DescriptorSize,
                                 &DescriptorVersion);
-    //L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);            
+    //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: Status:%X \n", __LINE__, Status);            
     DEBUG ((EFI_D_INFO, "%d:  Status:%X \n", __LINE__, Status));
     ASSERT (Status == EFI_BUFFER_TOO_SMALL);
     //
@@ -3985,7 +3991,7 @@ float L2_MEMORY_GETs()
                                 MemoryMapSize,
                                 (VOID **) &MemoryMap);
     ASSERT_EFI_ERROR (Status);
-    //L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
+    //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: Status:%X \n", __LINE__, Status);
         
     DEBUG ((EFI_D_INFO, "%d:  Status:%X \n", __LINE__, Status));
     //
@@ -3997,7 +4003,7 @@ float L2_MEMORY_GETs()
                                 &DescriptorSize,
                                 &DescriptorVersion);
     ASSERT_EFI_ERROR (Status);
-    //L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Status:%X \n", __LINE__, Status);
+    //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: Status:%X \n", __LINE__, Status);
         
     DEBUG ((EFI_D_INFO, "%d:  Status:%X \n", __LINE__, Status));
     
@@ -4014,7 +4020,7 @@ float L2_MEMORY_GETs()
     //for (UINT16 Index = 0; Index < 20; Index++) 
     {
         E820Type = 0;
-      //L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Index:%X \n", __LINE__, Index);
+      //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: Index:%X \n", __LINE__, Index);
         
       //DEBUG ((EFI_D_INFO, "%d:  Status:%X \n", __LINE__, Status));
     
@@ -4056,7 +4062,7 @@ float L2_MEMORY_GETs()
                 MemoryClassifySize[3] += MemoryMap->NumberOfPages;
 
                 
-                /*L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Index: %d: Start: %X Pages:%X End: %X Type: %d \n", __LINE__, 
+                /*L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: Index: %d: Start: %X Pages:%X End: %X Type: %d \n", __LINE__, 
                                                                             Index,
                                                                             MemoryMap->PhysicalStart, 
                                                                             MemoryMap->NumberOfPages,
@@ -4082,7 +4088,7 @@ float L2_MEMORY_GETs()
                     MemoryInformation.MemorySliceCount++;
                     
                     /*
-                    L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Start: %X  Virtual Start:%X: Pages:%X End: %X\n", __LINE__, 
+                    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: Start: %X  Virtual Start:%X: Pages:%X End: %X\n", __LINE__, 
                                                                                 MemoryMap->PhysicalStart,
                                                                                 ContinuousVirtualMemoryStart,
                                                                                 ContinuousMemoryPages,
@@ -4133,13 +4139,13 @@ float L2_MEMORY_GETs()
                                                               ContinuousMemoryPages,
                                                               ContinuousMemoryStart + ContinuousMemoryPages * 4 * 1024);
                                                                   
-    L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Start: %X: Pages:%X End: %X\n", __LINE__, 
+    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: Start: %X: Pages:%X End: %X\n", __LINE__, 
                                                                 ContinuousMemoryStart, 
                                                                 ContinuousMemoryPages,
                                                                 ContinuousMemoryStart + ContinuousMemoryPages * 4 * 1024);
     
     
-    L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d:  (MemoryMapSize / DescriptorSize):%X MemoryClassifySize[0]:%d %d %d %d %d %d MemoryAllSize: %d\n", __LINE__,
+    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d:  (MemoryMapSize / DescriptorSize):%X MemoryClassifySize[0]:%d %d %d %d %d %d MemoryAllSize: %d\n", __LINE__,
                                                                                 (MemoryMapSize / DescriptorSize),
                                                                         MemoryClassifySize[0],
                                                                         MemoryClassifySize[1],
@@ -4196,7 +4202,7 @@ char *L1_STRING_FloatToString(float val, int precision, char *buf)
 
 EFI_STATUS L3_WINDOW_Create(UINT8 *pBuffer, UINT8 *pParent, UINT16 Width, UINT16 Height, UINT16 Type, CHAR8 *pWindowTitle)
 {   
-    L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: Width: %d \n", __LINE__, Width);
+    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: Width: %d \n", __LINE__, Width);
     
     UINT16 i, j;
 
@@ -4259,7 +4265,7 @@ VOID L3_APPLICATION_MyComputerWindow(UINT16 StartX, UINT16 StartY)
     Color.Green = 0xff;
     Color.Reserved = GRAPHICS_LAYER_MY_COMPUTER;
     
-    L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: MyComputerWidth: %d \n", __LINE__, MyComputerWidth);
+    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: MyComputerWidth: %d \n", __LINE__, MyComputerWidth);
     L3_WINDOW_Create(pMyComputerBuffer, pParent, MyComputerWidth, MyComputerHeight, Type, pWindowTitle);
 
     UINT8 *pBuffer = pMyComputerBuffer;
@@ -4329,10 +4335,10 @@ VOID L3_APPLICATION_MyComputerWindow(UINT16 StartX, UINT16 StartY)
         
         char sizePostfix[3] = "MB";
         size /= 1024.0; //M
-        //L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: size: %llu \n", __LINE__, size);
+        //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: size: %llu \n", __LINE__, size);
         if (size > 1024.0)
         {
-            //L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: size: %llu \n", __LINE__, size);
+            //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: size: %llu \n", __LINE__, size);
             size /= 1024;   
             sizePostfix[0] = 'G';
         }
@@ -4410,7 +4416,7 @@ VOID L3_APPLICATION_MemoryInformationWindow(UINT16 StartX, UINT16 StartY)
     UINT16 i = 0;
     UINT16 j = 0;
     
-    L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: MemoryInformationWindowWidth: %d \n", __LINE__, MemoryInformationWindowWidth);
+    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: MemoryInformationWindowWidth: %d \n", __LINE__, MemoryInformationWindowWidth);
     L3_WINDOW_Create(pMemoryInformationBuffer, pParent, MemoryInformationWindowWidth, MemoryInformationWindowHeight, Type, pWindowTitle);
 
     UINT8 *pBuffer = pMemoryInformationBuffer;
@@ -4522,7 +4528,7 @@ VOID L3_APPLICATION_SystemLogWindow(UINT16 StartX, UINT16 StartY)
     UINT16 i = 0;
     UINT16 j = 0;
     
-    L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: SystemLogWindow: %d \n", __LINE__, SystemLogWindowWidth);
+    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: SystemLogWindow: %d \n", __LINE__, SystemLogWindowWidth);
     L3_WINDOW_Create(pSystemLogWindowBuffer, pParent, SystemLogWindowWidth, SystemLogWindowHeight, Type, pWindowTitle);
 
     UINT8 *pBuffer = pSystemLogWindowBuffer;
@@ -4607,10 +4613,10 @@ VOID L3_APPLICATION_SystemLogWindow(UINT16 StartX, UINT16 StartY)
 
 EFI_STATUS L3_APPLICATION_ReadFile(UINT8 *FileName, UINT8 NameLength, UINT8 *pBuffer)
 {
-    L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: FileName: %a \n", __LINE__, FileName);
+    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: FileName: %a \n", __LINE__, FileName);
     if (pBuffer == NULL)
     {
-        L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d:  \n", __LINE__);
+        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d:  \n", __LINE__);
         return -1;
     }
     
@@ -4627,7 +4633,7 @@ EFI_STATUS L3_APPLICATION_ReadFile(UINT8 *FileName, UINT8 NameLength, UINT8 *pBu
 
     for (int i = 0; i < 5; i++)
     {
-        L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: i: %d \n", __LINE__, i);
+        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: i: %d \n", __LINE__, i);
         DEBUG ((EFI_D_INFO, "%d HandleEnterPressed FSM_Event: %d\n", __LINE__, READ_FILE_FSM_Event));
         L2_STORE_FileRead(READ_FILE_FSM_Event++);
 
@@ -4729,7 +4735,7 @@ L2_KEYBOARD_Event (
                    display_sector_number = 0;                     
                }
                
-               L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: uniChar: %d display_sector_number: %d \n", __LINE__, uniChar, display_sector_number);
+               L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: uniChar: %d display_sector_number: %d \n", __LINE__, uniChar, display_sector_number);
                
 
                 // Enter pressed
@@ -5547,7 +5553,7 @@ EFI_STATUS L2_GRAPHICS_DeskInit()
         }
     }
         
-    L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: COMPUTER BMP\n", __LINE__);
+    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: COMPUTER BMP\n", __LINE__);
     
     //
     //status = L3_APPLICATION_ReadFile("RECYCLE BMP", 11, buffer);
@@ -5679,7 +5685,7 @@ EFI_STATUS L2_GRAPHICS_DeskInit()
 
 L2_MOUSE_WallpaperResetClicked()
 {   
-    L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d L2_MOUSE_WallpaperResetClicked\n", __LINE__);
+    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d L2_MOUSE_WallpaperResetClicked\n", __LINE__);
     
     L2_GRAPHICS_DeskInit();
 }
@@ -5704,7 +5710,7 @@ START_MENU_CURRENT_EVENT    StartMenuClickEvent = START_MENU_INIT_CLICKED_EVENT;
 
 L2_MOUSE_Moveover()
 {
-    //L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: iMouseX: %d iMouseY: %d \n",  __LINE__, iMouseX, iMouseY);
+    //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: iMouseX: %d iMouseY: %d \n",  __LINE__, iMouseX, iMouseY);
     EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
     Color.Red = 0xff;
     Color.Green= 0xff;
@@ -5719,14 +5725,9 @@ L2_MOUSE_Moveover()
     
     if (START_MENU_INIT_CLICKED_EVENT == StartMenuClickEvent)
         return;
-    //L2_DEBUG_Print3
-    GRAPHICS_LAYER_FOR_DISPLAY layer;
-    layer.pBuffer = pSystemLogWindowBuffer;
-    layer.BufferHeight = SystemLogWindowHeight;
-    layer.BufferWidth = SystemLogWindowWidth;
     
-    L2_DEBUG_Print3(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, layer, "%d: StartMenuClickEvent: %d \n", __LINE__, StartMenuClickEvent);
-        
+    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: StartMenuClickEvent: %d \n", __LINE__, StartMenuClickEvent);
+
     MouseClickFlag = MOUSE_NO_CLICKED;
     EFI_STATUS Status;
 
@@ -5756,8 +5757,8 @@ L2_MOUSE_Moveover()
         
     for (int i = 0; i <  sizeof(StartMenuStateTransformTable)/sizeof(StartMenuStateTransformTable[0]); i++ )
     {
-        L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: StartMenuStateTransformTable[i].CurrentState: %d\n", __LINE__, StartMenuStateTransformTable[i].CurrentState);
-        //L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: i: %d\n", __LINE__, i);
+        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: StartMenuStateTransformTable[i].CurrentState: %d\n", __LINE__, StartMenuStateTransformTable[i].CurrentState);
+        //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: i: %d\n", __LINE__, i);
         if (StartMenuStateTransformTable[i].CurrentState == StartMenuNextState 
             && StartMenuClickEvent == StartMenuStateTransformTable[i].event )
         {
@@ -5765,7 +5766,7 @@ L2_MOUSE_Moveover()
 
             // need to check the return value after function runs..... 
             StartMenuStateTransformTable[i].pFunc();
-            L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: StartMenuClickEvent: %d StartMenuNextState: %d\n", __LINE__, StartMenuClickEvent, StartMenuNextState);
+            L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: StartMenuClickEvent: %d StartMenuNextState: %d\n", __LINE__, StartMenuClickEvent, StartMenuNextState);
             break;
         }   
     }
@@ -5776,48 +5777,48 @@ EFI_STATUS L2_GRAPHICS_ScreenInit()
 {
     EFI_STATUS Status = 0;
     
-    L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: FAT32\n",  __LINE__);
+    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: FAT32\n",  __LINE__);
 
     Status = L3_APPLICATION_ReadFile("ZHUFENGBMP", 10, pDeskWallpaperBuffer);
     if (EFI_ERROR(Status))
     {
-        L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: ReadFileSelf error\n", __LINE__);
+        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: ReadFileSelf error\n", __LINE__);
     }
     
     Status = L3_APPLICATION_ReadFile("COMPUTERBMP", 11, pSystemIconBuffer[SYSTEM_ICON_MYCOMPUTER]);
     if (EFI_ERROR(Status))
     {
-        L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: ReadFileSelf error\n", __LINE__);
+        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: ReadFileSelf error\n", __LINE__);
     }
     
     Status = L3_APPLICATION_ReadFile("SETTINGBMP", 10, pSystemIconBuffer[SYSTEM_ICON_SETTING]);
     if (EFI_ERROR(Status))
     {
-        L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: ReadFileSelf error\n", __LINE__);
+        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: ReadFileSelf error\n", __LINE__);
     }
 
     Status = L3_APPLICATION_ReadFile("RECYCLEBMP", 10, pSystemIconBuffer[SYSTEM_ICON_RECYCLE]);
     if (EFI_ERROR(Status))
     {
-        L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: ReadFileSelf error\n", __LINE__);
+        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: ReadFileSelf error\n", __LINE__);
     }
 
     Status = L3_APPLICATION_ReadFile("FOLDERBMP", 9, pSystemIconBuffer[SYSTEM_ICON_FOLDER]);
     if (EFI_ERROR(Status))
     {
-        L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: ReadFileSelf error\n", __LINE__);
+        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: ReadFileSelf error\n", __LINE__);
     }
 
     Status = L3_APPLICATION_ReadFile("TEXTBMP", 7, pSystemIconBuffer[SYSTEM_ICON_TEXT]);
     if (EFI_ERROR(Status))
     {
-        L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: ReadFileSelf error\n", __LINE__);
+        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: ReadFileSelf error\n", __LINE__);
     }
     
     Status = L3_APPLICATION_ReadFile("HZK16", 5, sChineseChar);
     if (EFI_ERROR(Status))
     {
-        L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: ReadFileSelf error\n", __LINE__);
+        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: ReadFileSelf error\n", __LINE__);
     }
     
     L2_GRAPHICS_DeskInit();
@@ -5858,7 +5859,7 @@ EFI_STATUS L2_COMMON_MemoryAllocate()
     if (NULL == sChineseChar)
     {
         DEBUG ((EFI_D_INFO, "ChineseCharArrayInit AllocateZeroPool Failed: %x!\n "));
-        L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: ChineseCharArrayInit AllocateZeroPool failed\n",  __LINE__);
+        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: ChineseCharArrayInit AllocateZeroPool failed\n",  __LINE__);
         return -1;
     }   
 
@@ -5905,7 +5906,7 @@ EFI_STATUS L2_COMMON_MemoryAllocate()
     if (NULL == pStartMenuBuffer)
     {
         DEBUG ((EFI_D_INFO, "ChineseCharArrayInit pStartMenuBuffer Failed: %x!\n "));
-        L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: pStartMenuBuffer AllocateZeroPool failed\n",  __LINE__);
+        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: pStartMenuBuffer AllocateZeroPool failed\n",  __LINE__);
         return -1;
     }   
     
@@ -5940,7 +5941,7 @@ EFI_STATUS L2_COMMON_MemoryAllocate()
     if (NULL == pSystemSettingWindowBuffer)
     {
         DEBUG ((EFI_D_INFO, "ChineseCharArrayInit pStartMenuBuffer Failed: %x!\n "));
-        L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: pStartMenuBuffer AllocateZeroPool failed\n",  __LINE__);
+        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: pStartMenuBuffer AllocateZeroPool failed\n",  __LINE__);
         return -1;
     }   
     
@@ -5972,7 +5973,7 @@ EFI_STATUS L2_COMMON_MemoryAllocate()
 
 EFI_STATUS L2_GRAPHICS_ChineseCharInit()
 {
-    L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d:  \n", __LINE__);
+    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d:  \n", __LINE__);
 
     L3_APPLICATION_ReadFile("HZK16", 5, sChineseChar);
     /*
@@ -5994,6 +5995,14 @@ EFI_STATUS L2_GRAPHICS_ChineseCharInit()
 }
 
 char *p1;   
+
+void L2_COMMON_ParameterInit()
+{
+    LogLayer.pBuffer = pSystemLogWindowBuffer;
+    LogLayer.BufferHeight = SystemLogWindowHeight;
+    LogLayer.BufferWidth = SystemLogWindowWidth;
+}
+
 
 EFI_STATUS
 EFIAPI
@@ -6030,6 +6039,8 @@ Main (
     //L2_MEMORY_Initial();
 
     L2_COMMON_MemoryAllocate();
+
+    L2_COMMON_ParameterInit();
 
     //For locate bug
     //return;
