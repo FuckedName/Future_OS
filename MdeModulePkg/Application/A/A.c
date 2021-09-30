@@ -152,18 +152,18 @@ char pKeyboardInputBuffer[KEYBOARD_BUFFER_LENGTH] = {0};
 
 //Line 0
 #define DISPLAY_DESK_HEIGHT_WEIGHT_X (date_time_count % 30) 
-#define DISPLAY_DESK_HEIGHT_WEIGHT_Y (0)
+#define DISPLAY_DESK_HEIGHT_WEIGHT_Y (ScreenHeight - 16 * 3)
 
 #define STORE_EFI_PATH_PARTITION_SECTOR_COUNT 921564
 
 
 //Line 1
 #define DISPLAY_MOUSE_X (0) 
-#define DISPLAY_MOUSE_Y (16 * 1)
+#define DISPLAY_MOUSE_Y (ScreenHeight - 16 * 2  - 30)
 
 //Line 2
 #define DISPLAY_KEYBOARD_X (0) 
-#define DISPLAY_KEYBOARD_Y (16 * 2)
+#define DISPLAY_KEYBOARD_Y (ScreenHeight - 16 * 3  - 30)
 
 //Line 3
 #define TEXT_DEVICE_PATH_X (0) 
@@ -1655,7 +1655,7 @@ EFI_STATUS L1_FILE_RootPathAnalysis(UINT8 *p)
         if (pItems[i].FileName[0] != 0xE5 && (pItems[i].Attribute[0] == 0x20 
             || pItems[i].Attribute[0] == 0x10))
        {
-            L2_DEBUG_Print1(DISK_MBR_X, 16 * 37 + (valid_count) * 16, "%d FileName:%2c%2c%2c%2c%2c%2c%2c%2c ExtensionName:%2c%2c%2c StartCluster:%02X%02X%02X%02X FileLength: %02X%02X%02X%02X Attribute: %02X    ", __LINE__,
+            L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d FileName:%2c%2c%2c%2c%2c%2c%2c%2c ExtensionName:%2c%2c%2c StartCluster:%02X%02X%02X%02X FileLength: %02X%02X%02X%02X Attribute: %02X    ", __LINE__,
                                             pItems[i].FileName[0], pItems[i].FileName[1], pItems[i].FileName[2], pItems[i].FileName[3], pItems[i].FileName[4], pItems[i].FileName[5], pItems[i].FileName[6], pItems[i].FileName[7],
                                             pItems[i].ExtensionName[0], pItems[i].ExtensionName[1],pItems[i].ExtensionName[2],
                                             pItems[i].StartClusterHigh2B[0], pItems[i].StartClusterHigh2B[1],
@@ -1677,7 +1677,7 @@ EFI_STATUS L1_FILE_RootPathAnalysis(UINT8 *p)
             //  L2_DEBUG_Print1(j * 3 * 8, 16 * 40 + valid_count * 16, "%02X ", pItems[i].FileName[j]);
             if (L1_STRING_Compare(FileName2, ReadFileName, ReadFileNameLength) == EFI_SUCCESS)
             {
-                L2_DEBUG_Print1(DISK_MBR_X, 16 * 30 + (valid_count) * 16 + 4 * 16, "%d FileName:%2c%2c%2c%2c%2c%2c%2c%2c ExtensionName:%2c%2c%2c StartCluster:%02X%02X%02X%02X FileLength: %02X%02X%02X%02X Attribute: %02X    ",  __LINE__,
+                L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d FileName:%2c%2c%2c%2c%2c%2c%2c%2c ExtensionName:%2c%2c%2c StartCluster:%02X%02X%02X%02X FileLength: %02X%02X%02X%02X Attribute: %02X    ",  __LINE__,
                                 pItems[i].FileName[0], pItems[i].FileName[1], pItems[i].FileName[2], pItems[i].FileName[3], pItems[i].FileName[4], pItems[i].FileName[5], pItems[i].FileName[6], pItems[i].FileName[7],
                                 pItems[i].ExtensionName[0], pItems[i].ExtensionName[1],pItems[i].ExtensionName[2],
                                 pItems[i].StartClusterHigh2B[0], pItems[i].StartClusterHigh2B[1],
@@ -2280,7 +2280,7 @@ void L2_STORE_TextDevicePathAnalysis(CHAR16 *p, DEVICE_PARAMETER *device, UINTN 
     //L2_DEBUG_Print1(0, 11 * 16, "line: %d string: %s, length: %d\n",       __LINE__, p, strlen(p));
 
     // second display
-    L2_DEBUG_Print1(TEXT_DEVICE_PATH_X, TEXT_DEVICE_PATH_Y + 16 * (4 * count1 + 1), "%d: i: %d Start: %d Count: %d  DeviceType: %d PartitionType: %d PartitionID: %d\n",        
+    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: i: %d Start: %d Count: %d  DeviceType: %d PartitionType: %d PartitionID: %d\n",        
                                 __LINE__, 
                                 count1,
                                 device->StartSectorNumber,
@@ -3793,8 +3793,8 @@ VOID EFIAPI L2_TIMER_Slice(
     IN VOID           *Context
     )
 {
-    L2_DEBUG_Print1(0, 5 * 16, "%d TimeSlice %x %lu \n", __LINE__, Context, *((UINT32 *)Context));
-    L2_DEBUG_Print1(0, 6 * 16, "%d TimerSliceCount: %lu \n", __LINE__, TimerSliceCount);
+    L2_DEBUG_Print1(0, ScreenHeight - 30 - 5 * 16, "%d TimeSlice %x %lu \n", __LINE__, Context, *((UINT32 *)Context));
+    L2_DEBUG_Print1(0, ScreenHeight - 30 - 6 * 16, "%d TimerSliceCount: %lu \n", __LINE__, TimerSliceCount);
     //Print(L"%lu\n", *((UINT32 *)Context));
     if (TimerSliceCount % 2 == 0)
        gBS->SignalEvent (MultiTaskTriggerGroup1Event);
@@ -5026,7 +5026,8 @@ L2_TIMER_Print (
 
     x = DISPLAY_DESK_DATE_TIME_X;
     y = DISPLAY_DESK_DATE_TIME_Y;
-    
+
+    //Display system date time weekday.
     L2_DEBUG_Print1(x, y, "%04d-%02d-%02d %02d:%02d:%02d ", 
                   EFITime.Year, EFITime.Month, EFITime.Day, EFITime.Hour, EFITime.Minute, EFITime.Second);
     //  ÐÇ   4839    ÆÚ   3858
@@ -5300,7 +5301,7 @@ EFI_STATUS L2_TIMER_IntervalInit()
         *TimerCount = *TimerCount + 1;
         //L2_DEBUG_Print1(DISPLAY_X, DISPLAY_Y, "%d: SystemTimeIntervalInit while\n", __LINE__);
         //if (*TimerCount % 1000000 == 0)
-        L2_DEBUG_Print1(0, 3 * 16, "%d: L2_TIMER_IntervalInit p:%x %lu %llu\n", __LINE__, TimerCount, *TimerCount, QuitTimerCount);
+        L2_DEBUG_Print1(0, ScreenHeight - 30 - 4 * 16, "%d: L2_TIMER_IntervalInit p:%x %lu %llu\n", __LINE__, TimerCount, *TimerCount, QuitTimerCount);
 
         if (TRUE == SystemQuitFlag)
         {   
@@ -5317,7 +5318,7 @@ EFI_STATUS L2_TIMER_IntervalInit()
         {
             UINT16 count = SystemQuitCount / 100;
             
-            L2_DEBUG_Print1(0, 3 * 16, "%d: L2_TIMER_IntervalInit p:%x %lu \n", __LINE__, TimerCount, *TimerCount);
+            L2_DEBUG_Print1(0, ScreenHeight - 30 -  5 * 16, "%d: L2_TIMER_IntervalInit p:%x %lu \n", __LINE__, TimerCount, *TimerCount);
             
             for (UINT16 j = ScreenHeight / 4 ; j < ScreenHeight / 3; j++)
             {
@@ -5338,7 +5339,7 @@ EFI_STATUS L2_TIMER_IntervalInit()
 
         if ((TRUE == SystemQuitFlag) && ( SystemQuitCount >= ScreenWidth))
         {
-            L2_DEBUG_Print1(0, 3 * 16, "%d: L2_TIMER_IntervalInit p:%x %lu \n", __LINE__, TimerCount, *TimerCount);
+            L2_DEBUG_Print1(0, ScreenHeight - 30 - 6 * 16, "%d: L2_TIMER_IntervalInit p:%x %lu \n", __LINE__, TimerCount, *TimerCount);
             
             gBS->SetTimer( TimerOne, TimerCancel, 0 );
             gBS->CloseEvent( TimerOne );  
@@ -5673,7 +5674,7 @@ EFI_STATUS L2_GRAPHICS_DeskInit()
 
     for (int j = 0; j < 150; j++)
     {
-        L2_DEBUG_Print1(DISK_READ_BUFFER_X + (j % 16) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 16), "%02X ", sChineseChar[j] & 0xff);
+        //L2_DEBUG_Print1(DISK_READ_BUFFER_X + (j % 16) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 16), "%02X ", sChineseChar[j] & 0xff);
     }
 
     // menu chinese
