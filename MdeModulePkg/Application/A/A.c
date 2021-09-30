@@ -213,7 +213,7 @@ char pKeyboardInputBuffer[KEYBOARD_BUFFER_LENGTH] = {0};
 #define DISPLAY_ERROR_STATUS_Y (16 * (StatusErrorCount++ % (ScreenHeight / 16 - 3)) )
 
 #define DISPLAY_LOG_ERROR_STATUS_X (4) 
-#define DISPLAY_LOG_ERROR_STATUS_Y (16 * (LogStatusErrorCount++ % (ScreenHeight / 16 - 3)) )
+#define DISPLAY_LOG_ERROR_STATUS_Y (16 * (LogStatusErrorCount++ % (SystemLogWindowHeight / 16 + 2)) )
 
 #define FILE_SYSTEM_OTHER   0xff
 #define FILE_SYSTEM_FAT32  1
@@ -2805,9 +2805,6 @@ VOID L2_GRAPHICS_LayerCompute(int iMouseX, int iMouseY, UINT8 MouseClickFlag)
         return;                    
     }
 
-    if (DisplayMyComputerFlag)
-        L2_GRAPHICS_Copy(pDeskDisplayBuffer, pMyComputerBuffer, ScreenWidth, ScreenHeight, MyComputerWidth, MyComputerHeight, MyComputerPositionX, MyComputerPositionY);
-
     if (DisplaySystemLogWindowFlag)
         L2_GRAPHICS_Copy(pDeskDisplayBuffer, pSystemLogWindowBuffer, ScreenWidth, ScreenHeight, SystemLogWindowWidth, SystemLogWindowHeight, SystemLogWindowPositionX, SystemLogWindowPositionY);
 
@@ -2819,6 +2816,9 @@ VOID L2_GRAPHICS_LayerCompute(int iMouseX, int iMouseY, UINT8 MouseClickFlag)
 
     if (DisplayStartMenuFlag)
         L2_GRAPHICS_Copy(pDeskDisplayBuffer, pStartMenuBuffer, ScreenWidth, ScreenHeight, StartMenuWidth, StartMenuHeight, StartMenuPositionX, StartMenuPositionY);
+
+    if (DisplayMyComputerFlag)
+        L2_GRAPHICS_Copy(pDeskDisplayBuffer, pMyComputerBuffer, ScreenWidth, ScreenHeight, MyComputerWidth, MyComputerHeight, MyComputerPositionX, MyComputerPositionY);
 
     //my computer
     if (MouseClickFlag == 1 && pDeskDisplayBuffer[(iMouseY * ScreenWidth + iMouseX) * 4 + 3] == GRAPHICS_LAYER_MY_COMPUTER)
@@ -4902,7 +4902,7 @@ L2_MOUSE_Event (IN EFI_EVENT Event, IN VOID *Context)
     }
 
     //DEBUG ((EFI_D_INFO, "X: %X, Y: %X ", x_move, y_move));
-    L2_DEBUG_Print1(DISPLAY_MOUSE_X, DISPLAY_MOUSE_Y, "X: %04d, Y: %04d Increment X: %X Y: %X", iMouseX, iMouseY, x_move, y_move );
+    L2_DEBUG_Print1(DISPLAY_MOUSE_X, DISPLAY_MOUSE_Y, "%d X: %04d, Y: %04d Increment X: %X Y: %X", __LINE__, iMouseX, iMouseY, x_move, y_move );
     
     iMouseX = iMouseX + x_move * 3;
     iMouseY = iMouseY + y_move * 3; 
@@ -5556,37 +5556,8 @@ EFI_STATUS L2_GRAPHICS_DeskInit()
         
     L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: COMPUTER BMP\n", __LINE__);
     
-    //
-    //status = L3_APPLICATION_ReadFile("RECYCLE BMP", 11, buffer);
+    //the following three for loop is to draw system icon on desk
     /*
-    for (int j = 0; j < 250; j++)
-    {
-        L2_DEBUG_Print1(DISK_READ_BUFFER_X + (j % 16) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 16), "%02X ", buffer[j] & 0xff);
-    }
-    
-    
-    for (int i = 0; i < SYSTEM_ICON_MAX; i++)
-    {
-        for (int j = 0; j < SYSTEM_ICON_HEIGHT; j++)
-        {
-            for (int k = 0; k < SYSTEM_ICON_WIDTH; k++)
-            {
-                pDeskBuffer[(i + 16) * SYSTEM_ICON_HEIGHT * ScreenWidth * 4 + (j * ScreenWidth + k) * 4 ]     = buffer[0x36 + ((SYSTEM_ICON_HEIGHT - j) * SYSTEM_ICON_WIDTH + k) * 3 ];
-                pDeskBuffer[(i + 16) * SYSTEM_ICON_HEIGHT * ScreenWidth * 4 + (j * ScreenWidth + k) * 4 + 1 ] = buffer[0x36 + ((SYSTEM_ICON_HEIGHT - j) * SYSTEM_ICON_WIDTH + k) * 3 + 1 ];
-                pDeskBuffer[(i + 16) * SYSTEM_ICON_HEIGHT * ScreenWidth * 4 + (j * ScreenWidth + k) * 4 + 2 ] = buffer[0x36 + ((SYSTEM_ICON_HEIGHT - j) * SYSTEM_ICON_WIDTH + k) * 3 + 2 ];
-            }
-        }
-    }
-    
-    for (int j = 0; j < SYSTEM_ICON_HEIGHT; j++)
-    {
-        for (int k = 0; k < SYSTEM_ICON_WIDTH; k++)
-        {
-            pDeskBuffer[(j * ScreenWidth + k) * 4 ]     = pSystemIconBuffer[SYSTEM_ICON_MYCOMPUTER][0x36 + ((SYSTEM_ICON_HEIGHT - j) * SYSTEM_ICON_WIDTH + k) * 3 ];
-            pDeskBuffer[(j * ScreenWidth + k) * 4 + 1 ] = pSystemIconBuffer[SYSTEM_ICON_MYCOMPUTER][0x36 + ((SYSTEM_ICON_HEIGHT - j) * SYSTEM_ICON_WIDTH + k) * 3 + 1 ];
-            pDeskBuffer[(j * ScreenWidth + k) * 4 + 2 ] = pSystemIconBuffer[SYSTEM_ICON_MYCOMPUTER][0x36 + ((SYSTEM_ICON_HEIGHT - j) * SYSTEM_ICON_WIDTH + k) * 3 + 2 ];
-        }
-    }*/
     for (UINT8 i = 0; i < SYSTEM_ICON_MAX; i++)
     {
         for (int j = 0; j < SYSTEM_ICON_HEIGHT; j++)
@@ -5599,7 +5570,7 @@ EFI_STATUS L2_GRAPHICS_DeskInit()
             }
         }
     }       
-
+    */
     UINT16 HeightNew = SYSTEM_ICON_HEIGHT / 2;
     UINT16 WidthNew = SYSTEM_ICON_WIDTH / 2;
     //UINT8 *pSource = pSystemIconBuffer[0][0x36];
@@ -5755,7 +5726,14 @@ L2_MOUSE_Moveover()
         DisplayMemoryInformationWindowFlag = 0;
         return;
     }
-        
+
+    if (StartMenuClickEvent == MY_COMPUTER_CLICKED_EVENT || StartMenuClickEvent == MEMORY_INFORMATION_CLICKED_EVENT  || StartMenuClickEvent == SYSTEM_LOG_CLICKED_EVENT
+        || StartMenuClickEvent == WALLPAPER_RESET_CLICKED_EVENT  || StartMenuClickEvent == WALLPAPER_SETTING_CLICKED_EVENT)
+    {
+        DisplayStartMenuFlag = 0;
+    }
+
+   
     for (int i = 0; i <  sizeof(StartMenuStateTransformTable)/sizeof(StartMenuStateTransformTable[0]); i++ )
     {
         L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: StartMenuStateTransformTable[i].CurrentState: %d\n", __LINE__, StartMenuStateTransformTable[i].CurrentState);
