@@ -2979,7 +2979,7 @@ UINT16 L2_MOUSE_ClickEventGet()
     if (iMouseX >= 3 + StartMenuPositionX && iMouseX <= 3 + 4 * 16  + StartMenuPositionX  
          && iMouseY >= 3 + StartMenuPositionY + 16 * START_MENU_BUTTON_MEMORY_INFORMATION && iMouseY <= 3 + StartMenuPositionY + 16 * (START_MENU_BUTTON_MEMORY_INFORMATION + 1))
     {
-        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: SETTING_CLICKED_EVENT\n", __LINE__);
+        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: MEMORY_INFORMATION_CLICKED_EVENT\n", __LINE__);
         return MEMORY_INFORMATION_CLICKED_EVENT;
     }
     
@@ -2987,7 +2987,7 @@ UINT16 L2_MOUSE_ClickEventGet()
     if (iMouseX >= 3 + StartMenuPositionX && iMouseX <= 3 + 4 * 16  + StartMenuPositionX  
          && iMouseY >= 3 + StartMenuPositionY + 16 * START_MENU_BUTTON_SYSTEM_LOG && iMouseY <= 3 + StartMenuPositionY + 16 * (START_MENU_BUTTON_SYSTEM_LOG + 1))
     {
-        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: SYSTEM_QUIT_CLICKED_EVENT\n", __LINE__);
+        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: SYSTEM_LOG_CLICKED_EVENT\n", __LINE__);
         return SYSTEM_LOG_CLICKED_EVENT;
     }
 
@@ -3044,13 +3044,18 @@ UINT16 L2_MOUSE_ClickEventGet()
     if (iMouseX >= SystemSettingWindowPositionX + SystemSettingWindowWidth - 20 && iMouseX <=  SystemSettingWindowPositionX + SystemSettingWindowWidth - 4 
             && iMouseY >= SystemSettingWindowPositionY+ 0 && iMouseY <= SystemSettingWindowPositionY + 16)
     {
-        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: MEMORY_INFORMATION_CLOSE_CLICKED_EVENT\n", __LINE__);
+        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: SYSTEM_SETTING_CLOSE_CLICKED_EVENT\n", __LINE__);
         return SYSTEM_SETTING_CLOSE_CLICKED_EVENT;
     }
     
     //DisplayMyComputerFlag = 0;
     DisplaySystemSettingWindowFlag = 0;
-    DisplayStartMenuFlag = 0;
+    
+    if (TRUE  == WindowLayers.item[GRAPHICS_LAYER_START_MENU].DisplayFlag)
+    {
+        WindowLayers.ActiveWindowCount--;
+        WindowLayers.item[GRAPHICS_LAYER_START_MENU].DisplayFlag = FALSE;
+    }
     
     StartMenuNextState = CLICK_INIT_STATE;
 
@@ -3078,7 +3083,7 @@ L2_MOUSE_SystemQuitClicked()
 
 L2_MOUSE_MemoryInformationClicked()
 {   
-    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d L2_MOUSE_SystemQuitClicked\n", __LINE__);
+    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d L2_MOUSE_MemoryInformationClicked\n", __LINE__);
     //DisplayMemoryInformationWindowFlag = TRUE;
     if (FALSE == WindowLayers.item[GRAPHICS_LAYER_MEMORY_INFORMATION_WINDOW].DisplayFlag)
     {
@@ -3089,7 +3094,7 @@ L2_MOUSE_MemoryInformationClicked()
 
 L2_MOUSE_SystemLogClicked()
 {   
-    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d L2_MOUSE_SystemQuitClicked\n", __LINE__);
+    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d L2_MOUSE_SystemLogClicked\n", __LINE__);
     //DisplaySystemLogWindowFlag = TRUE;  
     //WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW].DisplayFlag = TRUE;
     if (FALSE == WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW].DisplayFlag)
@@ -5836,7 +5841,7 @@ L2_MOUSE_Moveover()
    
     for (int i = 0; i <  sizeof(StartMenuStateTransformTable)/sizeof(StartMenuStateTransformTable[0]); i++ )
     {
-        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: StartMenuStateTransformTable[i].CurrentState: %d\n", __LINE__, StartMenuStateTransformTable[i].CurrentState);
+        //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: StartMenuStateTransformTable[i].CurrentState: %d\n", __LINE__, StartMenuStateTransformTable[i].CurrentState);
         //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: i: %d\n", __LINE__, i);
         if (StartMenuStateTransformTable[i].CurrentState == StartMenuNextState 
             && StartMenuClickEvent == StartMenuStateTransformTable[i].event )
@@ -6130,6 +6135,8 @@ void L2_COMMON_ParameterInit()
     WindowLayers.item[GRAPHICS_LAYER_MEMORY_INFORMATION_WINDOW].StartY = MemoryInformationWindowPositionY;
     WindowLayers.item[GRAPHICS_LAYER_MEMORY_INFORMATION_WINDOW].WindowWidth = MemoryInformationWindowWidth;
     WindowLayers.item[GRAPHICS_LAYER_MEMORY_INFORMATION_WINDOW].WindowHeight= MemoryInformationWindowHeight;
+
+    WindowLayers.LayerCount++;
 
     L1_MEMORY_SetValue(WindowLayers.LayerSequences, 10 * 2, 0);
 
