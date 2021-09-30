@@ -1550,6 +1550,13 @@ VOID EFIAPI L2_DEBUG_Print1 (UINT16 x, UINT16 y,  IN  CONST CHAR8  *Format, ...)
     VA_END (VaList);
 }
 
+typedef struct
+{
+    UINT8 *pBuffer;
+    UINT16 BufferWidth;
+    UINT16 BufferHeight;
+}GRAPHICS_LAYER_FOR_DISPLAY;
+
 /* Display a string */
 VOID EFIAPI L2_DEBUG_Print2 (UINT16 x, UINT16 y, UINT8 *pBuffer, IN  CONST CHAR8  *Format, ...)
 {
@@ -1561,6 +1568,19 @@ VOID EFIAPI L2_DEBUG_Print2 (UINT16 x, UINT16 y, UINT8 *pBuffer, IN  CONST CHAR8
     L2_STRING_Maker2(x, y, pBuffer, Format, VaList);
     VA_END (VaList);
 }
+
+/* Display a string */
+VOID EFIAPI L2_DEBUG_Print3 (UINT16 x, UINT16 y, GRAPHICS_LAYER_FOR_DISPLAY layer, IN  CONST CHAR8  *Format, ...)
+{
+    if (y > layer.BufferHeight- 16 || x > layer.BufferWidth- 8)
+        return;
+
+    VA_LIST         VaList;
+    VA_START (VaList, Format);
+    L2_STRING_Maker2(x, y, layer.pBuffer, Format, VaList);
+    VA_END (VaList);
+}
+
 
 EFI_STATUS L1_STRING_Compare(UINT8 *p1, UINT8 *p2, UINT16 length)
 {
@@ -5699,8 +5719,13 @@ L2_MOUSE_Moveover()
     
     if (START_MENU_INIT_CLICKED_EVENT == StartMenuClickEvent)
         return;
+    //L2_DEBUG_Print3
+    GRAPHICS_LAYER_FOR_DISPLAY layer;
+    layer.pBuffer = pSystemLogWindowBuffer;
+    layer.BufferHeight = SystemLogWindowHeight;
+    layer.BufferWidth = SystemLogWindowWidth;
     
-    L2_DEBUG_Print1(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, "%d: StartMenuClickEvent: %d \n", __LINE__, StartMenuClickEvent);
+    L2_DEBUG_Print3(DISPLAY_ERROR_STATUS_X, DISPLAY_ERROR_STATUS_Y, layer, "%d: StartMenuClickEvent: %d \n", __LINE__, StartMenuClickEvent);
         
     MouseClickFlag = MOUSE_NO_CLICKED;
     EFI_STATUS Status;
