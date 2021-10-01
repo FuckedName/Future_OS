@@ -3100,8 +3100,9 @@ L2_MOUSE_SystemSettingClicked()
     {
         WindowLayers.ActiveWindowCount++;
         WindowLayers.item[GRAPHICS_LAYER_SYSTEM_SETTING_WINDOW].DisplayFlag = TRUE;
-        L1_GRAPHICS_UpdateWindowLayer(GRAPHICS_LAYER_SYSTEM_SETTING_WINDOW);
     }
+
+    L1_GRAPHICS_UpdateWindowLayer(GRAPHICS_LAYER_SYSTEM_SETTING_WINDOW);
 }
 
 
@@ -3119,8 +3120,8 @@ L2_MOUSE_MemoryInformationClicked()
     {
         WindowLayers.ActiveWindowCount++;
         WindowLayers.item[GRAPHICS_LAYER_MEMORY_INFORMATION_WINDOW].DisplayFlag = TRUE;
-        L1_GRAPHICS_UpdateWindowLayer(GRAPHICS_LAYER_MEMORY_INFORMATION_WINDOW);
     }
+    L1_GRAPHICS_UpdateWindowLayer(GRAPHICS_LAYER_MEMORY_INFORMATION_WINDOW);
 }
 
 L2_MOUSE_SystemLogClicked()
@@ -3133,8 +3134,8 @@ L2_MOUSE_SystemLogClicked()
         WindowLayers.ActiveWindowCount++;
         WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW].DisplayFlag = TRUE;
         
-        L1_GRAPHICS_UpdateWindowLayer(GRAPHICS_LAYER_SYSTEM_LOG_WINDOW);
     }
+    L1_GRAPHICS_UpdateWindowLayer(GRAPHICS_LAYER_SYSTEM_LOG_WINDOW);
 }
 
 
@@ -3333,8 +3334,8 @@ L2_MOUSE_MENU_Clicked()
         WindowLayers.ActiveWindowCount++;
         WindowLayers.item[GRAPHICS_LAYER_START_MENU].DisplayFlag = TRUE;
         
-        L1_GRAPHICS_UpdateWindowLayer(GRAPHICS_LAYER_START_MENU);
     }
+    L1_GRAPHICS_UpdateWindowLayer(GRAPHICS_LAYER_START_MENU);
 
 }
 
@@ -5831,7 +5832,7 @@ L2_MOUSE_Moveover()
     MouseClickFlag = MOUSE_NO_CLICKED;
     EFI_STATUS Status;
 
-    if (StartMenuClickEvent == MY_COMPUTER_CLOSE_CLICKED_EVENT && DisplayMyComputerFlag == 1)
+    if (StartMenuClickEvent == MY_COMPUTER_CLOSE_CLICKED_EVENT)
     {
         //DisplayMyComputerFlag = 0;
         if (TRUE  == WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].DisplayFlag)
@@ -5842,7 +5843,7 @@ L2_MOUSE_Moveover()
         return;
     }
 
-    if (StartMenuClickEvent == SYSTEM_LOG_CLOSE_CLICKED_EVENT && DisplaySystemLogWindowFlag == 1)
+    if (StartMenuClickEvent == SYSTEM_LOG_CLOSE_CLICKED_EVENT)
     {
         //DisplaySystemLogWindowFlag = 0;
         
@@ -5855,7 +5856,7 @@ L2_MOUSE_Moveover()
         return;
     }
 
-    if (StartMenuClickEvent == SYSTEM_SETTING_CLOSE_CLICKED_EVENT && DisplaySystemSettingWindowFlag == 1)
+    if (StartMenuClickEvent == SYSTEM_SETTING_CLOSE_CLICKED_EVENT)
     {
         //DisplaySystemSettingWindowFlag = 0;
         if (TRUE  == WindowLayers.item[GRAPHICS_LAYER_SYSTEM_SETTING_WINDOW].DisplayFlag)
@@ -5866,7 +5867,7 @@ L2_MOUSE_Moveover()
         return;
     }
 
-    if (StartMenuClickEvent == MEMORY_INFORMATION_CLOSE_CLICKED_EVENT && DisplayMemoryInformationWindowFlag == 1)
+    if (StartMenuClickEvent == MEMORY_INFORMATION_CLOSE_CLICKED_EVENT)
     {
         //DisplayMemoryInformationWindowFlag = 0;
         if (TRUE  == WindowLayers.item[GRAPHICS_LAYER_MEMORY_INFORMATION_WINDOW].DisplayFlag)
