@@ -309,7 +309,7 @@ UINT8 *sChineseChar = NULL;
 //UINT8 sChineseChar[267616];
 
 
-static UINTN ScreenWidth, ScreenHeight;  
+static UINTN ScreenWidth, ScreenHeight;
 UINT16 MyComputerWidth = 16 * 30;
 UINT16 MyComputerHeight = 16 * 40;
 UINT16 MyComputerPositionX = 300;
@@ -1095,6 +1095,17 @@ typedef struct
 
 WINDOW_LAYERS WindowLayers;
 
+
+L1_GRAPHICS_UpdateWindowLayer(UINT16 layer)
+{
+    WindowLayers.LayerSequences[0] = GRAPHICS_LAYER_START_MENU;
+    WindowLayers.LayerSequences[1] = GRAPHICS_LAYER_MEMORY_INFORMATION_WINDOW;
+    WindowLayers.LayerSequences[2] = GRAPHICS_LAYER_MY_COMPUTER_WINDOW;
+    WindowLayers.LayerSequences[3] = GRAPHICS_LAYER_SYSTEM_LOG_WINDOW;
+    WindowLayers.LayerSequences[4] = GRAPHICS_LAYER_SYSTEM_SETTING_WINDOW;
+    WindowLayers.LayerSequences[WindowLayers.LayerCount - 1] = layer;
+}
+
 // fill into rectangle
 void L1_MEMORY_RectangleFill(UINT8 *pBuffer,
         IN UINTN x0, UINTN y0, UINTN x1, UINTN y1, 
@@ -1602,7 +1613,7 @@ VOID EFIAPI L2_DEBUG_Print2 (UINT16 x, UINT16 y, UINT8 *pBuffer, IN  CONST CHAR8
 /* Display a string */
 VOID EFIAPI L2_DEBUG_Print3 (UINT16 x, UINT16 y, GRAPHICS_LAYER_FOR_DISPLAY layer, IN  CONST CHAR8  *Format, ...)
 {
-    if (y > layer.BufferHeight- 16 || x > layer.BufferWidth- 8)
+    if (y > layer.BufferHeight - 16 || x > layer.BufferWidth- 8)
         return;
 
     VA_LIST         VaList;
@@ -2809,7 +2820,7 @@ void L2_GRAPHICS_CopyBufferFromWindowsToDesk()
 {
     for (UINT16 i = 0; i < WindowLayers.LayerCount; i++)
     {
-        if (TRUE == WindowLayers.item[i].DisplayFlag)
+        if (TRUE == WindowLayers.item[WindowLayers.LayerSequences[i]].DisplayFlag)
         {
             L2_GRAPHICS_Copy(pDeskDisplayBuffer, WindowLayers.item[i].pBuffer, ScreenWidth, ScreenHeight, WindowLayers.item[i].WindowWidth, WindowLayers.item[i].WindowHeight, WindowLayers.item[i].StartX, WindowLayers.item[i].StartY);
         }
@@ -2854,7 +2865,7 @@ VOID L2_GRAPHICS_LayerCompute(int iMouseX, int iMouseY, UINT8 MouseClickFlag)
                     0, 0, 
                     ScreenWidth, ScreenHeight, 0);
                     
-        return;                    
+        return;
     }
 
     L2_GRAPHICS_CopyBufferFromWindowsToDesk();
@@ -2959,6 +2970,9 @@ UINT16 L2_MOUSE_ClickEventGet()
         return START_MENU_CLICKED_EVENT;
     }
 
+    StartMenuPositionX = WindowLayers.item[GRAPHICS_LAYER_START_MENU].StartX;
+    StartMenuPositionY = WindowLayers.item[GRAPHICS_LAYER_START_MENU].StartY;
+
     // Display my computer window
     if (iMouseX >= 3 + StartMenuPositionX && iMouseX <= 3 + 4 * 16  + StartMenuPositionX  
          && iMouseY >= 3 + StartMenuPositionY + 16 * START_MENU_BUTTON_MY_COMPUTER && iMouseY <= 3 + StartMenuPositionY + 16 * (START_MENU_BUTTON_MY_COMPUTER + 1))
@@ -2998,10 +3012,13 @@ UINT16 L2_MOUSE_ClickEventGet()
         L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: SYSTEM_QUIT_CLICKED_EVENT\n", __LINE__);
         return SYSTEM_QUIT_CLICKED_EVENT;
     }
+    
+    SystemSettingWindowPositionX = WindowLayers.item[GRAPHICS_LAYER_SYSTEM_SETTING_WINDOW].StartX;
+    SystemSettingWindowPositionY = WindowLayers.item[GRAPHICS_LAYER_SYSTEM_SETTING_WINDOW].StartY;
 
     //Wall paper setting
     if (iMouseX >= 3 + SystemSettingWindowPositionX && iMouseX <= 3 + 4 * 16  + SystemSettingWindowPositionX  
-         && iMouseY >= 3 + SystemSettingWindowPositionX && iMouseY <= 3 + SystemSettingWindowPositionY + 16)
+         && iMouseY >= 3 + SystemSettingWindowPositionY && iMouseY <= 3 + SystemSettingWindowPositionY + 16)
     {
         L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: WALLPAPER_SETTING_CLICKED_EVENT\n", __LINE__);
         return WALLPAPER_SETTING_CLICKED_EVENT;
@@ -3009,11 +3026,14 @@ UINT16 L2_MOUSE_ClickEventGet()
     
     //Wall paper Reset
     if (iMouseX >= 3 + SystemSettingWindowPositionX && iMouseX <= 3 + 4 * 16  + SystemSettingWindowPositionX  
-         && iMouseY >= 3 + SystemSettingWindowPositionX + 16 && iMouseY <= 3 + SystemSettingWindowPositionY + 16 * 2)
+         && iMouseY >= 3 + SystemSettingWindowPositionY + 16 && iMouseY <= 3 + SystemSettingWindowPositionY + 16 * 2)
     {
         L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: WALLPAPER_RESET_CLICKED_EVENT\n", __LINE__);
         return WALLPAPER_RESET_CLICKED_EVENT;
     }
+
+    MyComputerPositionX = WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].StartX;
+    MyComputerPositionY = WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].StartY;
 
     // Hide My computer window
     if (iMouseX >= MyComputerPositionX + MyComputerWidth - 20 && iMouseX <=  MyComputerPositionX + MyComputerWidth - 4 
@@ -3023,6 +3043,9 @@ UINT16 L2_MOUSE_ClickEventGet()
         return MY_COMPUTER_CLOSE_CLICKED_EVENT;
     }
 
+    SystemLogWindowPositionX = WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW].StartX;
+    SystemLogWindowPositionY = WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW].StartY;
+
     // Hide System Log window
     if (iMouseX >= SystemLogWindowPositionX + SystemLogWindowWidth - 20 && iMouseX <=  SystemLogWindowPositionX + SystemLogWindowWidth - 4 
             && iMouseY >= SystemLogWindowPositionY+ 0 && iMouseY <= SystemLogWindowPositionY + 16)
@@ -3030,6 +3053,9 @@ UINT16 L2_MOUSE_ClickEventGet()
         L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: SYSTEM_LOG_CLOSE_CLICKED_EVENT\n", __LINE__);
         return SYSTEM_LOG_CLOSE_CLICKED_EVENT;
     }
+    
+    MemoryInformationWindowPositionX = WindowLayers.item[GRAPHICS_LAYER_MEMORY_INFORMATION_WINDOW].StartX;
+    MemoryInformationWindowPositionY = WindowLayers.item[GRAPHICS_LAYER_MEMORY_INFORMATION_WINDOW].StartY;
     
     // Hide Memory Information window
     if (iMouseX >= MemoryInformationWindowPositionX + MemoryInformationWindowWidth - 20 && iMouseX <=  MemoryInformationWindowPositionX + MemoryInformationWindowWidth - 4 
@@ -3039,6 +3065,8 @@ UINT16 L2_MOUSE_ClickEventGet()
         return MEMORY_INFORMATION_CLOSE_CLICKED_EVENT;
     }
 
+    SystemSettingWindowPositionX = WindowLayers.item[GRAPHICS_LAYER_SYSTEM_SETTING_WINDOW].StartX;
+    SystemSettingWindowPositionY = WindowLayers.item[GRAPHICS_LAYER_SYSTEM_SETTING_WINDOW].StartY;
 
     // Hide Memory Information window
     if (iMouseX >= SystemSettingWindowPositionX + SystemSettingWindowWidth - 20 && iMouseX <=  SystemSettingWindowPositionX + SystemSettingWindowWidth - 4 
@@ -3071,6 +3099,7 @@ L2_MOUSE_SystemSettingClicked()
     {
         WindowLayers.ActiveWindowCount++;
         WindowLayers.item[GRAPHICS_LAYER_SYSTEM_SETTING_WINDOW].DisplayFlag = TRUE;
+        L1_GRAPHICS_UpdateWindowLayer(GRAPHICS_LAYER_SYSTEM_SETTING_WINDOW);
     }
 }
 
@@ -3089,6 +3118,7 @@ L2_MOUSE_MemoryInformationClicked()
     {
         WindowLayers.ActiveWindowCount++;
         WindowLayers.item[GRAPHICS_LAYER_MEMORY_INFORMATION_WINDOW].DisplayFlag = TRUE;
+        L1_GRAPHICS_UpdateWindowLayer(GRAPHICS_LAYER_MEMORY_INFORMATION_WINDOW);
     }
 }
 
@@ -3101,6 +3131,8 @@ L2_MOUSE_SystemLogClicked()
     {
         WindowLayers.ActiveWindowCount++;
         WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW].DisplayFlag = TRUE;
+        
+        L1_GRAPHICS_UpdateWindowLayer(GRAPHICS_LAYER_SYSTEM_LOG_WINDOW);
     }
 }
 
@@ -3252,6 +3284,8 @@ L2_MOUSE_MyComputerClicked()
     //DisplayMyComputerFlag = 1;
     WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].DisplayFlag = TRUE;
     
+    L1_GRAPHICS_UpdateWindowLayer(GRAPHICS_LAYER_MY_COMPUTER_WINDOW);
+    
     for (UINT16 i = 0; i < PartitionCount; i++)
     {       
         if (iMouseX >= MyComputerPositionX + 50 && iMouseX <= MyComputerPositionX + 50 + 16 * 6
@@ -3297,6 +3331,8 @@ L2_MOUSE_MENU_Clicked()
     {
         WindowLayers.ActiveWindowCount++;
         WindowLayers.item[GRAPHICS_LAYER_START_MENU].DisplayFlag = TRUE;
+        
+        L1_GRAPHICS_UpdateWindowLayer(GRAPHICS_LAYER_START_MENU);
     }
 
 }
@@ -4346,6 +4382,9 @@ VOID L3_APPLICATION_MyComputerWindow(UINT16 StartX, UINT16 StartY)
     L3_WINDOW_Create(pMyComputerBuffer, pParent, MyComputerWidth, MyComputerHeight, Type, pWindowTitle);
 
     UINT8 *pBuffer = pMyComputerBuffer;
+
+    WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].StartX = StartX;
+    WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].StartY = StartY;
     
     // wo de dian nao
     L2_GRAPHICS_ChineseCharDraw2(pMyComputerBuffer, 3, 6,          (46 - 1 ) * 94 + 50 - 1, Color, MyComputerWidth);    
@@ -4502,6 +4541,10 @@ VOID L3_APPLICATION_MemoryInformationWindow(UINT16 StartX, UINT16 StartY)
 
     MemoryInformationWindowPositionX = StartX;
     MemoryInformationWindowPositionY = StartY;
+
+    
+    WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].StartX = StartX;
+    WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].StartY = StartY;
     
     EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
     
@@ -4614,6 +4657,12 @@ VOID L3_APPLICATION_SystemLogWindow(UINT16 StartX, UINT16 StartY)
 
     SystemLogWindowPositionX = StartX;
     SystemLogWindowPositionY= StartY;
+
+    
+    WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW].StartX = StartX;
+    WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW].StartY = StartY;
+    WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW].WindowWidth = SystemLogWindowWidth;
+    WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW].WindowHeight= SystemLogWindowHeight;
     
     
     EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
@@ -6228,9 +6277,9 @@ Main (
     
     L3_APPLICATION_MyComputerWindow(100, 100);
         
-    L3_APPLICATION_SystemLogWindow(140, 140);
+    L3_APPLICATION_SystemLogWindow(1240, 140);
     
-    L3_APPLICATION_MemoryInformationWindow(200, 200);
+    L3_APPLICATION_MemoryInformationWindow(700, 200);
     
     L2_TIMER_IntervalInit();    
     
