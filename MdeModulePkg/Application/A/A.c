@@ -2820,9 +2820,10 @@ void L2_GRAPHICS_CopyBufferFromWindowsToDesk()
 {
     for (UINT16 i = 0; i < WindowLayers.LayerCount; i++)
     {
-        if (TRUE == WindowLayers.item[WindowLayers.LayerSequences[i]].DisplayFlag)
+        UINT16 j = WindowLayers.LayerSequences[i];
+        if (TRUE == WindowLayers.item[j].DisplayFlag)
         {
-            L2_GRAPHICS_Copy(pDeskDisplayBuffer, WindowLayers.item[i].pBuffer, ScreenWidth, ScreenHeight, WindowLayers.item[i].WindowWidth, WindowLayers.item[i].WindowHeight, WindowLayers.item[i].StartX, WindowLayers.item[i].StartY);
+            L2_GRAPHICS_Copy(pDeskDisplayBuffer, WindowLayers.item[j].pBuffer, ScreenWidth, ScreenHeight, WindowLayers.item[j].WindowWidth, WindowLayers.item[j].WindowHeight, WindowLayers.item[j].StartX, WindowLayers.item[j].StartY);
         }
     }
     /*
@@ -5760,13 +5761,14 @@ EFI_STATUS L2_GRAPHICS_DeskInit()
     Color.Green = 0x00;
     Color.Blue   = 0x00;
 
+    /*
     for (UINT16 i = 1; i < 10; i++)
     {
         for (UINT16 j = 1; j < 22; j++)
         {
             L2_GRAPHICS_ChineseCharDraw2(pDeskBuffer,  (16 + 2) * j, i * (16 + 2) + 322, (i - 1) * 94 + j - 1, Color, ScreenWidth);
         }
-    }
+    }*/
 
 
     for (int j = 0; j < 150; j++)
@@ -6190,6 +6192,8 @@ void L2_COMMON_ParameterInit()
     L1_MEMORY_SetValue(WindowLayers.LayerSequences, 10 * 2, 0);
 
     WindowLayers.ActiveWindowCount = 0;
+
+    MouseClickFlag = MOUSE_NO_CLICKED;
 }
 
 
@@ -6275,11 +6279,11 @@ Main (
 
     L2_GRAPHICS_SystemSettingInit();
     
-    L3_APPLICATION_MyComputerWindow(100, 100);
+    L3_APPLICATION_MyComputerWindow(100, 300);
         
-    L3_APPLICATION_SystemLogWindow(1240, 140);
+    L3_APPLICATION_SystemLogWindow(1040, 140);
     
-    L3_APPLICATION_MemoryInformationWindow(700, 200);
+    L3_APPLICATION_MemoryInformationWindow(600, 100);
     
     L2_TIMER_IntervalInit();    
     
