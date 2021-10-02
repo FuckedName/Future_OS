@@ -3297,11 +3297,12 @@ L2_MOUSE_MyComputerClicked()
     L1_GRAPHICS_UpdateWindowLayer(GRAPHICS_LAYER_MY_COMPUTER_WINDOW);
     
     for (UINT16 i = 0; i < PartitionCount; i++)
-    {       
+    {   
+        MyComputerPositionX = WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].StartX;
+        MyComputerPositionY = WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].StartY;
         if (iMouseX >= MyComputerPositionX + 50 && iMouseX <= MyComputerPositionX + 50 + 16 * 6
             && iMouseY >= MyComputerPositionY + i * 16 + 16 * 2 && iMouseY <= MyComputerPositionY + i * 16 + 16 * 3)
-        {
-            
+        {   
             if (PreviousItem == i)
             {
                 break;
@@ -3312,7 +3313,7 @@ L2_MOUSE_MyComputerClicked()
             // need to save result into cache, for next time to read, reduce disk operation
             L2_STORE_PartitionItemsPrint(i);
             PreviousItem = i;
-           L2_GRAPHICS_Copy(pDeskDisplayBuffer, pMouseSelectedBuffer, ScreenWidth, ScreenHeight, 32, 16, MyComputerPositionX + 50, MyComputerPositionY  + i * (16 + 2) + 16 * 2);   
+            L2_GRAPHICS_Copy(pDeskDisplayBuffer, pMouseSelectedBuffer, ScreenWidth, ScreenHeight, 32, 16, MyComputerPositionX + 50, MyComputerPositionY  + i * (16 + 2) + 16 * 2);   
         }
     }
 }
@@ -3378,6 +3379,7 @@ L2_MOUSE_Click()
         {
             WindowLayers.item[layer].StartX += x_move * 3;
             WindowLayers.item[layer].StartY += y_move * 3;
+            L1_GRAPHICS_UpdateWindowLayer(layer);
         }
     }
     
