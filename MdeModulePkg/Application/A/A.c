@@ -1098,12 +1098,20 @@ WINDOW_LAYERS WindowLayers;
 
 L1_GRAPHICS_UpdateWindowLayer(UINT16 layer)
 {
-    WindowLayers.LayerSequences[0] = GRAPHICS_LAYER_START_MENU;
-    WindowLayers.LayerSequences[1] = GRAPHICS_LAYER_MEMORY_INFORMATION_WINDOW;
-    WindowLayers.LayerSequences[2] = GRAPHICS_LAYER_MY_COMPUTER_WINDOW;
-    WindowLayers.LayerSequences[3] = GRAPHICS_LAYER_SYSTEM_LOG_WINDOW;
-    WindowLayers.LayerSequences[4] = GRAPHICS_LAYER_SYSTEM_SETTING_WINDOW;
-    WindowLayers.LayerSequences[WindowLayers.LayerCount - 1] = layer;
+    for (UINT16 i = 0; i < WindowLayers.LayerCount; i++)
+    {
+        if (layer == WindowLayers.LayerSequences[i])
+        {
+            for (UINT16 j = i; j < WindowLayers.LayerCount - 1; j++)
+            {
+                WindowLayers.LayerSequences[j] = WindowLayers.LayerSequences[j + 1];
+            }
+            WindowLayers.LayerSequences[WindowLayers.LayerCount - 1] = layer;
+            break;
+        }
+    }
+
+    //WindowLayers.LayerSequences[WindowLayers.LayerCount - 1] = layer;
 }
 
 // fill into rectangle
@@ -6195,6 +6203,13 @@ void L2_COMMON_ParameterInit()
     WindowLayers.ActiveWindowCount = 0;
 
     MouseClickFlag = MOUSE_NO_CLICKED;
+    
+    WindowLayers.LayerSequences[0] = GRAPHICS_LAYER_START_MENU;
+    WindowLayers.LayerSequences[1] = GRAPHICS_LAYER_MEMORY_INFORMATION_WINDOW;
+    WindowLayers.LayerSequences[2] = GRAPHICS_LAYER_MY_COMPUTER_WINDOW;
+    WindowLayers.LayerSequences[3] = GRAPHICS_LAYER_SYSTEM_LOG_WINDOW;
+    WindowLayers.LayerSequences[4] = GRAPHICS_LAYER_SYSTEM_SETTING_WINDOW;
+    
 }
 
 
