@@ -4379,9 +4379,9 @@ EFI_STATUS L3_WINDOW_Create(UINT8 *pBuffer, UINT8 *pParent, UINT16 Width, UINT16
     {
         for (j = 0; j < Width / 3; j++)
         {
-            pBuffer[(i * Width + j) * 4] = 214;
-            pBuffer[(i * Width + j) * 4 + 1] = 211;
-            pBuffer[(i * Width + j) * 4 + 2] = 204;
+            pBuffer[(i * Width + j) * 4]     = 235;
+            pBuffer[(i * Width + j) * 4 + 1] = 235;
+            pBuffer[(i * Width + j) * 4 + 2] = 235;
             pBuffer[(i * Width + j) * 4 + 3] = LayerID;
         }
     }
@@ -4391,9 +4391,9 @@ EFI_STATUS L3_WINDOW_Create(UINT8 *pBuffer, UINT8 *pParent, UINT16 Width, UINT16
     {
         for (j = Width / 3 - 1; j < Width; j++)
         {
-            pBuffer[(i * Width + j) * 4] = 214;
-            pBuffer[(i * Width + j) * 4 + 1] = 211;
-            pBuffer[(i * Width + j) * 4 + 2] = 104;
+            pBuffer[(i * Width + j) * 4]     = 0xff;
+            pBuffer[(i * Width + j) * 4 + 1] = 0xff;
+            pBuffer[(i * Width + j) * 4 + 2] = 0xff;
             pBuffer[(i * Width + j) * 4 + 3] = LayerID;
         }
     }
@@ -4423,16 +4423,26 @@ VOID L3_APPLICATION_MyComputerWindow(UINT16 StartX, UINT16 StartY)
     WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].StartX = StartX;
     WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].StartY = StartY;
     
+    int x, y;
+    x = 3;
+    y = 6;
+    
     // wo de dian nao
-    L2_GRAPHICS_ChineseCharDraw2(pMyComputerBuffer, 3, 6,          (46 - 1 ) * 94 + 50 - 1, Color, MyComputerWidth);    
-    L2_GRAPHICS_ChineseCharDraw2(pMyComputerBuffer, 3 + 16 , 6,     (21 - 1) * 94 + 36 - 1, Color, MyComputerWidth);
-    L2_GRAPHICS_ChineseCharDraw2(pMyComputerBuffer, 3 + 16 * 2, 6, (21 - 1) * 94 + 71 - 1, Color, MyComputerWidth);
-    L2_GRAPHICS_ChineseCharDraw2(pMyComputerBuffer, 3 + 16 * 3, 6, (36 - 1) * 94 + 52 - 1, Color, MyComputerWidth);
+    L2_GRAPHICS_ChineseCharDraw2(pMyComputerBuffer, x, y, (46 - 1) * 94 + 50 - 1, Color, MyComputerWidth);
+    x += 16;
+    
+    L2_GRAPHICS_ChineseCharDraw2(pMyComputerBuffer, x, y, (21 - 1) * 94 + 36 - 1, Color, MyComputerWidth);
+    x += 16;
+    
+    L2_GRAPHICS_ChineseCharDraw2(pMyComputerBuffer, x, y, (21 - 1) * 94 + 71 - 1, Color, MyComputerWidth);
+    x += 16;
+    
+    L2_GRAPHICS_ChineseCharDraw2(pMyComputerBuffer, x, y, (36 - 1) * 94 + 52 - 1, Color, MyComputerWidth);
+
     
     Color.Blue  = 0x00;
     Color.Red   = 0x00;
     Color.Green = 0x00;
-    int x, y;
 
     for (UINT16 i = 0 ; i < PartitionCount; i++)
     {
