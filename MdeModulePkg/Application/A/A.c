@@ -3427,7 +3427,7 @@ VOID L2_MOUSE_Move()
     
     // display graphics layer id mouse over, for mouse click event.
     //L2_DEBUG_Print1(DISPLAY_X, DISPLAY_Y, "%d: Graphics Layer id: %d ", __LINE__, pDeskDisplayBuffer[(iMouseY * ScreenWidth + iMouseX) * 4 + 3]);
-    
+    L2_DEBUG_Print1(0, ScreenHeight - 30 -  7 * 16, "%d: iMouseX: %d iMouseY: %d Graphics Layer id: %d ", __LINE__, iMouseX, iMouseY, pDeskDisplayBuffer[(iMouseY * ScreenWidth + iMouseX) * 4 + 3]);
     L2_MOUSE_Click();
     
     L2_MOUSE_Moveover();
@@ -4323,7 +4323,7 @@ char *L1_STRING_FloatToString(float val, int precision, char *buf)
 
 
 
-EFI_STATUS L3_WINDOW_Create(UINT8 *pBuffer, UINT8 *pParent, UINT16 Width, UINT16 Height, UINT16 Type, CHAR8 *pWindowTitle)
+EFI_STATUS L3_WINDOW_Create(UINT8 *pBuffer, UINT8 *pParent, UINT16 Width, UINT16 Height, UINT16 LayerID, CHAR8 *pWindowTitle)
 {   
     L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: Width: %d \n", __LINE__, Width);
     
@@ -4340,7 +4340,7 @@ EFI_STATUS L3_WINDOW_Create(UINT8 *pBuffer, UINT8 *pParent, UINT16 Width, UINT16
     Color.Blue  = 0xff;
     Color.Red   = 0xff;
     Color.Green = 0xff;
-    Color.Reserved = GRAPHICS_LAYER_MY_COMPUTER_WINDOW;
+    Color.Reserved = LayerID;
 
     L2_GRAPHICS_ChineseCharDraw2(pBuffer, Width - 3 * 16 - 3, 6, (12 - 1) * 94 + 58 - 1, Color, Width);
     L2_GRAPHICS_ChineseCharDraw2(pBuffer, Width - 2 * 16 - 3, 6, (01 - 1) * 94 + 85 - 1, Color, Width);
@@ -4354,7 +4354,7 @@ EFI_STATUS L3_WINDOW_Create(UINT8 *pBuffer, UINT8 *pParent, UINT16 Width, UINT16
             pBuffer[(i * Width + j) * 4] = 214;
             pBuffer[(i * Width + j) * 4 + 1] = 211;
             pBuffer[(i * Width + j) * 4 + 2] = 204;
-            pBuffer[(i * Width + j) * 4 + 3] = GRAPHICS_LAYER_MY_COMPUTER_WINDOW;
+            pBuffer[(i * Width + j) * 4 + 3] = LayerID;
         }
     }
 
@@ -4366,10 +4366,9 @@ EFI_STATUS L3_WINDOW_Create(UINT8 *pBuffer, UINT8 *pParent, UINT16 Width, UINT16
             pBuffer[(i * Width + j) * 4] = 214;
             pBuffer[(i * Width + j) * 4 + 1] = 211;
             pBuffer[(i * Width + j) * 4 + 2] = 104;
-            pBuffer[(i * Width + j) * 4 + 3] = GRAPHICS_LAYER_MY_COMPUTER_WINDOW;
+            pBuffer[(i * Width + j) * 4 + 3] = LayerID;
         }
     }
-
 
     return EFI_SUCCESS;
 }
@@ -4389,7 +4388,7 @@ VOID L3_APPLICATION_MyComputerWindow(UINT16 StartX, UINT16 StartY)
     Color.Reserved = GRAPHICS_LAYER_MY_COMPUTER_WINDOW;
     
     L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: MyComputerWidth: %d \n", __LINE__, MyComputerWidth);
-    L3_WINDOW_Create(pMyComputerBuffer, pParent, MyComputerWidth, MyComputerHeight, Type, pWindowTitle);
+    L3_WINDOW_Create(pMyComputerBuffer, pParent, MyComputerWidth, MyComputerHeight, GRAPHICS_LAYER_MY_COMPUTER_WINDOW, pWindowTitle);
 
     UINT8 *pBuffer = pMyComputerBuffer;
 
@@ -4543,7 +4542,7 @@ VOID L3_APPLICATION_MemoryInformationWindow(UINT16 StartX, UINT16 StartY)
     UINT16 j = 0;
     
     L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: MemoryInformationWindowWidth: %d \n", __LINE__, MemoryInformationWindowWidth);
-    L3_WINDOW_Create(pMemoryInformationBuffer, pParent, MemoryInformationWindowWidth, MemoryInformationWindowHeight, Type, pWindowTitle);
+    L3_WINDOW_Create(pMemoryInformationBuffer, pParent, MemoryInformationWindowWidth, MemoryInformationWindowHeight, GRAPHICS_LAYER_MEMORY_INFORMATION_WINDOW, pWindowTitle);
 
     UINT8 *pBuffer = pMemoryInformationBuffer;
     UINT16 Width = MemoryInformationWindowWidth;
@@ -4553,15 +4552,15 @@ VOID L3_APPLICATION_MemoryInformationWindow(UINT16 StartX, UINT16 StartY)
     MemoryInformationWindowPositionY = StartY;
 
     
-    WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].StartX = StartX;
-    WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].StartY = StartY;
+    WindowLayers.item[GRAPHICS_LAYER_MEMORY_INFORMATION_WINDOW].StartX = StartX;
+    WindowLayers.item[GRAPHICS_LAYER_MEMORY_INFORMATION_WINDOW].StartY = StartY;
     
     EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
     
     Color.Blue  = 0xff;
     Color.Red   = 0xff;
     Color.Green = 0xff;
-    Color.Reserved = GRAPHICS_LAYER_MY_COMPUTER_WINDOW;
+    Color.Reserved = GRAPHICS_LAYER_MEMORY_INFORMATION_WINDOW;
     
     //3658
     //内
@@ -4595,7 +4594,7 @@ VOID L3_APPLICATION_MemoryInformationWindow(UINT16 StartX, UINT16 StartY)
             pBuffer[(i * Width + j) * 4] = 214;
             pBuffer[(i * Width + j) * 4 + 1] = 211;
             pBuffer[(i * Width + j) * 4 + 2] = 204;
-            pBuffer[(i * Width + j) * 4 + 3] = GRAPHICS_LAYER_MY_COMPUTER_WINDOW;
+            pBuffer[(i * Width + j) * 4 + 3] = GRAPHICS_LAYER_MEMORY_INFORMATION_WINDOW;
         }
     }
 
@@ -4607,7 +4606,7 @@ VOID L3_APPLICATION_MemoryInformationWindow(UINT16 StartX, UINT16 StartY)
             pBuffer[(i * Width + j) * 4] = 214;
             pBuffer[(i * Width + j) * 4 + 1] = 211;
             pBuffer[(i * Width + j) * 4 + 2] = 104;
-            pBuffer[(i * Width + j) * 4 + 3] = GRAPHICS_LAYER_MY_COMPUTER_WINDOW;
+            pBuffer[(i * Width + j) * 4 + 3] = GRAPHICS_LAYER_MEMORY_INFORMATION_WINDOW;
         }
     }
     
@@ -4659,7 +4658,7 @@ VOID L3_APPLICATION_SystemLogWindow(UINT16 StartX, UINT16 StartY)
     UINT16 j = 0;
     
     L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: SystemLogWindow: %d \n", __LINE__, SystemLogWindowWidth);
-    L3_WINDOW_Create(pSystemLogWindowBuffer, pParent, SystemLogWindowWidth, SystemLogWindowHeight, Type, pWindowTitle);
+    L3_WINDOW_Create(pSystemLogWindowBuffer, pParent, SystemLogWindowWidth, SystemLogWindowHeight, GRAPHICS_LAYER_SYSTEM_LOG_WINDOW, pWindowTitle);
 
     UINT8 *pBuffer = pSystemLogWindowBuffer;
     UINT16 Width = SystemLogWindowWidth;
@@ -4680,7 +4679,7 @@ VOID L3_APPLICATION_SystemLogWindow(UINT16 StartX, UINT16 StartY)
     Color.Blue  = 0xff;
     Color.Red   = 0xff;
     Color.Green = 0xff;
-    Color.Reserved = GRAPHICS_LAYER_MY_COMPUTER_WINDOW;
+    Color.Reserved = GRAPHICS_LAYER_SYSTEM_LOG_WINDOW;
     
     //汉字	区位码	汉字	区位码	汉字	区位码	汉字	区位码
     //系	4721	统	4519	日	4053	志	5430
@@ -4710,7 +4709,7 @@ VOID L3_APPLICATION_SystemLogWindow(UINT16 StartX, UINT16 StartY)
             pBuffer[(i * Width + j) * 4] = 214;
             pBuffer[(i * Width + j) * 4 + 1] = 211;
             pBuffer[(i * Width + j) * 4 + 2] = 204;
-            pBuffer[(i * Width + j) * 4 + 3] = GRAPHICS_LAYER_MY_COMPUTER_WINDOW;
+            pBuffer[(i * Width + j) * 4 + 3] = GRAPHICS_LAYER_SYSTEM_LOG_WINDOW;
         }
     }
 
@@ -4722,7 +4721,7 @@ VOID L3_APPLICATION_SystemLogWindow(UINT16 StartX, UINT16 StartY)
             pBuffer[(i * Width + j) * 4] = 214;
             pBuffer[(i * Width + j) * 4 + 1] = 211;
             pBuffer[(i * Width + j) * 4 + 2] = 104;
-            pBuffer[(i * Width + j) * 4 + 3] = GRAPHICS_LAYER_MY_COMPUTER_WINDOW;
+            pBuffer[(i * Width + j) * 4 + 3] = GRAPHICS_LAYER_SYSTEM_LOG_WINDOW;
         }
     }
     
@@ -4741,7 +4740,6 @@ VOID L3_APPLICATION_SystemLogWindow(UINT16 StartX, UINT16 StartY)
     
     L2_GRAPHICS_ChineseCharDraw2(pBuffer, x, y,          (20 - 1 ) * 94 + 70 - 1, Color, Width);  
     x += 16;
-        
     
     return EFI_SUCCESS;
 }
