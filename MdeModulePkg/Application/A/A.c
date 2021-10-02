@@ -2895,14 +2895,10 @@ VOID L2_GRAPHICS_LayerCompute(int iMouseX, int iMouseY, UINT8 MouseClickFlag)
 
     L2_MOUSE_Move();
     
-    // init mouse buffer with cursor
-    L2_GRAPHICS_ChineseCharDraw2(pMouseBuffer, 0, 0, 11 * 94 + 42, MouseColor, 16);
-    //L2_DEBUG_Print1(DISPLAY_X, DISPLAY_Y, "%d: GraphicsLayerCompute\n", __LINE__);
-
     L2_GRAPHICS_Copy(pDeskDisplayBuffer, pMouseBuffer, ScreenWidth, ScreenHeight, 16, 16, iMouseX, iMouseY);
     //L2_DEBUG_Print1(DISPLAY_X, DISPLAY_Y, "%d: GraphicsLayerCompute\n", __LINE__);
 
-   GraphicsOutput->Blt(GraphicsOutput, 
+    GraphicsOutput->Blt(GraphicsOutput, 
                         (EFI_GRAPHICS_OUTPUT_BLT_PIXEL *) pDeskDisplayBuffer,
                         EfiBltBufferToVideo,
                         0, 0, 
@@ -3947,10 +3943,10 @@ VOID EFIAPI L2_TIMER_Slice(
     L2_DEBUG_Print1(0, ScreenHeight - 30 - 5 * 16, "%d TimeSlice %x %lu \n", __LINE__, Context, *((UINT32 *)Context));
     L2_DEBUG_Print1(0, ScreenHeight - 30 - 6 * 16, "%d TimerSliceCount: %lu \n", __LINE__, TimerSliceCount);
     //Print(L"%lu\n", *((UINT32 *)Context));
-    if (TimerSliceCount % 2 == 0)
+    if (TimerSliceCount % 10 == 0)
        gBS->SignalEvent (MultiTaskTriggerGroup1Event);
        
-    if (TimerSliceCount % 20 == 0)
+    if (TimerSliceCount % 50 == 0)
        gBS->SignalEvent (MultiTaskTriggerGroup2Event);
     
     //DEBUG ((EFI_D_INFO, "System time slice Loop ...\n"));
@@ -4444,8 +4440,8 @@ VOID L3_APPLICATION_MyComputerWindow(UINT16 StartX, UINT16 StartY)
     Color.Red   = 0x00;
     Color.Green = 0x00;
 
-    UINT16 HeightNew = SYSTEM_ICON_HEIGHT / 4;
-    UINT16 WidthNew = SYSTEM_ICON_WIDTH / 4;
+    UINT16 HeightNew = SYSTEM_ICON_HEIGHT / 8;
+    UINT16 WidthNew = SYSTEM_ICON_WIDTH / 8;
 
     //Skip bmp header.
     for (UINT32 i = 0; i < 384000; i++)
@@ -4480,9 +4476,9 @@ VOID L3_APPLICATION_MyComputerWindow(UINT16 StartX, UINT16 StartY)
     {
         for (int k = 0; k < WidthNew; k++)
         {
-            pBuffer[((340 + j) * MyComputerWidth + 100 + k) * 4 ]     = pSystemIconTempBuffer[((HeightNew - j) * WidthNew + k) * 3 ];
-            pBuffer[((340 + j) * MyComputerWidth + 100 + k) * 4 + 1 ] = pSystemIconTempBuffer[((HeightNew - j) * WidthNew + k) * 3 + 1 ];
-            pBuffer[((340 + j) * MyComputerWidth + 100 + k) * 4 + 2 ] = pSystemIconTempBuffer[((HeightNew - j) * WidthNew + k) * 3 + 2 ];
+            pBuffer[((130 + j) * MyComputerWidth + 100 + k) * 4 ]     = pSystemIconTempBuffer[((HeightNew - j) * WidthNew + k) * 3 ];
+            pBuffer[((130 + j) * MyComputerWidth + 100 + k) * 4 + 1 ] = pSystemIconTempBuffer[((HeightNew - j) * WidthNew + k) * 3 + 1 ];
+            pBuffer[((130 + j) * MyComputerWidth + 100 + k) * 4 + 2 ] = pSystemIconTempBuffer[((HeightNew - j) * WidthNew + k) * 3 + 2 ];
         }
     }
 
@@ -4917,62 +4913,65 @@ L2_KEYBOARD_Event (
     for (HandleIndex = 0; HandleIndex < HandleCount; HandleIndex++) 
     {
         Status = gBS->HandleProtocol (Handles[HandleIndex], &gEfiSimpleTextInputExProtocolGuid, (VOID **) &SimpleEx);
-
         if (EFI_ERROR(Status))  
+        {    
             continue;
+        }
+        
+        Status = gBS->CheckEvent(SimpleEx->WaitForKeyEx);
+        if (Status == EFI_NOT_READY)
+            continue;
+          
+        gBS->WaitForEvent(1, &(SimpleEx->WaitForKeyEx), &Index);
+
+        Status = SimpleEx->ReadKeyStrokeEx(SimpleEx, &KeyData);
+        if(EFI_ERROR(Status))
+        {
+            continue;
+        }
+        
+        scanCode    = KeyData.Key.ScanCode;
+        uniChar     = KeyData.Key.UnicodeChar;
+        shiftState  = KeyData.KeyState.KeyShiftState;
+        toggleState  = KeyData.KeyState.KeyToggleState;
+        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: keyboard input uniChar: %d", __LINE__, uniChar);
+       
+        pKeyboardInputBuffer[keyboard_input_count++] = uniChar;
+
+        display_sector_number = uniChar - '0';
+
+        if (display_sector_number > 10)
+        {
+            display_sector_number = 10;
+        }
+
+        if (display_sector_number < 0)
+        {
+            display_sector_number = 0;
+        }
+
+        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: uniChar: %d display_sector_number: %d \n", __LINE__, uniChar, display_sector_number);
+
+
+        // Enter pressed
+        if (0x0D == uniChar)
+        {
+            keyboard_input_count = 0;
+            memset(pKeyboardInputBuffer, '\0', KEYBOARD_BUFFER_LENGTH);
+            //L2_DEBUG_Print1(DISPLAY_KEYBOARD_X, DISPLAY_KEYBOARD_Y, "%a keyboard_input_count: %04d enter pressed", pKeyboardInputBuffer, keyboard_input_count);
+
+            L2_KEYBOARD_KeyPressed();
+        }
         else
         {
-            Status = gBS->CheckEvent(SimpleEx->WaitForKeyEx);
-            if (Status == EFI_NOT_READY)
-                continue;
-              
-            gBS->WaitForEvent(1, &(SimpleEx->WaitForKeyEx), &Index);
-
-            Status = SimpleEx->ReadKeyStrokeEx(SimpleEx, &KeyData);
-            if(!EFI_ERROR(Status))
-            {    
-                scanCode    = KeyData.Key.ScanCode;
-                uniChar     = KeyData.Key.UnicodeChar;
-                shiftState  = KeyData.KeyState.KeyShiftState;
-                toggleState  = KeyData.KeyState.KeyToggleState;
-                
-               pKeyboardInputBuffer[keyboard_input_count++] = uniChar;
-               
-               display_sector_number = uniChar - '0';
-               
-               if (display_sector_number > 10)
-               {
-                   display_sector_number = 10;                     
-               }
-               
-               if (display_sector_number < 0)
-               {
-                   display_sector_number = 0;                     
-               }
-               
-               L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: uniChar: %d display_sector_number: %d \n", __LINE__, uniChar, display_sector_number);
-               
-
-                // Enter pressed
-                 if (0x0D == uniChar)
-                 {
-                    keyboard_input_count = 0;
-                    memset(pKeyboardInputBuffer, '\0', KEYBOARD_BUFFER_LENGTH);
-                    //L2_DEBUG_Print1(DISPLAY_KEYBOARD_X, DISPLAY_KEYBOARD_Y, "%a keyboard_input_count: %04d enter pressed", pKeyboardInputBuffer, keyboard_input_count);
-
-                    L2_KEYBOARD_KeyPressed();
-                 }
-                 else
-                 {
-                    L2_DEBUG_Print1(DISPLAY_KEYBOARD_X, DISPLAY_KEYBOARD_Y, "%a keyboard_input_count: %04d ", pKeyboardInputBuffer, keyboard_input_count);
-                 }
-            }
-        }    
+            L2_DEBUG_Print1(DISPLAY_KEYBOARD_X, DISPLAY_KEYBOARD_Y, "%a keyboard_input_count: %04d ", pKeyboardInputBuffer, keyboard_input_count);
+        }
+       
     }  
     
      //DrawAsciiCharUseBuffer(pDeskBuffer, DISPLAY_KEYBOARD_X, DISPLAY_KEYBOARD_Y, uniChar, Color);
      
-     L2_GRAPHICS_LayerCompute(iMouseX, iMouseY, 0);
+    L2_GRAPHICS_LayerCompute(iMouseX, iMouseY, 0);
 }
 
  // iMouseX: left top
@@ -5090,6 +5089,12 @@ L2_MOUSE_Event (IN EFI_EVENT Event, IN VOID *Context)
     if (Status == EFI_DEVICE_ERROR)
     {
         return ;
+    }
+    L2_DEBUG_Print1(0, ScreenHeight - 30 -  8 * 16, "%d: X move: %d Y move: %d left: %d right: %d", __LINE__, State.RelativeMovementX, State.RelativeMovementY, State.LeftButton, State.RightButton);
+
+    if (0 == State.RelativeMovementX && 0 == State.RelativeMovementY && 0 == State.LeftButton && 0 == State.RightButton)
+    {
+        return;
     }
     
     //X
@@ -6080,6 +6085,11 @@ EFI_STATUS L2_GRAPHICS_ScreenInit()
     }
     
     L2_GRAPHICS_DeskInit();
+
+    
+    // init mouse buffer with cursor
+    L2_GRAPHICS_ChineseCharDraw2(pMouseBuffer, 0, 0, 11 * 94 + 42, MouseColor, 16);
+    //L2_DEBUG_Print1(DISPLAY_X, DISPLAY_Y, "%d: GraphicsLayerCompute\n", __LINE__);
     
     GraphicsOutput->Blt(
                 GraphicsOutput, 
