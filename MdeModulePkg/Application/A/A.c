@@ -3364,13 +3364,23 @@ L2_MOUSE_MyComputerCloseClicked()
 L2_MOUSE_Click()
 {
     //Move my computer window
-    if (MouseClickFlag == 1 && pDeskDisplayBuffer[(iMouseY * ScreenWidth + iMouseX) * 4 + 3] == GRAPHICS_LAYER_MY_COMPUTER_WINDOW)
+    /*if (MouseClickFlag == 1 && pDeskDisplayBuffer[(iMouseY * ScreenWidth + iMouseX) * 4 + 3] == GRAPHICS_LAYER_MY_COMPUTER_WINDOW)
     {
-        MyComputerPositionX += x_move * 3;
-        MyComputerPositionY += y_move * 3;
+        WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].StartX += x_move * 3;
+        WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].StartY+= y_move * 3;
         
-    //  L2_GRAPHICS_Copy(pDeskDisplayBuffer, pMyComputerBuffer, ScreenWidth, ScreenHeight, MyComputerWidth, MyComputerHeight, MyComputerPositionX, MyComputerPositionX);
+    }*/
+
+    if (MouseClickFlag == 1)
+    {
+        UINT16 layer = pDeskDisplayBuffer[(iMouseY * ScreenWidth + iMouseX) * 4 + 3];
+        if (0 != layer)
+        {
+            WindowLayers.item[layer].StartX += x_move * 3;
+            WindowLayers.item[layer].StartY += y_move * 3;
+        }
     }
+    
     x_move = 0;
     y_move = 0;
 
@@ -3420,14 +3430,14 @@ L2_MOUSE_MenuButtonClick()
     L2_GRAPHICS_Copy(pDeskDisplayBuffer, pMouseSelectedBuffer, ScreenWidth, ScreenHeight, 32, 16, 15, ScreenHeight - 22); 
 }
 
-
+UINT16 GraphicsLayerIDCount = 0;
 VOID L2_MOUSE_Move()
 {   
     //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: GraphicsLayerMouseMove\n",  __LINE__);
     
     // display graphics layer id mouse over, for mouse click event.
     //L2_DEBUG_Print1(DISPLAY_X, DISPLAY_Y, "%d: Graphics Layer id: %d ", __LINE__, pDeskDisplayBuffer[(iMouseY * ScreenWidth + iMouseX) * 4 + 3]);
-    L2_DEBUG_Print1(0, ScreenHeight - 30 -  7 * 16, "%d: iMouseX: %d iMouseY: %d Graphics Layer id: %d ", __LINE__, iMouseX, iMouseY, pDeskDisplayBuffer[(iMouseY * ScreenWidth + iMouseX) * 4 + 3]);
+    L2_DEBUG_Print1(0, ScreenHeight - 30 -  7 * 16, "%d: iMouseX: %d iMouseY: %d Graphics Layer id: %d GraphicsLayerIDCount: %u", __LINE__, iMouseX, iMouseY, pDeskDisplayBuffer[(iMouseY * ScreenWidth + iMouseX) * 4 + 3], GraphicsLayerIDCount++);
     L2_MOUSE_Click();
     
     L2_MOUSE_Moveover();
