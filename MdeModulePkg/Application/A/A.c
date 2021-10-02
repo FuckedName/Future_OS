@@ -3362,15 +3362,31 @@ L2_MOUSE_MyComputerCloseClicked()
 }
 
 
-L2_MOUSE_Click()
-{
-    //Move my computer window
-    /*if (MouseClickFlag == 1 && pDeskDisplayBuffer[(iMouseY * ScreenWidth + iMouseX) * 4 + 3] == GRAPHICS_LAYER_MY_COMPUTER_WINDOW)
-    {
-        WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].StartX += x_move * 3;
-        WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].StartY+= y_move * 3;
+L2_MOUSE_MoveOver()
+{    
+    EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
+    Color.Red = 0xff;
+    Color.Green= 0x00;
+    Color.Blue= 0x00;
+    for (UINT16 i = 0; i < PartitionCount; i++)
+    {   
+        MyComputerPositionX = WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].StartX;
+        MyComputerPositionY = WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].StartY;
         
-    }*/
+        if (iMouseX >= MyComputerPositionX + 50 && iMouseX <= MyComputerPositionX + 50 + 16 * 6
+            && iMouseY >= MyComputerPositionY + i * 16 + 16 * 2 && iMouseY <= MyComputerPositionY + i * 16 + 16 * 3)
+        {   
+            if (PreviousItem == i)
+            {
+                break;
+            }
+            
+            L2_GRAPHICS_RectangleDraw(pMouseSelectedBuffer, 0,  0, 31, 15, 1,  Color, 32);
+            L2_STORE_PartitionItemsPrint(i);
+            PreviousItem = i;
+            L2_GRAPHICS_Copy(pDeskDisplayBuffer, pMouseSelectedBuffer, ScreenWidth, ScreenHeight, 32, 16, MyComputerPositionX + 50, MyComputerPositionY  + i * (16 + 2) + 16 * 2);   
+        }
+    }
 
     if (MouseClickFlag == 1)
     {
@@ -3440,9 +3456,9 @@ VOID L2_MOUSE_Move()
     // display graphics layer id mouse over, for mouse click event.
     //L2_DEBUG_Print1(DISPLAY_X, DISPLAY_Y, "%d: Graphics Layer id: %d ", __LINE__, pDeskDisplayBuffer[(iMouseY * ScreenWidth + iMouseX) * 4 + 3]);
     L2_DEBUG_Print1(0, ScreenHeight - 30 -  7 * 16, "%d: iMouseX: %d iMouseY: %d Graphics Layer id: %d GraphicsLayerIDCount: %u", __LINE__, iMouseX, iMouseY, pDeskDisplayBuffer[(iMouseY * ScreenWidth + iMouseX) * 4 + 3], GraphicsLayerIDCount++);
-    L2_MOUSE_Click();
+    L2_MOUSE_MoveOver();
     
-    L2_MOUSE_Moveover();
+    L2_MOUSE_Click();
 }
 
 
@@ -5827,7 +5843,7 @@ START_MENU_STATE_TRANSFORM StartMenuStateTransformTable[] =
 
 START_MENU_CURRENT_EVENT    StartMenuClickEvent = START_MENU_INIT_CLICKED_EVENT;
 
-L2_MOUSE_Moveover()
+L2_MOUSE_Click()
 {
     //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: iMouseX: %d iMouseY: %d \n",  __LINE__, iMouseX, iMouseY);
     EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
