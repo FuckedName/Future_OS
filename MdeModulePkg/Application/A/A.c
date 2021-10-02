@@ -4444,6 +4444,49 @@ VOID L3_APPLICATION_MyComputerWindow(UINT16 StartX, UINT16 StartY)
     Color.Red   = 0x00;
     Color.Green = 0x00;
 
+    UINT16 HeightNew = SYSTEM_ICON_HEIGHT / 4;
+    UINT16 WidthNew = SYSTEM_ICON_WIDTH / 4;
+
+    //Skip bmp header.
+    for (UINT32 i = 0; i < 384000; i++)
+        pSystemIconTempBuffer2[i] = pSystemIconBuffer[SYSTEM_ICON_FOLDER][0x36 + i];
+
+    L1_GRAPHICS_ZoomImage(pSystemIconTempBuffer, WidthNew, HeightNew, pSystemIconTempBuffer2, SYSTEM_ICON_WIDTH, SYSTEM_ICON_HEIGHT);
+    
+    //WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].StartX = StartX;
+    //WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].StartY = StartY;
+    
+    for (int j = 0; j < HeightNew; j++)
+    {
+        for (int k = 0; k < WidthNew; k++)
+        {
+            pBuffer[((30 + j) * MyComputerWidth + 100 + k) * 4 ]     = pSystemIconTempBuffer[((HeightNew - j) * WidthNew + k) * 3 ];
+            pBuffer[((30 + j) * MyComputerWidth + 100 + k) * 4 + 1 ] = pSystemIconTempBuffer[((HeightNew - j) * WidthNew + k) * 3 + 1 ];
+            pBuffer[((30 + j) * MyComputerWidth + 100 + k) * 4 + 2 ] = pSystemIconTempBuffer[((HeightNew - j) * WidthNew + k) * 3 + 2 ];
+        }
+    }
+
+
+    //Skip bmp header.
+    for (UINT32 i = 0; i < 384000; i++)
+        pSystemIconTempBuffer2[i] = pSystemIconBuffer[SYSTEM_ICON_TEXT][0x36 + i];
+
+    L1_GRAPHICS_ZoomImage(pSystemIconTempBuffer, WidthNew, HeightNew, pSystemIconTempBuffer2, SYSTEM_ICON_WIDTH, SYSTEM_ICON_HEIGHT);
+    
+    //WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].StartX = StartX;
+    //WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].StartY = StartY;
+    
+    for (int j = 0; j < HeightNew; j++)
+    {
+        for (int k = 0; k < WidthNew; k++)
+        {
+            pBuffer[((340 + j) * MyComputerWidth + 100 + k) * 4 ]     = pSystemIconTempBuffer[((HeightNew - j) * WidthNew + k) * 3 ];
+            pBuffer[((340 + j) * MyComputerWidth + 100 + k) * 4 + 1 ] = pSystemIconTempBuffer[((HeightNew - j) * WidthNew + k) * 3 + 1 ];
+            pBuffer[((340 + j) * MyComputerWidth + 100 + k) * 4 + 2 ] = pSystemIconTempBuffer[((HeightNew - j) * WidthNew + k) * 3 + 2 ];
+        }
+    }
+
+
     for (UINT16 i = 0 ; i < PartitionCount; i++)
     {
         x = 50;
@@ -5743,12 +5786,13 @@ EFI_STATUS L2_GRAPHICS_DeskInit()
         }
     }       
     */
-    UINT16 HeightNew = SYSTEM_ICON_HEIGHT / 2;
-    UINT16 WidthNew = SYSTEM_ICON_WIDTH / 2;
+    UINT16 HeightNew = SYSTEM_ICON_HEIGHT / 4;
+    UINT16 WidthNew = SYSTEM_ICON_WIDTH / 4;
     //UINT8 *pSource = pSystemIconBuffer[0][0x36];
 
+    //Skip bmp header.
     for (UINT32 i = 0; i < 384000; i++)
-        pSystemIconTempBuffer2[i] = pSystemIconBuffer[0][0x36 + i];
+        pSystemIconTempBuffer2[i] = pSystemIconBuffer[SYSTEM_ICON_MYCOMPUTER][0x36 + i];
 
     L1_GRAPHICS_ZoomImage(pSystemIconTempBuffer, WidthNew, HeightNew, pSystemIconTempBuffer2, SYSTEM_ICON_WIDTH, SYSTEM_ICON_HEIGHT);
     
@@ -5756,11 +5800,45 @@ EFI_STATUS L2_GRAPHICS_DeskInit()
     {
         for (int k = 0; k < WidthNew; k++)
         {
-            pDeskBuffer[((320 + j) * ScreenWidth + 400 + k) * 4 ]     = pSystemIconTempBuffer[((HeightNew - j) * WidthNew + k) * 3 ];
-            pDeskBuffer[((320 + j) * ScreenWidth + 400 + k) * 4 + 1 ] = pSystemIconTempBuffer[((HeightNew - j) * WidthNew + k) * 3 + 1 ];
-            pDeskBuffer[((320 + j) * ScreenWidth + 400 + k) * 4 + 2 ] = pSystemIconTempBuffer[((HeightNew - j) * WidthNew + k) * 3 + 2 ];
+            pDeskBuffer[((20 + j) * ScreenWidth + 20 + k) * 4 ]     = pSystemIconTempBuffer[((HeightNew - j) * WidthNew + k) * 3 ];
+            pDeskBuffer[((20 + j) * ScreenWidth + 20 + k) * 4 + 1 ] = pSystemIconTempBuffer[((HeightNew - j) * WidthNew + k) * 3 + 1 ];
+            pDeskBuffer[((20 + j) * ScreenWidth + 20 + k) * 4 + 2 ] = pSystemIconTempBuffer[((HeightNew - j) * WidthNew + k) * 3 + 2 ];
         }
     }
+
+
+    //Skip bmp header.
+    for (UINT32 i = 0; i < 384000; i++)
+        pSystemIconTempBuffer2[i] = pSystemIconBuffer[SYSTEM_ICON_SETTING][0x36 + i];
+
+    L1_GRAPHICS_ZoomImage(pSystemIconTempBuffer, WidthNew, HeightNew, pSystemIconTempBuffer2, SYSTEM_ICON_WIDTH, SYSTEM_ICON_HEIGHT);
+    
+    for (int j = 0; j < HeightNew; j++)
+    {
+        for (int k = 0; k < WidthNew; k++)
+        {
+            pDeskBuffer[((120 + j) * ScreenWidth + 20 + k) * 4 ]     = pSystemIconTempBuffer[((HeightNew - j) * WidthNew + k) * 3 ];
+            pDeskBuffer[((120 + j) * ScreenWidth + 20 + k) * 4 + 1 ] = pSystemIconTempBuffer[((HeightNew - j) * WidthNew + k) * 3 + 1 ];
+            pDeskBuffer[((120 + j) * ScreenWidth + 20 + k) * 4 + 2 ] = pSystemIconTempBuffer[((HeightNew - j) * WidthNew + k) * 3 + 2 ];
+        }
+    }
+
+    //Skip bmp header.
+    for (UINT32 i = 0; i < 384000; i++)
+        pSystemIconTempBuffer2[i] = pSystemIconBuffer[SYSTEM_ICON_RECYCLE][0x36 + i];
+
+    L1_GRAPHICS_ZoomImage(pSystemIconTempBuffer, WidthNew, HeightNew, pSystemIconTempBuffer2, SYSTEM_ICON_WIDTH, SYSTEM_ICON_HEIGHT);
+    
+    for (int j = 0; j < HeightNew; j++)
+    {
+        for (int k = 0; k < WidthNew; k++)
+        {
+            pDeskBuffer[((220 + j) * ScreenWidth + 20 + k) * 4 ]     = pSystemIconTempBuffer[((HeightNew - j) * WidthNew + k) * 3 ];
+            pDeskBuffer[((220 + j) * ScreenWidth + 20 + k) * 4 + 1 ] = pSystemIconTempBuffer[((HeightNew - j) * WidthNew + k) * 3 + 1 ];
+            pDeskBuffer[((220 + j) * ScreenWidth + 20 + k) * 4 + 2 ] = pSystemIconTempBuffer[((HeightNew - j) * WidthNew + k) * 3 + 2 ];
+        }
+    }
+
     
     // line
     Color.Red   = 0xC6;
