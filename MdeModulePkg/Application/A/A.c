@@ -275,13 +275,15 @@ UINT8 *pSystemLogWindowBuffer = NULL; // MyComputer layer: 2
 UINT8 *pMemoryInformationBuffer = NULL; // MyComputer layer: 2
 UINT8 *pDeskDisplayBuffer = NULL; //desk display after multi graphicses layers compute
 UINT8 *pSystemIconBuffer[SYSTEM_ICON_MAX]; //desk display after multi graphicses layers compute
-UINT8 *pSystemIconMyComputerBuffer = NULL; //desk display after multi graphicses layers compute
-UINT8 *pSystemIconMySettingBuffer = NULL; //desk display after multi graphicses layers compute
+UINT8 *pSystemIconMyComputerBuffer = NULL; //after zoom in or zoom out
+UINT8 *pSystemIconMySettingBuffer = NULL; //after zoom in or zoom out
+UINT8 *pSystemIconRecycleBuffer = NULL; //after zoom in or zoom out
 UINT8 *pMouseSelectedBuffer = NULL;  // after mouse selected
 UINT8 *pMouseClickBuffer = NULL; // for mouse click 
 UINT8 *pDateTimeBuffer = NULL; //Mouse layer: 3
 UINT8 *pMouseBuffer = NULL; //Mouse layer: 4
-UINT8 *pSystemIconTempBuffer = NULL;
+UINT8 *pSystemIconFolderBuffer = NULL; //after zoom in or zoom out
+UINT8 *pSystemIconTextBuffer = NULL; //after zoom in or zoom out
 UINT8 *pSystemIconTempBuffer2 = NULL;
 
 
@@ -4447,7 +4449,7 @@ VOID L3_APPLICATION_MyComputerWindow(UINT16 StartX, UINT16 StartY)
     for (UINT32 i = 0; i < 384000; i++)
         pSystemIconTempBuffer2[i] = pSystemIconBuffer[SYSTEM_ICON_FOLDER][0x36 + i];
 
-    L1_GRAPHICS_ZoomImage(pSystemIconTempBuffer, WidthNew, HeightNew, pSystemIconTempBuffer2, SYSTEM_ICON_WIDTH, SYSTEM_ICON_HEIGHT);
+    L1_GRAPHICS_ZoomImage(pSystemIconFolderBuffer, WidthNew, HeightNew, pSystemIconTempBuffer2, SYSTEM_ICON_WIDTH, SYSTEM_ICON_HEIGHT);
     
     //WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].StartX = StartX;
     //WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].StartY = StartY;
@@ -4456,9 +4458,9 @@ VOID L3_APPLICATION_MyComputerWindow(UINT16 StartX, UINT16 StartY)
     {
         for (int k = 0; k < WidthNew; k++)
         {
-            pBuffer[((30 + j) * MyComputerWidth + 100 + k) * 4 ]     = pSystemIconTempBuffer[((HeightNew - j) * WidthNew + k) * 3 ];
-            pBuffer[((30 + j) * MyComputerWidth + 100 + k) * 4 + 1 ] = pSystemIconTempBuffer[((HeightNew - j) * WidthNew + k) * 3 + 1 ];
-            pBuffer[((30 + j) * MyComputerWidth + 100 + k) * 4 + 2 ] = pSystemIconTempBuffer[((HeightNew - j) * WidthNew + k) * 3 + 2 ];
+            pBuffer[((30 + j) * MyComputerWidth + 100 + k) * 4 ]     = pSystemIconFolderBuffer[((HeightNew - j) * WidthNew + k) * 3 ];
+            pBuffer[((30 + j) * MyComputerWidth + 100 + k) * 4 + 1 ] = pSystemIconFolderBuffer[((HeightNew - j) * WidthNew + k) * 3 + 1 ];
+            pBuffer[((30 + j) * MyComputerWidth + 100 + k) * 4 + 2 ] = pSystemIconFolderBuffer[((HeightNew - j) * WidthNew + k) * 3 + 2 ];
         }
     }
 
@@ -4467,7 +4469,7 @@ VOID L3_APPLICATION_MyComputerWindow(UINT16 StartX, UINT16 StartY)
     for (UINT32 i = 0; i < 384000; i++)
         pSystemIconTempBuffer2[i] = pSystemIconBuffer[SYSTEM_ICON_TEXT][0x36 + i];
 
-    L1_GRAPHICS_ZoomImage(pSystemIconTempBuffer, WidthNew, HeightNew, pSystemIconTempBuffer2, SYSTEM_ICON_WIDTH, SYSTEM_ICON_HEIGHT);
+    L1_GRAPHICS_ZoomImage(pSystemIconTextBuffer, WidthNew, HeightNew, pSystemIconTempBuffer2, SYSTEM_ICON_WIDTH, SYSTEM_ICON_HEIGHT);
     
     //WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].StartX = StartX;
     //WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].StartY = StartY;
@@ -4476,9 +4478,9 @@ VOID L3_APPLICATION_MyComputerWindow(UINT16 StartX, UINT16 StartY)
     {
         for (int k = 0; k < WidthNew; k++)
         {
-            pBuffer[((130 + j) * MyComputerWidth + 100 + k) * 4 ]     = pSystemIconTempBuffer[((HeightNew - j) * WidthNew + k) * 3 ];
-            pBuffer[((130 + j) * MyComputerWidth + 100 + k) * 4 + 1 ] = pSystemIconTempBuffer[((HeightNew - j) * WidthNew + k) * 3 + 1 ];
-            pBuffer[((130 + j) * MyComputerWidth + 100 + k) * 4 + 2 ] = pSystemIconTempBuffer[((HeightNew - j) * WidthNew + k) * 3 + 2 ];
+            pBuffer[((130 + j) * MyComputerWidth + 100 + k) * 4 ]     = pSystemIconTextBuffer[((HeightNew - j) * WidthNew + k) * 3 ];
+            pBuffer[((130 + j) * MyComputerWidth + 100 + k) * 4 + 1 ] = pSystemIconTextBuffer[((HeightNew - j) * WidthNew + k) * 3 + 1 ];
+            pBuffer[((130 + j) * MyComputerWidth + 100 + k) * 4 + 2 ] = pSystemIconTextBuffer[((HeightNew - j) * WidthNew + k) * 3 + 2 ];
         }
     }
 
@@ -5799,15 +5801,15 @@ EFI_STATUS L2_GRAPHICS_DeskInit()
     for (UINT32 i = 0; i < 384000; i++)
         pSystemIconTempBuffer2[i] = pSystemIconBuffer[SYSTEM_ICON_MYCOMPUTER][0x36 + i];
 
-    L1_GRAPHICS_ZoomImage(pSystemIconTempBuffer, WidthNew, HeightNew, pSystemIconTempBuffer2, SYSTEM_ICON_WIDTH, SYSTEM_ICON_HEIGHT);
+    L1_GRAPHICS_ZoomImage(pSystemIconMyComputerBuffer, WidthNew, HeightNew, pSystemIconTempBuffer2, SYSTEM_ICON_WIDTH, SYSTEM_ICON_HEIGHT);
     
     for (int j = 0; j < HeightNew; j++)
     {
         for (int k = 0; k < WidthNew; k++)
         {
-            pDeskBuffer[((20 + j) * ScreenWidth + 20 + k) * 4 ]     = pSystemIconTempBuffer[((HeightNew - j) * WidthNew + k) * 3 ];
-            pDeskBuffer[((20 + j) * ScreenWidth + 20 + k) * 4 + 1 ] = pSystemIconTempBuffer[((HeightNew - j) * WidthNew + k) * 3 + 1 ];
-            pDeskBuffer[((20 + j) * ScreenWidth + 20 + k) * 4 + 2 ] = pSystemIconTempBuffer[((HeightNew - j) * WidthNew + k) * 3 + 2 ];
+            pDeskBuffer[((20 + j) * ScreenWidth + 20 + k) * 4 ]     = pSystemIconMyComputerBuffer[((HeightNew - j) * WidthNew + k) * 3 ];
+            pDeskBuffer[((20 + j) * ScreenWidth + 20 + k) * 4 + 1 ] = pSystemIconMyComputerBuffer[((HeightNew - j) * WidthNew + k) * 3 + 1 ];
+            pDeskBuffer[((20 + j) * ScreenWidth + 20 + k) * 4 + 2 ] = pSystemIconMyComputerBuffer[((HeightNew - j) * WidthNew + k) * 3 + 2 ];
         }
     }
 
@@ -5816,15 +5818,15 @@ EFI_STATUS L2_GRAPHICS_DeskInit()
     for (UINT32 i = 0; i < 384000; i++)
         pSystemIconTempBuffer2[i] = pSystemIconBuffer[SYSTEM_ICON_SETTING][0x36 + i];
 
-    L1_GRAPHICS_ZoomImage(pSystemIconTempBuffer, WidthNew, HeightNew, pSystemIconTempBuffer2, SYSTEM_ICON_WIDTH, SYSTEM_ICON_HEIGHT);
+    L1_GRAPHICS_ZoomImage(pSystemIconMySettingBuffer, WidthNew, HeightNew, pSystemIconTempBuffer2, SYSTEM_ICON_WIDTH, SYSTEM_ICON_HEIGHT);
     
     for (int j = 0; j < HeightNew; j++)
     {
         for (int k = 0; k < WidthNew; k++)
         {
-            pDeskBuffer[((120 + j) * ScreenWidth + 20 + k) * 4 ]     = pSystemIconTempBuffer[((HeightNew - j) * WidthNew + k) * 3 ];
-            pDeskBuffer[((120 + j) * ScreenWidth + 20 + k) * 4 + 1 ] = pSystemIconTempBuffer[((HeightNew - j) * WidthNew + k) * 3 + 1 ];
-            pDeskBuffer[((120 + j) * ScreenWidth + 20 + k) * 4 + 2 ] = pSystemIconTempBuffer[((HeightNew - j) * WidthNew + k) * 3 + 2 ];
+            pDeskBuffer[((120 + j) * ScreenWidth + 20 + k) * 4 ]     = pSystemIconMySettingBuffer[((HeightNew - j) * WidthNew + k) * 3 ];
+            pDeskBuffer[((120 + j) * ScreenWidth + 20 + k) * 4 + 1 ] = pSystemIconMySettingBuffer[((HeightNew - j) * WidthNew + k) * 3 + 1 ];
+            pDeskBuffer[((120 + j) * ScreenWidth + 20 + k) * 4 + 2 ] = pSystemIconMySettingBuffer[((HeightNew - j) * WidthNew + k) * 3 + 2 ];
         }
     }
 
@@ -5832,15 +5834,15 @@ EFI_STATUS L2_GRAPHICS_DeskInit()
     for (UINT32 i = 0; i < 384000; i++)
         pSystemIconTempBuffer2[i] = pSystemIconBuffer[SYSTEM_ICON_RECYCLE][0x36 + i];
 
-    L1_GRAPHICS_ZoomImage(pSystemIconTempBuffer, WidthNew, HeightNew, pSystemIconTempBuffer2, SYSTEM_ICON_WIDTH, SYSTEM_ICON_HEIGHT);
+    L1_GRAPHICS_ZoomImage(pSystemIconRecycleBuffer, WidthNew, HeightNew, pSystemIconTempBuffer2, SYSTEM_ICON_WIDTH, SYSTEM_ICON_HEIGHT);
     
     for (int j = 0; j < HeightNew; j++)
     {
         for (int k = 0; k < WidthNew; k++)
         {
-            pDeskBuffer[((220 + j) * ScreenWidth + 20 + k) * 4 ]     = pSystemIconTempBuffer[((HeightNew - j) * WidthNew + k) * 3 ];
-            pDeskBuffer[((220 + j) * ScreenWidth + 20 + k) * 4 + 1 ] = pSystemIconTempBuffer[((HeightNew - j) * WidthNew + k) * 3 + 1 ];
-            pDeskBuffer[((220 + j) * ScreenWidth + 20 + k) * 4 + 2 ] = pSystemIconTempBuffer[((HeightNew - j) * WidthNew + k) * 3 + 2 ];
+            pDeskBuffer[((220 + j) * ScreenWidth + 20 + k) * 4 ]     = pSystemIconRecycleBuffer[((HeightNew - j) * WidthNew + k) * 3 ];
+            pDeskBuffer[((220 + j) * ScreenWidth + 20 + k) * 4 + 1 ] = pSystemIconRecycleBuffer[((HeightNew - j) * WidthNew + k) * 3 + 1 ];
+            pDeskBuffer[((220 + j) * ScreenWidth + 20 + k) * 4 + 2 ] = pSystemIconRecycleBuffer[((HeightNew - j) * WidthNew + k) * 3 + 2 ];
         }
     }
 
@@ -6135,8 +6137,9 @@ EFI_STATUS L2_COMMON_MemoryAllocate()
         pSystemIconBuffer[i] = L2_MEMORY_Allocate("System Icon Buffer", MEMORY_TYPE_GRAPHICS, 384054);
 
     
-    pSystemIconTempBuffer = L2_MEMORY_Allocate("System Icon temp Buffer", MEMORY_TYPE_GRAPHICS, 384054);
-    pSystemIconTempBuffer2 = L2_MEMORY_Allocate("System Icon temp2 Buffer", MEMORY_TYPE_GRAPHICS, 384054);
+    pSystemIconFolderBuffer = L2_MEMORY_Allocate("System pSystemIconFolder Buffer", MEMORY_TYPE_GRAPHICS, 384054);
+    pSystemIconTextBuffer   = L2_MEMORY_Allocate("System pSystemIconText Buffer", MEMORY_TYPE_GRAPHICS, 384054);
+    pSystemIconTempBuffer2  = L2_MEMORY_Allocate("System Icon temp2 Buffer", MEMORY_TYPE_GRAPHICS, 384054);
         
     pMouseClickBuffer = (UINT8 *)L2_MEMORY_Allocate("Mouse Click Buffer", MEMORY_TYPE_GRAPHICS, MouseClickWindowWidth * MouseClickWindowHeight * 4); 
     if (pMouseClickBuffer == NULL)
@@ -6184,6 +6187,10 @@ EFI_STATUS L2_COMMON_MemoryAllocate()
         DEBUG ((EFI_D_INFO, "MyComputer , AllocateZeroPool failed... "));
         return -1;
     }       
+
+    pSystemIconMyComputerBuffer = L2_MEMORY_Allocate("System pSystemIconMyComputerBuffer", MEMORY_TYPE_GRAPHICS, 384054);
+    pSystemIconMySettingBuffer  = L2_MEMORY_Allocate("System pSystemIconMySettingBuffer", MEMORY_TYPE_GRAPHICS, 384054);
+    pSystemIconRecycleBuffer    = L2_MEMORY_Allocate("System pSystemIconRecycleBuffer", MEMORY_TYPE_GRAPHICS, 384054);
     
     pSystemLogWindowBuffer = (UINT8 *)L2_MEMORY_Allocate("System Log Window Buffer", MEMORY_TYPE_GRAPHICS, SystemLogWindowWidth * SystemLogWindowHeight * 4);
     if (pSystemLogWindowBuffer == NULL)
