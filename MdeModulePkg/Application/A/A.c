@@ -2766,7 +2766,7 @@ L2_STORE_FolderItemsPrint()
     UINT16 HeightNew = SYSTEM_ICON_HEIGHT / 8;
     UINT16 WidthNew = SYSTEM_ICON_WIDTH / 8;
     UINT16 x = 0;
-    UINT16 y = 150;
+    UINT16 y = 200;
     
     for (UINT16 i = 0; i < 32; i++)
     {       
@@ -2774,24 +2774,27 @@ L2_STORE_FolderItemsPrint()
             break;
             
         char name[12] = {0};
+
+        for (UINT8 i = 0; i < 12; i++)
+            name[i] = '\0';
+        
         char ItemType[10] = "OTHER";
         L1_FILE_NameGet(i, name);
                 
-        if (pItems[i].Attribute[0] == 0x10)//Folder
+        if (pItems[i].Attribute[0] == 0x10) //Folder
         {
             for (int j = 0; j < HeightNew; j++)
             {
                 for (int k = 0; k < WidthNew; k++)
                 {
-                    pMyComputerBuffer[((valid_count * 90 + 200 + j) * MyComputerWidth + 100 + k) * 4 ]     = pSystemIconFolderBuffer[((HeightNew - j) * WidthNew + k) * 3 ];
-                    pMyComputerBuffer[((valid_count * 90 + 200 + j) * MyComputerWidth + 100 + k) * 4 + 1 ] = pSystemIconFolderBuffer[((HeightNew - j) * WidthNew + k) * 3 + 1 ];
-                    pMyComputerBuffer[((valid_count * 90 + 200 + j) * MyComputerWidth + 100 + k) * 4 + 2 ] = pSystemIconFolderBuffer[((HeightNew - j) * WidthNew + k) * 3 + 2 ];
+                    pMyComputerBuffer[((valid_count * (HeightNew + 16 * 2) + 200 + j) * MyComputerWidth + 130 + k) * 4 ]     = pSystemIconFolderBuffer[((HeightNew - j) * WidthNew + k) * 3 ];
+                    pMyComputerBuffer[((valid_count * (HeightNew + 16 * 2) + 200 + j) * MyComputerWidth + 130 + k) * 4 + 1 ] = pSystemIconFolderBuffer[((HeightNew - j) * WidthNew + k) * 3 + 1 ];
+                    pMyComputerBuffer[((valid_count * (HeightNew + 16 * 2) + 200 + j) * MyComputerWidth + 130 + k) * 4 + 2 ] = pSystemIconFolderBuffer[((HeightNew - j) * WidthNew + k) * 3 + 2 ];
                 }
             }
-            L2_DEBUG_Print2(16 * 50 / 3 + 32, 2 * 16 + (valid_count) * 16, pMyComputerBuffer, "%a %a %d Bytes",
-                                                ItemType,
+            L2_DEBUG_Print2(50, 200 + (HeightNew + 16 * 2) * (valid_count + 1) - 16 * 2, pMyComputerBuffer, "%a %d Bytes",
                                             name,
-                                            L1_NETWORK_4BytesToUINT32(pItems[i].FileLength));            
+                                            L1_NETWORK_4BytesToUINT32(pItems[i].FileLength));
             valid_count++;
         }
         else if (pItems[i].Attribute[0] == 0x20) //File
@@ -2801,13 +2804,12 @@ L2_STORE_FolderItemsPrint()
             {
                 for (int k = 0; k < WidthNew; k++)
                 {
-                    pMyComputerBuffer[((valid_count * 90 + 200 + j) * MyComputerWidth + 100 + k) * 4 ]     = pSystemIconTextBuffer[((HeightNew - j) * WidthNew + k) * 3 ];
-                    pMyComputerBuffer[((valid_count * 90 + 200 + j) * MyComputerWidth + 100 + k) * 4 + 1 ] = pSystemIconTextBuffer[((HeightNew - j) * WidthNew + k) * 3 + 1 ];
-                    pMyComputerBuffer[((valid_count * 90 + 200 + j) * MyComputerWidth + 100 + k) * 4 + 2 ] = pSystemIconTextBuffer[((HeightNew - j) * WidthNew + k) * 3 + 2 ];
+                    pMyComputerBuffer[((valid_count * (HeightNew + 16 * 2) + 200 + j) * MyComputerWidth + 130 + k) * 4 ]     = pSystemIconTextBuffer[((HeightNew - j) * WidthNew + k) * 3 ];
+                    pMyComputerBuffer[((valid_count * (HeightNew + 16 * 2) + 200 + j) * MyComputerWidth + 130 + k) * 4 + 1 ] = pSystemIconTextBuffer[((HeightNew - j) * WidthNew + k) * 3 + 1 ];
+                    pMyComputerBuffer[((valid_count * (HeightNew + 16 * 2) + 200 + j) * MyComputerWidth + 130 + k) * 4 + 2 ] = pSystemIconTextBuffer[((HeightNew - j) * WidthNew + k) * 3 + 2 ];
                 }
             }
-            L2_DEBUG_Print2(16 * 50 / 3 + 32, 2 * 16 + (valid_count) * 16, pMyComputerBuffer, "%a %a %d Bytes",
-                                                ItemType,
+            L2_DEBUG_Print2(50, 200 + (HeightNew + 16 * 2) * (valid_count + 1) - 16 * 2, pMyComputerBuffer, "%a %d Bytes",
                                             name,
                                             L1_NETWORK_4BytesToUINT32(pItems[i].FileLength));
             valid_count++;
@@ -4474,7 +4476,7 @@ VOID L3_APPLICATION_MyComputerWindow(UINT16 StartX, UINT16 StartY)
     
     //WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].StartX = StartX;
     //WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].StartY = StartY;
-    
+    /*
     for (int j = 0; j < HeightNew; j++)
     {
         for (int k = 0; k < WidthNew; k++)
@@ -4483,7 +4485,7 @@ VOID L3_APPLICATION_MyComputerWindow(UINT16 StartX, UINT16 StartY)
             pBuffer[((30 + j) * MyComputerWidth + 100 + k) * 4 + 1 ] = pSystemIconFolderBuffer[((HeightNew - j) * WidthNew + k) * 3 + 1 ];
             pBuffer[((30 + j) * MyComputerWidth + 100 + k) * 4 + 2 ] = pSystemIconFolderBuffer[((HeightNew - j) * WidthNew + k) * 3 + 2 ];
         }
-    }
+    }*/
 
 
     //Skip bmp header.
@@ -4494,7 +4496,7 @@ VOID L3_APPLICATION_MyComputerWindow(UINT16 StartX, UINT16 StartY)
     
     //WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].StartX = StartX;
     //WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].StartY = StartY;
-    
+    /*
     for (int j = 0; j < HeightNew; j++)
     {
         for (int k = 0; k < WidthNew; k++)
@@ -4504,7 +4506,7 @@ VOID L3_APPLICATION_MyComputerWindow(UINT16 StartX, UINT16 StartY)
             pBuffer[((130 + j) * MyComputerWidth + 100 + k) * 4 + 2 ] = pSystemIconTextBuffer[((HeightNew - j) * WidthNew + k) * 3 + 2 ];
         }
     }
-
+    */
 
     for (UINT16 i = 0 ; i < PartitionCount; i++)
     {
