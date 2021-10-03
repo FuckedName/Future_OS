@@ -2760,6 +2760,61 @@ EFI_STATUS L2_STORE_PartitionAnalysis()
     return EFI_SUCCESS;
 }
 
+L2_STORE_FolderItemsPrint()
+{
+    UINT16 valid_count = 0;
+    UINT16 HeightNew = SYSTEM_ICON_HEIGHT / 8;
+    UINT16 WidthNew = SYSTEM_ICON_WIDTH / 8;
+    UINT16 x = 0;
+    UINT16 y = 150;
+    
+    for (UINT16 i = 0; i < 32; i++)
+    {       
+        if (pItems[i].FileName[0] == 0)
+            break;
+            
+        char name[12] = {0};
+        char ItemType[10] = "OTHER";
+        L1_FILE_NameGet(i, name);
+                
+        if (pItems[i].Attribute[0] == 0x10)//Folder
+        {
+            for (int j = 0; j < HeightNew; j++)
+            {
+                for (int k = 0; k < WidthNew; k++)
+                {
+                    pMyComputerBuffer[((valid_count * 90 + 200 + j) * MyComputerWidth + 100 + k) * 4 ]     = pSystemIconFolderBuffer[((HeightNew - j) * WidthNew + k) * 3 ];
+                    pMyComputerBuffer[((valid_count * 90 + 200 + j) * MyComputerWidth + 100 + k) * 4 + 1 ] = pSystemIconFolderBuffer[((HeightNew - j) * WidthNew + k) * 3 + 1 ];
+                    pMyComputerBuffer[((valid_count * 90 + 200 + j) * MyComputerWidth + 100 + k) * 4 + 2 ] = pSystemIconFolderBuffer[((HeightNew - j) * WidthNew + k) * 3 + 2 ];
+                }
+            }
+            L2_DEBUG_Print2(16 * 50 / 3 + 32, 2 * 16 + (valid_count) * 16, pMyComputerBuffer, "%a %a %d Bytes",
+                                                ItemType,
+                                            name,
+                                            L1_NETWORK_4BytesToUINT32(pItems[i].FileLength));            
+            valid_count++;
+        }
+        else if (pItems[i].Attribute[0] == 0x20) //File
+        {
+            
+            for (int j = 0; j < HeightNew; j++)
+            {
+                for (int k = 0; k < WidthNew; k++)
+                {
+                    pMyComputerBuffer[((valid_count * 90 + 200 + j) * MyComputerWidth + 100 + k) * 4 ]     = pSystemIconTextBuffer[((HeightNew - j) * WidthNew + k) * 3 ];
+                    pMyComputerBuffer[((valid_count * 90 + 200 + j) * MyComputerWidth + 100 + k) * 4 + 1 ] = pSystemIconTextBuffer[((HeightNew - j) * WidthNew + k) * 3 + 1 ];
+                    pMyComputerBuffer[((valid_count * 90 + 200 + j) * MyComputerWidth + 100 + k) * 4 + 2 ] = pSystemIconTextBuffer[((HeightNew - j) * WidthNew + k) * 3 + 2 ];
+                }
+            }
+            L2_DEBUG_Print2(16 * 50 / 3 + 32, 2 * 16 + (valid_count) * 16, pMyComputerBuffer, "%a %a %d Bytes",
+                                                ItemType,
+                                            name,
+                                            L1_NETWORK_4BytesToUINT32(pItems[i].FileLength));
+            valid_count++;
+        }
+    }       
+
+}
 
 L2_STORE_PartitionItemsPrint(UINT16 Index)
 {
@@ -2772,41 +2827,7 @@ L2_STORE_PartitionItemsPrint(UINT16 Index)
     if (FileSystemType == FILE_SYSTEM_FAT32)
     {
         L2_FILE_FAT32_DataSectorHandle(Index);
-        UINT16 valid_count = 0;
-
-        for (UINT16 i = 0; i < 32; i++)
-        {       
-            if (pItems[i].FileName[0] == 0)
-                break;
-                
-            char name[12] = {0};
-            char ItemType[10] = "OTHER";
-           L1_FILE_NameGet(i, name);
-
-           if (pItems[i].Attribute[0] == 0x10)
-           {
-            ItemType[0] = 'F';
-            ItemType[1] = 'o';
-            ItemType[2] = 'l';
-            ItemType[3] = 'd';
-            ItemType[4] = 'e';
-            ItemType[5] = 'r';
-            ItemType[6] = '\0';
-           }
-           else if (pItems[i].Attribute[0] == 0x20)
-           {
-            ItemType[0] = 'F';
-            ItemType[1] = 'i';
-            ItemType[2] = 'l';
-            ItemType[3] = 'e';
-            ItemType[4] = '\0';
-           }
-            L2_DEBUG_Print2(16 * 50 / 3 + 32, 2 * 16 + (valid_count) * 16, pMyComputerBuffer, "%a %a %d Bytes",
-                                                ItemType,
-                                            name,
-                                            L1_NETWORK_4BytesToUINT32(pItems[i].FileLength));           
-            valid_count++;
-        }       
+        L2_STORE_FolderItemsPrint();
     }
     else if (FileSystemType == FILE_SYSTEM_NTFS)
     {
