@@ -1451,6 +1451,17 @@ EFI_STATUS L2_GRAPHICS_ChineseCharDraw2(UINT8 *pBuffer,
     return EFI_SUCCESS;
 }
 
+CHAR8 *L2_STRING_Maker4 (CONST CHAR8 *Format, VA_LIST VaList)
+{
+    for (UINT32 i = 0; i < 0x100; i++)
+        AsciiBuffer[i] = 0;
+
+    // Note this api do not supported ("%f", float)
+    AsciiVSPrint (AsciiBuffer, sizeof (AsciiBuffer), Format, VaList);
+    return AsciiBuffer;
+}    
+
+
 VOID L2_STRING_Maker (UINT16 x, UINT16 y,
   IN  CONST CHAR8   *Format,
   IN  VA_LIST       VaList
@@ -1606,6 +1617,22 @@ VOID EFIAPI L2_DEBUG_Print1 (UINT16 x, UINT16 y,  IN  CONST CHAR8  *Format, ...)
     L2_STRING_Maker(x, y, Format, VaList);
     VA_END (VaList);
 }
+
+/* Display a string */
+CHAR8 *L2_STRING_Make5 (CONST CHAR8  *Format, ...)
+{
+    for (UINT32 i = 0; i < 0x100; i++)
+        AsciiBuffer[i] = 0;
+        
+    VA_LIST         VaList;
+    VA_START (VaList, Format);
+    // Note this api do not supported ("%f", float)
+    AsciiVSPrint (AsciiBuffer, sizeof (AsciiBuffer), Format, VaList);
+    VA_END (VaList);    
+
+    return AsciiBuffer;
+}
+
 
 
 /* Display a string */
@@ -2760,13 +2787,31 @@ EFI_STATUS L2_STORE_PartitionAnalysis()
     return EFI_SUCCESS;
 }
 
+L3_GRAPHICS_ItemPrint(UINT8 *pDestBuffer, UINT8 *pSourceBuffer, UINT16 pDestWidth, UINT16 pDestHeight, 
+                              UINT16 pSourceWidth, UINT16 pSourceHeight, UINT16 x, UINT16 y, CHAR8 *pNameString, CHAR16 StringType)
+{
+    
+    for (int j = 0; j < pSourceHeight; j++)
+    {
+        for (int k = 0; k < pSourceWidth; k++)
+        {
+            pDestBuffer[((y + j) * pDestWidth + x + k) * 4 ]     = pSourceBuffer[((pSourceHeight - j) * pSourceWidth + k) * 3 ];
+            pDestBuffer[((y + j) * pDestWidth + x + k) * 4 + 1 ] = pSourceBuffer[((pSourceHeight - j) * pSourceWidth + k) * 3 + 1 ];
+            pDestBuffer[((y + j) * pDestWidth + x + k) * 4 + 2 ] = pSourceBuffer[((pSourceHeight - j) * pSourceWidth + k) * 3 + 2 ];
+        }
+    }
+
+    if (2 == StringType)
+        L2_DEBUG_Print2(x, y + pDestHeight, pDestBuffer, "%a ", pNameString);
+}
+
 L2_STORE_FolderItemsPrint()
 {
     UINT16 valid_count = 0;
     UINT16 HeightNew = SYSTEM_ICON_HEIGHT / 8;
     UINT16 WidthNew = SYSTEM_ICON_WIDTH / 8;
-    UINT16 x = 0;
-    UINT16 y = 200;
+    UINT16 x;
+    UINT16 y;
     
     for (UINT16 i = 0; i < 32; i++)
     {       
@@ -2774,6 +2819,9 @@ L2_STORE_FolderItemsPrint()
             break;
             
         char name[12] = {0};
+        x = 130;
+
+        y = valid_count * (HeightNew + 16 * 2) + 200;
 
         for (UINT8 i = 0; i < 12; i++)
             name[i] = '\0';
@@ -2783,6 +2831,9 @@ L2_STORE_FolderItemsPrint()
                 
         if (pItems[i].Attribute[0] == 0x10) //Folder
         {
+            ;
+            L3_GRAPHICS_ItemPrint(pMyComputerBuffer, pSystemIconFolderBuffer, MyComputerWidth, MyComputerHeight, WidthNew, HeightNew, x, y, "111", 2);
+            /*
             for (int j = 0; j < HeightNew; j++)
             {
                 for (int k = 0; k < WidthNew; k++)
@@ -2792,15 +2843,17 @@ L2_STORE_FolderItemsPrint()
                     pMyComputerBuffer[((valid_count * (HeightNew + 16 * 2) + 200 + j) * MyComputerWidth + 130 + k) * 4 + 2 ] = pSystemIconFolderBuffer[((HeightNew - j) * WidthNew + k) * 3 + 2 ];
                 }
             }
-            L2_DEBUG_Print2(50, 200 + (HeightNew + 16 * 2) * (valid_count + 1) - 16 * 2, pMyComputerBuffer, "%a %d Bytes",
+            */
+            L2_DEBUG_Print2(x, y + HeightNew, pMyComputerBuffer, "%a %d Bytes",
                                             name,
                                             L1_NETWORK_4BytesToUINT32(pItems[i].FileLength));
+            
             valid_count++;
         }
         else if (pItems[i].Attribute[0] == 0x20) //File
         {
             
-            for (int j = 0; j < HeightNew; j++)
+            /*for (int j = 0; j < HeightNew; j++)
             {
                 for (int k = 0; k < WidthNew; k++)
                 {
@@ -2808,10 +2861,12 @@ L2_STORE_FolderItemsPrint()
                     pMyComputerBuffer[((valid_count * (HeightNew + 16 * 2) + 200 + j) * MyComputerWidth + 130 + k) * 4 + 1 ] = pSystemIconTextBuffer[((HeightNew - j) * WidthNew + k) * 3 + 1 ];
                     pMyComputerBuffer[((valid_count * (HeightNew + 16 * 2) + 200 + j) * MyComputerWidth + 130 + k) * 4 + 2 ] = pSystemIconTextBuffer[((HeightNew - j) * WidthNew + k) * 3 + 2 ];
                 }
-            }
-            L2_DEBUG_Print2(50, 200 + (HeightNew + 16 * 2) * (valid_count + 1) - 16 * 2, pMyComputerBuffer, "%a %d Bytes",
+            }*/
+            L2_DEBUG_Print2(x, y + HeightNew, pMyComputerBuffer, "%a %d Bytes",
                                             name,
                                             L1_NETWORK_4BytesToUINT32(pItems[i].FileLength));
+            
+            L3_GRAPHICS_ItemPrint(pMyComputerBuffer, pSystemIconTextBuffer, MyComputerWidth, MyComputerHeight, WidthNew, HeightNew, x, y, "222", 2);
             valid_count++;
         }
     }       
@@ -5826,6 +5881,29 @@ EFI_STATUS L2_GRAPHICS_DeskInit()
 
     L1_GRAPHICS_ZoomImage(pSystemIconMyComputerBuffer, WidthNew, HeightNew, pSystemIconTempBuffer2, SYSTEM_ICON_WIDTH, SYSTEM_ICON_HEIGHT);
     
+    int x1, y1;
+    x1 = 20;
+    y1 = 20;
+    L3_GRAPHICS_ItemPrint(pDeskBuffer, pSystemIconMyComputerBuffer, ScreenWidth, ScreenHeight, WidthNew, HeightNew, x1, y1, "", 1);
+
+    
+    y1 += HeightNew;
+    // wo de dian nao
+    L2_GRAPHICS_ChineseCharDraw2(pDeskBuffer, x1, y1, (46 - 1) * 94 + 50 - 1, Color, ScreenWidth);
+    x1 += 16;
+    
+    L2_GRAPHICS_ChineseCharDraw2(pDeskBuffer, x1, y1, (21 - 1) * 94 + 36 - 1, Color, ScreenWidth);
+    x1 += 16;
+    
+    L2_GRAPHICS_ChineseCharDraw2(pDeskBuffer, x1, y1, (21 - 1) * 94 + 71 - 1, Color, ScreenWidth);
+    x1 += 16;
+    
+    L2_GRAPHICS_ChineseCharDraw2(pDeskBuffer, x1, y1, (36 - 1) * 94 + 52 - 1, Color, ScreenWidth);
+
+    y1 += 16;
+    y1 += 16;
+
+    /*
     for (int j = 0; j < HeightNew; j++)
     {
         for (int k = 0; k < WidthNew; k++)
@@ -5835,6 +5913,7 @@ EFI_STATUS L2_GRAPHICS_DeskInit()
             pDeskBuffer[((20 + j) * ScreenWidth + 20 + k) * 4 + 2 ] = pSystemIconMyComputerBuffer[((HeightNew - j) * WidthNew + k) * 3 + 2 ];
         }
     }
+    */
 
 
     //Skip bmp header.
@@ -5843,6 +5922,28 @@ EFI_STATUS L2_GRAPHICS_DeskInit()
 
     L1_GRAPHICS_ZoomImage(pSystemIconMySettingBuffer, WidthNew, HeightNew, pSystemIconTempBuffer2, SYSTEM_ICON_WIDTH, SYSTEM_ICON_HEIGHT);
     
+    x1 = 20;
+    L3_GRAPHICS_ItemPrint(pDeskBuffer, pSystemIconMySettingBuffer, ScreenWidth, ScreenHeight, WidthNew, HeightNew, x1, y1, "", 1);
+
+    
+    y1 += HeightNew;
+    // wo de dian nao
+    L2_GRAPHICS_ChineseCharDraw2(pDeskBuffer, x1, y1, (46 - 1) * 94 + 50 - 1, Color, ScreenWidth);
+    x1 += 16;
+    
+    L2_GRAPHICS_ChineseCharDraw2(pDeskBuffer, x1, y1, (21 - 1) * 94 + 36 - 1, Color, ScreenWidth);
+    x1 += 16;
+    
+    L2_GRAPHICS_ChineseCharDraw2(pDeskBuffer, x1, y1, (21 - 1) * 94 + 71 - 1, Color, ScreenWidth);
+    x1 += 16;
+    
+    L2_GRAPHICS_ChineseCharDraw2(pDeskBuffer, x1, y1, (36 - 1) * 94 + 52 - 1, Color, ScreenWidth);
+
+    y1 += 16;
+    y1 += 16;
+
+    
+    /*
     for (int j = 0; j < HeightNew; j++)
     {
         for (int k = 0; k < WidthNew; k++)
@@ -5851,14 +5952,14 @@ EFI_STATUS L2_GRAPHICS_DeskInit()
             pDeskBuffer[((120 + j) * ScreenWidth + 20 + k) * 4 + 1 ] = pSystemIconMySettingBuffer[((HeightNew - j) * WidthNew + k) * 3 + 1 ];
             pDeskBuffer[((120 + j) * ScreenWidth + 20 + k) * 4 + 2 ] = pSystemIconMySettingBuffer[((HeightNew - j) * WidthNew + k) * 3 + 2 ];
         }
-    }
+    }*/
 
     //Skip bmp header.
     for (UINT32 i = 0; i < 384000; i++)
         pSystemIconTempBuffer2[i] = pSystemIconBuffer[SYSTEM_ICON_RECYCLE][0x36 + i];
 
     L1_GRAPHICS_ZoomImage(pSystemIconRecycleBuffer, WidthNew, HeightNew, pSystemIconTempBuffer2, SYSTEM_ICON_WIDTH, SYSTEM_ICON_HEIGHT);
-    
+    /*
     for (int j = 0; j < HeightNew; j++)
     {
         for (int k = 0; k < WidthNew; k++)
@@ -5868,6 +5969,28 @@ EFI_STATUS L2_GRAPHICS_DeskInit()
             pDeskBuffer[((220 + j) * ScreenWidth + 20 + k) * 4 + 2 ] = pSystemIconRecycleBuffer[((HeightNew - j) * WidthNew + k) * 3 + 2 ];
         }
     }
+    */
+        
+    x1 = 20;
+
+    L3_GRAPHICS_ItemPrint(pDeskBuffer, pSystemIconRecycleBuffer, ScreenWidth, ScreenHeight, WidthNew, HeightNew, x1, y1, "", 1);
+
+    
+    y1 += HeightNew;
+    // wo de dian nao
+    L2_GRAPHICS_ChineseCharDraw2(pDeskBuffer, x1, y1, (46 - 1) * 94 + 50 - 1, Color, ScreenWidth);
+    x1 += 16;
+    
+    L2_GRAPHICS_ChineseCharDraw2(pDeskBuffer, x1, y1, (21 - 1) * 94 + 36 - 1, Color, ScreenWidth);
+    x1 += 16;
+    
+    L2_GRAPHICS_ChineseCharDraw2(pDeskBuffer, x1, y1, (21 - 1) * 94 + 71 - 1, Color, ScreenWidth);
+    x1 += 16;
+    
+    L2_GRAPHICS_ChineseCharDraw2(pDeskBuffer, x1, y1, (36 - 1) * 94 + 52 - 1, Color, ScreenWidth);
+
+    y1 += 16;
+    y1 += 16;
 
     
     // line
