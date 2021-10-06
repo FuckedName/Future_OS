@@ -40,20 +40,20 @@ current problems:
     2. display FAT32 file system root path items almost ok, display format not very beautiful.
     3. keyboard input not ok.
 
-³£ÓÃÍøÖ·
-1¡¢ÇøÎ»Âë²éÑ¯ http://quwei.911cha.com/
-2¡¢CÓïÑÔ´úÂë¸ñÊ½»¯ http://web.chacuo.net/formatc
+å¸¸ç”¨ç½‘å€
+1ã€åŒºä½ç æŸ¥è¯¢ http://quwei.911cha.com/
+2ã€Cè¯­è¨€ä»£ç æ ¼å¼åŒ– http://web.chacuo.net/formatc
 
-×¢ÒâÊÂÏî
-1¡¢´æ·ÅEFIÄ¿Â¼µÄ·ÖÇøÒ»¶¨ÒªÊÇFAT32¸ñÊ½
-2¡¢´æ·ÅEFI·ÖÇø´óĞ¡ÉÈÇøÊıÒ»¶¨ÒªÌæ»»ºêSTORE_EFI_PATH_PARTITION_SECTOR_COUNT
-3¡¢×ÀÃæÍ¼Æ¬ÎÄ¼şºÍHZK16ÎÄ¼şÒ»¶¨Òª´æ·ÅÔÚÕâ¸ö·ÖÇøµÄ¸ùÄ¿Â¼
-4¡¢
-5¡¢
+æ³¨æ„äº‹é¡¹
+1ã€å­˜æ”¾EFIç›®å½•çš„åˆ†åŒºä¸€å®šè¦æ˜¯FAT32æ ¼å¼
+2ã€å­˜æ”¾EFIåˆ†åŒºå¤§å°æ‰‡åŒºæ•°ä¸€å®šè¦æ›¿æ¢å®STORE_EFI_PATH_PARTITION_SECTOR_COUNT
+3ã€æ¡Œé¢å›¾ç‰‡æ–‡ä»¶å’ŒHZK16æ–‡ä»¶ä¸€å®šè¦å­˜æ”¾åœ¨è¿™ä¸ªåˆ†åŒºçš„æ ¹ç›®å½•
+4ã€
+5ã€
 
-³£¼ûÎÊÌâ
-1¡¢SecureCRT²»ÄÜÁ¬½ÓLINUX UBUNTU£¬PING²»Í¨£¬ĞèÒª°ÑLINUX ÍøÂç¶Ï¿ªÖØÁ¬ÏÂ
-2¡¢
+å¸¸è§é—®é¢˜
+1ã€SecureCRTä¸èƒ½è¿æ¥LINUX UBUNTUï¼ŒPINGä¸é€šï¼Œéœ€è¦æŠŠLINUX ç½‘ç»œæ–­å¼€é‡è¿ä¸‹
+2ã€
 **/
 
 #include <stdio.h>
@@ -545,22 +545,20 @@ typedef enum
     ALLOCATED_INFORMATION_DOMAIN_PHYSICAL_BLOCK_ID,
     ALLOCATED_INFORMATION_DOMAIN_MAX
 }MEMORY_ALLOCATED_INFORMATION_DOMAIN;
-
-
 // Index Header
 typedef struct {
-    UINT8 Flag[4]; //¹Ì¶¨Öµ "INDX"
-    UINT8 USNOffset[2];//¸üĞÂĞòÁĞºÅÆ«ÒÆ
-    UINT8 USNSize[2];//¸üĞÂĞòÁĞºÅºÍ¸üĞÂÊı×é´óĞ¡
-    UINT8 LogSequenceNumber[8]; // ÈÕÖ¾ÎÄ¼şĞòÁĞºÅ(LSN)
-    UINT8 IndexCacheVCN[8];//±¾Ë÷Òı»º³åÇøÔÚË÷Òı·ÖÅäÖĞµÄVCN
-    UINT8 IndexEntryOffset[4];//Ë÷ÒıÏîµÄÆ«ÒÆ Ïà¶ÔÓÚµ±Ç°Î»ÖÃ
-    UINT8 IndexEntrySize[4];//Ë÷ÒıÏîµÄ´óĞ¡
-    UINT8 IndexEntryAllocSize[4];//Ë÷ÒıÏî·ÖÅäµÄ´óĞ¡
-    UINT8 HasLeafNode;//ÖÃÒ» ±íÊ¾ÓĞ×Ó½Úµã
-    UINT8 Fill[3];//Ìî³ä
-    UINT8 USN[2];//¸üĞÂĞòÁĞºÅ
-    UINT8 USNArray[0];//¸üĞÂĞòÁĞÊı×é
+    UINT8 Flag[4]; //å›ºå®šå€¼ "INDX"
+    UINT8 USNOffset[2];//æ›´æ–°åºåˆ—å·åç§»
+    UINT8 USNSize[2];//æ›´æ–°åºåˆ—å·å’Œæ›´æ–°æ•°ç»„å¤§å°
+    UINT8 LogSequenceNumber[8]; // æ—¥å¿—æ–‡ä»¶åºåˆ—å·(LSN)
+    UINT8 IndexCacheVCN[8];//æœ¬ç´¢å¼•ç¼“å†²åŒºåœ¨ç´¢å¼•åˆ†é…ä¸­çš„VCN
+    UINT8 IndexEntryOffset[4];//ç´¢å¼•é¡¹çš„åç§» ç›¸å¯¹äºå½“å‰ä½ç½®
+    UINT8 IndexEntrySize[4];//ç´¢å¼•é¡¹çš„å¤§å°
+    UINT8 IndexEntryAllocSize[4];//ç´¢å¼•é¡¹åˆ†é…çš„å¤§å°
+    UINT8 HasLeafNode;//ç½®ä¸€ è¡¨ç¤ºæœ‰å­èŠ‚ç‚¹
+    UINT8 Fill[3];//å¡«å……
+    UINT8 USN[2];//æ›´æ–°åºåˆ—å·
+    UINT8 USNArray[0];//æ›´æ–°åºåˆ—æ•°ç»„
 }INDEX_HEADER;
 
 typedef enum
@@ -571,22 +569,22 @@ typedef enum
 }MEMORY_TYPE;
 
 typedef struct {
-     UINT8 MFTReferNumber[8];//ÎÄ¼şµÄMFT²Î¿¼ºÅ, first 6 Bytes * 2 + MFT table sector = file sector 
-     UINT8 IndexEntrySize[2];//Ë÷ÒıÏîµÄ´óĞ¡
-     UINT8 FileNameAttriBodySize[2];//ÎÄ¼şÃûÊôĞÔÌåµÄ´óĞ¡
-     UINT8 IndexFlag[2];//Ë÷Òı±êÖ¾
-     UINT8 Fill[2];//Ìî³ä
-     UINT8 FatherDirMFTReferNumber[8];//¸¸Ä¿Â¼MFTÎÄ¼ş²Î¿¼ºÅ
-     UINT8 CreatTime[8];//ÎÄ¼ş´´½¨Ê±¼ä 8
-     UINT8 AlterTime[8];//ÎÄ¼ş×îºóĞŞ¸ÄÊ±¼ä
-     UINT8 MFTChgTime[8];//ÎÄ¼ş¼ÇÂ¼×îºóĞŞ¸ÄÊ±¼ä
-     UINT8 ReadTime[8];//ÎÄ¼ş×îºó·ÃÎÊÊ±¼ä
-     UINT8 FileAllocSize[8];//ÎÄ¼ş·ÖÅä´óĞ¡
-     UINT8 FileRealSize[8];//ÎÄ¼şÊµ¼Ê´óĞ¡
-     UINT8 FileFlag[8];//ÎÄ¼ş±êÖ¾
-     UINT8 FileNameSize;//ÎÄ¼şÃû³¤¶È
-     UINT8 FileNamespace;//ÎÄ¼şÃüÃû¿Õ¼ä
-     UINT8 FileNameAndFill[0];//ÎÄ¼şÃûºÍÌî³ä
+     UINT8 MFTReferNumber[8];//æ–‡ä»¶çš„MFTå‚è€ƒå·, first 6 Bytes * 2 + MFT table sector = file sector 
+     UINT8 IndexEntrySize[2];//ç´¢å¼•é¡¹çš„å¤§å°
+     UINT8 FileNameAttriBodySize[2];//æ–‡ä»¶åå±æ€§ä½“çš„å¤§å°
+     UINT8 IndexFlag[2];//ç´¢å¼•æ ‡å¿—
+     UINT8 Fill[2];//å¡«å……
+     UINT8 FatherDirMFTReferNumber[8];//çˆ¶ç›®å½•MFTæ–‡ä»¶å‚è€ƒå·
+     UINT8 CreatTime[8];//æ–‡ä»¶åˆ›å»ºæ—¶é—´ 8
+     UINT8 AlterTime[8];//æ–‡ä»¶æœ€åä¿®æ”¹æ—¶é—´
+     UINT8 MFTChgTime[8];//æ–‡ä»¶è®°å½•æœ€åä¿®æ”¹æ—¶é—´
+     UINT8 ReadTime[8];//æ–‡ä»¶æœ€åè®¿é—®æ—¶é—´
+     UINT8 FileAllocSize[8];//æ–‡ä»¶åˆ†é…å¤§å°
+     UINT8 FileRealSize[8];//æ–‡ä»¶å®é™…å¤§å°
+     UINT8 FileFlag[8];//æ–‡ä»¶æ ‡å¿—
+     UINT8 FileNameSize;//æ–‡ä»¶åé•¿åº¦
+     UINT8 FileNamespace;//æ–‡ä»¶å‘½åç©ºé—´
+     UINT8 FileNameAndFill[0];//æ–‡ä»¶åå’Œå¡«å……
 }INDEX_ITEM;
 
 typedef struct{
@@ -607,240 +605,12 @@ typedef struct
     UINT32 type;        /* type of memory segment */
 }e820_entry_self;
 
-
+//save path and block information.
 typedef struct
 {
-    UINT16 DeviceType; // 0 Disk, 1: USB, 2: Sata;
-    UINT16 PartitionType; // 0 MBR, 1 GPT;
-    UINT16 PartitionID; // a physics device consist of Several parts like c: d: e:
-    UINT16 PartitionGUID; // like FA458FD2-4FF7-44D8-B542-BA560A5990B3
-    UINT16 DeviceSquenceID; //0025384961B47ECD
-    char Signare[50]; // MBR:0x077410A0
-    long long StartSectorNumber; //0x194000
-    long long SectorCount; //0xC93060
-}DEVICE_PARAMETER;
-
-DEVICE_PARAMETER device[10] = {0};
-
-/*
-    struct for FAT32 file system
-*/
-
-typedef struct
-{
-    UINT8 JMP[3] ; // 0x00 3 Ìø×ªÖ¸Áî£¨Ìø¹ı¿ªÍ·Ò»¶ÎÇøÓò£©
-    UINT8 OEM[8] ; // 0x03 8 OEMÃû³Æ³£¼ûÖµÊÇMSDOS5.0.
-    UINT8 BitsOfSector[2] ; // 0x0b 2 Ã¿¸öÉÈÇøµÄ×Ö½ÚÊı¡£È¡ÖµÖ»ÄÜÊÇÒÔÏÂ¼¸ÖÖ£º512£¬1024£¬2048»òÊÇ4096¡£ÉèÎª512»áÈ¡µÃ×îºÃµÄ¼æÈİĞÔ
-    UINT8 SectorOfCluster[1] ; // 0x0d 1 Ã¿´ØÉÈÇøÊı¡£ ÆäÖµ±ØĞëÖĞ2µÄÕûÊı´Î·½£¬Í¬Ê±»¹Òª±£Ö¤Ã¿´ØµÄ×Ö½ÚÊı²»ÄÜ³¬¹ı32K
-    UINT8 ReservedSelector[2] ; // 0x0e 2 ±£ÁôÉÈÇøÊı£¨°üÀ¨Æô¶¯ÉÈÇø£©´ËÓò²»ÄÜÎª0£¬FAT12/FAT16±ØĞëÎª1£¬FAT32µÄµäĞÍÖµÈ¡Îª32
-    UINT8 NumFATS[1] ; // 0x10 1 ÎÄ¼ş·ÖÅä±íÊıÄ¿¡£ NumFATS£¬ÈÎºÎFAT¸ñÊ½¶¼½¨ÒéÎª2
-    UINT8 RootPathRecords[2] ; // 0x11 2 ×î´ó¸ùÄ¿Â¼ÌõÄ¿¸öÊı, 0 for fat32, 512 for fat16
-    UINT8 AllSectors[2] ; // 0x13 2 ×ÜÉÈÇøÊı£¨Èç¹ûÊÇ0£¬¾ÍÊ¹ÓÃÆ«ÒÆ0x20´¦µÄ4×Ö½ÚÖµ£©0 for fat32
-    UINT8 Description[1] ; // 0x15 1 ½éÖÊÃèÊö 0xF8 µ¥Ãæ¡¢Ã¿Ãæ80´ÅµÀ¡¢Ã¿´ÅµÀ9ÉÈÇø
-    UINT8 xxx1[2] ; // 0x16 2 Ã¿¸öÎÄ¼ş·ÖÅä±íµÄÉÈÇø£¨FAT16£©,0 for fat32
-    UINT8 xxx2[2] ; // 0x18 2 Ã¿´ÅµÀµÄÉÈÇø, 0x003f
-    UINT8 xxx3[2] ; // 0x1a 2 ´ÅÍ·Êı£¬0xff
-    UINT8 xxx4[4] ; // 0x1c 4 Òş²ØÉÈÇø, ÓëMBRÖĞµØÖ·0x1C6¿ªÊ¼µÄ4¸ö×Ö½ÚÊıÖµÏàµÈ
-    UINT8 SectorCounts[4] ; // 0x20 4 ×ÜÉÈÇøÊı£¨Èç¹û³¬¹ı65535Ê¹ÓÃ´ËµØÖ·£¬Ğ¡ÓÚ65536²Î¼ûÆ«ÒÆ0x13£¬¶ÔFAT32£¬´ËÓò±ØĞëÊÇ·Ç0£©
-    UINT8 SectorsPerFat[4] ; // Sectors count each FAT use
-    UINT8 Fat32Flag[2] ; // 0x28 2 Flags (FAT32ÌØÓĞ)
-    UINT8 FatVersion[2] ; // 0x2a 2 °æ±¾ºÅ (FAT32ÌØÓĞ)
-    UINT8 BootPathStartCluster[4] ; // 0x2c 4 ¸ùÄ¿Â¼ÆğÊ¼´Ø (FAT32)£¬Ò»°ãÎª2
-    UINT8 ClusterName[11] ; // 0x2b 11 ¾í±ê£¨·ÇFAT32£©
-    UINT8 BootStrap[2] ; // 0x30 2 FSInfo ÉÈÇø (FAT32) bootstrap
-    UINT8 BootSectorBackup[2] ; // 0x32 2 Æô¶¯ÉÈÇø±¸·İ (FAT32)Èç¹û²»Îª0£¬±íÊ¾ÔÚ±£ÁôÇøÖĞÒıµ¼¼ÇÂ¼µÄ±¸Êı¾İËùÕ¼µÄÉÈÇøÊı£¬Í¨³£Îª6Í¬Ê±²»½¨ÒéÊ¹ÓÃ6ÒÔÍâµÄÆäËûÊıÖµ
-    UINT8 Reserved[2] ; // 0x34 2 ±£ÁôÎ´Ê¹ÓÃ (FAT32) ´ËÓòÓÃ0Ìî³ä
-    UINT8 FileSystemType[8] ; // 0x36 8 FATÎÄ¼şÏµÍ³ÀàĞÍ£¨ÈçFAT¡¢FAT12¡¢FAT16£©º¬"FAT"¾ÍÊÇPBR,·ñÔò¾ÍÊÇMBR
-    UINT8 SelfBootCode[2] ; // 0x3e 2 ²Ù×÷ÏµÍ³×ÔÒıµ¼´úÂë
-    UINT8 DeviceNumber[1] ; // 0x40 1 BIOSÉè±¸´úºÅ (FAT32)
-    UINT8 NoUse[1] ; // 0x41 1 Î´Ê¹ÓÃ (FAT32)
-    UINT8 Flag[1] ; // 0x42 1 ±ê¼Ç (FAT32)
-    UINT8 SequeenNumber[4] ; // 0x43 4 ¾íĞòºÅ (FAT32)
-    UINT8 juanbiao[11] ; // 0x47 11 ¾í±ê£¨FAT32£©
-    UINT8 TypeOfFileSystem[8] ; // 0x52 8 FATÎÄ¼şÏµÍ³ÀàĞÍ£¨FAT32£©
-    UINT8 BootAssembleCode[338]; // code
-    UINT8 Partition1[16] ; // 0x1be 64 partitions table, DOS_PART_TBL_OFFSET
-    UINT8 Partition2[16] ; // 0X1BE ~0X1CD 16 talbe entry for Partition 1
-    UINT8 Partition3[16] ; // 0X1CE ~0X1DD 16 talbe entry for Partition 2
-    UINT8 Partition4[16] ; // 0X1DE ~0X1ED 16 talbe entry for Partition 3
-    UINT8 EndFlag[2] ; // 0x1FE 2 ÉÈÇø½áÊø·û£¨0x55 0xAA£© ½áÊø±êÖ¾£ºMBRµÄ½áÊø±êÖ¾ÓëDBR£¬EBRµÄ½áÊø±êÖ¾ÏàÍ¬¡£
-}MasterBootRecord;
-
-/*
-    struct for NTFS file system
-*/
-
-//
-// first sector of partition
-typedef struct
-{
-    UINT8 JMP[3] ; // 0x00 3 Ìø×ªÖ¸Áî£¨Ìø¹ı¿ªÍ·Ò»¶ÎÇøÓò£©
-    UINT8 OEM[8] ; // 0x03 8 OEMÃû³Æ³£¼ûÖµÊÇMSDOS5.0, NTFS.
-
-    // 0x0B
-    UINT8 BitsOfSector[2];        //  0x0200¡¡¡¡ÉÈÇø´óĞ¡£¬512B
-    UINT8 SectorOfCluster;            //  0x08¡¡¡¡  Ã¿´ØÉÈÇøÊı£¬4KB
-    UINT8 ReservedSelector[2];            // ¡¡¡¡¡¡¡¡¡¡¡¡±£ÁôÉÈÇø
-    UINT8 NoUse01[5];            //
-    
-    // 0x15
-    UINT8 Description;            //  0xF8     
-    
-    // ´ÅÅÌ½éÖÊ -- Ó²ÅÌ
-    UINT8 NoUse02[2];            //
-    
-    // 0x18
-    UINT8 SectorPerTrack[2];     // ¡¡0x003F ¡¡Ã¿µÀÉÈÇøÊı 63
-    UINT8 Headers[2];           //¡¡ 0x00FF  ´ÅÍ·Êı
-    UINT8 SectorsHide[4];          // ¡¡0x3F¡¡¡¡Òş²ØÉÈÇø
-    UINT8 NoUse03[8];           //
-    
-    // 0x28
-    UINT8 AllSectorCount[8];        // ¾í×ÜÉÈÇøÊı, ¸ßÎ»ÔÚÇ°, µÍÎ»ÔÚºó
-    
-    // 0x30
-    UINT8 MFT_StartCluster[8];      // MFT ÆğÊ¼´Ø
-    UINT8 MFT_MirrStartCluster[8];  // MTF ±¸·İ MFTMirr Î»ÖÃ
-    
-    //0x40
-    UINT8 ClusterPerMFT[4];    // Ã¿¼ÇÂ¼´ØÊı 0xF6
-    UINT8 ClusterPerIndex[4];    // Ã¿Ë÷Òı´ØÊı
-    
-    //0x48
-    UINT8 SerialNumber[8];    // ¾íĞòÁĞºÅ
-    UINT8 CheckSum[8];    // Ğ£ÑéºÍ
-    UINT8 EndFlag[2];    // 0x1FE 2 ÉÈÇø½áÊø·û£¨0x55 0xAA£© ½áÊø±êÖ¾£ºMBRµÄ½áÊø±êÖ¾ÓëDBR£¬EBRµÄ½áÊø±êÖ¾ÏàÍ¬¡£
-}DOLLAR_BOOT;
-
-// ÎÄ¼ş¼ÇÂ¼Í·
-typedef struct
-{
-    /*+0x00*/ UINT8 Type[4];    // ¹Ì¶¨Öµ'FILE'
-    /*+0x04*/ UINT8 USNOffset[2]; // ¸üĞÂĞòÁĞºÅÆ«ÒÆ, Óë²Ù×÷ÏµÍ³ÓĞ¹Ø
-    /*+0x06*/ UINT8 USNCount[2]; // ¹Ì¶¨ÁĞ±í´óĞ¡Size in words of Update Sequence Number & Array (S)
-    /*+0x08*/ UINT8 Lsn[8]; // ÈÕÖ¾ÎÄ¼şĞòÁĞºÅ(LSN)
-    /*+0x10*/ UINT8 SequenceNumber[2]; // ĞòÁĞºÅ(ÓÃÓÚ¼ÇÂ¼ÎÄ¼ş±»·´¸´Ê¹ÓÃµÄ´ÎÊı)
-    /*+0x12*/ UINT8 LinkCount[2];// Ó²Á¬½ÓÊı
-    /*+0x14*/ UINT8 AttributeOffset[2]; // µÚÒ»¸öÊôĞÔÆ«ÒÆ
-    /*+0x16*/ UINT8 Flags[2];// flags, 00±íÊ¾É¾³ıÎÄ¼ş,01±íÊ¾Õı³£ÎÄ¼ş,02±íÊ¾É¾³ıÄ¿Â¼,03±íÊ¾Õı³£Ä¿Â¼
-    /*+0x18*/ UINT8 BytesInUse[4]; // ÎÄ¼ş¼ÇÂ¼ÊµÊ±´óĞ¡(×Ö½Ú) µ±Ç°MFT±íÏî³¤¶È,µ½FFFFFFµÄ³¤¶È+4
-    /*+0x1C*/ UINT8 BytesAllocated[4]; // ÎÄ¼ş¼ÇÂ¼·ÖÅä´óĞ¡(×Ö½Ú)
-    /*+0x20*/ UINT8 BaseFileRecord[8]; // = 0 »ù´¡ÎÄ¼ş¼ÇÂ¼ File reference to the base FILE record
-    /*+0x28*/ UINT8 NextAttributeNumber[2]; // ÏÂÒ»¸ö×ÔÓÉIDºÅ
-    /*+0x2A*/ UINT8 Pading[2]; // ±ß½ç
-    /*+0x2C*/ UINT8 MFTRecordNumber[4]; // windows xpÖĞÊ¹ÓÃ,±¾MFT¼ÇÂ¼ºÅ
-    /*+0x30*/ UINT8 USN[2]; // ¸üĞÂĞòÁĞºÅ
-    /*+0x32*/ UINT8 UpdateArray[0]; // ¸üĞÂÊı×é
- } FILE_HEADER, *pFILE_HEADER; 
-
-typedef struct  
-{
-    UINT8 Type[4];   //ÊôĞÔÀàĞÍ
-    UINT8 Size[4];   //ÊôĞÔÍ·ºÍÊôĞÔÌåµÄ×Ü³¤¶È
-    UINT8 ResidentFlag; //ÊÇ·ñÊÇ³£×¤ÊôĞÔ£¨0³£×¤ 1·Ç³£×¤£©
-    UINT8 NameSize;   //ÊôĞÔÃûµÄ³¤¶È
-    UINT8 NameOffset[2]; //ÊôĞÔÃûµÄÆ«ÒÆ Ïà¶ÔÓÚÊôĞÔÍ·
-    UINT8 Flags[2]; //±êÖ¾£¨0x0001Ñ¹Ëõ 0x4000¼ÓÃÜ 0x8000Ï¡Êè£©
-    UINT8 Id[2]; //ÊôĞÔÎ¨Ò»ID
-}CommonAttributeHeader;
-
-typedef struct 
-{
-    UINT8 OccupyCluster;
-    UINT64 Offset; //Please Note: The first item is start offset, and next item is relative offset....
-}IndexInformation;
-
-// Index of A0 attribute
-IndexInformation A0Indexes[10] = {0};
-
-typedef struct 
-{
-    UINT16 BitsOfSector;
-    UINT16 SectorOfCluster; 
-    UINT64 AllSectorCount;
-    UINT64 MFT_StartCluster;
-    UINT64 MFT_MirrStartCluster;
-}DollarBootSwitched;
-
-
-// MFT¼ÇÂ¼ÁËÕû¸ö¾íµÄËùÓĞÎÄ¼ş (°üÀ¨MFT±¾Éí¡¢Êı¾İÎÄ¼ş¡¢ÎÄ¼ş¼ĞµÈµÈ) ĞÅÏ¢£¬°üÀ¨¿Õ¼äÕ¼ÓÃ£¬ÎÄ¼ş»ù±¾ÊôĞÔ£¬ÎÄ¼şÎ»ÖÃË÷Òı£¬´´½¨Ê±
-// MFT µÄµÚÒ»Ïî¼ÇÂ¼$MFTÃèÊöµÄÊÇÖ÷·ÖÇø±íMFT±¾Éí£¬ËüµÄ±àºÅÎª0£¬MFTÏîµÄÍ·²¿¶¼ÊÇÈçÏÂ½á¹¹£º
-typedef struct {
-     UINT8    mark[4];             // "FILE" ±êÖ¾ 
-     UINT8    UsnOffset[2];        // ¸üĞÂĞòÁĞºÅÆ«ÒÆ ¡¡¡¡¡¡¡¡30 00
-     UINT8    usnSize[2];          // ¸üĞÂĞòÁĞÊı×é´óĞ¡+1 ¡¡ 03 00
-     UINT8    LSN[8];              // ÈÕÖ¾ÎÄ¼şĞòÁĞºÅ(Ã¿´Î¼ÇÂ¼ĞŞ¸Äºó¸Ä±ä)  58 8E 0F 34 00 00 00 00
-    // 0x10
-     UINT8    SN[2];               // ĞòÁĞºÅ ËæÖ÷ÎÄ¼ş±í¼ÇÂ¼ÖØÓÃ´ÎÊı¶øÔö¼Ó
-     UINT8    linkNum[2];          // Ó²Á¬½ÓÊı (¶àÉÙÄ¿Â¼Ö¸Ïò¸ÃÎÄ¼ş) 01 00
-     UINT8    firstAttr[2];        // µÚÒ»¸öÊôĞÔµÄÆ«ÒÆ¡¡¡¡38 00
-     UINT8    flags[2];            // 0ÒÑÉ¾³ı 1Õı³£ÎÄ¼ş 2ÒÑÉ¾³ıÄ¿Â¼ 3Ä¿Â¼ÕıÊ¹ÓÃ
-    // 0x18
-     UINT8    MftUseLen[4];        // ¼ÇÂ¼ÓĞĞ§³¤¶È   ¡¡A8 01 00 00
-     UINT8    maxLen[4];            // ¼ÇÂ¼Õ¼ÓÃ³¤¶È ¡¡ 00 04 00 00
-    // 0x20
-     UINT8    baseRecordNum[8];     // Ë÷Òı»ù±¾¼ÇÂ¼, Èç¹ûÊÇ»ù±¾¼ÇÂ¼ÔòÎª0
-     UINT8    nextAttrId[2];        // ÏÂÒ»ÊôĞÔId¡¡¡¡07 00
-     UINT8    border[2];            //
-     UINT8    xpRecordNum[4];       // ÓÃÓÚxp, ¼ÇÂ¼ºÅ
-    // 0x30
-     UINT8    USN[8];                 // ¸üĞÂĞòÁĞºÅ(2B) ºÍ ¸üĞÂĞòÁĞÊı×é
-}MFT_HEADER;
-
-/*
-    MFT ÊÇÓÉÒ»ÌõÌõ MFT Ïî(¼ÇÂ¼)Ëù×é³ÉµÄ£¬¶øÇÒÃ¿Ïî´óĞ¡ÊÇ¹Ì¶¨µÄ(Ò»°ãÎª1KB = 2 * 512)£¬MFT±£ÁôÁËÇ°16ÏîÓÃÓÚÌØÊâÎÄ¼ş¼ÇÂ¼£¬³ÆÎªÔªÊı¾İ£¬
-    ÔªÊı¾İÔÚ´ÅÅÌÉÏÊÇÎïÀíÁ¬ĞøµÄ£¬±àºÅÎª0~15£»Èç¹û$MFTµÄÆ«ÒÆÎª0x0C0000000, ÄÇÃ´ÏÂÒ»ÏîµÄÆ«ÒÆ¾ÍÊÇ0x0C0000400£¬ÔÚÏÂÒ»Ïî¾ÍÊÇ
-    0x0C0000800µÈµÈ£»
-*/
-
-//------------------  ÊôĞÔÍ·Í¨ÓÃ½á¹¹ ----
-typedef struct  //ËùÓĞÆ«ÒÆÁ¿¾ùÎªÏà¶ÔÓÚÊôĞÔÀàĞÍ Type µÄÆ«ÒÆÁ¿
-{
-     UINT8 Type[4];           // ÊôĞÔÀàĞÍ 0x10, 0x20, 0x30, 0x40,...,0xF0,0x100
-     UINT8 Length[4];         // ÊôĞÔµÄ³¤¶È
-     UINT8 NonResidentFiag;   // ÊÇ·ñÊÇ·Ç³£×¤ÊôĞÔ£¬l Îª·Ç³£×¤ÊôĞÔ£¬0 Îª³£×¤ÊôĞÔ 00
-     UINT8 NameLength;        // ÊôĞÔÃû³Æ³¤¶È£¬Èç¹ûÎŞÊôĞÔÃû³Æ£¬¸ÃÖµÎª 00
-     UINT8 ContentOffset[2];  // ÊôĞÔÄÚÈİµÄÆ«ÒÆÁ¿  18 00
-     UINT8 CompressedFiag[2]; // ¸ÃÎÄ¼ş¼ÇÂ¼±íÊ¾µÄÎÄ¼şÊı¾İÊÇ·ñ±»Ñ¹Ëõ¹ı 00 00
-     UINT8 Identify[2];       // Ê¶±ğ±êÖ¾  00 00
-    //--- 0ffset: 0x10 ---
-    //--------  ³£×¤ÊôĞÔºÍ·Ç³£×¤ÊôĞÔµÄ¹«¹²²¿·Ö ----
-    union CCommon
-    {
-    
-        //---- Èç¹û¸ÃÊôĞÔÎª ³£×¤ ÊôĞÔÊ±Ê¹ÓÃ¸Ã½á¹¹ ----
-        struct CResident
-        {
-             UINT8 StreamLength[4];        // ÊôĞÔÖµµÄ³¤¶È, ¼´ÊôĞÔ¾ßÌåÄÚÈİµÄ³¤¶È¡£"48 00 00 00"
-             UINT8 StreamOffset[2];        // ÊôĞÔÖµÆğÊ¼Æ«ÒÆÁ¿  "18 00"
-             UINT8 IndexFiag[2];           // ÊôĞÔÊÇ·ñ±»Ë÷ÒıÏîËùË÷Òı£¬Ë÷ÒıÏîÊÇÒ»¸öË÷Òı(ÈçÄ¿Â¼)µÄ»ù±¾×é³É  00 00
-        };
-        
-        //------- Èç¹û¸ÃÊôĞÔÎª ·Ç³£×¤ ÊôĞÔÊ±Ê¹ÓÃ¸Ã½á¹¹ ----
-        struct CNonResident
-        {
-             UINT8 StartVCN[8];            // ÆğÊ¼µÄ VCN Öµ(ĞéÄâ´ØºÅ£ºÔÚÒ»¸öÎÄ¼şÖĞµÄÄÚ²¿´Ø±àºÅ,0Æğ£©
-             UINT8 LastVCN[8];             // ×îºóµÄ VCN Öµ
-             UINT8 RunListOffset[2];       // ÔËĞĞÁĞ±íµÄÆ«ÒÆÁ¿
-             UINT8 CompressEngineIndex[2]; // Ñ¹ËõÒıÇæµÄË÷ÒıÖµ£¬Ö¸Ñ¹ËõÊ±Ê¹ÓÃµÄ¾ßÌåÒıÇæ¡£
-             UINT8 Reserved[4];
-             UINT8 StreamAiiocSize[8];     // ÎªÊôĞÔÖµ·ÖÅäµÄ¿Õ¼ä £¬µ¥Î»ÎªB£¬Ñ¹ËõÎÄ¼ş·ÖÅäÖµĞ¡ÓÚÊµ¼ÊÖµ
-             UINT8 StreamRealSize[8];      // ÊôĞÔÖµÊµ¼ÊÊ¹ÓÃµÄ¿Õ¼ä£¬µ¥Î»ÎªB
-             UINT8 StreamCompressedSize[8]; // ÊôĞÔÖµ¾­¹ıÑ¹ËõºóµÄ´óĞ¡, ÈçÎ´Ñ¹Ëõ, ÆäÖµÎªÊµ¼ÊÖµ
-        };
-    };
-}NTFSAttribute;
-
-typedef struct 
-{
-    UINT8 fileCreateTime[8];    // ÎÄ¼ş´´½¨Ê±¼ä
-    UINT8 fileChangeTime[8];    // ÎÄ¼şĞŞ¸ÄÊ±¼ä
-    UINT8 MFTChangeTime[8];     // MFTĞŞ¸ÄÊ±¼ä
-    UINT8 fileLatVisited[8];    // ÎÄ¼ş×îºó·ÃÎÊÊ±¼ä
-    UINT8 tranAtrribute[4];     // ÎÄ¼ş´«Í³ÊôĞÔ
-    UINT8 otherInfo[28];        // °æ±¾£¬ËùÓĞÕß£¬Åä¶î£¬°²È«µÈµÈĞÅÏ¢(ÏêÏ¸ÂÔ)
-    UINT8 updataNum[8];         // ÎÄ¼ş¸üĞÂĞòÁĞºÅ
-}Value0x10;
+    UINT8  Path[50];
+    UINT64 BlockNumber;
+}PATH_DETAIL;
 
 typedef struct 
 {
@@ -851,8 +621,6 @@ typedef struct
     UINT16 SectorOfCluster;
 }MasterBootRecordSwitched;
 
-MasterBootRecordSwitched MBRSwitched;
-DollarBootSwitched NTFSBootSwitched;
 
 typedef struct 
 {
@@ -878,6 +646,255 @@ typedef struct
     UINT8 StartClusterLow2B[2]; //*
     UINT8 FileLength[4];
 }FAT32_ROOTPATH_SHORT_FILE_ITEM;
+
+
+typedef struct
+{
+    UINT16 DeviceType; // 0 Disk, 1: USB, 2: Sata;
+    UINT16 PartitionType; // 0 MBR, 1 GPT;
+    UINT16 PartitionID; // a physics device consist of Several parts like c: d: e:
+    UINT16 PartitionGUID; // like FA458FD2-4FF7-44D8-B542-BA560A5990B3
+    UINT16 DeviceSquenceID; //0025384961B47ECD
+    char Signare[50]; // MBR:0x077410A0
+    long long StartSectorNumber; //0x194000
+    long long SectorCount; //0xC93060
+
+    //Partition parameter
+    MasterBootRecordSwitched stMBRSwitched;
+
+    // Path Stack
+    PATH_DETAIL PathStack[12];
+
+	//Items in folder include some folders and files
+	FAT32_ROOTPATH_SHORT_FILE_ITEM pItems[32];
+}DEVICE_PARAMETER;
+
+DEVICE_PARAMETER device[10] = {0};
+
+/*
+    struct for FAT32 file system
+*/
+
+typedef struct
+{
+    UINT8 JMP[3] ; // 0x00 3 è·³è½¬æŒ‡ä»¤ï¼ˆè·³è¿‡å¼€å¤´ä¸€æ®µåŒºåŸŸï¼‰
+    UINT8 OEM[8] ; // 0x03 8 OEMåç§°å¸¸è§å€¼æ˜¯MSDOS5.0.
+    UINT8 BitsOfSector[2] ; // 0x0b 2 æ¯ä¸ªæ‰‡åŒºçš„å­—èŠ‚æ•°ã€‚å–å€¼åªèƒ½æ˜¯ä»¥ä¸‹å‡ ç§ï¼š512ï¼Œ1024ï¼Œ2048æˆ–æ˜¯4096ã€‚è®¾ä¸º512ä¼šå–å¾—æœ€å¥½çš„å…¼å®¹æ€§
+    UINT8 SectorOfCluster[1] ; // 0x0d 1 æ¯ç°‡æ‰‡åŒºæ•°ã€‚ å…¶å€¼å¿…é¡»ä¸­2çš„æ•´æ•°æ¬¡æ–¹ï¼ŒåŒæ—¶è¿˜è¦ä¿è¯æ¯ç°‡çš„å­—èŠ‚æ•°ä¸èƒ½è¶…è¿‡32K
+    UINT8 ReservedSelector[2] ; // 0x0e 2 ä¿ç•™æ‰‡åŒºæ•°ï¼ˆåŒ…æ‹¬å¯åŠ¨æ‰‡åŒºï¼‰æ­¤åŸŸä¸èƒ½ä¸º0ï¼ŒFAT12/FAT16å¿…é¡»ä¸º1ï¼ŒFAT32çš„å…¸å‹å€¼å–ä¸º32
+    UINT8 NumFATS[1] ; // 0x10 1 æ–‡ä»¶åˆ†é…è¡¨æ•°ç›®ã€‚ NumFATSï¼Œä»»ä½•FATæ ¼å¼éƒ½å»ºè®®ä¸º2
+    UINT8 RootPathRecords[2] ; // 0x11 2 æœ€å¤§æ ¹ç›®å½•æ¡ç›®ä¸ªæ•°, 0 for fat32, 512 for fat16
+    UINT8 AllSectors[2] ; // 0x13 2 æ€»æ‰‡åŒºæ•°ï¼ˆå¦‚æœæ˜¯0ï¼Œå°±ä½¿ç”¨åç§»0x20å¤„çš„4å­—èŠ‚å€¼ï¼‰0 for fat32
+    UINT8 Description[1] ; // 0x15 1 ä»‹è´¨æè¿° 0xF8 å•é¢ã€æ¯é¢80ç£é“ã€æ¯ç£é“9æ‰‡åŒº
+    UINT8 xxx1[2] ; // 0x16 2 æ¯ä¸ªæ–‡ä»¶åˆ†é…è¡¨çš„æ‰‡åŒºï¼ˆFAT16ï¼‰,0 for fat32
+    UINT8 xxx2[2] ; // 0x18 2 æ¯ç£é“çš„æ‰‡åŒº, 0x003f
+    UINT8 xxx3[2] ; // 0x1a 2 ç£å¤´æ•°ï¼Œ0xff
+    UINT8 xxx4[4] ; // 0x1c 4 éšè—æ‰‡åŒº, ä¸MBRä¸­åœ°å€0x1C6å¼€å§‹çš„4ä¸ªå­—èŠ‚æ•°å€¼ç›¸ç­‰
+    UINT8 SectorCounts[4] ; // 0x20 4 æ€»æ‰‡åŒºæ•°ï¼ˆå¦‚æœè¶…è¿‡65535ä½¿ç”¨æ­¤åœ°å€ï¼Œå°äº65536å‚è§åç§»0x13ï¼Œå¯¹FAT32ï¼Œæ­¤åŸŸå¿…é¡»æ˜¯é0ï¼‰
+    UINT8 SectorsPerFat[4] ; // Sectors count each FAT use
+    UINT8 Fat32Flag[2] ; // 0x28 2 Flags (FAT32ç‰¹æœ‰)
+    UINT8 FatVersion[2] ; // 0x2a 2 ç‰ˆæœ¬å· (FAT32ç‰¹æœ‰)
+    UINT8 BootPathStartCluster[4] ; // 0x2c 4 æ ¹ç›®å½•èµ·å§‹ç°‡ (FAT32)ï¼Œä¸€èˆ¬ä¸º2
+    UINT8 ClusterName[11] ; // 0x2b 11 å·æ ‡ï¼ˆéFAT32ï¼‰
+    UINT8 BootStrap[2] ; // 0x30 2 FSInfo æ‰‡åŒº (FAT32) bootstrap
+    UINT8 BootSectorBackup[2] ; // 0x32 2 å¯åŠ¨æ‰‡åŒºå¤‡ä»½ (FAT32)å¦‚æœä¸ä¸º0ï¼Œè¡¨ç¤ºåœ¨ä¿ç•™åŒºä¸­å¼•å¯¼è®°å½•çš„å¤‡æ•°æ®æ‰€å çš„æ‰‡åŒºæ•°ï¼Œé€šå¸¸ä¸º6åŒæ—¶ä¸å»ºè®®ä½¿ç”¨6ä»¥å¤–çš„å…¶ä»–æ•°å€¼
+    UINT8 Reserved[2] ; // 0x34 2 ä¿ç•™æœªä½¿ç”¨ (FAT32) æ­¤åŸŸç”¨0å¡«å……
+    UINT8 FileSystemType[8] ; // 0x36 8 FATæ–‡ä»¶ç³»ç»Ÿç±»å‹ï¼ˆå¦‚FATã€FAT12ã€FAT16ï¼‰å«"FAT"å°±æ˜¯PBR,å¦åˆ™å°±æ˜¯MBR
+    UINT8 SelfBootCode[2] ; // 0x3e 2 æ“ä½œç³»ç»Ÿè‡ªå¼•å¯¼ä»£ç 
+    UINT8 DeviceNumber[1] ; // 0x40 1 BIOSè®¾å¤‡ä»£å· (FAT32)
+    UINT8 NoUse[1] ; // 0x41 1 æœªä½¿ç”¨ (FAT32)
+    UINT8 Flag[1] ; // 0x42 1 æ ‡è®° (FAT32)
+    UINT8 SequeenNumber[4] ; // 0x43 4 å·åºå· (FAT32)
+    UINT8 juanbiao[11] ; // 0x47 11 å·æ ‡ï¼ˆFAT32ï¼‰
+    UINT8 TypeOfFileSystem[8] ; // 0x52 8 FATæ–‡ä»¶ç³»ç»Ÿç±»å‹ï¼ˆFAT32ï¼‰
+    UINT8 BootAssembleCode[338]; // code
+    UINT8 Partition1[16] ; // 0x1be 64 partitions table, DOS_PART_TBL_OFFSET
+    UINT8 Partition2[16] ; // 0X1BE ~0X1CD 16 talbe entry for Partition 1
+    UINT8 Partition3[16] ; // 0X1CE ~0X1DD 16 talbe entry for Partition 2
+    UINT8 Partition4[16] ; // 0X1DE ~0X1ED 16 talbe entry for Partition 3
+    UINT8 EndFlag[2] ; // 0x1FE 2 æ‰‡åŒºç»“æŸç¬¦ï¼ˆ0x55 0xAAï¼‰ ç»“æŸæ ‡å¿—ï¼šMBRçš„ç»“æŸæ ‡å¿—ä¸DBRï¼ŒEBRçš„ç»“æŸæ ‡å¿—ç›¸åŒã€‚
+}MasterBootRecord;
+
+/*
+    struct for NTFS file system
+*/
+
+//
+// first sector of partition
+typedef struct
+{
+    UINT8 JMP[3] ; // 0x00 3 è·³è½¬æŒ‡ä»¤ï¼ˆè·³è¿‡å¼€å¤´ä¸€æ®µåŒºåŸŸï¼‰
+    UINT8 OEM[8] ; // 0x03 8 OEMåç§°å¸¸è§å€¼æ˜¯MSDOS5.0, NTFS.
+
+    // 0x0B
+    UINT8 BitsOfSector[2];        //  0x0200ã€€ã€€æ‰‡åŒºå¤§å°ï¼Œ512B
+    UINT8 SectorOfCluster;            //  0x08ã€€ã€€  æ¯ç°‡æ‰‡åŒºæ•°ï¼Œ4KB
+    UINT8 ReservedSelector[2];            // ã€€ã€€ã€€ã€€ã€€ã€€ä¿ç•™æ‰‡åŒº
+    UINT8 NoUse01[5];            //
+    
+    // 0x15
+    UINT8 Description;            //  0xF8     
+    
+    // ç£ç›˜ä»‹è´¨ -- ç¡¬ç›˜
+    UINT8 NoUse02[2];            //
+    
+    // 0x18
+    UINT8 SectorPerTrack[2];     // ã€€0x003F ã€€æ¯é“æ‰‡åŒºæ•° 63
+    UINT8 Headers[2];           //ã€€ 0x00FF  ç£å¤´æ•°
+    UINT8 SectorsHide[4];          // ã€€0x3Fã€€ã€€éšè—æ‰‡åŒº
+    UINT8 NoUse03[8];           //
+    
+    // 0x28
+    UINT8 AllSectorCount[8];        // å·æ€»æ‰‡åŒºæ•°, é«˜ä½åœ¨å‰, ä½ä½åœ¨å
+    
+    // 0x30
+    UINT8 MFT_StartCluster[8];      // MFT èµ·å§‹ç°‡
+    UINT8 MFT_MirrStartCluster[8];  // MTF å¤‡ä»½ MFTMirr ä½ç½®
+    
+    //0x40
+    UINT8 ClusterPerMFT[4];    // æ¯è®°å½•ç°‡æ•° 0xF6
+    UINT8 ClusterPerIndex[4];    // æ¯ç´¢å¼•ç°‡æ•°
+    
+    //0x48
+    UINT8 SerialNumber[8];    // å·åºåˆ—å·
+    UINT8 CheckSum[8];    // æ ¡éªŒå’Œ
+    UINT8 EndFlag[2];    // 0x1FE 2 æ‰‡åŒºç»“æŸç¬¦ï¼ˆ0x55 0xAAï¼‰ ç»“æŸæ ‡å¿—ï¼šMBRçš„ç»“æŸæ ‡å¿—ä¸DBRï¼ŒEBRçš„ç»“æŸæ ‡å¿—ç›¸åŒã€‚
+}DOLLAR_BOOT;
+
+// æ–‡ä»¶è®°å½•å¤´
+typedef struct
+{
+    /*+0x00*/ UINT8 Type[4];    // å›ºå®šå€¼'FILE'
+    /*+0x04*/ UINT8 USNOffset[2]; // æ›´æ–°åºåˆ—å·åç§», ä¸æ“ä½œç³»ç»Ÿæœ‰å…³
+    /*+0x06*/ UINT8 USNCount[2]; // å›ºå®šåˆ—è¡¨å¤§å°Size in words of Update Sequence Number & Array (S)
+    /*+0x08*/ UINT8 Lsn[8]; // æ—¥å¿—æ–‡ä»¶åºåˆ—å·(LSN)
+    /*+0x10*/ UINT8 SequenceNumber[2]; // åºåˆ—å·(ç”¨äºè®°å½•æ–‡ä»¶è¢«åå¤ä½¿ç”¨çš„æ¬¡æ•°)
+    /*+0x12*/ UINT8 LinkCount[2];// ç¡¬è¿æ¥æ•°
+    /*+0x14*/ UINT8 AttributeOffset[2]; // ç¬¬ä¸€ä¸ªå±æ€§åç§»
+    /*+0x16*/ UINT8 Flags[2];// flags, 00è¡¨ç¤ºåˆ é™¤æ–‡ä»¶,01è¡¨ç¤ºæ­£å¸¸æ–‡ä»¶,02è¡¨ç¤ºåˆ é™¤ç›®å½•,03è¡¨ç¤ºæ­£å¸¸ç›®å½•
+    /*+0x18*/ UINT8 BytesInUse[4]; // æ–‡ä»¶è®°å½•å®æ—¶å¤§å°(å­—èŠ‚) å½“å‰MFTè¡¨é¡¹é•¿åº¦,åˆ°FFFFFFçš„é•¿åº¦+4
+    /*+0x1C*/ UINT8 BytesAllocated[4]; // æ–‡ä»¶è®°å½•åˆ†é…å¤§å°(å­—èŠ‚)
+    /*+0x20*/ UINT8 BaseFileRecord[8]; // = 0 åŸºç¡€æ–‡ä»¶è®°å½• File reference to the base FILE record
+    /*+0x28*/ UINT8 NextAttributeNumber[2]; // ä¸‹ä¸€ä¸ªè‡ªç”±IDå·
+    /*+0x2A*/ UINT8 Pading[2]; // è¾¹ç•Œ
+    /*+0x2C*/ UINT8 MFTRecordNumber[4]; // windows xpä¸­ä½¿ç”¨,æœ¬MFTè®°å½•å·
+    /*+0x30*/ UINT8 USN[2]; // æ›´æ–°åºåˆ—å·
+    /*+0x32*/ UINT8 UpdateArray[0]; // æ›´æ–°æ•°ç»„
+ } FILE_HEADER, *pFILE_HEADER; 
+
+typedef struct  
+{
+    UINT8 Type[4];   //å±æ€§ç±»å‹
+    UINT8 Size[4];   //å±æ€§å¤´å’Œå±æ€§ä½“çš„æ€»é•¿åº¦
+    UINT8 ResidentFlag; //æ˜¯å¦æ˜¯å¸¸é©»å±æ€§ï¼ˆ0å¸¸é©» 1éå¸¸é©»ï¼‰
+    UINT8 NameSize;   //å±æ€§åçš„é•¿åº¦
+    UINT8 NameOffset[2]; //å±æ€§åçš„åç§» ç›¸å¯¹äºå±æ€§å¤´
+    UINT8 Flags[2]; //æ ‡å¿—ï¼ˆ0x0001å‹ç¼© 0x4000åŠ å¯† 0x8000ç¨€ç–ï¼‰
+    UINT8 Id[2]; //å±æ€§å”¯ä¸€ID
+}CommonAttributeHeader;
+
+typedef struct 
+{
+    UINT8 OccupyCluster;
+    UINT64 Offset; //Please Note: The first item is start offset, and next item is relative offset....
+}IndexInformation;
+
+// Index of A0 attribute
+IndexInformation A0Indexes[10] = {0};
+
+typedef struct 
+{
+    UINT16 BitsOfSector;
+    UINT16 SectorOfCluster; 
+    UINT64 AllSectorCount;
+    UINT64 MFT_StartCluster;
+    UINT64 MFT_MirrStartCluster;
+}DollarBootSwitched;
+
+
+// MFTè®°å½•äº†æ•´ä¸ªå·çš„æ‰€æœ‰æ–‡ä»¶ (åŒ…æ‹¬MFTæœ¬èº«ã€æ•°æ®æ–‡ä»¶ã€æ–‡ä»¶å¤¹ç­‰ç­‰) ä¿¡æ¯ï¼ŒåŒ…æ‹¬ç©ºé—´å ç”¨ï¼Œæ–‡ä»¶åŸºæœ¬å±æ€§ï¼Œæ–‡ä»¶ä½ç½®ç´¢å¼•ï¼Œåˆ›å»ºæ—¶
+// MFT çš„ç¬¬ä¸€é¡¹è®°å½•$MFTæè¿°çš„æ˜¯ä¸»åˆ†åŒºè¡¨MFTæœ¬èº«ï¼Œå®ƒçš„ç¼–å·ä¸º0ï¼ŒMFTé¡¹çš„å¤´éƒ¨éƒ½æ˜¯å¦‚ä¸‹ç»“æ„ï¼š
+typedef struct {
+     UINT8    mark[4];             // "FILE" æ ‡å¿— 
+     UINT8    UsnOffset[2];        // æ›´æ–°åºåˆ—å·åç§» ã€€ã€€ã€€ã€€30 00
+     UINT8    usnSize[2];          // æ›´æ–°åºåˆ—æ•°ç»„å¤§å°+1 ã€€ 03 00
+     UINT8    LSN[8];              // æ—¥å¿—æ–‡ä»¶åºåˆ—å·(æ¯æ¬¡è®°å½•ä¿®æ”¹åæ”¹å˜)  58 8E 0F 34 00 00 00 00
+    // 0x10
+     UINT8    SN[2];               // åºåˆ—å· éšä¸»æ–‡ä»¶è¡¨è®°å½•é‡ç”¨æ¬¡æ•°è€Œå¢åŠ 
+     UINT8    linkNum[2];          // ç¡¬è¿æ¥æ•° (å¤šå°‘ç›®å½•æŒ‡å‘è¯¥æ–‡ä»¶) 01 00
+     UINT8    firstAttr[2];        // ç¬¬ä¸€ä¸ªå±æ€§çš„åç§»ã€€ã€€38 00
+     UINT8    flags[2];            // 0å·²åˆ é™¤ 1æ­£å¸¸æ–‡ä»¶ 2å·²åˆ é™¤ç›®å½• 3ç›®å½•æ­£ä½¿ç”¨
+    // 0x18
+     UINT8    MftUseLen[4];        // è®°å½•æœ‰æ•ˆé•¿åº¦   ã€€A8 01 00 00
+     UINT8    maxLen[4];            // è®°å½•å ç”¨é•¿åº¦ ã€€ 00 04 00 00
+    // 0x20
+     UINT8    baseRecordNum[8];     // ç´¢å¼•åŸºæœ¬è®°å½•, å¦‚æœæ˜¯åŸºæœ¬è®°å½•åˆ™ä¸º0
+     UINT8    nextAttrId[2];        // ä¸‹ä¸€å±æ€§Idã€€ã€€07 00
+     UINT8    border[2];            //
+     UINT8    xpRecordNum[4];       // ç”¨äºxp, è®°å½•å·
+    // 0x30
+     UINT8    USN[8];                 // æ›´æ–°åºåˆ—å·(2B) å’Œ æ›´æ–°åºåˆ—æ•°ç»„
+}MFT_HEADER;
+
+/*
+    MFT æ˜¯ç”±ä¸€æ¡æ¡ MFT é¡¹(è®°å½•)æ‰€ç»„æˆçš„ï¼Œè€Œä¸”æ¯é¡¹å¤§å°æ˜¯å›ºå®šçš„(ä¸€èˆ¬ä¸º1KB = 2 * 512)ï¼ŒMFTä¿ç•™äº†å‰16é¡¹ç”¨äºç‰¹æ®Šæ–‡ä»¶è®°å½•ï¼Œç§°ä¸ºå…ƒæ•°æ®ï¼Œ
+    å…ƒæ•°æ®åœ¨ç£ç›˜ä¸Šæ˜¯ç‰©ç†è¿ç»­çš„ï¼Œç¼–å·ä¸º0~15ï¼›å¦‚æœ$MFTçš„åç§»ä¸º0x0C0000000, é‚£ä¹ˆä¸‹ä¸€é¡¹çš„åç§»å°±æ˜¯0x0C0000400ï¼Œåœ¨ä¸‹ä¸€é¡¹å°±æ˜¯
+    0x0C0000800ç­‰ç­‰ï¼›
+*/
+
+//------------------  å±æ€§å¤´é€šç”¨ç»“æ„ ----
+typedef struct  //æ‰€æœ‰åç§»é‡å‡ä¸ºç›¸å¯¹äºå±æ€§ç±»å‹ Type çš„åç§»é‡
+{
+     UINT8 Type[4];           // å±æ€§ç±»å‹ 0x10, 0x20, 0x30, 0x40,...,0xF0,0x100
+     UINT8 Length[4];         // å±æ€§çš„é•¿åº¦
+     UINT8 NonResidentFiag;   // æ˜¯å¦æ˜¯éå¸¸é©»å±æ€§ï¼Œl ä¸ºéå¸¸é©»å±æ€§ï¼Œ0 ä¸ºå¸¸é©»å±æ€§ 00
+     UINT8 NameLength;        // å±æ€§åç§°é•¿åº¦ï¼Œå¦‚æœæ— å±æ€§åç§°ï¼Œè¯¥å€¼ä¸º 00
+     UINT8 ContentOffset[2];  // å±æ€§å†…å®¹çš„åç§»é‡  18 00
+     UINT8 CompressedFiag[2]; // è¯¥æ–‡ä»¶è®°å½•è¡¨ç¤ºçš„æ–‡ä»¶æ•°æ®æ˜¯å¦è¢«å‹ç¼©è¿‡ 00 00
+     UINT8 Identify[2];       // è¯†åˆ«æ ‡å¿—  00 00
+    //--- 0ffset: 0x10 ---
+    //--------  å¸¸é©»å±æ€§å’Œéå¸¸é©»å±æ€§çš„å…¬å…±éƒ¨åˆ† ----
+    union CCommon
+    {
+    
+        //---- å¦‚æœè¯¥å±æ€§ä¸º å¸¸é©» å±æ€§æ—¶ä½¿ç”¨è¯¥ç»“æ„ ----
+        struct CResident
+        {
+             UINT8 StreamLength[4];        // å±æ€§å€¼çš„é•¿åº¦, å³å±æ€§å…·ä½“å†…å®¹çš„é•¿åº¦ã€‚"48 00 00 00"
+             UINT8 StreamOffset[2];        // å±æ€§å€¼èµ·å§‹åç§»é‡  "18 00"
+             UINT8 IndexFiag[2];           // å±æ€§æ˜¯å¦è¢«ç´¢å¼•é¡¹æ‰€ç´¢å¼•ï¼Œç´¢å¼•é¡¹æ˜¯ä¸€ä¸ªç´¢å¼•(å¦‚ç›®å½•)çš„åŸºæœ¬ç»„æˆ  00 00
+        };
+        
+        //------- å¦‚æœè¯¥å±æ€§ä¸º éå¸¸é©» å±æ€§æ—¶ä½¿ç”¨è¯¥ç»“æ„ ----
+        struct CNonResident
+        {
+             UINT8 StartVCN[8];            // èµ·å§‹çš„ VCN å€¼(è™šæ‹Ÿç°‡å·ï¼šåœ¨ä¸€ä¸ªæ–‡ä»¶ä¸­çš„å†…éƒ¨ç°‡ç¼–å·,0èµ·ï¼‰
+             UINT8 LastVCN[8];             // æœ€åçš„ VCN å€¼
+             UINT8 RunListOffset[2];       // è¿è¡Œåˆ—è¡¨çš„åç§»é‡
+             UINT8 CompressEngineIndex[2]; // å‹ç¼©å¼•æ“çš„ç´¢å¼•å€¼ï¼ŒæŒ‡å‹ç¼©æ—¶ä½¿ç”¨çš„å…·ä½“å¼•æ“ã€‚
+             UINT8 Reserved[4];
+             UINT8 StreamAiiocSize[8];     // ä¸ºå±æ€§å€¼åˆ†é…çš„ç©ºé—´ ï¼Œå•ä½ä¸ºBï¼Œå‹ç¼©æ–‡ä»¶åˆ†é…å€¼å°äºå®é™…å€¼
+             UINT8 StreamRealSize[8];      // å±æ€§å€¼å®é™…ä½¿ç”¨çš„ç©ºé—´ï¼Œå•ä½ä¸ºB
+             UINT8 StreamCompressedSize[8]; // å±æ€§å€¼ç»è¿‡å‹ç¼©åçš„å¤§å°, å¦‚æœªå‹ç¼©, å…¶å€¼ä¸ºå®é™…å€¼
+        };
+    };
+}NTFSAttribute;
+
+typedef struct 
+{
+    UINT8 fileCreateTime[8];    // æ–‡ä»¶åˆ›å»ºæ—¶é—´
+    UINT8 fileChangeTime[8];    // æ–‡ä»¶ä¿®æ”¹æ—¶é—´
+    UINT8 MFTChangeTime[8];     // MFTä¿®æ”¹æ—¶é—´
+    UINT8 fileLatVisited[8];    // æ–‡ä»¶æœ€åè®¿é—®æ—¶é—´
+    UINT8 tranAtrribute[4];     // æ–‡ä»¶ä¼ ç»Ÿå±æ€§
+    UINT8 otherInfo[28];        // ç‰ˆæœ¬ï¼Œæ‰€æœ‰è€…ï¼Œé…é¢ï¼Œå®‰å…¨ç­‰ç­‰ä¿¡æ¯(è¯¦ç»†ç•¥)
+    UINT8 updataNum[8];         // æ–‡ä»¶æ›´æ–°åºåˆ—å·
+}Value0x10;
+
+
+MasterBootRecordSwitched MBRSwitched;
+DollarBootSwitched NTFSBootSwitched;
+
 
 FAT32_ROOTPATH_SHORT_FILE_ITEM pItems[32];
 
@@ -921,13 +938,13 @@ typedef struct
     UINT16 NumFATS;
 }ROOT_PATH;
 
-/*Ä¿Â¼ÏîÊ××Ö½Úº¬Òå*/
+/*ç›®å½•é¡¹é¦–å­—èŠ‚å«ä¹‰*/
 typedef enum
 {
-    DirUnUsed            = 0x00,        /*±¾±íÏîÃ»ÓĞÊ¹ÓÃ*/
-    DirCharE5            = 0x05,        /*Ê××Ö·ûÎª0xe5*/
-    DirisSubDir          = 0x2e,        /*ÊÇÒ»¸ö×ÓÄ¿Â¼ .,..Îª¸¸Ä¿Â¼*/
-    DirFileisDeleted     = 0xe5        /*ÎÄ¼şÒÑÉ¾³ı*/
+    DirUnUsed            = 0x00,        /*æœ¬è¡¨é¡¹æ²¡æœ‰ä½¿ç”¨*/
+    DirCharE5            = 0x05,        /*é¦–å­—ç¬¦ä¸º0xe5*/
+    DirisSubDir          = 0x2e,        /*æ˜¯ä¸€ä¸ªå­ç›®å½• .,..ä¸ºçˆ¶ç›®å½•*/
+    DirFileisDeleted     = 0xe5        /*æ–‡ä»¶å·²åˆ é™¤*/
 }DirFirstChar;
 
 typedef struct {
@@ -961,23 +978,23 @@ typedef struct {
 DISK_HANDLE_TASK  disk_handle_task;
 
 #pragma  pack(1)
-typedef struct     //Õâ¸ö½á¹¹Ìå¾ÍÊÇ¶ÔÉÏÃæÄÇ¸öÍ¼×öÒ»¸ö·â×°¡£
+typedef struct     //è¿™ä¸ªç»“æ„ä½“å°±æ˜¯å¯¹ä¸Šé¢é‚£ä¸ªå›¾åšä¸€ä¸ªå°è£…ã€‚
 {
     //bmp header
     UINT8  Signatue[2] ;   // B  M
-    UINT8 FileSize[4] ;     //ÎÄ¼ş´óĞ¡
+    UINT8 FileSize[4] ;     //æ–‡ä»¶å¤§å°
     UINT8 Reserv1[2] ; 
     UINT8 Reserv2[2] ; 
-    UINT8 FileOffset[4] ;   //ÎÄ¼şÍ·Æ«ÒÆÁ¿
+    UINT8 FileOffset[4] ;   //æ–‡ä»¶å¤´åç§»é‡
 
     //DIB header
-    UINT8 DIBHeaderSize[4] ; //DIBÍ·´óĞ¡
-    UINT8 ImageWidth[4]   ;  //ÎÄ¼ş¿í¶È
-    UINT8 ImageHight[4]   ;  //ÎÄ¼ş¸ß¶È
+    UINT8 DIBHeaderSize[4] ; //DIBå¤´å¤§å°
+    UINT8 ImageWidth[4]   ;  //æ–‡ä»¶å®½åº¦
+    UINT8 ImageHight[4]   ;  //æ–‡ä»¶é«˜åº¦
     UINT8 Planes[2]       ; 
-    UINT8 BPP[2]          ;  //Ã¿¸öÏàËØµãµÄÎ»Êı
+    UINT8 BPP[2]          ;  //æ¯ä¸ªç›¸ç´ ç‚¹çš„ä½æ•°
     UINT8 Compression[4]  ; 
-    UINT8 ImageSize[4]    ;  //Í¼ÎÄ¼ş´óĞ¡
+    UINT8 ImageSize[4]    ;  //å›¾æ–‡ä»¶å¤§å°
     UINT8 XPPM[4] ; 
     UINT8 YPPM[4] ; 
     UINT8 CCT[4] ; 
@@ -1069,6 +1086,7 @@ typedef struct
     UINT8 *pMapper;
 }MEMORY_CONTINUOUS;
 
+
 typedef struct {
     UINT16 MemorySliceCount;
     MEMORY_CONTINUOUS MemoryContinuous[10];
@@ -1097,9 +1115,44 @@ typedef struct
 
 WINDOW_LAYERS WindowLayers;
 
-
-L1_GRAPHICS_UpdateWindowLayer(UINT16 layer)
+typedef enum 
 {
+    INIT_ACCESS_STATE = 0,    //
+    ROOT_PATH_STATE = 0,
+    FILE_ITEM_ACCESS_STATE,
+    FOLDER_ITEM_ACCESS_STATE,
+    PARENT_PATH_ACCESS_STATE,
+    MAX_ACCESS_STATE
+}PARTITION_ITEM_ACCESS_STATE;
+
+typedef enum 
+{
+    ROOT_PATH_ACCESS_EVENT = 0,
+    FOLDER_ACCESS_EVENT,
+    FILE_ACCESS_EVENT,
+    PARENT_ACCESS_EVENT,
+    CLOSE_ACCESS_EVENT,
+    MAX_ACCESS_EVENT
+}PARTITION_ITEM_ACCESS_EVENT;
+
+typedef struct
+{
+    PARTITION_ITEM_ACCESS_STATE     CurrentState;
+    PARTITION_ITEM_ACCESS_EVENT     event;
+    PARTITION_ITEM_ACCESS_STATE     NextState;
+    EFI_STATUS                      (*pFunc)(); 
+}PARTITION_ITEM_ACCESS_STATE_TRANSFORM;
+
+UINTN Index;
+
+
+EFI_STATUS Func()
+{
+}
+
+
+VOID L1_GRAPHICS_UpdateWindowLayer(UINT16 layer)
+{	
     for (UINT16 i = 0; i < WindowLayers.LayerCount; i++)
     {
         if (layer == WindowLayers.LayerSequences[i])
@@ -1112,8 +1165,6 @@ L1_GRAPHICS_UpdateWindowLayer(UINT16 layer)
             break;
         }
     }
-
-    //WindowLayers.LayerSequences[WindowLayers.LayerCount - 1] = layer;
 }
 
 // fill into rectangle
@@ -1128,7 +1179,6 @@ void L1_MEMORY_RectangleFill(UINT8 *pBuffer,
         return ;
     }
     
-
     UINT32 i = 0;
     UINT32 j = 0;
     for (j = y0; j <= y1; j++) 
@@ -1146,8 +1196,8 @@ void L1_MEMORY_RectangleFill(UINT8 *pBuffer,
 
 
 
-// Ğ¡¶ËÄ£Ê½
-// byte×ªint  
+// å°ç«¯æ¨¡å¼
+// byteè½¬int  
 UINT64 L1_NETWORK_8BytesToUINT64(UINT8 *bytes)
 {
     UINT64 s = bytes[0];
@@ -1228,16 +1278,16 @@ void L1_MEMORY_CopyColor3(UINT8 *pBuffer, EFI_GRAPHICS_OUTPUT_BLT_PIXEL color, U
 }
 
 //refer from https://www.cnblogs.com/onepixel/articles/7674659.html
-L1_SORT_Bubble(UINT8 *arr, UINT16 len)
+VOID L1_SORT_Bubble(UINT8 *arr, UINT16 len)
 {   
     for(UINT16 i = 0; i < len - 1; i++) 
     {
        for(UINT16 j = 0; j < len - 1 - i; j++) 
        {
-            // ÏàÁÚÔªËØÁ½Á½¶Ô±È
+            // ç›¸é‚»å…ƒç´ ä¸¤ä¸¤å¯¹æ¯”
            if(arr[j] > arr[j+1]) 
            {    
-               // ÔªËØ½»»»
+               // å…ƒç´ äº¤æ¢
                UINT16 temp = arr[j+1];       
                arr[j+1] = arr[j];
                arr[j] = temp;
@@ -1845,7 +1895,7 @@ UINT8 L1_BIT_Set(UINT8 *pMapper, UINT64 StartPageID, UINT64 Size)
     UINT32 ByteCount = Size / 8 + AddOneFlag;
 }
 
-L1_MEMORY_Memset(void *s, UINT8 c, UINT32 n)
+VOID L1_MEMORY_Memset(void *s, UINT8 c, UINT32 n)
 {
   UINT8 *d;
 
@@ -2105,12 +2155,12 @@ EFI_STATUS  L2_FILE_NTFS_MFTIndexItemsAnalysis(UINT8 *pBuffer)
     for (UINT16 i = 0; i < 512 * 8; i++)
         p[i] = pBuffer[i];
 
-    //IndexEntryOffset:Ë÷ÒıÏîµÄÆ«ÒÆ Ïà¶ÔÓÚµ±Ç°Î»ÖÃ
+    //IndexEntryOffset:ç´¢å¼•é¡¹çš„åç§» ç›¸å¯¹äºå½“å‰ä½ç½®
     L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d IndexEntryOffset: %llu IndexEntrySize: %llu\n", __LINE__, 
                                                                      L1_NETWORK_4BytesToUINT32(((INDEX_HEADER *)p)->IndexEntryOffset),
                                                                      L1_NETWORK_4BytesToUINT32(((INDEX_HEADER *)p)->IndexEntrySize));
 
-    // Ïà¶ÔÓÚµ±Ç°Î»ÖÃ need to add size before this Byte.
+    // ç›¸å¯¹äºå½“å‰ä½ç½® need to add size before this Byte.
     UINT8 length = L1_NETWORK_4BytesToUINT32(((INDEX_HEADER *)p)->IndexEntryOffset) + 24;
     UINT8 pItem[200] = {0};
     UINT16 index = length;
@@ -2528,8 +2578,8 @@ EFI_STATUS L1_FILE_FAT32_DataSectorAnalysis(UINT8 *p, MasterBootRecordSwitched *
     pMBR = (MasterBootRecord *)AllocateZeroPool(DISK_BUFFER_SIZE);
     memcpy(pMBR, p, DISK_BUFFER_SIZE);
 
-    // ´ó¶Ë×Ö½ÚĞò£ºµÍÎ»×Ö½ÚÔÚ¸ßµØÖ·£¬¸ßÎ»×Ö½ÚµÍµØÖ·ÉÏ¡£ÕâÊÇÈËÀà¶ÁĞ´ÊıÖµµÄ·½·¨¡£
-    // Ğ¡¶Ë×Ö½ÚĞò£ºÓëÉÏÃæÏà·´¡£µÍÎ»×Ö½ÚÔÚµÍµØÖ·£¬¸ßÎ»×Ö½ÚÔÚ¸ßµØÖ·¡£
+    // å¤§ç«¯å­—èŠ‚åºï¼šä½ä½å­—èŠ‚åœ¨é«˜åœ°å€ï¼Œé«˜ä½å­—èŠ‚ä½åœ°å€ä¸Šã€‚è¿™æ˜¯äººç±»è¯»å†™æ•°å€¼çš„æ–¹æ³•ã€‚
+    // å°ç«¯å­—èŠ‚åºï¼šä¸ä¸Šé¢ç›¸åã€‚ä½ä½å­—èŠ‚åœ¨ä½åœ°å€ï¼Œé«˜ä½å­—èŠ‚åœ¨é«˜åœ°å€ã€‚
 /*
     L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d ReservedSelector:%02X%02X SectorsPerFat:%02X%02X%02X%02X BootPathStartCluster:%02X%02X%02X%02X NumFATS: %X", 
                                         __LINE__,
@@ -2625,8 +2675,8 @@ EFI_STATUS L2_FILE_NTFS_FirstSelectorAnalysis(UINT8 *p, DollarBootSwitched *pNTF
     pDollarBoot = (DOLLAR_BOOT *)AllocateZeroPool(DISK_BUFFER_SIZE);
     memcpy(pDollarBoot, p, DISK_BUFFER_SIZE);
 
-    // ´ó¶Ë×Ö½ÚĞò£ºµÍÎ»×Ö½ÚÔÚ¸ßµØÖ·£¬¸ßÎ»×Ö½ÚµÍµØÖ·ÉÏ¡£ÕâÊÇÈËÀà¶ÁĞ´ÊıÖµµÄ·½·¨¡£
-    // Ğ¡¶Ë×Ö½ÚĞò£ºÓëÉÏÃæÏà·´¡£µÍÎ»×Ö½ÚÔÚµÍµØÖ·£¬¸ßÎ»×Ö½ÚÔÚ¸ßµØÖ·¡£
+    // å¤§ç«¯å­—èŠ‚åºï¼šä½ä½å­—èŠ‚åœ¨é«˜åœ°å€ï¼Œé«˜ä½å­—èŠ‚ä½åœ°å€ä¸Šã€‚è¿™æ˜¯äººç±»è¯»å†™æ•°å€¼çš„æ–¹æ³•ã€‚
+    // å°ç«¯å­—èŠ‚åºï¼šä¸ä¸Šé¢ç›¸åã€‚ä½ä½å­—èŠ‚åœ¨ä½åœ°å€ï¼Œé«˜ä½å­—èŠ‚åœ¨é«˜åœ°å€ã€‚
     /*
     L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d OEM:%c%c%c%c%c%c%c%c, BitsOfSector:%02X%02X SectorOfCluster:%02X ReservedSelector:%02X%02X Description: %X, size: %d", 
                                                                       __LINE__,
@@ -2734,6 +2784,8 @@ EFI_STATUS L2_FILE_PartitionTypeAnalysis(UINT16 DeviceID)
     return EFI_SUCCESS;
 
 }
+
+
 
 // all partitions analysis
 EFI_STATUS L2_STORE_PartitionAnalysis()
@@ -2873,7 +2925,65 @@ L2_STORE_FolderItemsPrint()
 
 }
 
-L2_STORE_PartitionItemsPrint(UINT16 Index)
+DEVICE_PARAMETER device2[10] = {0};
+
+
+EFI_STATUS L3_PARITION_RootPathAccess()
+{	
+    EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
+    Color.Red = 0xff;
+    Color.Green= 0x00;
+    Color.Blue= 0x00;
+    for (UINT16 i = 0; i < PartitionCount; i++)
+    {   
+        MyComputerPositionX = WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].StartX;
+        MyComputerPositionY = WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].StartY;
+        
+        if (iMouseX >= MyComputerPositionX + 50 && iMouseX <= MyComputerPositionX + 50 + 16 * 6
+            && iMouseY >= MyComputerPositionY + i * 16 + 16 * 2 && iMouseY <= MyComputerPositionY + i * 16 + 16 * 3)
+        {   
+            if (PreviousItem == i)
+            {
+                break;
+            }
+            
+            L2_GRAPHICS_RectangleDraw(pMouseSelectedBuffer, 0,  0, 31, 15, 1,  Color, 32);
+            L2_STORE_PartitionItemsPrint(i);
+            PreviousItem = i;
+            L2_GRAPHICS_Copy(pDeskDisplayBuffer, pMouseSelectedBuffer, ScreenWidth, ScreenHeight, 32, 16, MyComputerPositionX + 50, MyComputerPositionY  + i * (16 + 2) + 16 * 2);   
+        }
+    }
+
+}
+
+
+
+// need a stack to save current detailed path
+PARTITION_ITEM_ACCESS_STATE_TRANSFORM PartitionItemAccessStateTransformTable[] =
+{
+    // init state
+    {INIT_ACCESS_STATE,         ROOT_PATH_ACCESS_EVENT, ROOT_PATH_STATE,        L3_PARITION_RootPathAccess},
+
+    // root path
+    {ROOT_PATH_STATE,           FILE_ACCESS_EVENT,   FILE_ITEM_ACCESS_STATE,    Func},
+    {ROOT_PATH_STATE,           FOLDER_ACCESS_EVENT, FOLDER_ITEM_ACCESS_STATE,  Func},
+    {ROOT_PATH_STATE,           PARENT_ACCESS_EVENT, ROOT_PATH_STATE,           Func},
+    {ROOT_PATH_STATE,           CLOSE_ACCESS_EVENT,  INIT_ACCESS_STATE,         Func},
+    
+    // some folder
+    {FOLDER_ITEM_ACCESS_STATE,  FOLDER_ACCESS_EVENT, FOLDER_ITEM_ACCESS_STATE,  Func}, // a folder
+    {FOLDER_ITEM_ACCESS_STATE,  FILE_ACCESS_EVENT,   FOLDER_ITEM_ACCESS_STATE,  Func}, // open a file and next state is current folder
+    {FOLDER_ITEM_ACCESS_STATE,  PARENT_ACCESS_EVENT, FOLDER_ITEM_ACCESS_STATE,  Func}, // access parent path
+    {FOLDER_ITEM_ACCESS_STATE,  CLOSE_ACCESS_EVENT,  INIT_ACCESS_STATE,         Func},
+
+    // some file
+    {FILE_ITEM_ACCESS_STATE,    FILE_ACCESS_EVENT,   FOLDER_ITEM_ACCESS_STATE,  Func},
+    {FILE_ITEM_ACCESS_STATE,    FOLDER_ACCESS_EVENT, FOLDER_ITEM_ACCESS_STATE,  Func},
+    {FILE_ITEM_ACCESS_STATE,    PARENT_ACCESS_EVENT, FOLDER_ITEM_ACCESS_STATE,  Func},
+    {FILE_ITEM_ACCESS_STATE,    CLOSE_ACCESS_EVENT,  INIT_ACCESS_STATE,         Func}
+};
+
+VOID L2_STORE_PartitionItemsPrint(UINT16 Index)
 {
     //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: \n",  __LINE__);
     
@@ -3176,7 +3286,7 @@ UINT16 L2_MOUSE_ClickEventGet()
 
 }
 
-L2_MOUSE_SystemSettingClicked()
+VOID L2_MOUSE_SystemSettingClicked()
 {   
     L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d L2_MOUSE_SettingClicked\n", __LINE__);
     //DisplaySystemSettingWindowFlag = 1; 
@@ -3190,13 +3300,13 @@ L2_MOUSE_SystemSettingClicked()
 }
 
 
-L2_MOUSE_SystemQuitClicked()
+VOID L2_MOUSE_SystemQuitClicked()
 {   
     L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d L2_MOUSE_SystemQuitClicked\n", __LINE__);
     SystemQuitFlag = TRUE;  
 }
 
-L2_MOUSE_MemoryInformationClicked()
+VOID L2_MOUSE_MemoryInformationClicked()
 {   
     L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d L2_MOUSE_MemoryInformationClicked\n", __LINE__);
     //DisplayMemoryInformationWindowFlag = TRUE;
@@ -3208,7 +3318,7 @@ L2_MOUSE_MemoryInformationClicked()
     L1_GRAPHICS_UpdateWindowLayer(GRAPHICS_LAYER_MEMORY_INFORMATION_WINDOW);
 }
 
-L2_MOUSE_SystemLogClicked()
+VOID L2_MOUSE_SystemLogClicked()
 {   
     L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d L2_MOUSE_SystemLogClicked\n", __LINE__);
     //DisplaySystemLogWindowFlag = TRUE;  
@@ -3223,7 +3333,7 @@ L2_MOUSE_SystemLogClicked()
 }
 
 
-L2_MOUSE_WallpaperSettingClicked()
+VOID L2_MOUSE_WallpaperSettingClicked()
 {   
     L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d L2_MOUSE_WallpaperSettingClicked\n", __LINE__);
     //DisplaySystemSettingWindowFlag = 1;
@@ -3359,7 +3469,7 @@ UINT8 SystemIcon[SYSTEM_ICON_MAX][SYSTEM_ICON_WIDTH * SYSTEM_ICON_HEIGHT * 3 + 0
 
 
 
-L2_MOUSE_MyComputerClicked()
+VOID L2_MOUSE_MyComputerClicked()
 {       
     L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d L2_MOUSE_MyComputerClicked\n", __LINE__);
     EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
@@ -3395,7 +3505,7 @@ L2_MOUSE_MyComputerClicked()
 }
 
 
-L2_MOUSE_MENU_Clicked()
+VOID L2_MOUSE_MENU_Clicked()
 {
     L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d L2_MOUSE_MENU_Clicked\n", __LINE__);
     EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
@@ -3425,7 +3535,7 @@ L2_MOUSE_MENU_Clicked()
 }
 
 
-L2_MOUSE_MyComputerCloseClicked()
+VOID L2_MOUSE_MyComputerCloseClicked()
 {
     L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d L2_MOUSE_MyComputerCloseClicked\n", __LINE__);
     //DisplayMyComputerFlag = 0;
@@ -3438,34 +3548,13 @@ L2_MOUSE_MyComputerCloseClicked()
 }
 
 
-L2_MOUSE_MoveOver()
+VOID L2_MOUSE_MoveOver()
 {    
-    EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
-    Color.Red = 0xff;
-    Color.Green= 0x00;
-    Color.Blue= 0x00;
-    for (UINT16 i = 0; i < PartitionCount; i++)
-    {   
-        MyComputerPositionX = WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].StartX;
-        MyComputerPositionY = WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].StartY;
-        
-        if (iMouseX >= MyComputerPositionX + 50 && iMouseX <= MyComputerPositionX + 50 + 16 * 6
-            && iMouseY >= MyComputerPositionY + i * 16 + 16 * 2 && iMouseY <= MyComputerPositionY + i * 16 + 16 * 3)
-        {   
-            if (PreviousItem == i)
-            {
-                break;
-            }
-            
-            L2_GRAPHICS_RectangleDraw(pMouseSelectedBuffer, 0,  0, 31, 15, 1,  Color, 32);
-            L2_STORE_PartitionItemsPrint(i);
-            PreviousItem = i;
-            L2_GRAPHICS_Copy(pDeskDisplayBuffer, pMouseSelectedBuffer, ScreenWidth, ScreenHeight, 32, 16, MyComputerPositionX + 50, MyComputerPositionY  + i * (16 + 2) + 16 * 2);   
-        }
-    }
-
+	L3_PARITION_RootPathAccess();
+	
     if (MouseClickFlag == 1)
     {
+    	// Get graphics layer from display buffer..
         UINT16 layer = pDeskDisplayBuffer[(iMouseY * ScreenWidth + iMouseX) * 4 + 3];
         if (0 != layer)
         {
@@ -3480,7 +3569,7 @@ L2_MOUSE_MoveOver()
 
 }
 
-L2_MOUSE_MenuButtonClick()
+VOID L2_MOUSE_MenuButtonClick()
 {    
     EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
     Color.Red = 0xff;
@@ -3669,14 +3758,14 @@ EFI_STATUS L2_GRAPHICS_ChineseCharDraw(UINT8 *pBuffer,
     return EFI_SUCCESS;
 }
 
-L2_NETWORK_Init()
+VOID L2_NETWORK_Init()
 {}
 
 
-L2_NETWORK_DriverSend()
+VOID L2_NETWORK_DriverSend()
 {}
 
-L2_NETWORK_DriverReceive()
+VOID L2_NETWORK_DriverReceive()
 {}
 
 VOID L2_FILE_Transfer(MasterBootRecord *pSource, MasterBootRecordSwitched *pDest)
@@ -4584,7 +4673,7 @@ VOID L3_APPLICATION_MyComputerWindow(UINT16 StartX, UINT16 StartY)
         L2_GRAPHICS_ChineseCharDraw2(pBuffer, x, y,          (37 - 1 ) * 94 + 44 - 1, Color, MyComputerWidth); 
         x += 16;
 
-        //  2354 ·Ö 3988 Çø
+        //  2354 åˆ† 3988 åŒº
         L2_GRAPHICS_ChineseCharDraw2(pBuffer, x, y,          (23 - 1 ) * 94 + 54 - 1, Color, MyComputerWidth);    
         x += 16;
         
@@ -4592,11 +4681,11 @@ VOID L3_APPLICATION_MyComputerWindow(UINT16 StartX, UINT16 StartY)
         x += 16;
 
         // 5027
-        // Ò»
+        // ä¸€
         // 2294
-        // ¶ş
+        // äºŒ
         // 4093
-        // Èı
+        // ä¸‰
         if (device[i].PartitionID == 1)
         {
             L2_GRAPHICS_ChineseCharDraw2(pBuffer, x, y,          (50 - 1 ) * 94 + 27 - 1, Color, MyComputerWidth);   
@@ -4626,9 +4715,9 @@ VOID L3_APPLICATION_MyComputerWindow(UINT16 StartX, UINT16 StartY)
         }
 
         //2083
-        //´ó
+        //å¤§
         //4801
-        //Ğ¡
+        //å°
         L2_GRAPHICS_ChineseCharDraw2(pBuffer, x, y,          (20 - 1 ) * 94 + 83 - 1, Color, MyComputerWidth);  
         x += 16;
         
@@ -4669,9 +4758,9 @@ VOID L3_APPLICATION_MyComputerWindow(UINT16 StartX, UINT16 StartY)
     
     x = 50;
     //3658
-    //ÄÚ
+    //å†…
     //2070
-    //´æ
+    //å­˜
     L2_GRAPHICS_ChineseCharDraw2(pBuffer, x, y,          (36 - 1 ) * 94 + 58 - 1, Color, MyComputerWidth);  
     x += 16;
     
@@ -4720,11 +4809,11 @@ VOID L3_APPLICATION_MemoryInformationWindow(UINT16 StartX, UINT16 StartY)
     Color.Reserved = GRAPHICS_LAYER_MEMORY_INFORMATION_WINDOW;
     
     //3658
-    //ÄÚ
+    //å†…
     //2070
-    //´æ
-    //ºº×Ö    ÇøÎ»Âë ºº×Ö  ÇøÎ»Âë
-    //Ïê 4774    Ï¸   4724
+    //å­˜
+    //æ±‰å­—    åŒºä½ç  æ±‰å­—  åŒºä½ç 
+    //è¯¦ 4774    ç»†   4724
     UINT16 TitleX = 3;
     UINT16 TitleY = 6;
     // wo de dian nao
@@ -4774,9 +4863,9 @@ VOID L3_APPLICATION_MemoryInformationWindow(UINT16 StartX, UINT16 StartY)
     
     x = 50;
     //3658
-    //ÄÚ
+    //å†…
     //2070
-    //´æ
+    //å­˜
     L2_GRAPHICS_ChineseCharDraw2(pBuffer, x, y,          (36 - 1 ) * 94 + 58 - 1, Color, Width);  
     x += 16;
     
@@ -4838,8 +4927,8 @@ VOID L3_APPLICATION_SystemLogWindow(UINT16 StartX, UINT16 StartY)
     Color.Green = 0xff;
     Color.Reserved = GRAPHICS_LAYER_SYSTEM_LOG_WINDOW;
     
-    //ºº×Ö	ÇøÎ»Âë	ºº×Ö	ÇøÎ»Âë	ºº×Ö	ÇøÎ»Âë	ºº×Ö	ÇøÎ»Âë
-    //Ïµ	4721	Í³	4519	ÈÕ	4053	Ö¾	5430
+    //æ±‰å­—	åŒºä½ç 	æ±‰å­—	åŒºä½ç 	æ±‰å­—	åŒºä½ç 	æ±‰å­—	åŒºä½ç 
+    //ç³»	4721	ç»Ÿ	4519	æ—¥	4053	å¿—	5430
     UINT16 TitleX = 3;
     UINT16 TitleY = 6;
     // wo de dian nao
@@ -4889,9 +4978,9 @@ VOID L3_APPLICATION_SystemLogWindow(UINT16 StartX, UINT16 StartY)
     
     x = 50;
     //3658
-    //ÄÚ
+    //å†…
     //2070
-    //´æ
+    //å­˜
     L2_GRAPHICS_ChineseCharDraw2(pBuffer, x, y,          (36 - 1 ) * 94 + 58 - 1, Color, Width);  
     x += 16;
     
@@ -4938,7 +5027,7 @@ EFI_STATUS L3_APPLICATION_ReadFile(UINT8 *FileName, UINT8 NameLength, UINT8 *pBu
 UINT8 readflag = 0;
 
 
-EFIAPI L2_KEYBOARD_KeyPressed()
+VOID L2_KEYBOARD_KeyPressed()
 {
     DEBUG ((EFI_D_INFO, "%d HandleEnterPressed\n", __LINE__));
     
@@ -4953,10 +5042,7 @@ EFIAPI L2_KEYBOARD_KeyPressed()
     return EFI_SUCCESS;
 }
 
-STATIC
-VOID
-EFIAPI
-L2_KEYBOARD_Event (
+VOID L2_KEYBOARD_Event (
   IN EFI_EVENT Event,
   IN VOID      *Context
   )
@@ -5088,13 +5174,10 @@ L2_KEYBOARD_Event (
  
  }
 
-STATIC
-VOID
-EFIAPI
-L2_SYSTEM_Start (IN EFI_EVENT Event, IN VOID *Context)
+VOID L2_SYSTEM_Start (IN EFI_EVENT Event, IN VOID *Context)
 {
 
-    //Èç¹û²»¼ÓÏÂÃæÕâ¼¸ĞĞ£¬ÔòÊÇÖ±½ÓÏÔÊ¾ÄÚ´æĞÅÏ¢£¬¿´ÆğÀ´ÓĞµãÏñÑ©»¨
+    //å¦‚æœä¸åŠ ä¸‹é¢è¿™å‡ è¡Œï¼Œåˆ™æ˜¯ç›´æ¥æ˜¾ç¤ºå†…å­˜ä¿¡æ¯ï¼Œçœ‹èµ·æ¥æœ‰ç‚¹åƒé›ªèŠ±
     /*
     for (int j = 0; j < ScreenHeight; j++)
     {
@@ -5118,13 +5201,10 @@ L2_SYSTEM_Start (IN EFI_EVENT Event, IN VOID *Context)
 }
 
 
-STATIC
-VOID
-EFIAPI
-L2_MAIN_Start (IN EFI_EVENT Event, IN VOID *Context)
+VOID L2_MAIN_Start (IN EFI_EVENT Event, IN VOID *Context)
 {
 
-    //Èç¹û²»¼ÓÏÂÃæÕâ¼¸ĞĞ£¬ÔòÊÇÖ±½ÓÏÔÊ¾ÄÚ´æĞÅÏ¢£¬¿´ÆğÀ´ÓĞµãÏñÑ©»¨
+    //å¦‚æœä¸åŠ ä¸‹é¢è¿™å‡ è¡Œï¼Œåˆ™æ˜¯ç›´æ¥æ˜¾ç¤ºå†…å­˜ä¿¡æ¯ï¼Œçœ‹èµ·æ¥æœ‰ç‚¹åƒé›ªèŠ±
     
     for (int j = 0; j < ScreenHeight; j++)
     {
@@ -5148,10 +5228,7 @@ L2_MAIN_Start (IN EFI_EVENT Event, IN VOID *Context)
 
 
 // for mouse move & click
-STATIC
-VOID
-EFIAPI
-L2_MOUSE_Event (IN EFI_EVENT Event, IN VOID *Context)
+VOID L2_MOUSE_Event (IN EFI_EVENT Event, IN VOID *Context)
 {
     mouse_count++;
     //L2_DEBUG_Print1(DISPLAY_X, DISPLAY_Y, "%d: HandleMouseEvent\n", __LINE__);
@@ -5306,10 +5383,7 @@ UINT8 L1_TIMER_DayOfWeek(int y, int m, int d)
 
 
 // display system date & time
-STATIC
-VOID
-EFIAPI
-L2_TIMER_Print (
+VOID L2_TIMER_Print (
   IN EFI_EVENT Event,
   IN VOID      *Context
   )
@@ -5330,7 +5404,7 @@ L2_TIMER_Print (
     //Display system date time weekday.
     L2_DEBUG_Print1(x, y, "%04d-%02d-%02d %02d:%02d:%02d ", 
                   EFITime.Year, EFITime.Month, EFITime.Day, EFITime.Hour, EFITime.Minute, EFITime.Second);
-    //  ĞÇ   4839    ÆÚ   3858
+    //  æ˜Ÿ   4839    æœŸ   3858
     x += 21 * 8 + 3;
     L2_GRAPHICS_ChineseCharDraw2(pDeskBuffer, x, y,  (48 - 1) * 94 + 39 - 1, Color, ScreenWidth); 
     
@@ -5347,7 +5421,7 @@ L2_TIMER_Print (
     UINT8 AreaCode = 0;
     UINT8 BitCode = 0;
     
-    // ÈÕ 4053 Ò» 5027 ¶ş 2294 Èı 4093 ËÄ 4336 Îå 4669 Áù 3389
+    // æ—¥ 4053 ä¸€ 5027 äºŒ 2294 ä¸‰ 4093 å›› 4336 äº” 4669 å…­ 3389
     switch (DayOfWeek)
     {
         case 0: AreaCode = 40; BitCode = 53; break;
@@ -5508,8 +5582,8 @@ EFI_STATUS L2_GRAPHICS_SayGoodBye()
         }
     }
     
-    // ÔÙ    5257    ¼û   2891    £¬   0312    »¶   2722    Ó­   5113
-    // ÏÂ    4734    ´Î   2046    »Ø   2756    À´   3220
+    // å†    5257    è§   2891    ï¼Œ   0312    æ¬¢   2722    è¿   5113
+    // ä¸‹    4734    æ¬¡   2046    å›   2756    æ¥   3220
     // menu chinese
     UINT16 x = ScreenWidth / 2;
     UINT16 y = ScreenHeight / 2;
@@ -5661,8 +5735,8 @@ EFI_STATUS L2_GRAPHICS_StartMenuInit()
     Color.Green = 0x00;
     Color.Blue  = 0x00;
 
-    //Õâ±ßµÄĞòÁĞĞèÒª¸úSTART_MENU_BUTTON_SEQUENCEÕâ¸öÃ¶¾Ù¶¨ÒåµÄÒ»ÖÂ
-    //ÎÒµÄµçÄÔ
+    //è¿™è¾¹çš„åºåˆ—éœ€è¦è·ŸSTART_MENU_BUTTON_SEQUENCEè¿™ä¸ªæšä¸¾å®šä¹‰çš„ä¸€è‡´
+    //æˆ‘çš„ç”µè„‘
     L2_GRAPHICS_ChineseCharDraw2(pStartMenuBuffer, x , y,     (46 - 1 ) * 94 + 50 - 1, Color, StartMenuWidth);    
     x += 16;
     
@@ -5674,7 +5748,7 @@ EFI_STATUS L2_GRAPHICS_StartMenuInit()
     
     L2_GRAPHICS_ChineseCharDraw2(pStartMenuBuffer, x , y,     (36 - 1) * 94 + 52 - 1, Color, StartMenuWidth);   
 
-    //ÏµÍ³ÉèÖÃ
+    //ç³»ç»Ÿè®¾ç½®
     x = 3;
     y += 16;
     L2_GRAPHICS_ChineseCharDraw2(pStartMenuBuffer, x , y,     (47 - 1 ) * 94 + 21 - 1, Color, StartMenuWidth);    
@@ -5689,9 +5763,9 @@ EFI_STATUS L2_GRAPHICS_StartMenuInit()
     L2_GRAPHICS_ChineseCharDraw2(pStartMenuBuffer, x , y,     (54 - 1) * 94 + 35 - 1, Color, StartMenuWidth);   
     
 
-    //ÄÚ´æ²é¿´
-    //ºº×Ö    ÇøÎ»Âë ºº×Ö  ÇøÎ»Âë ºº×Ö  ÇøÎ»Âë ºº×Ö  ÇøÎ»Âë
-    //ÄÚ 3658    ´æ       2070    ²é       1873    ¿´       3120
+    //å†…å­˜æŸ¥çœ‹
+    //æ±‰å­—    åŒºä½ç  æ±‰å­—  åŒºä½ç  æ±‰å­—  åŒºä½ç  æ±‰å­—  åŒºä½ç 
+    //å†… 3658    å­˜       2070    æŸ¥       1873    çœ‹       3120
     x = 3;
     y += 16;
     L2_GRAPHICS_ChineseCharDraw2(pStartMenuBuffer, x , y,     (36 - 1 ) * 94 + 58 - 1, Color, StartMenuWidth);    
@@ -5705,9 +5779,9 @@ EFI_STATUS L2_GRAPHICS_StartMenuInit()
     
     L2_GRAPHICS_ChineseCharDraw2(pStartMenuBuffer, x , y,     (31 - 1) * 94 + 20 - 1, Color, StartMenuWidth);   
     
-    //ÏµÍ³ÈÕÖ¾
-    //ºº×Ö	ÇøÎ»Âë	ºº×Ö	ÇøÎ»Âë	ºº×Ö	ÇøÎ»Âë	ºº×Ö	ÇøÎ»Âë
-    //Ïµ	4721	Í³	4519	ÈÕ	4053	Ö¾	5430
+    //ç³»ç»Ÿæ—¥å¿—
+    //æ±‰å­—	åŒºä½ç 	æ±‰å­—	åŒºä½ç 	æ±‰å­—	åŒºä½ç 	æ±‰å­—	åŒºä½ç 
+    //ç³»	4721	ç»Ÿ	4519	æ—¥	4053	å¿—	5430
     x = 3;
     y += 16;
     L2_GRAPHICS_ChineseCharDraw2(pStartMenuBuffer, x , y,     (47 - 1 ) * 94 + 21 - 1, Color, StartMenuWidth);    
@@ -5721,8 +5795,8 @@ EFI_STATUS L2_GRAPHICS_StartMenuInit()
     
     L2_GRAPHICS_ChineseCharDraw2(pStartMenuBuffer, x , y,     (54 - 1) * 94 + 30 - 1, Color, StartMenuWidth);   
     
-    //ÏµÍ³ÍË³ö
-    //ÍË 4543    ³ö   1986
+    //ç³»ç»Ÿé€€å‡º
+    //é€€ 4543    å‡º   1986
     x = 3;
     y += 16;
     L2_GRAPHICS_ChineseCharDraw2(pStartMenuBuffer, x , y,     (47 - 1 ) * 94 + 21 - 1, Color, StartMenuWidth);    
@@ -5747,8 +5821,8 @@ EFI_STATUS L2_GRAPHICS_SystemSettingInit()
     Color.Green = 0x00;
     Color.Blue  = 0x00;
 
-    //±³¾°ÉèÖÃ
-    //±³ 1719    ¾°   3016    Éè   4172    ÖÃ   5435
+    //èƒŒæ™¯è®¾ç½®
+    //èƒŒ 1719    æ™¯   3016    è®¾   4172    ç½®   5435
     L2_GRAPHICS_ChineseCharDraw2(pSystemSettingWindowBuffer, x , y,   (17 - 1) * 94 + 19 - 1, Color, SystemSettingWindowWidth);   
     x += 16;
     
@@ -5761,8 +5835,8 @@ EFI_STATUS L2_GRAPHICS_SystemSettingInit()
     L2_GRAPHICS_ChineseCharDraw2(pSystemSettingWindowBuffer, x , y,   (54 - 1) * 94 + 35 - 1, Color, SystemSettingWindowWidth);
     x += 16;
 
-    //±³¾°»¹Ô­
-    //»¹ 2725    Ô­   5213
+    //èƒŒæ™¯è¿˜åŸ
+    //è¿˜ 2725    åŸ   5213
     x = 3;
     y += 16;
     L2_GRAPHICS_ChineseCharDraw2(pSystemSettingWindowBuffer, x , y,   (17 - 1) * 94 + 19 - 1, Color, SystemSettingWindowWidth);   
@@ -5888,6 +5962,9 @@ EFI_STATUS L2_GRAPHICS_DeskInit()
 
     
     y1 += HeightNew;
+    Color.Blue  = 0xff;
+    Color.Red   = 0xff;
+    Color.Green = 0xff;
     // wo de dian nao
     L2_GRAPHICS_ChineseCharDraw2(pDeskBuffer, x1, y1, (46 - 1) * 94 + 50 - 1, Color, ScreenWidth);
     x1 += 16;
@@ -6059,7 +6136,7 @@ EFI_STATUS L2_GRAPHICS_DeskInit()
 
 
 
-L2_MOUSE_WallpaperResetClicked()
+VOID L2_MOUSE_WallpaperResetClicked()
 {   
     L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d L2_MOUSE_WallpaperResetClicked\n", __LINE__);
     
@@ -6084,7 +6161,66 @@ START_MENU_STATE_TRANSFORM StartMenuStateTransformTable[] =
 
 START_MENU_CURRENT_EVENT    StartMenuClickEvent = START_MENU_INIT_CLICKED_EVENT;
 
-L2_MOUSE_Click()
+typedef struct
+{
+    // Current only surpport 12 level path depth.
+    PATH_DETAIL PathStack[12];
+    UINT8 *pFATTable;
+    MasterBootRecordSwitched stMBRSwitched;
+}PARTITION_PATH_DETAIL;
+
+
+PARTITION_ITEM_ACCESS_STATE PartitionItemAccessNextState = INIT_ACCESS_STATE;
+PARTITION_ITEM_ACCESS_EVENT PartitionItemAccessEvent = START_MENU_INIT_CLICKED_EVENT;
+
+
+VOID L3_PARTITION_PathAccess()
+{
+    PARTITION_ITEM_ACCESS_STATE     CurrentState;
+	UINT16 RootFlag = TRUE;
+
+    for (UINT16 i = 0; i <  sizeof(PartitionItemAccessStateTransformTable)/sizeof(PartitionItemAccessStateTransformTable[0]); i++ )
+    {
+        if (PartitionItemAccessStateTransformTable[i].CurrentState == PartitionItemAccessNextState 
+            && PartitionItemAccessEvent == PartitionItemAccessStateTransformTable[i].event )
+        {
+            PartitionItemAccessNextState = PartitionItemAccessStateTransformTable[i].NextState;
+
+            // need to check the return value after function runs..... 
+            PartitionItemAccessStateTransformTable[i].pFunc();
+            L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, 
+                                                        LogLayer, 
+                                                        "%d: StartMenuClickEvent: %d StartMenuNextState: %d\n", 
+                                                        __LINE__, 
+                                                        PartitionItemAccessEvent, 
+                                                        PartitionItemAccessNextState);
+            break;
+        }   
+    }
+    
+}
+
+int L1_STACK_Push(char* a,int top,char elem)
+{
+    a[++top]=elem;
+    return top;
+}
+
+
+int L1_STACK_Pop(char * a,int top)
+{
+    if (top==-1) 
+    {
+        printf("ç©ºæ ˆ");
+        return -1;
+    }
+    printf("å¼¹æ ˆå…ƒç´ ï¼š%c\n",a[top]);
+    top--;
+    return top;
+}
+
+
+VOID L2_MOUSE_Click()
 {
     //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: iMouseX: %d iMouseY: %d \n",  __LINE__, iMouseX, iMouseY);
     EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
@@ -6531,7 +6667,7 @@ Main (
     //For locate bug
     //return;
 
-    //Èç¹û²»¼ÓÏÂÃæÕâ¼¸ĞĞ£¬ÔòÊÇÖ±½ÓÏÔÊ¾ÄÚ´æĞÅÏ¢£¬¿´ÆğÀ´ÓĞµãÏñÑ©»¨
+    //å¦‚æœä¸åŠ ä¸‹é¢è¿™å‡ è¡Œï¼Œåˆ™æ˜¯ç›´æ¥æ˜¾ç¤ºå†…å­˜ä¿¡æ¯ï¼Œçœ‹èµ·æ¥æœ‰ç‚¹åƒé›ªèŠ±
     
     for (int j = 0; j < ScreenHeight; j++)
     {
@@ -6551,7 +6687,7 @@ Main (
                 0, 0, 
                 ScreenWidth, ScreenHeight, 0);   
 
-    //±¾À´ÏëÔÚÕâ×öÒ»¸öÆğ¶¯»­Ãæ£¬ÊÔÁËÏÂ£¬Î´³É¹¦£¬·ÅÆúÁË                  
+    //æœ¬æ¥æƒ³åœ¨è¿™åšä¸€ä¸ªèµ·åŠ¨ç”»é¢ï¼Œè¯•äº†ä¸‹ï¼ŒæœªæˆåŠŸï¼Œæ”¾å¼ƒäº†                  
     //L2_COMMON_SingleProcessInit();
 
     //L2_TIMER_IntervalInit0();
@@ -6590,21 +6726,23 @@ Main (
 
 /*
 
-Ò»Ğ©²Î¿¼×ÊÁÏ
-ÇøÎ»Âë:
+ä¸€äº›å‚è€ƒèµ„æ–™
+åŒºä½ç :
 http://witmax.cn/gb2312.html
 
-ºº×ÖµÄÇøÎ»Âë²éÑ¯:
+æ±‰å­—çš„åŒºä½ç æŸ¥è¯¢:
 http://quwei.911cha.com/
 
-ÖĞÎÄÏÔÊ¾£º
+ä¸­æ–‡æ˜¾ç¤ºï¼š
 https://blog.csdn.net/zenwanxin/article/details/8349124?utm_medium=distribute.pc_relevant.none-task-blog-2~default~baidujs_baidulandingword~default-0.control&spm=1001.2101.3001.4242
 
-Ó¢ÎÄÏÔÊ¾£º
+è‹±æ–‡æ˜¾ç¤ºï¼š
 https://blog.csdn.net/czg13548930186/article/details/79861914
 
-ÇøÎ»Âë²éÑ¯£ºhttp://quwei.911cha.com/
+åŒºä½ç æŸ¥è¯¢ï¼šhttp://quwei.911cha.com/
 
 InitializeMemory
 InternalMemSetMem
 */
+
+
