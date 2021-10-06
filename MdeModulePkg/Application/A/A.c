@@ -621,7 +621,6 @@ typedef struct
     UINT16 SectorOfCluster;
 }MasterBootRecordSwitched;
 
-
 typedef struct 
 {
     UINT8 FileName[8];
@@ -646,7 +645,6 @@ typedef struct
     UINT8 StartClusterLow2B[2]; //*
     UINT8 FileLength[4];
 }FAT32_ROOTPATH_SHORT_FILE_ITEM;
-
 
 typedef struct
 {
@@ -1144,11 +1142,6 @@ typedef struct
 }PARTITION_ITEM_ACCESS_STATE_TRANSFORM;
 
 UINTN Index;
-
-
-EFI_STATUS Func()
-{
-}
 
 
 VOID L1_GRAPHICS_UpdateWindowLayer(UINT16 layer)
@@ -2842,6 +2835,8 @@ EFI_STATUS L2_STORE_PartitionAnalysis()
 L3_GRAPHICS_ItemPrint(UINT8 *pDestBuffer, UINT8 *pSourceBuffer, UINT16 pDestWidth, UINT16 pDestHeight, 
                               UINT16 pSourceWidth, UINT16 pSourceHeight, UINT16 x, UINT16 y, CHAR8 *pNameString, CHAR16 StringType)
 {
+	UINT16 WindowLayerID = 0;
+	WindowLayers.item[WindowLayerID];
     
     for (int j = 0; j < pSourceHeight; j++)
     {
@@ -2856,6 +2851,115 @@ L3_GRAPHICS_ItemPrint(UINT8 *pDestBuffer, UINT8 *pSourceBuffer, UINT16 pDestWidt
     if (2 == StringType)
         L2_DEBUG_Print2(x, y + pDestHeight, pDestBuffer, "%a ", pNameString);
 }
+
+
+DEVICE_PARAMETER device2[10] = {0};
+
+
+EFI_STATUS L3_PARTITION_RootPathAccess()
+{	
+	EFI_STATUS Status;
+	UINT8 Buffer1[512];
+    EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
+	
+    Color.Red = 0xff;
+    Color.Green= 0x00;
+    Color.Blue= 0x00;
+
+	UINT16 i = 0;
+	
+    for (UINT16 i = 0; i < PartitionCount; i++)
+    {   
+        MyComputerPositionX = WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].StartX;
+        MyComputerPositionY = WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].StartY;
+        
+        if (iMouseX >= MyComputerPositionX + 50 && iMouseX <= MyComputerPositionX + 50 + 16 * 6
+            && iMouseY >= MyComputerPositionY + i * 16 + 16 * 2 && iMouseY <= MyComputerPositionY + i * 16 + 16 * 3)
+        {   
+            if (PreviousItem == i)
+            {
+                break;
+            }
+            
+            L2_GRAPHICS_RectangleDraw(pMouseSelectedBuffer, 0,  0, 31, 15, 1,  Color, 32);
+            L2_STORE_PartitionItemsPrint(i);
+            PreviousItem = i;
+            L2_GRAPHICS_Copy(pDeskDisplayBuffer, pMouseSelectedBuffer, ScreenWidth, ScreenHeight, 32, 16, MyComputerPositionX + 50, MyComputerPositionY  + i * (16 + 2) + 16 * 2);   
+        }
+    }
+	/*
+	Status = L1_STORE_READ(i, sector_count, 1, Buffer1); 
+	if ( EFI_SUCCESS == Status )
+	{
+		//L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: Status:%X\n", __LINE__, Status);
+
+		//When get root path data sector start number, we can get content of root path.
+		L1_FILE_RootPathAnalysis(Buffer1);  
+
+		// data area start from 1824, HZK16 file start from     FileBlockStart  block, so need to convert into sector by multi 8, block start number is 2   
+		// next state is to read FAT table
+		sector_count = MBRSwitched.ReservedSelector;
+		//L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: sector_count:%ld FileLength: %d MBRSwitched.ReservedSelector:%ld\n",  __LINE__, sector_count, FileLength, MBRSwitched.ReservedSelector);
+	}           
+	*/
+}
+
+
+
+EFI_STATUS L3_PARTITION_SubPathAccess()
+{
+}
+
+
+// Print Folder item in graphics layer 
+
+EFI_STATUS L3_PARTITION_FileAccess(UINT16 DeviceID)
+{
+	UINT8 Buffer1[512];
+	
+	EFI_STATUS Status = L1_STORE_READ(DeviceID, sector_count, 1, Buffer1 );  
+    if (EFI_ERROR(Status))
+    {
+        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d Status: %X\n", __LINE__, Status);
+        return Status;
+    }
+}
+
+EFI_STATUS L3_PARTITION_AccessFinish()
+{
+}
+
+EFI_STATUS L3_PARTITION_ParentPathAccess()
+{
+}
+
+
+// need a stack to save current detailed path
+PARTITION_ITEM_ACCESS_STATE_TRANSFORM PartitionItemAccessStateTransformTable[] =
+{
+	//Current state             Trigger Event          //Next state              //Handle function
+    // init state
+    {INIT_ACCESS_STATE,         ROOT_PATH_ACCESS_EVENT, ROOT_PATH_STATE,        L3_PARTITION_RootPathAccess},
+
+    // root path
+    {ROOT_PATH_STATE,           FILE_ACCESS_EVENT,   FILE_ITEM_ACCESS_STATE,    L3_PARTITION_FileAccess},
+    {ROOT_PATH_STATE,           FOLDER_ACCESS_EVENT, FOLDER_ITEM_ACCESS_STATE,  L3_PARTITION_SubPathAccess},
+    {ROOT_PATH_STATE,           PARENT_ACCESS_EVENT, ROOT_PATH_STATE,           L3_PARTITION_RootPathAccess},
+    {ROOT_PATH_STATE,           CLOSE_ACCESS_EVENT,  INIT_ACCESS_STATE,         L3_PARTITION_AccessFinish},
+    
+    // some folder
+    {FOLDER_ITEM_ACCESS_STATE,  FILE_ACCESS_EVENT,   FILE_ITEM_ACCESS_STATE,    L3_PARTITION_FileAccess}, // open a file and next state is current folder
+    {FOLDER_ITEM_ACCESS_STATE,  FOLDER_ACCESS_EVENT, FOLDER_ITEM_ACCESS_STATE,  L3_PARTITION_SubPathAccess}, // a folder.
+    {FOLDER_ITEM_ACCESS_STATE,  PARENT_ACCESS_EVENT, FOLDER_ITEM_ACCESS_STATE,  L3_PARTITION_ParentPathAccess}, // access parent path
+    {FOLDER_ITEM_ACCESS_STATE,  CLOSE_ACCESS_EVENT,  INIT_ACCESS_STATE,         L3_PARTITION_AccessFinish},
+
+    // some file
+    {FILE_ITEM_ACCESS_STATE,    FILE_ACCESS_EVENT,   INIT_ACCESS_STATE,    		L3_PARTITION_FileAccess},
+    {FILE_ITEM_ACCESS_STATE,    FOLDER_ACCESS_EVENT, INIT_ACCESS_STATE,  		L3_PARTITION_SubPathAccess},
+    {FILE_ITEM_ACCESS_STATE,    PARENT_ACCESS_EVENT, FOLDER_ITEM_ACCESS_STATE,  L3_PARTITION_ParentPathAccess},
+    {FILE_ITEM_ACCESS_STATE,    CLOSE_ACCESS_EVENT,  INIT_ACCESS_STATE,         L3_PARTITION_AccessFinish}
+};
+
 
 L2_STORE_FolderItemsPrint()
 {
@@ -2925,63 +3029,6 @@ L2_STORE_FolderItemsPrint()
 
 }
 
-DEVICE_PARAMETER device2[10] = {0};
-
-
-EFI_STATUS L3_PARITION_RootPathAccess()
-{	
-    EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
-    Color.Red = 0xff;
-    Color.Green= 0x00;
-    Color.Blue= 0x00;
-    for (UINT16 i = 0; i < PartitionCount; i++)
-    {   
-        MyComputerPositionX = WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].StartX;
-        MyComputerPositionY = WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].StartY;
-        
-        if (iMouseX >= MyComputerPositionX + 50 && iMouseX <= MyComputerPositionX + 50 + 16 * 6
-            && iMouseY >= MyComputerPositionY + i * 16 + 16 * 2 && iMouseY <= MyComputerPositionY + i * 16 + 16 * 3)
-        {   
-            if (PreviousItem == i)
-            {
-                break;
-            }
-            
-            L2_GRAPHICS_RectangleDraw(pMouseSelectedBuffer, 0,  0, 31, 15, 1,  Color, 32);
-            L2_STORE_PartitionItemsPrint(i);
-            PreviousItem = i;
-            L2_GRAPHICS_Copy(pDeskDisplayBuffer, pMouseSelectedBuffer, ScreenWidth, ScreenHeight, 32, 16, MyComputerPositionX + 50, MyComputerPositionY  + i * (16 + 2) + 16 * 2);   
-        }
-    }
-
-}
-
-
-
-// need a stack to save current detailed path
-PARTITION_ITEM_ACCESS_STATE_TRANSFORM PartitionItemAccessStateTransformTable[] =
-{
-    // init state
-    {INIT_ACCESS_STATE,         ROOT_PATH_ACCESS_EVENT, ROOT_PATH_STATE,        L3_PARITION_RootPathAccess},
-
-    // root path
-    {ROOT_PATH_STATE,           FILE_ACCESS_EVENT,   FILE_ITEM_ACCESS_STATE,    Func},
-    {ROOT_PATH_STATE,           FOLDER_ACCESS_EVENT, FOLDER_ITEM_ACCESS_STATE,  Func},
-    {ROOT_PATH_STATE,           PARENT_ACCESS_EVENT, ROOT_PATH_STATE,           Func},
-    {ROOT_PATH_STATE,           CLOSE_ACCESS_EVENT,  INIT_ACCESS_STATE,         Func},
-    
-    // some folder
-    {FOLDER_ITEM_ACCESS_STATE,  FOLDER_ACCESS_EVENT, FOLDER_ITEM_ACCESS_STATE,  Func}, // a folder
-    {FOLDER_ITEM_ACCESS_STATE,  FILE_ACCESS_EVENT,   FOLDER_ITEM_ACCESS_STATE,  Func}, // open a file and next state is current folder
-    {FOLDER_ITEM_ACCESS_STATE,  PARENT_ACCESS_EVENT, FOLDER_ITEM_ACCESS_STATE,  Func}, // access parent path
-    {FOLDER_ITEM_ACCESS_STATE,  CLOSE_ACCESS_EVENT,  INIT_ACCESS_STATE,         Func},
-
-    // some file
-    {FILE_ITEM_ACCESS_STATE,    FILE_ACCESS_EVENT,   FOLDER_ITEM_ACCESS_STATE,  Func},
-    {FILE_ITEM_ACCESS_STATE,    FOLDER_ACCESS_EVENT, FOLDER_ITEM_ACCESS_STATE,  Func},
-    {FILE_ITEM_ACCESS_STATE,    PARENT_ACCESS_EVENT, FOLDER_ITEM_ACCESS_STATE,  Func},
-    {FILE_ITEM_ACCESS_STATE,    CLOSE_ACCESS_EVENT,  INIT_ACCESS_STATE,         Func}
-};
 
 VOID L2_STORE_PartitionItemsPrint(UINT16 Index)
 {
@@ -3550,7 +3597,7 @@ VOID L2_MOUSE_MyComputerCloseClicked()
 
 VOID L2_MOUSE_MoveOver()
 {    
-	L3_PARITION_RootPathAccess();
+	L3_PARTITION_RootPathAccess();
 	
     if (MouseClickFlag == 1)
     {

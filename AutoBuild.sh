@@ -1,3 +1,5 @@
+clear
+
 cp /mnt/hgfs/Share/code/old/A.c MdeModulePkg/Application/A/
 if [ $? -ne 0 ]; then
     exit 0;
