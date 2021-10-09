@@ -126,6 +126,8 @@ current problems:
 #include <Protocol/DiskIo2.h>
 #include <Protocol/BlockIo2.h>
 
+#define STORE_EFI_PATH_PARTITION_SECTOR_COUNT 1691648
+
 UINT16 date_time_count = 0;
 UINT16 keyboard_count = 0;
 UINT16 mouse_count = 0;
@@ -154,7 +156,6 @@ char pKeyboardInputBuffer[KEYBOARD_BUFFER_LENGTH] = {0};
 #define DISPLAY_DESK_HEIGHT_WEIGHT_X (date_time_count % 30) 
 #define DISPLAY_DESK_HEIGHT_WEIGHT_Y (ScreenHeight - 16 * 3)
 
-#define STORE_EFI_PATH_PARTITION_SECTOR_COUNT 921564
 
 
 //Line 1
@@ -1114,6 +1115,33 @@ typedef struct
 
 WINDOW_LAYERS WindowLayers;
 
+typedef enum 
+{
+    INIT_ACCESS_STATE = 0,    //
+    ROOT_PATH_STATE,
+    FILE_ITEM_ACCESS_STATE,
+    FOLDER_ITEM_ACCESS_STATE,
+    PARENT_PATH_ACCESS_STATE,
+    MAX_ACCESS_STATE
+}PARTITION_ITEM_ACCESS_STATE;
+
+typedef enum 
+{
+    ROOT_PATH_ACCESS_EVENT = 0,
+    FOLDER_ACCESS_EVENT,
+    FILE_ACCESS_EVENT,
+    PARENT_ACCESS_EVENT,
+    CLOSE_ACCESS_EVENT,
+    MAX_ACCESS_EVENT
+}PARTITION_ITEM_ACCESS_EVENT;
+
+typedef struct
+{
+    PARTITION_ITEM_ACCESS_STATE     CurrentState;
+    PARTITION_ITEM_ACCESS_EVENT     event;
+    PARTITION_ITEM_ACCESS_STATE     NextState;
+    EFI_STATUS                      (*pFunc)(); 
+}PARTITION_ITEM_ACCESS_STATE_TRANSFORM;
 
 L1_GRAPHICS_UpdateWindowLayer(UINT16 layer)
 {
@@ -1245,7 +1273,7 @@ void L1_MEMORY_CopyColor3(UINT8 *pBuffer, EFI_GRAPHICS_OUTPUT_BLT_PIXEL color, U
 }
 
 //refer from https://www.cnblogs.com/onepixel/articles/7674659.html
-L1_SORT_Bubble(UINT8 *arr, UINT16 len)
+VOID L1_SORT_Bubble(UINT8 *arr, UINT16 len)
 {   
     for(UINT16 i = 0; i < len - 1; i++) 
     {
@@ -1862,7 +1890,7 @@ UINT8 L1_BIT_Set(UINT8 *pMapper, UINT64 StartPageID, UINT64 Size)
     UINT32 ByteCount = Size / 8 + AddOneFlag;
 }
 
-L1_MEMORY_Memset(void *s, UINT8 c, UINT32 n)
+VOID L1_MEMORY_Memset(void *s, UINT8 c, UINT32 n)
 {
   UINT8 *d;
 
@@ -2807,6 +2835,8 @@ EFI_STATUS L2_STORE_PartitionAnalysis()
 L3_GRAPHICS_ItemPrint(UINT8 *pDestBuffer, UINT8 *pSourceBuffer, UINT16 pDestWidth, UINT16 pDestHeight, 
                               UINT16 pSourceWidth, UINT16 pSourceHeight, UINT16 x, UINT16 y, CHAR8 *pNameString, CHAR16 StringType)
 {
+	UINT16 WindowLayerID = 0;
+	WindowLayers.item[WindowLayerID];
     
     for (int j = 0; j < pSourceHeight; j++)
     {
@@ -2822,10 +2852,7 @@ L3_GRAPHICS_ItemPrint(UINT8 *pDestBuffer, UINT8 *pSourceBuffer, UINT16 pDestWidt
         L2_DEBUG_Print2(x, y + pDestHeight, pDestBuffer, "%a ", pNameString);
 }
 DEVICE_PARAMETER device2[10] = {0};
-
-
-
-L2_STORE_PartitionItemsPrint(UINT16 Index)
+VOID L2_STORE_PartitionItemsPrint(UINT16 Index)
 {
     //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: \n",  __LINE__);
     
@@ -3245,7 +3272,7 @@ UINT16 L2_MOUSE_ClickEventGet()
 
 }
 
-L2_MOUSE_SystemSettingClicked()
+VOID L2_MOUSE_SystemSettingClicked()
 {   
     L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d L2_MOUSE_SettingClicked\n", __LINE__);
     //DisplaySystemSettingWindowFlag = 1; 
@@ -3259,13 +3286,13 @@ L2_MOUSE_SystemSettingClicked()
 }
 
 
-L2_MOUSE_SystemQuitClicked()
+VOID L2_MOUSE_SystemQuitClicked()
 {   
     L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d L2_MOUSE_SystemQuitClicked\n", __LINE__);
     SystemQuitFlag = TRUE;  
 }
 
-L2_MOUSE_MemoryInformationClicked()
+VOID L2_MOUSE_MemoryInformationClicked()
 {   
     L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d L2_MOUSE_MemoryInformationClicked\n", __LINE__);
     //DisplayMemoryInformationWindowFlag = TRUE;
@@ -3277,7 +3304,7 @@ L2_MOUSE_MemoryInformationClicked()
     L1_GRAPHICS_UpdateWindowLayer(GRAPHICS_LAYER_MEMORY_INFORMATION_WINDOW);
 }
 
-L2_MOUSE_SystemLogClicked()
+VOID L2_MOUSE_SystemLogClicked()
 {   
     L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d L2_MOUSE_SystemLogClicked\n", __LINE__);
     //DisplaySystemLogWindowFlag = TRUE;  
@@ -3292,7 +3319,7 @@ L2_MOUSE_SystemLogClicked()
 }
 
 
-L2_MOUSE_WallpaperSettingClicked()
+VOID L2_MOUSE_WallpaperSettingClicked()
 {   
     L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d L2_MOUSE_WallpaperSettingClicked\n", __LINE__);
     //DisplaySystemSettingWindowFlag = 1;
@@ -3428,7 +3455,7 @@ UINT8 SystemIcon[SYSTEM_ICON_MAX][SYSTEM_ICON_WIDTH * SYSTEM_ICON_HEIGHT * 3 + 0
 
 
 
-L2_MOUSE_MyComputerClicked()
+VOID L2_MOUSE_MyComputerClicked()
 {       
     L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d L2_MOUSE_MyComputerClicked\n", __LINE__);
     EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
@@ -3464,7 +3491,7 @@ L2_MOUSE_MyComputerClicked()
 }
 
 
-L2_MOUSE_MENU_Clicked()
+VOID L2_MOUSE_MENU_Clicked()
 {
     L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d L2_MOUSE_MENU_Clicked\n", __LINE__);
     EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
@@ -3494,7 +3521,7 @@ L2_MOUSE_MENU_Clicked()
 }
 
 
-L2_MOUSE_MyComputerCloseClicked()
+VOID L2_MOUSE_MyComputerCloseClicked()
 {
     L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d L2_MOUSE_MyComputerCloseClicked\n", __LINE__);
     //DisplayMyComputerFlag = 0;
@@ -3527,7 +3554,7 @@ VOID L2_MOUSE_MoveOver()
 
 }
 
-L2_MOUSE_MenuButtonClick()
+VOID L2_MOUSE_MenuButtonClick()
 {    
     EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
     Color.Red = 0xff;
@@ -3716,14 +3743,14 @@ EFI_STATUS L2_GRAPHICS_ChineseCharDraw(UINT8 *pBuffer,
     return EFI_SUCCESS;
 }
 
-L2_NETWORK_Init()
+VOID L2_NETWORK_Init()
 {}
 
 
-L2_NETWORK_DriverSend()
+VOID L2_NETWORK_DriverSend()
 {}
 
-L2_NETWORK_DriverReceive()
+VOID L2_NETWORK_DriverReceive()
 {}
 
 VOID L2_FILE_Transfer(MasterBootRecord *pSource, MasterBootRecordSwitched *pDest)
@@ -4985,7 +5012,7 @@ EFI_STATUS L3_APPLICATION_ReadFile(UINT8 *FileName, UINT8 NameLength, UINT8 *pBu
 UINT8 readflag = 0;
 
 
-EFIAPI L2_KEYBOARD_KeyPressed()
+VOID L2_KEYBOARD_KeyPressed()
 {
     DEBUG ((EFI_D_INFO, "%d HandleEnterPressed\n", __LINE__));
     
@@ -5935,6 +5962,9 @@ EFI_STATUS L2_GRAPHICS_DeskInit()
 
     
     y1 += HeightNew;
+    Color.Blue  = 0xff;
+    Color.Red   = 0xff;
+    Color.Green = 0xff;
     // wo de dian nao
     L2_GRAPHICS_ChineseCharDraw2(pDeskBuffer, x1, y1, (46 - 1) * 94 + 50 - 1, Color, ScreenWidth);
     x1 += 16;
@@ -6106,7 +6136,7 @@ EFI_STATUS L2_GRAPHICS_DeskInit()
 
 
 
-L2_MOUSE_WallpaperResetClicked()
+VOID L2_MOUSE_WallpaperResetClicked()
 {   
     L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d L2_MOUSE_WallpaperResetClicked\n", __LINE__);
     
@@ -6131,7 +6161,34 @@ START_MENU_STATE_TRANSFORM StartMenuStateTransformTable[] =
 
 START_MENU_CURRENT_EVENT    StartMenuClickEvent = START_MENU_INIT_CLICKED_EVENT;
 
-L2_MOUSE_Click()
+typedef struct
+{
+    // Current only surpport 12 level path depth.
+    PATH_DETAIL PathStack[12];
+    UINT8 *pFATTable;
+    MasterBootRecordSwitched stMBRSwitched;
+}PARTITION_PATH_DETAIL;
+PARTITION_ITEM_ACCESS_STATE PartitionItemAccessNextState = INIT_ACCESS_STATE;
+PARTITION_ITEM_ACCESS_EVENT PartitionItemAccessEvent = START_MENU_INIT_CLICKED_EVENT;
+int L1_STACK_Push(char* a,int top,char elem)
+{
+    a[++top]=elem;
+    return top;
+}
+
+
+int L1_STACK_Pop(char * a,int top)
+{
+    if (top==-1) 
+    {
+        printf("¿ÕÕ»");
+        return -1;
+    }
+    printf("µ¯Õ»ÔªËØ£º%c\n",a[top]);
+    top--;
+    return top;
+}
+VOID L2_MOUSE_Click()
 {
     //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d: iMouseX: %d iMouseY: %d \n",  __LINE__, iMouseX, iMouseY);
     EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
