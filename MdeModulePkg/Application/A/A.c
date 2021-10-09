@@ -349,14 +349,14 @@ UINT32 PreviousBlockNumber = 0;
 
 UINT8 BufferMFT[DISK_BUFFER_SIZE * 2];
 
-int iMouseX = 0;
-int iMouseY = 0;
+UINT16 iMouseX = 0;
+UINT16 iMouseY = 0;
 
 EFI_GRAPHICS_OUTPUT_BLT_PIXEL MouseColor;
 
 UINT32 TimerSliceCount = 0;
 
-int display_sector_number = 0;
+UINT16 display_sector_number = 0;
 
 #define SYSTEM_ICON_WIDTH 400
 #define SYSTEM_ICON_HEIGHT 320
@@ -1143,8 +1143,8 @@ typedef struct
     EFI_STATUS                      (*pFunc)(); 
 }PARTITION_ITEM_ACCESS_STATE_TRANSFORM;
 
-L1_GRAPHICS_UpdateWindowLayer(UINT16 layer)
-{
+VOID L1_GRAPHICS_UpdateWindowLayer(UINT16 layer)
+{	
     for (UINT16 i = 0; i < WindowLayers.LayerCount; i++)
     {
         if (layer == WindowLayers.LayerSequences[i])
@@ -2931,6 +2931,63 @@ EFI_STATUS L3_PARTITION_RootPathAccess()
 	*/
 }
 
+
+
+EFI_STATUS L3_PARTITION_SubPathAccess()
+{
+}
+
+
+// Print Folder item in graphics layer 
+
+EFI_STATUS L3_PARTITION_FileAccess(UINT16 DeviceID)
+{
+	UINT8 Buffer1[512];
+	
+	EFI_STATUS Status = L1_STORE_READ(DeviceID, sector_count, 1, Buffer1 );  
+    if (EFI_ERROR(Status))
+    {
+        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, LogLayer, "%d Status: %X\n", __LINE__, Status);
+        return Status;
+    }
+}
+
+EFI_STATUS L3_PARTITION_AccessFinish()
+{
+}
+
+EFI_STATUS L3_PARTITION_ParentPathAccess()
+{
+}
+
+
+// need a stack to save current detailed path
+PARTITION_ITEM_ACCESS_STATE_TRANSFORM PartitionItemAccessStateTransformTable[] =
+{
+	//Current state             Trigger Event          //Next state              //Handle function
+    // init state
+    {INIT_ACCESS_STATE,         ROOT_PATH_ACCESS_EVENT, ROOT_PATH_STATE,        L3_PARTITION_RootPathAccess},
+
+    // root path
+    {ROOT_PATH_STATE,           FILE_ACCESS_EVENT,   FILE_ITEM_ACCESS_STATE,    L3_PARTITION_FileAccess},
+    {ROOT_PATH_STATE,           FOLDER_ACCESS_EVENT, FOLDER_ITEM_ACCESS_STATE,  L3_PARTITION_SubPathAccess},
+    {ROOT_PATH_STATE,           PARENT_ACCESS_EVENT, ROOT_PATH_STATE,           L3_PARTITION_RootPathAccess},
+    {ROOT_PATH_STATE,           CLOSE_ACCESS_EVENT,  INIT_ACCESS_STATE,         L3_PARTITION_AccessFinish},
+    
+    // some folder
+    {FOLDER_ITEM_ACCESS_STATE,  FILE_ACCESS_EVENT,   FILE_ITEM_ACCESS_STATE,    L3_PARTITION_FileAccess}, // open a file and next state is current folder
+    {FOLDER_ITEM_ACCESS_STATE,  FOLDER_ACCESS_EVENT, FOLDER_ITEM_ACCESS_STATE,  L3_PARTITION_SubPathAccess}, // a folder.
+    {FOLDER_ITEM_ACCESS_STATE,  PARENT_ACCESS_EVENT, FOLDER_ITEM_ACCESS_STATE,  L3_PARTITION_ParentPathAccess}, // access parent path
+    {FOLDER_ITEM_ACCESS_STATE,  CLOSE_ACCESS_EVENT,  INIT_ACCESS_STATE,         L3_PARTITION_AccessFinish},
+
+    // some file
+    {FILE_ITEM_ACCESS_STATE,    FILE_ACCESS_EVENT,   INIT_ACCESS_STATE,    		L3_PARTITION_FileAccess},
+    {FILE_ITEM_ACCESS_STATE,    FOLDER_ACCESS_EVENT, INIT_ACCESS_STATE,  		L3_PARTITION_SubPathAccess},
+    {FILE_ITEM_ACCESS_STATE,    PARENT_ACCESS_EVENT, FOLDER_ITEM_ACCESS_STATE,  L3_PARTITION_ParentPathAccess},
+    {FILE_ITEM_ACCESS_STATE,    CLOSE_ACCESS_EVENT,  INIT_ACCESS_STATE,         L3_PARTITION_AccessFinish}
+};
+
+
 L2_STORE_FolderItemsPrint()
 {
     UINT16 valid_count = 0;
@@ -3028,7 +3085,7 @@ void L2_GRAPHICS_CopyBufferFromWindowsToDesk()
     */
 }
 
-VOID L2_GRAPHICS_LayerCompute(int iMouseX, int iMouseY, UINT8 MouseClickFlag)
+VOID L2_GRAPHICS_LayerCompute(UINT16 iMouseX, UINT16 iMouseY, UINT8 MouseClickFlag)
 {
     /*L2_DEBUG_Print1(DISPLAY_X, DISPLAY_Y, "%d: pDeskDisplayBuffer: %X pDeskBuffer: %X ScreenWidth: %d ScreenHeight: %d pMouseBuffer: %X\n", __LINE__, 
                                                                 pDeskDisplayBuffer,
@@ -5130,7 +5187,7 @@ L2_KEYBOARD_Event (
 
  // iMouseX: left top
  // iMouseY: left top
- VOID L2_GRAPHICS_RightClickMenu(int iMouseX, int iMouseY)
+ VOID L2_GRAPHICS_RightClickMenu(UINT16 iMouseX, UINT16 iMouseY)
  {
      INT16 i;    
      UINT16 width = 100;
@@ -5244,8 +5301,6 @@ L2_MOUSE_Event (IN EFI_EVENT Event, IN VOID *Context)
     {
         return ;
     }
-    L2_DEBUG_Print1(0, ScreenHeight - 30 -  8 * 16, "%d: X move: %d Y move: %d left: %d right: %d", __LINE__, State.RelativeMovementX, State.RelativeMovementY, State.LeftButton, State.RightButton);
-
     if (0 == State.RelativeMovementX && 0 == State.RelativeMovementY && 0 == State.LeftButton && 0 == State.RightButton)
     {
         return;
@@ -5276,10 +5331,12 @@ L2_MOUSE_Event (IN EFI_EVENT Event, IN VOID *Context)
     }
 
     //DEBUG ((EFI_D_INFO, "X: %X, Y: %X ", x_move, y_move));
-    L2_DEBUG_Print1(DISPLAY_MOUSE_X, DISPLAY_MOUSE_Y, "%d X: %04d, Y: %04d Increment X: %X Y: %X", __LINE__, iMouseX, iMouseY, x_move, y_move );
+    L2_DEBUG_Print1(0, ScreenHeight - 30 -  8 * 16, "%d X: %04d, Y: %04d move X: %X move Y: %X", __LINE__, iMouseX, iMouseY, x_move, y_move );
     
+    //L2_DEBUG_Print1(0, ScreenHeight - 30 -  8 * 16, "%d: X move: %d Y move: %d left: %d right: %d", __LINE__, State.RelativeMovementX, State.RelativeMovementY, State.LeftButton, State.RightButton);
     iMouseX = iMouseX + x_move * 3;
     iMouseY = iMouseY + y_move * 3; 
+    
 
     if (iMouseX < 0)
         iMouseX = 0;
@@ -5377,6 +5434,7 @@ UINT8 L1_TIMER_DayOfWeek(int y, int m, int d)
         
 }
 
+UINT16 date_time_count_increase_flag = 0;
 
 
 // display system date & time
@@ -5389,7 +5447,20 @@ L2_TIMER_Print (
   )
 {   
     EFI_TIME EFITime;
-    date_time_count++;
+
+	
+	if (date_time_count_increase_flag == 0)
+    {
+    	date_time_count++;
+	}
+	else if (date_time_count_increase_flag == 1)
+	{
+		date_time_count--;	
+	}
+		
+	if (date_time_count == 0 || date_time_count == 30)
+		date_time_count_increase_flag = (date_time_count_increase_flag == 0) ?  1 : 0;
+	
     gRT->GetTime(&EFITime, NULL);
     EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
     UINT16 x, y;
@@ -6144,7 +6215,6 @@ VOID L2_MOUSE_WallpaperResetClicked()
 }
 
 
-
 START_MENU_STATE_TRANSFORM StartMenuStateTransformTable[] =
 {
     {CLICK_INIT_STATE,              START_MENU_CLICKED_EVENT,           MENU_CLICKED_STATE,                 L2_MOUSE_MENU_Clicked},
@@ -6170,6 +6240,34 @@ typedef struct
 }PARTITION_PATH_DETAIL;
 PARTITION_ITEM_ACCESS_STATE PartitionItemAccessNextState = INIT_ACCESS_STATE;
 PARTITION_ITEM_ACCESS_EVENT PartitionItemAccessEvent = START_MENU_INIT_CLICKED_EVENT;
+
+
+VOID L3_PARTITION_PathAccess()
+{
+    PARTITION_ITEM_ACCESS_STATE     CurrentState;
+	UINT16 RootFlag = TRUE;
+
+    for (UINT16 i = 0; i <  sizeof(PartitionItemAccessStateTransformTable)/sizeof(PartitionItemAccessStateTransformTable[0]); i++ )
+    {
+        if (PartitionItemAccessStateTransformTable[i].CurrentState == PartitionItemAccessNextState 
+            && PartitionItemAccessEvent == PartitionItemAccessStateTransformTable[i].event )
+        {
+            PartitionItemAccessNextState = PartitionItemAccessStateTransformTable[i].NextState;
+
+            // need to check the return value after function runs..... 
+            PartitionItemAccessStateTransformTable[i].pFunc();
+            L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, 
+                                                        LogLayer, 
+                                                        "%d: StartMenuClickEvent: %d StartMenuNextState: %d\n", 
+                                                        __LINE__, 
+                                                        PartitionItemAccessEvent, 
+                                                        PartitionItemAccessNextState);
+            break;
+        }   
+    }
+    
+}
+
 int L1_STACK_Push(char* a,int top,char elem)
 {
     a[++top]=elem;
@@ -6181,10 +6279,10 @@ int L1_STACK_Pop(char * a,int top)
 {
     if (top==-1) 
     {
-        printf("¿ÕÕ»");
+        //printf("¿ÕÕ»");
         return -1;
     }
-    printf("µ¯Õ»ÔªËØ£º%c\n",a[top]);
+    //printf("µ¯Õ»ÔªËØ£º%c\n",a[top]);
     top--;
     return top;
 }
