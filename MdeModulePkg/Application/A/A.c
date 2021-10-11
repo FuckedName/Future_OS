@@ -3129,7 +3129,7 @@ VOID L2_GRAPHICS_LayerCompute(UINT16 iMouseX, UINT16 iMouseY, UINT8 MouseClickFl
 
     L2_MOUSE_Move();
     
-    L2_GRAPHICS_Copy(pDeskDisplayBuffer, pMouseBuffer, ScreenWidth, ScreenHeight, 16, 16, iMouseX, iMouseY);
+    L2_GRAPHICS_CopyNoReserved(pDeskDisplayBuffer, pMouseBuffer, ScreenWidth, ScreenHeight, 16, 16, iMouseX, iMouseY);
     //L2_DEBUG_Print1(DISPLAY_X, DISPLAY_Y, "%d: GraphicsLayerCompute\n", __LINE__);
 
     GraphicsOutput->Blt(GraphicsOutput, 
@@ -3699,26 +3699,6 @@ VOID L2_MOUSE_MyComputerClicked()
     
     L1_GRAPHICS_UpdateWindowLayer(GRAPHICS_LAYER_MY_COMPUTER_WINDOW);
     
-    for (UINT16 i = 0; i < PartitionCount; i++)
-    {   
-        MyComputerPositionX = WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].StartX;
-        MyComputerPositionY = WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].StartY;
-        if (iMouseX >= MyComputerPositionX + 50 && iMouseX <= MyComputerPositionX + 50 + 16 * 6
-            && iMouseY >= MyComputerPositionY + i * 16 + 16 * 2 && iMouseY <= MyComputerPositionY + i * 16 + 16 * 3)
-        {   
-            if (PreviousItem == i)
-            {
-                break;
-            }
-            
-            L2_GRAPHICS_RectangleDraw(pMouseSelectedBuffer, 0,  0, 31, 15, 1,  Color, 32);
-
-            // need to save result into cache, for next time to read, reduce disk operation
-            L2_STORE_PartitionItemsPrint(i);
-            PreviousItem = i;
-            L2_GRAPHICS_Copy(pDeskDisplayBuffer, pMouseSelectedBuffer, ScreenWidth, ScreenHeight, 32, 16, MyComputerPositionX + 50, MyComputerPositionY  + i * (16 + 2) + 16 * 2);   
-        }
-    }
 }
 
 
@@ -3922,27 +3902,7 @@ EFI_STATUS L2_GRAPHICS_ChineseHalfDraw(UINT8 *pBuffer,UINT8 d,
     return EFI_SUCCESS;
 }
 
-
 //http://quwei.911cha.com/
-EFI_STATUS L2_GRAPHICS_DrawChineseCharIntoBuffer(UINT8 *pBuffer,
-        IN UINTN x0, UINTN y0,UINT8 offset,
-        IN EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color , UINT16 AreaWidth)
-{
-    INT8 i;
-    if (NULL == pBuffer)
-    {
-        //DEBUG ((EFI_D_INFO, "NULL == pBuffer"));
-        return EFI_SUCCESS;
-    }
-    
-    for(i = 0; i < 32; i += 2)
-    {
-        L2_GRAPHICS_ChineseHalfDra2(pBuffer, sChinese[offset][i],     x0,     y0 + i / 2, 1, Color, AreaWidth);             
-        L2_GRAPHICS_ChineseHalfDra2(pBuffer, sChinese[offset][i + 1], x0 + 8, y0 + i / 2, 1, Color, AreaWidth);     
-    }
-    
-    return EFI_SUCCESS;
-}
 
 EFI_STATUS L2_GRAPHICS_ChineseCharDraw(UINT8 *pBuffer,
         IN UINTN x0, UINTN y0,UINT8 *c, UINT8 count,
@@ -5525,7 +5485,7 @@ L2_MOUSE_Event (IN EFI_EVENT Event, IN VOID *Context)
         iMouseY = ScreenHeight;
 
     //Button
-    if (State.LeftButton == 0x01)
+    if (State.LeftButton == MOUSE_LEFT_CLICKED)
     {
         //DEBUG ((EFI_D_INFO, "Left button clicked\n"));
         
@@ -6417,10 +6377,9 @@ typedef struct
     MasterBootRecordSwitched stMBRSwitched;
 }PARTITION_PATH_DETAIL;
 PARTITION_ITEM_ACCESS_STATE PartitionItemAccessNextState = INIT_ACCESS_STATE;
-PARTITION_ITEM_ACCESS_EVENT PartitionItemAccessEvent = START_MENU_INIT_CLICKED_EVENT;
+PARTITION_ITEM_ACCESS_EVENT PartitionItemAccessEvent = ROOT_PATH_ACCESS_EVENT;
 
-
-VOID L3_PARTITION_PathAccess()
+VOID L3_PARTITION_Access()
 {
 	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: L3_PARTITION_Access\n", __LINE__);
 	
