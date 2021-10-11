@@ -1160,7 +1160,7 @@ void L1_MEMORY_RectangleFill(UINT8 *pBuffer,
 {    
     if (NULL == pBuffer)
     {
-        DEBUG ((EFI_D_INFO, "NULL == pBuffer"));
+        //DEBUG ((EFI_D_INFO, "NULL == pBuffer"));
         return ;
     }
     
@@ -1323,7 +1323,7 @@ void L2_GRAPHICS_RectangleDraw(UINT8 *pBuffer,
 {    
     if (NULL == pBuffer)
     {
-        DEBUG ((EFI_D_INFO, "NULL == pBuffer"));
+        //DEBUG ((EFI_D_INFO, "NULL == pBuffer"));
         return ;
     }
     
@@ -1354,7 +1354,7 @@ VOID L2_GRAPHICS_Copy(UINT8 *pDest, UINT8 *pSource,
 }
 
 // Draw 8 X 16 point
-EFI_STATUS L2_GRAPHICS_ChineseHalfDra2(UINT8 *pBuffer,UINT8 d,
+EFI_STATUS L2_GRAPHICS_ChineseHalfDraw2(UINT8 *pBuffer,UINT8 d,
         IN UINTN x0, UINTN y0,
         UINT8 width,
         IN EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color, UINT16 AreaWidth)
@@ -1362,7 +1362,7 @@ EFI_STATUS L2_GRAPHICS_ChineseHalfDra2(UINT8 *pBuffer,UINT8 d,
     //L2_DEBUG_Print1(10, 10, "%X %X %X %X", x0, y0, AreaWidth);
     if (NULL == pBuffer)
     {
-        DEBUG ((EFI_D_INFO, "pBuffer is NULL\n"));
+        //DEBUG ((EFI_D_INFO, "pBuffer is NULL\n"));
         return EFI_SUCCESS;
     }
         
@@ -1462,27 +1462,27 @@ EFI_STATUS L2_GRAPHICS_ChineseCharDraw2(UINT8 *pBuffer,
 {
     INT8 i;
     //L2_DEBUG_Print1(10, 10, "%X %X %X %X", x0, y0, offset, AreaWidth);
-    //DEBUG ((EFI_D_INFO, "%X %X %X %X", x0, y0, offset, AreaWidth));
+    ////DEBUG ((EFI_D_INFO, "%X %X %X %X", x0, y0, offset, AreaWidth));
 
     if (NULL == pBuffer)
     {
-        DEBUG ((EFI_D_INFO, "NULL == pBuffer"));
+        //DEBUG ((EFI_D_INFO, "NULL == pBuffer"));
         return EFI_SUCCESS;
     }
 
     if (offset < 1)
     {
-        DEBUG ((EFI_D_INFO, "offset < 1 \n"));
+        //DEBUG ((EFI_D_INFO, "offset < 1 \n"));
         return EFI_SUCCESS;
     }
     
     for(i = 0; i < 32; i += 2)
     {
-        L2_GRAPHICS_ChineseHalfDra2(pBuffer, sChineseChar[offset * 32 + i ],     x0,     y0 + i / 2, 1, Color, AreaWidth);              
-        L2_GRAPHICS_ChineseHalfDra2(pBuffer, sChineseChar[offset * 32 + i + 1],  x0 + 8, y0 + i / 2, 1, Color, AreaWidth);      
+        L2_GRAPHICS_ChineseHalfDraw2(pBuffer, sChineseChar[offset * 32 + i ],     x0,     y0 + i / 2, 1, Color, AreaWidth);              
+        L2_GRAPHICS_ChineseHalfDraw2(pBuffer, sChineseChar[offset * 32 + i + 1],  x0 + 8, y0 + i / 2, 1, Color, AreaWidth);      
     }
     
-    //DEBUG ((EFI_D_INFO, "\n"));
+    ////DEBUG ((EFI_D_INFO, "\n"));
     
     return EFI_SUCCESS;
 }
@@ -1713,24 +1713,24 @@ void L1_FILE_NameGet2(UINT8 deviceID, UINT8 *FileName)
     }
 }
 
-void L1_FILE_NameGet(UINT8 deviceID, UINT8 *FileName)
+void L1_FILE_NameGet(UINT8 ItemID, UINT8 *FileName)
  {    
     int count = 0;
-    while (pItems[deviceID].FileName[count] != 0)
+    while (pItems[ItemID].FileName[count] != 0)
     {
-        FileName[count] = pItems[deviceID].FileName[count];
+        FileName[count] = pItems[ItemID].FileName[count];
         count++;
     }
     
-    if (pItems[deviceID].ExtensionName[0] != 0)
+    if (pItems[ItemID].ExtensionName[0] != 0)
     {
         FileName[count] = ' ';
         count++;
     }
     int count2 = 0;
-    while (pItems[deviceID].ExtensionName[count2] != 0)
+    while (pItems[ItemID].ExtensionName[count2] != 0)
     {
-        FileName[count] = pItems[deviceID].ExtensionName[count2];
+        FileName[count] = pItems[ItemID].ExtensionName[count2];
         count++;
         count2++;
     }
@@ -1814,7 +1814,7 @@ UINTN L1_STRING_Length(char *String)
 {
     UINTN  Length;
     for (Length = 0; *String != '\0'; String++, Length++) ;
-//   DEBUG ((EFI_D_INFO, "%d Length: %d\n", __LINE__, Length));
+//   //DEBUG ((EFI_D_INFO, "%d Length: %d\n", __LINE__, Length));
     return Length;
 }
 
@@ -2224,18 +2224,18 @@ L1_MATH_StringToLongLong(const char * nptr, char ** endptr, int base)
   base = 16; 
   ++nptr;
   ++nptr;
-  DEBUG ((EFI_D_INFO, "line:%d device->StartSectorNumber: %a base: %d \n", __LINE__, nptr, base));
+  //DEBUG ((EFI_D_INFO, "line:%d device->StartSectorNumber: %a base: %d \n", __LINE__, nptr, base));
 
   while( L1_STRING_IsAllNumber(*nptr) && ((temp = L1_MATH_DigitToInteger(*nptr)) < base)) 
   {
-    DEBUG ((EFI_D_INFO, "line:%d temp: %d, Result: %d \n", __LINE__, temp, Result));
+    //DEBUG ((EFI_D_INFO, "line:%d temp: %d, Result: %d \n", __LINE__, temp, Result));
     Previous = Result;
     Result = L1_MATH_Multi (Result, base) + (long long int)temp;
     if( Result <= Previous) 
     {   // Detect Overflow
       if(Negative) 
       {
-        DEBUG ((EFI_D_INFO, "line:%d Negative!!!!\n", __LINE__, temp, Result));
+        //DEBUG ((EFI_D_INFO, "line:%d Negative!!!!\n", __LINE__, temp, Result));
         Result = LLONG_MIN;
       }
       else 
@@ -2248,7 +2248,7 @@ L1_MATH_StringToLongLong(const char * nptr, char ** endptr, int base)
     pEnd = ++nptr;
   }
 
-  DEBUG ((EFI_D_INFO, "line:%d device->StartSectorNumber: %d \n", __LINE__, Result));
+  //DEBUG ((EFI_D_INFO, "line:%d device->StartSectorNumber: %d \n", __LINE__, Result));
   if(Negative) 
   {
     Result = -Result;
@@ -2260,7 +2260,7 @@ L1_MATH_StringToLongLong(const char * nptr, char ** endptr, int base)
     *endptr = (char *)pEnd;
   }
 
-  DEBUG ((EFI_D_INFO, "line:%d temp: %d, Result: %d \n", __LINE__, temp, Result));
+  //DEBUG ((EFI_D_INFO, "line:%d temp: %d, Result: %d \n", __LINE__, temp, Result));
   return Result;
 }
 
@@ -2352,7 +2352,7 @@ void L2_STORE_TextDevicePathAnalysis(CHAR16 *p, DEVICE_PARAMETER *device, UINTN 
     temp[j] = '\0';
     //strtol(const char * nptr,char * * endptr,int base)
     //puts(temp);
-    DEBUG ((EFI_D_INFO, "line:%d device->StartSectorNumber: %a \n", __LINE__, temp));
+    //DEBUG ((EFI_D_INFO, "line:%d device->StartSectorNumber: %a \n", __LINE__, temp));
     //printf("line:%d start: %d\n", __LINE__, strtol(temp));
     device->StartSectorNumber = L1_MATH_StringToLongLong(temp, NULL, 10);
     //putchar('\n');
@@ -2368,7 +2368,7 @@ void L2_STORE_TextDevicePathAnalysis(CHAR16 *p, DEVICE_PARAMETER *device, UINTN 
     //puts(temp);
     //printf("line:%d end: %d\n", __LINE__, strtol(temp));
     device->SectorCount = L1_MATH_StringToLongLong(temp, NULL, 10);;
-    DEBUG ((EFI_D_INFO, "line:%d device->SectorCount: %a \n", __LINE__, temp));
+    //DEBUG ((EFI_D_INFO, "line:%d device->SectorCount: %a \n", __LINE__, temp));
     //putchar('\n');
     
     //L2_DEBUG_Print1(0, 11 * 16, "line: %d string: %s, length: %d\n",       __LINE__, p, strlen(p));
@@ -2383,11 +2383,11 @@ void L2_STORE_TextDevicePathAnalysis(CHAR16 *p, DEVICE_PARAMETER *device, UINTN 
                                 device->PartitionType,
                                 device->PartitionID);
                                 
-    DEBUG ((EFI_D_INFO, "line:%d device->DeviceType: %d \n", __LINE__, device->DeviceType));
-    DEBUG ((EFI_D_INFO, "line:%d device->PartitionType: %d \n", __LINE__, device->PartitionType));
-    DEBUG ((EFI_D_INFO, "line:%d device->PartitionID: %d \n", __LINE__, device->PartitionID));
-    DEBUG ((EFI_D_INFO, "line:%d device->StartSectorNumber: %d \n", __LINE__, device->StartSectorNumber));
-    DEBUG ((EFI_D_INFO, "line:%d device->SectorCount: %d \n", __LINE__, device->SectorCount));
+    //DEBUG ((EFI_D_INFO, "line:%d device->DeviceType: %d \n", __LINE__, device->DeviceType));
+    //DEBUG ((EFI_D_INFO, "line:%d device->PartitionType: %d \n", __LINE__, device->PartitionType));
+    //DEBUG ((EFI_D_INFO, "line:%d device->PartitionID: %d \n", __LINE__, device->PartitionID));
+    //DEBUG ((EFI_D_INFO, "line:%d device->StartSectorNumber: %d \n", __LINE__, device->StartSectorNumber));
+    //DEBUG ((EFI_D_INFO, "line:%d device->SectorCount: %d \n", __LINE__, device->SectorCount));
     //putchar('\n');
 }
 
@@ -2512,7 +2512,7 @@ EFI_STATUS L2_FILE_NTFS_MFT_Item_Read(UINT16 DeviceID, UINT16 MFT_Item_ID)
 {
     L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d DeviceID: %d\n", __LINE__, DeviceID);
     //printf( "RootPathAnalysis\n" );
-    DEBUG ((EFI_D_INFO, "PartitionUSBRead!!\r\n"));
+    //DEBUG ((EFI_D_INFO, "PartitionUSBRead!!\r\n"));
     EFI_STATUS Status ;
     EFI_HANDLE *ControllerHandle = NULL;
 
@@ -2770,7 +2770,7 @@ EFI_STATUS L2_STORE_PartitionAnalysis()
     //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: Status:%X \n", __LINE__, Status);
     if (EFI_ERROR(Status))
     {
-         DEBUG ((EFI_D_INFO, "LocateProtocol1 error: %x\n", Status));
+         //DEBUG ((EFI_D_INFO, "LocateProtocol1 error: %x\n", Status));
          L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: Status:%X \n", __LINE__, Status);
         return Status;
     }
@@ -3616,7 +3616,7 @@ VOID L2_MOUSE_MenuButtonClick()
         char *pClickMenuBuffer = (UINT8 *)AllocateZeroPool(16 * 16 * 4);
         if (NULL != pClickMenuBuffer)
         {
-            DEBUG ((EFI_D_INFO, "ScreenInit AllocatePool pDeskDisplayBuffer NULL\n"));
+            //DEBUG ((EFI_D_INFO, "ScreenInit AllocatePool pDeskDisplayBuffer NULL\n"));
 
             for(int i = 0; i < 16; i++)
                 for(int j = 0; j < 16; j++)
@@ -3734,7 +3734,7 @@ EFI_STATUS L2_GRAPHICS_DrawChineseCharIntoBuffer(UINT8 *pBuffer,
     INT8 i;
     if (NULL == pBuffer)
     {
-        DEBUG ((EFI_D_INFO, "NULL == pBuffer"));
+        //DEBUG ((EFI_D_INFO, "NULL == pBuffer"));
         return EFI_SUCCESS;
     }
     
@@ -3755,7 +3755,7 @@ EFI_STATUS L2_GRAPHICS_ChineseCharDraw(UINT8 *pBuffer,
     
     if (NULL == pBuffer)
     {
-        DEBUG ((EFI_D_INFO, "NULL == pBuffer"));
+        //DEBUG ((EFI_D_INFO, "NULL == pBuffer"));
         return EFI_SUCCESS;
     }
 
@@ -4006,7 +4006,7 @@ void L1_MEMORY_SetValue(UINT8 *pBuffer, UINT32 Length, UINT8 Value)
 EFI_STATUS L2_STORE_ReadFileFSM()
 {    
     L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d ReadFileFSM: PartitionCount: %d FileLength: %d sector_count: %llu\n", __LINE__, PartitionCount, FileLength, sector_count);
-    //DEBUG ((EFI_D_INFO, "PartitionUSBRead!!\r\n"));
+    ////DEBUG ((EFI_D_INFO, "PartitionUSBRead!!\r\n"));
     EFI_STATUS Status ;
     UINT8 BufferBlock[DISK_BLOCK_BUFFER_SIZE];
             
@@ -4137,7 +4137,7 @@ VOID EFIAPI L2_TIMER_Slice(
     if (TimerSliceCount % 50 == 0)
        gBS->SignalEvent (MultiTaskTriggerGroup2Event);
     
-    //DEBUG ((EFI_D_INFO, "System time slice Loop ...\n"));
+    ////DEBUG ((EFI_D_INFO, "System time slice Loop ...\n"));
     //gBS->SignalEvent (MultiTaskTriggerEvent);
 
     TimerSliceCount++;
@@ -4316,7 +4316,7 @@ float L2_MEMORY_GETs()
                                 &DescriptorSize,
                                 &DescriptorVersion);
     //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: Status:%X \n", __LINE__, Status);            
-    DEBUG ((EFI_D_INFO, "%d:  Status:%X \n", __LINE__, Status));
+    //DEBUG ((EFI_D_INFO, "%d:  Status:%X \n", __LINE__, Status));
     ASSERT (Status == EFI_BUFFER_TOO_SMALL);
     //
     // Enlarge space here, because we will allocate pool now.
@@ -4328,7 +4328,7 @@ float L2_MEMORY_GETs()
     ASSERT_EFI_ERROR (Status);
     //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: Status:%X \n", __LINE__, Status);
         
-    DEBUG ((EFI_D_INFO, "%d:  Status:%X \n", __LINE__, Status));
+    //DEBUG ((EFI_D_INFO, "%d:  Status:%X \n", __LINE__, Status));
     //
     // Get System MemoryMap
     //
@@ -4340,7 +4340,7 @@ float L2_MEMORY_GETs()
     ASSERT_EFI_ERROR (Status);
     //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: Status:%X \n", __LINE__, Status);
         
-    DEBUG ((EFI_D_INFO, "%d:  Status:%X \n", __LINE__, Status));
+    //DEBUG ((EFI_D_INFO, "%d:  Status:%X \n", __LINE__, Status));
     
     EFI_PHYSICAL_ADDRESS lastPhysicalEnd = 0;
     UINTN ContinuousMemoryPages = 0;
@@ -4357,7 +4357,7 @@ float L2_MEMORY_GETs()
         E820Type = 0;
       //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: Index:%X \n", __LINE__, Index);
         
-      //DEBUG ((EFI_D_INFO, "%d:  Status:%X \n", __LINE__, Status));
+      ////DEBUG ((EFI_D_INFO, "%d:  Status:%X \n", __LINE__, Status));
     
       if (MemoryMap->NumberOfPages == 0) 
       {
@@ -4410,7 +4410,7 @@ float L2_MEMORY_GETs()
                                                                                 ContinuousMemoryPages,
                                                                                 ContinuousMemoryStart + ContinuousMemoryPages * 4 * 1024);
                                                                                 
-                     DEBUG ((EFI_D_INFO, "%d: E820Type:%X Start:%X Virtual Start:%X Number:%X\n", __LINE__, 
+                     //DEBUG ((EFI_D_INFO, "%d: E820Type:%X Start:%X Virtual Start:%X Number:%X\n", __LINE__, 
                                                                                 ContinuousMemoryStart,
                                                                                 ContinuousVirtualMemoryStart,
                                                                                 ContinuousMemoryPages,
@@ -4445,15 +4445,15 @@ float L2_MEMORY_GETs()
         
           default:
                 MemoryClassifySize[5] += MemoryMap->NumberOfPages;
-                DEBUG ((DEBUG_ERROR,
+                /*DEBUG ((DEBUG_ERROR,
                   "Invalid EFI memory descriptor type (0x%x)!\n",
                   MemoryMap->Type));
-                    
-                   DEBUG ((EFI_D_INFO, "%d:  Invalid EFI memory descriptor type (0x%x)!\n", __LINE__, MemoryMap->Type));
+                  */  
+                   //DEBUG ((EFI_D_INFO, "%d:  Invalid EFI memory descriptor type (0x%x)!\n", __LINE__, MemoryMap->Type));
                 continue;         
       }
 
-      /*DEBUG ((EFI_D_INFO, "%d: E820Type:%X Start:%X Virtual Start:%X Number:%X\n", __LINE__, 
+      /*//DEBUG ((EFI_D_INFO, "%d: E820Type:%X Start:%X Virtual Start:%X Number:%X\n", __LINE__, 
                                                                             E820Type, 
                                                                             MemoryMap->PhysicalStart, 
                                                                             MemoryMap->VirtualStart, 
@@ -4543,7 +4543,7 @@ EFI_STATUS L3_WINDOW_Create(UINT8 *pBuffer, UINT8 *pParent, UINT16 Width, UINT16
 
     if (NULL == pBuffer)
     {
-        DEBUG ((EFI_D_INFO, "NULL == pBuffer"));
+        //DEBUG ((EFI_D_INFO, "NULL == pBuffer"));
         return EFI_SUCCESS;
     }   
     
@@ -5033,7 +5033,7 @@ EFI_STATUS L3_APPLICATION_ReadFile(UINT8 *FileName, UINT8 NameLength, UINT8 *pBu
     for (int i = 0; i < 5; i++)
     {
         L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: i: %d \n", __LINE__, i);
-        DEBUG ((EFI_D_INFO, "%d HandleEnterPressed FSM_Event: %d\n", __LINE__, READ_FILE_FSM_Event));
+        //DEBUG ((EFI_D_INFO, "%d HandleEnterPressed FSM_Event: %d\n", __LINE__, READ_FILE_FSM_Event));
         L2_STORE_FileRead(READ_FILE_FSM_Event++);
 
         if (READ_FILE_EVENT <= READ_FILE_FSM_Event)
@@ -5048,7 +5048,7 @@ UINT8 readflag = 0;
 
 VOID L2_KEYBOARD_KeyPressed()
 {
-    DEBUG ((EFI_D_INFO, "%d HandleEnterPressed\n", __LINE__));
+    //DEBUG ((EFI_D_INFO, "%d HandleEnterPressed\n", __LINE__));
     
         
     EFI_STATUS Status;
@@ -5057,7 +5057,7 @@ VOID L2_KEYBOARD_KeyPressed()
 
     // char buffer[SYSTEM_ICON_WIDTH * SYSTEM_ICON_HEIGHT * 3 + 0x36] = {0};
     
-    DEBUG ((EFI_D_INFO, "%d HandleEnterPressed\n", __LINE__));
+    //DEBUG ((EFI_D_INFO, "%d HandleEnterPressed\n", __LINE__));
     return EFI_SUCCESS;
 }
 
@@ -5307,7 +5307,7 @@ L2_MOUSE_Event (IN EFI_EVENT Event, IN VOID *Context)
         y_move = (State.RelativeMovementY >> 16) & 0xff;
     }
 
-    //DEBUG ((EFI_D_INFO, "X: %X, Y: %X ", x_move, y_move));
+    ////DEBUG ((EFI_D_INFO, "X: %X, Y: %X ", x_move, y_move));
     L2_DEBUG_Print1(0, ScreenHeight - 30 -  8 * 16, "%d X: %04d, Y: %04d move X: %X move Y: %X", __LINE__, iMouseX, iMouseY, x_move, y_move );
     
     //L2_DEBUG_Print1(0, ScreenHeight - 30 -  8 * 16, "%d: X move: %d Y move: %d left: %d right: %d", __LINE__, State.RelativeMovementX, State.RelativeMovementY, State.LeftButton, State.RightButton);
@@ -5330,7 +5330,7 @@ L2_MOUSE_Event (IN EFI_EVENT Event, IN VOID *Context)
     //Button
     if (State.LeftButton == 0x01)
     {
-        DEBUG ((EFI_D_INFO, "Left button clicked\n"));
+        //DEBUG ((EFI_D_INFO, "Left button clicked\n"));
         
         L2_GRAPHICS_RightClickMenu(iMouseX, iMouseY);
         
@@ -5341,7 +5341,7 @@ L2_MOUSE_Event (IN EFI_EVENT Event, IN VOID *Context)
     
     if (State.RightButton == 0x01)
     {
-        DEBUG ((EFI_D_INFO, "Right button clicked\n"));
+        //DEBUG ((EFI_D_INFO, "Right button clicked\n"));
         //DrawAsciiCharUseBuffer(GraphicsOutput, 20 + process2_i * 8 + 16, 60, 'R', Color);
 
         L2_GRAPHICS_RightClickMenu(iMouseX, iMouseY);
@@ -5349,7 +5349,7 @@ L2_MOUSE_Event (IN EFI_EVENT Event, IN VOID *Context)
         MouseClickFlag = 2;
     }
     //L2_DEBUG_Print1(DISPLAY_X, DISPLAY_Y, "%d: HandleMouseEvent\n", __LINE__);
-    //DEBUG ((EFI_D_INFO, "\n"));
+    ////DEBUG ((EFI_D_INFO, "\n"));
     L2_MOUSE_Move();
     
     gBS->WaitForEvent( 1, &gMouse->WaitForInput, &Index );
@@ -5577,7 +5577,7 @@ EFI_STATUS L2_TIMER_IntervalInit0()
     TimerCount = (UINT32 *)AllocateZeroPool(4);
     if (NULL == TimerCount)
     {
-        DEBUG(( EFI_D_INFO, "%d, NULL == TimerCount \r\n", __LINE__));
+        //DEBUG(( EFI_D_INFO, "%d, NULL == TimerCount \r\n", __LINE__));
         return;
     }
 
@@ -5589,7 +5589,7 @@ EFI_STATUS L2_TIMER_IntervalInit0()
 
     if ( EFI_ERROR( Status ) )
     {
-        DEBUG(( EFI_D_INFO, "Create Event Error! \r\n" ));
+        //DEBUG(( EFI_D_INFO, "Create Event Error! \r\n" ));
         return(1);
     }
 
@@ -5599,7 +5599,7 @@ EFI_STATUS L2_TIMER_IntervalInit0()
 
     if ( EFI_ERROR( Status ) )
     {
-        DEBUG(( EFI_D_INFO, "Set Timer Error! \r\n" ));
+        //DEBUG(( EFI_D_INFO, "Set Timer Error! \r\n" ));
         return(2);
     }
 
@@ -5691,7 +5691,7 @@ EFI_STATUS L2_TIMER_IntervalInit()
     TimerCount = (UINT32 *)AllocateZeroPool(4);
     if (NULL == TimerCount)
     {
-        DEBUG(( EFI_D_INFO, "%d, NULL == TimerCount \r\n", __LINE__));
+        //DEBUG(( EFI_D_INFO, "%d, NULL == TimerCount \r\n", __LINE__));
         return;
     }
 
@@ -5703,7 +5703,7 @@ EFI_STATUS L2_TIMER_IntervalInit()
 
     if ( EFI_ERROR( Status ) )
     {
-        DEBUG(( EFI_D_INFO, "Create Event Error! \r\n" ));
+        //DEBUG(( EFI_D_INFO, "Create Event Error! \r\n" ));
         return(1);
     }
 
@@ -5713,7 +5713,7 @@ EFI_STATUS L2_TIMER_IntervalInit()
 
     if ( EFI_ERROR( Status ) )
     {
-        DEBUG(( EFI_D_INFO, "Set Timer Error! \r\n" ));
+        //DEBUG(( EFI_D_INFO, "Set Timer Error! \r\n" ));
         return(2);
     }
     UINT32 QuitTimerCount = 0;
@@ -6453,7 +6453,7 @@ EFI_STATUS L2_COMMON_MemoryAllocate()
     sChineseChar = (UINT8 *)L2_MEMORY_Allocate("Chinese Char Buffer", MEMORY_TYPE_GRAPHICS, size);
     if (NULL == sChineseChar)
     {
-        DEBUG ((EFI_D_INFO, "ChineseCharArrayInit AllocateZeroPool Failed: %x!\n "));
+        //DEBUG ((EFI_D_INFO, "ChineseCharArrayInit AllocateZeroPool Failed: %x!\n "));
         L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: ChineseCharArrayInit AllocateZeroPool failed\n",  __LINE__);
         return -1;
     }   
@@ -6487,21 +6487,21 @@ EFI_STATUS L2_COMMON_MemoryAllocate()
     pMouseBuffer = (UINT8 *)L2_MEMORY_Allocate("Mouse Buffer", MEMORY_TYPE_GRAPHICS, 16 * 16 * 4);
     if (NULL == pMouseBuffer)
     {
-        DEBUG ((EFI_D_INFO, "MultiProcessInit pMouseBuffer pDeskDisplayBuffer NULL\n"));
+        //DEBUG ((EFI_D_INFO, "MultiProcessInit pMouseBuffer pDeskDisplayBuffer NULL\n"));
         return -1;
     }
     
     pMouseSelectedBuffer = (UINT8 *)L2_MEMORY_Allocate("Mouse Selected Buffer", MEMORY_TYPE_GRAPHICS, 16 * 16 * 2 * 4);
     if (NULL == pMouseSelectedBuffer)
     {
-        DEBUG ((EFI_D_INFO, "ScreenInit AllocatePool pDeskDisplayBuffer NULL\n"));
+        //DEBUG ((EFI_D_INFO, "ScreenInit AllocatePool pDeskDisplayBuffer NULL\n"));
         return -1;
     }
     
     pStartMenuBuffer = (UINT8 *)L2_MEMORY_Allocate("Start Menu Buffer", MEMORY_TYPE_GRAPHICS, StartMenuWidth * StartMenuHeight * 4);
     if (NULL == pStartMenuBuffer)
     {
-        DEBUG ((EFI_D_INFO, "ChineseCharArrayInit pStartMenuBuffer Failed: %x!\n "));
+        //DEBUG ((EFI_D_INFO, "ChineseCharArrayInit pStartMenuBuffer Failed: %x!\n "));
         L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: pStartMenuBuffer AllocateZeroPool failed\n",  __LINE__);
         return -1;
     }   
@@ -6509,7 +6509,7 @@ EFI_STATUS L2_COMMON_MemoryAllocate()
     pMyComputerBuffer = (UINT8 *)L2_MEMORY_Allocate("My Computer Buffer", MEMORY_TYPE_GRAPHICS, MyComputerWidth * MyComputerHeight * 4); 
     if (pMyComputerBuffer == NULL)
     {
-        DEBUG ((EFI_D_INFO, "MyComputer , AllocateZeroPool failed... "));
+        //DEBUG ((EFI_D_INFO, "MyComputer , AllocateZeroPool failed... "));
         return -1;
     }       
 
@@ -6520,7 +6520,7 @@ EFI_STATUS L2_COMMON_MemoryAllocate()
     pSystemLogWindowBuffer = (UINT8 *)L2_MEMORY_Allocate("System Log Window Buffer", MEMORY_TYPE_GRAPHICS, SystemLogWindowWidth * SystemLogWindowHeight * 4);
     if (pSystemLogWindowBuffer == NULL)
     {
-        DEBUG ((EFI_D_INFO, "pSystemLogWindowBuffer , AllocateZeroPool failed... "));
+        //DEBUG ((EFI_D_INFO, "pSystemLogWindowBuffer , AllocateZeroPool failed... "));
         return -1;
     }
     
@@ -6540,7 +6540,7 @@ EFI_STATUS L2_COMMON_MemoryAllocate()
     pSystemSettingWindowBuffer = (UINT8 *)L2_MEMORY_Allocate("System Setting Window Buffer", MEMORY_TYPE_GRAPHICS, SystemSettingWindowWidth * SystemSettingWindowHeight * 4);
     if (NULL == pSystemSettingWindowBuffer)
     {
-        DEBUG ((EFI_D_INFO, "ChineseCharArrayInit pStartMenuBuffer Failed: %x!\n "));
+        //DEBUG ((EFI_D_INFO, "ChineseCharArrayInit pStartMenuBuffer Failed: %x!\n "));
         L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: pStartMenuBuffer AllocateZeroPool failed\n",  __LINE__);
         return -1;
     }   
@@ -6678,7 +6678,7 @@ Main (
     char *pBuffer = (UINT8 *)AllocatePool(4); 
     if (NULL == pBuffer)
     {
-        DEBUG ((EFI_D_INFO, "ScreenInit AllocatePool pDeskBuffer NULL\n"));
+        //DEBUG ((EFI_D_INFO, "ScreenInit AllocatePool pDeskBuffer NULL\n"));
         return -1;
     }
     
