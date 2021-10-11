@@ -240,7 +240,7 @@ CHAR8 y_move = 0;
 UINT16 DebugPrintX = 0;
 UINT16 DebugPrintY = 0; 
 
-UINT8 MouseClickFlag = 0;
+UINT8 MouseClickFlag = MOUSE_NO_CLICKED;
 INT8 DisplayRootItemsFlag = 0;
 INT8 DisplayMyComputerFlag = 0;
 INT8 DisplaySystemLogWindowFlag = 0;
@@ -1094,6 +1094,7 @@ typedef struct
     UINT16 StartY;
     UINT16 WindowWidth;
     UINT16 WindowHeight;
+    UINT16 LayerID;
 }WINDOW_LAYER_ITEM;
 
 typedef struct
@@ -1352,6 +1353,25 @@ VOID L2_GRAPHICS_Copy(UINT8 *pDest, UINT8 *pSource,
         }
     }
 }
+
+// Note: Do not copy Color's reserved member
+VOID L2_GRAPHICS_CopyNoReserved(UINT8 *pDest, UINT8 *pSource, 
+                           UINT16 DestWidth, UINT16 DestHeight, 
+                           UINT16 SourceWidth, UINT16 SourceHeight, 
+                           UINT16 StartX, UINT16 StartY)
+{
+    int i, j;
+    for(i = 0; i < SourceHeight; i++)
+    {
+        for (j = 0; j < SourceWidth; j++)
+        {
+            pDest[((StartY + i) * DestWidth + StartX + j) * 4] = pSource[(i * SourceWidth + j) * 4];
+            pDest[((StartY + i) * DestWidth + StartX + j) * 4 + 1] = pSource[(i * SourceWidth + j) * 4 + 1];
+            pDest[((StartY + i) * DestWidth + StartX + j) * 4 + 2] = pSource[(i * SourceWidth + j) * 4 + 2];
+        }
+    }
+}
+
 
 // Draw 8 X 16 point
 EFI_STATUS L2_GRAPHICS_ChineseHalfDraw2(UINT8 *pBuffer,UINT8 d,
@@ -2810,7 +2830,7 @@ EFI_STATUS L2_STORE_PartitionAnalysis()
 }
 
 L3_GRAPHICS_ItemPrint(UINT8 *pDestBuffer, UINT8 *pSourceBuffer, UINT16 pDestWidth, UINT16 pDestHeight, 
-                              UINT16 pSourceWidth, UINT16 pSourceHeight, UINT16 x, UINT16 y, CHAR8 *pNameString, CHAR16 StringType)
+                              UINT16 pSourceWidth, UINT16 pSourceHeight, UINT16 x, UINT16 y, CHAR8 *pNameString, CHAR16 StringType, UINT16 DestLayerID)
 {
 	UINT16 WindowLayerID = 0;
 	WindowLayers.item[WindowLayerID];
@@ -2822,6 +2842,7 @@ L3_GRAPHICS_ItemPrint(UINT8 *pDestBuffer, UINT8 *pSourceBuffer, UINT16 pDestWidt
             pDestBuffer[((y + j) * pDestWidth + x + k) * 4 ]     = pSourceBuffer[((pSourceHeight - j) * pSourceWidth + k) * 3 ];
             pDestBuffer[((y + j) * pDestWidth + x + k) * 4 + 1 ] = pSourceBuffer[((pSourceHeight - j) * pSourceWidth + k) * 3 + 1 ];
             pDestBuffer[((y + j) * pDestWidth + x + k) * 4 + 2 ] = pSourceBuffer[((pSourceHeight - j) * pSourceWidth + k) * 3 + 2 ];
+            pDestBuffer[((y + j) * pDestWidth + x + k) * 4 + 3 ] = DestLayerID;
         }
     }
 
@@ -2992,7 +3013,7 @@ L2_STORE_FolderItemsPrint()
         if (pItems[i].Attribute[0] == 0x10) //Folder
         {
             ;
-            L3_GRAPHICS_ItemPrint(pMyComputerBuffer, pSystemIconFolderBuffer, MyComputerWidth, MyComputerHeight, WidthNew, HeightNew, x, y, "111", 2);
+            L3_GRAPHICS_ItemPrint(pMyComputerBuffer, pSystemIconFolderBuffer, MyComputerWidth, MyComputerHeight, WidthNew, HeightNew, x, y, "111", 2, GRAPHICS_LAYER_MY_COMPUTER_WINDOW);
             /*
             for (int j = 0; j < HeightNew; j++)
             {
@@ -3026,7 +3047,7 @@ L2_STORE_FolderItemsPrint()
                                             name,
                                             L1_NETWORK_4BytesToUINT32(pItems[i].FileLength));
             
-            L3_GRAPHICS_ItemPrint(pMyComputerBuffer, pSystemIconTextBuffer, MyComputerWidth, MyComputerHeight, WidthNew, HeightNew, x, y, "222", 2);
+            L3_GRAPHICS_ItemPrint(pMyComputerBuffer, pSystemIconTextBuffer, MyComputerWidth, MyComputerHeight, WidthNew, HeightNew, x, y, "222", 2, GRAPHICS_LAYER_MY_COMPUTER_WINDOW);
             valid_count++;
         }
     }       
@@ -4128,8 +4149,8 @@ VOID EFIAPI L2_TIMER_Slice(
     IN VOID           *Context
     )
 {
-    L2_DEBUG_Print1(0, ScreenHeight - 30 - 5 * 16, "%d TimeSlice %x %lu \n", __LINE__, Context, *((UINT32 *)Context));
-    L2_DEBUG_Print1(0, ScreenHeight - 30 - 6 * 16, "%d TimerSliceCount: %lu \n", __LINE__, TimerSliceCount);
+    L2_DEBUG_Print1(0, ScreenHeight - 30 - 5 * 16, "%d: TimeSlice %x %lu \n", __LINE__, Context, *((UINT32 *)Context));
+    L2_DEBUG_Print1(0, ScreenHeight - 30 - 6 * 16, "%d: TimerSliceCount: %lu \n", __LINE__, TimerSliceCount);
     //Print(L"%lu\n", *((UINT32 *)Context));
     if (TimerSliceCount % 10 == 0)
        gBS->SignalEvent (MultiTaskTriggerGroup1Event);
@@ -5308,7 +5329,7 @@ L2_MOUSE_Event (IN EFI_EVENT Event, IN VOID *Context)
     }
 
     ////DEBUG ((EFI_D_INFO, "X: %X, Y: %X ", x_move, y_move));
-    L2_DEBUG_Print1(0, ScreenHeight - 30 -  8 * 16, "%d X: %04d, Y: %04d move X: %X move Y: %X", __LINE__, iMouseX, iMouseY, x_move, y_move );
+    L2_DEBUG_Print1(0, ScreenHeight - 30 -  8 * 16, "%d: X: %04d, Y: %04d move X: %X move Y: %X", __LINE__, iMouseX, iMouseY, x_move, y_move );
     
     //L2_DEBUG_Print1(0, ScreenHeight - 30 -  8 * 16, "%d: X move: %d Y move: %d left: %d right: %d", __LINE__, State.RelativeMovementX, State.RelativeMovementY, State.LeftButton, State.RightButton);
     iMouseX = iMouseX + x_move * 3;
@@ -5484,7 +5505,7 @@ L2_TIMER_Print (
 
     L2_GRAPHICS_ChineseCharDraw2(pDeskBuffer, x, y, (AreaCode - 1 ) * 94 + BitCode - 1, Color, ScreenWidth);
     
-   L2_DEBUG_Print1(DISPLAY_DESK_HEIGHT_WEIGHT_X, DISPLAY_DESK_HEIGHT_WEIGHT_Y, "%d ScreenWidth:%d, ScreenHeight:%d\n", __LINE__, ScreenWidth, ScreenHeight);
+   L2_DEBUG_Print1(DISPLAY_DESK_HEIGHT_WEIGHT_X, DISPLAY_DESK_HEIGHT_WEIGHT_Y, "%d: ScreenWidth:%d, ScreenHeight:%d\n", __LINE__, ScreenWidth, ScreenHeight);
    /*
    GraphicsOutput->Blt(GraphicsOutput, 
                         (EFI_GRAPHICS_OUTPUT_BLT_PIXEL *) pDateTimeBuffer,
@@ -5782,6 +5803,7 @@ EFI_STATUS L2_GRAPHICS_StartMenuInit()
     Color.Red   = 0xff;
     Color.Green = 0x00;
     Color.Blue  = 0x00;
+    Color.Reserved  = GRAPHICS_LAYER_START_MENU;
 
     //这边的序列需要跟START_MENU_BUTTON_SEQUENCE这个枚举定义的一致
     //我的电脑
@@ -5959,6 +5981,8 @@ EFI_STATUS L2_GRAPHICS_DeskInit()
     EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
     UINT32 x = ScreenWidth;
     UINT32 y = ScreenHeight;
+
+	Color.Reserved = GRAPHICS_LAYER_DESK;
     
     for (int i = 0; i < ScreenHeight; i++)
     {
@@ -5968,6 +5992,7 @@ EFI_STATUS L2_GRAPHICS_DeskInit()
             pDeskBuffer[(i * ScreenWidth + j) * 4]     = pDeskWallpaperBuffer[0x36 + ((ScreenHeight - i) * 1920 + j) * 3 ];
             pDeskBuffer[(i * ScreenWidth + j) * 4 + 1] = pDeskWallpaperBuffer[0x36 + ((ScreenHeight - i) * 1920 + j) * 3 + 1];
             pDeskBuffer[(i * ScreenWidth + j) * 4 + 2] = pDeskWallpaperBuffer[0x36 + ((ScreenHeight - i) * 1920 + j) * 3 + 2];
+            pDeskBuffer[(i * ScreenWidth + j) * 4 + 3] = GRAPHICS_LAYER_DESK;
 
             //white
             //pDeskBuffer[(i * ScreenWidth + j) * 4]     = 0xff;
@@ -6006,7 +6031,7 @@ EFI_STATUS L2_GRAPHICS_DeskInit()
     int x1, y1;
     x1 = 20;
     y1 = 20;
-    L3_GRAPHICS_ItemPrint(pDeskBuffer, pSystemIconMyComputerBuffer, ScreenWidth, ScreenHeight, WidthNew, HeightNew, x1, y1, "", 1);
+    L3_GRAPHICS_ItemPrint(pDeskBuffer, pSystemIconMyComputerBuffer, ScreenWidth, ScreenHeight, WidthNew, HeightNew, x1, y1, "", 1, GRAPHICS_LAYER_DESK);
 
     
     y1 += HeightNew;
@@ -6048,7 +6073,7 @@ EFI_STATUS L2_GRAPHICS_DeskInit()
     L1_GRAPHICS_ZoomImage(pSystemIconMySettingBuffer, WidthNew, HeightNew, pSystemIconTempBuffer2, SYSTEM_ICON_WIDTH, SYSTEM_ICON_HEIGHT);
     
     x1 = 20;
-    L3_GRAPHICS_ItemPrint(pDeskBuffer, pSystemIconMySettingBuffer, ScreenWidth, ScreenHeight, WidthNew, HeightNew, x1, y1, "", 1);
+    L3_GRAPHICS_ItemPrint(pDeskBuffer, pSystemIconMySettingBuffer, ScreenWidth, ScreenHeight, WidthNew, HeightNew, x1, y1, "", 1, GRAPHICS_LAYER_DESK);
 
     
     y1 += HeightNew;
@@ -6098,7 +6123,7 @@ EFI_STATUS L2_GRAPHICS_DeskInit()
         
     x1 = 20;
 
-    L3_GRAPHICS_ItemPrint(pDeskBuffer, pSystemIconRecycleBuffer, ScreenWidth, ScreenHeight, WidthNew, HeightNew, x1, y1, "", 1);
+    L3_GRAPHICS_ItemPrint(pDeskBuffer, pSystemIconRecycleBuffer, ScreenWidth, ScreenHeight, WidthNew, HeightNew, x1, y1, "", 1, GRAPHICS_LAYER_DESK);
 
     
     y1 += HeightNew;
@@ -6600,13 +6625,14 @@ void L2_COMMON_ParameterInit()
 {
     WindowLayers.LayerCount = 0;
 
-    WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW].DisplayFlag = FALSE;
+    WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW].DisplayFlag = TRUE;
     L1_MEMORY_Copy(WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW].Name, "System Log Window", sizeof("System Log Window"));
     WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW].pBuffer = pSystemLogWindowBuffer;
     WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW].StartX = SystemLogWindowPositionX;
     WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW].StartY = SystemLogWindowPositionY;
     WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW].WindowWidth = SystemLogWindowWidth;
     WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW].WindowHeight= SystemLogWindowHeight;
+    WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW].LayerID = GRAPHICS_LAYER_SYSTEM_LOG_WINDOW;
 
     WindowLayers.LayerCount++;
     
@@ -6617,6 +6643,7 @@ void L2_COMMON_ParameterInit()
     WindowLayers.item[GRAPHICS_LAYER_SYSTEM_SETTING_WINDOW].StartY = SystemSettingWindowPositionY;
     WindowLayers.item[GRAPHICS_LAYER_SYSTEM_SETTING_WINDOW].WindowWidth = SystemSettingWindowWidth;
     WindowLayers.item[GRAPHICS_LAYER_SYSTEM_SETTING_WINDOW].WindowHeight= SystemSettingWindowHeight;
+    WindowLayers.item[GRAPHICS_LAYER_SYSTEM_SETTING_WINDOW].LayerID = GRAPHICS_LAYER_SYSTEM_SETTING_WINDOW;
     
     WindowLayers.LayerCount++;
 
@@ -6627,6 +6654,7 @@ void L2_COMMON_ParameterInit()
     WindowLayers.item[GRAPHICS_LAYER_START_MENU].StartY = StartMenuPositionY;
     WindowLayers.item[GRAPHICS_LAYER_START_MENU].WindowWidth = StartMenuWidth;
     WindowLayers.item[GRAPHICS_LAYER_START_MENU].WindowHeight= StartMenuHeight;
+    WindowLayers.item[GRAPHICS_LAYER_START_MENU].LayerID = GRAPHICS_LAYER_START_MENU;
     
     WindowLayers.LayerCount++;
 
@@ -6637,6 +6665,7 @@ void L2_COMMON_ParameterInit()
     WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].StartY = MyComputerPositionY;
     WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].WindowWidth = MyComputerWidth;
     WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].WindowHeight= MyComputerHeight;
+    WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].LayerID = GRAPHICS_LAYER_MY_COMPUTER_WINDOW;
     
     WindowLayers.LayerCount++;
 
@@ -6647,6 +6676,18 @@ void L2_COMMON_ParameterInit()
     WindowLayers.item[GRAPHICS_LAYER_MEMORY_INFORMATION_WINDOW].StartY = MemoryInformationWindowPositionY;
     WindowLayers.item[GRAPHICS_LAYER_MEMORY_INFORMATION_WINDOW].WindowWidth = MemoryInformationWindowWidth;
     WindowLayers.item[GRAPHICS_LAYER_MEMORY_INFORMATION_WINDOW].WindowHeight= MemoryInformationWindowHeight;
+    WindowLayers.item[GRAPHICS_LAYER_MEMORY_INFORMATION_WINDOW].LayerID = GRAPHICS_LAYER_MEMORY_INFORMATION_WINDOW;
+
+    WindowLayers.LayerCount++;
+	
+    WindowLayers.item[GRAPHICS_LAYER_DESK].DisplayFlag = FALSE;
+    L1_MEMORY_Copy(WindowLayers.item[GRAPHICS_LAYER_DESK].Name, "Memory Information", sizeof("Memory Information"));
+    WindowLayers.item[GRAPHICS_LAYER_DESK].pBuffer = pMemoryInformationBuffer;
+    WindowLayers.item[GRAPHICS_LAYER_DESK].StartX = MemoryInformationWindowPositionX;
+    WindowLayers.item[GRAPHICS_LAYER_DESK].StartY = MemoryInformationWindowPositionY;
+    WindowLayers.item[GRAPHICS_LAYER_DESK].WindowWidth = MemoryInformationWindowWidth;
+    WindowLayers.item[GRAPHICS_LAYER_DESK].WindowHeight= MemoryInformationWindowHeight;
+    WindowLayers.item[GRAPHICS_LAYER_DESK].LayerID = GRAPHICS_LAYER_MEMORY_INFORMATION_WINDOW;
 
     WindowLayers.LayerCount++;
 
@@ -6655,12 +6696,15 @@ void L2_COMMON_ParameterInit()
     WindowLayers.ActiveWindowCount = 0;
 
     MouseClickFlag = MOUSE_NO_CLICKED;
-    
+
+	// Active window list, please note: desk layer always display at firstly.
+	// So WindowLayers.LayerCount value always one more than WindowLayers.ActiveWindowCount
     WindowLayers.LayerSequences[0] = GRAPHICS_LAYER_START_MENU;
     WindowLayers.LayerSequences[1] = GRAPHICS_LAYER_MEMORY_INFORMATION_WINDOW;
     WindowLayers.LayerSequences[2] = GRAPHICS_LAYER_MY_COMPUTER_WINDOW;
     WindowLayers.LayerSequences[3] = GRAPHICS_LAYER_SYSTEM_LOG_WINDOW;
     WindowLayers.LayerSequences[4] = GRAPHICS_LAYER_SYSTEM_SETTING_WINDOW;
+    WindowLayers.ActiveWindowCount = WindowLayers.LayerCount - 1;
     
 }
 
@@ -6749,7 +6793,7 @@ Main (
     
     L3_APPLICATION_MyComputerWindow(100, 300);
         
-    L3_APPLICATION_SystemLogWindow(1040, 140);
+    L3_APPLICATION_SystemLogWindow(ScreenWidth / 2, 10);
     
     L3_APPLICATION_MemoryInformationWindow(600, 100);
     
