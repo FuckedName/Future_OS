@@ -519,13 +519,13 @@ const UINT8 sChinese[][32] =
 
 typedef enum
 {
-    GRAPHICS_LAYER_START_MENU = 0,
+    GRAPHICS_LAYER_DESK = 0,
+    GRAPHICS_LAYER_START_MENU,
     GRAPHICS_LAYER_SYSTEM_SETTING_WINDOW,
     GRAPHICS_LAYER_MY_COMPUTER_WINDOW,
     GRAPHICS_LAYER_SYSTEM_LOG_WINDOW,
     GRAPHICS_LAYER_MEMORY_INFORMATION_WINDOW,
     GRAPHICS_LAYER_MOUSE,
-    GRAPHICS_LAYER_DESK,
     GRAPHICS_LAYER_MAX
 }GRAPHICS_LAYER_ID;
 
@@ -1647,7 +1647,7 @@ VOID L2_STRING_Maker2 (UINT16 x, UINT16 y, WINDOW_LAYER_ITEM layer,
     Color.Blue = 0xFF;
     Color.Red = 0xFF;
     Color.Green = 0xFF;
-    Color.Reserved = GRAPHICS_LAYER_MY_COMPUTER_WINDOW;
+    Color.Reserved = layer.LayerID;
 
     ASSERT (Format != NULL);
 
@@ -2933,6 +2933,7 @@ EFI_STATUS L3_PARTITION_RootPathAccess()
 
 EFI_STATUS L3_PARTITION_SubPathAccess()
 {
+	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: L3_PARTITION_SubPathAccess\n", __LINE__);
 }
 
 
@@ -2940,6 +2941,7 @@ EFI_STATUS L3_PARTITION_SubPathAccess()
 
 EFI_STATUS L3_PARTITION_FileAccess(UINT16 DeviceID)
 {
+	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: L3_PARTITION_FileAccess\n", __LINE__);
 	UINT8 Buffer1[512];
 	
 	EFI_STATUS Status = L1_STORE_READ(DeviceID, sector_count, 1, Buffer1 );  
@@ -2952,6 +2954,7 @@ EFI_STATUS L3_PARTITION_FileAccess(UINT16 DeviceID)
 
 EFI_STATUS L3_PARTITION_AccessFinish()
 {
+	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: L3_PARTITION_AccessFinish\n", __LINE__);
 }
 
 EFI_STATUS L3_PARTITION_ParentPathAccess()
@@ -3160,7 +3163,7 @@ typedef enum
     WALLPAPER_SETTING_CLICKED_EVENT,
     WALLPAPER_RESET_CLICKED_EVENT,
     MAX_CLICKED_EVENT
-}START_MENU_CURRENT_EVENT;
+}MOUSE_CLICK_EVENT;
 
 typedef enum 
 {
@@ -3187,10 +3190,183 @@ typedef enum
 typedef struct
 {
     START_MENU_STATE                    CurrentState;
-    START_MENU_CURRENT_EVENT            event;
+    MOUSE_CLICK_EVENT            		event;
     START_MENU_STATE                    NextState;
     EFI_STATUS                          (*pFunc)(); 
 }START_MENU_STATE_TRANSFORM;
+
+MOUSE_CLICK_EVENT L2_GRAPHICS_DeskLayerClickEventGet()
+{
+	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: L2_GRAPHICS_DeskLayerClickEventGet\n", __LINE__);
+
+    //start button
+    if (iMouseX >= 0 && iMouseX <= 16 + 16 * 2
+        && iMouseY >= ScreenHeight - 21 && iMouseY <= ScreenHeight)
+    {
+        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: START_MENU_CLICKED_EVENT\n", __LINE__);
+        return START_MENU_CLICKED_EVENT;
+    }
+
+	return MAX_CLICKED_EVENT;
+}
+
+MOUSE_CLICK_EVENT L2_GRAPHICS_StartMenuLayerClickEventGet()
+{
+	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: L2_GRAPHICS_StartMenuLayerClickEventGet\n", __LINE__);
+
+    StartMenuPositionX = WindowLayers.item[GRAPHICS_LAYER_START_MENU].StartX;
+    StartMenuPositionY = WindowLayers.item[GRAPHICS_LAYER_START_MENU].StartY;
+
+    // Display my computer window
+    if (iMouseX >= 3 + StartMenuPositionX && iMouseX <= 3 + 4 * 16  + StartMenuPositionX  
+         && iMouseY >= 3 + StartMenuPositionY + 16 * START_MENU_BUTTON_MY_COMPUTER && iMouseY <= 3 + StartMenuPositionY + 16 * (START_MENU_BUTTON_MY_COMPUTER + 1))
+    {
+        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: MY_COMPUTER_CLICKED_EVENT\n", __LINE__);
+        return MY_COMPUTER_CLICKED_EVENT;
+    }
+
+    // Display Setting window
+    if (iMouseX >= 3 + StartMenuPositionX && iMouseX <= 3 + 4 * 16  + StartMenuPositionX  
+         && iMouseY >= 3 + StartMenuPositionY + 16 * START_MENU_BUTTON_SYSTEM_SETTING && iMouseY <= 3 + StartMenuPositionY + 16 * (START_MENU_BUTTON_SYSTEM_SETTING + 1))
+    {
+        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: SETTING_CLICKED_EVENT\n", __LINE__);
+        return SETTING_CLICKED_EVENT;
+    }
+
+    // Display Memory Information window
+    if (iMouseX >= 3 + StartMenuPositionX && iMouseX <= 3 + 4 * 16  + StartMenuPositionX  
+         && iMouseY >= 3 + StartMenuPositionY + 16 * START_MENU_BUTTON_MEMORY_INFORMATION && iMouseY <= 3 + StartMenuPositionY + 16 * (START_MENU_BUTTON_MEMORY_INFORMATION + 1))
+    {
+        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: MEMORY_INFORMATION_CLICKED_EVENT\n", __LINE__);
+        return MEMORY_INFORMATION_CLICKED_EVENT;
+    }
+    
+    // System quit button
+    if (iMouseX >= 3 + StartMenuPositionX && iMouseX <= 3 + 4 * 16  + StartMenuPositionX  
+         && iMouseY >= 3 + StartMenuPositionY + 16 * START_MENU_BUTTON_SYSTEM_LOG && iMouseY <= 3 + StartMenuPositionY + 16 * (START_MENU_BUTTON_SYSTEM_LOG + 1))
+    {
+        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: SYSTEM_LOG_CLICKED_EVENT\n", __LINE__);
+        return SYSTEM_LOG_CLICKED_EVENT;
+    }
+
+    // System quit button
+    if (iMouseX >= 3 + StartMenuPositionX && iMouseX <= 3 + 4 * 16  + StartMenuPositionX  
+         && iMouseY >= 3 + StartMenuPositionY + 16 * START_MENU_BUTTON_SYSTEM_QUIT && iMouseY <= 3 + StartMenuPositionY + 16 * (START_MENU_BUTTON_SYSTEM_QUIT + 1))
+    {
+        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: SYSTEM_QUIT_CLICKED_EVENT\n", __LINE__);
+        return SYSTEM_QUIT_CLICKED_EVENT;
+    }
+
+	return MAX_CLICKED_EVENT;
+}
+
+
+MOUSE_CLICK_EVENT L2_GRAPHICS_SystemSettingLayerClickEventGet()
+{
+	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: L2_GRAPHICS_SystemSettingLayerClickEventGet\n", __LINE__);
+	
+    SystemSettingWindowPositionX = WindowLayers.item[GRAPHICS_LAYER_SYSTEM_SETTING_WINDOW].StartX;
+    SystemSettingWindowPositionY = WindowLayers.item[GRAPHICS_LAYER_SYSTEM_SETTING_WINDOW].StartY;
+
+    //Wall paper setting
+    if (iMouseX >= 3 + SystemSettingWindowPositionX && iMouseX <= 3 + 4 * 16  + SystemSettingWindowPositionX  
+         && iMouseY >= 3 + SystemSettingWindowPositionY && iMouseY <= 3 + SystemSettingWindowPositionY + 16)
+    {
+        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: WALLPAPER_SETTING_CLICKED_EVENT\n", __LINE__);
+        return WALLPAPER_SETTING_CLICKED_EVENT;
+    }
+    
+    //Wall paper Reset
+    if (iMouseX >= 3 + SystemSettingWindowPositionX && iMouseX <= 3 + 4 * 16  + SystemSettingWindowPositionX  
+         && iMouseY >= 3 + SystemSettingWindowPositionY + 16 && iMouseY <= 3 + SystemSettingWindowPositionY + 16 * 2)
+    {
+        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: WALLPAPER_RESET_CLICKED_EVENT\n", __LINE__);
+        return WALLPAPER_RESET_CLICKED_EVENT;
+    }
+
+    // Hide Memory Information window
+    if (iMouseX >= SystemSettingWindowPositionX + SystemSettingWindowWidth - 20 && iMouseX <=  SystemSettingWindowPositionX + SystemSettingWindowWidth - 4 
+            && iMouseY >= SystemSettingWindowPositionY+ 0 && iMouseY <= SystemSettingWindowPositionY + 16)
+    {
+        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: SYSTEM_SETTING_CLOSE_CLICKED_EVENT\n", __LINE__);
+        return SYSTEM_SETTING_CLOSE_CLICKED_EVENT;
+    }	
+
+	return MAX_CLICKED_EVENT;
+
+}
+
+MOUSE_CLICK_EVENT L2_GRAPHICS_MyComputerLayerClickEventGet()
+{
+	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: L2_GRAPHICS_MyComputerLayerClickEventGet\n", __LINE__);
+		
+    MyComputerPositionX = WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].StartX;
+    MyComputerPositionY = WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].StartY;
+
+    // Hide My computer window
+    if (iMouseX >= MyComputerPositionX + MyComputerWidth - 20 && iMouseX <=  MyComputerPositionX + MyComputerWidth - 4 
+            && iMouseY >= MyComputerPositionY + 0 && iMouseY <= MyComputerPositionY + 16)
+    {
+        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: MY_COMPUTER_CLOSE_CLICKED_EVENT\n", __LINE__);
+        return MY_COMPUTER_CLOSE_CLICKED_EVENT;
+    }
+
+	return MAX_CLICKED_EVENT;
+}
+
+MOUSE_CLICK_EVENT L2_GRAPHICS_SystemLogLayerClickEventGet()
+{	
+	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: L2_GRAPHICS_SystemLogLayerClickEventGet\n", __LINE__);
+    SystemLogWindowPositionX = WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW].StartX;
+    SystemLogWindowPositionY = WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW].StartY;
+
+    // Hide System Log window
+    if (iMouseX >= SystemLogWindowPositionX + SystemLogWindowWidth - 20 && iMouseX <=  SystemLogWindowPositionX + SystemLogWindowWidth - 4 
+            && iMouseY >= SystemLogWindowPositionY+ 0 && iMouseY <= SystemLogWindowPositionY + 16)
+    {
+        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: SYSTEM_LOG_CLOSE_CLICKED_EVENT\n", __LINE__);
+        return SYSTEM_LOG_CLOSE_CLICKED_EVENT;
+    }    
+
+	return MAX_CLICKED_EVENT;			
+}
+
+MOUSE_CLICK_EVENT L2_GRAPHICS_MemoryInformationLayerClickEventGet()
+{
+	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: L2_GRAPHICS_MemoryInformationLayerClickEventGet\n", __LINE__);
+
+    MemoryInformationWindowPositionX = WindowLayers.item[GRAPHICS_LAYER_MEMORY_INFORMATION_WINDOW].StartX;
+    MemoryInformationWindowPositionY = WindowLayers.item[GRAPHICS_LAYER_MEMORY_INFORMATION_WINDOW].StartY;
+    
+    // Hide Memory Information window
+    if (iMouseX >= MemoryInformationWindowPositionX + MemoryInformationWindowWidth - 20 && iMouseX <=  MemoryInformationWindowPositionX + MemoryInformationWindowWidth - 4 
+            && iMouseY >= MemoryInformationWindowPositionY+ 0 && iMouseY <= MemoryInformationWindowPositionY + 16)
+    {
+        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: MEMORY_INFORMATION_CLOSE_CLICKED_EVENT\n", __LINE__);
+        return MEMORY_INFORMATION_CLOSE_CLICKED_EVENT;
+    }
+			
+	return MAX_CLICKED_EVENT;
+}
+
+typedef struct
+{
+    GRAPHICS_LAYER_ID           GraphicsLayerID;
+    MOUSE_CLICK_EVENT           (*pFunction)(); 
+}GRAPHICS_LAYER_EVENT_GET;
+
+//Get click event from different graphics layer.
+GRAPHICS_LAYER_EVENT_GET GraphicsLayerEventGet[] =
+{
+    {GRAPHICS_LAYER_DESK,       					 L2_GRAPHICS_DeskLayerClickEventGet},
+    {GRAPHICS_LAYER_START_MENU,            			 L2_GRAPHICS_StartMenuLayerClickEventGet},
+    {GRAPHICS_LAYER_SYSTEM_SETTING_WINDOW,           L2_GRAPHICS_SystemSettingLayerClickEventGet},
+    {GRAPHICS_LAYER_MY_COMPUTER_WINDOW,            	 L2_GRAPHICS_MyComputerLayerClickEventGet},
+    {GRAPHICS_LAYER_SYSTEM_LOG_WINDOW,            	 L2_GRAPHICS_SystemLogLayerClickEventGet},
+    {GRAPHICS_LAYER_MEMORY_INFORMATION_WINDOW,       L2_GRAPHICS_MemoryInformationLayerClickEventGet},
+};
+
+UINT16 LayerID = -1;
 
 START_MENU_STATE StartMenuNextState = CLICK_INIT_STATE;
 
@@ -6231,7 +6407,7 @@ START_MENU_STATE_TRANSFORM StartMenuStateTransformTable[] =
 };
 
 
-START_MENU_CURRENT_EVENT    StartMenuClickEvent = START_MENU_INIT_CLICKED_EVENT;
+MOUSE_CLICK_EVENT    StartMenuClickEvent = START_MENU_INIT_CLICKED_EVENT;
 
 typedef struct
 {
@@ -6246,21 +6422,24 @@ PARTITION_ITEM_ACCESS_EVENT PartitionItemAccessEvent = START_MENU_INIT_CLICKED_E
 
 VOID L3_PARTITION_PathAccess()
 {
+	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: L3_PARTITION_Access\n", __LINE__);
+	
     PARTITION_ITEM_ACCESS_STATE     CurrentState;
 	UINT16 RootFlag = TRUE;
 
-    for (UINT16 i = 0; i <  sizeof(PartitionItemAccessStateTransformTable)/sizeof(PartitionItemAccessStateTransformTable[0]); i++ )
+    for (UINT16 i = 0; i < sizeof(PartitionItemAccessStateTransformTable) / sizeof(PartitionItemAccessStateTransformTable[0]); i++ )
     {
         if (PartitionItemAccessStateTransformTable[i].CurrentState == PartitionItemAccessNextState 
             && PartitionItemAccessEvent == PartitionItemAccessStateTransformTable[i].event )
         {
+        	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: L3_PARTITION_Access For\n", __LINE__);
             PartitionItemAccessNextState = PartitionItemAccessStateTransformTable[i].NextState;
 
             // need to check the return value after function runs..... 
             PartitionItemAccessStateTransformTable[i].pFunc();
             L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, 
                                                         WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], 
-                                                        "%d: StartMenuClickEvent: %d StartMenuNextState: %d\n", 
+                                                        "%d: L3_PARTITION_Access For: %d L3_PARTITION_Access For: %d\n", 
                                                         __LINE__, 
                                                         PartitionItemAccessEvent, 
                                                         PartitionItemAccessNextState);
