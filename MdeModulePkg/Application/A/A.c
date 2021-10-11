@@ -1476,7 +1476,7 @@ EFI_STATUS L2_GRAPHICS_AsciiCharDraw(UINT8 *pBufferDest,
 }
 
 
-EFI_STATUS L2_GRAPHICS_ChineseCharDraw2(UINT8 *pBuffer,
+EFI_STATUS L2_GRAPHICS_ChineseCharDraw(UINT8 *pBuffer,
         IN UINTN x0, UINTN y0, UINT32 offset,
         IN EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color , UINT16 AreaWidth)
 {
@@ -3154,6 +3154,8 @@ typedef enum
     MY_COMPUTER_CLICKED_EVENT,
     SETTING_CLICKED_EVENT,
     MEMORY_INFORMATION_CLICKED_EVENT,
+    MY_COMPUTER_PARTITION_ITEM_CLICKED_EVENT,
+    MY_COMPUTER_FOLDER_ITEM_CLICKED_EVENT,
     MY_COMPUTER_CLOSE_CLICKED_EVENT,
     SYSTEM_LOG_CLOSE_CLICKED_EVENT,
     MEMORY_INFORMATION_CLOSE_CLICKED_EVENT,
@@ -3173,6 +3175,8 @@ typedef enum
     MEMORY_INFORMATION_CLICKED_STATE,
     SYSTEM_SETTING_CLICKED_STATE,
     SYSTEM_LOG_STATE,
+    MY_COMPUTER_PARTITION_CLICKED_STATE,
+    MY_COMPUTER_FOLDER_CLICKED_STATE,
     SYSTEM_QUIT_STATE
 }START_MENU_STATE;
 
@@ -3296,6 +3300,8 @@ MOUSE_CLICK_EVENT L2_GRAPHICS_SystemSettingLayerClickEventGet()
 
 }
 
+UINT16 PartitionItemID = 0xffff; // invalid
+
 MOUSE_CLICK_EVENT L2_GRAPHICS_MyComputerLayerClickEventGet()
 {
 	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: L2_GRAPHICS_MyComputerLayerClickEventGet\n", __LINE__);
@@ -3310,6 +3316,20 @@ MOUSE_CLICK_EVENT L2_GRAPHICS_MyComputerLayerClickEventGet()
         L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: MY_COMPUTER_CLOSE_CLICKED_EVENT\n", __LINE__);
         return MY_COMPUTER_CLOSE_CLICKED_EVENT;
     }
+	
+    for (UINT16 i = 0 ; i < PartitionCount; i++)
+    {
+		UINT16 StartX = MyComputerPositionX + 50;
+		UINT16 StartY = MyComputerPositionY + i * 18 + 16 * 2;
+		
+		if (iMouseX >= StartX && iMouseX <=  StartX + 16 * 4 
+            && iMouseY >= StartY + 0 && iMouseY <= StartY + 16)
+		{
+			PartitionItemID = i;
+			L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: MY_COMPUTER_PARTITION_ITEM_CLICKED_EVENT PartitionItemID: %d\n", __LINE__, PartitionItemID);
+			return MY_COMPUTER_PARTITION_ITEM_CLICKED_EVENT;
+		}
+	}
 
 	return MAX_CLICKED_EVENT;
 }
@@ -3382,8 +3402,7 @@ UINT16 L2_MOUSE_ClickEventGet()
 		return event;
 	}
 	
-    //DisplayMyComputerFlag = 0;
-    DisplaySystemSettingWindowFlag = 0;
+    WindowLayers.item[GRAPHICS_LAYER_SYSTEM_SETTING_WINDOW].DisplayFlag = FALSE;
     
     if (TRUE  == WindowLayers.item[GRAPHICS_LAYER_START_MENU].DisplayFlag)
     {
@@ -3515,8 +3534,8 @@ VOID L2_MOUSE_WallpaperSettingClicked()
     Color.Green = 0x00;
     Color.Blue   = 0x00;
 
-    L2_GRAPHICS_ChineseCharDraw2(pDeskBuffer,  16, ScreenHeight - 21,     (18 - 1) * 94 + 43 - 1, Color, ScreenWidth);
-    L2_GRAPHICS_ChineseCharDraw2(pDeskBuffer,  16 * 2, ScreenHeight - 21, (21 - 1) * 94 + 05 - 1, Color, ScreenWidth);      
+    L2_GRAPHICS_ChineseCharDraw(pDeskBuffer,  16, ScreenHeight - 21,     (18 - 1) * 94 + 43 - 1, Color, ScreenWidth);
+    L2_GRAPHICS_ChineseCharDraw(pDeskBuffer,  16 * 2, ScreenHeight - 21, (21 - 1) * 94 + 05 - 1, Color, ScreenWidth);      
 }
 
 EFI_STATUS L2_GRAPHICS_ButtonDraw()
@@ -3635,6 +3654,28 @@ VOID L2_MOUSE_MyComputerCloseClicked()
         WindowLayers.ActiveWindowCount--;
         WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].DisplayFlag = FALSE;
     }
+}
+
+
+VOID L2_MOUSE_MyComputerPartitionItemClicked()
+{
+    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d L2_MOUSE_MyComputerPartitionItemClicked\n", __LINE__);
+	EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
+	
+    Color.Red = 0xff;
+    Color.Green= 0x00;
+    Color.Blue= 0x00;
+	
+    L2_GRAPHICS_RectangleDraw(pMouseSelectedBuffer, 0,  0, 31, 15, 1,  Color, 32);
+    L2_STORE_PartitionItemsPrint(PartitionItemID);
+    L2_GRAPHICS_Copy(pDeskDisplayBuffer, pMouseSelectedBuffer, ScreenWidth, ScreenHeight, 32, 16, MyComputerPositionX + 50, MyComputerPositionY  + PartitionItemID * (16 + 2) + 16 * 2);   
+}
+
+VOID L2_MOUSE_MyComputerFolderItemClicked()
+{
+    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d L2_MOUSE_MyComputerFolderItemClicked\n", __LINE__);
+
+	
 }
 
 
@@ -3796,36 +3837,6 @@ EFI_STATUS L2_GRAPHICS_ChineseHalfDraw(UINT8 *pBuffer,UINT8 d,
 }
 
 //http://quwei.911cha.com/
-
-EFI_STATUS L2_GRAPHICS_ChineseCharDraw(UINT8 *pBuffer,
-        IN UINTN x0, UINTN y0,UINT8 *c, UINT8 count,
-        IN EFI_GRAPHICS_OUTPUT_BLT_PIXEL FontColor, UINT16 AreaWidth)
-{
-    INT16 i, j;    
-    
-    if (NULL == pBuffer)
-    {
-        //DEBUG ((EFI_D_INFO, "NULL == pBuffer"));
-        return EFI_SUCCESS;
-    }
-
-    for (i = 0; i < 16 * 16 * 4; i++)
-    {
-        pBuffer[i] = 0x00;
-    }
-
-    for (j = 0; j < count; j++)
-    {
-        for(i = 0; i < 32; i += 2)
-        {
-            L2_GRAPHICS_ChineseHalfDraw(pBuffer, sChinese[j][i],     x0,     y0 + i / 2, 1, FontColor, AreaWidth);                
-            L2_GRAPHICS_ChineseHalfDraw(pBuffer, sChinese[j][i + 1], x0 + 8, y0 + i / 2, 1, FontColor, AreaWidth);        
-        }
-        x0 += 16;
-    }
-    
-    return EFI_SUCCESS;
-}
 
 VOID L2_NETWORK_Init()
 {}
@@ -4604,9 +4615,9 @@ EFI_STATUS L3_WINDOW_Create(UINT8 *pBuffer, UINT8 *pParent, UINT16 Width, UINT16
     Color.Green = 0xff;
     Color.Reserved = LayerID;
 
-    L2_GRAPHICS_ChineseCharDraw2(pBuffer, Width - 3 * 16 - 3, 6, (12 - 1) * 94 + 58 - 1, Color, Width);
-    L2_GRAPHICS_ChineseCharDraw2(pBuffer, Width - 2 * 16 - 3, 6, (01 - 1) * 94 + 85 - 1, Color, Width);
-    L2_GRAPHICS_ChineseCharDraw2(pBuffer, Width - 1 * 16 - 3, 6, (14 - 1) * 94 + 21 - 1, Color, Width);
+    L2_GRAPHICS_ChineseCharDraw(pBuffer, Width - 3 * 16 - 3, 6, (12 - 1) * 94 + 58 - 1, Color, Width);
+    L2_GRAPHICS_ChineseCharDraw(pBuffer, Width - 2 * 16 - 3, 6, (01 - 1) * 94 + 85 - 1, Color, Width);
+    L2_GRAPHICS_ChineseCharDraw(pBuffer, Width - 1 * 16 - 3, 6, (14 - 1) * 94 + 21 - 1, Color, Width);
 
     // The Left of Window
     for (i = 23; i < Height; i++)
@@ -4662,16 +4673,16 @@ VOID L3_APPLICATION_MyComputerWindow(UINT16 StartX, UINT16 StartY)
     y = 6;
     
     // wo de dian nao
-    L2_GRAPHICS_ChineseCharDraw2(pMyComputerBuffer, x, y, (46 - 1) * 94 + 50 - 1, Color, MyComputerWidth);
+    L2_GRAPHICS_ChineseCharDraw(pMyComputerBuffer, x, y, (46 - 1) * 94 + 50 - 1, Color, MyComputerWidth);
     x += 16;
     
-    L2_GRAPHICS_ChineseCharDraw2(pMyComputerBuffer, x, y, (21 - 1) * 94 + 36 - 1, Color, MyComputerWidth);
+    L2_GRAPHICS_ChineseCharDraw(pMyComputerBuffer, x, y, (21 - 1) * 94 + 36 - 1, Color, MyComputerWidth);
     x += 16;
     
-    L2_GRAPHICS_ChineseCharDraw2(pMyComputerBuffer, x, y, (21 - 1) * 94 + 71 - 1, Color, MyComputerWidth);
+    L2_GRAPHICS_ChineseCharDraw(pMyComputerBuffer, x, y, (21 - 1) * 94 + 71 - 1, Color, MyComputerWidth);
     x += 16;
     
-    L2_GRAPHICS_ChineseCharDraw2(pMyComputerBuffer, x, y, (36 - 1) * 94 + 52 - 1, Color, MyComputerWidth);
+    L2_GRAPHICS_ChineseCharDraw(pMyComputerBuffer, x, y, (36 - 1) * 94 + 52 - 1, Color, MyComputerWidth);
 
     
     Color.Blue  = 0x00;
@@ -4729,24 +4740,24 @@ VOID L3_APPLICATION_MyComputerWindow(UINT16 StartX, UINT16 StartY)
         if (device[i].DeviceType == 2)
         {
             //
-            L2_GRAPHICS_ChineseCharDraw2(pBuffer, x, y,          (20 - 1 ) * 94 + 37 - 1, Color, MyComputerWidth); 
+            L2_GRAPHICS_ChineseCharDraw(pBuffer, x, y,          (20 - 1 ) * 94 + 37 - 1, Color, MyComputerWidth); 
             x += 16;
         }
         else
         {
             // U pan
-            L2_GRAPHICS_ChineseCharDraw2(pBuffer, x, y,          (51 - 1 ) * 94 + 37 - 1, Color, MyComputerWidth); 
+            L2_GRAPHICS_ChineseCharDraw(pBuffer, x, y,          (51 - 1 ) * 94 + 37 - 1, Color, MyComputerWidth); 
             x += 16;
         }   
         //pan
-        L2_GRAPHICS_ChineseCharDraw2(pBuffer, x, y,          (37 - 1 ) * 94 + 44 - 1, Color, MyComputerWidth); 
+        L2_GRAPHICS_ChineseCharDraw(pBuffer, x, y,          (37 - 1 ) * 94 + 44 - 1, Color, MyComputerWidth); 
         x += 16;
 
         //  2354 分 3988 区
-        L2_GRAPHICS_ChineseCharDraw2(pBuffer, x, y,          (23 - 1 ) * 94 + 54 - 1, Color, MyComputerWidth);    
+        L2_GRAPHICS_ChineseCharDraw(pBuffer, x, y,          (23 - 1 ) * 94 + 54 - 1, Color, MyComputerWidth);    
         x += 16;
         
-        L2_GRAPHICS_ChineseCharDraw2(pBuffer, x, y,          (39 - 1 ) * 94 + 88 - 1, Color, MyComputerWidth);   
+        L2_GRAPHICS_ChineseCharDraw(pBuffer, x, y,          (39 - 1 ) * 94 + 88 - 1, Color, MyComputerWidth);   
         x += 16;
 
         // 5027
@@ -4757,17 +4768,17 @@ VOID L3_APPLICATION_MyComputerWindow(UINT16 StartX, UINT16 StartY)
         // 三
         if (device[i].PartitionID == 1)
         {
-            L2_GRAPHICS_ChineseCharDraw2(pBuffer, x, y,          (50 - 1 ) * 94 + 27 - 1, Color, MyComputerWidth);   
+            L2_GRAPHICS_ChineseCharDraw(pBuffer, x, y,          (50 - 1 ) * 94 + 27 - 1, Color, MyComputerWidth);   
             x += 16;
         }
         else if (device[i].PartitionID == 2)
         {
-            L2_GRAPHICS_ChineseCharDraw2(pBuffer, x, y,          (22 - 1 ) * 94 + 94 - 1, Color, MyComputerWidth);   
+            L2_GRAPHICS_ChineseCharDraw(pBuffer, x, y,          (22 - 1 ) * 94 + 94 - 1, Color, MyComputerWidth);   
             x += 16;
         }
         else if (device[i].PartitionID == 3)
         {
-            L2_GRAPHICS_ChineseCharDraw2(pBuffer, x, y,          (40 - 1 ) * 94 + 93 - 1, Color, MyComputerWidth);   
+            L2_GRAPHICS_ChineseCharDraw(pBuffer, x, y,          (40 - 1 ) * 94 + 93 - 1, Color, MyComputerWidth);   
             x += 16;
         }
         
@@ -4787,10 +4798,10 @@ VOID L3_APPLICATION_MyComputerWindow(UINT16 StartX, UINT16 StartY)
         //大
         //4801
         //小
-        L2_GRAPHICS_ChineseCharDraw2(pBuffer, x, y,          (20 - 1 ) * 94 + 83 - 1, Color, MyComputerWidth);  
+        L2_GRAPHICS_ChineseCharDraw(pBuffer, x, y,          (20 - 1 ) * 94 + 83 - 1, Color, MyComputerWidth);  
         x += 16;
         
-        L2_GRAPHICS_ChineseCharDraw2(pBuffer, x, y,          (48 - 1 ) * 94 + 1 - 1, Color, MyComputerWidth);  
+        L2_GRAPHICS_ChineseCharDraw(pBuffer, x, y,          (48 - 1 ) * 94 + 1 - 1, Color, MyComputerWidth);  
         x += 16;
 
         L2_DEBUG_Print3(x, y, WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW], "%d%a", size, sizePostfix);
@@ -4830,10 +4841,10 @@ VOID L3_APPLICATION_MyComputerWindow(UINT16 StartX, UINT16 StartY)
     //内
     //2070
     //存
-    L2_GRAPHICS_ChineseCharDraw2(pBuffer, x, y,          (36 - 1 ) * 94 + 58 - 1, Color, MyComputerWidth);  
+    L2_GRAPHICS_ChineseCharDraw(pBuffer, x, y,          (36 - 1 ) * 94 + 58 - 1, Color, MyComputerWidth);  
     x += 16;
     
-    L2_GRAPHICS_ChineseCharDraw2(pBuffer, x, y,          (20 - 1 ) * 94 + 70 - 1, Color, MyComputerWidth);  
+    L2_GRAPHICS_ChineseCharDraw(pBuffer, x, y,          (20 - 1 ) * 94 + 70 - 1, Color, MyComputerWidth);  
     x += 16;
     
     // Get memory infomation
@@ -4886,20 +4897,20 @@ VOID L3_APPLICATION_MemoryInformationWindow(UINT16 StartX, UINT16 StartY)
     UINT16 TitleX = 3;
     UINT16 TitleY = 6;
     // wo de dian nao
-    L2_GRAPHICS_ChineseCharDraw2(pBuffer, TitleX, TitleY, (36 - 1) * 94 + 58 - 1, Color, Width); 
+    L2_GRAPHICS_ChineseCharDraw(pBuffer, TitleX, TitleY, (36 - 1) * 94 + 58 - 1, Color, Width); 
 
     TitleX += 16;
-    L2_GRAPHICS_ChineseCharDraw2(pBuffer, TitleX, TitleY, (20 - 1) * 94 + 70 - 1, Color, Width);
+    L2_GRAPHICS_ChineseCharDraw(pBuffer, TitleX, TitleY, (20 - 1) * 94 + 70 - 1, Color, Width);
     
     TitleX += 16;
-    L2_GRAPHICS_ChineseCharDraw2(pBuffer, TitleX, TitleY, (47 - 1) * 94 + 74 - 1, Color, Width);
+    L2_GRAPHICS_ChineseCharDraw(pBuffer, TitleX, TitleY, (47 - 1) * 94 + 74 - 1, Color, Width);
     
     TitleX += 16;
-    L2_GRAPHICS_ChineseCharDraw2(pBuffer, TitleX, TitleY, (47 - 1) * 94 + 24 - 1, Color, Width);
+    L2_GRAPHICS_ChineseCharDraw(pBuffer, TitleX, TitleY, (47 - 1) * 94 + 24 - 1, Color, Width);
 
-    L2_GRAPHICS_ChineseCharDraw2(pBuffer, MyComputerWidth - 3 * 16 - 3, 6, (12 - 1) * 94 + 58 - 1, Color, Width);
-    L2_GRAPHICS_ChineseCharDraw2(pBuffer, MyComputerWidth - 2 * 16 - 3, 6, (01 - 1) * 94 + 85 - 1, Color, Width);
-    L2_GRAPHICS_ChineseCharDraw2(pBuffer, MyComputerWidth - 1 * 16 - 3, 6, (14 - 1) * 94 + 21 - 1, Color, Width);
+    L2_GRAPHICS_ChineseCharDraw(pBuffer, MyComputerWidth - 3 * 16 - 3, 6, (12 - 1) * 94 + 58 - 1, Color, Width);
+    L2_GRAPHICS_ChineseCharDraw(pBuffer, MyComputerWidth - 2 * 16 - 3, 6, (01 - 1) * 94 + 85 - 1, Color, Width);
+    L2_GRAPHICS_ChineseCharDraw(pBuffer, MyComputerWidth - 1 * 16 - 3, 6, (14 - 1) * 94 + 21 - 1, Color, Width);
 
     // The Left of Window
     for (i = 23; i < Height; i++)
@@ -4935,10 +4946,10 @@ VOID L3_APPLICATION_MemoryInformationWindow(UINT16 StartX, UINT16 StartY)
     //内
     //2070
     //存
-    L2_GRAPHICS_ChineseCharDraw2(pBuffer, x, y,          (36 - 1 ) * 94 + 58 - 1, Color, Width);  
+    L2_GRAPHICS_ChineseCharDraw(pBuffer, x, y,          (36 - 1 ) * 94 + 58 - 1, Color, Width);  
     x += 16;
     
-    L2_GRAPHICS_ChineseCharDraw2(pBuffer, x, y,          (20 - 1 ) * 94 + 70 - 1, Color, Width);  
+    L2_GRAPHICS_ChineseCharDraw(pBuffer, x, y,          (20 - 1 ) * 94 + 70 - 1, Color, Width);  
     x += 16;
         
     y += 16;
@@ -5001,20 +5012,20 @@ VOID L3_APPLICATION_SystemLogWindow(UINT16 StartX, UINT16 StartY)
     UINT16 TitleX = 3;
     UINT16 TitleY = 6;
     // wo de dian nao
-    L2_GRAPHICS_ChineseCharDraw2(pBuffer, TitleX, TitleY, (47 - 1) * 94 + 21 - 1, Color, Width); 
+    L2_GRAPHICS_ChineseCharDraw(pBuffer, TitleX, TitleY, (47 - 1) * 94 + 21 - 1, Color, Width); 
 
     TitleX += 16;
-    L2_GRAPHICS_ChineseCharDraw2(pBuffer, TitleX, TitleY, (45 - 1) * 94 + 19 - 1, Color, Width);
+    L2_GRAPHICS_ChineseCharDraw(pBuffer, TitleX, TitleY, (45 - 1) * 94 + 19 - 1, Color, Width);
     
     TitleX += 16;
-    L2_GRAPHICS_ChineseCharDraw2(pBuffer, TitleX, TitleY, (40 - 1) * 94 + 53 - 1, Color, Width);
+    L2_GRAPHICS_ChineseCharDraw(pBuffer, TitleX, TitleY, (40 - 1) * 94 + 53 - 1, Color, Width);
     
     TitleX += 16;
-    L2_GRAPHICS_ChineseCharDraw2(pBuffer, TitleX, TitleY, (54 - 1) * 94 + 30 - 1, Color, Width);
+    L2_GRAPHICS_ChineseCharDraw(pBuffer, TitleX, TitleY, (54 - 1) * 94 + 30 - 1, Color, Width);
 
-    L2_GRAPHICS_ChineseCharDraw2(pBuffer, Width - 3 * 16 - 3, 6, (12 - 1) * 94 + 58 - 1, Color, Width);
-    L2_GRAPHICS_ChineseCharDraw2(pBuffer, Width - 2 * 16 - 3, 6, (01 - 1) * 94 + 85 - 1, Color, Width);
-    L2_GRAPHICS_ChineseCharDraw2(pBuffer, Width - 1 * 16 - 3, 6, (14 - 1) * 94 + 21 - 1, Color, Width);
+    L2_GRAPHICS_ChineseCharDraw(pBuffer, Width - 3 * 16 - 3, 6, (12 - 1) * 94 + 58 - 1, Color, Width);
+    L2_GRAPHICS_ChineseCharDraw(pBuffer, Width - 2 * 16 - 3, 6, (01 - 1) * 94 + 85 - 1, Color, Width);
+    L2_GRAPHICS_ChineseCharDraw(pBuffer, Width - 1 * 16 - 3, 6, (14 - 1) * 94 + 21 - 1, Color, Width);
 
     // The Left of Window
     for (i = 23; i < Height; i++)
@@ -5050,10 +5061,10 @@ VOID L3_APPLICATION_SystemLogWindow(UINT16 StartX, UINT16 StartY)
     //内
     //2070
     //存
-    L2_GRAPHICS_ChineseCharDraw2(pBuffer, x, y,          (36 - 1 ) * 94 + 58 - 1, Color, Width);  
+    L2_GRAPHICS_ChineseCharDraw(pBuffer, x, y,          (36 - 1 ) * 94 + 58 - 1, Color, Width);  
     x += 16;
     
-    L2_GRAPHICS_ChineseCharDraw2(pBuffer, x, y,          (20 - 1 ) * 94 + 70 - 1, Color, Width);  
+    L2_GRAPHICS_ChineseCharDraw(pBuffer, x, y,          (20 - 1 ) * 94 + 70 - 1, Color, Width);  
     x += 16;
     
     return EFI_SUCCESS;
@@ -5504,17 +5515,17 @@ L2_TIMER_Print (
                   EFITime.Year, EFITime.Month, EFITime.Day, EFITime.Hour, EFITime.Minute, EFITime.Second);
     //  星   4839    期   3858
     x += 21 * 8 + 3;
-    L2_GRAPHICS_ChineseCharDraw2(pDeskBuffer, x, y,  (48 - 1) * 94 + 39 - 1, Color, ScreenWidth); 
+    L2_GRAPHICS_ChineseCharDraw(pDeskBuffer, x, y,  (48 - 1) * 94 + 39 - 1, Color, ScreenWidth); 
     
     x += 16;
-    L2_GRAPHICS_ChineseCharDraw2(pDeskBuffer, x, y,  (38 - 1) * 94 + 58 - 1, Color, ScreenWidth);
+    L2_GRAPHICS_ChineseCharDraw(pDeskBuffer, x, y,  (38 - 1) * 94 + 58 - 1, Color, ScreenWidth);
 
     x += 16;
 
     UINT8 DayOfWeek = L1_TIMER_DayOfWeek(EFITime.Year, EFITime.Month, EFITime.Day);
     if (0 == DayOfWeek)
     {
-        L2_GRAPHICS_ChineseCharDraw2(pDeskBuffer, x, y, (48 - 1 ) * 94 + 39 - 1, Color, ScreenWidth);    
+        L2_GRAPHICS_ChineseCharDraw(pDeskBuffer, x, y, (48 - 1 ) * 94 + 39 - 1, Color, ScreenWidth);    
     }
     UINT8 AreaCode = 0;
     UINT8 BitCode = 0;
@@ -5532,7 +5543,7 @@ L2_TIMER_Print (
         default: AreaCode = 16; BitCode = 01; break;
     }
 
-    L2_GRAPHICS_ChineseCharDraw2(pDeskBuffer, x, y, (AreaCode - 1 ) * 94 + BitCode - 1, Color, ScreenWidth);
+    L2_GRAPHICS_ChineseCharDraw(pDeskBuffer, x, y, (AreaCode - 1 ) * 94 + BitCode - 1, Color, ScreenWidth);
     
    L2_DEBUG_Print1(DISPLAY_DESK_HEIGHT_WEIGHT_X, DISPLAY_DESK_HEIGHT_WEIGHT_Y, "%d: ScreenWidth:%d, ScreenHeight:%d\n", __LINE__, ScreenWidth, ScreenHeight);
    /*
@@ -5579,7 +5590,7 @@ EFI_STATUS L2_COMMON_MultiProcessInit ()
     // task group for display date time
     EFI_GUID gMultiProcessGroup2Guid  = { 0x0579257E, 0x1843, 0x45FB, { 0x83, 0x9D, 0x6B, 0x79, 0x09, 0x38, 0x29, 0xAA } };
     
-    //L2_GRAPHICS_ChineseCharDraw2(pMouseBuffer, 0, 0, 11 * 94 + 42, Color, 16);
+    //L2_GRAPHICS_ChineseCharDraw(pMouseBuffer, 0, 0, 11 * 94 + 42, Color, 16);
     
     //DrawChineseCharIntoBuffer(pMouseBuffer, 0, 0, 0, Color, 16);
     
@@ -5691,31 +5702,31 @@ EFI_STATUS L2_GRAPHICS_SayGoodBye()
     Color.Green = 0xff;
     Color.Blue  = 0xff;
     
-    L2_GRAPHICS_ChineseCharDraw2(pDeskBuffer,  x, y, (52 - 1) * 94 + 57 - 1, Color, ScreenWidth);
+    L2_GRAPHICS_ChineseCharDraw(pDeskBuffer,  x, y, (52 - 1) * 94 + 57 - 1, Color, ScreenWidth);
     x += 16;
     
-    L2_GRAPHICS_ChineseCharDraw2(pDeskBuffer,  x, y, (28 - 1) * 94 + 91 - 1, Color, ScreenWidth);
+    L2_GRAPHICS_ChineseCharDraw(pDeskBuffer,  x, y, (28 - 1) * 94 + 91 - 1, Color, ScreenWidth);
     x += 16;
 
-    L2_GRAPHICS_ChineseCharDraw2(pDeskBuffer,  x, y, (3 - 1) * 94 + 12 - 1, Color, ScreenWidth);
+    L2_GRAPHICS_ChineseCharDraw(pDeskBuffer,  x, y, (3 - 1) * 94 + 12 - 1, Color, ScreenWidth);
     x += 16;
 
-    L2_GRAPHICS_ChineseCharDraw2(pDeskBuffer,  x, y, (27 - 1) * 94 + 22 - 1, Color, ScreenWidth);
+    L2_GRAPHICS_ChineseCharDraw(pDeskBuffer,  x, y, (27 - 1) * 94 + 22 - 1, Color, ScreenWidth);
     x += 16;
 
-    L2_GRAPHICS_ChineseCharDraw2(pDeskBuffer,  x, y, (51 - 1) * 94 + 13 - 1, Color, ScreenWidth);
+    L2_GRAPHICS_ChineseCharDraw(pDeskBuffer,  x, y, (51 - 1) * 94 + 13 - 1, Color, ScreenWidth);
     x += 16;
 
-    L2_GRAPHICS_ChineseCharDraw2(pDeskBuffer,  x, y, (47 - 1) * 94 + 34 - 1, Color, ScreenWidth);
+    L2_GRAPHICS_ChineseCharDraw(pDeskBuffer,  x, y, (47 - 1) * 94 + 34 - 1, Color, ScreenWidth);
     x += 16;
 
-    L2_GRAPHICS_ChineseCharDraw2(pDeskBuffer,  x, y, (20 - 1) * 94 + 46 - 1, Color, ScreenWidth);
+    L2_GRAPHICS_ChineseCharDraw(pDeskBuffer,  x, y, (20 - 1) * 94 + 46 - 1, Color, ScreenWidth);
     x += 16;
 
-    L2_GRAPHICS_ChineseCharDraw2(pDeskBuffer,  x, y, (27 - 1) * 94 + 56 - 1, Color, ScreenWidth);
+    L2_GRAPHICS_ChineseCharDraw(pDeskBuffer,  x, y, (27 - 1) * 94 + 56 - 1, Color, ScreenWidth);
     x += 16;
 
-    L2_GRAPHICS_ChineseCharDraw2(pDeskBuffer,  x, y, (32 - 1) * 94 + 20 - 1, Color, ScreenWidth);
+    L2_GRAPHICS_ChineseCharDraw(pDeskBuffer,  x, y, (32 - 1) * 94 + 20 - 1, Color, ScreenWidth);
     x += 16;
 
     GraphicsOutput->Blt(
@@ -5836,30 +5847,30 @@ EFI_STATUS L2_GRAPHICS_StartMenuInit()
 
     //这边的序列需要跟START_MENU_BUTTON_SEQUENCE这个枚举定义的一致
     //我的电脑
-    L2_GRAPHICS_ChineseCharDraw2(pStartMenuBuffer, x , y,     (46 - 1 ) * 94 + 50 - 1, Color, StartMenuWidth);    
+    L2_GRAPHICS_ChineseCharDraw(pStartMenuBuffer, x , y,     (46 - 1 ) * 94 + 50 - 1, Color, StartMenuWidth);    
     x += 16;
     
-    L2_GRAPHICS_ChineseCharDraw2(pStartMenuBuffer, x , y,     (21 - 1) * 94 + 36 - 1, Color, StartMenuWidth);
+    L2_GRAPHICS_ChineseCharDraw(pStartMenuBuffer, x , y,     (21 - 1) * 94 + 36 - 1, Color, StartMenuWidth);
     x += 16;
     
-    L2_GRAPHICS_ChineseCharDraw2(pStartMenuBuffer, x , y,     (21 - 1) * 94 + 71 - 1, Color, StartMenuWidth);
+    L2_GRAPHICS_ChineseCharDraw(pStartMenuBuffer, x , y,     (21 - 1) * 94 + 71 - 1, Color, StartMenuWidth);
     x += 16;
     
-    L2_GRAPHICS_ChineseCharDraw2(pStartMenuBuffer, x , y,     (36 - 1) * 94 + 52 - 1, Color, StartMenuWidth);   
+    L2_GRAPHICS_ChineseCharDraw(pStartMenuBuffer, x , y,     (36 - 1) * 94 + 52 - 1, Color, StartMenuWidth);   
 
     //系统设置
     x = 3;
     y += 16;
-    L2_GRAPHICS_ChineseCharDraw2(pStartMenuBuffer, x , y,     (47 - 1 ) * 94 + 21 - 1, Color, StartMenuWidth);    
+    L2_GRAPHICS_ChineseCharDraw(pStartMenuBuffer, x , y,     (47 - 1 ) * 94 + 21 - 1, Color, StartMenuWidth);    
     x += 16;
     
-    L2_GRAPHICS_ChineseCharDraw2(pStartMenuBuffer, x , y,     (45 - 1) * 94 + 19 - 1, Color, StartMenuWidth);
+    L2_GRAPHICS_ChineseCharDraw(pStartMenuBuffer, x , y,     (45 - 1) * 94 + 19 - 1, Color, StartMenuWidth);
     x += 16;
     
-    L2_GRAPHICS_ChineseCharDraw2(pStartMenuBuffer, x , y,     (41 - 1) * 94 + 72 - 1, Color, StartMenuWidth);
+    L2_GRAPHICS_ChineseCharDraw(pStartMenuBuffer, x , y,     (41 - 1) * 94 + 72 - 1, Color, StartMenuWidth);
     x += 16;
     
-    L2_GRAPHICS_ChineseCharDraw2(pStartMenuBuffer, x , y,     (54 - 1) * 94 + 35 - 1, Color, StartMenuWidth);   
+    L2_GRAPHICS_ChineseCharDraw(pStartMenuBuffer, x , y,     (54 - 1) * 94 + 35 - 1, Color, StartMenuWidth);   
     
 
     //内存查看
@@ -5867,47 +5878,47 @@ EFI_STATUS L2_GRAPHICS_StartMenuInit()
     //内 3658    存       2070    查       1873    看       3120
     x = 3;
     y += 16;
-    L2_GRAPHICS_ChineseCharDraw2(pStartMenuBuffer, x , y,     (36 - 1 ) * 94 + 58 - 1, Color, StartMenuWidth);    
+    L2_GRAPHICS_ChineseCharDraw(pStartMenuBuffer, x , y,     (36 - 1 ) * 94 + 58 - 1, Color, StartMenuWidth);    
     x += 16;
     
-    L2_GRAPHICS_ChineseCharDraw2(pStartMenuBuffer, x , y,     (20 - 1) * 94 + 70 - 1, Color, StartMenuWidth);
+    L2_GRAPHICS_ChineseCharDraw(pStartMenuBuffer, x , y,     (20 - 1) * 94 + 70 - 1, Color, StartMenuWidth);
     x += 16;
     
-    L2_GRAPHICS_ChineseCharDraw2(pStartMenuBuffer, x , y,     (18 - 1) * 94 + 73 - 1, Color, StartMenuWidth);
+    L2_GRAPHICS_ChineseCharDraw(pStartMenuBuffer, x , y,     (18 - 1) * 94 + 73 - 1, Color, StartMenuWidth);
     x += 16;
     
-    L2_GRAPHICS_ChineseCharDraw2(pStartMenuBuffer, x , y,     (31 - 1) * 94 + 20 - 1, Color, StartMenuWidth);   
+    L2_GRAPHICS_ChineseCharDraw(pStartMenuBuffer, x , y,     (31 - 1) * 94 + 20 - 1, Color, StartMenuWidth);   
     
     //系统日志
     //汉字	区位码	汉字	区位码	汉字	区位码	汉字	区位码
     //系	4721	统	4519	日	4053	志	5430
     x = 3;
     y += 16;
-    L2_GRAPHICS_ChineseCharDraw2(pStartMenuBuffer, x , y,     (47 - 1 ) * 94 + 21 - 1, Color, StartMenuWidth);    
+    L2_GRAPHICS_ChineseCharDraw(pStartMenuBuffer, x , y,     (47 - 1 ) * 94 + 21 - 1, Color, StartMenuWidth);    
     x += 16;
     
-    L2_GRAPHICS_ChineseCharDraw2(pStartMenuBuffer, x , y,     (45 - 1) * 94 + 19 - 1, Color, StartMenuWidth);
+    L2_GRAPHICS_ChineseCharDraw(pStartMenuBuffer, x , y,     (45 - 1) * 94 + 19 - 1, Color, StartMenuWidth);
     x += 16;
     
-    L2_GRAPHICS_ChineseCharDraw2(pStartMenuBuffer, x , y,     (40 - 1) * 94 + 53 - 1, Color, StartMenuWidth);
+    L2_GRAPHICS_ChineseCharDraw(pStartMenuBuffer, x , y,     (40 - 1) * 94 + 53 - 1, Color, StartMenuWidth);
     x += 16;
     
-    L2_GRAPHICS_ChineseCharDraw2(pStartMenuBuffer, x , y,     (54 - 1) * 94 + 30 - 1, Color, StartMenuWidth);   
+    L2_GRAPHICS_ChineseCharDraw(pStartMenuBuffer, x , y,     (54 - 1) * 94 + 30 - 1, Color, StartMenuWidth);   
     
     //系统退出
     //退 4543    出   1986
     x = 3;
     y += 16;
-    L2_GRAPHICS_ChineseCharDraw2(pStartMenuBuffer, x , y,     (47 - 1 ) * 94 + 21 - 1, Color, StartMenuWidth);    
+    L2_GRAPHICS_ChineseCharDraw(pStartMenuBuffer, x , y,     (47 - 1 ) * 94 + 21 - 1, Color, StartMenuWidth);    
     x += 16;
     
-    L2_GRAPHICS_ChineseCharDraw2(pStartMenuBuffer, x , y,     (45 - 1) * 94 + 19 - 1, Color, StartMenuWidth);
+    L2_GRAPHICS_ChineseCharDraw(pStartMenuBuffer, x , y,     (45 - 1) * 94 + 19 - 1, Color, StartMenuWidth);
     x += 16;
     
-    L2_GRAPHICS_ChineseCharDraw2(pStartMenuBuffer, x , y,     (45 - 1) * 94 + 43 - 1, Color, StartMenuWidth);
+    L2_GRAPHICS_ChineseCharDraw(pStartMenuBuffer, x , y,     (45 - 1) * 94 + 43 - 1, Color, StartMenuWidth);
     x += 16;
     
-    L2_GRAPHICS_ChineseCharDraw2(pStartMenuBuffer, x , y,     (19 - 1) * 94 + 86 - 1, Color, StartMenuWidth);   
+    L2_GRAPHICS_ChineseCharDraw(pStartMenuBuffer, x , y,     (19 - 1) * 94 + 86 - 1, Color, StartMenuWidth);   
 }
 
 
@@ -5922,32 +5933,32 @@ EFI_STATUS L2_GRAPHICS_SystemSettingInit()
 
     //背景设置
     //背 1719    景   3016    设   4172    置   5435
-    L2_GRAPHICS_ChineseCharDraw2(pSystemSettingWindowBuffer, x , y,   (17 - 1) * 94 + 19 - 1, Color, SystemSettingWindowWidth);   
+    L2_GRAPHICS_ChineseCharDraw(pSystemSettingWindowBuffer, x , y,   (17 - 1) * 94 + 19 - 1, Color, SystemSettingWindowWidth);   
     x += 16;
     
-    L2_GRAPHICS_ChineseCharDraw2(pSystemSettingWindowBuffer, x , y,   (30 - 1) * 94 + 16 - 1, Color, SystemSettingWindowWidth);
+    L2_GRAPHICS_ChineseCharDraw(pSystemSettingWindowBuffer, x , y,   (30 - 1) * 94 + 16 - 1, Color, SystemSettingWindowWidth);
     x += 16;
         
-    L2_GRAPHICS_ChineseCharDraw2(pSystemSettingWindowBuffer, x , y,   (41 - 1) * 94 + 72 - 1, Color, SystemSettingWindowWidth); 
+    L2_GRAPHICS_ChineseCharDraw(pSystemSettingWindowBuffer, x , y,   (41 - 1) * 94 + 72 - 1, Color, SystemSettingWindowWidth); 
     x += 16;
     
-    L2_GRAPHICS_ChineseCharDraw2(pSystemSettingWindowBuffer, x , y,   (54 - 1) * 94 + 35 - 1, Color, SystemSettingWindowWidth);
+    L2_GRAPHICS_ChineseCharDraw(pSystemSettingWindowBuffer, x , y,   (54 - 1) * 94 + 35 - 1, Color, SystemSettingWindowWidth);
     x += 16;
 
     //背景还原
     //还 2725    原   5213
     x = 3;
     y += 16;
-    L2_GRAPHICS_ChineseCharDraw2(pSystemSettingWindowBuffer, x , y,   (17 - 1) * 94 + 19 - 1, Color, SystemSettingWindowWidth);   
+    L2_GRAPHICS_ChineseCharDraw(pSystemSettingWindowBuffer, x , y,   (17 - 1) * 94 + 19 - 1, Color, SystemSettingWindowWidth);   
     x += 16;
     
-    L2_GRAPHICS_ChineseCharDraw2(pSystemSettingWindowBuffer, x , y,   (30 - 1) * 94 + 16 - 1, Color, SystemSettingWindowWidth);
+    L2_GRAPHICS_ChineseCharDraw(pSystemSettingWindowBuffer, x , y,   (30 - 1) * 94 + 16 - 1, Color, SystemSettingWindowWidth);
     x += 16;
     
-    L2_GRAPHICS_ChineseCharDraw2(pSystemSettingWindowBuffer, x , y,   (27 - 1) * 94 + 25 - 1, Color, SystemSettingWindowWidth);
+    L2_GRAPHICS_ChineseCharDraw(pSystemSettingWindowBuffer, x , y,   (27 - 1) * 94 + 25 - 1, Color, SystemSettingWindowWidth);
     x += 16;
     
-    L2_GRAPHICS_ChineseCharDraw2(pSystemSettingWindowBuffer, x , y,   (52 - 1) * 94 + 13 - 1, Color, SystemSettingWindowWidth);
+    L2_GRAPHICS_ChineseCharDraw(pSystemSettingWindowBuffer, x , y,   (52 - 1) * 94 + 13 - 1, Color, SystemSettingWindowWidth);
     
 
 }
@@ -6068,16 +6079,16 @@ EFI_STATUS L2_GRAPHICS_DeskInit()
     Color.Red   = 0xff;
     Color.Green = 0xff;
     // wo de dian nao
-    L2_GRAPHICS_ChineseCharDraw2(pDeskBuffer, x1, y1, (46 - 1) * 94 + 50 - 1, Color, ScreenWidth);
+    L2_GRAPHICS_ChineseCharDraw(pDeskBuffer, x1, y1, (46 - 1) * 94 + 50 - 1, Color, ScreenWidth);
     x1 += 16;
     
-    L2_GRAPHICS_ChineseCharDraw2(pDeskBuffer, x1, y1, (21 - 1) * 94 + 36 - 1, Color, ScreenWidth);
+    L2_GRAPHICS_ChineseCharDraw(pDeskBuffer, x1, y1, (21 - 1) * 94 + 36 - 1, Color, ScreenWidth);
     x1 += 16;
     
-    L2_GRAPHICS_ChineseCharDraw2(pDeskBuffer, x1, y1, (21 - 1) * 94 + 71 - 1, Color, ScreenWidth);
+    L2_GRAPHICS_ChineseCharDraw(pDeskBuffer, x1, y1, (21 - 1) * 94 + 71 - 1, Color, ScreenWidth);
     x1 += 16;
     
-    L2_GRAPHICS_ChineseCharDraw2(pDeskBuffer, x1, y1, (36 - 1) * 94 + 52 - 1, Color, ScreenWidth);
+    L2_GRAPHICS_ChineseCharDraw(pDeskBuffer, x1, y1, (36 - 1) * 94 + 52 - 1, Color, ScreenWidth);
 
     y1 += 16;
     y1 += 16;
@@ -6107,16 +6118,16 @@ EFI_STATUS L2_GRAPHICS_DeskInit()
     
     y1 += HeightNew;
     // wo de dian nao
-    L2_GRAPHICS_ChineseCharDraw2(pDeskBuffer, x1, y1, (46 - 1) * 94 + 50 - 1, Color, ScreenWidth);
+    L2_GRAPHICS_ChineseCharDraw(pDeskBuffer, x1, y1, (46 - 1) * 94 + 50 - 1, Color, ScreenWidth);
     x1 += 16;
     
-    L2_GRAPHICS_ChineseCharDraw2(pDeskBuffer, x1, y1, (21 - 1) * 94 + 36 - 1, Color, ScreenWidth);
+    L2_GRAPHICS_ChineseCharDraw(pDeskBuffer, x1, y1, (21 - 1) * 94 + 36 - 1, Color, ScreenWidth);
     x1 += 16;
     
-    L2_GRAPHICS_ChineseCharDraw2(pDeskBuffer, x1, y1, (21 - 1) * 94 + 71 - 1, Color, ScreenWidth);
+    L2_GRAPHICS_ChineseCharDraw(pDeskBuffer, x1, y1, (21 - 1) * 94 + 71 - 1, Color, ScreenWidth);
     x1 += 16;
     
-    L2_GRAPHICS_ChineseCharDraw2(pDeskBuffer, x1, y1, (36 - 1) * 94 + 52 - 1, Color, ScreenWidth);
+    L2_GRAPHICS_ChineseCharDraw(pDeskBuffer, x1, y1, (36 - 1) * 94 + 52 - 1, Color, ScreenWidth);
 
     y1 += 16;
     y1 += 16;
@@ -6157,16 +6168,16 @@ EFI_STATUS L2_GRAPHICS_DeskInit()
     
     y1 += HeightNew;
     // wo de dian nao
-    L2_GRAPHICS_ChineseCharDraw2(pDeskBuffer, x1, y1, (46 - 1) * 94 + 50 - 1, Color, ScreenWidth);
+    L2_GRAPHICS_ChineseCharDraw(pDeskBuffer, x1, y1, (46 - 1) * 94 + 50 - 1, Color, ScreenWidth);
     x1 += 16;
     
-    L2_GRAPHICS_ChineseCharDraw2(pDeskBuffer, x1, y1, (21 - 1) * 94 + 36 - 1, Color, ScreenWidth);
+    L2_GRAPHICS_ChineseCharDraw(pDeskBuffer, x1, y1, (21 - 1) * 94 + 36 - 1, Color, ScreenWidth);
     x1 += 16;
     
-    L2_GRAPHICS_ChineseCharDraw2(pDeskBuffer, x1, y1, (21 - 1) * 94 + 71 - 1, Color, ScreenWidth);
+    L2_GRAPHICS_ChineseCharDraw(pDeskBuffer, x1, y1, (21 - 1) * 94 + 71 - 1, Color, ScreenWidth);
     x1 += 16;
     
-    L2_GRAPHICS_ChineseCharDraw2(pDeskBuffer, x1, y1, (36 - 1) * 94 + 52 - 1, Color, ScreenWidth);
+    L2_GRAPHICS_ChineseCharDraw(pDeskBuffer, x1, y1, (36 - 1) * 94 + 52 - 1, Color, ScreenWidth);
 
     y1 += 16;
     y1 += 16;
@@ -6221,7 +6232,7 @@ EFI_STATUS L2_GRAPHICS_DeskInit()
     {
         for (UINT16 j = 1; j < 22; j++)
         {
-            L2_GRAPHICS_ChineseCharDraw2(pDeskBuffer,  (16 + 2) * j, i * (16 + 2) + 322, (i - 1) * 94 + j - 1, Color, ScreenWidth);
+            L2_GRAPHICS_ChineseCharDraw(pDeskBuffer,  (16 + 2) * j, i * (16 + 2) + 322, (i - 1) * 94 + j - 1, Color, ScreenWidth);
         }
     }*/
 
@@ -6232,8 +6243,8 @@ EFI_STATUS L2_GRAPHICS_DeskInit()
     }
 
     // menu chinese
-    L2_GRAPHICS_ChineseCharDraw2(pDeskBuffer,  16, ScreenHeight - 21,     (18 - 1) * 94 + 43 - 1, Color, ScreenWidth);
-    L2_GRAPHICS_ChineseCharDraw2(pDeskBuffer,  16 * 2, ScreenHeight - 21, (21 - 1) * 94 + 05 - 1, Color, ScreenWidth);
+    L2_GRAPHICS_ChineseCharDraw(pDeskBuffer,  16, ScreenHeight - 21,     (18 - 1) * 94 + 43 - 1, Color, ScreenWidth);
+    L2_GRAPHICS_ChineseCharDraw(pDeskBuffer,  16 * 2, ScreenHeight - 21, (21 - 1) * 94 + 05 - 1, Color, ScreenWidth);
 }
 
 
@@ -6248,15 +6259,18 @@ VOID L2_MOUSE_WallpaperResetClicked()
 
 START_MENU_STATE_TRANSFORM StartMenuStateTransformTable[] =
 {
-    {CLICK_INIT_STATE,              START_MENU_CLICKED_EVENT,           MENU_CLICKED_STATE,                 L2_MOUSE_MENU_Clicked},
-    {MENU_CLICKED_STATE,            MY_COMPUTER_CLICKED_EVENT,          MY_COMPUTER_CLICKED_STATE,          L2_MOUSE_MyComputerClicked},
-    {MENU_CLICKED_STATE,            SETTING_CLICKED_EVENT,              SYSTEM_SETTING_CLICKED_STATE,       L2_MOUSE_SystemSettingClicked},
-    {MENU_CLICKED_STATE,            MEMORY_INFORMATION_CLICKED_EVENT,   MEMORY_INFORMATION_CLICKED_STATE,   L2_MOUSE_MemoryInformationClicked},
-    {MENU_CLICKED_STATE,            SYSTEM_LOG_CLICKED_EVENT,           SYSTEM_LOG_STATE,                   L2_MOUSE_SystemLogClicked},
-    {MENU_CLICKED_STATE,            SYSTEM_QUIT_CLICKED_EVENT,          SYSTEM_QUIT_STATE,                  L2_MOUSE_SystemQuitClicked},
-    {SYSTEM_SETTING_CLICKED_STATE,  WALLPAPER_SETTING_CLICKED_EVENT,    CLICK_INIT_STATE,                   L2_MOUSE_WallpaperSettingClicked},
-    {SYSTEM_SETTING_CLICKED_STATE,  WALLPAPER_RESET_CLICKED_EVENT,      CLICK_INIT_STATE,                   L2_MOUSE_WallpaperResetClicked},
-    {MY_COMPUTER_CLICKED_STATE,     MY_COMPUTER_CLOSE_CLICKED_EVENT,    CLICK_INIT_STATE,                   L2_MOUSE_MyComputerCloseClicked},
+    {CLICK_INIT_STATE,              START_MENU_CLICKED_EVENT,           		MENU_CLICKED_STATE,                 	L2_MOUSE_MENU_Clicked},
+    {MENU_CLICKED_STATE,            MY_COMPUTER_CLICKED_EVENT,          		MY_COMPUTER_CLICKED_STATE,          	L2_MOUSE_MyComputerClicked},
+    {MENU_CLICKED_STATE,            SETTING_CLICKED_EVENT,              		SYSTEM_SETTING_CLICKED_STATE,       	L2_MOUSE_SystemSettingClicked},
+    {MENU_CLICKED_STATE,            MEMORY_INFORMATION_CLICKED_EVENT,   		MEMORY_INFORMATION_CLICKED_STATE,   	L2_MOUSE_MemoryInformationClicked},
+    {MENU_CLICKED_STATE,            SYSTEM_LOG_CLICKED_EVENT,           		SYSTEM_LOG_STATE,                   	L2_MOUSE_SystemLogClicked},
+    {MENU_CLICKED_STATE,            SYSTEM_QUIT_CLICKED_EVENT,          		SYSTEM_QUIT_STATE,                  	L2_MOUSE_SystemQuitClicked},
+    {SYSTEM_SETTING_CLICKED_STATE,  WALLPAPER_SETTING_CLICKED_EVENT,    		CLICK_INIT_STATE,                   	L2_MOUSE_WallpaperSettingClicked},
+    {SYSTEM_SETTING_CLICKED_STATE,  WALLPAPER_RESET_CLICKED_EVENT,      		CLICK_INIT_STATE,                   	L2_MOUSE_WallpaperResetClicked},
+    {MY_COMPUTER_CLICKED_STATE,     MY_COMPUTER_CLOSE_CLICKED_EVENT,    	   	CLICK_INIT_STATE,                   	L2_MOUSE_MyComputerCloseClicked},
+    {MY_COMPUTER_CLICKED_STATE,     MY_COMPUTER_PARTITION_ITEM_CLICKED_EVENT,   MY_COMPUTER_PARTITION_CLICKED_STATE,    L2_MOUSE_MyComputerPartitionItemClicked},
+    {MY_COMPUTER_PARTITION_CLICKED_STATE, MY_COMPUTER_FOLDER_ITEM_CLICKED_EVENT,      MY_COMPUTER_FOLDER_CLICKED_STATE, L2_MOUSE_MyComputerFolderItemClicked},
+    {MY_COMPUTER_FOLDER_CLICKED_STATE, MY_COMPUTER_FOLDER_ITEM_CLICKED_EVENT,      MY_COMPUTER_FOLDER_CLICKED_STATE,    L2_MOUSE_MyComputerFolderItemClicked},
 };
 
 
@@ -6471,7 +6485,7 @@ EFI_STATUS L2_GRAPHICS_ScreenInit()
 
     
     // init mouse buffer with cursor
-    L2_GRAPHICS_ChineseCharDraw2(pMouseBuffer, 0, 0, 11 * 94 + 42, MouseColor, 16);
+    L2_GRAPHICS_ChineseCharDraw(pMouseBuffer, 0, 0, 11 * 94 + 42, MouseColor, 16);
     //L2_DEBUG_Print1(DISPLAY_X, DISPLAY_Y, "%d: GraphicsLayerCompute\n", __LINE__);
     
     GraphicsOutput->Blt(
