@@ -3707,7 +3707,39 @@ VOID L2_MOUSE_MyComputerFolderItemClicked()
     UINT8 Buffer1[DISK_BUFFER_SIZE];
 	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d PartitionItemID: %d FolderItemID: %d \n", __LINE__, PartitionItemID, FolderItemID);
 		
+	if (0xffff == PartitionItemID || 0xffff == FolderItemID)
+	{
+		L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d 0xffff == PartitionItemID\n", __LINE__);
+		return;
+	}
 
+	UINT16 index = FolderItemValidIndexArray[FolderItemID];
+
+	UINT16 High2B = L1_NETWORK_2BytesToUINT16(pItems[index].StartClusterHigh2B);
+	UINT16 Low2B  = L1_NETWORK_2BytesToUINT16(pItems[index].StartClusterLow2B);
+	UINT32 StartCluster = High2B * 16 * 16 * 16 * 16 + Low2B;
+
+	UINT32 StartSectorNumber = 8192 + (StartCluster - 2) * 8;
+	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], 
+					"%d High2B: %X Low2B: %X StartCluster: %X StartSectorNumber: %X\n", 
+					__LINE__, 
+					High2B,
+					Low2B,
+					StartCluster,
+					StartSectorNumber);
+
+					
+    Status = L1_STORE_READ(PartitionItemID, StartSectorNumber, 1, Buffer1); 
+    if (EFI_ERROR(Status))
+    {
+        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d Status: %X\n", __LINE__, Status);
+        return Status;
+    }
+
+	for (int j = 0; j < 250; j++)
+    {
+        L2_DEBUG_Print1(DISK_READ_BUFFER_X + (j % 16) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 16), "%02X ", Buffer1[j] & 0xff);
+    }
 	
 }
 
