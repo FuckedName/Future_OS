@@ -2988,6 +2988,8 @@ PARTITION_ITEM_ACCESS_STATE_TRANSFORM PartitionItemAccessStateTransformTable[] =
     {FILE_ITEM_ACCESS_STATE,    CLOSE_ACCESS_EVENT,  INIT_ACCESS_STATE,         L3_PARTITION_AccessFinish}
 };
 
+// because part items of  pItems is not valid;
+UINT16 FolderItemValidIndexArray[10] = {0};
 
 L2_STORE_FolderItemsPrint()
 {
@@ -3031,7 +3033,7 @@ L2_STORE_FolderItemsPrint()
             L2_DEBUG_Print3(x, y + HeightNew, WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW], "%a %d Bytes",
                                             name,
                                             L1_NETWORK_4BytesToUINT32(pItems[i].FileLength));
-            
+            FolderItemValidIndexArray[valid_count] = i;
             valid_count++;
         }
         else if (pItems[i].Attribute[0] == 0x20) //File
@@ -3051,6 +3053,7 @@ L2_STORE_FolderItemsPrint()
                                             L1_NETWORK_4BytesToUINT32(pItems[i].FileLength));
             
             L3_GRAPHICS_ItemPrint(pMyComputerBuffer, pSystemIconTextBuffer, MyComputerWidth, MyComputerHeight, WidthNew, HeightNew, x, y, "222", 2, GRAPHICS_LAYER_MY_COMPUTER_WINDOW);
+			FolderItemValidIndexArray[valid_count] = i;
             valid_count++;
         }
     }       
@@ -3301,6 +3304,7 @@ MOUSE_CLICK_EVENT L2_GRAPHICS_SystemSettingLayerClickEventGet()
 }
 
 UINT16 PartitionItemID = 0xffff; // invalid
+UINT16 FolderItemID = 0xffff; // invalid
 
 MOUSE_CLICK_EVENT L2_GRAPHICS_MyComputerLayerClickEventGet()
 {
@@ -3328,6 +3332,24 @@ MOUSE_CLICK_EVENT L2_GRAPHICS_MyComputerLayerClickEventGet()
 			PartitionItemID = i;
 			L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: MY_COMPUTER_PARTITION_ITEM_CLICKED_EVENT PartitionItemID: %d\n", __LINE__, PartitionItemID);
 			return MY_COMPUTER_PARTITION_ITEM_CLICKED_EVENT;
+		}
+	}
+
+    UINT16 HeightNew = SYSTEM_ICON_HEIGHT / 8;
+    UINT16 WidthNew = SYSTEM_ICON_WIDTH / 8;
+
+	//Only 6 item, need to fix after test.
+    for (UINT16 i = 0 ; i < 6; i++)
+    {
+		UINT16 StartX = MyComputerPositionX + 130;
+		UINT16 StartY = MyComputerPositionY + i  * (HeightNew + 16 * 2) + 200;
+		
+		if (iMouseX >= StartX && iMouseX <=  StartX + WidthNew 
+            && iMouseY >= StartY && iMouseY <= HeightNew)
+		{
+			FolderItemID = i;
+			L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: MY_COMPUTER_PARTITION_ITEM_CLICKED_EVENT PartitionItemID: %d\n", __LINE__, FolderItemID);
+			return MY_COMPUTER_FOLDER_ITEM_CLICKED_EVENT;
 		}
 	}
 
@@ -3671,9 +3693,20 @@ VOID L2_MOUSE_MyComputerPartitionItemClicked()
     L2_GRAPHICS_Copy(pDeskDisplayBuffer, pMouseSelectedBuffer, ScreenWidth, ScreenHeight, 32, 16, MyComputerPositionX + 50, MyComputerPositionY  + PartitionItemID * (16 + 2) + 16 * 2);   
 }
 
+// 1. To judge folder item is file or folder
+// 2. Get StartClusterHigh2B and StartClusterLow2B and computer the next read sector id number
+// 3. Read sector id number sector content from partition
+// 4. Analysis content and print result 
 VOID L2_MOUSE_MyComputerFolderItemClicked()
 {
     L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d L2_MOUSE_MyComputerFolderItemClicked\n", __LINE__);
+	//FolderItemID;
+	//L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d DeviceID: %d\n", __LINE__, DeviceID);
+    //printf( "RootPathAnalysis\n" );
+    EFI_STATUS Status ;
+    UINT8 Buffer1[DISK_BUFFER_SIZE];
+	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d PartitionItemID: %d FolderItemID: %d \n", __LINE__, PartitionItemID, FolderItemID);
+		
 
 	
 }
