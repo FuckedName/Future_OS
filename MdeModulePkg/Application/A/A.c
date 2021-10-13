@@ -3118,8 +3118,8 @@ VOID L2_GRAPHICS_LayerCompute(UINT16 iMouseX, UINT16 iMouseY, UINT8 MouseClickFl
         
     if (MouseClickFlag == 1 && pDeskDisplayBuffer[(iMouseY * ScreenWidth + iMouseX) * 4 + 3] == GRAPHICS_LAYER_MY_COMPUTER_WINDOW)
     {
-        MyComputerPositionX += x_move * 3;
-        MyComputerPositionY += y_move * 3;
+        WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].StartX += x_move * 3;
+        WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].StartY += y_move * 3;
         
     //  L2_GRAPHICS_Copy(pDeskDisplayBuffer, pMyComputerBuffer, ScreenWidth, ScreenHeight, MyComputerWidth, MyComputerHeight, MyComputerPositionX, MyComputerPositionX);
     }
@@ -3345,10 +3345,10 @@ MOUSE_CLICK_EVENT L2_GRAPHICS_MyComputerLayerClickEventGet()
 		UINT16 StartY = MyComputerPositionY + i  * (HeightNew + 16 * 2) + 200;
 		
 		if (iMouseX >= StartX && iMouseX <=  StartX + WidthNew 
-            && iMouseY >= StartY && iMouseY <= HeightNew)
+            && iMouseY >= StartY && iMouseY <= StartY + HeightNew)
 		{
 			FolderItemID = i;
-			L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: MY_COMPUTER_PARTITION_ITEM_CLICKED_EVENT PartitionItemID: %d\n", __LINE__, FolderItemID);
+			L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: MY_COMPUTER_PARTITION_ITEM_CLICKED_EVENT FolderItemID: %d\n", __LINE__, FolderItemID);
 			return MY_COMPUTER_FOLDER_ITEM_CLICKED_EVENT;
 		}
 	}
