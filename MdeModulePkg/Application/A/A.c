@@ -2998,7 +2998,27 @@ L2_STORE_FolderItemsPrint()
     UINT16 WidthNew = SYSTEM_ICON_WIDTH / 8;
     UINT16 x;
     UINT16 y;
-    
+	
+	pMyComputerBuffer = WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].pBuffer;
+
+	UINT16 StartX = MyComputerPositionX + 130;
+	UINT16 StartY = MyComputerPositionY + 6  * (HeightNew + 16 * 2) + 200;
+
+	UINT16 Width = WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].WindowWidth;
+	UINT16 Height = WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].WindowHeight;
+
+	// Clear old display items
+	for (UINT16 i = 632; i < Height; i++)
+    {
+        for (UINT16 j = 130; j < Width; j++)
+        {
+            pMyComputerBuffer[(i * Width + j) * 4]     = 0xff;
+            pMyComputerBuffer[(i * Width + j) * 4 + 1] = 0xff;
+            pMyComputerBuffer[(i * Width + j) * 4 + 2] = 0xff;
+            pMyComputerBuffer[(i * Width + j) * 4 + 3] = GRAPHICS_LAYER_MY_COMPUTER_WINDOW;
+        }
+    }	
+	
     for (UINT16 i = 0; i < 32; i++)
     {       
         if (pItems[i].FileName[0] == 0)
@@ -3693,6 +3713,14 @@ VOID L2_MOUSE_MyComputerPartitionItemClicked()
     L2_GRAPHICS_Copy(pDeskDisplayBuffer, pMouseSelectedBuffer, ScreenWidth, ScreenHeight, 32, 16, MyComputerPositionX + 50, MyComputerPositionY  + PartitionItemID * (16 + 2) + 16 * 2);   
 }
 
+VOID L2_PARTITION_FileContentPrint(UINT8 *Buffer)
+{	
+	for (int j = 0; j < 250; j++)
+    {
+        L2_DEBUG_Print1(DISK_READ_BUFFER_X + (j % 16) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 16), "%02X ", Buffer[j] & 0xff);
+    }
+}
+
 // 1. To judge folder item is file or folder
 // 2. Get StartClusterHigh2B and StartClusterLow2B and computer the next read sector id number
 // 3. Read sector id number sector content from partition
@@ -3704,7 +3732,7 @@ VOID L2_MOUSE_MyComputerFolderItemClicked()
 	//L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d DeviceID: %d\n", __LINE__, DeviceID);
     //printf( "RootPathAnalysis\n" );
     EFI_STATUS Status ;
-    UINT8 Buffer1[DISK_BUFFER_SIZE];
+    UINT8 Buffer[DISK_BUFFER_SIZE];
 	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d PartitionItemID: %d FolderItemID: %d \n", __LINE__, PartitionItemID, FolderItemID);
 		
 	if (0xffff == PartitionItemID || 0xffff == FolderItemID)
@@ -3719,6 +3747,7 @@ VOID L2_MOUSE_MyComputerFolderItemClicked()
 	UINT16 Low2B  = L1_NETWORK_2BytesToUINT16(pItems[index].StartClusterLow2B);
 	UINT32 StartCluster = High2B * 16 * 16 * 16 * 16 + Low2B;
 
+	// Start cluster id is 2, exclude 0,1
 	UINT32 StartSectorNumber = 8192 + (StartCluster - 2) * 8;
 	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], 
 					"%d High2B: %X Low2B: %X StartCluster: %X StartSectorNumber: %X\n", 
@@ -3728,18 +3757,26 @@ VOID L2_MOUSE_MyComputerFolderItemClicked()
 					StartCluster,
 					StartSectorNumber);
 
-					
-    Status = L1_STORE_READ(PartitionItemID, StartSectorNumber, 1, Buffer1); 
+	// Read data from partition(disk or USB etc..)					
+    Status = L1_STORE_READ(PartitionItemID, StartSectorNumber, 1, Buffer); 
     if (EFI_ERROR(Status))
     {
         L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d Status: %X\n", __LINE__, Status);
         return Status;
     }
 
-	for (int j = 0; j < 250; j++)
-    {
-        L2_DEBUG_Print1(DISK_READ_BUFFER_X + (j % 16) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 16), "%02X ", Buffer1[j] & 0xff);
-    }
+	switch(pItems[index].Attribute[0])
+	{
+		case 0x10:  L1_MEMORY_Memset(&pItems, 0, sizeof(pItems));
+				    memcpy(&pItems, Buffer, DISK_BUFFER_SIZE);
+					L2_STORE_FolderItemsPrint();
+					break;
+		
+		case 0x20: L2_PARTITION_FileContentPrint(Buffer); break;
+
+		default: break;
+	}
+
 	
 }
 
