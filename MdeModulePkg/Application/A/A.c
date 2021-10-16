@@ -2189,7 +2189,7 @@ EFI_STATUS  L2_FILE_NTFS_MFTDollarRootFileAnalysis(UINT8 *pBuffer)
             UINT8 DataRuns[20] = {0};
             L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: A0 attribute has been found: ", __LINE__);
             for (int i = NameOffset; i < NameOffset + NameSize * 2; i++)
-                L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%02X ", pItem[i] & 0xff);
+                L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: %02X ", __LINE__, pItem[i] & 0xff);
 
             int j = 0;
 
@@ -2197,7 +2197,7 @@ EFI_STATUS  L2_FILE_NTFS_MFTDollarRootFileAnalysis(UINT8 *pBuffer)
             for (int i = NameOffset + NameSize * 2; i < AttributeSize; i++)
             {           
                 DataRuns[j] = pItem[i] & 0xff;
-                L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%02X ", DataRuns[j] & 0xff);   
+                L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: %02X ", __LINE__, DataRuns[j] & 0xff);   
                 j++;
             }
             L2_FILE_NTFS_DollarRootA0DatarunAnalysis(DataRuns);
@@ -2241,7 +2241,7 @@ EFI_STATUS  L2_FILE_NTFS_MFTIndexItemsAnalysis(UINT8 *pBuffer)
          if (index >= L1_NETWORK_4BytesToUINT32(((INDEX_HEADER *)p)->IndexEntrySize))
             break;
             
-         //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%s index: %d\n", __LINE__,  index);  
+         //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: index: %d\n", __LINE__,  index);  
          // length use 2b at 8, 9 bit
          UINT16 length2 = pBuffer[index + 8] + pBuffer[index + 9] * 16;
 
@@ -2251,9 +2251,9 @@ EFI_STATUS  L2_FILE_NTFS_MFTIndexItemsAnalysis(UINT8 *pBuffer)
             
          UINT8 FileNameSize = ((INDEX_ITEM *)pItem)->FileNameSize;
          UINT8 FileContentRelativeSector =   L1_NETWORK_6BytesToUINT64(((INDEX_ITEM *)pItem)->MFTReferNumber);
-         //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d attribut length2: %d FileNameSize: %d\n", __LINE__, 
-        //                                                           length2,
-        //                                                           FileNameSize);    
+         /*L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: attribut length2: %d FileNameSize: %d\n", __LINE__, 
+                                                                   length2,
+                                                                   FileNameSize);  */  
          UINT8 attributeName[20];                                                                    
          for (int i = 0; i < FileNameSize; i++)
          {
@@ -2697,19 +2697,19 @@ EFI_STATUS L2_FILE_FAT32_DataSectorHandle(UINT16 DeviceID)
 }
 EFI_STATUS L2_FILE_NTFS_RootPathItemsRead(UINT8 i)
 {
-    //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d DeviceType: %d, SectorCount: %lld\n", __LINE__, i);
+    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d DeviceType: %d, SectorCount: %lld\n", __LINE__, i);
     EFI_STATUS Status ;
     UINT8 BufferBlock[DISK_BLOCK_BUFFER_SIZE];
 
     UINT8 k = 0;
     UINT16 lastOffset = 0;
-    /*
+   
     L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: Offset:%ld OccupyCluster:%ld\n",  __LINE__, 
                                                                      (A0Indexes[k].Offset + lastOffset) * 8, 
                                                                      A0Indexes[k].OccupyCluster * 8);
-    */
+    
     // cluster need to multi with 8 then it is sector.
-   Status = L1_STORE_READ(i, (A0Indexes[k].Offset + lastOffset) * 8 + sector_count , A0Indexes[k].OccupyCluster * 8, BufferBlock);
+    Status = L1_STORE_READ(i, (A0Indexes[k].Offset + lastOffset) * 8 , A0Indexes[k].OccupyCluster * 8, BufferBlock);
     if (EFI_ERROR(Status))
     {
         L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d Status: %X\n", __LINE__, Status);
