@@ -775,8 +775,9 @@ typedef struct
     /*+0x2C*/ UINT8 MFTRecordNumber[4]; // windows xp中使用,本MFT记录号
     /*+0x30*/ UINT8 USN[2]; // 更新序列号
     /*+0x32*/ UINT8 UpdateArray[0]; // 更新数组
- } FILE_HEADER, *pFILE_HEADER; 
+ } NTFS_FILE_HEADER, *pNTFS_FILE_HEADER; 
 
+// NTFS FILE 属性头
 typedef struct  
 {
     UINT8 Type[4];   //属性类型
@@ -786,7 +787,7 @@ typedef struct
     UINT8 NameOffset[2]; //属性名的偏移 相对于属性头
     UINT8 Flags[2]; //标志（0x0001压缩 0x4000加密 0x8000稀疏）
     UINT8 Id[2]; //属性唯一ID
-}CommonAttributeHeader;
+}NTFS_FILE_ATTRIBUTE_HEADER;
 
 typedef struct 
 {
@@ -806,21 +807,49 @@ typedef struct
     UINT64 MFT_MirrStartCluster;
 }DollarBootSwitched;
 
-
+// Master File Table
 typedef enum
 {
-	MFT_ITEM_DOLLAR_ATTR_DEF = 0,
-	MFT_ITEM_DOLLAR_BAD_CLUS,
+	MFT_ITEM_DOLLAR_MFT = 0,
+	MFT_ITEM_DOLLAR_MFT_MIRR,
+	MFT_ITEM_DOLLAR_LOG_FILE,
+	MFT_ITEM_DOLLAR_VOLUME,
+	MFT_ITEM_DOLLAR_ATTR_DEF,
+	MFT_ITEM_DOLLAR_ROOT,
 	MFT_ITEM_DOLLAR_BIT_MAP,
 	MFT_ITEM_DOLLAR_BOOT,
-	MFT_ITEM_DOLLAR_LOG_FILE,
-	MFT_ITEM_DOLLAR_MFT,
-	MFT_ITEM_DOLLAR_MFT_MIRR,
+	MFT_ITEM_DOLLAR_BAD_CLUS,
+	MFT_ITEM_DOLLAR_QUOTA,
 	MFT_ITEM_DOLLAR_SECURE,
 	MFT_ITEM_DOLLAR_UP_CASE,
-	MFT_ITEM_DOLLAR_VOLUME,
+	MFT_ITEM_DOLLAR_EXTEND_METADATA_DIRECTORY,
+	MFT_ITEM_DOLLAR_EXTEND_REPARSE,
+	MFT_ITEM_DOLLAR_EXTEND_USNJML,
+	MFT_ITEM_DOLLAR_EXTEND_QUOTA,
+	MFT_ITEM_DOLLAR_EXTEND_OBJECT_ID,
 	MFT_ITEM_DOLLAR_MAX
 }MFT_ITEM;
+
+// Master File Table
+typedef enum
+{
+	MFT_ATTRIBUTE_DOLLAR_STANDARD_INFORMATION 		= 0x10,
+	MFT_ATTRIBUTE_DOLLAR_ATTRIBUTE_LIST 			= 0x20,
+	MFT_ATTRIBUTE_DOLLAR_FILE_NAME					= 0x30,
+	MFT_ATTRIBUTE_DOLLAR_OBJECT_ID					= 0x40,
+	MFT_ATTRIBUTE_DOLLAR_SECURITY_DESCRIPTOR		= 0x50,
+	MFT_ATTRIBUTE_DOLLAR_VOLUME_NAME				= 0x60,
+	MFT_ATTRIBUTE_DOLLAR_VOLUME_INFORMATION			= 0x70,
+	MFT_ATTRIBUTE_DOLLAR_DATA						= 0x80,	
+	MFT_ATTRIBUTE_DOLLAR_INDEX_ROOT					= 0x90,
+	MFT_ATTRIBUTE_DOLLAR_INDEX_ALLOCATION			= 0xA0,
+	MFT_ATTRIBUTE_DOLLAR_BITMAP						= 0xB0,
+	MFT_ATTRIBUTE_DOLLAR_REPARSE_POINT				= 0xC0,
+	MFT_ATTRIBUTE_DOLLAR_EA_INFORMATION				= 0xD0,
+	MFT_ATTRIBUTE_DOLLAR_EA							= 0xE0,
+	MFT_ATTRIBUTE_DOLLAR_LOGGED_UTILITY_STREAM		= 0x100,
+	MFT_ATTRIBUTE_DOLLAR_MAX						
+}MFT_ATTRIBUTE_TYPE;
 
 
 // MFT记录了整个卷的所有文件 (包括MFT本身、数据文件、文件夹等等) 信息，包括空间占用，文件基本属性，文件位置索引，创建时
@@ -846,6 +875,25 @@ typedef struct {
     // 0x30
      UINT8    USN[8];                 // 更新序列号(2B) 和 更新序列数组
 }MFT_HEADER;
+
+
+
+/*
+	NTFS文件系统分区访问方法：
+		1、第一个扇区；数据结构DOLLAR_BOOT，获取：MFT_StartCluster的值；
+		2、通过MFT_StartCluster * 8 访问MFT表，有很多项，数据结构：MFT_ITEM，访问通过偏移10个扇区访问MFT_ITEM_DOLLAR_ROOT项；
+		3、每个MFT项,以FILE的ASSCI码开头（占用2个扇区，1024字节大小）包含MFT头部：数据结构：MFT_HEADER;
+			还包含还有很多个属性组成(多个枚举值：MFT_ATTRIBUTE_TYPE)，属性数据结构：NTFSAttribute
+			我们需要找到0x90属性和0xA0属性，并获取data runs
+			0X90索引根属性，存放着该目录下的子目录和子文件的索引项；
+			当某个目录下的内容比较多，从而导致0X90属性无法完全存放时，0XA0属性会指向一个索引区域，
+			这个索引区域包含了该目录下所有剩余内容的索引项。
+		4、
+		5、
+
+		
+*/
+
 
 /*
     MFT 是由一条条 MFT 项(记录)所组成的，而且每项大小是固定的(一般为1KB = 2 * 512)，MFT保留了前16项用于特殊文件记录，称为元数据，
@@ -1861,26 +1909,33 @@ UINTN L1_STRING_Length(char *String)
 EFI_STATUS  L2_FILE_NTFS_DollarRootA0DatarunAnalysis(UINT8 *p)
 {
     L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: string length: %d\n", __LINE__,  L1_STRING_Length(p));
-    UINT16 i = 0;
+
     UINT16 length = L1_STRING_Length(p);
     UINT8 occupyCluster = 0;
     UINT16 offset = 0;
 
     UINT16 Index = 0;
+	UINT16 i = 0;
     while(i < length)
     {
-        int  offsetLength  = p[i] >> 4;
-        int  occupyClusterLength = p[i] & 0x0f;
-        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: occupyClusterLength: %d offsetLength: %d\n", __LINE__,  occupyClusterLength, offsetLength);
+    	// for exampleData runs:11 01 24
+        UINT8  offsetLength  = p[i] >> 4;
+        UINT8  occupyClusterLength = p[i] & 0x0f;
+        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: OccupyClusterLength: %d offsetLength: %d\n", __LINE__,  occupyClusterLength, offsetLength);
         
         i++;
+
+		// Current only handle value is 1
         if (occupyClusterLength == 1)
             A0Indexes[Index].OccupyCluster = p[i];
+		
         i++;
         //INFO_SELF(" i: %d\n", i);
         if (offsetLength == 1)
-            offset = p[i];
-        else if (offsetLength == 3)
+        {
+        	offset = p[i];
+        }
+		else if (offsetLength == 3)
         {
             UINT8 size[3];
             size[0] = p[i];
@@ -2090,7 +2145,7 @@ EFI_STATUS  L2_FILE_NTFS_MFTDollarRootFileAnalysis(UINT8 *pBuffer)
     //}
     
     // File header length
-    UINT16 AttributeOffset = L1_NETWORK_2BytesToUINT16(((FILE_HEADER *)p)->AttributeOffset);
+    UINT16 AttributeOffset = L1_NETWORK_2BytesToUINT16(((NTFS_FILE_HEADER *)p)->AttributeOffset);
     L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: AttributeOffset:%X \n", __LINE__, AttributeOffset);
 
     // location of a0 attribute may be in front of 10 
@@ -2111,18 +2166,18 @@ EFI_STATUS  L2_FILE_NTFS_MFTDollarRootFileAnalysis(UINT8 *pBuffer)
             pItem[i] = p[AttributeOffset + i];
 
         // after buffer copied, we can get information in item
-        UINT16  NameSize = ((CommonAttributeHeader *)pItem)->NameSize;
+        UINT16  NameSize = ((NTFS_FILE_ATTRIBUTE_HEADER *)pItem)->NameSize;
         
-        UINT16  NameOffset = L1_NETWORK_2BytesToUINT16(((CommonAttributeHeader *)pItem)->NameOffset);
+        UINT16  NameOffset = L1_NETWORK_2BytesToUINT16(((NTFS_FILE_ATTRIBUTE_HEADER *)pItem)->NameOffset);
         L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: Type[0]: %02X AttributeSize: %02X NameSize: %02X NameOffset: %02X\n", __LINE__, 
-                                                            ((CommonAttributeHeader *)pItem)->Type[0],
+                                                            ((NTFS_FILE_ATTRIBUTE_HEADER *)pItem)->Type[0],
                                                             AttributeSize,
                                                             NameSize,
                                                             NameOffset);   
                                                             
          //A0 attribute is very important for us to analysis root path items(file or folder)
          // ofcourse the other parameter of attribut can analysis, if you want
-         if (0xA0 == ((CommonAttributeHeader *)pItem)->Type[0])
+         if (0xA0 == ((NTFS_FILE_ATTRIBUTE_HEADER *)pItem)->Type[0])
          {
             // every name char use two bytes.
             UINT16 DataRunsSize = AttributeSize - NameOffset - NameSize * 2;
@@ -2153,6 +2208,7 @@ EFI_STATUS  L2_FILE_NTFS_MFTDollarRootFileAnalysis(UINT8 *pBuffer)
     }
 }
 
+//Print ROOT Path items.
 EFI_STATUS  L2_FILE_NTFS_MFTIndexItemsAnalysis(UINT8 *pBuffer)
 {
     UINT8 *p = NULL;
@@ -2193,7 +2249,7 @@ EFI_STATUS  L2_FILE_NTFS_MFTIndexItemsAnalysis(UINT8 *pBuffer)
         for (int i = 0; i < length2; i++)
             pItem[i] = pBuffer[index + i];
             
-         UINT8 FileNameSize =    ((INDEX_ITEM *)pItem)->FileNameSize;
+         UINT8 FileNameSize = ((INDEX_ITEM *)pItem)->FileNameSize;
          UINT8 FileContentRelativeSector =   L1_NETWORK_6BytesToUINT64(((INDEX_ITEM *)pItem)->MFTReferNumber);
          //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d attribut length2: %d FileNameSize: %d\n", __LINE__, 
         //                                                           length2,
@@ -2201,9 +2257,11 @@ EFI_STATUS  L2_FILE_NTFS_MFTIndexItemsAnalysis(UINT8 *pBuffer)
          UINT8 attributeName[20];                                                                    
          for (int i = 0; i < FileNameSize; i++)
          {
+         	//every name char use 2 Bytes.
+         	// Item before name use 82 Bytes. 
             attributeName[i] = pItem[82 + 2 * i];
          }
-         L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: attributeName: %a, FileContentRelativeSector: %llu\n", __LINE__, attributeName, FileContentRelativeSector);
+         L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: attributeName: %a, RelativeSector: %llu\n", __LINE__, attributeName, FileContentRelativeSector);
          //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%s attributeName: %a\n", __LINE__,  attributeName);  
          index += length2;
     }
@@ -2651,7 +2709,7 @@ EFI_STATUS L2_FILE_NTFS_RootPathItemsRead(UINT8 i)
                                                                      A0Indexes[k].OccupyCluster * 8);
     */
     // cluster need to multi with 8 then it is sector.
-   Status = L1_STORE_READ(i, (A0Indexes[k].Offset + lastOffset) * 8 , A0Indexes[k].OccupyCluster * 8, BufferBlock);
+   Status = L1_STORE_READ(i, (A0Indexes[k].Offset + lastOffset) * 8 + sector_count , A0Indexes[k].OccupyCluster * 8, BufferBlock);
     if (EFI_ERROR(Status))
     {
         L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d Status: %X\n", __LINE__, Status);
@@ -2893,7 +2951,7 @@ VOID L2_STORE_PartitionItemsPrint(UINT16 Index)
     else if (FileSystemType == FILE_SYSTEM_NTFS)
     {
         // get MFT $ROOT item. 
-        L2_FILE_NTFS_MFT_Item_Read(Index, MFT_ITEM_DOLLAR_MFT);
+        L2_FILE_NTFS_MFT_Item_Read(Index, MFT_ITEM_DOLLAR_ROOT);
 
         // get data runs
         L2_FILE_NTFS_MFTDollarRootFileAnalysis(BufferMFT);      
