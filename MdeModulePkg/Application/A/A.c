@@ -1811,6 +1811,10 @@ void L1_FILE_NameGet(UINT8 ItemID, UINT8 *FileName)
     int count = 0;
     while (pItems[ItemID].FileName[count] != 0)
     {
+    	if (count >= 8)
+		{
+			break;
+    	}
         FileName[count] = pItems[ItemID].FileName[count];
         count++;
     }
@@ -1823,11 +1827,18 @@ void L1_FILE_NameGet(UINT8 ItemID, UINT8 *FileName)
     int count2 = 0;
     while (pItems[ItemID].ExtensionName[count2] != 0)
     {
+    	if (count2 >= 3)
+		{
+			break;
+    	}
+    
         FileName[count] = pItems[ItemID].ExtensionName[count2];
         count++;
         count2++;
     }
+	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: count: %d\n", __LINE__, count);
 
+	FileName[12] = 0;
  }
 
 void L1_FILE_NameGet3(UINT8 ItemID, UINT8 *FileName)
