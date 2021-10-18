@@ -636,6 +636,19 @@ typedef struct
     UINT8 FileLength[4];
 }FAT32_ROOTPATH_SHORT_FILE_ITEM;
 
+
+FAT32_ROOTPATH_SHORT_FILE_ITEM pItems[32];
+
+// To save folder or file after read from file system.
+typedef struct
+{
+	UINT8 Name[100]; 
+	UINT8 Type[100]; // 1 file; 2 folder; 
+	UINT16 Size;
+	UINT16 CreateTime;
+	UINT16 LatestModifiedTime;
+}COMMON_STORAGE_ITEM;
+
 typedef struct
 {
     UINT16 DeviceType; // 0 Disk, 1: USB, 2: Sata;
@@ -949,9 +962,6 @@ typedef struct
 
 MasterBootRecordSwitched MBRSwitched;
 DollarBootSwitched NTFSBootSwitched;
-
-
-FAT32_ROOTPATH_SHORT_FILE_ITEM pItems[32];
 
 typedef struct 
 {
@@ -1817,6 +1827,35 @@ void L1_FILE_NameGet(UINT8 ItemID, UINT8 *FileName)
         count++;
         count2++;
     }
+
+ }
+
+void L1_FILE_NameGet3(UINT8 ItemID, UINT8 *FileName)
+ {    
+    int count = 0;
+	    
+    while (pItems[ItemID].FileName[count] != 0x20)
+    {
+    	
+    	FileName[count] = pItems[ItemID].FileName[count];
+        count++;
+    }
+    
+    if (pItems[ItemID].ExtensionName[0] != 0x20)
+    {
+        FileName[count] = ' ';
+        count++;
+    }
+    int count2 = 0;
+    while (pItems[ItemID].ExtensionName[count2] != 0x20)
+    {
+        FileName[count] = pItems[ItemID].ExtensionName[count2];
+        count++;
+        count2++;
+    }
+	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: count: %d\n", __LINE__, count);
+		
+	FileName[count] = 0;
 
  }
 
@@ -3097,7 +3136,7 @@ L2_STORE_FolderItemsPrint()
 	UINT16 Height = WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].WindowHeight;
 
 	// Clear old display items
-	for (UINT16 i = 232; i < Height; i++)
+	for (UINT16 i = 200; i < Height; i++)
     {
         for (UINT16 j = 130; j < Width; j++)
         {
@@ -3113,7 +3152,7 @@ L2_STORE_FolderItemsPrint()
         if (pItems[i].FileName[0] == 0)
             break;
             
-        char name[12] = {0};
+        char name[13] = {0};
         x = 130;
 
         y = valid_count * (HeightNew + 16 * 2) + 200;
