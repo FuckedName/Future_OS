@@ -216,9 +216,7 @@ char pKeyboardInputBuffer[KEYBOARD_BUFFER_LENGTH] = {0};
 #define DISPLAY_LOG_ERROR_STATUS_X (4) 
 #define DISPLAY_LOG_ERROR_STATUS_Y (16 * (LogStatusErrorCount++ % (SystemLogWindowHeight / 16 + 2)) )
 
-#define FILE_SYSTEM_OTHER   0xff
-#define FILE_SYSTEM_FAT32  1
-#define FILE_SYSTEM_NTFS   2
+
 
 #define MOUSE_NO_CLICKED 0
 #define MOUSE_LEFT_CLICKED 1
@@ -270,6 +268,14 @@ typedef enum
     SYSTEM_ICON_MAX 
 }SYSTEM_ICON_320_400_BMP;
 
+typedef enum
+{
+	FILE_SYSTEM_FAT32 = 1,
+	FILE_SYSTEM_NTFS,
+	FILE_SYSTEM_MAX
+}FILE_SYSTEM_TYPE;
+
+
 UINT8 *pDeskBuffer = NULL; //only Desk layer include wallpaper and button : 1
 UINT8 *pMyComputerBuffer = NULL; // MyComputer layer: 2
 UINT8 *pSystemLogWindowBuffer = NULL; // MyComputer layer: 2
@@ -314,32 +320,22 @@ UINT8 *sChineseChar = NULL;
 
 static UINTN ScreenWidth, ScreenHeight;
 UINT16 MyComputerWidth = 16 * 30;
-UINT16 MyComputerHeight = 16 * 40;
-UINT16 MyComputerPositionX = 300;
-UINT16 MyComputerPositionY = 300;
+UINT16 MyComputerHeight = 16 * 50;
 
 UINT16 SystemLogWindowWidth = 16 * 30;
 UINT16 SystemLogWindowHeight = 16 * 40;
-UINT16 SystemLogWindowPositionX = 160;
-UINT16 SystemLogWindowPositionY = 160;
 
 UINT16 MemoryInformationWindowWidth = 16 * 30;
 UINT16 MemoryInformationWindowHeight = 16 * 40;
-UINT16 MemoryInformationWindowPositionX = 200;
-UINT16 MemoryInformationWindowPositionY = 200;
 
 UINT16 MouseClickWindowWidth = 300;
 UINT16 MouseClickWindowHeight = 400;
 
 UINT16 SystemSettingWindowWidth = 16 * 10;
 UINT16 SystemSettingWindowHeight = 16 * 10;
-UINT16 SystemSettingWindowPositionX = 50;
-UINT16 SystemSettingWindowPositionY = 50;
 
 UINT16 StartMenuWidth = 16 * 10;
 UINT16 StartMenuHeight = 16 * 20;
-UINT16 StartMenuPositionX;
-UINT16 StartMenuPositionY;
 
 UINT64 sector_count = 0;
 UINT32 FileBlockStart = 0;
@@ -566,7 +562,7 @@ typedef struct {
      UINT8 MFTReferNumber[8];//文件的MFT参考号, first 6 Bytes * 2 + MFT table sector = file sector 
      UINT8 IndexEntrySize[2];//索引项的大小
      UINT8 FileNameAttriBodySize[2];//文件名属性体的大小
-     UINT8 IndexFlag[2];//索引标志
+     UINT8 IndexFlag[2];//索引标志:	 0x00 普通文件项;    	 0x01 有子项 0x02 当前项是最后一个目录项
      UINT8 Fill[2];//填充
      UINT8 FatherDirMFTReferNumber[8];//父目录MFT文件参考号
      UINT8 CreatTime[8];//文件创建时间 8
@@ -2208,8 +2204,10 @@ EFI_STATUS  L2_FILE_NTFS_MFTDollarRootFileAnalysis(UINT8 *pBuffer)
     }
 }
 
+UINT64 FileContentRelativeSector;
+
 //Print ROOT Path items.
-EFI_STATUS  L2_FILE_NTFS_MFTIndexItemsAnalysis(UINT8 *pBuffer)
+EFI_STATUS  L2_FILE_NTFS_MFTIndexItemsAnalysis(UINT8 *pBuffer, UINT8 DeviceID)
 {
     UINT8 *p = NULL;
     
@@ -2250,7 +2248,7 @@ EFI_STATUS  L2_FILE_NTFS_MFTIndexItemsAnalysis(UINT8 *pBuffer)
             pItem[i] = pBuffer[index + i];
             
          UINT8 FileNameSize = ((INDEX_ITEM *)pItem)->FileNameSize;
-         UINT8 FileContentRelativeSector =   L1_NETWORK_6BytesToUINT64(((INDEX_ITEM *)pItem)->MFTReferNumber);
+         FileContentRelativeSector = L1_NETWORK_6BytesToUINT64(((INDEX_ITEM *)pItem)->MFTReferNumber);
          /*L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: attribut length2: %d FileNameSize: %d\n", __LINE__, 
                                                                    length2,
                                                                    FileNameSize);  */  
@@ -2261,7 +2259,9 @@ EFI_STATUS  L2_FILE_NTFS_MFTIndexItemsAnalysis(UINT8 *pBuffer)
          	// Item before name use 82 Bytes. 
             attributeName[i] = pItem[82 + 2 * i];
          }
-         L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: attributeName: %a, RelativeSector: %llu\n", __LINE__, attributeName, FileContentRelativeSector);
+
+		 UINT8 IndexFlag = L1_NETWORK_2BytesToUINT16(((INDEX_ITEM *)pItem)->IndexFlag);
+         L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: Name: %a, RelativeSector: %llu, IndexFlag: %d\n", __LINE__, attributeName, FileContentRelativeSector, IndexFlag);
          //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%s attributeName: %a\n", __LINE__,  attributeName);  
          index += length2;
     }
@@ -2611,7 +2611,7 @@ EFI_STATUS L1_STORE_Write(UINT8 deviceID, UINT64 StartSectorNumber, UINT16 Write
                5 $ROOT
                etc 
 */
-EFI_STATUS L2_FILE_NTFS_MFT_Item_Read(UINT16 DeviceID, UINT16 MFT_Item_ID)
+EFI_STATUS L2_FILE_NTFS_MFT_Item_Read(UINT16 DeviceID, UINT64 SectorStartNumber)
 {
     L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d DeviceID: %d\n", __LINE__, DeviceID);
     //printf( "RootPathAnalysis\n" );
@@ -2621,7 +2621,7 @@ EFI_STATUS L2_FILE_NTFS_MFT_Item_Read(UINT16 DeviceID, UINT16 MFT_Item_ID)
 
     //sector_count is MFT start sector, 5 * 2 means $ROOT sector...
     //Every MFT Item use 2 sector .
-    Status = L1_STORE_READ(DeviceID, sector_count + MFT_Item_ID * 2, 2, BufferMFT); 
+    Status = L1_STORE_READ(DeviceID, SectorStartNumber, 2, BufferMFT); 
     if (EFI_ERROR(Status))
     {
         L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d Status: %X\n", __LINE__, Status);
@@ -2695,9 +2695,9 @@ EFI_STATUS L2_FILE_FAT32_DataSectorHandle(UINT16 DeviceID)
 
     return EFI_SUCCESS;
 }
-EFI_STATUS L2_FILE_NTFS_RootPathItemsRead(UINT8 i)
+EFI_STATUS L2_FILE_NTFS_RootPathItemsRead(UINT8 PartitionID)
 {
-    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d DeviceType: %d, SectorCount: %lld\n", __LINE__, i);
+    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d DeviceType: %d, SectorCount: %lld\n", __LINE__, PartitionID);
     EFI_STATUS Status ;
     UINT8 BufferBlock[DISK_BLOCK_BUFFER_SIZE];
 
@@ -2709,14 +2709,14 @@ EFI_STATUS L2_FILE_NTFS_RootPathItemsRead(UINT8 i)
                                                                      A0Indexes[k].OccupyCluster * 8);
     
     // cluster need to multi with 8 then it is sector.
-    Status = L1_STORE_READ(i, (A0Indexes[k].Offset + lastOffset) * 8 , A0Indexes[k].OccupyCluster * 8, BufferBlock);
+    Status = L1_STORE_READ(PartitionID, (A0Indexes[k].Offset + lastOffset) * 8 , A0Indexes[k].OccupyCluster * 8, BufferBlock);
     if (EFI_ERROR(Status))
     {
         L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d Status: %X\n", __LINE__, Status);
         return Status;
     }
 
-    L2_FILE_NTFS_MFTIndexItemsAnalysis(BufferBlock);    
+    L2_FILE_NTFS_MFTIndexItemsAnalysis(BufferBlock, PartitionID);    
     
     lastOffset = A0Indexes[k].Offset;
     
@@ -2837,6 +2837,7 @@ EFI_STATUS L2_FILE_PartitionTypeAnalysis(UINT16 DeviceID)
 
         // data sector number start include: reserved selector, fat sectors(usually is 2: fat1 and fat2), and file system boot path start cluster(usually is 2, data block start number is 2)
         sector_count = MBRSwitched.ReservedSelector + MBRSwitched.SectorsPerFat * MBRSwitched.NumFATS + (MBRSwitched.BootPathStartCluster - 2) * 8;
+		device[DeviceID].StartSectorNumber = MBRSwitched.ReservedSelector + MBRSwitched.SectorsPerFat * MBRSwitched.NumFATS;
         BlockSize = MBRSwitched.SectorOfCluster * 512;
         //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: sector_count:%ld BlockSize: %d\n",  __LINE__, sector_count, BlockSize);
         return FILE_SYSTEM_FAT32;
@@ -2845,7 +2846,7 @@ EFI_STATUS L2_FILE_PartitionTypeAnalysis(UINT16 DeviceID)
     else if (Buffer1[3] == 'N' && Buffer1[4] == 'T' && Buffer1[5] == 'F' && Buffer1[6] == 'S')
     {
         L2_FILE_NTFS_FirstSelectorAnalysis(Buffer1, &NTFSBootSwitched);
-        sector_count = NTFSBootSwitched.MFT_StartCluster * 8;
+		device[DeviceID].StartSectorNumber = NTFSBootSwitched.MFT_StartCluster * 8;
         //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: NTFS sector_count:%llu\n",  __LINE__, sector_count);
         return FILE_SYSTEM_NTFS;
     }
@@ -2853,7 +2854,7 @@ EFI_STATUS L2_FILE_PartitionTypeAnalysis(UINT16 DeviceID)
     else
     {
         //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: \n",  __LINE__);
-        return FILE_SYSTEM_OTHER;
+        return FILE_SYSTEM_MAX;
     }                   
 
     return EFI_SUCCESS;
@@ -2934,7 +2935,6 @@ L3_GRAPHICS_ItemPrint(UINT8 *pDestBuffer, UINT8 *pSourceBuffer, UINT16 pDestWidt
 }
 
 							  
-DEVICE_PARAMETER device2[10] = {0};
 VOID L2_STORE_PartitionItemsPrint(UINT16 Index)
 {
     //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: \n",  __LINE__);
@@ -2950,8 +2950,9 @@ VOID L2_STORE_PartitionItemsPrint(UINT16 Index)
     }
     else if (FileSystemType == FILE_SYSTEM_NTFS)
     {
+    	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: %d\n",  __LINE__, device[Index].StartSectorNumber + MFT_ITEM_DOLLAR_ROOT * 2);
         // get MFT $ROOT item. 
-        L2_FILE_NTFS_MFT_Item_Read(Index, MFT_ITEM_DOLLAR_ROOT);
+        L2_FILE_NTFS_MFT_Item_Read(Index, device[Index].StartSectorNumber + MFT_ITEM_DOLLAR_ROOT * 2);
 
         // get data runs
         L2_FILE_NTFS_MFTDollarRootFileAnalysis(BufferMFT);      
@@ -2959,7 +2960,7 @@ VOID L2_STORE_PartitionItemsPrint(UINT16 Index)
         // use data run get root path item index
         L2_FILE_NTFS_RootPathItemsRead(Index);
     }
-    else if (FileSystemType == FILE_SYSTEM_OTHER)
+    else if (FileSystemType == FILE_SYSTEM_MAX)
     {
         return;
     }
@@ -2980,8 +2981,8 @@ EFI_STATUS L3_PARTITION_RootPathAccess()
 	
     for (UINT16 i = 0; i < PartitionCount; i++)
     {   
-        MyComputerPositionX = WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].StartX;
-        MyComputerPositionY = WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].StartY;
+        UINT16 MyComputerPositionX = WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].StartX;
+        UINT16 MyComputerPositionY = WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].StartY;
         
         if (iMouseX >= MyComputerPositionX + 50 && iMouseX <= MyComputerPositionX + 50 + 16 * 6
             && iMouseY >= MyComputerPositionY + i * 16 + 16 * 2 && iMouseY <= MyComputerPositionY + i * 16 + 16 * 3)
@@ -3040,6 +3041,9 @@ EFI_STATUS L3_PARTITION_FileAccess(UINT16 DeviceID)
 EFI_STATUS L3_PARTITION_AccessFinish()
 {
 	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: L3_PARTITION_AccessFinish\n", __LINE__);
+		
+	PARTITION_ITEM_ACCESS_STATE PartitionItemAccessNextState = INIT_ACCESS_STATE;
+	PARTITION_ITEM_ACCESS_EVENT PartitionItemAccessEvent = ROOT_PATH_ACCESS_EVENT;
 }
 
 EFI_STATUS L3_PARTITION_ParentPathAccess()
@@ -3086,8 +3090,8 @@ L2_STORE_FolderItemsPrint()
 	
 	pMyComputerBuffer = WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].pBuffer;
 
-	UINT16 StartX = MyComputerPositionX + 130;
-	UINT16 StartY = MyComputerPositionY + 6  * (HeightNew + 16 * 2) + 200;
+	UINT16 StartX = WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].StartX + 130;
+	UINT16 StartY = WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].StartY + 6  * (HeightNew + 16 * 2) + 200;
 
 	UINT16 Width = WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].WindowWidth;
 	UINT16 Height = WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].WindowHeight;
@@ -3326,8 +3330,8 @@ MOUSE_CLICK_EVENT L2_GRAPHICS_StartMenuLayerClickEventGet()
 {
 	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: L2_GRAPHICS_StartMenuLayerClickEventGet\n", __LINE__);
 
-    StartMenuPositionX = WindowLayers.item[GRAPHICS_LAYER_START_MENU].StartX;
-    StartMenuPositionY = WindowLayers.item[GRAPHICS_LAYER_START_MENU].StartY;
+    UINT16 StartMenuPositionX = WindowLayers.item[GRAPHICS_LAYER_START_MENU].StartX;
+    UINT16 StartMenuPositionY = WindowLayers.item[GRAPHICS_LAYER_START_MENU].StartY;
 
     // Display my computer window
     if (iMouseX >= 3 + StartMenuPositionX && iMouseX <= 3 + 4 * 16  + StartMenuPositionX  
@@ -3377,8 +3381,8 @@ MOUSE_CLICK_EVENT L2_GRAPHICS_SystemSettingLayerClickEventGet()
 {
 	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: L2_GRAPHICS_SystemSettingLayerClickEventGet\n", __LINE__);
 	
-    SystemSettingWindowPositionX = WindowLayers.item[GRAPHICS_LAYER_SYSTEM_SETTING_WINDOW].StartX;
-    SystemSettingWindowPositionY = WindowLayers.item[GRAPHICS_LAYER_SYSTEM_SETTING_WINDOW].StartY;
+    UINT16 SystemSettingWindowPositionX = WindowLayers.item[GRAPHICS_LAYER_SYSTEM_SETTING_WINDOW].StartX;
+    UINT16 SystemSettingWindowPositionY = WindowLayers.item[GRAPHICS_LAYER_SYSTEM_SETTING_WINDOW].StartY;
 
     //Wall paper setting
     if (iMouseX >= 3 + SystemSettingWindowPositionX && iMouseX <= 3 + 4 * 16  + SystemSettingWindowPositionX  
@@ -3415,8 +3419,8 @@ MOUSE_CLICK_EVENT L2_GRAPHICS_MyComputerLayerClickEventGet()
 {
 	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: L2_GRAPHICS_MyComputerLayerClickEventGet\n", __LINE__);
 		
-    MyComputerPositionX = WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].StartX;
-    MyComputerPositionY = WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].StartY;
+    UINT16 MyComputerPositionX = WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].StartX;
+    UINT16 MyComputerPositionY = WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].StartY;
 
     // Hide My computer window
     if (iMouseX >= MyComputerPositionX + MyComputerWidth - 20 && iMouseX <=  MyComputerPositionX + MyComputerWidth - 4 
@@ -3464,8 +3468,8 @@ MOUSE_CLICK_EVENT L2_GRAPHICS_MyComputerLayerClickEventGet()
 MOUSE_CLICK_EVENT L2_GRAPHICS_SystemLogLayerClickEventGet()
 {	
 	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: L2_GRAPHICS_SystemLogLayerClickEventGet\n", __LINE__);
-    SystemLogWindowPositionX = WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW].StartX;
-    SystemLogWindowPositionY = WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW].StartY;
+    UINT16 SystemLogWindowPositionX = WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW].StartX;
+    UINT16 SystemLogWindowPositionY = WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW].StartY;
 
     // Hide System Log window
     if (iMouseX >= SystemLogWindowPositionX + SystemLogWindowWidth - 20 && iMouseX <=  SystemLogWindowPositionX + SystemLogWindowWidth - 4 
@@ -3482,8 +3486,8 @@ MOUSE_CLICK_EVENT L2_GRAPHICS_MemoryInformationLayerClickEventGet()
 {
 	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: L2_GRAPHICS_MemoryInformationLayerClickEventGet\n", __LINE__);
 
-    MemoryInformationWindowPositionX = WindowLayers.item[GRAPHICS_LAYER_MEMORY_INFORMATION_WINDOW].StartX;
-    MemoryInformationWindowPositionY = WindowLayers.item[GRAPHICS_LAYER_MEMORY_INFORMATION_WINDOW].StartY;
+    UINT16 MemoryInformationWindowPositionX = WindowLayers.item[GRAPHICS_LAYER_MEMORY_INFORMATION_WINDOW].StartX;
+    UINT16 MemoryInformationWindowPositionY = WindowLayers.item[GRAPHICS_LAYER_MEMORY_INFORMATION_WINDOW].StartY;
     
     // Hide Memory Information window
     if (iMouseX >= MemoryInformationWindowPositionX + MemoryInformationWindowWidth - 20 && iMouseX <=  MemoryInformationWindowPositionX + MemoryInformationWindowWidth - 4 
@@ -3795,7 +3799,7 @@ VOID L2_MOUSE_MyComputerPartitionItemClicked()
 	
     L2_GRAPHICS_RectangleDraw(pMouseSelectedBuffer, 0,  0, 31, 15, 1,  Color, 32);
     L2_STORE_PartitionItemsPrint(PartitionItemID);
-    L2_GRAPHICS_Copy(pDeskDisplayBuffer, pMouseSelectedBuffer, ScreenWidth, ScreenHeight, 32, 16, MyComputerPositionX + 50, MyComputerPositionY  + PartitionItemID * (16 + 2) + 16 * 2);   
+    L2_GRAPHICS_Copy(pDeskDisplayBuffer, pMouseSelectedBuffer, ScreenWidth, ScreenHeight, 32, 16, WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].StartX + 50, WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].StartY  + PartitionItemID * (16 + 2) + 16 * 2);   
 }
 
 VOID L2_PARTITION_FileContentPrint(UINT8 *Buffer)
@@ -3890,6 +3894,8 @@ VOID L2_MOUSE_MenuButtonClick()
 {    
     EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
     Color.Red = 0xff;
+	UINT16 MyComputerPositionX = WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].StartX;
+	UINT16 MyComputerPositionY = WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].StartY;
     
     for (int i = 0; i < 16; i++)
     {
@@ -4835,7 +4841,7 @@ EFI_STATUS L3_WINDOW_Create(UINT8 *pBuffer, UINT8 *pParent, UINT16 Width, UINT16
 
 VOID L3_APPLICATION_WindowsInitial()
 {    
-    L3_APPLICATION_MyComputerWindow(100, 300);
+    L3_APPLICATION_MyComputerWindow(100, 100);
         
     L3_APPLICATION_SystemLogWindow(ScreenWidth / 2, 10);
     
@@ -5067,10 +5073,6 @@ VOID L3_APPLICATION_MemoryInformationWindow(UINT16 StartX, UINT16 StartY)
     UINT8 *pBuffer = pMemoryInformationBuffer;
     UINT16 Width = MemoryInformationWindowWidth;
     UINT16 Height = MemoryInformationWindowHeight;
-
-    MemoryInformationWindowPositionX = StartX;
-    MemoryInformationWindowPositionY = StartY;
-
     
     WindowLayers.item[GRAPHICS_LAYER_MEMORY_INFORMATION_WINDOW].StartX = StartX;
     WindowLayers.item[GRAPHICS_LAYER_MEMORY_INFORMATION_WINDOW].StartY = StartY;
@@ -5177,23 +5179,17 @@ VOID L3_APPLICATION_SystemLogWindow(UINT16 StartX, UINT16 StartY)
     UINT16 i = 0;
     UINT16 j = 0;
     
-    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: SystemLogWindow: %d \n", __LINE__, SystemLogWindowWidth);
-    L3_WINDOW_Create(pSystemLogWindowBuffer, pParent, SystemLogWindowWidth, SystemLogWindowHeight, GRAPHICS_LAYER_SYSTEM_LOG_WINDOW, pWindowTitle);
-
-    UINT8 *pBuffer = pSystemLogWindowBuffer;
     UINT16 Width = SystemLogWindowWidth;
     UINT16 Height = SystemLogWindowHeight;
+	
+    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: SystemLogWindow: %d \n", __LINE__, Width);
+    L3_WINDOW_Create(pSystemLogWindowBuffer, pParent, Width, Height, GRAPHICS_LAYER_SYSTEM_LOG_WINDOW, pWindowTitle);
 
-    SystemLogWindowPositionX = StartX;
-    SystemLogWindowPositionY= StartY;
+    UINT8 *pBuffer = pSystemLogWindowBuffer;
 
-    
-    WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW].StartX = StartX;
-    WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW].StartY = StartY;
-    WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW].WindowWidth = SystemLogWindowWidth;
-    WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW].WindowHeight= SystemLogWindowHeight;
-    
-    
+	WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW].StartX = StartX;
+	WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW].StartY = StartY;
+        
     EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
     
     Color.Blue  = 0xff;
@@ -6824,12 +6820,6 @@ EFI_STATUS L2_COMMON_MemoryAllocate()
     FileReadCount = 0;
     FAT32_Table = NULL;
     
-    StartMenuPositionX = 0;
-    StartMenuPositionY = ScreenHeight - StartMenuHeight - 25;
-
-    SystemSettingWindowPositionX = StartMenuWidth;
-    SystemSettingWindowPositionY = StartMenuPositionY + 16;
-
     INFO_SELF(L"\r\n");
 
     return EFI_SUCCESS;
@@ -6867,43 +6857,44 @@ void L2_COMMON_ParameterInit()
     WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW].DisplayFlag = TRUE;
     L1_MEMORY_Copy(WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW].Name, "System Log Window", sizeof("System Log Window"));
     WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW].pBuffer = pSystemLogWindowBuffer;
-    WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW].StartX = SystemLogWindowPositionX;
-    WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW].StartY = SystemLogWindowPositionY;
-    WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW].WindowWidth = SystemLogWindowWidth;
-    WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW].WindowHeight= SystemLogWindowHeight;
+    WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW].StartX = 0;
+    WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW].StartY = 0;
+    WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW].WindowWidth  = SystemLogWindowWidth;
+    WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW].WindowHeight = SystemLogWindowHeight;
     WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW].LayerID = GRAPHICS_LAYER_SYSTEM_LOG_WINDOW;
 
     WindowLayers.LayerCount++;
     
-    WindowLayers.item[GRAPHICS_LAYER_SYSTEM_SETTING_WINDOW].DisplayFlag = FALSE;
-    L1_MEMORY_Copy(WindowLayers.item[GRAPHICS_LAYER_SYSTEM_SETTING_WINDOW].Name, "System Setting Window", sizeof("System Setting Window"));
-    WindowLayers.item[GRAPHICS_LAYER_SYSTEM_SETTING_WINDOW].pBuffer = pSystemSettingWindowBuffer;
-    WindowLayers.item[GRAPHICS_LAYER_SYSTEM_SETTING_WINDOW].StartX = SystemSettingWindowPositionX;
-    WindowLayers.item[GRAPHICS_LAYER_SYSTEM_SETTING_WINDOW].StartY = SystemSettingWindowPositionY;
-    WindowLayers.item[GRAPHICS_LAYER_SYSTEM_SETTING_WINDOW].WindowWidth = SystemSettingWindowWidth;
-    WindowLayers.item[GRAPHICS_LAYER_SYSTEM_SETTING_WINDOW].WindowHeight= SystemSettingWindowHeight;
-    WindowLayers.item[GRAPHICS_LAYER_SYSTEM_SETTING_WINDOW].LayerID = GRAPHICS_LAYER_SYSTEM_SETTING_WINDOW;
-    
-    WindowLayers.LayerCount++;
 
     WindowLayers.item[GRAPHICS_LAYER_START_MENU].DisplayFlag = FALSE;
     L1_MEMORY_Copy(WindowLayers.item[GRAPHICS_LAYER_START_MENU].Name, "Start Menu", sizeof("Start Menu"));
     WindowLayers.item[GRAPHICS_LAYER_START_MENU].pBuffer = pStartMenuBuffer;
-    WindowLayers.item[GRAPHICS_LAYER_START_MENU].StartX = StartMenuPositionX;
-    WindowLayers.item[GRAPHICS_LAYER_START_MENU].StartY = StartMenuPositionY;
+    WindowLayers.item[GRAPHICS_LAYER_START_MENU].StartX = 0;
+    WindowLayers.item[GRAPHICS_LAYER_START_MENU].StartY = ScreenHeight - StartMenuHeight - 25;
     WindowLayers.item[GRAPHICS_LAYER_START_MENU].WindowWidth = StartMenuWidth;
     WindowLayers.item[GRAPHICS_LAYER_START_MENU].WindowHeight= StartMenuHeight;
     WindowLayers.item[GRAPHICS_LAYER_START_MENU].LayerID = GRAPHICS_LAYER_START_MENU;
     
     WindowLayers.LayerCount++;
 
+    WindowLayers.item[GRAPHICS_LAYER_SYSTEM_SETTING_WINDOW].DisplayFlag = FALSE;
+    L1_MEMORY_Copy(WindowLayers.item[GRAPHICS_LAYER_SYSTEM_SETTING_WINDOW].Name, "System Setting Window", sizeof("System Setting Window"));
+    WindowLayers.item[GRAPHICS_LAYER_SYSTEM_SETTING_WINDOW].pBuffer = pSystemSettingWindowBuffer;
+    WindowLayers.item[GRAPHICS_LAYER_SYSTEM_SETTING_WINDOW].StartX = StartMenuWidth;
+    WindowLayers.item[GRAPHICS_LAYER_SYSTEM_SETTING_WINDOW].StartY = WindowLayers.item[GRAPHICS_LAYER_START_MENU].StartY + 16;
+    WindowLayers.item[GRAPHICS_LAYER_SYSTEM_SETTING_WINDOW].WindowWidth = SystemSettingWindowWidth;
+    WindowLayers.item[GRAPHICS_LAYER_SYSTEM_SETTING_WINDOW].WindowHeight= SystemSettingWindowHeight;
+    WindowLayers.item[GRAPHICS_LAYER_SYSTEM_SETTING_WINDOW].LayerID = GRAPHICS_LAYER_SYSTEM_SETTING_WINDOW;
+    
+    WindowLayers.LayerCount++;
+
     WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].DisplayFlag = FALSE;
     L1_MEMORY_Copy(WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].Name, "My Computer", sizeof("My Computer"));
     WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].pBuffer = pMyComputerBuffer;
-    WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].StartX = MyComputerPositionX;
-    WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].StartY = MyComputerPositionY;
+    WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].StartX = 0;
+    WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].StartY = 0;
     WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].WindowWidth = MyComputerWidth;
-    WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].WindowHeight= MyComputerHeight;
+    WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].WindowHeight = MyComputerHeight;
     WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].LayerID = GRAPHICS_LAYER_MY_COMPUTER_WINDOW;
     
     WindowLayers.LayerCount++;
@@ -6911,8 +6902,8 @@ void L2_COMMON_ParameterInit()
     WindowLayers.item[GRAPHICS_LAYER_MEMORY_INFORMATION_WINDOW].DisplayFlag = FALSE;
     L1_MEMORY_Copy(WindowLayers.item[GRAPHICS_LAYER_MEMORY_INFORMATION_WINDOW].Name, "Memory Information", sizeof("Memory Information"));
     WindowLayers.item[GRAPHICS_LAYER_MEMORY_INFORMATION_WINDOW].pBuffer = pMemoryInformationBuffer;
-    WindowLayers.item[GRAPHICS_LAYER_MEMORY_INFORMATION_WINDOW].StartX = MemoryInformationWindowPositionX;
-    WindowLayers.item[GRAPHICS_LAYER_MEMORY_INFORMATION_WINDOW].StartY = MemoryInformationWindowPositionY;
+    WindowLayers.item[GRAPHICS_LAYER_MEMORY_INFORMATION_WINDOW].StartX = 0;
+    WindowLayers.item[GRAPHICS_LAYER_MEMORY_INFORMATION_WINDOW].StartY = 0;
     WindowLayers.item[GRAPHICS_LAYER_MEMORY_INFORMATION_WINDOW].WindowWidth = MemoryInformationWindowWidth;
     WindowLayers.item[GRAPHICS_LAYER_MEMORY_INFORMATION_WINDOW].WindowHeight= MemoryInformationWindowHeight;
     WindowLayers.item[GRAPHICS_LAYER_MEMORY_INFORMATION_WINDOW].LayerID = GRAPHICS_LAYER_MEMORY_INFORMATION_WINDOW;
@@ -6920,13 +6911,13 @@ void L2_COMMON_ParameterInit()
     WindowLayers.LayerCount++;
 	
     WindowLayers.item[GRAPHICS_LAYER_DESK].DisplayFlag = FALSE;
-    L1_MEMORY_Copy(WindowLayers.item[GRAPHICS_LAYER_DESK].Name, "Memory Information", sizeof("Memory Information"));
-    WindowLayers.item[GRAPHICS_LAYER_DESK].pBuffer = pMemoryInformationBuffer;
-    WindowLayers.item[GRAPHICS_LAYER_DESK].StartX = MemoryInformationWindowPositionX;
-    WindowLayers.item[GRAPHICS_LAYER_DESK].StartY = MemoryInformationWindowPositionY;
-    WindowLayers.item[GRAPHICS_LAYER_DESK].WindowWidth = MemoryInformationWindowWidth;
-    WindowLayers.item[GRAPHICS_LAYER_DESK].WindowHeight= MemoryInformationWindowHeight;
-    WindowLayers.item[GRAPHICS_LAYER_DESK].LayerID = GRAPHICS_LAYER_MEMORY_INFORMATION_WINDOW;
+    L1_MEMORY_Copy(WindowLayers.item[GRAPHICS_LAYER_DESK].Name, "Desk layer", sizeof("Desk layer"));
+    WindowLayers.item[GRAPHICS_LAYER_DESK].pBuffer = pDeskBuffer;
+    WindowLayers.item[GRAPHICS_LAYER_DESK].StartX = 0;
+    WindowLayers.item[GRAPHICS_LAYER_DESK].StartY = 0;
+    WindowLayers.item[GRAPHICS_LAYER_DESK].WindowWidth = ScreenWidth;
+    WindowLayers.item[GRAPHICS_LAYER_DESK].WindowHeight= ScreenHeight;
+    WindowLayers.item[GRAPHICS_LAYER_DESK].LayerID = GRAPHICS_LAYER_DESK;
 
     WindowLayers.LayerCount++;
 
