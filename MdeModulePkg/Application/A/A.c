@@ -319,7 +319,7 @@ UINT8 *sChineseChar = NULL;
 
 
 static UINTN ScreenWidth, ScreenHeight;
-UINT16 MyComputerWidth = 16 * 30;
+UINT16 MyComputerWidth = 16 * 40;
 UINT16 MyComputerHeight = 16 * 50;
 
 UINT16 SystemLogWindowWidth = 16 * 30;
@@ -1634,7 +1634,7 @@ VOID L2_STRING_Maker (UINT16 x, UINT16 y,
 }
 
 
-EFI_STATUS L2_GRAPHICS_AsciiCharDraw2(UINT8 *pBufferDest,
+EFI_STATUS L2_GRAPHICS_AsciiCharDraw2(WINDOW_LAYER_ITEM layer,
         IN UINTN x0, UINTN y0, UINT8 c,
         IN EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color)
 {
@@ -1680,7 +1680,7 @@ EFI_STATUS L2_GRAPHICS_AsciiCharDraw2(UINT8 *pBufferDest,
         
     }
 
-    L2_GRAPHICS_Copy(pBufferDest, pBuffer, MyComputerWidth, ScreenHeight, 8, 16, x0, y0);
+    L2_GRAPHICS_Copy(layer.pBuffer, pBuffer, layer.WindowWidth, layer.WindowWidth, 8, 16, x0, y0);
     
     /*
     GraphicsOutput->Blt(GraphicsOutput, 
@@ -1717,7 +1717,7 @@ VOID L2_STRING_Maker2 (UINT16 x, UINT16 y, WINDOW_LAYER_ITEM layer,
     AsciiVSPrint (AsciiBuffer, sizeof (AsciiBuffer), Format, VaList);
             
     for (i = 0; i < sizeof(AsciiBuffer) /sizeof(CHAR8); i++)
-        L2_GRAPHICS_AsciiCharDraw2(layer.pBuffer, x + i * 8, y, AsciiBuffer[i], Color);
+        L2_GRAPHICS_AsciiCharDraw2(layer, x + i * 8, y, AsciiBuffer[i], Color);
 
 }
 
@@ -3097,7 +3097,7 @@ L2_STORE_FolderItemsPrint()
 	UINT16 Height = WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].WindowHeight;
 
 	// Clear old display items
-	for (UINT16 i = 632; i < Height; i++)
+	for (UINT16 i = 232; i < Height; i++)
     {
         for (UINT16 j = 130; j < Width; j++)
         {
