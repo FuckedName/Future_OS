@@ -3415,10 +3415,6 @@ VOID L3_GRAPHICS_SystemSettingClickEventHandle(MOUSE_CLICK_EVENT event)
 
 }
 
-VOID L3_GRAPHICS_MyComupterClickEventHandle(MOUSE_CLICK_EVENT event)
-{
-
-}
 
 VOID L3_GRAPHICS_SystemLogClickEventHandle(MOUSE_CLICK_EVENT event)
 {
@@ -3663,6 +3659,7 @@ VOID L2_MOUSE_MemoryInformationClicked()
         WindowLayers.ActiveWindowCount++;
         WindowLayers.item[GRAPHICS_LAYER_MEMORY_INFORMATION_WINDOW].DisplayFlag = TRUE;
     }
+	WindowLayers.item[GRAPHICS_LAYER_START_MENU].DisplayFlag = FALSE;
     L1_GRAPHICS_UpdateWindowLayer(GRAPHICS_LAYER_MEMORY_INFORMATION_WINDOW);
 }
 
@@ -3677,6 +3674,7 @@ VOID L2_MOUSE_SystemLogClicked()
         WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW].DisplayFlag = TRUE;
         
     }
+	WindowLayers.item[GRAPHICS_LAYER_START_MENU].DisplayFlag = FALSE;
     L1_GRAPHICS_UpdateWindowLayer(GRAPHICS_LAYER_SYSTEM_LOG_WINDOW);
 }
 
@@ -3690,6 +3688,7 @@ VOID L2_MOUSE_WallpaperSettingClicked()
         WindowLayers.ActiveWindowCount++;
         WindowLayers.item[GRAPHICS_LAYER_SYSTEM_SETTING_WINDOW].DisplayFlag = TRUE;
     }
+	WindowLayers.item[GRAPHICS_LAYER_START_MENU].DisplayFlag = FALSE;
     EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
     UINT32 x = ScreenWidth;
     UINT32 y = ScreenHeight;
@@ -3816,6 +3815,8 @@ EFI_STATUS L2_GRAPHICS_ButtonDraw2(UINT16 StartX, UINT16 StartY, UINT16 Width, U
 UINT8 SystemIcon[SYSTEM_ICON_MAX][SYSTEM_ICON_WIDTH * SYSTEM_ICON_HEIGHT * 3 + 0x36];
 
 
+START_MENU_STATE 	 MyComputerNextState = CLICK_INIT_STATE;
+
 
 VOID L2_MOUSE_MyComputerClicked()
 {       
@@ -3826,7 +3827,9 @@ VOID L2_MOUSE_MyComputerClicked()
     Color.Blue= 0x00;
 
     WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].DisplayFlag = TRUE;
-    
+	WindowLayers.item[GRAPHICS_LAYER_START_MENU].DisplayFlag = FALSE;
+    MyComputerNextState = MY_COMPUTER_CLICKED_STATE;
+		
     L1_GRAPHICS_UpdateWindowLayer(GRAPHICS_LAYER_MY_COMPUTER_WINDOW);
     
 }
@@ -6529,7 +6532,7 @@ EFI_STATUS L2_GRAPHICS_DeskInit()
 VOID L2_MOUSE_WallpaperResetClicked()
 {   
     L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d L2_MOUSE_WallpaperResetClicked\n", __LINE__);
-    
+    WindowLayers.item[GRAPHICS_LAYER_START_MENU].DisplayFlag = FALSE;
     L2_GRAPHICS_DeskInit();
 }
 
@@ -6554,6 +6557,27 @@ START_MENU_STATE_TRANSFORM MyComputerStateTransformTable[] =
     {MY_COMPUTER_FOLDER_CLICKED_STATE, 	  MY_COMPUTER_FOLDER_ITEM_CLICKED_EVENT,      MY_COMPUTER_FOLDER_CLICKED_STATE,     L2_MOUSE_MyComputerFolderItemClicked},
 };
 
+
+VOID L3_GRAPHICS_MyComupterClickEventHandle(MOUSE_CLICK_EVENT event)
+{
+	
+    for (int i = 0; i <  sizeof(MyComputerStateTransformTable)/sizeof(MyComputerStateTransformTable[0]); i++ )
+    {
+        //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: MyComputerStateTransformTable[i].CurrentState: %d\n", __LINE__, MyComputerStateTransformTable[i].CurrentState);
+        //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: i: %d\n", __LINE__, i);
+        if (MyComputerStateTransformTable[i].CurrentState == MyComputerNextState 
+            && event == MyComputerStateTransformTable[i].event )
+        {
+            MyComputerNextState = MyComputerStateTransformTable[i].NextState;
+
+            // need to check the return value after function runs..... 
+            MyComputerStateTransformTable[i].pFunc();
+            L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: MouseClickEvent: %d StartMenuNextState: %d\n", __LINE__, MouseClickEvent, StartMenuNextState);
+            break;
+        }   
+    }
+
+}
 
 
 typedef struct
@@ -6615,17 +6639,13 @@ int L1_STACK_Pop(char * a,int top)
 }
 
 
-MOUSE_CLICK_EVENT    MyComputerClickEvent = MY_COMPUTER_CLICKED_STATE;
-
-START_MENU_STATE 	 MyComputerNextState = CLICK_INIT_STATE;
-
 VOID L3_GRAPHICS_StartMenuClickEventHandle(MOUSE_CLICK_EVENT event)
 { 
     L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: event: %d StartMenuNextState: %d\n", __LINE__, event, StartMenuNextState);
     for (UINT16 i = 0; i <  sizeof(StartMenuStateTransformTable)/sizeof(StartMenuStateTransformTable[0]); i++ )
     {
-        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: StartMenuStateTransformTable[i].CurrentState: %d\n", __LINE__, StartMenuStateTransformTable[i].CurrentState);
-        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: i: %d\n", __LINE__, i);
+        //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: StartMenuStateTransformTable[i].CurrentState: %d\n", __LINE__, StartMenuStateTransformTable[i].CurrentState);
+        //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: i: %d\n", __LINE__, i);
         if (StartMenuStateTransformTable[i].CurrentState == StartMenuNextState 
             && event == StartMenuStateTransformTable[i].event )
         {
@@ -6644,22 +6664,6 @@ VOID L3_GRAPHICS_StartMenuClickEventHandle(MOUSE_CLICK_EVENT event)
 // Handle my computer window click event
 VOID L3_GRAPHICS_MyComputerWindowEvent(MOUSE_CLICK_EVENT Event)
 {   
-	
-    for (int i = 0; i <  sizeof(MyComputerStateTransformTable)/sizeof(MyComputerStateTransformTable[0]); i++ )
-    {
-        //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: MyComputerStateTransformTable[i].CurrentState: %d\n", __LINE__, MyComputerStateTransformTable[i].CurrentState);
-        //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: i: %d\n", __LINE__, i);
-        if (MyComputerStateTransformTable[i].CurrentState == MyComputerNextState 
-            && MyComputerClickEvent == MyComputerStateTransformTable[i].event )
-        {
-            MyComputerNextState = MyComputerStateTransformTable[i].NextState;
-
-            // need to check the return value after function runs..... 
-            MyComputerStateTransformTable[i].pFunc();
-            L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: MouseClickEvent: %d StartMenuNextState: %d\n", __LINE__, MouseClickEvent, StartMenuNextState);
-            break;
-        }   
-    }
 
 	
 }
@@ -6718,7 +6722,7 @@ VOID L2_MOUSE_Click()
         return;
     }
 
-    MouseClickEvent = L2_MOUSE_ClickEventHandle();
+    L2_MOUSE_ClickEventHandle();
 	
     return;
 	
