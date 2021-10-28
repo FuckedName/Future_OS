@@ -10,4 +10,5 @@ int L1_MATH_DigitToInteger( int c);
 long long
 L1_MATH_StringToLongLong(const char * nptr, char ** endptr, int base);
 
+long L1_MATH_ABS(long v);
 

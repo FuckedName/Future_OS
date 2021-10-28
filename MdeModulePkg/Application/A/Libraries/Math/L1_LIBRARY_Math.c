@@ -9,9 +9,12 @@ long long L1_MATH_Multi(long x, long y)
 
 int L1_MATH_DigitToInteger( int c)
 {
-  if (((c >= 'a') && (c <= 'z')) || ((c >= 'A') && (c <= 'Z'))) {  /* If c is one of [A-Za-z]... */
+  if (((c >= 'a') && (c <= 'z')) || ((c >= 'A') && (c <= 'Z'))) 
+  {  
+    /* If c is one of [A-Za-z]... */
     c = L1_STRING_ToUpper(c) - 7;   // Adjust so 'A' is ('9' + 1)
   }
+  
   return c - '0';   // Value returned is between 0 and 35, inclusive.
 }
 
@@ -72,4 +75,8 @@ L1_MATH_StringToLongLong(const char * nptr, char ** endptr, int base)
 }
 
 
+long L1_MATH_ABS(long v)
+{
+    return (v < 0) ? -v : v;
+}
 

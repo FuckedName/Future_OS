@@ -11,6 +11,8 @@
   	A.c
   	Libraries/Math/L1_LIBRARY_Math.h
 	Libraries/Math/L1_LIBRARY_Math.c
+  	Libraries/Network/L1_LIBRARY_Network.h
+	Libraries/Network/L1_LIBRARY_Network.c
 
 [Packages]
   MdePkg/MdePkg.dec

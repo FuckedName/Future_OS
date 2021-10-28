@@ -127,6 +127,7 @@ current problems:
 #include <Protocol/BlockIo2.h>
 
 #include <Libraries/Math/L1_LIBRARY_Math.h>
+#include <Libraries/Network/L1_LIBRARY_Network.h>
 
 #define STORE_EFI_PATH_PARTITION_SECTOR_COUNT 1691648
 
@@ -1256,64 +1257,6 @@ void L1_MEMORY_RectangleFill(UINT8 *pBuffer,
 
 }
 
-
-
-// 小端模式
-// byte转int  
-UINT64 L1_NETWORK_8BytesToUINT64(UINT8 *bytes)
-{
-    UINT64 s = bytes[0];
-    s += ((UINT64)bytes[1]) << 8;
-    s += ((UINT64)bytes[2]) << 16;
-    s += ((UINT64)bytes[3]) << 24;
-    s += ((UINT64)bytes[4]) << 32;
-    s += ((UINT64)bytes[5]) << 40;
-    s += ((UINT64)bytes[6]) << 48;
-    s += ((UINT64)bytes[7]) << 56;
-    //printf("%llu\n",  s );
-
-    return s;
-}
-
-UINT64 L1_NETWORK_6BytesToUINT64(UINT8 *bytes)
-{
-    UINT64 s = bytes[0];
-    s += ((UINT64)bytes[1]) << 8;
-    s += ((UINT64)bytes[2]) << 16;
-    s += ((UINT64)bytes[3]) << 24;
-    s += ((UINT64)bytes[4]) << 32;
-    s += ((UINT64)bytes[5]) << 40;
-    //printf("%llu\n",  s );
-
-    return s;
-}
-
-UINT32 L1_NETWORK_4BytesToUINT32(UINT8 *bytes)
-{
-    UINT32 Result = bytes[0] & 0xFF;
-    Result |= (bytes[1] << 8 & 0xFF00);
-    Result |= ((bytes[2] << 16) & 0xFF0000);
-    Result |= ((bytes[3] << 24) & 0xFF000000);
-    return Result;
-}
-
-UINT32 L1_NETWORK_3BytesToUINT32(UINT8 *bytes)
-{
-    //INFO_SELF("%x %x %x\n", bytes[0], bytes[1], bytes[2]);
-    UINT32 Result = bytes[0] & 0xFF;
-    Result |= (bytes[1] << 8 & 0xFF00);
-    Result |= ((bytes[2] << 16) & 0xFF0000);
-    return Result;
-}
-
-UINT16 L1_NETWORK_2BytesToUINT16(UINT8 *bytes)
-{
-    UINT16 Result = bytes[0] & 0xFF;
-    Result |= (bytes[1] << 8 & 0xFF00);
-    return Result;
-}
-
-
 void L1_MEMORY_CopyColor1(UINT8 *pBuffer, EFI_GRAPHICS_OUTPUT_BLT_PIXEL color, UINT16 x0, UINT16 y0, UINT16 AreaWidth)
 {
     pBuffer[y0 * AreaWidth * 4 + x0 * 4]     = color.Blue;
@@ -1357,11 +1300,6 @@ VOID L1_SORT_Bubble(UINT8 *arr, UINT16 len)
        }
     }
 
-}
-
-INT32 L1_MATH_ABS(INT32 v)
-{
-    return (v < 0) ? -v : v;
 }
 
 EFI_STATUS L2_GRAPHICS_LineDraw(UINT8 *pBuffer,
