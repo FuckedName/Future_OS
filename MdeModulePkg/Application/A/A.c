@@ -128,6 +128,10 @@ current problems:
 
 #include <Libraries/Math/L1_LIBRARY_Math.h>
 #include <Libraries/Network/L1_LIBRARY_Network.h>
+#include <Libraries/String/L2_LIBRARY_String.h>
+#include <Libraries/String/L1_LIBRARY_String.h>
+#include <Graphics/L1_GRAPHICS.h>
+
 
 #define STORE_EFI_PATH_PARTITION_SECTOR_COUNT 1691648
 
@@ -250,9 +254,6 @@ INT8 DisplayMemoryInformationWindowFlag = 0;
 INT8 SystemQuitFlag = FALSE;
 INT8 DisplayStartMenuFlag = 0;
 UINT8 PreviousItem = -1;
-
-
-CHAR8    AsciiBuffer[0x100] = {0};
 
 
 EFI_GRAPHICS_OUTPUT_PROTOCOL       *GraphicsOutput = NULL;
@@ -515,18 +516,6 @@ const UINT8 sChinese[][32] =
     {0x10,0x08,0x08,0x08,0xC8,0x38,0x08,0x00,0x20,0x38,0x26,0x21,0x20,0x20,0x18,0x00,
      0x00,0x00,0x00,0xFE,0x02,0x02,0x02,0x00,0x00,0x00,0x00,0x7F,0x40,0x40,0x40,0x00},
 };
-
-typedef enum
-{
-    GRAPHICS_LAYER_DESK = 0,
-    GRAPHICS_LAYER_START_MENU,
-    GRAPHICS_LAYER_SYSTEM_SETTING_WINDOW,
-    GRAPHICS_LAYER_MY_COMPUTER_WINDOW,
-    GRAPHICS_LAYER_SYSTEM_LOG_WINDOW,
-    GRAPHICS_LAYER_MEMORY_INFORMATION_WINDOW,
-    GRAPHICS_LAYER_MOUSE,
-    GRAPHICS_LAYER_MAX
-}GRAPHICS_LAYER_ID;
 
 typedef enum
 {
@@ -1161,27 +1150,7 @@ typedef struct {
     UINT16 CurrentAllocatedCount;
 }MEMORY_INFORMATION;
 
-typedef struct
-{
-    UINT16 Name[40]; // graphics layer
-    UINT8  DisplayFlag; // 0: do not display, 1: display
-    UINT8 *pBuffer;
-    UINT16 StartX;
-    UINT16 StartY;
-    UINT16 WindowWidth;
-    UINT16 WindowHeight;
-    UINT16 LayerID;
-}WINDOW_LAYER_ITEM;
 
-typedef struct
-{
-    WINDOW_LAYER_ITEM item[10];
-    UINT16 LayerCount;
-    UINT16 ActiveWindowCount;
-    UINT16 LayerSequences[10];
-}WINDOW_LAYERS;
-
-WINDOW_LAYERS WindowLayers;
 
 typedef enum 
 {
@@ -1530,60 +1499,6 @@ CHAR8 *L2_STRING_Maker4 (CONST CHAR8 *Format, VA_LIST VaList)
     return AsciiBuffer;
 }    
 
-
-VOID L2_STRING_Maker (UINT16 x, UINT16 y,
-  IN  CONST CHAR8   *Format,
-  IN  VA_LIST       VaList
-  )
-{
-    EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
-    UINT32 i = 0;
-    
-    for (i = 0; i < 0x100; i++)
-        AsciiBuffer[i] = 0;
-        
-    Color.Blue = 0xFF;
-    Color.Red = 0xFF;
-    Color.Green = 0xFF;
-
-    ASSERT (Format != NULL);
-
-    // Note this api do not supported ("%f", float)
-    AsciiVSPrint (AsciiBuffer, sizeof (AsciiBuffer), Format, VaList);
-    /*
-    if (StatusErrorCount % 61 == 0)
-    {
-        for (int j = 0; j < ScreenHeight - 25; j++)
-        {
-            for (int i = ScreenWidth / 2; i < ScreenWidth; i++)
-            {
-                pDeskBuffer[(j * ScreenWidth + i) * 4]     = 0x84;
-                pDeskBuffer[(j * ScreenWidth + i) * 4 + 1] = 0x84;
-                pDeskBuffer[(j * ScreenWidth + i) * 4 + 2] = 0x00;
-            }
-        }       
-    }
-    */
-    /*
-    if (DisplayCount % 52 == 0)
-    {
-        for (int j = 2; j < 54 * 16; j++)
-        {
-            for (int i = 0; i < ScreenWidth / 4; i++)
-            {
-                pDeskBuffer[(j * ScreenWidth + i) * 4]     = 0x84;
-                pDeskBuffer[(j * ScreenWidth + i) * 4 + 1] = 0x84;
-                pDeskBuffer[(j * ScreenWidth + i) * 4 + 2] = 0x00;
-            }
-        }       
-    }
-    */
-    for (i = 0; i < sizeof(AsciiBuffer) /sizeof(CHAR8); i++)
-        L2_GRAPHICS_AsciiCharDraw(pDeskBuffer, x + i * 8, y, AsciiBuffer[i], Color);
-
-}
-
-
 EFI_STATUS L2_GRAPHICS_AsciiCharDraw2(WINDOW_LAYER_ITEM layer,
         IN UINTN x0, UINTN y0, UINT8 c,
         IN EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color)
@@ -1644,34 +1559,6 @@ EFI_STATUS L2_GRAPHICS_AsciiCharDraw2(WINDOW_LAYER_ITEM layer,
     return EFI_SUCCESS;
 }
 
-
-
-VOID L2_STRING_Maker2 (UINT16 x, UINT16 y, WINDOW_LAYER_ITEM layer,
-  IN  CONST CHAR8   *Format,
-  IN  VA_LIST       VaList
-  )
-{
-    EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
-    UINT32 i = 0;
-    
-    for (i = 0; i < 0x100; i++)
-        AsciiBuffer[i] = 0;
-        
-    Color.Blue = 0xFF;
-    Color.Red = 0xFF;
-    Color.Green = 0xFF;
-    Color.Reserved = layer.LayerID;
-
-    ASSERT (Format != NULL);
-
-    AsciiVSPrint (AsciiBuffer, sizeof (AsciiBuffer), Format, VaList);
-            
-    for (i = 0; i < sizeof(AsciiBuffer) /sizeof(CHAR8); i++)
-        L2_GRAPHICS_AsciiCharDraw2(layer, x + i * 8, y, AsciiBuffer[i], Color);
-
-}
-
-
 /* Display a string */
 VOID EFIAPI L2_DEBUG_Print1 (UINT16 x, UINT16 y,  IN  CONST CHAR8  *Format, ...)
 {
@@ -1712,20 +1599,6 @@ VOID EFIAPI L2_DEBUG_Print3 (UINT16 x, UINT16 y, WINDOW_LAYER_ITEM layer, IN  CO
     VA_START (VaList, Format);
     L2_STRING_Maker2(x, y, layer, Format, VaList);
     VA_END (VaList);
-}
-
-
-EFI_STATUS L1_STRING_Compare(UINT8 *p1, UINT8 *p2, UINT16 length)
-{
-    //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: StrCmpSelf\n", __LINE__);
-    
-    for (int i = 0; i < length; i++)
-    {
-        //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%02X %02X ", p1[i], p2[i]);
-        if (p1[i] != p2[i])
-            return -1;
-    }
-    return EFI_SUCCESS;
 }
 
 //delete blanks of file name and file extension name
@@ -1881,14 +1754,6 @@ EFI_STATUS L1_FILE_RootPathAnalysis1(UINT8 *p)
             
             valid_count++;
         }
-}
-
-UINTN L1_STRING_Length(char *String)
-{
-    UINTN  Length;
-    for (Length = 0; *String != '\0'; String++, Length++) ;
-//   //DEBUG ((EFI_D_INFO, "%d Length: %d\n", __LINE__, Length));
-    return Length;
 }
 
 // Analysis attribut A0 of $Root
@@ -2255,36 +2120,6 @@ EFI_STATUS  L2_FILE_NTFS_MFTIndexItemsAnalysis(UINT8 *pBuffer, UINT8 DeviceID)
          //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%s attributeName: %a\n", __LINE__,  attributeName);  
          index += length2;
     }
-}
-
-int L1_STRING_IsSpace (int c)
-{
-  //
-  // <space> ::= [ ]
-  //
-  return ((c) == ' ') || ((c) == '\t') || ((c) == '\r') || ((c) == '\n') || ((c) == '\v')  || ((c) == '\f');
-}
-
-int L1_STRING_IsAllNumber (int c)
-{
-  //
-  // <alnum> ::= [0-9] | [a-z] | [A-Z]
-  //
-  return ((('0' <= (c)) && ((c) <= '9')) ||
-          (('a' <= (c)) && ((c) <= 'z')) ||
-          (('A' <= (c)) && ((c) <= 'Z')));
-}
-
-
-int
-L1_STRING_ToUpper(
-  IN  int c
-  )
-{
-  if ( (c >= 'a') && (c <= 'z') ) {
-    c = c - ('a' - 'A');
-  }
-  return c;
 }
 
 void L2_STORE_TextDevicePathAnalysis(CHAR16 *p, DEVICE_PARAMETER *device, UINTN count1)
@@ -4713,40 +4548,6 @@ float L2_MEMORY_Initial()
     MemorySize = (float)L2_MEMORY_GETs();
     L2_MEMORY_MapInitial();
 }
-
-char *L1_STRING_FloatToString(float val, int precision, char *buf)
-{
-    char *cur, *end;
-    float temp = 0;
-    int count = 0;
-
-    if (val == 0)
-    {
-        buf[count++] = '0';
-        buf[count++] = '\0';
-        return;
-    }
-
-    if (val > 0)
-    {
-    buf[count++] = (int)val + '0'; 
-    }
-
-    buf[count++] = '.'; 
-
-    temp = val - (int)val;
-    //printf("%d: %f\n", __LINE__, temp);
-
-    while(precision--) 
-    {
-        temp = temp * 10;
-        buf[count++] = (int)temp + '0';
-        temp = temp - (int)temp;
-    }
-    return buf;
-}
-
-
 
 EFI_STATUS L3_WINDOW_Create(UINT8 *pBuffer, UINT8 *pParent, UINT16 Width, UINT16 Height, UINT16 LayerID, CHAR8 *pWindowTitle)
 {   

@@ -13,6 +13,12 @@
 	Libraries/Math/L1_LIBRARY_Math.c
   	Libraries/Network/L1_LIBRARY_Network.h
 	Libraries/Network/L1_LIBRARY_Network.c
+  	Libraries/String/L2_LIBRARY_String.h
+  	Libraries/String/L2_LIBRARY_String.c
+  	Libraries/String/L1_LIBRARY_String.h
+  	Libraries/String/L1_LIBRARY_String.c
+  	Graphics/L1_GRAPHICS.c
+  	Graphics/L1_GRAPHICS.h
 
 [Packages]
   MdePkg/MdePkg.dec
