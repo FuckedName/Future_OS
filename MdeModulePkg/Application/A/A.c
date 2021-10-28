@@ -33,7 +33,7 @@ ToDo:
     c.
     d.
     e.
-
+15. memory management for process, different process use different memory page.
 
 current problems:
     1. display NTFS file system root path items system will go die...
@@ -214,7 +214,7 @@ char pKeyboardInputBuffer[KEYBOARD_BUFFER_LENGTH] = {0};
 #define DISPLAY_ERROR_STATUS_Y (16 * (StatusErrorCount++ % (ScreenHeight / 16 - 3)) )
 
 #define DISPLAY_LOG_ERROR_STATUS_X (4) 
-#define DISPLAY_LOG_ERROR_STATUS_Y (16 * (LogStatusErrorCount++ % (SystemLogWindowHeight / 16 + 2)) )
+#define DISPLAY_LOG_ERROR_STATUS_Y (16 * (LogStatusErrorCount++ % (SystemLogWindowHeight / 16)) )
 
 
 
@@ -267,12 +267,12 @@ typedef enum
     SYSTEM_ICON_TEXT,
     SYSTEM_ICON_MAX 
 }SYSTEM_ICON_320_400_BMP;
-
+		  
 typedef enum
 {
-	FILE_SYSTEM_FAT32 = 1,
-	FILE_SYSTEM_NTFS,
-	FILE_SYSTEM_MAX
+       FILE_SYSTEM_FAT32 = 1,
+       FILE_SYSTEM_NTFS,
+       FILE_SYSTEM_MAX
 }FILE_SYSTEM_TYPE;
 
 
@@ -293,6 +293,9 @@ UINT8 *pSystemIconFolderBuffer = NULL; //after zoom in or zoom out
 UINT8 *pSystemIconTextBuffer = NULL; //after zoom in or zoom out
 UINT8 *pSystemIconTempBuffer2 = NULL;
 
+UINT8 *pSystemLogBuffer = NULL; // Save log data
+#define SYSTEM_LOG_DATA_WIDTH 200
+#define SYSTEM_LOG_DATA_LINE 40
 
 // Read File 
 UINT8 ReadFileName[20];
@@ -549,7 +552,7 @@ typedef struct {
     UINT8 Fill[3];//填充
     UINT8 USN[2];//更新序列号
     UINT8 USNArray[0];//更新序列数组
-}INDEX_HEADER;
+}NTFS_INDEX_HEADER;
 
 typedef enum
 {
@@ -575,7 +578,7 @@ typedef struct {
      UINT8 FileNameSize;//文件名长度
      UINT8 FileNamespace;//文件命名空间
      UINT8 FileNameAndFill[0];//文件名和填充
-}INDEX_ITEM;
+}NTFS_INDEX_ITEM;
 
 typedef struct{
     UINT32 efi_loader_signature;
@@ -651,12 +654,14 @@ typedef struct
 
 typedef struct
 {
+	UINT16 FileSystemType; //
     UINT16 DeviceType; // 0 Disk, 1: USB, 2: Sata;
     UINT16 PartitionType; // 0 MBR, 1 GPT;
     UINT16 PartitionID; // a physics device consist of Several parts like c: d: e:
     UINT16 PartitionGUID; // like FA458FD2-4FF7-44D8-B542-BA560A5990B3
     UINT16 DeviceSquenceID; //0025384961B47ECD
-    char Signare[50]; // MBR:0x077410A0
+    UINT8 Signare[50]; // MBR:0x077410A0
+    UINT8 PartitionName[50];
     long long StartSectorNumber; //0x194000
     long long SectorCount; //0xC93060
 
@@ -784,7 +789,7 @@ typedef struct
     /*+0x2C*/ UINT8 MFTRecordNumber[4]; // windows xp中使用,本MFT记录号
     /*+0x30*/ UINT8 USN[2]; // 更新序列号
     /*+0x32*/ UINT8 UpdateArray[0]; // 更新数组
- } NTFS_FILE_HEADER, *pNTFS_FILE_HEADER; 
+} NTFS_FILE_HEADER, *pNTFS_FILE_HEADER; 
 
 // NTFS FILE 属性头
 typedef struct  
@@ -1028,6 +1033,16 @@ typedef struct {
   LIST_ENTRY          Subtasks;               // List of all FAT_SUBTASKs
   LIST_ENTRY          Link;                   // Link to other FAT_TASKs
 } FAT_TASK;
+
+typedef struct
+{
+	UINT8  Buffer[SYSTEM_LOG_DATA_LINE][SYSTEM_LOG_DATA_WIDTH];
+	UINT16 Front;
+	UINT16 Rear;
+	UINT16 LineCount;
+}QUEUE;
+
+QUEUE Queue;
 
 typedef struct {
   UINTN               Signature;
@@ -1387,10 +1402,35 @@ EFI_STATUS L2_GRAPHICS_LineDraw(UINT8 *pBuffer,
     return EFI_SUCCESS;
 }
 
+void L1_QUEUE_Init(QUEUE *pQueue)
+{
+	L1_MEMORY_Memset(pQueue->Buffer, 0, SYSTEM_LOG_DATA_LINE * SYSTEM_LOG_DATA_WIDTH);
+		
+    pQueue->Front = pQueue->Rear = 0; //初始化头尾指针
+    pQueue->LineCount = 0;
+}
 
+void L1_QUEUE_In(QUEUE *pQueue , UINT8 *s, UINT16 Size)
+{
+	UINT16 i;
+	// Copy one line into buffer
+	for (i = 0; i < Size; i++)
+		pQueue->Buffer[pQueue->Rear][i] = s[i];
+
+	pQueue->Buffer[pQueue->Rear][i] = '\0';
+	
+    pQueue->Rear = (pQueue->Rear + 1) % SYSTEM_LOG_DATA_LINE ;    //尾指针偏移
+
+	pQueue->LineCount++;
+
+	if (pQueue->LineCount > 40)
+	{
+		pQueue->Front = (pQueue->Front + 1) % SYSTEM_LOG_DATA_LINE;
+	}
+}
 
 // draw rectangle borders
-void L2_GRAPHICS_RectangleDraw(UINT8 *pBuffer,
+VOID L2_GRAPHICS_RectangleDraw(UINT8 *pBuffer,
         IN UINTN x0, UINTN y0, UINTN x1, UINTN y1, 
         IN UINTN BorderWidth,
         IN EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color, UINT16 AreaWidth)
@@ -1482,8 +1522,6 @@ EFI_STATUS L2_GRAPHICS_ChineseHalfDraw2(UINT8 *pBuffer,UINT8 d,
     
     if ((d & 0x01) != 0) 
         L1_MEMORY_CopyColor1(pBuffer, Color, x0 + 7, y0, AreaWidth );
-
-
 
     return EFI_SUCCESS;
 }
@@ -1579,16 +1617,6 @@ EFI_STATUS L2_GRAPHICS_ChineseCharDraw(UINT8 *pBuffer,
     
     return EFI_SUCCESS;
 }
-
-CHAR8 *L2_STRING_Maker4 (CONST CHAR8 *Format, VA_LIST VaList)
-{
-    for (UINT32 i = 0; i < 0x100; i++)
-        AsciiBuffer[i] = 0;
-
-    // Note this api do not supported ("%f", float)
-    AsciiVSPrint (AsciiBuffer, sizeof (AsciiBuffer), Format, VaList);
-    return AsciiBuffer;
-}    
 
 
 VOID L2_STRING_Maker (UINT16 x, UINT16 y,
@@ -1705,6 +1733,41 @@ EFI_STATUS L2_GRAPHICS_AsciiCharDraw2(WINDOW_LAYER_ITEM layer,
 }
 
 
+VOID L2_STRING_Maker3 (UINT16 x, UINT16 y, WINDOW_LAYER_ITEM layer,
+  IN  CONST CHAR8   *Format,
+  IN  VA_LIST       VaList
+  )
+{
+    EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
+    UINT32 i = 0;
+    
+    for (i = 0; i < 0x100; i++)
+        AsciiBuffer[i] = 0;
+        
+    Color.Blue = 0xFF;
+    Color.Red = 0xFF;
+    Color.Green = 0xFF;
+    Color.Reserved = layer.LayerID;
+
+    ASSERT (Format != NULL);
+
+    AsciiVSPrint (AsciiBuffer, sizeof (AsciiBuffer), Format, VaList);
+
+	L1_QUEUE_In(&Queue, AsciiBuffer, (sizeof(AsciiBuffer) /sizeof(CHAR8)));
+
+	UINT16 PrintLineCount = Queue.LineCount > 40 ? 40 : Queue.LineCount;
+
+	for (UINT16 line = 0; line < PrintLineCount; line++)
+	{
+		UINT16 temp = (line + Queue.Front) % SYSTEM_LOG_DATA_LINE;
+		for (i = 0; i < sizeof(Queue.Buffer[temp]) / sizeof(CHAR8); i++)
+    	{
+    		L2_GRAPHICS_AsciiCharDraw2(layer, i * 8, line * 16, Queue.Buffer[temp][i], Color);
+	    }
+	}
+
+}
+
 
 VOID L2_STRING_Maker2 (UINT16 x, UINT16 y, WINDOW_LAYER_ITEM layer,
   IN  CONST CHAR8   *Format,
@@ -1770,9 +1833,19 @@ VOID EFIAPI L2_DEBUG_Print3 (UINT16 x, UINT16 y, WINDOW_LAYER_ITEM layer, IN  CO
 
     VA_LIST         VaList;
     VA_START (VaList, Format);
-    L2_STRING_Maker2(x, y, layer, Format, VaList);
-    VA_END (VaList);
+	
+	if (layer.LayerID == GRAPHICS_LAYER_SYSTEM_LOG_WINDOW)
+	{
+		L2_STRING_Maker3(x, y, layer, Format, VaList);
+	}
+    else
+    {
+    	L2_STRING_Maker2(x, y, layer, Format, VaList);
+    }
+	
+	VA_END (VaList);
 }
+
 
 
 EFI_STATUS L1_STRING_Compare(UINT8 *p1, UINT8 *p2, UINT16 length)
@@ -2158,6 +2231,104 @@ UINT8 *L2_MEMORY_Allocate(char *pApplicationName, UINT16 type, UINT32 SizeRequir
 }
 
 
+
+
+
+EFI_STATUS  L2_FILE_NTFS_IndexRecordHeaderAnalysis(UINT8 *pBuffer)
+{
+	NTFS_FILE_HEADER;
+}
+
+EFI_STATUS  L2_FILE_NTFS_IndexRecordAttributeAnalysis(UINT8 *pBuffer)
+{
+	NTFS_FILE_ATTRIBUTE_HEADER;
+}
+
+//L2_FILE_NTFS_MFTIndexItemsAnalysis
+EFI_STATUS  L2_FILE_NTFS_IndexItemBufferAnalysis(UINT8 *pBuffer)
+{
+	NTFS_INDEX_HEADER;
+	NTFS_INDEX_ITEM;
+	L2_FILE_NTFS_IndexRecordHeaderAnalysis(pBuffer);
+	L2_FILE_NTFS_IndexRecordAttributeAnalysis(pBuffer);
+}
+
+
+UINT16 L2_FILE_NTFS_FileRecordHeaderAnalysis(UINT8 *pBuffer)
+{
+	// File header length
+	UINT16 AttributeOffset = L1_NETWORK_2BytesToUINT16(((NTFS_FILE_HEADER *)pBuffer)->AttributeOffset);
+	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: AttributeOffset:%X \n", __LINE__, AttributeOffset);
+
+	return AttributeOffset;
+}
+
+UINT16  L2_FILE_NTFS_FileRecordAttributeAnalysis(UINT8 *p, UINT16 AttributeOffset)
+{
+	UINT8 pItem[200] = {0};
+    UINT8 size[4];
+	UINT16 AttributeSize;
+	UINT16 i;
+
+    // get Attribute size
+    for (i = 0; i < 4; i++)
+        size[i] = p[AttributeOffset + 4 + i];
+        
+    AttributeSize = L1_NETWORK_4BytesToUINT32(size);
+
+    // Copy attribute to buffer
+    for (i = 0; i < AttributeSize; i++)
+        pItem[i] = p[AttributeOffset + i];
+
+    // after buffer copied, we can get information in item
+    UINT16 NameSize = ((NTFS_FILE_ATTRIBUTE_HEADER *)pItem)->NameSize;
+    
+    UINT16 NameOffset = L1_NETWORK_2BytesToUINT16(((NTFS_FILE_ATTRIBUTE_HEADER *)pItem)->NameOffset);
+                                                        
+    UINT16 Attribute = ((NTFS_FILE_ATTRIBUTE_HEADER *)pItem)->Type[0];
+
+	switch (Attribute)
+	{
+		case MFT_ATTRIBUTE_DOLLAR_STANDARD_INFORMATION:
+			break;
+
+		case MFT_ATTRIBUTE_DOLLAR_ATTRIBUTE_LIST:
+			break;
+
+		default:;
+	}		 
+
+	return AttributeSize;
+}
+
+
+//File means data on disk, not file in folder.. 
+//L2_FILE_NTFS_MFTDollarRootFileAnalysis
+EFI_STATUS  L2_FILE_NTFS_FileRecordBufferAnalysis(UINT8 *pBuffer)
+{
+	UINT16 AttributeSize;
+	UINT8 *p = (UINT8 *)AllocateZeroPool(DISK_BUFFER_SIZE * 2);
+	if (p == NULL)
+	{
+		L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: p == NULL \n", __LINE__);
+		return EFI_SUCCESS;
+	}
+	
+	for (UINT16 i = 0; i < DISK_BUFFER_SIZE * 2; i++)
+		p[i] = pBuffer[i];
+	
+	// 第一个属性偏移
+	UINT16 Offset = L2_FILE_NTFS_FileRecordHeaderAnalysis(p);
+
+	for (UINT16 i = 0; i < 10; i++)
+	{
+		AttributeSize = L2_FILE_NTFS_FileRecordAttributeAnalysis(pBuffer, Offset);
+		
+	    Offset += AttributeSize;
+	}
+}
+
+
 // Find $Root file from all MFT(may be 15 file,)
 // pBuffer store all MFT
 //比较重要的几个属性如0X30文件名属性，其中记录着该目录或者文件的文件名；
@@ -2275,18 +2446,18 @@ EFI_STATUS  L2_FILE_NTFS_MFTIndexItemsAnalysis(UINT8 *pBuffer, UINT8 DeviceID)
 
     //IndexEntryOffset:索引项的偏移 相对于当前位置
     L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d IndexEntryOffset: %llu IndexEntrySize: %llu\n", __LINE__, 
-                                                                     L1_NETWORK_4BytesToUINT32(((INDEX_HEADER *)p)->IndexEntryOffset),
-                                                                     L1_NETWORK_4BytesToUINT32(((INDEX_HEADER *)p)->IndexEntrySize));
+                                                                     L1_NETWORK_4BytesToUINT32(((NTFS_INDEX_HEADER *)p)->IndexEntryOffset),
+                                                                     L1_NETWORK_4BytesToUINT32(((NTFS_INDEX_HEADER *)p)->IndexEntrySize));
 
     // 相对于当前位置 need to add size before this Byte.
-    UINT8 length = L1_NETWORK_4BytesToUINT32(((INDEX_HEADER *)p)->IndexEntryOffset) + 24;
+    UINT8 length = L1_NETWORK_4BytesToUINT32(((NTFS_INDEX_HEADER *)p)->IndexEntryOffset) + 24;
     UINT8 pItem[200] = {0};
     UINT16 index = length;
 
 	//
     for (UINT8 i = 0; ; i++)
     {    
-         if (index >= L1_NETWORK_4BytesToUINT32(((INDEX_HEADER *)p)->IndexEntrySize))
+         if (index >= L1_NETWORK_4BytesToUINT32(((NTFS_INDEX_HEADER *)p)->IndexEntrySize))
             break;
             
          //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: index: %d\n", __LINE__,  index);  
@@ -2297,8 +2468,8 @@ EFI_STATUS  L2_FILE_NTFS_MFTIndexItemsAnalysis(UINT8 *pBuffer, UINT8 DeviceID)
         for (int i = 0; i < length2; i++)
             pItem[i] = pBuffer[index + i];
             
-         UINT8 FileNameSize = ((INDEX_ITEM *)pItem)->FileNameSize;
-         FileContentRelativeSector = L1_NETWORK_6BytesToUINT64(((INDEX_ITEM *)pItem)->MFTReferNumber);
+         UINT8 FileNameSize = ((NTFS_INDEX_ITEM *)pItem)->FileNameSize;
+         FileContentRelativeSector = L1_NETWORK_6BytesToUINT64(((NTFS_INDEX_ITEM *)pItem)->MFTReferNumber);
          /*L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: attribut length2: %d FileNameSize: %d\n", __LINE__, 
                                                                    length2,
                                                                    FileNameSize);  */  
@@ -2310,7 +2481,7 @@ EFI_STATUS  L2_FILE_NTFS_MFTIndexItemsAnalysis(UINT8 *pBuffer, UINT8 DeviceID)
             attributeName[i] = pItem[82 + 2 * i];
          }
 
-		 UINT8 IndexFlag = L1_NETWORK_2BytesToUINT16(((INDEX_ITEM *)pItem)->IndexFlag);
+		 UINT8 IndexFlag = L1_NETWORK_2BytesToUINT16(((NTFS_INDEX_ITEM *)pItem)->IndexFlag);
          L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: Name: %a, RelativeSector: %llu, IndexFlag: %d\n", __LINE__, attributeName, FileContentRelativeSector, IndexFlag);
          //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%s attributeName: %a\n", __LINE__,  attributeName);  
          index += length2;
@@ -2862,6 +3033,81 @@ EFI_STATUS L2_FILE_NTFS_FirstSelectorAnalysis(UINT8 *p, DollarBootSwitched *pNTF
 
 }
 
+EFI_STATUS L2_FILE_PartitionNameAnalysis(UINT16 DeviceID, UINT8 *pBuffer)
+{
+	switch (device[DeviceID].FileSystemType)
+	{
+		case FILE_SYSTEM_FAT32:
+			break;
+	}
+}
+
+typedef struct
+{
+	FILE_SYSTEM_TYPE FileSystemType;
+    UINT64    	  (*pFunctionStartSectorNumberGet)(UINT16); 
+    EFI_STATUS    (*pFunctionBufferAnalysis)(UINT16, UINT8 *); 
+}PARTITION_NAME_GET;
+
+UINT64 L2_PARTITION_NameFAT32StartSectorNumberGet(UINT16 DeviceID)
+{
+	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d DeviceID: %d StartSectorNumber: %d\n", __LINE__, DeviceID, device[DeviceID].StartSectorNumber);
+	// Start with 2 cluster
+	return device[DeviceID].StartSectorNumber;
+}
+
+UINT64 L2_PARTITION_NameNTFSStartSectorNumberGet(UINT16 DeviceID)
+{	// Start with $volume
+	return device[DeviceID].StartSectorNumber + 2 * MFT_ITEM_DOLLAR_VOLUME;
+}
+
+
+EFI_STATUS L2_PARTITION_NameFAT32Analysis(UINT16 DeviceID, UINT8 *Buffer)
+{
+	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d %X %X %X %X\n", __LINE__, device[DeviceID].PartitionName[0], device[DeviceID].PartitionName[1], device[DeviceID].PartitionName[2], device[DeviceID].PartitionName[3]);
+
+	for (UINT16 i = 0; i < 6; i++)
+		device[DeviceID].PartitionName[i] = Buffer[i];
+	device[DeviceID].PartitionName[6] = '\0';
+}
+
+EFI_STATUS L2_PARTITION_NameNTFSAnalysis(UINT16 DeviceID, UINT8 *Buffer)
+{
+	device[DeviceID].PartitionName[6] = '\0';
+}
+
+
+PARTITION_NAME_GET PartitionNameGet[]=
+{
+	{FILE_SYSTEM_FAT32, L2_PARTITION_NameFAT32StartSectorNumberGet,  L2_PARTITION_NameFAT32Analysis},  
+	{FILE_SYSTEM_NTFS,  L2_PARTITION_NameNTFSStartSectorNumberGet,   L2_PARTITION_NameNTFSAnalysis}
+};
+
+EFI_STATUS L2_FILE_PartitionNameGet(UINT16 DeviceID)
+{
+	//L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d DeviceID: %X\n", __LINE__, DeviceID);
+	UINT8 Buffer[DISK_BUFFER_SIZE] = {0};
+	UINT64 StartSectorNumber = 0;
+	EFI_STATUS Status;
+	UINT16 FileSystemType = device[DeviceID].FileSystemType;
+	//L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d FileSystemType: %llu\n", __LINE__, FileSystemType);
+
+	StartSectorNumber = PartitionNameGet[FileSystemType].pFunctionStartSectorNumberGet(DeviceID);
+
+	//L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d StartSectorNumber: %llu\n", __LINE__, StartSectorNumber);
+	
+	Status = L1_STORE_READ(DeviceID, StartSectorNumber, 1, Buffer);  
+	if (EFI_ERROR(Status))
+	{
+		L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d Status: %X\n", __LINE__, Status);
+		return Status;
+	}
+
+	PartitionNameGet[FileSystemType].pFunctionBufferAnalysis(DeviceID, Buffer);
+	return EFI_SUCCESS;
+}
+
+
 // all partitions analysis
 EFI_STATUS L2_FILE_PartitionTypeAnalysis(UINT16 DeviceID)
 {    
@@ -2887,7 +3133,8 @@ EFI_STATUS L2_FILE_PartitionTypeAnalysis(UINT16 DeviceID)
 
         // data sector number start include: reserved selector, fat sectors(usually is 2: fat1 and fat2), and file system boot path start cluster(usually is 2, data block start number is 2)
         sector_count = MBRSwitched.ReservedSelector + MBRSwitched.SectorsPerFat * MBRSwitched.NumFATS + (MBRSwitched.BootPathStartCluster - 2) * 8;
-		device[DeviceID].StartSectorNumber = MBRSwitched.ReservedSelector + MBRSwitched.SectorsPerFat * MBRSwitched.NumFATS;
+		device[DeviceID].StartSectorNumber = MBRSwitched.ReservedSelector + MBRSwitched.SectorsPerFat * MBRSwitched.NumFATS + (MBRSwitched.BootPathStartCluster - 2) * 8;
+		device[DeviceID].FileSystemType = FILE_SYSTEM_FAT32;
         BlockSize = MBRSwitched.SectorOfCluster * 512;
         //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: sector_count:%ld BlockSize: %d\n",  __LINE__, sector_count, BlockSize);
         return FILE_SYSTEM_FAT32;
@@ -2897,6 +3144,7 @@ EFI_STATUS L2_FILE_PartitionTypeAnalysis(UINT16 DeviceID)
     {
         L2_FILE_NTFS_FirstSelectorAnalysis(Buffer1, &NTFSBootSwitched);
 		device[DeviceID].StartSectorNumber = NTFSBootSwitched.MFT_StartCluster * 8;
+		device[DeviceID].FileSystemType = FILE_SYSTEM_NTFS;
         //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: NTFS sector_count:%llu\n",  __LINE__, sector_count);
         return FILE_SYSTEM_NTFS;
     }
@@ -2983,6 +3231,7 @@ L3_GRAPHICS_ItemPrint(UINT8 *pDestBuffer, UINT8 *pSourceBuffer, UINT16 pDestWidt
     //if (2 == StringType)
     //    L2_DEBUG_Print2(x, y + pDestHeight, pDestBuffer, "%a ", pNameString);
 }
+					
 
 							  
 VOID L2_STORE_PartitionItemsPrint(UINT16 Index)
@@ -3088,6 +3337,16 @@ EFI_STATUS L3_PARTITION_FileAccess(UINT16 DeviceID)
     }
 }
 
+
+EFI_STATUS L3_PARTITION_ParentPathAccess()
+{
+	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: L3_PARTITION_ParentPathAccess\n", __LINE__);
+		
+	PARTITION_ITEM_ACCESS_STATE PartitionItemAccessNextState = INIT_ACCESS_STATE;
+	PARTITION_ITEM_ACCESS_EVENT PartitionItemAccessEvent = ROOT_PATH_ACCESS_EVENT;
+}
+
+
 EFI_STATUS L3_PARTITION_AccessFinish()
 {
 	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: L3_PARTITION_AccessFinish\n", __LINE__);
@@ -3096,13 +3355,10 @@ EFI_STATUS L3_PARTITION_AccessFinish()
 	PARTITION_ITEM_ACCESS_EVENT PartitionItemAccessEvent = ROOT_PATH_ACCESS_EVENT;
 }
 
-EFI_STATUS L3_PARTITION_ParentPathAccess()
-{
-}
 
 
 // need a stack to save current detailed path
-PARTITION_ITEM_ACCESS_STATE_TRANSFORM PartitionItemAccessStateTransformTable[] =
+PARTITION_ITEM_ACCESS_STATE_TRANSFORM PartitionItemAccessStateTransitionTable[] =
 {
 	//Current state             Trigger Event          //Next state              //Handle function
     // init state
@@ -4142,7 +4398,7 @@ VOID L2_FILE_Transfer(MasterBootRecord *pSource, MasterBootRecordSwitched *pDest
     //Todo: the other parameters can compute like above too
     //Current only get parameters we need to use
     
-    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "ReservedSelector:%d SectorsPerFat:%d BootPathStartCluster: %d NumFATS:%d SectorOfCluster:%d", 
+    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "Selector:%d PerFat:%d StartCluster: %d NumFATS:%d SectorOfCluster:%d", 
                                                 pDest->ReservedSelector,
                                                 pDest->SectorsPerFat,
                                                 pDest->BootPathStartCluster,
@@ -4412,7 +4668,8 @@ EFI_STATUS L2_STORE_ReadFileFSM()
     return EFI_SUCCESS;
 }
 
-STATE_TRANS StatusTransitionTable[] =
+
+STATE_TRANS FileReadStateTransitionTable[] =
 {
     { INIT_STATE,                READ_PATITION_EVENT,   GET_PARTITION_INFO_STATE, L2_STORE_PartitionAnalysisFSM},
     { GET_PARTITION_INFO_STATE,  READ_ROOT_PATH_EVENT,  GET_ROOT_PATH_INFO_STATE, L2_STORE_RootPathAnalysisFSM},
@@ -4434,14 +4691,14 @@ int L2_STORE_FileRead(EVENT event)
                               __LINE__, 
                             event, 
                             NextState,
-                            StatusTransitionTable[NextState].event,
-                            StatusTransitionTable[NextState].NextState);
+                            FileReadStateTransitionTable[NextState].event,
+                            FileReadStateTransitionTable[NextState].NextState);
     
-    if ( event == StatusTransitionTable[NextState].event )
+    if ( event == FileReadStateTransitionTable[NextState].event )
     {
         L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: Status:%X \n", __LINE__, Status);
-        StatusTransitionTable[NextState].pFunc();
-        NextState = StatusTransitionTable[NextState].NextState;
+        FileReadStateTransitionTable[NextState].pFunc();
+        NextState = FileReadStateTransitionTable[NextState].NextState;
     }
     else  
     {
@@ -5118,6 +5375,9 @@ VOID L3_APPLICATION_MyComputerWindow(UINT16 StartX, UINT16 StartY)
             type[3] = 'S';
             type[4] = '\0';
         }
+
+		L2_FILE_PartitionNameGet(i);
+		L2_DEBUG_Print3(0, y, WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW], "%a", device[i].PartitionName);
 
         L2_DEBUG_Print3(x, y, WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW], "%a", type);
         
@@ -6536,8 +6796,9 @@ VOID L2_MOUSE_WallpaperResetClicked()
     L2_GRAPHICS_DeskInit();
 }
 
+
 // For start menu state transform
-START_MENU_STATE_TRANSFORM StartMenuStateTransformTable[] =
+START_MENU_STATE_TRANSFORM StartMenuStateTransitionTable[] =
 {
     {MENU_CLICKED_STATE,            MY_COMPUTER_CLICKED_EVENT,          		CLICK_INIT_STATE,          				L2_MOUSE_MyComputerClicked},
     {MENU_CLICKED_STATE,            SETTING_CLICKED_EVENT,              		SYSTEM_SETTING_CLICKED_STATE,       	L2_MOUSE_SystemSettingClicked},
@@ -6548,8 +6809,9 @@ START_MENU_STATE_TRANSFORM StartMenuStateTransformTable[] =
     {SYSTEM_SETTING_CLICKED_STATE,  WALLPAPER_RESET_CLICKED_EVENT,      		CLICK_INIT_STATE,                   	L2_MOUSE_WallpaperResetClicked},
 };
 
+
 // For my computer window state transform.
-START_MENU_STATE_TRANSFORM MyComputerStateTransformTable[] =
+START_MENU_STATE_TRANSFORM MyComputerStateTransitionTable[] =
 {
     {MY_COMPUTER_CLICKED_STATE,           MY_COMPUTER_CLOSE_CLICKED_EVENT,    	   	  CLICK_INIT_STATE,                   	L2_MOUSE_MyComputerCloseClicked},
     {MY_COMPUTER_CLICKED_STATE,     	  MY_COMPUTER_PARTITION_ITEM_CLICKED_EVENT,   MY_COMPUTER_PARTITION_CLICKED_STATE,  L2_MOUSE_MyComputerPartitionItemClicked},
@@ -6561,17 +6823,17 @@ START_MENU_STATE_TRANSFORM MyComputerStateTransformTable[] =
 VOID L3_GRAPHICS_MyComupterClickEventHandle(MOUSE_CLICK_EVENT event)
 {
 	
-    for (int i = 0; i <  sizeof(MyComputerStateTransformTable)/sizeof(MyComputerStateTransformTable[0]); i++ )
+    for (int i = 0; i <  sizeof(MyComputerStateTransitionTable)/sizeof(MyComputerStateTransitionTable[0]); i++ )
     {
-        //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: MyComputerStateTransformTable[i].CurrentState: %d\n", __LINE__, MyComputerStateTransformTable[i].CurrentState);
+        //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: MyComputerStateTransitionTable[i].CurrentState: %d\n", __LINE__, MyComputerStateTransitionTable[i].CurrentState);
         //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: i: %d\n", __LINE__, i);
-        if (MyComputerStateTransformTable[i].CurrentState == MyComputerNextState 
-            && event == MyComputerStateTransformTable[i].event )
+        if (MyComputerStateTransitionTable[i].CurrentState == MyComputerNextState 
+            && event == MyComputerStateTransitionTable[i].event )
         {
-            MyComputerNextState = MyComputerStateTransformTable[i].NextState;
+            MyComputerNextState = MyComputerStateTransitionTable[i].NextState;
 
             // need to check the return value after function runs..... 
-            MyComputerStateTransformTable[i].pFunc();
+            MyComputerStateTransitionTable[i].pFunc();
             L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: MouseClickEvent: %d StartMenuNextState: %d\n", __LINE__, MouseClickEvent, StartMenuNextState);
             break;
         }   
@@ -6597,16 +6859,16 @@ VOID L3_PARTITION_Access()
     PARTITION_ITEM_ACCESS_STATE     CurrentState;
 	UINT16 RootFlag = TRUE;
 
-    for (UINT16 i = 0; i < sizeof(PartitionItemAccessStateTransformTable) / sizeof(PartitionItemAccessStateTransformTable[0]); i++ )
+    for (UINT16 i = 0; i < sizeof(PartitionItemAccessStateTransitionTable) / sizeof(PartitionItemAccessStateTransitionTable[0]); i++ )
     {
-        if (PartitionItemAccessStateTransformTable[i].CurrentState == PartitionItemAccessNextState 
-            && PartitionItemAccessEvent == PartitionItemAccessStateTransformTable[i].event )
+        if (PartitionItemAccessStateTransitionTable[i].CurrentState == PartitionItemAccessNextState 
+            && PartitionItemAccessEvent == PartitionItemAccessStateTransitionTable[i].event )
         {
         	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: L3_PARTITION_Access For\n", __LINE__);
-            PartitionItemAccessNextState = PartitionItemAccessStateTransformTable[i].NextState;
+            PartitionItemAccessNextState = PartitionItemAccessStateTransitionTable[i].NextState;
 
             // need to check the return value after function runs..... 
-            PartitionItemAccessStateTransformTable[i].pFunc();
+            PartitionItemAccessStateTransitionTable[i].pFunc();
             L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, 
                                                         WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], 
                                                         "%d: L3_PARTITION_Access For: %d L3_PARTITION_Access For: %d\n", 
@@ -6642,17 +6904,17 @@ int L1_STACK_Pop(char * a,int top)
 VOID L3_GRAPHICS_StartMenuClickEventHandle(MOUSE_CLICK_EVENT event)
 { 
     L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: event: %d StartMenuNextState: %d\n", __LINE__, event, StartMenuNextState);
-    for (UINT16 i = 0; i <  sizeof(StartMenuStateTransformTable)/sizeof(StartMenuStateTransformTable[0]); i++ )
+    for (UINT16 i = 0; i <  sizeof(StartMenuStateTransitionTable)/sizeof(StartMenuStateTransitionTable[0]); i++ )
     {
-        //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: StartMenuStateTransformTable[i].CurrentState: %d\n", __LINE__, StartMenuStateTransformTable[i].CurrentState);
+        //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: StartMenuStateTransitionTable[i].CurrentState: %d\n", __LINE__, StartMenuStateTransitionTable[i].CurrentState);
         //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: i: %d\n", __LINE__, i);
-        if (StartMenuStateTransformTable[i].CurrentState == StartMenuNextState 
-            && event == StartMenuStateTransformTable[i].event )
+        if (StartMenuStateTransitionTable[i].CurrentState == StartMenuNextState 
+            && event == StartMenuStateTransitionTable[i].event )
         {
-            StartMenuNextState = StartMenuStateTransformTable[i].NextState;
+            StartMenuNextState = StartMenuStateTransitionTable[i].NextState;
 
             // need to check the return value after function runs..... 
-            StartMenuStateTransformTable[i].pFunc();
+            StartMenuStateTransitionTable[i].pFunc();
             L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: MouseClickEvent: %d StartMenuNextState: %d\n", __LINE__, MouseClickEvent, StartMenuNextState);
             break;
         }   
@@ -6955,6 +7217,8 @@ EFI_STATUS L2_COMMON_MemoryAllocate()
         //DEBUG ((EFI_D_INFO, "pSystemLogWindowBuffer , AllocateZeroPool failed... "));
         return -1;
     }
+
+	L1_QUEUE_Init(&Queue);
     
     MouseColor.Blue  = 0xff;
     MouseColor.Red   = 0xff;
