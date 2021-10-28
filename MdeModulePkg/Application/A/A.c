@@ -131,6 +131,7 @@ current problems:
 #include <Libraries/String/L2_LIBRARY_String.h>
 #include <Libraries/String/L1_LIBRARY_String.h>
 #include <Libraries/Memory/L1_LIBRARY_Memory.h>
+#include <Libraries/DataStructure/L1_LIBRARY_DataStructure.h>
 #include <Graphics/L1_GRAPHICS.h>
 
 
@@ -1807,11 +1808,6 @@ EFI_STATUS  L2_FILE_NTFS_DollarRootA0DatarunAnalysis(UINT8 *p)
 MEMORY_INFORMATION MemoryInformation = {0};
 
 
-UINT8 L1_BIT_Set(UINT8 *pMapper, UINT64 StartPageID, UINT64 Size)
-{
-    UINT8 AddOneFlag = (Size % 8 == 0) ? 0 : 1;
-    UINT32 ByteCount = Size / 8 + AddOneFlag;
-}
 // memory: 1G->3G
 #define ALL_PAGE_COUNT 0x80000
 #define PHYSICAL_ADDRESS_START 0x40000000
@@ -6203,26 +6199,6 @@ VOID L3_PARTITION_Access()
     }
     
 }
-
-int L1_STACK_Push(char* a,int top,char elem)
-{
-    a[++top]=elem;
-    return top;
-}
-
-
-int L1_STACK_Pop(char * a,int top)
-{
-    if (top==-1) 
-    {
-        //printf("空栈");
-        return -1;
-    }
-    //printf("弹栈元素：%c\n",a[top]);
-    top--;
-    return top;
-}
-
 
 VOID L3_GRAPHICS_StartMenuClickEventHandle(MOUSE_CLICK_EVENT event)
 { 
