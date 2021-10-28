@@ -133,13 +133,16 @@ current problems:
 #include <Libraries/Memory/L1_LIBRARY_Memory.h>
 #include <Libraries/DataStructure/L1_LIBRARY_DataStructure.h>
 #include <Graphics/L1_GRAPHICS.h>
+#include <Devices/Mouse/L1_DEVICE_Mouse.h>
 
 
 #define STORE_EFI_PATH_PARTITION_SECTOR_COUNT 1691648
 
+extern EFI_SIMPLE_POINTER_PROTOCOL        *gMouse;
+
+
 UINT16 date_time_count = 0;
 UINT16 keyboard_count = 0;
-UINT16 mouse_count = 0;
 UINT16 parameter_count = 0;
 
 int keyboard_input_count = 0;
@@ -241,13 +244,9 @@ UINT16 StatusErrorCount = 0;
 UINT16 DisplayCount = 0;
 UINTN PartitionCount = 0;
 
-CHAR8 x_move = 0;
-CHAR8 y_move = 0;
-
 UINT16 DebugPrintX = 0;
 UINT16 DebugPrintY = 0; 
 
-UINT8 MouseClickFlag = MOUSE_NO_CLICKED;
 INT8 DisplayRootItemsFlag = 0;
 INT8 DisplayMyComputerFlag = 0;
 INT8 DisplaySystemLogWindowFlag = 0;
@@ -259,8 +258,6 @@ UINT8 PreviousItem = -1;
 
 
 EFI_GRAPHICS_OUTPUT_PROTOCOL       *GraphicsOutput = NULL;
-EFI_SIMPLE_POINTER_PROTOCOL        *gMouse;
-
 
 EFI_HANDLE *handle;
 
@@ -350,9 +347,6 @@ UINT32 FileLength = 0;
 UINT32 PreviousBlockNumber = 0;
 
 UINT8 BufferMFT[DISK_BUFFER_SIZE * 2];
-
-UINT16 iMouseX = 0;
-UINT16 iMouseY = 0;
 
 EFI_GRAPHICS_OUTPUT_BLT_PIXEL MouseColor;
 
@@ -4102,45 +4096,6 @@ VOID EFIAPI L2_TIMER_Slice(
     TimerSliceCount++;
     return;
 }
-
-EFI_STATUS L2_MOUSE_Init()
-{
-    EFI_STATUS                         Status;
-    EFI_HANDLE                         *PointerHandleBuffer = NULL;
-    UINTN                              i = 0;
-    UINTN                              HandleCount = 0;
-    
-    //get the handles which supports
-    Status = gBS->LocateHandleBuffer(
-                                    ByProtocol,
-                                    &gEfiSimplePointerProtocolGuid,
-                                    NULL,
-                                    &HandleCount,
-                                    &PointerHandleBuffer
-                                    );
-        
-    if (EFI_ERROR(Status))  return Status;      //unsupport
-    
-    for (i = 0; i < HandleCount; i++)
-    {
-        Status = gBS->HandleProtocol(PointerHandleBuffer[i],
-                                    &gEfiSimplePointerProtocolGuid,
-                                    (VOID**)&gMouse);
-            
-        if (EFI_ERROR(Status))  
-            continue;
-        
-        else
-        {
-            return EFI_SUCCESS;
-        }
-    }   
-    
-    return EFI_SUCCESS;
-
-}
-
-
 
 EFI_STATUS L2_MEMORY_MapInitial()
 {

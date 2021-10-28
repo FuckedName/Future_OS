@@ -23,6 +23,8 @@
   	Libraries/DataStructure/L1_LIBRARY_DataStructure.c
   	Graphics/L1_GRAPHICS.c
   	Graphics/L1_GRAPHICS.h
+  	Devices/Mouse/L1_DEVICE_Mouse.h
+  	Devices/Mouse/L1_DEVICE_Mouse.c
 
 [Packages]
   MdePkg/MdePkg.dec
