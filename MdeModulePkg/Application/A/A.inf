@@ -8,7 +8,9 @@
   ENTRY_POINT                    = Main
 
 [Sources]
-  A.c
+  	A.c
+  	Libraries/Math/L1_LIBRARY_Math.h
+	Libraries/Math/L1_LIBRARY_Math.c
 
 [Packages]
   MdePkg/MdePkg.dec
