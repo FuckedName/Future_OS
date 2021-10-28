@@ -17,6 +17,8 @@
   	Libraries/String/L2_LIBRARY_String.c
   	Libraries/String/L1_LIBRARY_String.h
   	Libraries/String/L1_LIBRARY_String.c
+  	Libraries/Memory/L1_LIBRARY_Memory.h
+  	Libraries/Memory/L1_LIBRARY_Memory.c
   	Graphics/L1_GRAPHICS.c
   	Graphics/L1_GRAPHICS.h
 

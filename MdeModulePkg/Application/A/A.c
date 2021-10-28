@@ -130,6 +130,7 @@ current problems:
 #include <Libraries/Network/L1_LIBRARY_Network.h>
 #include <Libraries/String/L2_LIBRARY_String.h>
 #include <Libraries/String/L1_LIBRARY_String.h>
+#include <Libraries/Memory/L1_LIBRARY_Memory.h>
 #include <Graphics/L1_GRAPHICS.h>
 
 
@@ -1811,21 +1812,6 @@ UINT8 L1_BIT_Set(UINT8 *pMapper, UINT64 StartPageID, UINT64 Size)
     UINT8 AddOneFlag = (Size % 8 == 0) ? 0 : 1;
     UINT32 ByteCount = Size / 8 + AddOneFlag;
 }
-
-VOID L1_MEMORY_Memset(void *s, UINT8 c, UINT32 n)
-{
-  UINT8 *d;
-
-  d = s;
-
-  while (n-- != 0) 
-  {
-    *d++ = c;
-  }
-
-  return s;
-}
-
 // memory: 1G->3G
 #define ALL_PAGE_COUNT 0x80000
 #define PHYSICAL_ADDRESS_START 0x40000000
@@ -1852,26 +1838,13 @@ typedef struct
 
 MEMORY_ALLOCATED_CURRENT MemoryAllocatedCurrent;
 
-void *L1_MEMORY_Copy(UINT8 *dest, const UINT8 *src, UINT8 count)
-{
-    UINT8 *d;
-    const UINT8 *s;
-
-    d = dest;
-    s = src;
-    while (count--)
-        *d++ = *s++;        
-    
-    return dest;
-}
-
 void L2_MEMORY_CountInitial()
 {
     MemoryAllocatedCurrent.AllocatedSliceCount = 0;
     MemoryAllocatedCurrent.AllocatedSizeSum = 0;
     MemoryAllocatedCurrent.AllocatedPageSum = 0;
 
-    L1_MEMORY_SetValue(MemoryAllocatedCurrent, 0, sizeof(MemoryAllocatedCurrent));
+    L1_MEMORY_SetValue((UINT8 *)&MemoryAllocatedCurrent, 0, sizeof(MemoryAllocatedCurrent));
 }
 
 UINT8 *L2_MEMORY_MapperInitial()
@@ -3990,64 +3963,6 @@ UINT32 L2_FILE_GetNextBlockNumber()
     
     return FAT32_Table[PreviousBlockNumber  * 4] + (UINT32)FAT32_Table[PreviousBlockNumber * 4 + 1] * 16 * 16 + (UINT32)FAT32_Table[PreviousBlockNumber * 4 + 2] * 16 * 16 * 16 * 16 + (UINT32)FAT32_Table[PreviousBlockNumber * 4 + 3] * 16 * 16 * 16 * 16 * 16 * 16;  
 }
-
-//InternalMemSetMem
-void L1_MEMORY_SetValue(UINT8 *pBuffer, UINT32 Length, UINT8 Value)
-{
-    //
-  // Declare the local variables that actually move the data elements as
-  // volatile to prevent the optimizer from replacing this function with
-  // the intrinsic memset()
-  //
-  volatile UINT8                    *Pointer8;
-  volatile UINT32                   *Pointer32;
-  volatile UINT64                   *Pointer64;
-  UINT32                            Value32;
-  UINT64                            Value64;
-
-  if ((((UINTN)pBuffer & 0x7) == 0) && (Length >= 8)) 
-  {
-    // Generate the 64bit value
-    Value32 = (Value << 24) | (Value << 16) | (Value << 8) | Value;
-    Value64 = LShiftU64 (Value32, 32) | Value32;
-
-    Pointer64 = (UINT64*)pBuffer;
-    while (Length >= 8) 
-    {
-      *(Pointer64++) = Value64;
-      Length -= 8;
-    }
-
-    // Finish with bytes if needed
-    Pointer8 = (UINT8*)Pointer64;
-  } 
-  else if ((((UINTN)pBuffer & 0x3) == 0) && (Length >= 4)) 
-  {
-    // Generate the 32bit value
-    Value32 = (Value << 24) | (Value << 16) | (Value << 8) | Value;
-
-    Pointer32 = (UINT32*)pBuffer;
-    while (Length >= 4) 
-    {
-      *(Pointer32++) = Value32;
-      Length -= 4;
-    }
-
-    // Finish with bytes if needed
-    Pointer8 = (UINT8*)Pointer32;
-  } 
-  else 
-  {
-    Pointer8 = (UINT8*)pBuffer;
-  }
-  
-  while (Length-- > 0) 
-  {
-    *(Pointer8++) = Value;
-  }
-  return pBuffer;
-}
-
 
 //https://blog.csdn.net/goodwillyang/article/details/45559925
 
