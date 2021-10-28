@@ -237,6 +237,7 @@ char pKeyboardInputBuffer[KEYBOARD_BUFFER_LENGTH] = {0};
 #define SYSTEM_QUIT_FLAG FALSE
 
 extern EFI_SIMPLE_FILE_SYSTEM_PROTOCOL *gSimpleFileSystem; 
+UINTN ScreenWidth, ScreenHeight;
 
 UINT16 LogStatusErrorCount = 0;
 
@@ -321,7 +322,6 @@ UINT8 *sChineseChar = NULL;
 //UINT8 sChineseChar[267616];
 
 
-static UINTN ScreenWidth, ScreenHeight;
 UINT16 MyComputerWidth = 16 * 40;
 UINT16 MyComputerHeight = 16 * 50;
 
