@@ -27,9 +27,17 @@
   	Graphics/L2_GRAPHICS.h
   	Devices/Mouse/L1_DEVICE_Mouse.h
   	Devices/Mouse/L1_DEVICE_Mouse.c
+  	Devices/Store/L2_DEVICE_Store.h
+  	Devices/Store/L2_DEVICE_Store.c
   	Memory/L1_MEMORY.h
   	Memory/L1_MEMORY.c
   	Global/Global.h
+  	Partitions/L1_PARTITION.c
+  	Partitions/L1_PARTITION.h
+  	Partitions/L2_PARTITION.c
+  	Partitions/L2_PARTITION.h
+  	Partitions/L3_PARTITION.c
+  	Partitions/L3_PARTITION.h
 
 [Packages]
   MdePkg/MdePkg.dec
