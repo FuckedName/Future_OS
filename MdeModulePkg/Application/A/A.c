@@ -139,6 +139,14 @@ current problems:
 #define STORE_EFI_PATH_PARTITION_SECTOR_COUNT 1691648
 
 extern EFI_SIMPLE_POINTER_PROTOCOL        *gMouse;
+extern UINT16 mouse_count;
+extern UINT8 MouseClickFlag;
+
+extern CHAR8 x_move;
+extern CHAR8 y_move;
+
+extern UINT16 iMouseX;
+extern UINT16 iMouseY;
 
 
 UINT16 date_time_count = 0;
