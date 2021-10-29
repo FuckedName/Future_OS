@@ -134,21 +134,13 @@ current problems:
 #include <Libraries/DataStructure/L1_LIBRARY_DataStructure.h>
 #include <Graphics/L1_GRAPHICS.h>
 #include <Devices/Mouse/L1_DEVICE_Mouse.h>
+#include <Memory/L1_MEMORY.h>
+#include <Global/Global.h>
+
 
 
 #define STORE_EFI_PATH_PARTITION_SECTOR_COUNT 1691648
 
-extern EFI_SIMPLE_POINTER_PROTOCOL        *gMouse;
-extern UINT16 mouse_count;
-extern UINT8 MouseClickFlag;
-
-extern CHAR8 x_move;
-extern CHAR8 y_move;
-
-extern UINT16 iMouseX;
-extern UINT16 iMouseY;
-extern unsigned char AsciiBuffer[0x100];
-extern WINDOW_LAYERS WindowLayers;
 
 
 UINT16 date_time_count = 0;
@@ -160,11 +152,6 @@ int keyboard_input_count = 0;
 #define KEYBOARD_BUFFER_LENGTH (30) 
 char pKeyboardInputBuffer[KEYBOARD_BUFFER_LENGTH] = {0};
 
-#define INFO_SELF(...)   \
-            do {   \
-                 Print(L"%d ",__LINE__);  \
-                 Print(__VA_ARGS__); \
-            }while(0);
             
 /*
 #define INFO_SELF(...)   \
@@ -235,9 +222,6 @@ char pKeyboardInputBuffer[KEYBOARD_BUFFER_LENGTH] = {0};
 #define DISPLAY_ERROR_STATUS_X (ScreenWidth * 2 / 4) 
 #define DISPLAY_ERROR_STATUS_Y (16 * (StatusErrorCount++ % (ScreenHeight / 16 - 3)) )
 
-#define DISPLAY_LOG_ERROR_STATUS_X (4) 
-#define DISPLAY_LOG_ERROR_STATUS_Y (16 * (LogStatusErrorCount++ % (SystemLogWindowHeight / 16 + 2)) )
-
 
 
 #define MOUSE_NO_CLICKED 0
@@ -272,15 +256,7 @@ EFI_GRAPHICS_OUTPUT_PROTOCOL       *GraphicsOutput = NULL;
 
 EFI_HANDLE *handle;
 
-typedef enum
-{
-    SYSTEM_ICON_MYCOMPUTER = 0,
-    SYSTEM_ICON_SETTING,
-    SYSTEM_ICON_RECYCLE,
-    SYSTEM_ICON_FOLDER,
-    SYSTEM_ICON_TEXT,
-    SYSTEM_ICON_MAX 
-}SYSTEM_ICON_320_400_BMP;
+
 
 typedef enum
 {
@@ -296,7 +272,6 @@ UINT8 *pSystemLogWindowBuffer = NULL; // MyComputer layer: 2
 UINT8 *pMemoryInformationBuffer = NULL; // MyComputer layer: 2
 UINT8 *pDeskDisplayBuffer = NULL; //desk display after multi graphicses layers compute
 UINT8 *pSystemIconBuffer[SYSTEM_ICON_MAX]; //desk display after multi graphicses layers compute
-UINT8 *pSystemIconMyComputerBuffer = NULL; //after zoom in or zoom out
 UINT8 *pSystemIconMySettingBuffer = NULL; //after zoom in or zoom out
 UINT8 *pSystemIconRecycleBuffer = NULL; //after zoom in or zoom out
 UINT8 *pMouseSelectedBuffer = NULL;  // after mouse selected
@@ -324,6 +299,7 @@ EFI_EVENT MultiTaskTriggerGroup2Event;
 int Nodei = 0;
 
 UINT8 *FAT32_Table = NULL;
+
 
 UINT8 *pStartMenuBuffer = NULL;
 UINT8 *pSystemSettingWindowBuffer = NULL;
@@ -549,12 +525,6 @@ typedef struct {
     UINT8 USNArray[0];//更新序列数组
 }INDEX_HEADER;
 
-typedef enum
-{
-    MEMORY_TYPE_GRAPHICS,
-    MEMORY_TYPE_APPLICATION,
-    MEMORY_TYPE_TEST
-}MEMORY_TYPE;
 
 typedef struct {
      UINT8 MFTReferNumber[8];//文件的MFT参考号, first 6 Bytes * 2 + MFT table sector = file sector 
@@ -1812,31 +1782,6 @@ EFI_STATUS  L2_FILE_NTFS_DollarRootA0DatarunAnalysis(UINT8 *p)
 MEMORY_INFORMATION MemoryInformation = {0};
 
 
-// memory: 1G->3G
-#define ALL_PAGE_COUNT 0x80000
-#define PHYSICAL_ADDRESS_START 0x40000000
-#define ALLOCATE_UNIT_SIZE (8 * 512)
-UINT64 FreeNumberOfPages = ALL_PAGE_COUNT;
-UINT64 SystemAllPagesAllocated = 0;
-
-UINT8 *pMapper = (UINT8 *)(PHYSICAL_ADDRESS_START);
-
-typedef struct
-{
-    UINT8 ApplicationName[50];
-    UINT32 AllocatedSize;
-    UINT16 MemoryType;
-}MEMORY_ALLOCATED_ITEMS;
-
-typedef struct
-{
-    MEMORY_ALLOCATED_ITEMS items[100];
-    UINT32 AllocatedSliceCount;
-    UINT32 AllocatedSizeSum;
-    UINT32 AllocatedPageSum;
-}MEMORY_ALLOCATED_CURRENT;
-
-MEMORY_ALLOCATED_CURRENT MemoryAllocatedCurrent;
 
 void L2_MEMORY_CountInitial()
 {
@@ -1856,84 +1801,6 @@ UINT8 *L2_MEMORY_MapperInitial()
     }
 }
 
-// size: the one unit size is Bytes 
-UINT8 *L2_MEMORY_Allocate(char *pApplicationName, UINT16 type, UINT32 SizeRequired)
-{
-    // Allocate minimize unit is 4K
-    UINT32 PagesRequired = SizeRequired / (ALLOCATE_UNIT_SIZE);
-    UINT8  AddOne = (SizeRequired % (ALLOCATE_UNIT_SIZE) != 0) ? 1 : 0;
-    
-    PagesRequired += AddOne;
-    UINT16 currentCount= MemoryAllocatedCurrent.AllocatedSliceCount;
-    L1_MEMORY_Copy(MemoryAllocatedCurrent.items[currentCount].ApplicationName, pApplicationName, L1_STRING_Length(pApplicationName));
-    MemoryAllocatedCurrent.items[currentCount].AllocatedSize = SizeRequired;
-    MemoryAllocatedCurrent.items[currentCount].MemoryType = type;
-
-    MemoryAllocatedCurrent.AllocatedPageSum += PagesRequired;
-    MemoryAllocatedCurrent.AllocatedSizeSum += SizeRequired;
-    
-    MemoryAllocatedCurrent.AllocatedSliceCount++;
-    
-    INFO_SELF(L"Name: %a, Size: 0x%X, Pages: 0x%X \r\n", pApplicationName, SizeRequired, PagesRequired);  
-
-    UINT64 j = 0;
-    UINT64 k = 0;
-
-    //use 2G memory, page size: 1024 * 4B, Mapper use size: 2 * 1024 * 1024 * 1024 / (1024 * 4 ) =  524288 = 0x80000
-    UINT8 *pData = (UINT8 *)(PHYSICAL_ADDRESS_START + ALL_PAGE_COUNT);      
-    //all pages 
-    for (j = 0; j < ALL_PAGE_COUNT; j++)
-    {           
-        //INFO_SELF(L"j: %d\r\n", j);  
-        //find first page is no use 
-        //mapper 0: no use, 1: using
-        if (pMapper[j] == 0)
-        {
-            // then check the next n - 1 pages
-            for (k = 1; k < PagesRequired; k++)
-            {
-                if (pMapper[j + k] != 0)
-                {
-                    j += k;
-                    break;
-                }
-            }
-
-            // found 
-            if (k >= PagesRequired)
-            {
-                //INFO_SELF(L"k: %d \r\n", k);  
-                INFO_SELF(L"Block j: 0x%X, k: 0x%X, Allocated: 0x%X \r\n", j, k, SystemAllPagesAllocated); 
-                SystemAllPagesAllocated += k;
-
-                // Update mapper array from j to j + PagesRequired - 1
-                for (UINT64 m = j; m < PagesRequired + j; m++)
-                    pMapper[m] = 1;
-
-                FreeNumberOfPages -= PagesRequired;
-                
-                INFO_SELF(L"Success: 0x%X, Start: 0x%X, Required: 0x%X, Physical: 0x%X, Free: 0x%X\r\n", 
-                            pData, 
-                            j, 
-                            PagesRequired, 
-                            pData + j * ALLOCATE_UNIT_SIZE, 
-                            FreeNumberOfPages);  
-
-                L1_MEMORY_Memset(pData + j * ALLOCATE_UNIT_SIZE, 0, SizeRequired);
-                
-                INFO_SELF(L"\r\n");
-
-                // start physical address
-                return pData + j * ALLOCATE_UNIT_SIZE;
-            }
-        }
-    }
-
-    if (ALL_PAGE_COUNT <= j)
-    {
-        return NULL;
-    }
-}
 
 
 // Find $Root file from all MFT(may be 15 file,)
@@ -6390,138 +6257,6 @@ EFI_STATUS L2_GRAPHICS_ScreenInit()
     return EFI_SUCCESS;
 }
 
-EFI_STATUS L2_COMMON_MemoryAllocate()
-{
-    EFI_STATUS  Status;
-    
-    INFO_SELF(L"\r\n");
-
-    L2_MEMORY_MapperInitial();
-    
-    L2_MEMORY_CountInitial();
-
-    pDeskBuffer = L2_MEMORY_Allocate("Desk Buffer", MEMORY_TYPE_GRAPHICS, ScreenWidth * ScreenHeight * 4);
-    
-    pDeskDisplayBuffer = L2_MEMORY_Allocate("Desk Display Buffer", MEMORY_TYPE_GRAPHICS, ScreenWidth * ScreenHeight * 4);
-
-    pDeskWallpaperBuffer = L2_MEMORY_Allocate("Desk Wall paper Buffer", MEMORY_TYPE_GRAPHICS, ScreenWidth * ScreenHeight * 3 + 0x36);
-
-    UINT32 size = 267616;
-    
-    sChineseChar = (UINT8 *)L2_MEMORY_Allocate("Chinese Char Buffer", MEMORY_TYPE_GRAPHICS, size);
-    if (NULL == sChineseChar)
-    {
-        //DEBUG ((EFI_D_INFO, "ChineseCharArrayInit AllocateZeroPool Failed: %x!\n "));
-        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: ChineseCharArrayInit AllocateZeroPool failed\n",  __LINE__);
-        return -1;
-    }   
-
-    for (UINT8 i = 0; i < SYSTEM_ICON_MAX; i++)
-        pSystemIconBuffer[i] = L2_MEMORY_Allocate("System Icon Buffer", MEMORY_TYPE_GRAPHICS, 384054);
-
-    
-    pSystemIconFolderBuffer = L2_MEMORY_Allocate("System pSystemIconFolder Buffer", MEMORY_TYPE_GRAPHICS, 384054);
-    pSystemIconTextBuffer   = L2_MEMORY_Allocate("System pSystemIconText Buffer", MEMORY_TYPE_GRAPHICS, 384054);
-    pSystemIconTempBuffer2  = L2_MEMORY_Allocate("System Icon temp2 Buffer", MEMORY_TYPE_GRAPHICS, 384054);
-        
-    pMouseClickBuffer = (UINT8 *)L2_MEMORY_Allocate("Mouse Click Buffer", MEMORY_TYPE_GRAPHICS, MouseClickWindowWidth * MouseClickWindowHeight * 4); 
-    if (pMouseClickBuffer == NULL)
-    {
-        return -1;
-    }   
-
-    pMemoryInformationBuffer = (UINT8 *)L2_MEMORY_Allocate("Date Time Buffer", MEMORY_TYPE_GRAPHICS, MemoryInformationWindowWidth * MemoryInformationWindowHeight * 4); 
-    if (pMemoryInformationBuffer == NULL)
-    {
-        return -1;
-    }  
-    
-    pDateTimeBuffer = (UINT8 *)L2_MEMORY_Allocate("Date Time Buffer", MEMORY_TYPE_GRAPHICS, 8 * 16 * 50 * 4); 
-    if (pDateTimeBuffer == NULL)
-    {
-        return -1;
-    }   
-    
-    pMouseBuffer = (UINT8 *)L2_MEMORY_Allocate("Mouse Buffer", MEMORY_TYPE_GRAPHICS, 16 * 16 * 4);
-    if (NULL == pMouseBuffer)
-    {
-        //DEBUG ((EFI_D_INFO, "MultiProcessInit pMouseBuffer pDeskDisplayBuffer NULL\n"));
-        return -1;
-    }
-    
-    pMouseSelectedBuffer = (UINT8 *)L2_MEMORY_Allocate("Mouse Selected Buffer", MEMORY_TYPE_GRAPHICS, 16 * 16 * 2 * 4);
-    if (NULL == pMouseSelectedBuffer)
-    {
-        //DEBUG ((EFI_D_INFO, "ScreenInit AllocatePool pDeskDisplayBuffer NULL\n"));
-        return -1;
-    }
-    
-    pStartMenuBuffer = (UINT8 *)L2_MEMORY_Allocate("Start Menu Buffer", MEMORY_TYPE_GRAPHICS, StartMenuWidth * StartMenuHeight * 4);
-    if (NULL == pStartMenuBuffer)
-    {
-        //DEBUG ((EFI_D_INFO, "ChineseCharArrayInit pStartMenuBuffer Failed: %x!\n "));
-        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: pStartMenuBuffer AllocateZeroPool failed\n",  __LINE__);
-        return -1;
-    }   
-    
-    pMyComputerBuffer = (UINT8 *)L2_MEMORY_Allocate("My Computer Buffer", MEMORY_TYPE_GRAPHICS, MyComputerWidth * MyComputerHeight * 4); 
-    if (pMyComputerBuffer == NULL)
-    {
-        //DEBUG ((EFI_D_INFO, "MyComputer , AllocateZeroPool failed... "));
-        return -1;
-    }       
-
-    pSystemIconMyComputerBuffer = L2_MEMORY_Allocate("System pSystemIconMyComputerBuffer", MEMORY_TYPE_GRAPHICS, 384054);
-    pSystemIconMySettingBuffer  = L2_MEMORY_Allocate("System pSystemIconMySettingBuffer", MEMORY_TYPE_GRAPHICS, 384054);
-    pSystemIconRecycleBuffer    = L2_MEMORY_Allocate("System pSystemIconRecycleBuffer", MEMORY_TYPE_GRAPHICS, 384054);
-    
-    pSystemLogWindowBuffer = (UINT8 *)L2_MEMORY_Allocate("System Log Window Buffer", MEMORY_TYPE_GRAPHICS, SystemLogWindowWidth * SystemLogWindowHeight * 4);
-    if (pSystemLogWindowBuffer == NULL)
-    {
-        //DEBUG ((EFI_D_INFO, "pSystemLogWindowBuffer , AllocateZeroPool failed... "));
-        return -1;
-    }
-    
-    MouseColor.Blue  = 0xff;
-    MouseColor.Red   = 0xff;
-    MouseColor.Green = 0xff;
-
-    for (int i = 0; i < StartMenuHeight; i++)
-        for (int j = 0; j < StartMenuWidth; j++)
-        {
-            pStartMenuBuffer[(i * StartMenuWidth + j) * 4 + 0] = 237;
-            pStartMenuBuffer[(i * StartMenuWidth + j) * 4 + 1] = 234;
-            pStartMenuBuffer[(i * StartMenuWidth + j) * 4 + 2] = 231;
-            pStartMenuBuffer[(i * StartMenuWidth + j) * 4 + 3] = GRAPHICS_LAYER_START_MENU;
-        }
-
-    pSystemSettingWindowBuffer = (UINT8 *)L2_MEMORY_Allocate("System Setting Window Buffer", MEMORY_TYPE_GRAPHICS, SystemSettingWindowWidth * SystemSettingWindowHeight * 4);
-    if (NULL == pSystemSettingWindowBuffer)
-    {
-        //DEBUG ((EFI_D_INFO, "ChineseCharArrayInit pStartMenuBuffer Failed: %x!\n "));
-        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: pStartMenuBuffer AllocateZeroPool failed\n",  __LINE__);
-        return -1;
-    }   
-    
-    for (int i = 0; i < SystemSettingWindowHeight; i++)
-        for (int j = 0; j < SystemSettingWindowWidth; j++)
-        {
-            pSystemSettingWindowBuffer[(i * SystemSettingWindowWidth + j) * 4 + 0] = 237;
-            pSystemSettingWindowBuffer[(i * SystemSettingWindowWidth + j) * 4 + 1] = 234;
-            pSystemSettingWindowBuffer[(i * SystemSettingWindowWidth + j) * 4 + 2] = 0;
-            pSystemSettingWindowBuffer[(i * SystemSettingWindowWidth + j) * 4 + 3] = GRAPHICS_LAYER_SYSTEM_SETTING_WINDOW;
-        }
-    
-    iMouseX = ScreenWidth / 2;
-    iMouseY = ScreenHeight / 2;
-
-    FileReadCount = 0;
-    FAT32_Table = NULL;
-    
-    INFO_SELF(L"\r\n");
-
-    return EFI_SUCCESS;
-}
 
 EFI_STATUS L2_GRAPHICS_ChineseCharInit()
 {

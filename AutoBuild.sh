@@ -7,6 +7,10 @@ if [ $? -ne 0 ]; then
     exit 0;
 fi
 
+#rm -rf /mnt/hgfs/Share/code/Split/*
+#cp -rf MdeModulePkg/Application/A/* /mnt/hgfs/Share/code/Split/  
+
+
 #EmulatorPkg/build.sh -a IA32
 #if [ $? -ne 0 ]; then
 #    exit 0;

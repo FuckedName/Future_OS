@@ -25,6 +25,9 @@
   	Graphics/L1_GRAPHICS.h
   	Devices/Mouse/L1_DEVICE_Mouse.h
   	Devices/Mouse/L1_DEVICE_Mouse.c
+  	Memory/L1_MEMORY.h
+  	Memory/L1_MEMORY.c
+  	Global/Global.h
 
 [Packages]
   MdePkg/MdePkg.dec
