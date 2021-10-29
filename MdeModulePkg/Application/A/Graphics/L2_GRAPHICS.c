@@ -2,6 +2,8 @@
 #include <L2_GRAPHICS.h>
 #include <Global/Global.h>
 
+#include <Libraries/String/L2_LIBRARY_String.h>
+
 
 
 void L2_GRAPHICS_ParameterInit()
@@ -90,5 +92,33 @@ void L2_GRAPHICS_ParameterInit()
     WindowLayers.LayerSequences[4] = GRAPHICS_LAYER_SYSTEM_SETTING_WINDOW;
     WindowLayers.ActiveWindowCount = WindowLayers.LayerCount - 1;
     
+}
+
+/* Display a string */
+VOID EFIAPI L2_DEBUG_Print3 (UINT16 x, UINT16 y, WINDOW_LAYER_ITEM layer, IN  CONST CHAR8  *Format, ...)
+{
+    if (y > layer.WindowHeight - 16 || x > layer.WindowWidth- 8)
+        return;
+
+    VA_LIST         VaList;
+    VA_START (VaList, Format);
+    L2_STRING_Maker2(x, y, layer, Format, VaList);
+    VA_END (VaList);
+}
+
+
+/* Display a string */
+VOID EFIAPI L2_DEBUG_Print1 (UINT16 x, UINT16 y,  IN  CONST CHAR8  *Format, ...)
+{
+    if (y > ScreenHeight - 16 || x > ScreenWidth - 8)
+        return;
+
+    if (NULL == pDeskBuffer)
+        return;
+
+    VA_LIST         VaList;
+    VA_START (VaList, Format);
+    L2_STRING_Maker(x, y, Format, VaList);
+    VA_END (VaList);
 }
 

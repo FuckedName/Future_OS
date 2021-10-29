@@ -132,7 +132,7 @@ current problems:
 #include <Libraries/String/L1_LIBRARY_String.h>
 #include <Libraries/Memory/L1_LIBRARY_Memory.h>
 #include <Libraries/DataStructure/L1_LIBRARY_DataStructure.h>
-#include <Graphics/L1_GRAPHICS.h>
+#include <Graphics/L2_GRAPHICS.h>
 #include <Devices/Mouse/L1_DEVICE_Mouse.h>
 #include <Memory/L1_MEMORY.h>
 #include <Global/Global.h>
@@ -1536,21 +1536,6 @@ EFI_STATUS L2_GRAPHICS_AsciiCharDraw2(WINDOW_LAYER_ITEM layer,
 }
 
 /* Display a string */
-VOID EFIAPI L2_DEBUG_Print1 (UINT16 x, UINT16 y,  IN  CONST CHAR8  *Format, ...)
-{
-    if (y > ScreenHeight - 16 || x > ScreenWidth - 8)
-        return;
-
-    if (NULL == pDeskBuffer)
-        return;
-
-    VA_LIST         VaList;
-    VA_START (VaList, Format);
-    L2_STRING_Maker(x, y, Format, VaList);
-    VA_END (VaList);
-}
-
-/* Display a string */
 CHAR8 *L2_STRING_Make5 (CONST CHAR8  *Format, ...)
 {
     for (UINT32 i = 0; i < 0x100; i++)
@@ -1565,17 +1550,6 @@ CHAR8 *L2_STRING_Make5 (CONST CHAR8  *Format, ...)
     return AsciiBuffer;
 }
 
-/* Display a string */
-VOID EFIAPI L2_DEBUG_Print3 (UINT16 x, UINT16 y, WINDOW_LAYER_ITEM layer, IN  CONST CHAR8  *Format, ...)
-{
-    if (y > layer.WindowHeight - 16 || x > layer.WindowWidth- 8)
-        return;
-
-    VA_LIST         VaList;
-    VA_START (VaList, Format);
-    L2_STRING_Maker2(x, y, layer, Format, VaList);
-    VA_END (VaList);
-}
 
 //delete blanks of file name and file extension name
 void L1_FILE_NameGet2(UINT8 deviceID, UINT8 *FileName)
