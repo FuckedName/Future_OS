@@ -24,9 +24,6 @@ typedef struct
     UINT16 LayerSequences[10];
 }WINDOW_LAYERS;
 
-static WINDOW_LAYERS WindowLayers;
-
-
 typedef enum
 {
     GRAPHICS_LAYER_DESK = 0,

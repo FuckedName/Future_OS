@@ -1,6 +1,8 @@
 
 #include <L1_LIBRARY_String.h>
 
+unsigned char AsciiBuffer[0x100] = {0};
+
 unsigned long long L1_STRING_Length(char *String)
 {
     unsigned long long  Length;

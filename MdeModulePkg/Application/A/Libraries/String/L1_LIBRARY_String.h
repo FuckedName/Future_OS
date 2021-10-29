@@ -1,7 +1,6 @@
 #pragma once
 
 
-static unsigned char AsciiBuffer[0x100] = {0};
 
 int L1_STRING_ToUpper( int c  );
 

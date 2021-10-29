@@ -147,6 +147,8 @@ extern CHAR8 y_move;
 
 extern UINT16 iMouseX;
 extern UINT16 iMouseY;
+extern unsigned char AsciiBuffer[0x100];
+extern WINDOW_LAYERS WindowLayers;
 
 
 UINT16 date_time_count = 0;

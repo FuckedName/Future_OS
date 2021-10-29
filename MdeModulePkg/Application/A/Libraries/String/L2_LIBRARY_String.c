@@ -6,6 +6,9 @@
 #include <Graphics/L1_GRAPHICS.h>
 #include <Graphics/L1_GRAPHICS.h>
 
+extern unsigned char AsciiBuffer[0x100];
+extern WINDOW_LAYERS WindowLayers;
+
 
 VOID L2_STRING_Maker (UINT16 x, UINT16 y,
   IN  CONST CHAR8   *Format,
