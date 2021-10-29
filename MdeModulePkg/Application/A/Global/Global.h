@@ -83,6 +83,10 @@ extern UINT8 *pMapper;
 extern UINT64 FreeNumberOfPages;
 extern UINT64 SystemAllPagesAllocated;
 
+#define MOUSE_NO_CLICKED 0
+#define MOUSE_LEFT_CLICKED 1
+#define MOUSE_RIGHT_CLICKED 2
+
 
 typedef struct
 {

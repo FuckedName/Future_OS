@@ -4,9 +4,8 @@
 #include <Library/UefiBootServicesTableLib.h>
 
 
-#define MOUSE_NO_CLICKED 0
-#define MOUSE_LEFT_CLICKED 1
-#define MOUSE_RIGHT_CLICKED 2
+#include <Global/Global.h>
+
 
 
 
