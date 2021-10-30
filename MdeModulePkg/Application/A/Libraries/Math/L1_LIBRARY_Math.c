@@ -80,3 +80,16 @@ long L1_MATH_ABS(long v)
     return (v < 0) ? -v : v;
 }
 
+UINT8 L1_MATH_DayOfWeek(int y, int m, int d)
+{
+    UINT8 T;
+    
+    if ( m < 3 )
+    {
+        m += 12;
+        y -= 1;
+    }
+    
+    return ( (d + 2 * m + 3 * (m + 1) / 5 + y + y / 4 - y / 100 + y / 400 + 1) % 7 + 7) % 7;        
+}
+

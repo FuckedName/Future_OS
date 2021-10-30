@@ -664,15 +664,6 @@ extern UINT8 BufferMFT[DISK_BUFFER_SIZE * 2];
 
 
 
-VOID L1_FILE_NTFS_DollerRootTransfer(DOLLAR_BOOT *pSource, DollarBootSwitched *pDest)
-{
-    pDest->BitsOfSector = L1_NETWORK_2BytesToUINT16(pSource->BitsOfSector);
-    pDest->SectorOfCluster = (UINT16)pSource->SectorOfCluster;
-    pDest->AllSectorCount = L1_NETWORK_8BytesToUINT64(pSource->AllSectorCount) + 1;
-    pDest->MFT_StartCluster = L1_NETWORK_8BytesToUINT64(pSource->MFT_StartCluster);
-    pDest->MFT_MirrStartCluster = L1_NETWORK_8BytesToUINT64(pSource->MFT_MirrStartCluster);
-    
-}
 
 L3_GRAPHICS_ItemPrint(UINT8 *pDestBuffer, UINT8 *pSourceBuffer, UINT16 pDestWidth, UINT16 pDestHeight, 
                               UINT16 pSourceWidth, UINT16 pSourceHeight, UINT16 x, UINT16 y, CHAR8 *pNameString, CHAR16 StringType, UINT16 DestLayerID)
@@ -1453,18 +1444,6 @@ L2_MOUSE_Event (IN EFI_EVENT Event, IN VOID *Context)
     gBS->WaitForEvent( 1, &gMouse->WaitForInput, &Index );
 }
 
-UINT8 L1_TIMER_DayOfWeek(int y, int m, int d)
-{
-    UINT8 T;
-    
-    if ( m < 3 )
-    {
-        m += 12;
-        y -= 1;
-    }
-    
-    return ( (d + 2 * m + 3 * (m + 1) / 5 + y + y / 4 - y / 100 + y / 400 + 1) % 7 + 7) % 7;        
-}
 
 UINT16 date_time_count_increase_flag = 0;
 
@@ -1516,7 +1495,7 @@ L2_TIMER_Print (
 
     x += 16;
 
-    UINT8 DayOfWeek = L1_TIMER_DayOfWeek(EFITime.Year, EFITime.Month, EFITime.Day);
+    UINT8 DayOfWeek = L1_MATH_DayOfWeek(EFITime.Year, EFITime.Month, EFITime.Day);
     if (0 == DayOfWeek)
     {
         L2_GRAPHICS_ChineseCharDraw(pDeskBuffer, x, y, (48 - 1 ) * 94 + 39 - 1, Color, ScreenWidth);    
