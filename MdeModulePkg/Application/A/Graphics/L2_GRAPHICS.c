@@ -816,6 +816,11 @@ EFI_STATUS L2_GRAPHICS_SayGoodBye()
 
 }
 
+BOOLEAN L1_GRAPHICS_InsideRectangle(UINT16 StartX, UINT16 EndX, UINT16 StartY, UINT16 EndY)
+{
+	return (iMouseX >= StartX && iMouseX <= EndX && iMouseY >= StartY && iMouseY <= EndY);
+}
+
 
 MOUSE_CLICK_EVENT L2_GRAPHICS_DeskLayerClickEventGet()
 {
@@ -1210,6 +1215,60 @@ VOID L2_MOUSE_Click()
 
 
 
+EFI_STATUS L2_GRAPHICS_ButtonDraw()
+{
+    EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
+    UINT32 x = ScreenWidth;
+    UINT32 y = ScreenHeight;
+    
+    // Button
+    // white
+    Color.Red   = 0xFF;
+    Color.Green = 0xFF;
+    Color.Blue  = 0xFF;
+    L1_MEMORY_RectangleFill(pDeskBuffer, 3,  y - 24, 59, y - 24, 1, Color); //line top (3,  y - 24) (59, y - 24)
+    L1_MEMORY_RectangleFill(pDeskBuffer, 2,  y - 24, 59, y - 4,  1, Color); //area center(2,  y - 24) (59, y - 4)
+
+    Color.Red   = 0x84;
+    Color.Green = 0x84;
+    Color.Blue  = 0x84;
+    L1_MEMORY_RectangleFill(pDeskBuffer, 3,  y -  4, 59, y -  4, 1, Color); // line button (3,  y -  4) (59, y -  4)
+    L1_MEMORY_RectangleFill(pDeskBuffer, 59, y - 23, 59, y -  5, 1, Color); // line right(59, y - 23) (59, y -  5)
+
+    // Black
+    Color.Red   = 0x00;
+    Color.Green = 0x00;
+    Color.Blue  = 0x00;
+    L1_MEMORY_RectangleFill(pDeskBuffer, 2,  y -  3, 59, y -  3, 1, Color); // line button(2,  y -  3) (59, y -  3)
+    L1_MEMORY_RectangleFill(pDeskBuffer, 60, y - 24, 60, y -  3, 1, Color); // line right(60, y - 24) (60, y -  3)
+}
+
+
+//                                                 16 * 4,        16 * 7,       16 * 4,        16 * 2
+EFI_STATUS L2_GRAPHICS_ButtonDraw2(UINT16 StartX, UINT16 StartY, UINT16 Width, UINT16 Height)
+{
+    EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
+    
+    // Button
+    // white
+    Color.Red   = 0xFF;
+    Color.Green = 0xFF;
+    Color.Blue  = 0xFF;
+    L1_MEMORY_RectangleFill(pDeskBuffer, StartX,  StartY, StartX + Width, StartY, 1, Color); //line top 
+    L1_MEMORY_RectangleFill(pDeskBuffer, StartX,  StartY, StartX, StartY + Height,  1, Color); //line left
+
+    Color.Red   = 214;
+    Color.Green = 211;
+    Color.Blue  = 206;
+    L1_MEMORY_RectangleFill(pDeskBuffer, StartX + 1, StartY + 1, StartX + Width, StartY + Height, 1, Color); // Area
+    
+    // Black
+    Color.Red   = 0x00;
+    Color.Green = 0x00;
+    Color.Blue  = 0x00;
+    L1_MEMORY_RectangleFill(pDeskBuffer, StartX,  StartY + Height + 1, StartX + Width, StartY + Height + 2, 1, Color); // line button
+    L1_MEMORY_RectangleFill(pDeskBuffer, StartX + Width + 1, StartY + 1 , StartX + Width + 2, StartY + Height + 1, 1, Color); // line right
+}
 
 EFI_STATUS L2_GRAPHICS_DeskInit()
 {
@@ -1526,6 +1585,24 @@ EFI_STATUS L2_GRAPHICS_ChineseHalfDraw(UINT8 *pBuffer,UINT8 d,
     return EFI_SUCCESS;
 }
 
+
+// Note: Do not copy Color's reserved member
+VOID L2_GRAPHICS_CopyNoReserved(UINT8 *pDest, UINT8 *pSource, 
+                           UINT16 DestWidth, UINT16 DestHeight, 
+                           UINT16 SourceWidth, UINT16 SourceHeight, 
+                           UINT16 StartX, UINT16 StartY)
+{
+    int i, j;
+    for(i = 0; i < SourceHeight; i++)
+    {
+        for (j = 0; j < SourceWidth; j++)
+        {
+            pDest[((StartY + i) * DestWidth + StartX + j) * 4] = pSource[(i * SourceWidth + j) * 4];
+            pDest[((StartY + i) * DestWidth + StartX + j) * 4 + 1] = pSource[(i * SourceWidth + j) * 4 + 1];
+            pDest[((StartY + i) * DestWidth + StartX + j) * 4 + 2] = pSource[(i * SourceWidth + j) * 4 + 2];
+        }
+    }
+}
 
 VOID L2_GRAPHICS_LayerCompute(UINT16 iMouseX, UINT16 iMouseY, UINT8 MouseClickFlag)
 {
