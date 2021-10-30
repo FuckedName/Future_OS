@@ -61,6 +61,10 @@ extern INT8 SystemQuitFlag;
 extern UINT16 FolderItemValidIndexArray[10];
 extern START_MENU_STATE 	StartMenuNextState;
 
+//last Line
+#define DISPLAY_DESK_DATE_TIME_X (ScreenWidth - 22 * 8 - 16 * 3) 
+#define DISPLAY_DESK_DATE_TIME_Y (ScreenHeight - 21)
+
 
 #define DISK_BUFFER_SIZE (512)
 

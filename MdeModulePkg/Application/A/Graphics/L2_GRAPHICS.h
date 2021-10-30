@@ -76,3 +76,6 @@ UINT16 L2_MOUSE_ClickEventHandle();
 
 VOID L2_MOUSE_Click();
 
+EFI_STATUS L2_GRAPHICS_DeskInit();
+
+

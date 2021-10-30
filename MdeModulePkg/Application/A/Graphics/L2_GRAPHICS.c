@@ -1046,8 +1046,242 @@ VOID L2_MOUSE_Click()
             WindowLayers.ActiveWindowCount--;
             WindowLayers.item[GRAPHICS_LAYER_START_MENU].DisplayFlag = FALSE;
         }
+    }    
+}
+
+
+
+
+EFI_STATUS L2_GRAPHICS_DeskInit()
+{
+    
+    EFI_STATUS status = 0;
+    EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
+    UINT32 x = ScreenWidth;
+    UINT32 y = ScreenHeight;
+
+	Color.Reserved = GRAPHICS_LAYER_DESK;
+    
+    for (int i = 0; i < ScreenHeight; i++)
+    {
+        for (int j = 0; j < ScreenWidth; j++)
+        {
+            // BMP 3bits, and desk buffer 4bits
+            pDeskBuffer[(i * ScreenWidth + j) * 4]     = pDeskWallpaperBuffer[0x36 + ((ScreenHeight - i) * 1920 + j) * 3 ];
+            pDeskBuffer[(i * ScreenWidth + j) * 4 + 1] = pDeskWallpaperBuffer[0x36 + ((ScreenHeight - i) * 1920 + j) * 3 + 1];
+            pDeskBuffer[(i * ScreenWidth + j) * 4 + 2] = pDeskWallpaperBuffer[0x36 + ((ScreenHeight - i) * 1920 + j) * 3 + 2];
+            pDeskBuffer[(i * ScreenWidth + j) * 4 + 3] = GRAPHICS_LAYER_DESK;
+
+            //white
+            //pDeskBuffer[(i * ScreenWidth + j) * 4]     = 0xff;
+            //pDeskBuffer[(i * ScreenWidth + j) * 4 + 1] = 0xff;
+            //pDeskBuffer[(i * ScreenWidth + j) * 4 + 2] = 0xff;
+        }
     }
+        
+    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: COMPUTER BMP\n", __LINE__);
+    
+    //the following three for loop is to draw system icon on desk
+    /*
+    for (UINT8 i = 0; i < SYSTEM_ICON_MAX; i++)
+    {
+        for (int j = 0; j < SYSTEM_ICON_HEIGHT; j++)
+        {
+            for (int k = 0; k < SYSTEM_ICON_WIDTH; k++)
+            {
+                pDeskBuffer[(j * ScreenWidth + 400 * i + k) * 4 ]     = pSystemIconBuffer[i][0x36 + ((SYSTEM_ICON_HEIGHT - j) * SYSTEM_ICON_WIDTH + k) * 3 ];
+                pDeskBuffer[(j * ScreenWidth + 400 * i + k) * 4 + 1 ] = pSystemIconBuffer[i][0x36 + ((SYSTEM_ICON_HEIGHT - j) * SYSTEM_ICON_WIDTH + k) * 3 + 1 ];
+                pDeskBuffer[(j * ScreenWidth + 400 * i + k) * 4 + 2 ] = pSystemIconBuffer[i][0x36 + ((SYSTEM_ICON_HEIGHT - j) * SYSTEM_ICON_WIDTH + k) * 3 + 2 ];
+            }
+        }
+    }       
+    */
+    UINT16 HeightNew = SYSTEM_ICON_HEIGHT / 4;
+    UINT16 WidthNew = SYSTEM_ICON_WIDTH / 4;
+    //UINT8 *pSource = pSystemIconBuffer[0][0x36];
+
+    //Skip bmp header.
+    for (UINT32 i = 0; i < 384000; i++)
+        pSystemIconTempBuffer2[i] = pSystemIconBuffer[SYSTEM_ICON_MYCOMPUTER][0x36 + i];
+
+    L1_GRAPHICS_ZoomImage(pSystemIconMyComputerBuffer, WidthNew, HeightNew, pSystemIconTempBuffer2, SYSTEM_ICON_WIDTH, SYSTEM_ICON_HEIGHT);
+    
+    int x1, y1;
+    x1 = 20;
+    y1 = 20;
+    L3_GRAPHICS_ItemPrint(pDeskBuffer, pSystemIconMyComputerBuffer, ScreenWidth, ScreenHeight, WidthNew, HeightNew, x1, y1, "", 1, GRAPHICS_LAYER_DESK);
 
     
+    y1 += HeightNew;
+    Color.Blue  = 0xff;
+    Color.Red   = 0xff;
+    Color.Green = 0xff;
+    // wo de dian nao
+    L2_GRAPHICS_ChineseCharDraw(pDeskBuffer, x1, y1, (46 - 1) * 94 + 50 - 1, Color, ScreenWidth);
+    x1 += 16;
+    
+    L2_GRAPHICS_ChineseCharDraw(pDeskBuffer, x1, y1, (21 - 1) * 94 + 36 - 1, Color, ScreenWidth);
+    x1 += 16;
+    
+    L2_GRAPHICS_ChineseCharDraw(pDeskBuffer, x1, y1, (21 - 1) * 94 + 71 - 1, Color, ScreenWidth);
+    x1 += 16;
+    
+    L2_GRAPHICS_ChineseCharDraw(pDeskBuffer, x1, y1, (36 - 1) * 94 + 52 - 1, Color, ScreenWidth);
+
+    y1 += 16;
+    y1 += 16;
+
+    /*
+    for (int j = 0; j < HeightNew; j++)
+    {
+        for (int k = 0; k < WidthNew; k++)
+        {
+            pDeskBuffer[((20 + j) * ScreenWidth + 20 + k) * 4 ]     = pSystemIconMyComputerBuffer[((HeightNew - j) * WidthNew + k) * 3 ];
+            pDeskBuffer[((20 + j) * ScreenWidth + 20 + k) * 4 + 1 ] = pSystemIconMyComputerBuffer[((HeightNew - j) * WidthNew + k) * 3 + 1 ];
+            pDeskBuffer[((20 + j) * ScreenWidth + 20 + k) * 4 + 2 ] = pSystemIconMyComputerBuffer[((HeightNew - j) * WidthNew + k) * 3 + 2 ];
+        }
+    }
+    */
+
+
+    //Skip bmp header.
+    for (UINT32 i = 0; i < 384000; i++)
+        pSystemIconTempBuffer2[i] = pSystemIconBuffer[SYSTEM_ICON_SETTING][0x36 + i];
+
+    L1_GRAPHICS_ZoomImage(pSystemIconMySettingBuffer, WidthNew, HeightNew, pSystemIconTempBuffer2, SYSTEM_ICON_WIDTH, SYSTEM_ICON_HEIGHT);
+    
+    x1 = 20;
+    L3_GRAPHICS_ItemPrint(pDeskBuffer, pSystemIconMySettingBuffer, ScreenWidth, ScreenHeight, WidthNew, HeightNew, x1, y1, "", 1, GRAPHICS_LAYER_DESK);
+
+    
+    y1 += HeightNew;
+    // wo de dian nao
+    L2_GRAPHICS_ChineseCharDraw(pDeskBuffer, x1, y1, (46 - 1) * 94 + 50 - 1, Color, ScreenWidth);
+    x1 += 16;
+    
+    L2_GRAPHICS_ChineseCharDraw(pDeskBuffer, x1, y1, (21 - 1) * 94 + 36 - 1, Color, ScreenWidth);
+    x1 += 16;
+    
+    L2_GRAPHICS_ChineseCharDraw(pDeskBuffer, x1, y1, (21 - 1) * 94 + 71 - 1, Color, ScreenWidth);
+    x1 += 16;
+    
+    L2_GRAPHICS_ChineseCharDraw(pDeskBuffer, x1, y1, (36 - 1) * 94 + 52 - 1, Color, ScreenWidth);
+
+    y1 += 16;
+    y1 += 16;
+
+    
+    /*
+    for (int j = 0; j < HeightNew; j++)
+    {
+        for (int k = 0; k < WidthNew; k++)
+        {
+            pDeskBuffer[((120 + j) * ScreenWidth + 20 + k) * 4 ]     = pSystemIconMySettingBuffer[((HeightNew - j) * WidthNew + k) * 3 ];
+            pDeskBuffer[((120 + j) * ScreenWidth + 20 + k) * 4 + 1 ] = pSystemIconMySettingBuffer[((HeightNew - j) * WidthNew + k) * 3 + 1 ];
+            pDeskBuffer[((120 + j) * ScreenWidth + 20 + k) * 4 + 2 ] = pSystemIconMySettingBuffer[((HeightNew - j) * WidthNew + k) * 3 + 2 ];
+        }
+    }*/
+
+    //Skip bmp header.
+    for (UINT32 i = 0; i < 384000; i++)
+        pSystemIconTempBuffer2[i] = pSystemIconBuffer[SYSTEM_ICON_RECYCLE][0x36 + i];
+
+    L1_GRAPHICS_ZoomImage(pSystemIconRecycleBuffer, WidthNew, HeightNew, pSystemIconTempBuffer2, SYSTEM_ICON_WIDTH, SYSTEM_ICON_HEIGHT);
+    /*
+    for (int j = 0; j < HeightNew; j++)
+    {
+        for (int k = 0; k < WidthNew; k++)
+        {
+            pDeskBuffer[((220 + j) * ScreenWidth + 20 + k) * 4 ]     = pSystemIconRecycleBuffer[((HeightNew - j) * WidthNew + k) * 3 ];
+            pDeskBuffer[((220 + j) * ScreenWidth + 20 + k) * 4 + 1 ] = pSystemIconRecycleBuffer[((HeightNew - j) * WidthNew + k) * 3 + 1 ];
+            pDeskBuffer[((220 + j) * ScreenWidth + 20 + k) * 4 + 2 ] = pSystemIconRecycleBuffer[((HeightNew - j) * WidthNew + k) * 3 + 2 ];
+        }
+    }
+    */
+        
+    x1 = 20;
+
+    L3_GRAPHICS_ItemPrint(pDeskBuffer, pSystemIconRecycleBuffer, ScreenWidth, ScreenHeight, WidthNew, HeightNew, x1, y1, "", 1, GRAPHICS_LAYER_DESK);
+
+    
+    y1 += HeightNew;
+    // wo de dian nao
+    L2_GRAPHICS_ChineseCharDraw(pDeskBuffer, x1, y1, (46 - 1) * 94 + 50 - 1, Color, ScreenWidth);
+    x1 += 16;
+    
+    L2_GRAPHICS_ChineseCharDraw(pDeskBuffer, x1, y1, (21 - 1) * 94 + 36 - 1, Color, ScreenWidth);
+    x1 += 16;
+    
+    L2_GRAPHICS_ChineseCharDraw(pDeskBuffer, x1, y1, (21 - 1) * 94 + 71 - 1, Color, ScreenWidth);
+    x1 += 16;
+    
+    L2_GRAPHICS_ChineseCharDraw(pDeskBuffer, x1, y1, (36 - 1) * 94 + 52 - 1, Color, ScreenWidth);
+
+    y1 += 16;
+    y1 += 16;
+
+    
+    // line
+    Color.Red   = 0xC6;
+    Color.Green = 0xC6;
+    Color.Blue  = 0xC6;
+    L1_MEMORY_RectangleFill(pDeskBuffer, 0,     y - 28, x -  1, y - 28, 1, Color); // area top
+
+    // line
+    Color.Red   = 0xFF;
+    Color.Green = 0xFF;
+    Color.Blue  = 0xFF;
+    L1_MEMORY_RectangleFill(pDeskBuffer, 0,     y - 27, x -  1, y - 27, 1, Color); // line top
+
+    // rectangle
+    Color.Red   = 0xC6;
+    Color.Green = 0xC6;
+    Color.Blue  = 0xC6;
+    L1_MEMORY_RectangleFill(pDeskBuffer, 0,     y - 26, x -  1, y -  1, 1, Color); // area task bar
+
+    // Menu Button
+    L2_GRAPHICS_ButtonDraw();
+
+    L2_GRAPHICS_ButtonDraw2(16 * 6, ScreenHeight - 22, 16 * 4, 16);
+
+    L2_GRAPHICS_ButtonDraw2(16 * 11, ScreenHeight - 22, 16 * 4, 16);
+
+    L2_GRAPHICS_ButtonDraw2(16 * 16, ScreenHeight - 22, 16 * 4, 16);
+
+    Color.Red   = 0x84;
+    Color.Green = 0x84;
+    Color.Blue  = 0x84;
+    L1_MEMORY_RectangleFill(pDeskBuffer, DISPLAY_DESK_DATE_TIME_X, y - 24, x -  4, y - 24, 1, Color); // line
+    //L1_MEMORY_RectangleFill(pDeskBuffer, DISPLAY_DESK_DATE_TIME_X, y - 23, x - 47, y -  4, 1, Color); // area
+    
+    Color.Red   = 0xFF;
+    Color.Green = 0xFF;
+    Color.Blue  = 0xFF;
+    L1_MEMORY_RectangleFill(pDeskBuffer, DISPLAY_DESK_DATE_TIME_X,    y - 3, x - 4,     y - 3, 1, Color); // line
+    L1_MEMORY_RectangleFill(pDeskBuffer, x - 3,     y - 24, x - 3,     y - 3, 1, Color); //line
+
+    //Black
+    Color.Red   = 0x00;
+    Color.Green = 0x00;
+    Color.Blue   = 0x00;
+
+    /*
+    for (UINT16 i = 1; i < 10; i++)
+    {
+        for (UINT16 j = 1; j < 22; j++)
+        {
+            L2_GRAPHICS_ChineseCharDraw(pDeskBuffer,  (16 + 2) * j, i * (16 + 2) + 322, (i - 1) * 94 + j - 1, Color, ScreenWidth);
+        }
+    }*/
+
+
+    for (int j = 0; j < 150; j++)
+    {
+        //L2_DEBUG_Print1(DISK_READ_BUFFER_X + (j % 16) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 16), "%02X ", sChineseChar[j] & 0xff);
+    }
+
+    // menu chinese
+    L2_GRAPHICS_ChineseCharDraw(pDeskBuffer,  16, ScreenHeight - 21,     (18 - 1) * 94 + 43 - 1, Color, ScreenWidth);
+    L2_GRAPHICS_ChineseCharDraw(pDeskBuffer,  16 * 2, ScreenHeight - 21, (21 - 1) * 94 + 05 - 1, Color, ScreenWidth);
 }
 
