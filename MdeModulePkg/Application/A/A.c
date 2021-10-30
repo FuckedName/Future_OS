@@ -357,31 +357,6 @@ void L1_MEMORY_RectangleFill(UINT8 *pBuffer,
 
 }
 
-void L1_MEMORY_CopyColor1(UINT8 *pBuffer, EFI_GRAPHICS_OUTPUT_BLT_PIXEL color, UINT16 x0, UINT16 y0, UINT16 AreaWidth)
-{
-    pBuffer[y0 * AreaWidth * 4 + x0 * 4]     = color.Blue;
-    pBuffer[y0 * AreaWidth * 4 + x0 * 4 + 1] = color.Green;
-    pBuffer[y0 * AreaWidth * 4 + x0 * 4 + 2] = color.Red;
-    pBuffer[y0 * AreaWidth * 4 + x0 * 4 + 3] = color.Reserved;
-
-}
-
-void L1_MEMORY_CopyColor2(UINT8 *pBuffer, EFI_GRAPHICS_OUTPUT_BLT_PIXEL color, UINT16 x0, UINT16 y0)
-{
-    pBuffer[y0 * 8 * 4 + x0 * 4]     = color.Blue;
-    pBuffer[y0 * 8 * 4 + x0 * 4 + 1] = color.Green;
-    pBuffer[y0 * 8 * 4 + x0 * 4 + 2] = color.Red;
-    pBuffer[y0 * 8 * 4 + x0 * 4 + 3] = color.Reserved;
-}
-
-void L1_MEMORY_CopyColor3(UINT8 *pBuffer, EFI_GRAPHICS_OUTPUT_BLT_PIXEL color, UINT16 x0, UINT16 y0, UINT8 AreaWidth)
-{
-    pBuffer[y0 * AreaWidth * 4 + x0 * 4]     = color.Blue;
-    pBuffer[y0 * AreaWidth * 4 + x0 * 4 + 1] = color.Green;
-    pBuffer[y0 * AreaWidth * 4 + x0 * 4 + 2] = color.Red;
-    pBuffer[y0 * AreaWidth * 4 + x0 * 4 + 3] = color.Reserved;
-}
-
 EFI_STATUS L2_GRAPHICS_LineDraw(UINT8 *pBuffer,
         IN UINTN x0, UINTN y0, UINTN x1, UINTN y1, 
         IN UINTN BorderWidth,
@@ -784,20 +759,6 @@ VOID L2_PARTITION_FileContentPrint(UINT8 *Buffer)
     {
         L2_DEBUG_Print1(DISK_READ_BUFFER_X + (j % 16) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 16), "%02X ", Buffer[j] & 0xff);
     }
-}
-
-
-UINT16 GraphicsLayerIDCount = 0;
-VOID L2_MOUSE_Move()
-{   
-    //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: GraphicsLayerMouseMove\n",  __LINE__);
-    
-    // display graphics layer id mouse over, for mouse click event.
-    //L2_DEBUG_Print1(DISPLAY_X, DISPLAY_Y, "%d: Graphics Layer id: %d ", __LINE__, pDeskDisplayBuffer[(iMouseY * ScreenWidth + iMouseX) * 4 + 3]);
-    L2_DEBUG_Print1(0, ScreenHeight - 30 -  7 * 16, "%d: iMouseX: %d iMouseY: %d Graphics Layer id: %d GraphicsLayerIDCount: %u", __LINE__, iMouseX, iMouseY, pDeskDisplayBuffer[(iMouseY * ScreenWidth + iMouseX) * 4 + 3], GraphicsLayerIDCount++);
-    L2_MOUSE_MoveOver();
-    
-    L2_MOUSE_Click();
 }
 
 
