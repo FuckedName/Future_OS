@@ -18,3 +18,5 @@ EFI_STATUS L2_GRAPHICS_SystemSettingInit();
 
 EFI_STATUS L2_GRAPHICS_StartMenuInit();
 
+EFI_STATUS L2_GRAPHICS_SayGoodBye();
+

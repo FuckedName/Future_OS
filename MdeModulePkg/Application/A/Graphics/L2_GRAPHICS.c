@@ -319,3 +319,65 @@ EFI_STATUS L2_GRAPHICS_SystemSettingInit()
 
 }
 
+
+EFI_STATUS L2_GRAPHICS_SayGoodBye()
+{
+    for (int i = 0; i < ScreenHeight; i++)
+    {
+        for (int j = 0; j < ScreenWidth; j++)
+        {
+            // BMP 3bits, and desk buffer 4bits
+            pDeskBuffer[(i * ScreenWidth + j) * 4]     = 0xff;
+            pDeskBuffer[(i * ScreenWidth + j) * 4 + 1] = 0x00;
+            pDeskBuffer[(i * ScreenWidth + j) * 4 + 2] = 0x00;
+        }
+    }
+    
+    // 再    5257    见   2891    ，   0312    欢   2722    迎   5113
+    // 下    4734    次   2046    回   2756    来   3220
+    // menu chinese
+    UINT16 x = ScreenWidth / 2;
+    UINT16 y = ScreenHeight / 2;
+    
+    EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
+    Color.Red   = 0xff;
+    Color.Green = 0xff;
+    Color.Blue  = 0xff;
+    
+    L2_GRAPHICS_ChineseCharDraw(pDeskBuffer,  x, y, (52 - 1) * 94 + 57 - 1, Color, ScreenWidth);
+    x += 16;
+    
+    L2_GRAPHICS_ChineseCharDraw(pDeskBuffer,  x, y, (28 - 1) * 94 + 91 - 1, Color, ScreenWidth);
+    x += 16;
+
+    L2_GRAPHICS_ChineseCharDraw(pDeskBuffer,  x, y, (3 - 1) * 94 + 12 - 1, Color, ScreenWidth);
+    x += 16;
+
+    L2_GRAPHICS_ChineseCharDraw(pDeskBuffer,  x, y, (27 - 1) * 94 + 22 - 1, Color, ScreenWidth);
+    x += 16;
+
+    L2_GRAPHICS_ChineseCharDraw(pDeskBuffer,  x, y, (51 - 1) * 94 + 13 - 1, Color, ScreenWidth);
+    x += 16;
+
+    L2_GRAPHICS_ChineseCharDraw(pDeskBuffer,  x, y, (47 - 1) * 94 + 34 - 1, Color, ScreenWidth);
+    x += 16;
+
+    L2_GRAPHICS_ChineseCharDraw(pDeskBuffer,  x, y, (20 - 1) * 94 + 46 - 1, Color, ScreenWidth);
+    x += 16;
+
+    L2_GRAPHICS_ChineseCharDraw(pDeskBuffer,  x, y, (27 - 1) * 94 + 56 - 1, Color, ScreenWidth);
+    x += 16;
+
+    L2_GRAPHICS_ChineseCharDraw(pDeskBuffer,  x, y, (32 - 1) * 94 + 20 - 1, Color, ScreenWidth);
+    x += 16;
+
+    GraphicsOutput->Blt(
+                GraphicsOutput, 
+                (EFI_GRAPHICS_OUTPUT_BLT_PIXEL *) pDeskBuffer,
+                EfiBltBufferToVideo,
+                0, 0, 
+                0, 0, 
+                ScreenWidth, ScreenHeight, 0);   
+
+}
+
