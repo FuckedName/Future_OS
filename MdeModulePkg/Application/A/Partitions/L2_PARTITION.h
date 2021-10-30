@@ -15,3 +15,5 @@ typedef struct
 	UINT16 LatestModifiedTime;
 }COMMON_STORAGE_ITEM;
 
+EFI_STATUS L2_FILE_PartitionTypeAnalysis(UINT16 DeviceID);
+

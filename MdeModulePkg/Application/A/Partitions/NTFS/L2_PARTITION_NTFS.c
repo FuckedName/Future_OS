@@ -294,3 +294,16 @@ EFI_STATUS  L2_FILE_NTFS_DollarRootA0DatarunAnalysis(UINT8 *p)
 
 }
 
+
+EFI_STATUS L2_FILE_NTFS_FirstSelectorAnalysis(UINT8 *p, DollarBootSwitched *pNTFSBootSwitched)
+{
+    DOLLAR_BOOT *pDollarBoot;
+    
+    pDollarBoot = (DOLLAR_BOOT *)AllocateZeroPool(DISK_BUFFER_SIZE);
+    memcpy(pDollarBoot, p, DISK_BUFFER_SIZE);
+  
+    L1_FILE_NTFS_DollerRootTransfer(pDollarBoot, pNTFSBootSwitched);
+
+    FreePool(pDollarBoot);
+}
+
