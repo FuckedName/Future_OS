@@ -3,6 +3,8 @@
 #include <Library/BaseLib.h>
 #include <Protocol/SimplePointer.h>
 #include <Protocol/GraphicsOutput.h>
+			
+#include <Graphics/L2_GRAPHICS.h>
 
 #include <Graphics/L1_GRAPHICS.h>
 
@@ -54,8 +56,16 @@ typedef struct
     UINT8 FileLength[4];
 }FAT32_ROOTPATH_SHORT_FILE_ITEM;
 
+extern FAT32_ROOTPATH_SHORT_FILE_ITEM pItems[32];
+extern INT8 SystemQuitFlag;
+extern UINT16 FolderItemValidIndexArray[10];
+extern START_MENU_STATE 	StartMenuNextState;
+
 
 #define DISK_BUFFER_SIZE (512)
+
+#define SYSTEM_ICON_WIDTH 400
+#define SYSTEM_ICON_HEIGHT 320
 
 
 typedef struct 
@@ -143,6 +153,9 @@ extern UINT32 PreviousBlockNumber;
 extern  UINT32 FileLength;                           
 extern  UINT8 *pReadFileDestBuffer;                          
 extern UINT32 PreviousBlockNumber;   
+extern UINT16 PartitionItemID;
+extern UINT16 FolderItemID;
+
 
  // init -> partition analysised -> root path analysised -> read fat table -> start read file -> reading a file -> read finished
  typedef enum 
@@ -153,6 +166,18 @@ extern UINT32 PreviousBlockNumber;
 	 GET_FAT_TABLE_STATE,
 	 READ_FILE_STATE,
  }STATE;
+
+
+typedef enum 
+{
+    START_MENU_BUTTON_MY_COMPUTER = 0,
+    START_MENU_BUTTON_SYSTEM_SETTING,
+    START_MENU_BUTTON_MEMORY_INFORMATION,
+    START_MENU_BUTTON_SYSTEM_LOG,
+    START_MENU_BUTTON_SYSTEM_QUIT,
+    START_MENU_BUTTON_MAX
+}START_MENU_BUTTON_SEQUENCE;
+
           
 typedef enum 
 {
@@ -169,6 +194,7 @@ typedef struct
     STATE          NextState;
     EFI_STATUS    (*pFunc)(); 
 }STATE_TRANS;
+
 
 	                      
 extern UINT8 ReadFileName[20];                                
