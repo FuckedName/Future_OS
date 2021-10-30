@@ -65,23 +65,9 @@ VOID L2_STRING_Maker2 (UINT16 x, UINT16 y, WINDOW_LAYER_ITEM layer,
   IN  VA_LIST       VaList
   )
 {
-    EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
-    UINT32 i = 0;
-    
-    for (i = 0; i < 0x100; i++)
-        AsciiBuffer[i] = 0;
-        
-    Color.Blue = 0xFF;
-    Color.Red = 0xFF;
-    Color.Green = 0xFF;
-    Color.Reserved = layer.LayerID;
 
     //ASSERT (Format != NULL);
 
-    AsciiVSPrint (AsciiBuffer, sizeof (AsciiBuffer), Format, VaList);
-            
-    for (i = 0; i < sizeof(AsciiBuffer) /sizeof(CHAR8); i++)
-        L2_GRAPHICS_AsciiCharDraw2(layer, x + i * 8, y, AsciiBuffer[i], Color);
-
+    AsciiVSPrint (AsciiBuffer, sizeof (AsciiBuffer), Format, VaList);    
 }
 
