@@ -1852,3 +1852,59 @@ EFI_STATUS L2_GRAPHICS_AsciiCharDraw2(WINDOW_LAYER_ITEM layer,
     return EFI_SUCCESS;
 }
 
+// iMouseX: left top
+// iMouseY: left top
+VOID L2_GRAPHICS_RightClickMenu(UINT16 iMouseX, UINT16 iMouseY)
+{
+	INT16 i;	
+	UINT16 width = 100;
+	UINT16 height = 300;
+	EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
+		 
+	for (i = 0; i < width * height; i++)
+	{
+		pMouseClickBuffer[i * 4] = 160;
+		pMouseClickBuffer[i * 4 + 1] = 160;
+		pMouseClickBuffer[i * 4 + 2] = 160;
+	}
+
+	Color.Blue = 0xFF;
+	Color.Red  = 0xFF;
+	Color.Green= 0xFF;
+	
+	//DrawChineseCharUseBuffer(pBuffer, 10, 10, sChinese[0], 5, Color, width);
+	/*
+	GraphicsOutput->Blt(GraphicsOutput, 
+						(EFI_GRAPHICS_OUTPUT_BLT_PIXEL *) pMouseClickBuffer,
+						EfiBltBufferToVideo,
+						0, 0, 
+						iMouseX, iMouseY, 
+						width, height, 0);	
+   */
+	//FreePool(pBuffer);
+	return ;
+
+}
+
+
+
+VOID L2_MOUSE_MoveOver()
+{    
+	//L3_PARTITION_RootPathAccess();
+	
+    if (MouseClickFlag == 1)
+    {
+        UINT16 layer = pDeskDisplayBuffer[(iMouseY * ScreenWidth + iMouseX) * 4 + 3];
+        if (0 != layer)
+        {
+            WindowLayers.item[layer].StartX += x_move * 3;
+            WindowLayers.item[layer].StartY += y_move * 3;
+            L1_GRAPHICS_UpdateWindowLayer(layer);
+        }
+    }
+    
+    x_move = 0;
+    y_move = 0;
+
+}
+
