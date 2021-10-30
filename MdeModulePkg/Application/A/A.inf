@@ -29,10 +29,16 @@
   	Graphics/L3_GRAPHICS.h
   	Devices/Mouse/L1_DEVICE_Mouse.h
   	Devices/Mouse/L1_DEVICE_Mouse.c
+  	Devices/Keyboard/L1_DEVICE_Keyboard.h
+  	Devices/Keyboard/L1_DEVICE_Keyboard.c
+  	Devices/Keyboard/L2_DEVICE_Keyboard.h
+  	Devices/Keyboard/L2_DEVICE_Keyboard.c
   	Devices/Store/L2_DEVICE_Store.h
   	Devices/Store/L2_DEVICE_Store.c
   	Memory/L1_MEMORY.h
   	Memory/L1_MEMORY.c
+  	Memory/L2_MEMORY.h
+  	Memory/L2_MEMORY.c
   	Global/Global.h
   	Partitions/L1_PARTITION.c
   	Partitions/L1_PARTITION.h
