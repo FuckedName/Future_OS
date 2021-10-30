@@ -1,6 +1,26 @@
 #include <L2_PARTITION_FAT32.h>
 #include <string.h>
 
+//http://quwei.911cha.com/
+VOID L2_FILE_Transfer(MasterBootRecord *pSource, MasterBootRecordSwitched *pDest)
+{
+    pDest->ReservedSelector = pSource->ReservedSelector[0] + pSource->ReservedSelector[1] * 16 * 16;
+    pDest->SectorsPerFat    = (UINT16)pSource->SectorsPerFat[0] + (UINT16)(pSource->SectorsPerFat[1]) * 16 * 16 + pSource->SectorsPerFat[2] * 16 * 16 * 16 * 16 + pSource->SectorsPerFat[3] * 16 * 16 * 16 * 16 * 16 * 16;
+    pDest->BootPathStartCluster = (UINT16)pSource->BootPathStartCluster[0] + pSource->BootPathStartCluster[1] * 16 * 16 + pSource->BootPathStartCluster[2] * 16 * 16 * 16 * 16, pSource->BootPathStartCluster[3] * 16 * 16 * 16 * 16 * 16 * 16;
+    pDest->NumFATS      = pSource->NumFATS[0];
+    pDest->SectorOfCluster = pSource->SectorOfCluster[0];
+
+    //Todo: the other parameters can compute like above too
+    //Current only get parameters we need to use
+    
+    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "ReservedSelector:%d SectorsPerFat:%d BootPathStartCluster: %d NumFATS:%d SectorOfCluster:%d", 
+                                                pDest->ReservedSelector,
+                                                pDest->SectorsPerFat,
+                                                pDest->BootPathStartCluster,
+                                                pDest->NumFATS,
+                                                pDest->SectorOfCluster);
+}
+
 
 EFI_STATUS L1_FILE_FAT32_DataSectorAnalysis(UINT8 *p, MasterBootRecordSwitched *pMBRSwitched)
 {
