@@ -4,6 +4,7 @@
 
 UINT8 *pSystemIconMyComputerBuffer; //after zoom in or zoom out
 
+float MemorySize = 0;
 MEMORY_ALLOCATED_CURRENT MemoryAllocatedCurrent;
 UINT64 FreeNumberOfPages = ALL_PAGE_COUNT;
 UINT64 SystemAllPagesAllocated = 0;

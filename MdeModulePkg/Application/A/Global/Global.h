@@ -59,6 +59,7 @@ typedef struct
 extern FAT32_ROOTPATH_SHORT_FILE_ITEM pItems[32];
 extern INT8 SystemQuitFlag;
 extern UINT16 FolderItemValidIndexArray[10];
+extern float MemorySize;
 
 //last Line
 #define DISPLAY_DESK_DATE_TIME_X (ScreenWidth - 22 * 8 - 16 * 3) 
