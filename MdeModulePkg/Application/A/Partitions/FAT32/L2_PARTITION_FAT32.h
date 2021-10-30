@@ -4,3 +4,5 @@
 
 EFI_STATUS L1_FILE_FAT32_DataSectorAnalysis(UINT8 *p, MasterBootRecordSwitched *pMBRSwitched);
 
+EFI_STATUS L2_FILE_FAT32_DataSectorHandle(UINT16 DeviceID);
+
