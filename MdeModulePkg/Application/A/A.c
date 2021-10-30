@@ -350,58 +350,6 @@ DEVICE_PARAMETER device[10] = {0};
     struct for NTFS file system
 */
 
-// NTFS first sector
-// first sector of partition
-typedef struct
-{
-    UINT8 JMP[3] ; // 0x00 3 跳转指令（跳过开头一段区域）
-    UINT8 OEM[8] ; // 0x03 8 OEM名称常见值是MSDOS5.0, NTFS.
-
-    // 0x0B
-    UINT8 BitsOfSector[2];        //  0x0200　　扇区大小，512B
-    UINT8 SectorOfCluster;            //  0x08　　  每簇扇区数，4KB
-    UINT8 ReservedSelector[2];            // 　　　　　　保留扇区
-    UINT8 NoUse01[5];            //
-    
-    // 0x15
-    UINT8 Description;            //  0xF8     
-    
-    // 磁盘介质 -- 硬盘
-    UINT8 NoUse02[2];            //
-    
-    // 0x18
-    UINT8 SectorPerTrack[2];     // 　0x003F 　每道扇区数 63
-    UINT8 Headers[2];           //　 0x00FF  磁头数
-    UINT8 SectorsHide[4];          // 　0x3F　　隐藏扇区
-    UINT8 NoUse03[8];           //
-    
-    // 0x28
-    UINT8 AllSectorCount[8];        // 卷总扇区数, 高位在前, 低位在后
-    
-    // 0x30
-    UINT8 MFT_StartCluster[8];      // MFT 起始簇
-    UINT8 MFT_MirrStartCluster[8];  // MTF 备份 MFTMirr 位置
-    
-    //0x40
-    UINT8 ClusterPerMFT[4];    // 每记录簇数 0xF6
-    UINT8 ClusterPerIndex[4];    // 每索引簇数
-    
-    //0x48
-    UINT8 SerialNumber[8];    // 卷序列号
-    UINT8 CheckSum[8];    // 校验和
-    UINT8 EndFlag[2];    // 0x1FE 2 扇区结束符（0x55 0xAA） 结束标志：MBR的结束标志与DBR，EBR的结束标志相同。
-}DOLLAR_BOOT;
-
-
-typedef struct 
-{
-    UINT16 BitsOfSector;
-    UINT16 SectorOfCluster; 
-    UINT64 AllSectorCount;
-    UINT64 MFT_StartCluster;
-    UINT64 MFT_MirrStartCluster;
-}DollarBootSwitched;
-
 MasterBootRecordSwitched MBRSwitched;
 DollarBootSwitched NTFSBootSwitched;
 
