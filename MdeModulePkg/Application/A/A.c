@@ -147,7 +147,6 @@ int keyboard_input_count = 0;
 
 #define KEYBOARD_BUFFER_LENGTH (30) 
 char pKeyboardInputBuffer[KEYBOARD_BUFFER_LENGTH] = {0};
-
             
 /*
 #define INFO_SELF(...)   \
@@ -160,8 +159,6 @@ char pKeyboardInputBuffer[KEYBOARD_BUFFER_LENGTH] = {0};
 //Line 0
 #define DISPLAY_DESK_HEIGHT_WEIGHT_X (date_time_count % 30) 
 #define DISPLAY_DESK_HEIGHT_WEIGHT_Y (ScreenHeight - 16 * 3)
-
-
 
 //Line 1
 #define DISPLAY_MOUSE_X (0) 
@@ -209,9 +206,6 @@ char pKeyboardInputBuffer[KEYBOARD_BUFFER_LENGTH] = {0};
 // For exception returned status 
 #define DISPLAY_ERROR_STATUS_X (ScreenWidth * 2 / 4) 
 #define DISPLAY_ERROR_STATUS_Y (16 * (StatusErrorCount++ % (ScreenHeight / 16 - 3)) )
-
-
-
 #define MOUSE_NO_CLICKED 0
 #define MOUSE_LEFT_CLICKED 1
 #define MOUSE_RIGHT_CLICKED 2
@@ -237,13 +231,9 @@ INT8 DisplaySystemSettingWindowFlag = 0;
 INT8 DisplayMemoryInformationWindowFlag = 0;
 INT8 DisplayStartMenuFlag = 0;
 
-
 EFI_GRAPHICS_OUTPUT_PROTOCOL       *GraphicsOutput = NULL;
 
 EFI_HANDLE *handle;
-
-
-
 
 UINT8 *pDeskBuffer = NULL; //only Desk layer include wallpaper and button : 1
 UINT8 *pMyComputerBuffer = NULL; // MyComputer layer: 2
@@ -318,26 +308,6 @@ UINT32 TimerSliceCount = 0;
 
 UINT16 display_sector_number = 0;
 
-
-/* chinese char */
-const UINT8 sChinese[][32] =
-{   
-    {0x04,0x80,0x0E,0xA0,0x78,0x90,0x08,0x90,0x08,0x84,0xFF,0xFE,0x08,0x80,0x08,0x90,
-     0x0A,0x90,0x0C,0x60,0x18,0x40,0x68,0xA0,0x09,0x20,0x0A,0x14,0x28,0x14,0x10,0x0C},
-    {0x00,0x02,0xBC,0x20,0x20,0x20,0xBF,0x24,0x24,0xA4,0x24,0x24,0xA4,0x44,0x44,0x84,
-     0x08,0x04,0x3F,0x00,0x11,0x0A,0x7F,0x04,0x04,0x3F,0x04,0x15,0x24,0x44,0x14,0x08},
-    {0x20,0x20,0xFC,0x24,0xFF,0x24,0xFC,0x20,0xFC,0x20,0x20,0xFE,0x20,0x20,0xFF,0x00,
-     0x00,0x00,0x7D,0x04,0x0B,0x08,0x11,0x3C,0x05,0x04,0x24,0x1B,0x08,0x16,0x21,0x40},
-    {0x00,0x80,0x80,0xFF,0x08,0x08,0x10,0x10,0x20,0x40,0x80,0x40,0x20,0x10,0x0C,0x03,
-     0x01,0x00,0x00,0x7F,0x08,0x08,0x04,0x04,0x02,0x01,0x00,0x01,0x02,0x04,0x18,0x60},
-    {0x10,0x10,0x90,0x90,0xFE,0x10,0x10,0x10,0x10,0xFF,0x10,0x10,0x10,0x10,0x10,0x10,
-     0x04,0x04,0x04,0x08,0x08,0x19,0x19,0x2A,0x48,0x0B,0x08,0x08,0x08,0x08,0x08,0x08}, 
-    {0x01,0x41,0x21,0x37,0x21,0x01,0x01,0xF7,0x11,0x11,0x12,0x12,0x14,0x28,0x47,0x00,
-     0x10,0x10,0x10,0xFC,0x10,0x10,0x10,0xFE,0x10,0x10,0x10,0x10,0x10,0x00,0xFE,0x00},
-    {0x10,0x08,0x08,0x08,0xC8,0x38,0x08,0x00,0x20,0x38,0x26,0x21,0x20,0x20,0x18,0x00,
-     0x00,0x00,0x00,0xFE,0x02,0x02,0x02,0x00,0x00,0x00,0x00,0x7F,0x40,0x40,0x40,0x00},
-};
-
 typedef enum
 {
     ALLOCATED_INFORMATION_DOMAIN_PHYSICAL_BLOCK_START = 0,
@@ -401,18 +371,6 @@ typedef struct
     UINT64 size;        /* size of memory segment */
     UINT32 type;        /* type of memory segment */
 }e820_entry_self;
-
-
-
-// To save folder or file after read from file system.
-typedef struct
-{
-	UINT8 Name[100]; 
-	UINT8 Type[100]; // 1 file; 2 folder; 
-	UINT16 Size;
-	UINT16 CreateTime;
-	UINT16 LatestModifiedTime;
-}COMMON_STORAGE_ITEM;
 
 
 //注意：FAT32分区的卷标存放在第2个簇前几个字符
@@ -560,209 +518,8 @@ typedef struct
     UINT64 MFT_MirrStartCluster;
 }DollarBootSwitched;
 
-
-// Master File Table
-typedef enum
-{
-	MFT_ATTRIBUTE_DOLLAR_STANDARD_INFORMATION 		= 0x10,
-	MFT_ATTRIBUTE_DOLLAR_ATTRIBUTE_LIST 			= 0x20,
-	MFT_ATTRIBUTE_DOLLAR_FILE_NAME					= 0x30,
-	MFT_ATTRIBUTE_DOLLAR_OBJECT_ID					= 0x40,
-	MFT_ATTRIBUTE_DOLLAR_SECURITY_DESCRIPTOR		= 0x50,
-	MFT_ATTRIBUTE_DOLLAR_VOLUME_NAME				= 0x60,
-	MFT_ATTRIBUTE_DOLLAR_VOLUME_INFORMATION			= 0x70,
-	MFT_ATTRIBUTE_DOLLAR_DATA						= 0x80,	
-	MFT_ATTRIBUTE_DOLLAR_INDEX_ROOT					= 0x90,
-	MFT_ATTRIBUTE_DOLLAR_INDEX_ALLOCATION			= 0xA0,
-	MFT_ATTRIBUTE_DOLLAR_BITMAP						= 0xB0,
-	MFT_ATTRIBUTE_DOLLAR_REPARSE_POINT				= 0xC0,
-	MFT_ATTRIBUTE_DOLLAR_EA_INFORMATION				= 0xD0,
-	MFT_ATTRIBUTE_DOLLAR_EA							= 0xE0,
-	MFT_ATTRIBUTE_DOLLAR_LOGGED_UTILITY_STREAM		= 0x100,
-	MFT_ATTRIBUTE_DOLLAR_MAX						
-}MFT_ATTRIBUTE_TYPE;
-
-
-// MFT记录了整个卷的所有文件 (包括MFT本身、数据文件、文件夹等等) 信息，包括空间占用，文件基本属性，文件位置索引，创建时
-// MFT 的第一项记录$MFT描述的是主分区表MFT本身，它的编号为0，MFT项的头部都是如下结构：
-typedef struct {
-     UINT8    mark[4];             // "FILE" 标志 
-     UINT8    UsnOffset[2];        // 更新序列号偏移 　　　　30 00
-     UINT8    usnSize[2];          // 更新序列数组大小+1 　 03 00
-     UINT8    LSN[8];              // 日志文件序列号(每次记录修改后改变)  58 8E 0F 34 00 00 00 00
-    // 0x10
-     UINT8    SN[2];               // 序列号 随主文件表记录重用次数而增加
-     UINT8    linkNum[2];          // 硬连接数 (多少目录指向该文件) 01 00
-     UINT8    firstAttr[2];        // 第一个属性的偏移　　38 00
-     UINT8    flags[2];            // 0已删除 1正常文件 2已删除目录 3目录正使用
-    // 0x18
-     UINT8    MftUseLen[4];        // 记录有效长度   　A8 01 00 00
-     UINT8    maxLen[4];            // 记录占用长度 　 00 04 00 00
-    // 0x20
-     UINT8    baseRecordNum[8];     // 索引基本记录, 如果是基本记录则为0
-     UINT8    nextAttrId[2];        // 下一属性Id　　07 00
-     UINT8    border[2];            //
-     UINT8    xpRecordNum[4];       // 用于xp, 记录号
-    // 0x30
-     UINT8    USN[8];                 // 更新序列号(2B) 和 更新序列数组
-}MFT_HEADER;
-
-
-
-/*
-	NTFS文件系统分区访问方法：
-		1、第一个扇区；数据结构DOLLAR_BOOT，获取：MFT_StartCluster的值；
-		2、通过MFT_StartCluster * 8 访问MFT表，有很多项，数据结构：MFT_ITEM，访问通过偏移10个扇区访问MFT_ITEM_DOLLAR_ROOT项；
-		3、每个MFT项,以FILE的ASSCI码开头（占用2个扇区，1024字节大小）包含MFT头部：数据结构：MFT_HEADER;
-			还包含还有很多个属性组成(多个枚举值：MFT_ATTRIBUTE_TYPE)，属性数据结构：NTFSAttribute
-			我们需要找到0x90属性和0xA0属性，并获取data runs
-			0X90索引根属性，存放着该目录下的子目录和子文件的索引项；
-			当某个目录下的内容比较多，从而导致0X90属性无法完全存放时，0XA0属性会指向一个索引区域，
-			这个索引区域包含了该目录下所有剩余内容的索引项。
-		4、
-		5、
-
-		
-*/
-
-
-/*
-    MFT 是由一条条 MFT 项(记录)所组成的，而且每项大小是固定的(一般为1KB = 2 * 512)，MFT保留了前16项用于特殊文件记录，称为元数据，
-    元数据在磁盘上是物理连续的，编号为0~15；如果$MFT的偏移为0x0C0000000, 那么下一项的偏移就是0x0C0000400，在下一项就是
-    0x0C0000800等等；
-*/
-
-//------------------  属性头通用结构 ----
-typedef struct  //所有偏移量均为相对于属性类型 Type 的偏移量
-{
-     UINT8 Type[4];           // 属性类型 0x10, 0x20, 0x30, 0x40,...,0xF0,0x100
-     UINT8 Length[4];         // 属性的长度
-     UINT8 NonResidentFiag;   // 是否是非常驻属性，l 为非常驻属性，0 为常驻属性 00
-     UINT8 NameLength;        // 属性名称长度，如果无属性名称，该值为 00
-     UINT8 ContentOffset[2];  // 属性内容的偏移量  18 00
-     UINT8 CompressedFiag[2]; // 该文件记录表示的文件数据是否被压缩过 00 00
-     UINT8 Identify[2];       // 识别标志  00 00
-    //--- 0ffset: 0x10 ---
-    //--------  常驻属性和非常驻属性的公共部分 ----
-    union CCommon
-    {
-    
-        //---- 如果该属性为 常驻 属性时使用该结构 ----
-        struct CResident
-        {
-             UINT8 StreamLength[4];        // 属性值的长度, 即属性具体内容的长度。"48 00 00 00"
-             UINT8 StreamOffset[2];        // 属性值起始偏移量  "18 00"
-             UINT8 IndexFiag[2];           // 属性是否被索引项所索引，索引项是一个索引(如目录)的基本组成  00 00
-        };
-        
-        //------- 如果该属性为 非常驻 属性时使用该结构 ----
-        struct CNonResident
-        {
-             UINT8 StartVCN[8];            // 起始的 VCN 值(虚拟簇号：在一个文件中的内部簇编号,0起）
-             UINT8 LastVCN[8];             // 最后的 VCN 值
-             UINT8 RunListOffset[2];       // 运行列表的偏移量
-             UINT8 CompressEngineIndex[2]; // 压缩引擎的索引值，指压缩时使用的具体引擎。
-             UINT8 Reserved[4];
-             UINT8 StreamAiiocSize[8];     // 为属性值分配的空间 ，单位为B，压缩文件分配值小于实际值
-             UINT8 StreamRealSize[8];      // 属性值实际使用的空间，单位为B
-             UINT8 StreamCompressedSize[8]; // 属性值经过压缩后的大小, 如未压缩, 其值为实际值
-        };
-    };
-}NTFSAttribute;
-
-typedef struct 
-{
-    UINT8 fileCreateTime[8];    // 文件创建时间
-    UINT8 fileChangeTime[8];    // 文件修改时间
-    UINT8 MFTChangeTime[8];     // MFT修改时间
-    UINT8 fileLatVisited[8];    // 文件最后访问时间
-    UINT8 tranAtrribute[4];     // 文件传统属性
-    UINT8 otherInfo[28];        // 版本，所有者，配额，安全等等信息(详细略)
-    UINT8 updataNum[8];         // 文件更新序列号
-}Value0x10;
-
-
 MasterBootRecordSwitched MBRSwitched;
 DollarBootSwitched NTFSBootSwitched;
-
-typedef struct 
-{
-    UINT8 Reserved[1];
-    UINT8 CreateTimeLow[1];
-    UINT8 CreateTimeHigh[2];
-    UINT8 CreateDate[2];
-    UINT8 LatestVisitedDate[2];
-    UINT8 StartClusterHigh2B[2];
-    UINT8 LatestModiedTime[2];
-    UINT8 LatestModiedDate[2];
-    UINT8 StartClusterLow2B[2]; //*
-    UINT8 FileLength[4];
-}FAT32_ROOTPATH_SHORT_FILE_ITEMSwitched;
-
-
-typedef struct 
-{
-    UINT8 FileName[8];
-    UINT8 ExtensionName[3];
-    UINT8 Attribute[1];  // if 0x0FH then Long path structor
-    UINT8 Reserved[1];
-    UINT8 CreateTimeLow[1];
-    UINT8 CreateTimeHigh[2];
-    UINT8 CreateDate[2];
-    UINT8 LatestVisitedDate[2];
-    UINT8 StartClusterHigh2B[2];
-    UINT8 LatestModiedTime[2];
-    UINT8 LatestModiedDate[2];
-    UINT8 StartClusterLow2B[2]; //*
-    UINT8 FileLength[4];
-}FAT32_ROOTPATH_LONG_FILE_ITEM;
-
-typedef struct 
-{
-    UINT16 ReservedSelector;
-    UINT16 SectorsPerFat;   
-    UINT16 BootPathStartCluster;
-    UINT16 NumFATS;
-}ROOT_PATH;
-
-/*目录项首字节含义*/
-typedef enum
-{
-    DirUnUsed            = 0x00,        /*本表项没有使用*/
-    DirCharE5            = 0x05,        /*首字符为0xe5*/
-    DirisSubDir          = 0x2e,        /*是一个子目录 .,..为父目录*/
-    DirFileisDeleted     = 0xe5        /*文件已删除*/
-}DirFirstChar;
-
-typedef struct {
-  UINTN               Signature;
-  EFI_FILE_PROTOCOL   Handle;
-  UINT64              Position;
-  BOOLEAN             ReadOnly;
-  LIST_ENTRY          Tasks;                  // List of all FAT_TASKs
-  LIST_ENTRY          Link;                   // Link to other IFiles
-} FAT_IFILE;
-
-typedef struct {
-  UINTN               Signature;
-  EFI_FILE_IO_TOKEN   *FileIoToken;
-  FAT_IFILE           *IFile;
-  LIST_ENTRY          Subtasks;               // List of all FAT_SUBTASKs
-  LIST_ENTRY          Link;                   // Link to other FAT_TASKs
-} FAT_TASK;
-
-typedef struct {
-  UINTN               Signature;
-  EFI_DISK_IO2_TOKEN  DiskIo2Token;
-  FAT_TASK            *Task;
-  BOOLEAN             Write;
-  UINT64              Offset;
-  VOID                *Buffer;
-  UINTN               BufferSize;
-  LIST_ENTRY          Link;
-} DISK_HANDLE_TASK;
-
-DISK_HANDLE_TASK  disk_handle_task;
 
 #pragma  pack(1)
 typedef struct     //这个结构体就是对上面那个图做一个封装。
@@ -818,14 +575,9 @@ typedef struct
     BUTTON *pButtons;
 } WINDOW;
 
-
-
 STATE   NextState = INIT_STATE;
 
-
 int READ_FILE_FSM_Event = READ_PATITION_EVENT;
-
-
 
 //refer from EFI_MEMORY_DESCRIPTOR
 typedef struct 
@@ -858,9 +610,6 @@ typedef struct {
     UINT64 AllocatedInformation[20][ALLOCATED_INFORMATION_DOMAIN_MAX];
     UINT16 CurrentAllocatedCount;
 }MEMORY_INFORMATION;
-
-
-
 
 VOID L1_GRAPHICS_UpdateWindowLayer(UINT16 layer)
 {	
@@ -933,26 +682,6 @@ void L1_MEMORY_CopyColor3(UINT8 *pBuffer, EFI_GRAPHICS_OUTPUT_BLT_PIXEL color, U
     pBuffer[y0 * AreaWidth * 4 + x0 * 4 + 3] = color.Reserved;
 }
 
-//refer from https://www.cnblogs.com/onepixel/articles/7674659.html
-VOID L1_SORT_Bubble(UINT8 *arr, UINT16 len)
-{   
-    for(UINT16 i = 0; i < len - 1; i++) 
-    {
-       for(UINT16 j = 0; j < len - 1 - i; j++) 
-       {
-            // 相邻元素两两对比
-           if(arr[j] > arr[j+1]) 
-           {    
-               // 元素交换
-               UINT16 temp = arr[j+1];       
-               arr[j+1] = arr[j];
-               arr[j] = temp;
-           }
-       }
-    }
-
-}
-
 EFI_STATUS L2_GRAPHICS_LineDraw(UINT8 *pBuffer,
         IN UINTN x0, UINTN y0, UINTN x1, UINTN y1, 
         IN UINTN BorderWidth,
@@ -978,8 +707,6 @@ EFI_STATUS L2_GRAPHICS_LineDraw(UINT8 *pBuffer,
     return EFI_SUCCESS;
 }
 
-
-
 // draw rectangle borders
 void L2_GRAPHICS_RectangleDraw(UINT8 *pBuffer,
         IN UINTN x0, UINTN y0, UINTN x1, UINTN y1, 
@@ -996,9 +723,7 @@ void L2_GRAPHICS_RectangleDraw(UINT8 *pBuffer,
     L2_GRAPHICS_LineDraw(pBuffer, x0, y0, x1, y0, 1, Color, AreaWidth);
     L2_GRAPHICS_LineDraw(pBuffer, x0, y1, x1, y1, 1, Color, AreaWidth);
     L2_GRAPHICS_LineDraw(pBuffer, x1, y0, x1, y1, 1, Color, AreaWidth);
-
 }
-
 
 VOID L2_GRAPHICS_Copy(UINT8 *pDest, UINT8 *pSource, 
                            UINT16 DestWidth, UINT16 DestHeight, 
@@ -1074,12 +799,8 @@ EFI_STATUS L2_GRAPHICS_ChineseHalfDraw2(UINT8 *pBuffer,UINT8 d,
     if ((d & 0x01) != 0) 
         L1_MEMORY_CopyColor1(pBuffer, Color, x0 + 7, y0, AreaWidth );
 
-
-
     return EFI_SUCCESS;
 }
-
-
 
 EFI_STATUS L2_GRAPHICS_ChineseCharDraw(UINT8 *pBuffer,
         IN UINTN x0, UINTN y0, UINT32 offset,
@@ -1111,32 +832,6 @@ EFI_STATUS L2_GRAPHICS_ChineseCharDraw(UINT8 *pBuffer,
     
     return EFI_SUCCESS;
 }
-
-CHAR8 *L2_STRING_Maker4 (CONST CHAR8 *Format, VA_LIST VaList)
-{
-    for (UINT32 i = 0; i < 0x100; i++)
-        AsciiBuffer[i] = 0;
-
-    // Note this api do not supported ("%f", float)
-    AsciiVSPrint (AsciiBuffer, sizeof (AsciiBuffer), Format, VaList);
-    return AsciiBuffer;
-}    
-
-/* Display a string */
-CHAR8 *L2_STRING_Make5 (CONST CHAR8  *Format, ...)
-{
-    for (UINT32 i = 0; i < 0x100; i++)
-        AsciiBuffer[i] = 0;
-        
-    VA_LIST         VaList;
-    VA_START (VaList, Format);
-    // Note this api do not supported ("%f", float)
-    AsciiVSPrint (AsciiBuffer, sizeof (AsciiBuffer), Format, VaList);
-    VA_END (VaList);    
-
-    return AsciiBuffer;
-}
-
 
 //delete blanks of file name and file extension name
 void L1_FILE_NameGet2(UINT8 deviceID, UINT8 *FileName)
@@ -1191,35 +886,6 @@ void L1_FILE_NameGet(UINT8 ItemID, UINT8 *FileName)
 	FileName[12] = 0;
  }
 
-void L1_FILE_NameGet3(UINT8 ItemID, UINT8 *FileName)
- {    
-    int count = 0;
-	    
-    while (pItems[ItemID].FileName[count] != 0x20)
-    {
-    	
-    	FileName[count] = pItems[ItemID].FileName[count];
-        count++;
-    }
-    
-    if (pItems[ItemID].ExtensionName[0] != 0x20)
-    {
-        FileName[count] = ' ';
-        count++;
-    }
-    int count2 = 0;
-    while (pItems[ItemID].ExtensionName[count2] != 0x20)
-    {
-        FileName[count] = pItems[ItemID].ExtensionName[count2];
-        count++;
-        count2++;
-    }
-	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: count: %d\n", __LINE__, count);
-		
-	FileName[count] = 0;
-
- }
-
 EFI_STATUS L1_FILE_RootPathAnalysis(UINT8 *p)
 {
     memcpy(&pItems, p, DISK_BUFFER_SIZE);
@@ -1271,28 +937,6 @@ EFI_STATUS L1_FILE_RootPathAnalysis(UINT8 *p)
 
 }
 
-EFI_STATUS L1_FILE_RootPathAnalysis1(UINT8 *p)
-{
-    memcpy(&pItems, p, DISK_BUFFER_SIZE);
-    UINT16 valid_count = 0;
-
-    //display filing file and subpath. 
-    for (int i = 0; i < 30; i++)
-        //if (pItems[i].FileName[0] != 0xE5 && (pItems[i].Attribute[0] == 0x20 
-        //    || pItems[i].Attribute[0] == 0x10))
-       {
-            L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d FileName:%2c%2c%2c%2c%2c%2c%2c%2c ExtensionName:%2c%2c%2c StartCluster:%02X%02X%02X%02X FileLength: %02X%02X%02X%02X Attribute: %02X    ",  __LINE__,
-                                            pItems[i].FileName[0], pItems[i].FileName[1], pItems[i].FileName[2], pItems[i].FileName[3], pItems[i].FileName[4], pItems[i].FileName[5], pItems[i].FileName[6], pItems[i].FileName[7],
-                                            pItems[i].ExtensionName[0], pItems[i].ExtensionName[1],pItems[i].ExtensionName[2],
-                                            pItems[i].StartClusterHigh2B[0], pItems[i].StartClusterHigh2B[1],
-                                            pItems[i].StartClusterLow2B[0], pItems[i].StartClusterLow2B[1],
-                                            pItems[i].FileLength[0], pItems[i].FileLength[1], pItems[i].FileLength[2], pItems[i].FileLength[3],
-                                            pItems[i].Attribute[0]);
-            
-            valid_count++;
-        }
-}
-
 // Analysis attribut A0 of $Root
 EFI_STATUS  L2_FILE_NTFS_DollarRootA0DatarunAnalysis(UINT8 *p)
 {
@@ -1342,8 +986,6 @@ EFI_STATUS  L2_FILE_NTFS_DollarRootA0DatarunAnalysis(UINT8 *p)
 
 MEMORY_INFORMATION MemoryInformation = {0};
 
-
-
 void L2_MEMORY_CountInitial()
 {
     MemoryAllocatedCurrent.AllocatedSliceCount = 0;
@@ -1361,8 +1003,6 @@ UINT8 *L2_MEMORY_MapperInitial()
         pMapper[temp] = 0; // no use
     }
 }
-
-
 
 // Find $Root file from all MFT(may be 15 file,)
 // pBuffer store all MFT
@@ -1656,14 +1296,6 @@ VOID L1_FILE_NTFS_DollerRootTransfer(DOLLAR_BOOT *pSource, DollarBootSwitched *p
     pDest->MFT_StartCluster = L1_NETWORK_8BytesToUINT64(pSource->MFT_StartCluster);
     pDest->MFT_MirrStartCluster = L1_NETWORK_8BytesToUINT64(pSource->MFT_MirrStartCluster);
     
-    /*
-    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d BitsOfSector:%ld SectorOfCluster:%d AllSectorCount: %llu MFT_StartCluster:%llu MFT_MirrStartCluster:%llu", __LINE__,
-                                                pDest->BitsOfSector,
-                                                pDest->SectorOfCluster,
-                                                pDest->AllSectorCount,
-                                                pDest->MFT_StartCluster,
-                                                pDest->MFT_MirrStartCluster);
-    */
 }
 
 
@@ -1673,67 +1305,10 @@ EFI_STATUS L2_FILE_NTFS_FirstSelectorAnalysis(UINT8 *p, DollarBootSwitched *pNTF
     
     pDollarBoot = (DOLLAR_BOOT *)AllocateZeroPool(DISK_BUFFER_SIZE);
     memcpy(pDollarBoot, p, DISK_BUFFER_SIZE);
-
-    // 大端字节序：低位字节在高地址，高位字节低地址上。这是人类读写数值的方法。
-    // 小端字节序：与上面相反。低位字节在低地址，高位字节在高地址。
-    /*
-    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d OEM:%c%c%c%c%c%c%c%c, BitsOfSector:%02X%02X SectorOfCluster:%02X ReservedSelector:%02X%02X Description: %X, size: %d", 
-                                                                      __LINE__,
-                                                                      pDollarBoot->OEM[0],
-                                                                      pDollarBoot->OEM[1],
-                                                                      pDollarBoot->OEM[2],
-                                                                      pDollarBoot->OEM[3],
-                                                                      pDollarBoot->OEM[4],
-                                                                      pDollarBoot->OEM[5],
-                                                                      pDollarBoot->OEM[6],
-                                                                      pDollarBoot->OEM[7],
-                                                                  pDollarBoot->BitsOfSector[0], 
-                                                                  pDollarBoot->BitsOfSector[1], 
-                                                                  pDollarBoot->SectorOfCluster, 
-                                                                  pDollarBoot->ReservedSelector[0],
-                                                                  pDollarBoot->ReservedSelector[1], 
-                                                                  pDollarBoot->Description,
-                                                                  sizeof(pDollarBoot->OEM) / sizeof(pDollarBoot->OEM[0]));
-                                                                  
-    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d AllSectorCount:%02X%02X%02X%02X%02X%02X%02X%02X, MFT_StartCluster:%02X%02X%02X%02X%02X%02X%02X%02X MFT_MirrStartCluster:%02X%02X%02X%02X%02X%02X%02X%02X ClusterPerMFT:%02X%02X%02X%02X ClusterPerIndex: %02X%02X%02X%02X", 
-                                                                      __LINE__,                                                                   
-                                                                  pDollarBoot->AllSectorCount[0], 
-                                                                  pDollarBoot->AllSectorCount[1], 
-                                                                  pDollarBoot->AllSectorCount[2], 
-                                                                  pDollarBoot->AllSectorCount[3], 
-                                                                  pDollarBoot->AllSectorCount[4], 
-                                                                  pDollarBoot->AllSectorCount[5], 
-                                                                  pDollarBoot->AllSectorCount[6], 
-                                                                  pDollarBoot->AllSectorCount[7], 
-                                                                  pDollarBoot->MFT_StartCluster[0],
-                                                                  pDollarBoot->MFT_StartCluster[1],
-                                                                  pDollarBoot->MFT_StartCluster[2],
-                                                                  pDollarBoot->MFT_StartCluster[3],
-                                                                  pDollarBoot->MFT_StartCluster[4],
-                                                                  pDollarBoot->MFT_StartCluster[5],
-                                                                  pDollarBoot->MFT_StartCluster[6],
-                                                                  pDollarBoot->MFT_StartCluster[7], 
-                                                                  pDollarBoot->MFT_MirrStartCluster[0],
-                                                                  pDollarBoot->MFT_MirrStartCluster[1],
-                                                                  pDollarBoot->MFT_MirrStartCluster[2],
-                                                                  pDollarBoot->MFT_MirrStartCluster[3],
-                                                                  pDollarBoot->MFT_MirrStartCluster[4],
-                                                                  pDollarBoot->MFT_MirrStartCluster[5],
-                                                                  pDollarBoot->MFT_MirrStartCluster[6],
-                                                                  pDollarBoot->MFT_MirrStartCluster[7], 
-                                                                  pDollarBoot->ClusterPerMFT[0],
-                                                                  pDollarBoot->ClusterPerMFT[1],
-                                                                  pDollarBoot->ClusterPerMFT[2],
-                                                                  pDollarBoot->ClusterPerMFT[3],
-                                                                  pDollarBoot->ClusterPerIndex[0], 
-                                                                  pDollarBoot->ClusterPerIndex[1], 
-                                                                  pDollarBoot->ClusterPerIndex[2], 
-                                                                  pDollarBoot->ClusterPerIndex[3]);
-    */
+  
     L1_FILE_NTFS_DollerRootTransfer(pDollarBoot, pNTFSBootSwitched);
 
     FreePool(pDollarBoot);
-
 }
 
 // all partitions analysis
@@ -1806,16 +1381,6 @@ L3_GRAPHICS_ItemPrint(UINT8 *pDestBuffer, UINT8 *pSourceBuffer, UINT16 pDestWidt
     //if (2 == StringType)
     //    L2_DEBUG_Print2(x, y + pDestHeight, pDestBuffer, "%a ", pNameString);
 }
-
-
-typedef enum 
-{
-    START_MENU_CLICKED = 0,
-    MY_COMPUTER_MENU_CLICKED,
-    SETTING_MENU_CLICKED
-}BUTTON_CLICKED_ID;
-
-
 
 VOID L3_GRAPHICS_StartMenuClicked()
 {
@@ -1909,44 +1474,6 @@ EFI_STATUS L2_GRAPHICS_ButtonDraw2(UINT16 StartX, UINT16 StartY, UINT16 Width, U
     L1_MEMORY_RectangleFill(pDeskBuffer, StartX + Width + 1, StartY + 1 , StartX + Width + 2, StartY + Height + 1, 1, Color); // line right
 }
 
-// bmp format
-UINT8 SystemIcon[SYSTEM_ICON_MAX][SYSTEM_ICON_WIDTH * SYSTEM_ICON_HEIGHT * 3 + 0x36];
-
-
-
-
-VOID L2_MOUSE_MENU_Clicked()
-{
-    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d L2_MOUSE_MENU_Clicked\n", __LINE__);
-    EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
-    Color.Red   = 0xff;
-    Color.Green = 0x00;
-    Color.Blue   = 0x00;
-    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: iMouseX: %d iMouseY: %d \n",  __LINE__, iMouseX, iMouseY);
-    L2_GRAPHICS_RectangleDraw(pMouseSelectedBuffer, 0,  0, 31, 15, 1,  Color, 32);
-    //MenuButtonClickResponse();
-    Color.Red   = 0xFF;
-    Color.Green = 0xFF;
-    Color.Blue  = 0xFF;
-    //L1_MEMORY_RectangleFill(pDeskBuffer, 3,     ScreenHeight - 21, 13,     ScreenHeight - 11, 1, Color);
-    L2_GRAPHICS_Copy(pDeskDisplayBuffer, pMouseSelectedBuffer, ScreenWidth, ScreenHeight, 32, 16, 3, ScreenHeight - 21);
-        
-    //L2_GRAPHICS_Copy(pDeskDisplayBuffer, pStartMenuBuffer, ScreenWidth, ScreenHeight, StartMenuWidth, StartMenuHeight, StartMenuPositionX, StartMenuPositionY);
-    //DisplayStartMenuFlag = 1;
-
-    if (FALSE == WindowLayers.item[GRAPHICS_LAYER_START_MENU].DisplayFlag)
-    {
-        WindowLayers.ActiveWindowCount++;
-        WindowLayers.item[GRAPHICS_LAYER_START_MENU].DisplayFlag = TRUE;
-        
-    }
-    L1_GRAPHICS_UpdateWindowLayer(GRAPHICS_LAYER_START_MENU);
-
-}
-
-
-
-
 VOID L2_PARTITION_FileContentPrint(UINT8 *Buffer)
 {	
 	for (int j = 0; j < 250; j++)
@@ -1977,52 +1504,6 @@ VOID L2_MOUSE_MoveOver()
 
 }
 
-VOID L2_MOUSE_MenuButtonClick()
-{    
-    EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
-    Color.Red = 0xff;
-	UINT16 MyComputerPositionX = WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].StartX;
-	UINT16 MyComputerPositionY = WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].StartY;
-    
-    for (int i = 0; i < 16; i++)
-    {
-        for (int j = 0; j < 32; j++)
-        {   
-            pMouseSelectedBuffer[(i * 32 + j) * 4]     = pDeskDisplayBuffer[((MyComputerPositionX + 50 + i) * ScreenWidth +  MyComputerPositionY  + i * (16 + 2) + 16 * 2 + j) * 4];
-            pMouseSelectedBuffer[(i * 32 + j) * 4 + 1] = pDeskDisplayBuffer[((MyComputerPositionX + 50 + i) * ScreenWidth +  MyComputerPositionY  + i * (16 + 2) + 16 * 2 + j) * 4 + 1];
-            pMouseSelectedBuffer[(i * 32 + j) * 4 + 2] = pDeskDisplayBuffer[((MyComputerPositionX + 50 + i) * ScreenWidth +  MyComputerPositionY  + i * (16 + 2) + 16 * 2 + j) * 4 + 2];            
-        }
-    }
-     //L1_MEMORY_RectangleFill(UINT8 * pBuffer,IN UINTN x0,UINTN y0,UINTN x1,UINTN y1,IN UINTN BorderWidth,IN EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color)
-    
-    //L1_MEMORY_RectangleFill(pMouseSelectedBuffer, 0,  0, 32, 16, 1,  Color);
-
-    // Draw a red rectangle when mouse move over left down (like menu button)
-    L2_GRAPHICS_RectangleDraw(pMouseSelectedBuffer, 0,  0, 31, 15, 1,  Color, 32);
-
-    //L2_DEBUG_Print1(DISPLAY_X, DISPLAY_Y, "%d: GraphicsLayerCompute\n", __LINE__);
-
-    if (MouseClickFlag == 1)
-    {
-        char *pClickMenuBuffer = (UINT8 *)AllocateZeroPool(16 * 16 * 4);
-        if (NULL != pClickMenuBuffer)
-        {
-            //DEBUG ((EFI_D_INFO, "ScreenInit AllocatePool pDeskDisplayBuffer NULL\n"));
-
-            for(int i = 0; i < 16; i++)
-                for(int j = 0; j < 16; j++)
-                {
-                    pClickMenuBuffer[(i * 16 + j) * 4] = 0x33;
-                    pClickMenuBuffer[(i * 16 + j) * 4 + 1] = 0x33;
-                    pClickMenuBuffer[(i * 16 + j) * 4 + 2] = 0x33;
-                }
-            L2_GRAPHICS_Copy(pDeskDisplayBuffer, pClickMenuBuffer, ScreenWidth, ScreenHeight, 16, 16, 0, ScreenHeight - 22 - 16);
-        }
-    }
-    
-    L2_GRAPHICS_Copy(pDeskDisplayBuffer, pMouseSelectedBuffer, ScreenWidth, ScreenHeight, 32, 16, 15, ScreenHeight - 22); 
-}
-
 UINT16 GraphicsLayerIDCount = 0;
 VOID L2_MOUSE_Move()
 {   
@@ -2036,20 +1517,7 @@ VOID L2_MOUSE_Move()
     L2_MOUSE_Click();
 }
 
-
-
 //http://quwei.911cha.com/
-
-VOID L2_NETWORK_Init()
-{}
-
-
-VOID L2_NETWORK_DriverSend()
-{}
-
-VOID L2_NETWORK_DriverReceive()
-{}
-
 VOID L2_FILE_Transfer(MasterBootRecord *pSource, MasterBootRecordSwitched *pDest)
 {
     pDest->ReservedSelector = pSource->ReservedSelector[0] + pSource->ReservedSelector[1] * 16 * 16;
@@ -2092,23 +1560,6 @@ UINT32 L2_FILE_GetNextBlockNumber()
 }
 
 //https://blog.csdn.net/goodwillyang/article/details/45559925
-
-
-
-
-VOID EFIAPI L2_TIMER_Slice0(
-    IN EFI_EVENT Event,
-    IN VOID           *Context
-    )
-{
-    //Print(L"%lu\n", *((UINT32 *)Context));
-    if (TimerSliceCount % 2 == 0)
-       gBS->SignalEvent (MultiTaskTriggerGroup0Event);
-    
-    TimerSliceCount++;
-    return;
-}
-
 
 VOID EFIAPI L2_TIMER_Slice(
     IN EFI_EVENT Event,
@@ -3080,58 +2531,7 @@ EFIAPI
 L2_SYSTEM_Start (IN EFI_EVENT Event, IN VOID *Context)
 {
 
-    //如果不加下面这几行，则是直接显示内存信息，看起来有点像雪花
-    /*
-    for (int j = 0; j < ScreenHeight; j++)
-    {
-        for (int i = 0; i < ScreenWidth; i++)
-        {
-            pDeskBuffer[(j * ScreenWidth + i) * 4]     = TimerSliceCount % 256;
-            pDeskBuffer[(j * ScreenWidth + i) * 4 + 1] = TimerSliceCount % 256;
-            pDeskBuffer[(j * ScreenWidth + i) * 4 + 2] = TimerSliceCount % 256;
-        }
-    }       
-    
-    GraphicsOutput->Blt(
-                GraphicsOutput, 
-                (EFI_GRAPHICS_OUTPUT_BLT_PIXEL *) pDeskBuffer,
-                EfiBltBufferToVideo,
-                0, 0, 
-                0, 0, 
-                ScreenWidth, ScreenHeight, 0);   
-    */
-
 }
-
-
-STATIC
-VOID
-EFIAPI
-L2_MAIN_Start (IN EFI_EVENT Event, IN VOID *Context)
-{
-
-    //如果不加下面这几行，则是直接显示内存信息，看起来有点像雪花
-    
-    for (int j = 0; j < ScreenHeight; j++)
-    {
-        for (int i = 0; i < ScreenWidth; i++)
-        {
-            pDeskBuffer[(j * ScreenWidth + i) * 4]     = TimerSliceCount % 256;
-            pDeskBuffer[(j * ScreenWidth + i) * 4 + 1] = TimerSliceCount % 256;
-            pDeskBuffer[(j * ScreenWidth + i) * 4 + 2] = TimerSliceCount % 256;
-        }
-    }       
-    /**/
-    GraphicsOutput->Blt(
-                GraphicsOutput, 
-                (EFI_GRAPHICS_OUTPUT_BLT_PIXEL *) pDeskBuffer,
-                EfiBltBufferToVideo,
-                0, 0, 
-                0, 0, 
-                ScreenWidth, ScreenHeight, 0);   
-
-}
-
 
 // for mouse move & click
 STATIC
@@ -3243,50 +2643,7 @@ UINT8 L1_TIMER_DayOfWeek(int y, int m, int d)
         y -= 1;
     }
     
-    return ( (d + 2 * m + 3 * (m + 1) / 5 + y + y / 4 - y / 100 + y / 400 + 1) % 7 + 7) % 7;
-    /*
-    if ( T == 0 )
-    {
-        printf( "Sunday\n" );
-        L1_MEMORY_Copy();
-    }
-    
-    if ( T == 1 )
-    {
-        printf( "Monday\n" );
-        L1_MEMORY_Copy();
-    }
-        
-    if ( T == 2 )
-    {
-        printf( "Tuesday\n" );
-        L1_MEMORY_Copy();
-    }
-        
-    if ( T == 3 )
-    {
-        printf( "Wednesday\n" );
-        L1_MEMORY_Copy();
-    }
-        
-    if ( T == 4 )
-    {
-        printf( "Thursday\n" );
-        L1_MEMORY_Copy();
-    }
-        
-    if ( T == 5 )
-    {
-        printf( "Friday\n" );
-        L1_MEMORY_Copy();
-    }
-        
-    if ( T == 6 )
-    {
-        printf( "Saturday\n" );
-        L1_MEMORY_Copy();
-    }*/
-        
+    return ( (d + 2 * m + 3 * (m + 1) / 5 + y + y / 4 - y / 100 + y / 400 + 1) % 7 + 7) % 7;        
 }
 
 UINT16 date_time_count_increase_flag = 0;
@@ -3372,31 +2729,6 @@ L2_TIMER_Print (
                         8 * 50, 16, 0);*/
 }
 
-EFI_STATUS L2_COMMON_SingleProcessInit ()
-{
-    UINT16 i;
-
-    // task group for mouse keyboard
-    EFI_GUID gMultiProcessGroup1Guid  = { 0x0579257E, 0x1843, 0x45FB, { 0x83, 0x9D, 0x6B, 0x79, 0x09, 0x38, 0x29, 0xA9 } };
-        
-    EFI_EVENT_NOTIFY       TaskProcessesGroup1[] = {L2_SYSTEM_Start, L2_MAIN_Start};
-
-    for (i = 0; i < sizeof(TaskProcessesGroup1) / sizeof(EFI_EVENT_NOTIFY); i++)
-    {
-        gBS->CreateEventEx(
-                          EVT_NOTIFY_SIGNAL,
-                          TPL_NOTIFY,
-                          TaskProcessesGroup1[i],
-                          NULL,
-                          &gMultiProcessGroup1Guid,
-                          &MultiTaskTriggerGroup0Event
-                          );
-    }    
-
-    return EFI_SUCCESS;
-}
-
-
 EFI_STATUS L2_COMMON_MultiProcessInit ()
 {
     UINT16 i;
@@ -3442,60 +2774,6 @@ EFI_STATUS L2_COMMON_MultiProcessInit ()
     return EFI_SUCCESS;
 }
 // https://blog.csdn.net/longsonssss/article/details/80221513
-
-
-EFI_STATUS L2_TIMER_IntervalInit0()
-{
-    EFI_STATUS  Status;
-    EFI_HANDLE  TimerOne    = NULL;
-    static const UINTN TimeInterval = 20000;
-    
-    UINT32 *TimerCount;
-
-    TimerCount = (UINT32 *)AllocateZeroPool(4);
-    if (NULL == TimerCount)
-    {
-        //DEBUG(( EFI_D_INFO, "%d, NULL == TimerCount \r\n", __LINE__));
-        return;
-    }
-
-    Status = gBS->CreateEvent(EVT_NOTIFY_SIGNAL | EVT_TIMER,
-                            TPL_CALLBACK,
-                            L2_TIMER_Slice0,
-                            (VOID *)TimerCount,
-                            &TimerOne);
-
-    if ( EFI_ERROR( Status ) )
-    {
-        //DEBUG(( EFI_D_INFO, "Create Event Error! \r\n" ));
-        return(1);
-    }
-
-    Status = gBS->SetTimer(TimerOne,
-                          TimerPeriodic,
-                          MultU64x32( TimeInterval, 1)); // will multi 100, ns
-
-    if ( EFI_ERROR( Status ) )
-    {
-        //DEBUG(( EFI_D_INFO, "Set Timer Error! \r\n" ));
-        return(2);
-    }
-
-    while (1)
-    {
-        *TimerCount = *TimerCount + 1;
-        //L2_DEBUG_Print1(DISPLAY_X, DISPLAY_Y, "%d: SystemTimeIntervalInit while\n", __LINE__);
-        //if (*TimerCount % 1000000 == 0)
-           //L2_DEBUG_Print1(0, 4 * 16, "%d: while (1) p:%x %lu \n", __LINE__, TimerCount, *TimerCount);
-    }
-    
-    gBS->SetTimer( TimerOne, TimerCancel, 0 );
-    gBS->CloseEvent( TimerOne );    
-
-    return EFI_SUCCESS;
-}
-
-
 
 EFI_STATUS L2_TIMER_IntervalInit()
 {
@@ -3589,26 +2867,6 @@ EFI_STATUS L2_TIMER_IntervalInit()
     }
     
     return EFI_SUCCESS;
-}
-
-
-
-
-
-typedef struct
-{
-    // Current only surpport 12 level path depth.
-    PATH_DETAIL PathStack[12];
-    UINT8 *pFATTable;
-    MasterBootRecordSwitched stMBRSwitched;
-}PARTITION_PATH_DETAIL;
-
-
-// Handle my computer window click event
-VOID L3_GRAPHICS_MyComputerWindowEvent(MOUSE_CLICK_EVENT Event)
-{   
-
-	
 }
 
 char *p1;   
