@@ -1547,56 +1547,6 @@ float L2_MEMORY_Initial()
     L2_MEMORY_MapInitial();
 }
 
-EFI_STATUS L3_WINDOW_Create(UINT8 *pBuffer, UINT8 *pParent, UINT16 Width, UINT16 Height, UINT16 LayerID, CHAR8 *pWindowTitle)
-{   
-    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: Width: %d \n", __LINE__, Width);
-    
-    UINT16 i, j;
-
-    if (NULL == pBuffer)
-    {
-        //DEBUG ((EFI_D_INFO, "NULL == pBuffer"));
-        return EFI_SUCCESS;
-    }   
-    
-    EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
-    
-    Color.Blue  = 0xff;
-    Color.Red   = 0xff;
-    Color.Green = 0xff;
-    Color.Reserved = LayerID;
-
-    L2_GRAPHICS_ChineseCharDraw(pBuffer, Width - 3 * 16 - 3, 6, (12 - 1) * 94 + 58 - 1, Color, Width);
-    L2_GRAPHICS_ChineseCharDraw(pBuffer, Width - 2 * 16 - 3, 6, (01 - 1) * 94 + 85 - 1, Color, Width);
-    L2_GRAPHICS_ChineseCharDraw(pBuffer, Width - 1 * 16 - 3, 6, (14 - 1) * 94 + 21 - 1, Color, Width);
-
-    // The Left of Window
-    for (i = 23; i < Height; i++)
-    {
-        for (j = 0; j < Width / 3; j++)
-        {
-            pBuffer[(i * Width + j) * 4]     = 235;
-            pBuffer[(i * Width + j) * 4 + 1] = 235;
-            pBuffer[(i * Width + j) * 4 + 2] = 235;
-            pBuffer[(i * Width + j) * 4 + 3] = LayerID;
-        }
-    }
-
-    // The right of Window
-    for (i = 23; i < Height; i++)
-    {
-        for (j = Width / 3 - 1; j < Width; j++)
-        {
-            pBuffer[(i * Width + j) * 4]     = 0xff;
-            pBuffer[(i * Width + j) * 4 + 1] = 0xff;
-            pBuffer[(i * Width + j) * 4 + 2] = 0xff;
-            pBuffer[(i * Width + j) * 4 + 3] = LayerID;
-        }
-    }
-
-    return EFI_SUCCESS;
-}
-
 UINT8 readflag = 0;
 
 
