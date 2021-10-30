@@ -1698,8 +1698,6 @@ void L2_GRAPHICS_CopyBufferFromWindowsToDesk()
         L2_GRAPHICS_Copy(pDeskDisplayBuffer, pMyComputerBuffer, ScreenWidth, ScreenHeight, MyComputerWidth, MyComputerHeight, MyComputerPositionX, MyComputerPositionY);
     */
 }
-
-
 							  
 VOID L2_STORE_PartitionItemsPrint(UINT16 Index)
 {

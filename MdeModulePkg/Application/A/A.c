@@ -1,130 +1,6 @@
 #define Note ""
 
-/** //by renqihong
-
-ToDo:
-1. Read File From Path; OK====> optimize point: when blocks get from FAT table are continuous, can read from disk once, it can reduce, disk io.
-2. Fix trigger event with mouse and keyboard; OK
-3. NetWork connect baidu.com; ==> driver not found
-4. File System Simple Management; ==> current can read and write, Sub directory read,NTFS almost ok.
-5. progcess; ==> current mouse move, keyboard input, read file they can similar to process, but the real process is very complex, for example: 
-    a.register push and pop, 
-    b.progress communicate, 
-    c.progress priority,
-    d.PCB
-    e.semaphoe
-    etc.
-6. My Computer window(disk partition)  
-    ==> finish partly
-    ==> read partitions root path items need to save to cache, for fastly get next time, and can reduce disk io...
-    ==> partition volumn name
-7. Setting window(select file, delete file, modify file) ==> 0%
-8. Memory Simple Management 
-    ==> can get memory information, but it looks like something wrong.
-    ==> get memory information successfully.
-9. Multi Windows, button click event. ==> 10%
-10. Application. ==>10%
-11. How to Automated Testing? ==>0%
-12. Graphics run slowly. ===> need to fix the bug.
-13. Desk wallpaper display successfully..
-14. Need to rule naming, about function name, variable name, struct name, and etc.
-    a.function name ruled
-    b.
-    c.
-    d.
-    e.
-
-
-current problems:
-    1. display NTFS file system root path items system will go die...
-    2. display FAT32 file system root path items almost ok, display format not very beautiful.
-    3. keyboard input not ok.
-
-常用网址
-1、区位码查询 http://quwei.911cha.com/
-2、C语言代码格式化 http://web.chacuo.net/formatc
-
-注意事项
-1、存放EFI目录的分区一定要是FAT32格式
-2、存放EFI分区大小扇区数一定要替换宏STORE_EFI_PATH_PARTITION_SECTOR_COUNT
-3、桌面图片文件和HZK16文件一定要存放在这个分区的根目录
-4、
-5、
-
-常见问题
-1、SecureCRT不能连接LINUX UBUNTU，PING不通，需要把LINUX 网络断开重连下
-2、
-**/
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <Library/BaseLib.h>
-
-#include <Guid/ConsoleInDevice.h>
-#include <Guid/ConsoleOutDevice.h>
-#include <Guid/FileSystemVolumeLabelInfo.h>
-#include <Guid/GlobalVariable.h>
-#include <Guid/HiiBootMaintenanceFormset.h>
-#include <Guid/MdeModuleHii.h>
-#include <Guid/ShellLibHiiGuid.h>
-#include <Guid/TtyTerm.h>
-#include <IndustryStandard/Pci.h>
-#include <Library/BaseLib.h>
-#include <Library/BaseMemoryLib.h>
-#include <Library/DebugLib.h>
-#include <Library/DevicePathLib.h>
-#include <Library/FileExplorerLib.h>
-#include <Library/FileHandleLib.h>
-#include <Library/HandleParsingLib.h>
-#include <Library/HiiLib.h>
-#include <Library/MemoryAllocationLib.h>
-#include <Library/PcdLib.h>
-#include <Library/PeCoffGetEntryPointLib.h>
-#include <Library/PrintLib.h>
-#include <Library/ShellCEntryLib.h> 
-#include <Library/ShellCommandLib.h>
-#include <Library/ShellLib.h>
-#include <Library/SortLib.h>
-#include <Library/UefiApplicationEntryPoint.h>
-#include <Library/UefiBootManagerLib.h>
-#include <Library/UefiBootServicesTableLib.h>
-#include <Library/UefiHiiServicesLib.h>
-#include <Library/UefiLib.h>
-#include <Library/UefiRuntimeLib.h>
 #include <Library/UefiRuntimeServicesTableLib.h>
-#include <Pi/PiFirmwareFile.h>
-#include <Pi/PiFirmwareVolume.h>
-#include <Protocol/AbsolutePointer.h>
-#include <Protocol/BusSpecificDriverOverride.h>
-#include <Protocol/DevicePath.h>
-#include <Protocol/DevicePathToText.h>
-#include <Protocol/DriverDiagnostics2.h>
-#include <Protocol/DriverDiagnostics.h>
-#include <Protocol/DriverFamilyOverride.h>
-#include <Protocol/DriverHealth.h>
-#include <Protocol/DriverSupportedEfiVersion.h>
-#include <Protocol/FirmwareVolume2.h>
-#include <Protocol/FormBrowserEx2.h>
-#include <Protocol/GraphicsOutput.h>
-#include <Protocol/HiiConfigAccess.h>
-#include <Protocol/LoadedImage.h>
-#include <Protocol/LoadFile.h>
-#include <Protocol/PciIo.h>
-#include <Protocol/PciRootBridgeIo.h>
-#include <Protocol/PlatformDriverOverride.h>
-#include <Protocol/PlatformToDriverConfiguration.h>
-#include <Protocol/SerialIo.h>
-#include <Protocol/Shell.h>
-#include <Protocol/ShellParameters.h>
-#include <Protocol/SimpleFileSystem.h>
-#include <Protocol/SimplePointer.h>
-#include <Protocol/SimpleTextInEx.h>
-#include <Protocol/UnicodeCollation.h>
-#include <Protocol/DiskIo.h>
-#include <Protocol/BlockIo.h>
-#include <Protocol/DiskIo2.h>
-#include <Protocol/BlockIo2.h>
 
 #include <Libraries/Math/L1_LIBRARY_Math.h>
 #include <Libraries/Network/L1_LIBRARY_Network.h>
@@ -341,15 +217,6 @@ typedef struct
 //注意：FAT32分区的卷标存放在第2个簇前几个字符
 //      NTFS分区的卷标存放在MFT表项$VOLUME表里
 DEVICE_PARAMETER device[10] = {0};
-
-/*
-    struct for FAT32 file system
-*/
-
-
-/*
-    struct for NTFS file system
-*/
 
 MasterBootRecordSwitched MBRSwitched;
 DollarBootSwitched NTFSBootSwitched;
@@ -1855,16 +1722,9 @@ Main (
     ScreenWidth  = GraphicsOutput->Mode->Info->HorizontalResolution;
     ScreenHeight = GraphicsOutput->Mode->Info->VerticalResolution;
     
-    //INFO_SELF(L"%X \r\n", ScreenWidth);  
-
-    //L2_MEMORY_Initial();
-
     L2_COMMON_MemoryAllocate();
 
     L2_GRAPHICS_ParameterInit();
-
-    //For locate bug
-    //return;
 
     //如果不加下面这几行，则是直接显示内存信息，看起来有点像雪花
     
@@ -1877,7 +1737,7 @@ Main (
             pDeskBuffer[(j * ScreenWidth + i) * 4 + 2] = 0x00;
         }
     }       
-    /**/
+	
     GraphicsOutput->Blt(
                 GraphicsOutput, 
                 (EFI_GRAPHICS_OUTPUT_BLT_PIXEL *) pDeskBuffer,
@@ -1886,21 +1746,13 @@ Main (
                 0, 0, 
                 ScreenWidth, ScreenHeight, 0);   
 
-    //本来想在这做一个起动画面，试了下，未成功，放弃了                  
-    //L2_COMMON_SingleProcessInit();
-
-    //L2_TIMER_IntervalInit0();
-
     L2_MOUSE_Init();
         
     // get partitions use api
     L2_STORE_PartitionAnalysis();
     
     L2_COMMON_MultiProcessInit();
-    
-    //L2_GRAPHICS_ChineseCharInit();
-    
-    //return;
+	
     L2_GRAPHICS_ScreenInit();
     
     L2_GRAPHICS_StartMenuInit();
@@ -1910,32 +1762,8 @@ Main (
 	L3_APPLICATION_WindowsInitial();
     
     L2_TIMER_IntervalInit();    
-    
-    //GraphicsLayerCompute(iMouseX, iMouseY, 0);
-    
-    //L2_DEBUG_Print1(100, 100, "%d %d\n", __LINE__, Status);
-    
+        
     return EFI_SUCCESS;
 }
 
 
-/*
-
-一些参考资料
-区位码:
-http://witmax.cn/gb2312.html
-
-汉字的区位码查询:
-http://quwei.911cha.com/
-
-中文显示：
-https://blog.csdn.net/zenwanxin/article/details/8349124?utm_medium=distribute.pc_relevant.none-task-blog-2~default~baidujs_baidulandingword~default-0.control&spm=1001.2101.3001.4242
-
-英文显示：
-https://blog.csdn.net/czg13548930186/article/details/79861914
-
-区位码查询：http://quwei.911cha.com/
-
-InitializeMemory
-InternalMemSetMem
-*/
