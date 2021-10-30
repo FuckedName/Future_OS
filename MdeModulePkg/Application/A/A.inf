@@ -38,6 +38,14 @@
   	Partitions/L2_PARTITION.h
   	Partitions/L3_PARTITION.c
   	Partitions/L3_PARTITION.h
+  	Partitions/NTFS/L2_PARTITION_NTFS.c
+	Partitions/NTFS/L2_PARTITION_NTFS.h
+	Partitions/NTFS/L1_PARTITION_NTFS.c
+	Partitions/NTFS/L1_PARTITION_NTFS.h
+	Partitions/FAT32/L1_PARTITION_FAT32.h
+	Partitions/FAT32/L1_PARTITION_FAT32.c
+	Partitions/FAT32/L2_PARTITION_FAT32.c
+	Partitions/FAT32/L2_PARTITION_FAT32.h
 
 [Packages]
   MdePkg/MdePkg.dec

@@ -3,6 +3,8 @@
 #include <string.h>
 
 #include <Libraries/String/L2_LIBRARY_String.h>
+#include <Partitions/FAT32/L2_PARTITION_FAT32.h>
+
 
 
 
