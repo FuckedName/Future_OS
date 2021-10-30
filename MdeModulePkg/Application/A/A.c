@@ -345,45 +345,6 @@ DEVICE_PARAMETER device[10] = {0};
     struct for FAT32 file system
 */
 
-typedef struct
-{
-    UINT8 JMP[3] ; // 0x00 3 跳转指令（跳过开头一段区域）
-    UINT8 OEM[8] ; // 0x03 8 OEM名称常见值是MSDOS5.0.
-    UINT8 BitsOfSector[2] ; // 0x0b 2 每个扇区的字节数。取值只能是以下几种：512，1024，2048或是4096。设为512会取得最好的兼容性
-    UINT8 SectorOfCluster[1] ; // 0x0d 1 每簇扇区数。 其值必须中2的整数次方，同时还要保证每簇的字节数不能超过32K
-    UINT8 ReservedSelector[2] ; // 0x0e 2 保留扇区数（包括启动扇区）此域不能为0，FAT12/FAT16必须为1，FAT32的典型值取为32
-    UINT8 NumFATS[1] ; // 0x10 1 文件分配表数目。 NumFATS，任何FAT格式都建议为2
-    UINT8 RootPathRecords[2] ; // 0x11 2 最大根目录条目个数, 0 for fat32, 512 for fat16
-    UINT8 AllSectors[2] ; // 0x13 2 总扇区数（如果是0，就使用偏移0x20处的4字节值）0 for fat32
-    UINT8 Description[1] ; // 0x15 1 介质描述 0xF8 单面、每面80磁道、每磁道9扇区
-    UINT8 xxx1[2] ; // 0x16 2 每个文件分配表的扇区（FAT16）,0 for fat32
-    UINT8 xxx2[2] ; // 0x18 2 每磁道的扇区, 0x003f
-    UINT8 xxx3[2] ; // 0x1a 2 磁头数，0xff
-    UINT8 xxx4[4] ; // 0x1c 4 隐藏扇区, 与MBR中地址0x1C6开始的4个字节数值相等
-    UINT8 SectorCounts[4] ; // 0x20 4 总扇区数（如果超过65535使用此地址，小于65536参见偏移0x13，对FAT32，此域必须是非0）
-    UINT8 SectorsPerFat[4] ; // Sectors count each FAT use
-    UINT8 Fat32Flag[2] ; // 0x28 2 Flags (FAT32特有)
-    UINT8 FatVersion[2] ; // 0x2a 2 版本号 (FAT32特有)
-    UINT8 BootPathStartCluster[4] ; // 0x2c 4 根目录起始簇 (FAT32)，一般为2
-    UINT8 ClusterName[11] ; // 0x2b 11 卷标（非FAT32）
-    UINT8 BootStrap[2] ; // 0x30 2 FSInfo 扇区 (FAT32) bootstrap
-    UINT8 BootSectorBackup[2] ; // 0x32 2 启动扇区备份 (FAT32)如果不为0，表示在保留区中引导记录的备数据所占的扇区数，通常为6同时不建议使用6以外的其他数值
-    UINT8 Reserved[2] ; // 0x34 2 保留未使用 (FAT32) 此域用0填充
-    UINT8 FileSystemType[8] ; // 0x36 8 FAT文件系统类型（如FAT、FAT12、FAT16）含"FAT"就是PBR,否则就是MBR
-    UINT8 SelfBootCode[2] ; // 0x3e 2 操作系统自引导代码
-    UINT8 DeviceNumber[1] ; // 0x40 1 BIOS设备代号 (FAT32)
-    UINT8 NoUse[1] ; // 0x41 1 未使用 (FAT32)
-    UINT8 Flag[1] ; // 0x42 1 标记 (FAT32)
-    UINT8 SequeenNumber[4] ; // 0x43 4 卷序号 (FAT32)
-    UINT8 juanbiao[11] ; // 0x47 11 卷标（FAT32）
-    UINT8 TypeOfFileSystem[8] ; // 0x52 8 FAT文件系统类型（FAT32）
-    UINT8 BootAssembleCode[338]; // code
-    UINT8 Partition1[16] ; // 0x1be 64 partitions table, DOS_PART_TBL_OFFSET
-    UINT8 Partition2[16] ; // 0X1BE ~0X1CD 16 talbe entry for Partition 1
-    UINT8 Partition3[16] ; // 0X1CE ~0X1DD 16 talbe entry for Partition 2
-    UINT8 Partition4[16] ; // 0X1DE ~0X1ED 16 talbe entry for Partition 3
-    UINT8 EndFlag[2] ; // 0x1FE 2 扇区结束符（0x55 0xAA） 结束标志：MBR的结束标志与DBR，EBR的结束标志相同。
-}MasterBootRecord;
 
 /*
     struct for NTFS file system
