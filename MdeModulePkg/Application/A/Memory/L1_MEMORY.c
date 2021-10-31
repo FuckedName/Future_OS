@@ -89,6 +89,21 @@ UINT8 *L2_MEMORY_Allocate(char *pApplicationName, UINT16 type, UINT32 SizeRequir
     }
 }
 
+
+
+UINT8 *L2_MEMORY_MapperInitial()
+{
+
+    for (UINT64 temp = 0; temp < ALL_PAGE_COUNT; temp++)
+    {
+        pMapper[temp] = 0; // no use
+    }
+}
+
+
+extern UINT8 BufferMFT[DISK_BUFFER_SIZE * 2];
+
+
 EFI_STATUS L2_COMMON_MemoryAllocate()
 {
     EFI_STATUS  Status;

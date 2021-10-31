@@ -60,9 +60,6 @@ char pKeyboardInputBuffer[KEYBOARD_BUFFER_LENGTH] = {0};
 #define DISK_READ_X (0) 
 #define DISK_READ_Y (16 * 19)
 
-// Line 22
-#define DISK_READ_BUFFER_X (0) 
-#define DISK_READ_BUFFER_Y (6 * 56)
 
 #define DISK_MBR_X (0) 
 #define DISK_MBR_Y (16 * 62)
@@ -270,24 +267,6 @@ STATE   NextState = INIT_STATE;
 int READ_FILE_FSM_Event = READ_PATITION_EVENT;
 
 
-VOID L1_GRAPHICS_UpdateWindowLayer(UINT16 layer)
-{	
-    for (UINT16 i = 0; i < WindowLayers.LayerCount; i++)
-    {
-        if (layer == WindowLayers.LayerSequences[i])
-        {
-            for (UINT16 j = i; j < WindowLayers.LayerCount - 1; j++)
-            {
-                WindowLayers.LayerSequences[j] = WindowLayers.LayerSequences[j + 1];
-            }
-            WindowLayers.LayerSequences[WindowLayers.LayerCount - 1] = layer;
-            break;
-        }
-    }
-
-    //WindowLayers.LayerSequences[WindowLayers.LayerCount - 1] = layer;
-}
-
 // fill into rectangle
 void L1_MEMORY_RectangleFill(UINT8 *pBuffer,
         IN UINTN x0, UINTN y0, UINTN x1, UINTN y1, 
@@ -449,124 +428,6 @@ EFI_STATUS L2_GRAPHICS_ChineseCharDraw(UINT8 *pBuffer,
     return EFI_SUCCESS;
 }
 
-//delete blanks of file name and file extension name
-void L1_FILE_NameGet2(UINT8 deviceID, UINT8 *FileName)
-{    
-    UINT8 s[12] = {0};
-    for (UINT8 i = 0; i < 11; i++)
-    {       
-        s[i] = pItems[deviceID].FileName[i];
-    }
-    UINT8 j = 0;
-    for (UINT8 i = 0; i < 11; )
-    {
-        if (s[i] != 32)
-            FileName[j++] = s[i++];
-        else
-            i++;
-    }
-}
-
-void L1_FILE_NameGet(UINT8 ItemID, UINT8 *FileName)
- {    
-    UINT8 count = 0;
-    while (pItems[ItemID].FileName[count] != 0)
-    {
-    	if (count >= 8)
-		{
-			break;
-    	}
-        FileName[count] = pItems[ItemID].FileName[count];
-        count++;
-    }
-	
-    if (pItems[ItemID].ExtensionName[0] != 0)
-    {
-        FileName[count] = ' ';
-        count++;
-    }
-
-	UINT8 count2 = 0;
-    while (pItems[ItemID].ExtensionName[count2] != 0)
-    {
-    	if (count2 >= 3)
-		{
-			break;
-    	}
-    
-        FileName[count] = pItems[ItemID].ExtensionName[count2];
-        count++;
-        count2++;
-    }
-	
-	FileName[12] = 0;
- }
-
-EFI_STATUS L1_FILE_RootPathAnalysis(UINT8 *p)
-{
-    memcpy(&pItems, p, DISK_BUFFER_SIZE);
-    UINT16 valid_count = 0;
-    
-    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: .: %d\n", __LINE__, ReadFileName[7]);
-
-    //display filing file and subpath. 
-    for (int i = 0; i < 30; i++)
-        if (pItems[i].FileName[0] != 0xE5 && (pItems[i].Attribute[0] == 0x20 
-            || pItems[i].Attribute[0] == 0x10))
-       {
-            L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d FileName:%2c%2c%2c%2c%2c%2c%2c%2c ExtensionName:%2c%2c%2c StartCluster:%02X%02X%02X%02X FileLength: %02X%02X%02X%02X Attribute: %02X    ", __LINE__,
-                                            pItems[i].FileName[0], pItems[i].FileName[1], pItems[i].FileName[2], pItems[i].FileName[3], pItems[i].FileName[4], pItems[i].FileName[5], pItems[i].FileName[6], pItems[i].FileName[7],
-                                            pItems[i].ExtensionName[0], pItems[i].ExtensionName[1],pItems[i].ExtensionName[2],
-                                            pItems[i].StartClusterHigh2B[0], pItems[i].StartClusterHigh2B[1],
-                                            pItems[i].StartClusterLow2B[0], pItems[i].StartClusterLow2B[1],
-                                            pItems[i].FileLength[0], pItems[i].FileLength[1], pItems[i].FileLength[2], pItems[i].FileLength[3],
-                                            pItems[i].Attribute[0]);
-            
-            valid_count++;
-            
-            UINT8 FileName[13] = {0};
-            UINT8 FileName2[13] = {0};
-            L1_FILE_NameGet(i, FileName);
-            L1_FILE_NameGet2(i, FileName2);
-            L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: FileName: %a\n", __LINE__, FileName);
-            L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: FileName2: %a\n", __LINE__, FileName2);
-            L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: ReadFileName: %a\n", __LINE__, ReadFileName);
-
-            //for (int j = 0; j < 5; j++)
-            //  L2_DEBUG_Print1(j * 3 * 8, 16 * 40 + valid_count * 16, "%02X ", pItems[i].FileName[j]);
-            if (L1_STRING_Compare(FileName2, ReadFileName, ReadFileNameLength) == EFI_SUCCESS)
-            {
-                L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d FileName:%2c%2c%2c%2c%2c%2c%2c%2c ExtensionName:%2c%2c%2c StartCluster:%02X%02X%02X%02X FileLength: %02X%02X%02X%02X Attribute: %02X    ",  __LINE__,
-                                pItems[i].FileName[0], pItems[i].FileName[1], pItems[i].FileName[2], pItems[i].FileName[3], pItems[i].FileName[4], pItems[i].FileName[5], pItems[i].FileName[6], pItems[i].FileName[7],
-                                pItems[i].ExtensionName[0], pItems[i].ExtensionName[1],pItems[i].ExtensionName[2],
-                                pItems[i].StartClusterHigh2B[0], pItems[i].StartClusterHigh2B[1],
-                                pItems[i].StartClusterLow2B[0], pItems[i].StartClusterLow2B[1],
-                                pItems[i].FileLength[0], pItems[i].FileLength[1], pItems[i].FileLength[2], pItems[i].FileLength[3],
-                                pItems[i].Attribute[0]);
-                
-              FileBlockStart = (UINT32)pItems[i].StartClusterHigh2B[0] * 16 * 16 * 16 * 16 + (UINT32)pItems[i].StartClusterHigh2B[1] * 16 * 16 * 16 * 16 * 16 * 16 + pItems[i].StartClusterLow2B[0] + (UINT32)pItems[i].StartClusterLow2B[1] * 16 * 16;
-              FileLength = pItems[i].FileLength[0] + (UINT32)pItems[i].FileLength[1] * 16 * 16 + (UINT32)pItems[i].FileLength[2] * 16 * 16 * 16 * 16 + (UINT32)pItems[i].FileLength[3] * 16 * 16 * 16 * 16 * 16 * 16;
-
-              L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: FileBlockStart: %d FileLength: %ld\n", __LINE__, FileBlockStart, FileLength);
-            }
-        }
-
-}
-
-UINT8 *L2_MEMORY_MapperInitial()
-{
-
-    for (UINT64 temp = 0; temp < ALL_PAGE_COUNT; temp++)
-    {
-        pMapper[temp] = 0; // no use
-    }
-}
-
-
-extern UINT8 BufferMFT[DISK_BUFFER_SIZE * 2];
-
-
-
 
 
 L3_GRAPHICS_ItemPrint(UINT8 *pDestBuffer, UINT8 *pSourceBuffer, UINT16 pDestWidth, UINT16 pDestHeight, 
@@ -589,46 +450,6 @@ L3_GRAPHICS_ItemPrint(UINT8 *pDestBuffer, UINT8 *pSourceBuffer, UINT16 pDestWidt
     //if (2 == StringType)
     //    L2_DEBUG_Print2(x, y + pDestHeight, pDestBuffer, "%a ", pNameString);
 }
-
-VOID L3_GRAPHICS_StartMenuClicked()
-{
-    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d L3_GRAPHICS_StartMenuClicked\n", __LINE__);
-    EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
-    Color.Red   = 0xff;
-    Color.Green = 0x00;
-    Color.Blue   = 0x00;
-    //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: iMouseX: %d iMouseY: %d \n",  __LINE__, iMouseX, iMouseY);
-    L2_GRAPHICS_RectangleDraw(pMouseSelectedBuffer, 0,  0, 31, 15, 1,  Color, 32);
-    //MenuButtonClickResponse();
-    Color.Red   = 0xFF;
-    Color.Green = 0xFF;
-    Color.Blue  = 0xFF;
-    //L1_MEMORY_RectangleFill(pDeskBuffer, 3,     ScreenHeight - 21, 13,     ScreenHeight - 11, 1, Color);
-    L2_GRAPHICS_Copy(pDeskDisplayBuffer, pMouseSelectedBuffer, ScreenWidth, ScreenHeight, 32, 16, 3, ScreenHeight - 21);
-        
-    //L2_GRAPHICS_Copy(pDeskDisplayBuffer, pStartMenuBuffer, ScreenWidth, ScreenHeight, StartMenuWidth, StartMenuHeight, StartMenuPositionX, StartMenuPositionY);
-
-	//Update state
-    StartMenuNextState = MENU_CLICKED_STATE;
-
-    if (FALSE == WindowLayers.item[GRAPHICS_LAYER_START_MENU].DisplayFlag)
-    {
-        WindowLayers.ActiveWindowCount++;
-        WindowLayers.item[GRAPHICS_LAYER_START_MENU].DisplayFlag = TRUE;
-        
-    }
-    L1_GRAPHICS_UpdateWindowLayer(GRAPHICS_LAYER_START_MENU);
-
-}
-
-VOID L2_PARTITION_FileContentPrint(UINT8 *Buffer)
-{	
-	for (int j = 0; j < 250; j++)
-    {
-        L2_DEBUG_Print1(DISK_READ_BUFFER_X + (j % 16) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 16), "%02X ", Buffer[j] & 0xff);
-    }
-}
-
 
 UINT32 L2_FILE_GetNextBlockNumber()
 {

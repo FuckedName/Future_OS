@@ -6,6 +6,10 @@
 #include <Partitions/FAT32/L2_PARTITION_FAT32.h>
 
 
+// Line 22
+#define DISK_READ_BUFFER_X (0) 
+#define DISK_READ_BUFFER_Y (6 * 56)
+
 
 
 UINT8 BufferMFT[DISK_BUFFER_SIZE * 2];
@@ -192,6 +196,15 @@ VOID L2_MOUSE_MyComputerPartitionItemClicked()
     L2_STORE_PartitionItemsPrint(PartitionItemID);
 }
 
+VOID L2_PARTITION_FileContentPrint(UINT8 *Buffer)
+{	
+	for (int j = 0; j < 250; j++)
+    {
+        L2_DEBUG_Print1(DISK_READ_BUFFER_X + (j % 16) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 16), "%02X ", Buffer[j] & 0xff);
+    }
+}
+
+
 // 1. To judge folder item is file or folder
 // 2. Get StartClusterHigh2B and StartClusterLow2B and computer the next read sector id number
 // 3. Read sector id number sector content from partition
@@ -260,6 +273,24 @@ START_MENU_STATE_TRANSFORM MyComputerStateTransformTable[] =
     {MY_COMPUTER_PARTITION_CLICKED_STATE, MY_COMPUTER_FOLDER_ITEM_CLICKED_EVENT,      MY_COMPUTER_FOLDER_CLICKED_STATE,     L2_MOUSE_MyComputerFolderItemClicked},
     {MY_COMPUTER_FOLDER_CLICKED_STATE, 	  MY_COMPUTER_FOLDER_ITEM_CLICKED_EVENT,      MY_COMPUTER_FOLDER_CLICKED_STATE,     L2_MOUSE_MyComputerFolderItemClicked},
 };
+
+VOID L1_GRAPHICS_UpdateWindowLayer(UINT16 layer)
+{	
+    for (UINT16 i = 0; i < WindowLayers.LayerCount; i++)
+    {
+        if (layer == WindowLayers.LayerSequences[i])
+        {
+            for (UINT16 j = i; j < WindowLayers.LayerCount - 1; j++)
+            {
+                WindowLayers.LayerSequences[j] = WindowLayers.LayerSequences[j + 1];
+            }
+            WindowLayers.LayerSequences[WindowLayers.LayerCount - 1] = layer;
+            break;
+        }
+    }
+
+    //WindowLayers.LayerSequences[WindowLayers.LayerCount - 1] = layer;
+}
 
 
 VOID L2_MOUSE_MyComputerClicked()
@@ -1009,6 +1040,37 @@ MOUSE_CLICK_EVENT L2_GRAPHICS_MemoryInformationLayerClickEventGet()
     }
 			
 	return MAX_CLICKED_EVENT;
+}
+
+VOID L3_GRAPHICS_StartMenuClicked()
+{
+    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d L3_GRAPHICS_StartMenuClicked\n", __LINE__);
+    EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
+    Color.Red   = 0xff;
+    Color.Green = 0x00;
+    Color.Blue   = 0x00;
+    //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: iMouseX: %d iMouseY: %d \n",  __LINE__, iMouseX, iMouseY);
+    L2_GRAPHICS_RectangleDraw(pMouseSelectedBuffer, 0,  0, 31, 15, 1,  Color, 32);
+    //MenuButtonClickResponse();
+    Color.Red   = 0xFF;
+    Color.Green = 0xFF;
+    Color.Blue  = 0xFF;
+    //L1_MEMORY_RectangleFill(pDeskBuffer, 3,     ScreenHeight - 21, 13,     ScreenHeight - 11, 1, Color);
+    L2_GRAPHICS_Copy(pDeskDisplayBuffer, pMouseSelectedBuffer, ScreenWidth, ScreenHeight, 32, 16, 3, ScreenHeight - 21);
+        
+    //L2_GRAPHICS_Copy(pDeskDisplayBuffer, pStartMenuBuffer, ScreenWidth, ScreenHeight, StartMenuWidth, StartMenuHeight, StartMenuPositionX, StartMenuPositionY);
+
+	//Update state
+    StartMenuNextState = MENU_CLICKED_STATE;
+
+    if (FALSE == WindowLayers.item[GRAPHICS_LAYER_START_MENU].DisplayFlag)
+    {
+        WindowLayers.ActiveWindowCount++;
+        WindowLayers.item[GRAPHICS_LAYER_START_MENU].DisplayFlag = TRUE;
+        
+    }
+    L1_GRAPHICS_UpdateWindowLayer(GRAPHICS_LAYER_START_MENU);
+
 }
 
 VOID L3_GRAPHICS_DeskClickEventHandle(MOUSE_CLICK_EVENT event)
