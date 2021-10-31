@@ -4,6 +4,8 @@
 #include <Devices/Store/L2_DEVICE_Store.h>
 #include <Global/Global.h>
 
+int READ_FILE_FSM_Event = READ_PATITION_EVENT;
+
 
 // all partitions analysis
 EFI_STATUS L2_STORE_PartitionAnalysisFSM()

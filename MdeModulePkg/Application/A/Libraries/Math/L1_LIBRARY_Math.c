@@ -1,6 +1,13 @@
 
 #include <L1_LIBRARY_Math.h>
 
+#define BitSet(x,y) x |= (0x01 << y)
+#define BitSlr(x,y) x &= ~(0x01 << y)
+#define BitReverse(x,y) x ^= (0x01 << y)
+#define BitGet(x,y)  ((x) >> (y) & 0x01)
+#define ByteSet(x)    x |= 0xff
+#define ByteClear(x)  x |= 0x00
+
 
 long long L1_MATH_Multi(long x, long y)
 {
