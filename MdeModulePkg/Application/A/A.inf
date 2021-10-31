@@ -29,6 +29,10 @@
   	Graphics/L3_GRAPHICS.h
   	Devices/Mouse/L1_DEVICE_Mouse.h
   	Devices/Mouse/L1_DEVICE_Mouse.c
+  	Devices/Mouse/L2_DEVICE_Mouse.h
+  	Devices/Mouse/L2_DEVICE_Mouse.c
+  	Devices/Timer/L2_DEVICE_Timer.h
+  	Devices/Timer/L2_DEVICE_Timer.c
   	Devices/Keyboard/L1_DEVICE_Keyboard.h
   	Devices/Keyboard/L1_DEVICE_Keyboard.c
   	Devices/Keyboard/L2_DEVICE_Keyboard.h
@@ -54,6 +58,10 @@
 	Partitions/FAT32/L1_PARTITION_FAT32.c
 	Partitions/FAT32/L2_PARTITION_FAT32.c
 	Partitions/FAT32/L2_PARTITION_FAT32.h
+	Processes/L1_PROCESS_Multi.h
+	Processes/L1_PROCESS_Multi.c
+	Processes/L2_PROCESS_Multi.h
+	Processes/L2_PROCESS_Multi.c
 
 [Packages]
   MdePkg/MdePkg.dec

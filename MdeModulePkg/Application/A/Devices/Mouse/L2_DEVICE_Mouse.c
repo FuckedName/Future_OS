@@ -1,10 +1,81 @@
+#include <Library/BaseLib.h>
+
+#include <Guid/ConsoleInDevice.h>
+#include <Guid/ConsoleOutDevice.h>
+#include <Guid/FileSystemVolumeLabelInfo.h>
+#include <Guid/GlobalVariable.h>
+#include <Guid/HiiBootMaintenanceFormset.h>
+#include <Guid/MdeModuleHii.h>
+#include <Guid/ShellLibHiiGuid.h>
+#include <Guid/TtyTerm.h>
+#include <IndustryStandard/Pci.h>
+#include <Library/BaseLib.h>
+#include <Library/BaseMemoryLib.h>
+#include <Library/DebugLib.h>
+#include <Library/DevicePathLib.h>
+#include <Library/FileExplorerLib.h>
+#include <Library/FileHandleLib.h>
+#include <Library/HandleParsingLib.h>
+#include <Library/HiiLib.h>
+#include <Library/MemoryAllocationLib.h>
+#include <Library/PcdLib.h>
+#include <Library/PeCoffGetEntryPointLib.h>
+#include <Library/PrintLib.h>
+#include <Library/ShellCEntryLib.h> 
+#include <Library/ShellCommandLib.h>
+#include <Library/ShellLib.h>
+#include <Library/SortLib.h>
+#include <Library/UefiApplicationEntryPoint.h>
+#include <Library/UefiBootManagerLib.h>
+#include <Library/UefiBootServicesTableLib.h>
+#include <Library/UefiHiiServicesLib.h>
+#include <Library/UefiLib.h>
+#include <Library/UefiRuntimeLib.h>
+#include <Library/UefiRuntimeServicesTableLib.h>
+#include <Pi/PiFirmwareFile.h>
+#include <Pi/PiFirmwareVolume.h>
+#include <Protocol/AbsolutePointer.h>
+#include <Protocol/BusSpecificDriverOverride.h>
+#include <Protocol/DevicePath.h>
+#include <Protocol/DevicePathToText.h>
+#include <Protocol/DriverDiagnostics2.h>
+#include <Protocol/DriverDiagnostics.h>
+#include <Protocol/DriverFamilyOverride.h>
+#include <Protocol/DriverHealth.h>
+#include <Protocol/DriverSupportedEfiVersion.h>
+#include <Protocol/FirmwareVolume2.h>
+#include <Protocol/FormBrowserEx2.h>
+#include <Protocol/GraphicsOutput.h>
+#include <Protocol/HiiConfigAccess.h>
+#include <Protocol/LoadedImage.h>
+#include <Protocol/LoadFile.h>
+#include <Protocol/PciIo.h>
+#include <Protocol/PciRootBridgeIo.h>
+#include <Protocol/PlatformDriverOverride.h>
+#include <Protocol/PlatformToDriverConfiguration.h>
+#include <Protocol/SerialIo.h>
+#include <Protocol/Shell.h>
+#include <Protocol/ShellParameters.h>
+#include <Protocol/SimpleFileSystem.h>
+#include <Protocol/SimplePointer.h>
+#include <Protocol/SimpleTextInEx.h>
+#include <Protocol/UnicodeCollation.h>
+#include <Protocol/DiskIo.h>
+#include <Protocol/BlockIo.h>
+#include <Protocol/DiskIo2.h>
+#include <Protocol/BlockIo2.h>
+
+#include <Library/UefiBootServicesTableLib.h>
+#include <Global/Global.h>
+
 #include <L2_DEVICE_Mouse.h>
 
 #include <Graphics/L2_GRAPHICS.h>
 
-
-
-VOID L2_MOUSE_Event (EFI_EVENT Event,  VOID *Context)
+// for mouse move & click
+VOID
+EFIAPI
+L2_MOUSE_Event (IN EFI_EVENT Event, IN VOID *Context)
 {
     mouse_count++;
     //L2_DEBUG_Print1(DISPLAY_X, DISPLAY_Y, "%d: HandleMouseEvent\n", __LINE__);
@@ -99,6 +170,7 @@ VOID L2_MOUSE_Event (EFI_EVENT Event,  VOID *Context)
     
     gBS->WaitForEvent( 1, &gMouse->WaitForInput, &Index );
 }
+
 
 
 EFI_STATUS L2_DEVICE_MouseInit()

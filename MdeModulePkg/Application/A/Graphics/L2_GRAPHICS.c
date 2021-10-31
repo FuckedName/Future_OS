@@ -1,4 +1,73 @@
 
+#include <Library/UefiRuntimeLib.h>
+#include <Library/UefiRuntimeServicesTableLib.h>
+#include <Library/BaseLib.h>
+
+#include <Guid/ConsoleInDevice.h>
+#include <Guid/ConsoleOutDevice.h>
+#include <Guid/FileSystemVolumeLabelInfo.h>
+#include <Guid/GlobalVariable.h>
+#include <Guid/HiiBootMaintenanceFormset.h>
+#include <Guid/MdeModuleHii.h>
+#include <Guid/ShellLibHiiGuid.h>
+#include <Guid/TtyTerm.h>
+#include <IndustryStandard/Pci.h>
+#include <Library/BaseLib.h>
+#include <Library/BaseMemoryLib.h>
+#include <Library/DebugLib.h>
+#include <Library/DevicePathLib.h>
+#include <Library/FileExplorerLib.h>
+#include <Library/FileHandleLib.h>
+#include <Library/HandleParsingLib.h>
+#include <Library/HiiLib.h>
+#include <Library/MemoryAllocationLib.h>
+#include <Library/PcdLib.h>
+#include <Library/PeCoffGetEntryPointLib.h>
+#include <Library/PrintLib.h>
+#include <Library/ShellCEntryLib.h> 
+#include <Library/ShellCommandLib.h>
+#include <Library/ShellLib.h>
+#include <Library/SortLib.h>
+#include <Library/UefiApplicationEntryPoint.h>
+#include <Library/UefiBootManagerLib.h>
+#include <Library/UefiBootServicesTableLib.h>
+#include <Library/UefiHiiServicesLib.h>
+#include <Library/UefiLib.h>
+#include <Library/UefiRuntimeLib.h>
+#include <Library/UefiRuntimeServicesTableLib.h>
+#include <Pi/PiFirmwareFile.h>
+#include <Pi/PiFirmwareVolume.h>
+#include <Protocol/AbsolutePointer.h>
+#include <Protocol/BusSpecificDriverOverride.h>
+#include <Protocol/DevicePath.h>
+#include <Protocol/DevicePathToText.h>
+#include <Protocol/DriverDiagnostics2.h>
+#include <Protocol/DriverDiagnostics.h>
+#include <Protocol/DriverFamilyOverride.h>
+#include <Protocol/DriverHealth.h>
+#include <Protocol/DriverSupportedEfiVersion.h>
+#include <Protocol/FirmwareVolume2.h>
+#include <Protocol/FormBrowserEx2.h>
+#include <Protocol/GraphicsOutput.h>
+#include <Protocol/HiiConfigAccess.h>
+#include <Protocol/LoadedImage.h>
+#include <Protocol/LoadFile.h>
+#include <Protocol/PciIo.h>
+#include <Protocol/PciRootBridgeIo.h>
+#include <Protocol/PlatformDriverOverride.h>
+#include <Protocol/PlatformToDriverConfiguration.h>
+#include <Protocol/SerialIo.h>
+#include <Protocol/Shell.h>
+#include <Protocol/ShellParameters.h>
+#include <Protocol/SimpleFileSystem.h>
+#include <Protocol/SimplePointer.h>
+#include <Protocol/SimpleTextInEx.h>
+#include <Protocol/UnicodeCollation.h>
+#include <Protocol/DiskIo.h>
+#include <Protocol/BlockIo.h>
+#include <Protocol/DiskIo2.h>
+#include <Protocol/BlockIo2.h>
+
 #include <L2_GRAPHICS.h>
 #include <string.h>
 
@@ -10,6 +79,9 @@
 #define DISK_READ_BUFFER_X (0) 
 #define DISK_READ_BUFFER_Y (6 * 56)
 
+
+UINT16 date_time_count_increase_flag = 0;
+UINT16 date_time_count = 0;
 
 
 UINT8 BufferMFT[DISK_BUFFER_SIZE * 2];
@@ -29,6 +101,10 @@ START_MENU_STATE 	StartMenuNextState = CLICK_INIT_STATE;
 START_MENU_STATE 	 MyComputerNextState = CLICK_INIT_STATE;
 
 FAT32_ROOTPATH_SHORT_FILE_ITEM pItems[32];
+
+//Line 0
+#define DISPLAY_DESK_HEIGHT_WEIGHT_X (date_time_count % 30) 
+#define DISPLAY_DESK_HEIGHT_WEIGHT_Y (ScreenHeight - 16 * 3)
 
 
 
@@ -1907,7 +1983,7 @@ VOID L2_GRAPHICS_LayerCompute(UINT16 iMouseX, UINT16 iMouseY, UINT8 MouseClickFl
                         ScreenWidth, ScreenHeight, 0);
 }
 
-L2_STORE_FolderItemsPrint()
+VOID L2_STORE_FolderItemsPrint()
 {
     UINT16 valid_count = 0;
     UINT16 HeightNew = SYSTEM_ICON_HEIGHT / 8;
@@ -2271,5 +2347,84 @@ VOID L2_MOUSE_Move()
     L2_MOUSE_MoveOver();
     
     L2_MOUSE_Click();
+}
+
+// display system date & time
+VOID
+EFIAPI
+L2_TIMER_Print (
+  IN EFI_EVENT Event,
+  IN VOID      *Context
+  )
+{   
+    EFI_TIME EFITime;
+
+	
+	if (date_time_count_increase_flag == 0)
+    {
+    	date_time_count++;
+	}
+	else if (date_time_count_increase_flag == 1)
+	{
+		date_time_count--;	
+	}
+		
+	if (date_time_count == 0 || date_time_count == 30)
+		date_time_count_increase_flag = (date_time_count_increase_flag == 0) ?  1 : 0;
+	
+    gRT->GetTime(&EFITime, NULL);
+    EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
+    UINT16 x, y;
+    
+    Color.Blue = 0x00;
+    Color.Red = 0xFF;
+    Color.Green = 0x00;
+
+    x = DISPLAY_DESK_DATE_TIME_X;
+    y = DISPLAY_DESK_DATE_TIME_Y;
+
+    //Display system date time weekday.
+    L2_DEBUG_Print1(x, y, "%04d-%02d-%02d %02d:%02d:%02d ", 
+                  EFITime.Year, EFITime.Month, EFITime.Day, EFITime.Hour, EFITime.Minute, EFITime.Second);
+    //  星   4839    期   3858
+    x += 21 * 8 + 3;
+    L2_GRAPHICS_ChineseCharDraw(pDeskBuffer, x, y,  (48 - 1) * 94 + 39 - 1, Color, ScreenWidth); 
+    
+    x += 16;
+    L2_GRAPHICS_ChineseCharDraw(pDeskBuffer, x, y,  (38 - 1) * 94 + 58 - 1, Color, ScreenWidth);
+
+    x += 16;
+
+    UINT8 DayOfWeek = L1_MATH_DayOfWeek(EFITime.Year, EFITime.Month, EFITime.Day);
+    if (0 == DayOfWeek)
+    {
+        L2_GRAPHICS_ChineseCharDraw(pDeskBuffer, x, y, (48 - 1 ) * 94 + 39 - 1, Color, ScreenWidth);    
+    }
+    UINT8 AreaCode = 0;
+    UINT8 BitCode = 0;
+    
+    // 日 4053 一 5027 二 2294 三 4093 四 4336 五 4669 六 3389
+    switch (DayOfWeek)
+    {
+        case 0: AreaCode = 40; BitCode = 53; break;
+        case 1: AreaCode = 50; BitCode = 27; break;
+        case 2: AreaCode = 22; BitCode = 94; break;
+        case 3: AreaCode = 40; BitCode = 93; break;
+        case 4: AreaCode = 43; BitCode = 36; break;
+        case 5: AreaCode = 46; BitCode = 69; break;
+        case 6: AreaCode = 33; BitCode = 89; break;
+        default: AreaCode = 16; BitCode = 01; break;
+    }
+
+    L2_GRAPHICS_ChineseCharDraw(pDeskBuffer, x, y, (AreaCode - 1 ) * 94 + BitCode - 1, Color, ScreenWidth);
+    
+   L2_DEBUG_Print1(DISPLAY_DESK_HEIGHT_WEIGHT_X, DISPLAY_DESK_HEIGHT_WEIGHT_Y, "%d: ScreenWidth:%d, ScreenHeight:%d\n", __LINE__, ScreenWidth, ScreenHeight);
+   /*
+   GraphicsOutput->Blt(GraphicsOutput, 
+                        (EFI_GRAPHICS_OUTPUT_BLT_PIXEL *) pDateTimeBuffer,
+                        EfiBltBufferToVideo,
+                        0, 0, 
+                        0, 16 * 8, 
+                        8 * 50, 16, 0);*/
 }
 

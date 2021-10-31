@@ -126,7 +126,7 @@ EFI_STATUS L2_GRAPHICS_ChineseHalfDraw(UINT8 *pBuffer,UINT8 d,
 
 VOID L2_GRAPHICS_LayerCompute(UINT16 iMouseX, UINT16 iMouseY, UINT8 MouseClickFlag);
 
-L2_STORE_FolderItemsPrint();
+VOID L2_STORE_FolderItemsPrint();
 
 void L2_GRAPHICS_CopyBufferFromWindowsToDesk();
 
@@ -143,4 +143,13 @@ EFI_STATUS L2_GRAPHICS_AsciiCharDraw2(WINDOW_LAYER_ITEM layer,
 VOID L2_GRAPHICS_RightClickMenu(UINT16 iMouseX, UINT16 iMouseY);
 
 VOID L2_MOUSE_MoveOver();
+
+VOID L2_MOUSE_Move();
+
+VOID
+EFIAPI
+L2_TIMER_Print (
+  IN EFI_EVENT Event,
+  IN VOID      *Context
+  );
 
