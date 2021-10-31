@@ -2,6 +2,10 @@
 
 #include <Libraries/Memory/L1_LIBRARY_Memory.h>
 
+QUEUE Queue;
+
+#define LOG_LINE_CHAR_SIZE 100
+
 unsigned char L1_BIT_Set(unsigned char *pMapper, unsigned long long StartPageID, unsigned long long Size)
 {
     unsigned char AddOneFlag = (Size % 8 == 0) ? 0 : 1;
@@ -28,10 +32,11 @@ int L1_LIBRARY_StackPop(char * a,int top)
 }
 
 
-void L1_LIBRARY_QueueInit(QUEUE *pQueue)
+void L1_LIBRARY_QueueInit(QUEUE *pQueue, unsigned long LineCount)
 {
-	L1_MEMORY_SetValue(pQueue->Buffer, SYSTEM_LOG_DATA_LINE * SYSTEM_LOG_DATA_WIDTH, 0);
-		
+	// Todo: need to allocate buffer before set zero..
+	L1_MEMORY_SetValue(pQueue->Buffer, 40 * 100, 0);
+	pQueue->Size = LineCount;
     pQueue->Front = pQueue->Rear = 0; //初始化头尾指针
     pQueue->LineCount = 0;
 }
@@ -42,20 +47,21 @@ void L1_LIBRARY_QueueIn(QUEUE *pQueue , unsigned char *s, unsigned int Size)
 
 	if (Size > 100)
 		return;
-	
+
+	//Todo realize pBuffer save buffer data...
 	// Copy one line into buffer
 	for (i = 0; i < Size; i++)
 		pQueue->Buffer[pQueue->Rear][i] = s[i];
 
 	pQueue->Buffer[pQueue->Rear][i] = '\0';
 	
-    pQueue->Rear = (pQueue->Rear + 1) % SYSTEM_LOG_DATA_LINE ;    //尾指针偏移
+    pQueue->Rear = (pQueue->Rear + 1) % pQueue->Size ;    //尾指针偏移
 
 	pQueue->LineCount++;
 
 	if (pQueue->LineCount > 40)
 	{
-		pQueue->Front = (pQueue->Front + 1) % SYSTEM_LOG_DATA_LINE;
+		pQueue->Front = (pQueue->Front + 1) % pQueue->Size;
 	}
 }
 

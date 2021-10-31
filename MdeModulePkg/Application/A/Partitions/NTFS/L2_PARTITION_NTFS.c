@@ -204,18 +204,18 @@ EFI_STATUS  L2_FILE_NTFS_MFTIndexItemsAnalysis(UINT8 *pBuffer, UINT8 DeviceID)
 
     //IndexEntryOffset:索引项的偏移 相对于当前位置
     L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d IndexEntryOffset: %llu IndexEntrySize: %llu\n", __LINE__, 
-                                                                     L1_NETWORK_4BytesToUINT32(((INDEX_HEADER *)p)->IndexEntryOffset),
-                                                                     L1_NETWORK_4BytesToUINT32(((INDEX_HEADER *)p)->IndexEntrySize));
+                                                                     L1_NETWORK_4BytesToUINT32(((NTFS_INDEX_HEADER *)p)->IndexEntryOffset),
+                                                                     L1_NETWORK_4BytesToUINT32(((NTFS_INDEX_HEADER *)p)->IndexEntrySize));
 
     // 相对于当前位置 need to add size before this Byte.
-    UINT8 length = L1_NETWORK_4BytesToUINT32(((INDEX_HEADER *)p)->IndexEntryOffset) + 24;
+    UINT8 length = L1_NETWORK_4BytesToUINT32(((NTFS_INDEX_HEADER *)p)->IndexEntryOffset) + 24;
     UINT8 pItem[200] = {0};
     UINT16 index = length;
 
 	//
     for (UINT8 i = 0; ; i++)
     {    
-         if (index >= L1_NETWORK_4BytesToUINT32(((INDEX_HEADER *)p)->IndexEntrySize))
+         if (index >= L1_NETWORK_4BytesToUINT32(((NTFS_INDEX_HEADER *)p)->IndexEntrySize))
             break;
             
          //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: index: %d\n", __LINE__,  index);  
@@ -226,8 +226,8 @@ EFI_STATUS  L2_FILE_NTFS_MFTIndexItemsAnalysis(UINT8 *pBuffer, UINT8 DeviceID)
         for (int i = 0; i < length2; i++)
             pItem[i] = pBuffer[index + i];
             
-         UINT8 FileNameSize = ((INDEX_ITEM *)pItem)->FileNameSize;
-         FileContentRelativeSector = L1_NETWORK_6BytesToUINT64(((INDEX_ITEM *)pItem)->MFTReferNumber);
+         UINT8 FileNameSize = ((NTFS_INDEX_ITEM *)pItem)->FileNameSize;
+         FileContentRelativeSector = L1_NETWORK_6BytesToUINT64(((NTFS_INDEX_ITEM *)pItem)->MFTReferNumber);
          /*L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: attribut length2: %d FileNameSize: %d\n", __LINE__, 
                                                                    length2,
                                                                    FileNameSize);  */  
@@ -239,7 +239,7 @@ EFI_STATUS  L2_FILE_NTFS_MFTIndexItemsAnalysis(UINT8 *pBuffer, UINT8 DeviceID)
             attributeName[i] = pItem[82 + 2 * i];
          }
 
-		 UINT8 IndexFlag = L1_NETWORK_2BytesToUINT16(((INDEX_ITEM *)pItem)->IndexFlag);
+		 UINT8 IndexFlag = L1_NETWORK_2BytesToUINT16(((NTFS_INDEX_ITEM *)pItem)->IndexFlag);
          L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: Name: %a, RelativeSector: %llu, IndexFlag: %d\n", __LINE__, attributeName, FileContentRelativeSector, IndexFlag);
          //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%s attributeName: %a\n", __LINE__,  attributeName);  
          index += length2;

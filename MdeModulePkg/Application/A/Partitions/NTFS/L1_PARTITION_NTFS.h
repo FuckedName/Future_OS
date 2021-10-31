@@ -56,7 +56,7 @@ typedef struct {
     UINT8 Fill[3];//填充
     UINT8 USN[2];//更新序列号
     UINT8 USNArray[0];//更新序列数组
-}INDEX_HEADER;
+}NTFS_INDEX_HEADER;
 
 typedef struct {
      UINT8 MFTReferNumber[8];//文件的MFT参考号, first 6 Bytes * 2 + MFT table sector = file sector 
@@ -75,7 +75,7 @@ typedef struct {
      UINT8 FileNameSize;//文件名长度
      UINT8 FileNamespace;//文件命名空间
      UINT8 FileNameAndFill[0];//文件名和填充
-}INDEX_ITEM;
+}NTFS_INDEX_ITEM;
 
 // Master File Table
 typedef enum

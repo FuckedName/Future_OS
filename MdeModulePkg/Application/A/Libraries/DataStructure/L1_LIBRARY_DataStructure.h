@@ -1,18 +1,16 @@
 #pragma once
 
-
-#define SYSTEM_LOG_DATA_WIDTH 200
-#define SYSTEM_LOG_DATA_LINE 40
-
 typedef struct
 {
-	UINT8  Buffer[SYSTEM_LOG_DATA_LINE][SYSTEM_LOG_DATA_WIDTH];
-	UINT16 Front;
-	UINT16 Rear;
-	UINT16 LineCount;
+	unsigned char Buffer[40][100];
+	unsigned long Front;
+	unsigned long Rear;
+	unsigned long Size;
+	unsigned long LineCount;
 }QUEUE;
 
-void L1_LIBRARY_QueueInit(QUEUE *pQueue);
+
+void L1_LIBRARY_QueueInit(QUEUE *pQueue, unsigned long BufferSize);
 
 int L1_LIBRARY_StackPush(char* a, int top, char elem);
 

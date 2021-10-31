@@ -58,6 +58,12 @@ EFI_GRAPHICS_OUTPUT_PROTOCOL       *GraphicsOutput = NULL;
 
 EFI_GRAPHICS_OUTPUT_BLT_PIXEL MouseColor;
 
+UINT8 *pSystemLogBuffer = NULL; // Save log data
+
+//Need to allocate buffer in this module.
+#define SYSTEM_LOG_DATA_WIDTH 200
+#define SYSTEM_LOG_DATA_LINE 40
+
 
 // Line 22
 #define DISK_READ_BUFFER_X (0) 
@@ -741,7 +747,17 @@ VOID EFIAPI L2_DEBUG_Print3 (UINT16 x, UINT16 y, WINDOW_LAYER_ITEM layer, IN  CO
 
     VA_LIST         VaList;
     VA_START (VaList, Format);
-    L2_STRING_Maker2(x, y, layer, Format, VaList);
+	
+	if (layer.LayerID == GRAPHICS_LAYER_SYSTEM_LOG_WINDOW)
+	{
+		L2_STRING_Maker3(x, y, layer, Format, VaList);
+	}
+    else
+    {
+    	L2_STRING_Maker2(x, y, layer, Format, VaList);
+    }
+
+	
     VA_END (VaList);
 	
     for (UINT16 i = 0; i < sizeof(AsciiBuffer) /sizeof(CHAR8); i++)

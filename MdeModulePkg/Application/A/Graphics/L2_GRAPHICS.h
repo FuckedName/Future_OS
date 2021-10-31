@@ -8,14 +8,6 @@
 #include <L1_GRAPHICS.h>
 
 
-
-typedef enum
-{
-	FILE_SYSTEM_FAT32 = 1,
-	FILE_SYSTEM_NTFS,
-	FILE_SYSTEM_MAX
-}FILE_SYSTEM_TYPE;
-
 // Master File Table
 typedef enum
 {

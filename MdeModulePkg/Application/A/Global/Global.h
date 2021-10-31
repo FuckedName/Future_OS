@@ -1,10 +1,12 @@
 #pragma once
+#include <Library/UefiLib.h>
 
 #include <Library/BaseLib.h>
 #include <Protocol/SimplePointer.h>
 #include <Protocol/GraphicsOutput.h>
-			
 #include <Graphics/L2_GRAPHICS.h>
+			
+#include <Libraries/DataStructure/L1_LIBRARY_DataStructure.h>
 
 #include <Graphics/L1_GRAPHICS.h>
 
@@ -109,6 +111,7 @@ typedef struct
 }DOLLAR_BOOT;
 
 
+extern QUEUE Queue;
 
 extern FAT32_ROOTPATH_SHORT_FILE_ITEM pItems[32];
 extern INT8 SystemQuitFlag;
@@ -177,16 +180,26 @@ typedef struct
 }MasterBootRecord;
 
 
+typedef enum
+{
+	FILE_SYSTEM_FAT32 = 0,
+	FILE_SYSTEM_NTFS,
+	FILE_SYSTEM_MAX
+}FILE_SYSTEM_TYPE;
+
 typedef struct
 {
+	
+	UINT16 FileSystemType; //
     UINT16 DeviceType; // 0 Disk, 1: USB, 2: Sata;
     UINT16 PartitionType; // 0 MBR, 1 GPT;
     UINT16 PartitionID; // a physics device consist of Several parts like c: d: e:
     UINT16 PartitionGUID; // like FA458FD2-4FF7-44D8-B542-BA560A5990B3
     UINT16 DeviceSquenceID; //0025384961B47ECD
-    char Signare[50]; // MBR:0x077410A0
     long long StartSectorNumber; //0x194000
     long long SectorCount; //0xC93060
+    UINT8 Signare[50]; // MBR:0x077410A0
+    UINT8 PartitionName[50];
 
     //Partition parameter
     MasterBootRecordSwitched stMBRSwitched; //FAT32
