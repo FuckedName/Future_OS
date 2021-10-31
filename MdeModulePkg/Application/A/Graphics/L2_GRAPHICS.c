@@ -5,6 +5,14 @@
 
 #include <L2_GRAPHICS.h>
 #include <string.h>
+#include <Libraries/Math/L1_LIBRARY_Math.h>
+#include <Libraries/Network/L1_LIBRARY_Network.h>
+#include <Libraries/Memory/L1_LIBRARY_Memory.h>
+
+#include <Devices/Store/L2_DEVICE_Store.h>
+
+
+
 
 #include <Libraries/String/L2_LIBRARY_String.h>
 #include <Partitions/FAT32/L2_PARTITION_FAT32.h>
@@ -221,7 +229,7 @@ const UINT8 sASCII[][16] =
     {0x00,0x00,0xCC,0x00,0x00,0x78,0x0C,0x7C,0xCC,0xCC,0xCC,0x76,0x00,0x00,0x00,0x00},       
 };
 
-L3_GRAPHICS_ItemPrint(UINT8 *pDestBuffer, UINT8 *pSourceBuffer, UINT16 pDestWidth, UINT16 pDestHeight, 
+VOID L3_GRAPHICS_ItemPrint(UINT8 *pDestBuffer, UINT8 *pSourceBuffer, UINT16 pDestWidth, UINT16 pDestHeight, 
                               UINT16 pSourceWidth, UINT16 pSourceHeight, UINT16 x, UINT16 y, CHAR8 *pNameString, CHAR16 StringType, UINT16 DestLayerID)
 {
 	UINT16 WindowLayerID = 0;
@@ -240,77 +248,6 @@ L3_GRAPHICS_ItemPrint(UINT8 *pDestBuffer, UINT8 *pSourceBuffer, UINT16 pDestWidt
 
     //if (2 == StringType)
     //    L2_DEBUG_Print2(x, y + pDestHeight, pDestBuffer, "%a ", pNameString);
-}
-
-// Draw 8 X 16 point
-EFI_STATUS L2_GRAPHICS_ChineseHalfDraw2(UINT8 *pBuffer,UINT8 d,
-        IN UINTN x0, UINTN y0,
-        UINT8 width,
-        IN EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color, UINT16 AreaWidth)
-{
-    //L2_DEBUG_Print1(10, 10, "%X %X %X %X", x0, y0, AreaWidth);
-    if (NULL == pBuffer)
-    {
-        //DEBUG ((EFI_D_INFO, "pBuffer is NULL\n"));
-        return EFI_SUCCESS;
-    }
-        
-    if ((d & 0x80) != 0) 
-        L1_MEMORY_CopyColor1(pBuffer, Color, x0 + 0, y0, AreaWidth ); 
-    
-    if ((d & 0x40) != 0) 
-        L1_MEMORY_CopyColor1(pBuffer, Color, x0 + 1, y0, AreaWidth );
-    
-    if ((d & 0x20) != 0) 
-        L1_MEMORY_CopyColor1(pBuffer, Color, x0 + 2, y0, AreaWidth );
-    
-    if ((d & 0x10) != 0) 
-        L1_MEMORY_CopyColor1(pBuffer, Color, x0 + 3, y0, AreaWidth );
-    
-    if ((d & 0x08) != 0) 
-        L1_MEMORY_CopyColor1(pBuffer, Color, x0 + 4, y0, AreaWidth );
-    
-    if ((d & 0x04) != 0) 
-        L1_MEMORY_CopyColor1(pBuffer, Color, x0 + 5, y0, AreaWidth );
-    
-    if ((d & 0x02) != 0) 
-        L1_MEMORY_CopyColor1(pBuffer, Color, x0 + 6, y0, AreaWidth );
-    
-    if ((d & 0x01) != 0) 
-        L1_MEMORY_CopyColor1(pBuffer, Color, x0 + 7, y0, AreaWidth );
-
-    return EFI_SUCCESS;
-}
-
-EFI_STATUS L2_GRAPHICS_ChineseCharDraw(UINT8 *pBuffer,
-        IN UINTN x0, UINTN y0, UINT32 offset,
-        IN EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color , UINT16 AreaWidth)
-{
-    INT8 i;
-    //L2_DEBUG_Print1(10, 10, "%X %X %X %X", x0, y0, offset, AreaWidth);
-    ////DEBUG ((EFI_D_INFO, "%X %X %X %X", x0, y0, offset, AreaWidth));
-
-    if (NULL == pBuffer)
-    {
-        //DEBUG ((EFI_D_INFO, "NULL == pBuffer"));
-        return EFI_SUCCESS;
-    }
-
-    if (offset < 1)
-    {
-        //DEBUG ((EFI_D_INFO, "offset < 1 \n"));
-        return EFI_SUCCESS;
-    }
-    
-    for(i = 0; i < 32; i += 2)
-    {
-        L2_GRAPHICS_ChineseHalfDraw2(pBuffer, sChineseChar[offset * 32 + i ],     x0,     y0 + i / 2, 1, Color, AreaWidth);              
-        L2_GRAPHICS_ChineseHalfDraw2(pBuffer, sChineseChar[offset * 32 + i + 1],  x0 + 8, y0 + i / 2, 1, Color, AreaWidth);      
-    }
-    
-    ////DEBUG ((EFI_D_INFO, "\n"));
-    
-    return EFI_SUCCESS;
 }
 
 
@@ -448,7 +385,7 @@ VOID L2_PARTITION_FileContentPrint(UINT8 *Buffer)
 // 2. Get StartClusterHigh2B and StartClusterLow2B and computer the next read sector id number
 // 3. Read sector id number sector content from partition
 // 4. Analysis content and print result 
-VOID L2_MOUSE_MyComputerFolderItemClicked()
+EFI_STATUS L2_MOUSE_MyComputerFolderItemClicked()
 {
     L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d L2_MOUSE_MyComputerFolderItemClicked\n", __LINE__);
 	//FolderItemID;
@@ -461,7 +398,7 @@ VOID L2_MOUSE_MyComputerFolderItemClicked()
 	if (0xffff == PartitionItemID || 0xffff == FolderItemID)
 	{
 		L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d 0xffff == PartitionItemID\n", __LINE__);
-		return;
+		return -1;
 	}
 
 	UINT16 index = FolderItemValidIndexArray[FolderItemID];
@@ -500,7 +437,7 @@ VOID L2_MOUSE_MyComputerFolderItemClicked()
 		default: break;
 	}
 
-	
+	return EFI_SUCCESS;
 }
 
 
@@ -701,7 +638,7 @@ void L2_GRAPHICS_ParameterInit()
     WindowLayers.LayerCount = 0;
 
     WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW].DisplayFlag = TRUE;
-    L1_MEMORY_Copy(WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW].Name, "System Log Window", sizeof("System Log Window"));
+    L1_MEMORY_Copy((UINT8 *)WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW].Name, "System Log Window", sizeof("System Log Window"));
     WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW].pBuffer = pSystemLogWindowBuffer;
     WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW].StartX = 0;
     WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW].StartY = 0;
@@ -713,7 +650,7 @@ void L2_GRAPHICS_ParameterInit()
     
 
     WindowLayers.item[GRAPHICS_LAYER_START_MENU].DisplayFlag = FALSE;
-    L1_MEMORY_Copy(WindowLayers.item[GRAPHICS_LAYER_START_MENU].Name, "Start Menu", sizeof("Start Menu"));
+    L1_MEMORY_Copy((UINT8 *)WindowLayers.item[GRAPHICS_LAYER_START_MENU].Name, "Start Menu", sizeof("Start Menu"));
     WindowLayers.item[GRAPHICS_LAYER_START_MENU].pBuffer = pStartMenuBuffer;
     WindowLayers.item[GRAPHICS_LAYER_START_MENU].StartX = 0;
     WindowLayers.item[GRAPHICS_LAYER_START_MENU].StartY = ScreenHeight - StartMenuHeight - 25;
@@ -724,7 +661,7 @@ void L2_GRAPHICS_ParameterInit()
     WindowLayers.LayerCount++;
 
     WindowLayers.item[GRAPHICS_LAYER_SYSTEM_SETTING_WINDOW].DisplayFlag = FALSE;
-    L1_MEMORY_Copy(WindowLayers.item[GRAPHICS_LAYER_SYSTEM_SETTING_WINDOW].Name, "System Setting Window", sizeof("System Setting Window"));
+    L1_MEMORY_Copy((UINT8 *)WindowLayers.item[GRAPHICS_LAYER_SYSTEM_SETTING_WINDOW].Name, "System Setting Window", sizeof("System Setting Window"));
     WindowLayers.item[GRAPHICS_LAYER_SYSTEM_SETTING_WINDOW].pBuffer = pSystemSettingWindowBuffer;
     WindowLayers.item[GRAPHICS_LAYER_SYSTEM_SETTING_WINDOW].StartX = StartMenuWidth;
     WindowLayers.item[GRAPHICS_LAYER_SYSTEM_SETTING_WINDOW].StartY = WindowLayers.item[GRAPHICS_LAYER_START_MENU].StartY + 16;
@@ -735,7 +672,7 @@ void L2_GRAPHICS_ParameterInit()
     WindowLayers.LayerCount++;
 
     WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].DisplayFlag = FALSE;
-    L1_MEMORY_Copy(WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].Name, "My Computer", sizeof("My Computer"));
+    L1_MEMORY_Copy((UINT8 *)WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].Name, "My Computer", sizeof("My Computer"));
     WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].pBuffer = pMyComputerBuffer;
     WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].StartX = 0;
     WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].StartY = 0;
@@ -746,7 +683,7 @@ void L2_GRAPHICS_ParameterInit()
     WindowLayers.LayerCount++;
 
     WindowLayers.item[GRAPHICS_LAYER_MEMORY_INFORMATION_WINDOW].DisplayFlag = FALSE;
-    L1_MEMORY_Copy(WindowLayers.item[GRAPHICS_LAYER_MEMORY_INFORMATION_WINDOW].Name, "Memory Information", sizeof("Memory Information"));
+    L1_MEMORY_Copy((UINT8 *)WindowLayers.item[GRAPHICS_LAYER_MEMORY_INFORMATION_WINDOW].Name, "Memory Information", sizeof("Memory Information"));
     WindowLayers.item[GRAPHICS_LAYER_MEMORY_INFORMATION_WINDOW].pBuffer = pMemoryInformationBuffer;
     WindowLayers.item[GRAPHICS_LAYER_MEMORY_INFORMATION_WINDOW].StartX = 0;
     WindowLayers.item[GRAPHICS_LAYER_MEMORY_INFORMATION_WINDOW].StartY = 0;
@@ -757,7 +694,7 @@ void L2_GRAPHICS_ParameterInit()
     WindowLayers.LayerCount++;
 	
     WindowLayers.item[GRAPHICS_LAYER_DESK].DisplayFlag = FALSE;
-    L1_MEMORY_Copy(WindowLayers.item[GRAPHICS_LAYER_DESK].Name, "Desk layer", sizeof("Desk layer"));
+    L1_MEMORY_Copy((UINT8 *)WindowLayers.item[GRAPHICS_LAYER_DESK].Name, "Desk layer", sizeof("Desk layer"));
     WindowLayers.item[GRAPHICS_LAYER_DESK].pBuffer = pDeskBuffer;
     WindowLayers.item[GRAPHICS_LAYER_DESK].StartX = 0;
     WindowLayers.item[GRAPHICS_LAYER_DESK].StartY = 0;
@@ -2309,6 +2246,77 @@ void L1_MEMORY_CopyColor3(UINT8 *pBuffer, EFI_GRAPHICS_OUTPUT_BLT_PIXEL color, U
     pBuffer[y0 * AreaWidth * 4 + x0 * 4 + 1] = color.Green;
     pBuffer[y0 * AreaWidth * 4 + x0 * 4 + 2] = color.Red;
     pBuffer[y0 * AreaWidth * 4 + x0 * 4 + 3] = color.Reserved;
+}
+
+// Draw 8 X 16 point
+EFI_STATUS L2_GRAPHICS_ChineseHalfDraw2(UINT8 *pBuffer,UINT8 d,
+        IN UINTN x0, UINTN y0,
+        UINT8 width,
+        IN EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color, UINT16 AreaWidth)
+{
+    //L2_DEBUG_Print1(10, 10, "%X %X %X %X", x0, y0, AreaWidth);
+    if (NULL == pBuffer)
+    {
+        //DEBUG ((EFI_D_INFO, "pBuffer is NULL\n"));
+        return EFI_SUCCESS;
+    }
+        
+    if ((d & 0x80) != 0) 
+        L1_MEMORY_CopyColor1(pBuffer, Color, x0 + 0, y0, AreaWidth ); 
+    
+    if ((d & 0x40) != 0) 
+        L1_MEMORY_CopyColor1(pBuffer, Color, x0 + 1, y0, AreaWidth );
+    
+    if ((d & 0x20) != 0) 
+        L1_MEMORY_CopyColor1(pBuffer, Color, x0 + 2, y0, AreaWidth );
+    
+    if ((d & 0x10) != 0) 
+        L1_MEMORY_CopyColor1(pBuffer, Color, x0 + 3, y0, AreaWidth );
+    
+    if ((d & 0x08) != 0) 
+        L1_MEMORY_CopyColor1(pBuffer, Color, x0 + 4, y0, AreaWidth );
+    
+    if ((d & 0x04) != 0) 
+        L1_MEMORY_CopyColor1(pBuffer, Color, x0 + 5, y0, AreaWidth );
+    
+    if ((d & 0x02) != 0) 
+        L1_MEMORY_CopyColor1(pBuffer, Color, x0 + 6, y0, AreaWidth );
+    
+    if ((d & 0x01) != 0) 
+        L1_MEMORY_CopyColor1(pBuffer, Color, x0 + 7, y0, AreaWidth );
+
+    return EFI_SUCCESS;
+}
+
+EFI_STATUS L2_GRAPHICS_ChineseCharDraw(UINT8 *pBuffer,
+        IN UINTN x0, UINTN y0, UINT32 offset,
+        IN EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color , UINT16 AreaWidth)
+{
+    INT8 i;
+    //L2_DEBUG_Print1(10, 10, "%X %X %X %X", x0, y0, offset, AreaWidth);
+    ////DEBUG ((EFI_D_INFO, "%X %X %X %X", x0, y0, offset, AreaWidth));
+
+    if (NULL == pBuffer)
+    {
+        //DEBUG ((EFI_D_INFO, "NULL == pBuffer"));
+        return EFI_SUCCESS;
+    }
+
+    if (offset < 1)
+    {
+        //DEBUG ((EFI_D_INFO, "offset < 1 \n"));
+        return EFI_SUCCESS;
+    }
+    
+    for(i = 0; i < 32; i += 2)
+    {
+        L2_GRAPHICS_ChineseHalfDraw2(pBuffer, sChineseChar[offset * 32 + i ],     x0,     y0 + i / 2, 1, Color, AreaWidth);              
+        L2_GRAPHICS_ChineseHalfDraw2(pBuffer, sChineseChar[offset * 32 + i + 1],  x0 + 8, y0 + i / 2, 1, Color, AreaWidth);      
+    }
+    
+    ////DEBUG ((EFI_D_INFO, "\n"));
+    
+    return EFI_SUCCESS;
 }
 
 

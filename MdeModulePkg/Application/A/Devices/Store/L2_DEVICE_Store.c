@@ -10,10 +10,8 @@
 #include <Protocol/DevicePathToText.h>
 
 #include <Graphics/L2_GRAPHICS.h>
-
-
-#include "L2_DEVICE_Store.h"
-
+#include <Libraries/Math/L1_LIBRARY_Math.h>
+#include <L2_DEVICE_Store.h>
 #include <L2_GRAPHICS.h>
 
 

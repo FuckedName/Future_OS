@@ -38,7 +38,6 @@ VOID L2_KEYBOARD_KeyPressed()
     // char buffer[SYSTEM_ICON_WIDTH * SYSTEM_ICON_HEIGHT * 3 + 0x36] = {0};
     
     //DEBUG ((EFI_D_INFO, "%d HandleEnterPressed\n", __LINE__));
-    return EFI_SUCCESS;
 }
 
 VOID

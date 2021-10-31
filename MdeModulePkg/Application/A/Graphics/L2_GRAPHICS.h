@@ -88,7 +88,7 @@ typedef struct
     START_MENU_STATE                    CurrentState;
     MOUSE_CLICK_EVENT            		event;
     START_MENU_STATE                    NextState;
-    EFI_STATUS                          (*pFunc)(); 
+    VOID                          (*pFunc)(); 
 }START_MENU_STATE_TRANSFORM;
 
 
@@ -152,4 +152,15 @@ L2_TIMER_Print (
   IN EFI_EVENT Event,
   IN VOID      *Context
   );
+
+EFI_STATUS L2_GRAPHICS_ChineseCharDraw(UINT8 *pBuffer,
+        IN UINTN x0, UINTN y0, UINT32 offset,
+        IN EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color , UINT16 AreaWidth);
+
+void L1_MEMORY_CopyColor1(UINT8 *pBuffer, EFI_GRAPHICS_OUTPUT_BLT_PIXEL color, UINT16 x0, UINT16 y0, UINT16 AreaWidth);
+
+void L1_MEMORY_CopyColor2(UINT8 *pBuffer, EFI_GRAPHICS_OUTPUT_BLT_PIXEL color, UINT16 x0, UINT16 y0);
+
+void L1_MEMORY_CopyColor3(UINT8 *pBuffer, EFI_GRAPHICS_OUTPUT_BLT_PIXEL color, UINT16 x0, UINT16 y0, UINT8 AreaWidth);
+
 

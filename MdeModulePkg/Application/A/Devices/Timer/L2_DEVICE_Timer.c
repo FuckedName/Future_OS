@@ -26,7 +26,7 @@ EFI_STATUS L2_TIMER_IntervalInit()
     if (NULL == TimerCount)
     {
         //DEBUG(( EFI_D_INFO, "%d, NULL == TimerCount \r\n", __LINE__));
-        return;
+        return -1;
     }
 
     Status = gBS->CreateEvent(EVT_NOTIFY_SIGNAL | EVT_TIMER,

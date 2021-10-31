@@ -1,8 +1,8 @@
 #pragma once
 
-#include <string.h>
 
 #include <Library/UefiLib.h>
+#include <string.h>
 //#include <Device/Mouse/L1_DEVICE_Mouse.h>
 //#include <Device/Screen/L1_DEVICE_Screen.h>
 
@@ -63,19 +63,19 @@ typedef struct  //所有偏移量均为相对于属性类型 Type 的偏移量
      UINT8 Identify[2];       // 识别标志  00 00
     //--- 0ffset: 0x10 ---
     //--------  常驻属性和非常驻属性的公共部分 ----
-    union CCommon
+    union
     {
     
         //---- 如果该属性为 常驻 属性时使用该结构 ----
-        struct CResident
+        struct 
         {
              UINT8 StreamLength[4];        // 属性值的长度, 即属性具体内容的长度。"48 00 00 00"
              UINT8 StreamOffset[2];        // 属性值起始偏移量  "18 00"
              UINT8 IndexFiag[2];           // 属性是否被索引项所索引，索引项是一个索引(如目录)的基本组成  00 00
-        };
+        }CResident;
         
         //------- 如果该属性为 非常驻 属性时使用该结构 ----
-        struct CNonResident
+        struct 
         {
              UINT8 StartVCN[8];            // 起始的 VCN 值(虚拟簇号：在一个文件中的内部簇编号,0起）
              UINT8 LastVCN[8];             // 最后的 VCN 值
@@ -85,8 +85,8 @@ typedef struct  //所有偏移量均为相对于属性类型 Type 的偏移量
              UINT8 StreamAiiocSize[8];     // 为属性值分配的空间 ，单位为B，压缩文件分配值小于实际值
              UINT8 StreamRealSize[8];      // 属性值实际使用的空间，单位为B
              UINT8 StreamCompressedSize[8]; // 属性值经过压缩后的大小, 如未压缩, 其值为实际值
-        };
-    };
+        }CNonResident;
+     }CCommon;
 }NTFSAttribute;
 
 

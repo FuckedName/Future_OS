@@ -325,7 +325,7 @@ extern EFI_GRAPHICS_OUTPUT_PROTOCOL       *GraphicsOutput;
 
 // memory: 1G->3G
 #define ALL_PAGE_COUNT 0x80000
-#define PHYSICAL_ADDRESS_START 0x40000000
+#define PHYSICAL_ADDRESS_START 0x20000000
 
 extern UINT64 FreeNumberOfPages;
 extern UINT64 SystemAllPagesAllocated;

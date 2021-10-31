@@ -1,6 +1,8 @@
 #define Note ""
 
 #include <Library/UefiRuntimeServicesTableLib.h>
+#include <Library/MemoryAllocationLib.h>
+
 
 #include <Libraries/Math/L1_LIBRARY_Math.h>
 #include <Libraries/Network/L1_LIBRARY_Network.h>
@@ -12,10 +14,14 @@
 #include <Graphics/L3_GRAPHICS.h>
 #include <Devices/Mouse/L1_DEVICE_Mouse.h>
 #include <Devices/Keyboard/L2_DEVICE_Keyboard.h>
+#include <Devices/Timer/L2_DEVICE_Timer.h>
 #include <Devices/Store/L2_DEVICE_Store.h>
 #include <Memory/L2_MEMORY.h>
+#include <Memory/L1_MEMORY.h>
 #include <Global/Global.h>
 #include <Partitions/L2_PARTITION.h>
+#include <Processes/L2_PROCESS_Multi.h>
+
 
 //https://blog.csdn.net/goodwillyang/article/details/45559925
 //注意：FAT32分区的卷标存放在第2个簇前几个字符
