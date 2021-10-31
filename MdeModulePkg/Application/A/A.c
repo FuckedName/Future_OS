@@ -266,48 +266,6 @@ STATE   NextState = INIT_STATE;
 
 int READ_FILE_FSM_Event = READ_PATITION_EVENT;
 
-L3_GRAPHICS_ItemPrint(UINT8 *pDestBuffer, UINT8 *pSourceBuffer, UINT16 pDestWidth, UINT16 pDestHeight, 
-                              UINT16 pSourceWidth, UINT16 pSourceHeight, UINT16 x, UINT16 y, CHAR8 *pNameString, CHAR16 StringType, UINT16 DestLayerID)
-{
-	UINT16 WindowLayerID = 0;
-	WindowLayers.item[WindowLayerID];
-    
-    for (int j = 0; j < pSourceHeight; j++)
-    {
-        for (int k = 0; k < pSourceWidth; k++)
-        {
-            pDestBuffer[((y + j) * pDestWidth + x + k) * 4 ]     = pSourceBuffer[((pSourceHeight - j) * pSourceWidth + k) * 3 ];
-            pDestBuffer[((y + j) * pDestWidth + x + k) * 4 + 1 ] = pSourceBuffer[((pSourceHeight - j) * pSourceWidth + k) * 3 + 1 ];
-            pDestBuffer[((y + j) * pDestWidth + x + k) * 4 + 2 ] = pSourceBuffer[((pSourceHeight - j) * pSourceWidth + k) * 3 + 2 ];
-            pDestBuffer[((y + j) * pDestWidth + x + k) * 4 + 3 ] = DestLayerID;
-        }
-    }
-
-    //if (2 == StringType)
-    //    L2_DEBUG_Print2(x, y + pDestHeight, pDestBuffer, "%a ", pNameString);
-}
-
-UINT32 L2_FILE_GetNextBlockNumber()
-{
-    //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: PreviousBlockNumber: %d\n",  __LINE__, PreviousBlockNumber);
-
-    if (PreviousBlockNumber == 0)
-    {
-        return 0x0fffffff;
-    }
-    
-    if (FAT32_Table[PreviousBlockNumber * 4] == 0xff 
-        && FAT32_Table[PreviousBlockNumber * 4 + 1] == 0xff 
-        && FAT32_Table[PreviousBlockNumber * 4 + 2] == 0xff 
-        && FAT32_Table[PreviousBlockNumber * 4 + 3] == 0x0f)
-    {
-        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: PreviousBlockNumber: %d, PreviousBlockNumber: %llX\n",  __LINE__, PreviousBlockNumber, 0x0fffffff);
-        return 0x0fffffff;
-    }
-    
-    return FAT32_Table[PreviousBlockNumber  * 4] + (UINT32)FAT32_Table[PreviousBlockNumber * 4 + 1] * 16 * 16 + (UINT32)FAT32_Table[PreviousBlockNumber * 4 + 2] * 16 * 16 * 16 * 16 + (UINT32)FAT32_Table[PreviousBlockNumber * 4 + 3] * 16 * 16 * 16 * 16 * 16 * 16;  
-}
-
 //https://blog.csdn.net/goodwillyang/article/details/45559925
 
 VOID EFIAPI L2_TIMER_Slice(

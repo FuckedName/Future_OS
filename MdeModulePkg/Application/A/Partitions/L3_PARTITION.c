@@ -229,6 +229,27 @@ EFI_STATUS L2_STORE_GetFatTableFSM()
     return EFI_SUCCESS;
 }
 
+UINT32 L2_FILE_GetNextBlockNumber()
+{
+    //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: PreviousBlockNumber: %d\n",  __LINE__, PreviousBlockNumber);
+
+    if (PreviousBlockNumber == 0)
+    {
+        return 0x0fffffff;
+    }
+    
+    if (FAT32_Table[PreviousBlockNumber * 4] == 0xff 
+        && FAT32_Table[PreviousBlockNumber * 4 + 1] == 0xff 
+        && FAT32_Table[PreviousBlockNumber * 4 + 2] == 0xff 
+        && FAT32_Table[PreviousBlockNumber * 4 + 3] == 0x0f)
+    {
+        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: PreviousBlockNumber: %d, PreviousBlockNumber: %llX\n",  __LINE__, PreviousBlockNumber, 0x0fffffff);
+        return 0x0fffffff;
+    }
+    
+    return FAT32_Table[PreviousBlockNumber  * 4] + (UINT32)FAT32_Table[PreviousBlockNumber * 4 + 1] * 16 * 16 + (UINT32)FAT32_Table[PreviousBlockNumber * 4 + 2] * 16 * 16 * 16 * 16 + (UINT32)FAT32_Table[PreviousBlockNumber * 4 + 3] * 16 * 16 * 16 * 16 * 16 * 16;  
+}
+
 
 EFI_STATUS L2_STORE_ReadFileFSM()
 {    
@@ -371,6 +392,7 @@ EFI_STATUS L3_APPLICATION_ReadFile(UINT8 *FileName, UINT8 NameLength, UINT8 *pBu
 
     
 }
+
 
 UINT8 PreviousItem = -1;
 
