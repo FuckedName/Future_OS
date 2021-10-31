@@ -9,6 +9,8 @@ CHAR8 y_move = 0;
 
 UINT16 iMouseX = 0;
 UINT16 iMouseY = 0;
+UINT16 MouseClickWindowWidth = 300;
+UINT16 MouseClickWindowHeight = 400;
 
 EFI_STATUS L2_MOUSE_Init()
 {

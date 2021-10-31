@@ -238,7 +238,6 @@ extern UINT8 *pSystemIconMySettingBuffer;
 extern UINT8 *pSystemIconRecycleBuffer;
 extern UINT8 *pSystemLogWindowBuffer;
 extern UINT8 *pSystemSettingWindowBuffer;
-extern UINT16 LogStatusErrorCount;
 extern UINT16 SystemLogWindowHeight;
 
 extern UINTN PartitionCount; 
@@ -250,8 +249,7 @@ extern UINTN PartitionCount;
 extern UINT32 FileBlockStart;                               
 extern UINT32 PreviousBlockNumber;                              
 extern  UINT32 FileLength;                           
-extern  UINT8 *pReadFileDestBuffer;                          
-extern UINT32 PreviousBlockNumber;   
+extern  UINT8 *pReadFileDestBuffer;    
 extern UINT16 PartitionItemID;
 extern UINT16 FolderItemID;
 
@@ -312,6 +310,8 @@ extern UINT16 StatusErrorCount;
 
 #define ALLOCATE_UNIT_SIZE (8 * 512)
 
+
+extern UINT16 LogStatusErrorCount;
 
 #define DISPLAY_LOG_ERROR_STATUS_X (4) 
 #define DISPLAY_LOG_ERROR_STATUS_Y (16 * (LogStatusErrorCount++ % (SystemLogWindowHeight / 16 + 2)) )

@@ -5,6 +5,21 @@
 #include <Global/Global.h>
 
 int READ_FILE_FSM_Event = READ_PATITION_EVENT;
+UINTN PartitionCount = 0;
+
+STATE   NextState = INIT_STATE;
+
+UINT16 FileReadCount = 0;
+
+UINT32 FileLength = 0;
+
+UINT32 PreviousBlockNumber = 0;
+
+UINT8 ReadFileNameLength = 0;
+
+UINT8 ReadFileName[20];
+
+UINT64 sector_count = 0;
 
 
 // all partitions analysis

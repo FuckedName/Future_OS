@@ -13,69 +13,13 @@
 #include <Devices/Mouse/L1_DEVICE_Mouse.h>
 #include <Devices/Keyboard/L2_DEVICE_Keyboard.h>
 #include <Devices/Store/L2_DEVICE_Store.h>
-
-
 #include <Memory/L2_MEMORY.h>
 #include <Global/Global.h>
 #include <Partitions/L2_PARTITION.h>
 
-
 //https://blog.csdn.net/goodwillyang/article/details/45559925
-UINT32 BlockSize = 0;
 //注意：FAT32分区的卷标存放在第2个簇前几个字符
 //      NTFS分区的卷标存放在MFT表项$VOLUME表里
-UINT8 *FAT32_Table = NULL;
-UINT32 FileBlockStart = 0;
-UINT32 FileLength = 0;
-UINT16 FileReadCount = 0;
-EFI_GRAPHICS_OUTPUT_PROTOCOL       *GraphicsOutput = NULL;
-UINT16 LogStatusErrorCount = 0;
-UINT16 MemoryInformationWindowHeight = 16 * 40;
-UINT16 MemoryInformationWindowWidth = 16 * 30;
-UINT16 MouseClickWindowWidth = 300;
-UINT16 MouseClickWindowHeight = 400;
-EFI_GRAPHICS_OUTPUT_BLT_PIXEL MouseColor;
-UINT16 MyComputerWidth = 16 * 40;
-UINT16 MyComputerHeight = 16 * 50;
-STATE   NextState = INIT_STATE;
-UINTN PartitionCount = 0;
-UINT8 *pDateTimeBuffer = NULL; //Mouse layer: 3
-UINT8 *pDeskBuffer = NULL; //only Desk layer include wallpaper and button : 1
-UINT8 *pDeskDisplayBuffer = NULL; //desk display after multi graphicses layers compute
-UINT8 *pDeskWallpaperBuffer = NULL;
-UINT8 *pMemoryInformationBuffer = NULL; // MyComputer layer: 2
-UINT8 *pMouseBuffer = NULL; //Mouse layer: 4
-UINT8 *pMouseClickBuffer = NULL; // for mouse click 
-UINT8 *pMouseSelectedBuffer = NULL;  // after mouse selected
-UINT8 *pMyComputerBuffer = NULL; // MyComputer layer: 2
-UINT8 *pReadFileDestBuffer = NULL;
-UINT32 PreviousBlockNumber = 0;
-UINT8 *pStartMenuBuffer = NULL;
-UINT8 *pSystemIconBuffer[SYSTEM_ICON_MAX]; //desk display after multi graphicses layers compute
-UINT8 *pSystemIconFolderBuffer = NULL; //after zoom in or zoom out
-UINT8 *pSystemIconMySettingBuffer = NULL; //after zoom in or zoom out
-UINT8 *pSystemIconRecycleBuffer = NULL; //after zoom in or zoom out
-UINT8 *pSystemIconTempBuffer2 = NULL;
-UINT8 *pSystemIconTextBuffer = NULL; //after zoom in or zoom out
-UINT8 *pSystemLogWindowBuffer = NULL; // MyComputer layer: 2
-UINT8 *pSystemSettingWindowBuffer = NULL;
-UINT8 ReadFileName[20];
-UINT8 ReadFileNameLength = 0;
-UINT8 *sChineseChar = NULL;
-UINTN ScreenWidth, ScreenHeight;
-UINT64 sector_count = 0;
-UINT16 StartMenuWidth = 16 * 10;
-UINT16 StartMenuHeight = 16 * 20;
-UINT16 StatusErrorCount = 0;
-UINT16 SystemLogWindowWidth = 16 * 30;
-UINT16 SystemLogWindowHeight = 16 * 40;
-UINT16 SystemSettingWindowWidth = 16 * 10;
-UINT16 SystemSettingWindowHeight = 16 * 10;
-UINT16 parameter_count = 0;
-
-DEVICE_PARAMETER device[10] = {0};
-MasterBootRecordSwitched MBRSwitched;
-DollarBootSwitched NTFSBootSwitched;
 
 char *p1;   
 extern const UINT8 sASCII[][16];

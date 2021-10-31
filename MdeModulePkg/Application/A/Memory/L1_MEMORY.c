@@ -10,6 +10,10 @@ UINT64 FreeNumberOfPages = ALL_PAGE_COUNT;
 UINT64 SystemAllPagesAllocated = 0;
 UINT8 *pMapper = (UINT8 *)(PHYSICAL_ADDRESS_START);
 
+UINT8 *FAT32_Table = NULL;
+
+UINT8 *pDateTimeBuffer = NULL; //Mouse layer: 3
+
 // size: the one unit size is Bytes 
 UINT8 *L2_MEMORY_Allocate(char *pApplicationName, UINT16 type, UINT32 SizeRequired)
 {

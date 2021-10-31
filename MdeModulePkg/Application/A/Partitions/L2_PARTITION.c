@@ -12,6 +12,11 @@
 //#include <FAT32/L2_PARTITION_FAT32.h>
 //#include <NTFS/L2_PARTITION_NTFS.h>
 
+UINT32 BlockSize = 0;
+DEVICE_PARAMETER device[10] = {0};
+UINT32 FileBlockStart = 0;
+MasterBootRecordSwitched MBRSwitched;
+DollarBootSwitched NTFSBootSwitched;
 
 // all partitions analysis
 EFI_STATUS L2_FILE_PartitionTypeAnalysis(UINT16 DeviceID)

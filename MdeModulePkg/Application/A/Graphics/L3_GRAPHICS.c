@@ -7,6 +7,9 @@
 #include <Global/Global.h>
 #include <Memory/L1_MEMORY.h>
 
+UINT16 MyComputerWidth = 16 * 40;
+UINT16 MyComputerHeight = 16 * 50;
+
 EFI_STATUS L3_WINDOW_Create(UINT8 *pBuffer, UINT8 *pParent, UINT16 Width, UINT16 Height, UINT16 LayerID, CHAR8 *pWindowTitle)
 {   
     L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: Width: %d \n", __LINE__, Width);

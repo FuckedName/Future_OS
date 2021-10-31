@@ -3,76 +3,52 @@
 #include <Library/UefiRuntimeServicesTableLib.h>
 #include <Library/BaseLib.h>
 
-#include <Guid/ConsoleInDevice.h>
-#include <Guid/ConsoleOutDevice.h>
-#include <Guid/FileSystemVolumeLabelInfo.h>
-#include <Guid/GlobalVariable.h>
-#include <Guid/HiiBootMaintenanceFormset.h>
-#include <Guid/MdeModuleHii.h>
-#include <Guid/ShellLibHiiGuid.h>
-#include <Guid/TtyTerm.h>
-#include <IndustryStandard/Pci.h>
-#include <Library/BaseLib.h>
-#include <Library/BaseMemoryLib.h>
-#include <Library/DebugLib.h>
-#include <Library/DevicePathLib.h>
-#include <Library/FileExplorerLib.h>
-#include <Library/FileHandleLib.h>
-#include <Library/HandleParsingLib.h>
-#include <Library/HiiLib.h>
-#include <Library/MemoryAllocationLib.h>
-#include <Library/PcdLib.h>
-#include <Library/PeCoffGetEntryPointLib.h>
-#include <Library/PrintLib.h>
-#include <Library/ShellCEntryLib.h> 
-#include <Library/ShellCommandLib.h>
-#include <Library/ShellLib.h>
-#include <Library/SortLib.h>
-#include <Library/UefiApplicationEntryPoint.h>
-#include <Library/UefiBootManagerLib.h>
-#include <Library/UefiBootServicesTableLib.h>
-#include <Library/UefiHiiServicesLib.h>
-#include <Library/UefiLib.h>
-#include <Library/UefiRuntimeLib.h>
-#include <Library/UefiRuntimeServicesTableLib.h>
-#include <Pi/PiFirmwareFile.h>
-#include <Pi/PiFirmwareVolume.h>
-#include <Protocol/AbsolutePointer.h>
-#include <Protocol/BusSpecificDriverOverride.h>
-#include <Protocol/DevicePath.h>
-#include <Protocol/DevicePathToText.h>
-#include <Protocol/DriverDiagnostics2.h>
-#include <Protocol/DriverDiagnostics.h>
-#include <Protocol/DriverFamilyOverride.h>
-#include <Protocol/DriverHealth.h>
-#include <Protocol/DriverSupportedEfiVersion.h>
-#include <Protocol/FirmwareVolume2.h>
-#include <Protocol/FormBrowserEx2.h>
-#include <Protocol/GraphicsOutput.h>
-#include <Protocol/HiiConfigAccess.h>
-#include <Protocol/LoadedImage.h>
-#include <Protocol/LoadFile.h>
-#include <Protocol/PciIo.h>
-#include <Protocol/PciRootBridgeIo.h>
-#include <Protocol/PlatformDriverOverride.h>
-#include <Protocol/PlatformToDriverConfiguration.h>
-#include <Protocol/SerialIo.h>
-#include <Protocol/Shell.h>
-#include <Protocol/ShellParameters.h>
-#include <Protocol/SimpleFileSystem.h>
-#include <Protocol/SimplePointer.h>
-#include <Protocol/SimpleTextInEx.h>
-#include <Protocol/UnicodeCollation.h>
-#include <Protocol/DiskIo.h>
-#include <Protocol/BlockIo.h>
-#include <Protocol/DiskIo2.h>
-#include <Protocol/BlockIo2.h>
-
 #include <L2_GRAPHICS.h>
 #include <string.h>
 
 #include <Libraries/String/L2_LIBRARY_String.h>
 #include <Partitions/FAT32/L2_PARTITION_FAT32.h>
+
+UINTN ScreenWidth, ScreenHeight;
+
+UINT16 LogStatusErrorCount = 0;
+
+UINT8 *sChineseChar = NULL;
+
+UINT8 *pDeskBuffer = NULL; //only Desk layer include wallpaper and button : 1
+UINT8 *pDeskDisplayBuffer = NULL; //desk display after multi graphicses layers compute
+UINT8 *pDeskWallpaperBuffer = NULL;
+UINT8 *pMemoryInformationBuffer = NULL; // MyComputer layer: 2
+UINT8 *pMouseBuffer = NULL; //Mouse layer: 4
+UINT8 *pMouseClickBuffer = NULL; // for mouse click 
+UINT8 *pMouseSelectedBuffer = NULL;  // after mouse selected
+UINT8 *pMyComputerBuffer = NULL; // MyComputer layer: 2
+UINT8 *pReadFileDestBuffer = NULL;
+
+UINT8 *pStartMenuBuffer = NULL;
+UINT8 *pSystemIconBuffer[SYSTEM_ICON_MAX]; //desk display after multi graphicses layers compute
+UINT8 *pSystemIconFolderBuffer = NULL; //after zoom in or zoom out
+UINT8 *pSystemIconMySettingBuffer = NULL; //after zoom in or zoom out
+UINT8 *pSystemIconRecycleBuffer = NULL; //after zoom in or zoom out
+UINT8 *pSystemIconTempBuffer2 = NULL;
+UINT8 *pSystemIconTextBuffer = NULL; //after zoom in or zoom out
+UINT8 *pSystemLogWindowBuffer = NULL; // MyComputer layer: 2
+UINT8 *pSystemSettingWindowBuffer = NULL;
+
+UINT16 StartMenuWidth = 16 * 10;
+UINT16 StartMenuHeight = 16 * 20;
+UINT16 StatusErrorCount = 0;
+UINT16 SystemLogWindowWidth = 16 * 30;
+UINT16 SystemLogWindowHeight = 16 * 40;
+UINT16 SystemSettingWindowWidth = 16 * 10;
+UINT16 SystemSettingWindowHeight = 16 * 10;
+
+UINT16 MemoryInformationWindowHeight = 16 * 40;
+UINT16 MemoryInformationWindowWidth = 16 * 30;
+
+EFI_GRAPHICS_OUTPUT_PROTOCOL       *GraphicsOutput = NULL;
+
+EFI_GRAPHICS_OUTPUT_BLT_PIXEL MouseColor;
 
 
 // Line 22
