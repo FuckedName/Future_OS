@@ -123,7 +123,8 @@ L2_KEYBOARD_Event (
         if (0x0D == uniChar)
         {
             keyboard_input_count = 0;
-            memset(pKeyboardInputBuffer, '\0', KEYBOARD_BUFFER_LENGTH);
+			L1_MEMORY_SetValue(pKeyboardInputBuffer, KEYBOARD_BUFFER_LENGTH, '\0');
+            //memset(pKeyboardInputBuffer, '\0', KEYBOARD_BUFFER_LENGTH);
             //L2_DEBUG_Print1(DISPLAY_KEYBOARD_X, DISPLAY_KEYBOARD_Y, "%a keyboard_input_count: %04d enter pressed", pKeyboardInputBuffer, keyboard_input_count);
 
             L2_KEYBOARD_KeyPressed();
