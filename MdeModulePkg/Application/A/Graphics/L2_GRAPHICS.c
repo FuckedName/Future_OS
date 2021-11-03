@@ -458,8 +458,7 @@ EFI_STATUS L2_MOUSE_MyComputerFolderItemClicked()
 	switch(pItems[index].Attribute[0])
 	{
 		case 0x10:  L1_MEMORY_Memset(&pItems, 0, sizeof(pItems));
-					L1_MEMORY_Copy(&pItems, Buffer, DISK_BUFFER_SIZE);
-				    //memcpy(&pItems, Buffer, DISK_BUFFER_SIZE);
+				    L1_MEMORY_Copy(&pItems, Buffer, DISK_BUFFER_SIZE);
 					L2_STORE_FolderItemsPrint();
 					break;
 		
@@ -735,7 +734,7 @@ void L2_GRAPHICS_ParameterInit()
 
     WindowLayers.LayerCount++;
 
-    L1_MEMORY_SetValue(WindowLayers.LayerSequences, 10 * 2, 0);
+    L1_MEMORY_SetValue(WindowLayers.LayerSequences, 0, 10 * 2);
 
     WindowLayers.ActiveWindowCount = 0;
 

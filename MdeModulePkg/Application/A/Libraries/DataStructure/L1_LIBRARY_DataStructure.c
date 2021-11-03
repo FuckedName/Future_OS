@@ -59,7 +59,7 @@ int L1_LIBRARY_StackPop(char * a,int top)
 void L1_LIBRARY_QueueInit(QUEUE *pQueue, unsigned long LineCount)
 {
 	// Todo: need to allocate buffer before set zero..
-	L1_MEMORY_SetValue(pQueue->Buffer, 40 * 100, 0);
+	L1_MEMORY_SetValue(pQueue->Buffer, 0, 40 * 100);
 	pQueue->Size = LineCount;
     pQueue->Front = pQueue->Rear = 0; //初始化头尾指针
     pQueue->LineCount = 0;

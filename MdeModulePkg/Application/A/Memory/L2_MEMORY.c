@@ -141,7 +141,7 @@ float L2_MEMORY_GETs()
     EFI_MEMORY_DESCRIPTOR                *MemoryMap;
     UINTN MemoryClassifySize[6] = {0};
 
-    L1_MEMORY_SetValue(&MemoryInformation, sizeof(MemoryInformation), 0);
+    L1_MEMORY_SetValue(&MemoryInformation, 0, sizeof(MemoryInformation));
     
     //
     // Get System MemoryMapSize
@@ -338,7 +338,7 @@ EFI_STATUS L2_MEMORY_MapInitial()
 
     INFO_SELF(L"%X \r\n", L2_MEMORY_MapInitial);  
 
-    L1_MEMORY_SetValue(&MemoryInformation.AllocatedInformation, sizeof(MemoryInformation.AllocatedInformation), 0);
+    L1_MEMORY_SetValue(&MemoryInformation.AllocatedInformation, 0, sizeof(MemoryInformation.AllocatedInformation));
 
     // Sort by pages
     for (UINT16 i = 0; i < MemoryInformation.MemorySliceCount; i++)
