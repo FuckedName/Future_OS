@@ -4,7 +4,7 @@
     File name:      	A.c
     Author：	        任启红
     ID：		00001
-    Version: Date:  	202107
+    Date:          	202107
     Description:    	整个模块的主入口函数
     Others:         	无
     History:        	无
