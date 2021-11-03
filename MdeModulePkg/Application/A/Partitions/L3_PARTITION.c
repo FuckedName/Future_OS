@@ -132,8 +132,7 @@ void L1_FILE_NameGet2(UINT8 deviceID, UINT8 *FileName)
 
 EFI_STATUS L1_FILE_RootPathAnalysis(UINT8 *p)
 {
-	L1_MEMORY_Copy(&pItems, p, DISK_BUFFER_SIZE);
-    //memcpy(&pItems, p, DISK_BUFFER_SIZE);
+    memcpy(&pItems, p, DISK_BUFFER_SIZE);
     UINT16 valid_count = 0;
     
     L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: .: %d\n", __LINE__, ReadFileName[7]);

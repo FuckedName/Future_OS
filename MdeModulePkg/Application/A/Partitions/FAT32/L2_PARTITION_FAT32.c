@@ -49,8 +49,7 @@ EFI_STATUS L1_FILE_FAT32_DataSectorAnalysis(UINT8 *p, MasterBootRecordSwitched *
     MasterBootRecord *pMBR;
     
     pMBR = (MasterBootRecord *)AllocateZeroPool(DISK_BUFFER_SIZE);
-	L1_MEMORY_Copy(pMBR, p, DISK_BUFFER_SIZE);
-    //memcpy(pMBR, p, DISK_BUFFER_SIZE);
+    memcpy(pMBR, p, DISK_BUFFER_SIZE);
 
     // 大端字节序：低位字节在高地址，高位字节低地址上。这是人类读写数值的方法。
     // 小端字节序：与上面相反。低位字节在低地址，高位字节在高地址。

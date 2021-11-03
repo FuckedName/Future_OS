@@ -456,8 +456,7 @@ EFI_STATUS L2_MOUSE_MyComputerFolderItemClicked()
 	switch(pItems[index].Attribute[0])
 	{
 		case 0x10:  L1_MEMORY_Memset(&pItems, 0, sizeof(pItems));
-					L1_MEMORY_Copy(&pItems, Buffer, DISK_BUFFER_SIZE);
-				    //memcpy(&pItems, Buffer, DISK_BUFFER_SIZE);
+				    memcpy(&pItems, Buffer, DISK_BUFFER_SIZE);
 					L2_STORE_FolderItemsPrint();
 					break;
 		
