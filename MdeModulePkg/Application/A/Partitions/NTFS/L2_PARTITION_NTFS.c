@@ -322,7 +322,8 @@ EFI_STATUS L2_FILE_NTFS_FirstSelectorAnalysis(UINT8 *p, DollarBootSwitched *pNTF
     DOLLAR_BOOT *pDollarBoot;
     
     pDollarBoot = (DOLLAR_BOOT *)AllocateZeroPool(DISK_BUFFER_SIZE);
-    memcpy(pDollarBoot, p, DISK_BUFFER_SIZE);
+	L1_MEMORY_Copy(pDollarBoot, p, DISK_BUFFER_SIZE);
+    //memcpy(pDollarBoot, p, DISK_BUFFER_SIZE);
   
     L1_FILE_NTFS_DollerRootTransfer(pDollarBoot, pNTFSBootSwitched);
 
