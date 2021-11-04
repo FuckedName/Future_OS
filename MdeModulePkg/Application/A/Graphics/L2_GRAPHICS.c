@@ -854,7 +854,6 @@ EFI_STATUS L2_GRAPHICS_ScreenInit()
     
     L2_GRAPHICS_DeskInit();
 
-    
     // init mouse buffer with cursor
     L2_GRAPHICS_ChineseCharDraw(pMouseBuffer, 0, 0, 11 * 94 + 42, MouseColor, 16);
     //L2_DEBUG_Print1(DISPLAY_X, DISPLAY_Y, "%d: GraphicsLayerCompute\n", __LINE__);
@@ -1924,6 +1923,18 @@ VOID L2_GRAPHICS_LayerCompute(UINT16 iMouseX, UINT16 iMouseY, UINT8 MouseClickFl
     int i, j;
 
     L2_MOUSE_Move();
+	
+    for (UINT8 i = 0; i < 16; i++)
+    {
+        for (UINT8 j = 0; j < 16; j++)
+        {
+			pMouseBuffer[(i * 16 + j) * 4]     = pDeskDisplayBuffer[((iMouseY + i) * ScreenWidth + iMouseX + j) * 4 + 0];
+			pMouseBuffer[(i * 16 + j) * 4 + 1] = pDeskDisplayBuffer[((iMouseY + i) * ScreenWidth + iMouseX + j) * 4 + 1];
+			pMouseBuffer[(i * 16 + j) * 4 + 2] = pDeskDisplayBuffer[((iMouseY + i) * ScreenWidth + iMouseX + j) * 4 + 2];
+        }
+	}
+	
+    L2_GRAPHICS_ChineseCharDraw(pMouseBuffer, 0, 0, 11 * 94 + 42, MouseColor, 16);
     
     L2_GRAPHICS_CopyNoReserved(pDeskDisplayBuffer, pMouseBuffer, ScreenWidth, ScreenHeight, 16, 16, iMouseX, iMouseY);
     //L2_DEBUG_Print1(DISPLAY_X, DISPLAY_Y, "%d: GraphicsLayerCompute\n", __LINE__);
