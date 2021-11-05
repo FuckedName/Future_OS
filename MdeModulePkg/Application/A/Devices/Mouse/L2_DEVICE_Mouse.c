@@ -83,25 +83,19 @@ L2_MOUSE_Event (IN EFI_EVENT Event, IN VOID *Context)
     }
 
     ////DEBUG ((EFI_D_INFO, "X: %X, Y: %X ", x_move, y_move));
-    L2_DEBUG_Print1(0, ScreenHeight - 30 -  8 * 16, "%d: X: %04d, Y: %04d move X: %X move Y: %X", __LINE__, iMouseX, iMouseY, x_move, y_move );
+    L2_DEBUG_Print1(0, ScreenHeight - 30 -  8 * 16, "%d: X: %04d, Y: %04d move X: %d move Y: %d", __LINE__, iMouseX, iMouseY, x_move, y_move );
     
     //L2_DEBUG_Print1(0, ScreenHeight - 30 -  8 * 16, "%d: X move: %d Y move: %d left: %d right: %d", __LINE__, State.RelativeMovementX, State.RelativeMovementY, State.LeftButton, State.RightButton);
-    iMouseX = iMouseX + x_move * 3;
-    iMouseY = iMouseY + y_move * 3; 
-    
+	
+	iMouseX = iMouseX + x_move * 3;
+	iMouseY = iMouseY + y_move * 3; 
 
-    if (iMouseX < 0)
-        iMouseX = 0;
-        
-    if (iMouseX > ScreenWidth)
-        iMouseX = ScreenWidth;
-
-    if (iMouseY < 0)
-        iMouseY = 0;
-
-    if (iMouseY > ScreenHeight)
-        iMouseY = ScreenHeight;
-
+	iMouseX = (iMouseX < 0) ? 0 : iMouseX;
+	iMouseX = (iMouseX > ScreenWidth - 16) ? ScreenWidth - 16 : iMouseX;
+	
+	iMouseY = (iMouseY < 0) ? 0 : iMouseY;
+	iMouseY = (iMouseY > ScreenHeight - 16) ? ScreenHeight - 16 : iMouseY;
+	
     //Button
     if (State.LeftButton == MOUSE_LEFT_CLICKED)
     {

@@ -248,8 +248,8 @@ extern UINT8 MouseClickFlag;
 extern CHAR8 x_move;
 extern CHAR8 y_move;
 
-extern UINT16 iMouseX;
-extern UINT16 iMouseY;
+extern INT16 iMouseX;
+extern INT16 iMouseY;
 extern unsigned char AsciiBuffer[0x100];
 extern WINDOW_LAYERS WindowLayers;
 extern EFI_GRAPHICS_OUTPUT_BLT_PIXEL MouseColor;
