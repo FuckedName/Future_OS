@@ -43,9 +43,9 @@ VOID L2_STRING_Maker (UINT16 x, UINT16 y,
     for (i = 0; i < 0x100; i++)
         AsciiBuffer[i] = 0;
         
-    Color.Blue = 0xFF;
-    Color.Red = 0xFF;
-    Color.Green = 0xFF;
+    Color.Blue = 0x00;
+    Color.Red = 0x00;
+    Color.Green = 0x00;
 
     //ASSERT (Format != NULL);
 
@@ -107,9 +107,9 @@ VOID L2_STRING_Maker3 (UINT16 x, UINT16 y, WINDOW_LAYER_ITEM layer,
     for (i = 0; i < 0x100; i++)
         AsciiBuffer[i] = 0;
         
-    Color.Blue = 0xFF;
-    Color.Red = 0xFF;
-    Color.Green = 0xFF;
+    Color.Blue = 0x00;
+    Color.Red = 0x00;
+    Color.Green = 0x00;
     Color.Reserved = layer.LayerID;
 
     //ASSERT (Format != NULL);

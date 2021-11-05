@@ -761,9 +761,9 @@ VOID EFIAPI L2_DEBUG_Print3 (UINT16 x, UINT16 y, WINDOW_LAYER_ITEM layer, IN  CO
     UINT32 i = 0;
     
         
-    Color.Blue = 0xFF;
-    Color.Red = 0xFF;
-    Color.Green = 0xFF;
+    Color.Blue = 0x00;
+    Color.Red = 0x00;
+    Color.Green = 0x00;
     Color.Reserved = layer.LayerID;
 
     for (UINT16 i = 0; i < 0x100; i++)
@@ -2111,7 +2111,7 @@ EFI_STATUS L2_GRAPHICS_AsciiCharDraw(UINT8 *pBufferDest,
 
     for(i = 0; i < 16 * 8 * 4; i++)
     {
-        pBuffer[i] = 0x00;
+        pBuffer[i] = 0xff;
     }
     
     for(i = 0; i < 16; i++)
@@ -2171,7 +2171,7 @@ EFI_STATUS L2_GRAPHICS_AsciiCharDraw2(WINDOW_LAYER_ITEM layer,
 
     for(i = 0; i < 16 * 8 * 4; i++)
     {
-        pBuffer[i] = 0x00;
+        pBuffer[i] = 0xff;
     }
     
     for(i = 0; i < 16; i++)
