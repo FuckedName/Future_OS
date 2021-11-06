@@ -359,7 +359,6 @@ extern UINTN ScreenWidth, ScreenHeight;
 extern UINT16 MouseClickWindowWidth;
 extern UINT16 MouseClickWindowHeight;
 extern UINT8 *pMapper;
-extern EFI_GRAPHICS_OUTPUT_PROTOCOL       *GraphicsOutput;
 
 // memory: 1G->3G
 #define ALL_PAGE_COUNT 0x80000

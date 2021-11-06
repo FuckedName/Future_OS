@@ -34,10 +34,12 @@
 
 #include <L2_DEVICE_Screen.h>
 
+EFI_GRAPHICS_OUTPUT_PROTOCOL       *GraphicsOutput = NULL;
+
 
 /****************************************************************************
 *
-*  描述:   屏幕参数初始化
+*  描述:   屏幕参数初始化，用于后续屏幕绘图，获取屏幕分辨率用于后续使用
 *
 *  参数1： xxxxx
 *  参数2： xxxxx

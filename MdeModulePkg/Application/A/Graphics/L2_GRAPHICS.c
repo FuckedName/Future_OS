@@ -79,7 +79,6 @@ UINT16 SystemSettingWindowHeight = 16 * 10;
 UINT16 MemoryInformationWindowHeight = 16 * 40;
 UINT16 MemoryInformationWindowWidth = 16 * 30;
 
-EFI_GRAPHICS_OUTPUT_PROTOCOL       *GraphicsOutput = NULL;
 
 EFI_GRAPHICS_OUTPUT_BLT_PIXEL MouseColor;
 
@@ -3263,10 +3262,7 @@ VOID EFIAPI L2_TIMER_Print (
     x += 16;
 
     UINT8 DayOfWeek = L1_MATH_DayOfWeek(EFITime.Year, EFITime.Month, EFITime.Day);
-    if (0 == DayOfWeek)
-    {
-        L2_GRAPHICS_ChineseCharDraw(pDeskBuffer, x, y, (48 - 1 ) * 94 + 39 - 1, Color, ScreenWidth);    
-    }
+	
     UINT8 AreaCode = 0;
     UINT8 BitCode = 0;
     
