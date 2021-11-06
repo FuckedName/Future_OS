@@ -1,12 +1,13 @@
 
 /*************************************************
     .
-    File name:      	A.c
-    Author：	        任启红
-    ID：		00001
-    Date:          	202107
-    Description:    	整个模块的主入口函数
+    File name:      	*.*
+    Author：	        	任启红
+    ID：					00001
+    Date:          		202107
+    Description:    	定义系统的一些全局变量
     Others:         	无
+
     History:        	无
 	    1.  Date:
 		    Author: 

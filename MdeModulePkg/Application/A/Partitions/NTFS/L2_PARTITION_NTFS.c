@@ -1,12 +1,13 @@
 
 /*************************************************
     .
-    File name:      	A.c
-    Author：	        任启红
-    ID：		00001
-    Date:          	202107
-    Description:    	整个模块的主入口函数
+    File name:      	*.*
+    Author：	        	任启红
+    ID：					00001
+    Date:          		202107
+    Description:    	
     Others:         	无
+
     History:        	无
 	    1.  Date:
 		    Author: 
@@ -340,4 +341,193 @@ VOID L1_FILE_NTFS_DollerRootTransfer(DOLLAR_BOOT *pSource, DollarBootSwitched *p
     pDest->MFT_MirrStartCluster = L1_NETWORK_8BytesToUINT64(pSource->MFT_MirrStartCluster);
     
 }
+
+
+
+
+// L2_FILE_NTFS_MFTIndexItemsAnalysis
+UINT16  L2_FILE_NTFS_IndexItemHeaderAnalysis(UINT8 *p)
+{
+	NTFS_INDEX_HEADER;
+	
+    // 相对于当前位置的偏移，所以需要加上当前位置前面的24个字节。 need to add size before this Byte.
+    UINT16 HeaderLength = L1_NETWORK_4BytesToUINT32(((NTFS_INDEX_HEADER *)p)->IndexEntryOffset) + 24;
+
+	return HeaderLength;
+}
+
+EFI_STATUS  L2_FILE_NTFS_IndexItemAttributeAnalysis(UINT8 *pBuffer, UINT16 Offset)
+{
+	NTFS_INDEX_ITEM;
+
+	if (Offset >= L1_NETWORK_4BytesToUINT32(((NTFS_INDEX_HEADER *)pBuffer)->IndexEntrySize))
+            return -1;
+	
+	UINT8 pItem[200] = {0};
+
+	// 索引项大小
+	UINT16 length2 = pBuffer[Offset + 8] + pBuffer[Offset + 9] * 16;
+
+	// copy item into pItem buffer
+	for (int i = 0; i < length2; i++)
+		pItem[i] = pBuffer[Offset + i];
+
+	UINT8 FileNameSize = ((NTFS_INDEX_ITEM *)pItem)->FileNameSize;
+	FileContentRelativeSector = L1_NETWORK_6BytesToUINT64(((NTFS_INDEX_ITEM *)pItem)->MFTReferNumber);
+	/*L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: attribut length2: %d FileNameSize: %d\n", __LINE__, 
+	                                                       length2,
+	                                                       FileNameSize);  */  
+	UINT8 attributeName[20];                                                                    
+	for (int i = 0; i < FileNameSize; i++)
+	{
+		//every name char use 2 Bytes.
+		// Item before name use 82 Bytes. 
+		attributeName[i] = pItem[82 + 2 * i];
+	}
+
+	UINT8 IndexFlag = L1_NETWORK_2BytesToUINT16(((NTFS_INDEX_ITEM *)pItem)->IndexFlag);
+	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: Name: %a, RelativeSector: %llu, IndexFlag: %d\n", __LINE__, attributeName, FileContentRelativeSector, IndexFlag);
+
+	return length2;	
+}
+
+
+//NTFS文件系统 索引项分析
+//
+EFI_STATUS  L2_FILE_NTFS_IndexItemBufferAnalysis(UINT8 *pBuffer)
+{
+	NTFS_INDEX_HEADER;
+	NTFS_INDEX_ITEM;
+	
+	UINT8 *p = NULL;
+		
+	p = (UINT8 *)AllocateZeroPool(DISK_BUFFER_SIZE * 8);
+
+	if (NULL == p)
+	{
+		L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d NULL == p\n", __LINE__);
+		return EFI_SUCCESS;
+	}
+	
+	//memcpy(p, pBuffer[512 * 2], DISK_BUFFER_SIZE);
+	for (UINT16 i = 0; i < 512 * 8; i++)
+		p[i] = pBuffer[i];
+
+	// 获取索引头相关参数
+	UINT16 Offset = L2_FILE_NTFS_IndexItemHeaderAnalysis(p);
+
+	// 获取各个索引项相关的参数
+	for (UINT16 i = 0; i < 10; i++)
+	{
+		UINT16 AttributeSize = L2_FILE_NTFS_IndexItemAttributeAnalysis(p, Offset);
+		
+	    Offset += AttributeSize;
+	}
+
+
+	
+}
+
+
+UINT16 L2_FILE_NTFS_FileItemHeaderAnalysis(UINT8 *pBuffer)
+{
+	// File header length
+	UINT16 AttributeOffset = L1_NETWORK_2BytesToUINT16(((NTFS_FILE_HEADER *)pBuffer)->AttributeOffset);
+	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: AttributeOffset:%X \n", __LINE__, AttributeOffset);
+
+	return AttributeOffset;
+}
+
+EFI_STATUS  L2_FILE_NTFS_FileItemNonResidentAttributeAnalysis(pBuffer, Offset)
+{
+	NonResidentAttributeHeader;
+}
+
+
+EFI_STATUS  L2_FILE_NTFS_FileItemResidentAttributeAnalysis(pBuffer, Offset)
+{
+	ResidentAttributeHeader;
+}
+
+//比较重要的几个属性如0X30文件名属性，其中记录着该目录或者文件的文件名；
+//0X80数据属性记录着文件中的数据；
+//0X90索引根属性，存放着该目录下的子目录和子文件的索引项；当某个目录下的内容比较多，从而导致0X90属性无法完全存放时，
+//0XA0属性会指向一个索引区域，这个索引区域包含了该目录下所有剩余内容的索引项。
+//属性有常驻属性和非常驻属性之分，当一个属性的数据能够在1KB的文件记录中保存的时候，该属性为常驻属性；
+//而当属性的数据无法在文件记录中存放，需要存放到MFT外的其他位置时，该属性为非常驻属性。常驻属性和非常驻属性的头部结构定义如下：
+UINT16  L2_FILE_NTFS_FileItemAttributeAnalysis(UINT8 *p, UINT16 AttributeOffset)
+{
+	UINT8 pItem[200] = {0};
+    UINT8 size[4];
+	UINT16 AttributeSize;
+	UINT16 i;
+
+    // 属性头和属性体总长度
+    for (i = 0; i < 4; i++)
+        size[i] = p[AttributeOffset + 4 + i];
+        
+    AttributeSize = L1_NETWORK_4BytesToUINT32(size);
+    // Copy attribute to buffer
+    for (i = 0; i < AttributeSize; i++)
+        pItem[i] = p[AttributeOffset + i];
+
+    // after buffer copied, we can get information in item
+    UINT16 NameSize = ((NTFS_FILE_ATTRIBUTE_HEADER *)pItem)->NameSize;
+    
+    UINT16 NameOffset = L1_NETWORK_2BytesToUINT16(((NTFS_FILE_ATTRIBUTE_HEADER *)pItem)->NameOffset);
+                                                        
+    UINT16 ResidentFlag = L1_NETWORK_2BytesToUINT16(((NTFS_FILE_ATTRIBUTE_HEADER *)pItem)->ResidentFlag);
+	
+    UINT16 Attribute = ((NTFS_FILE_ATTRIBUTE_HEADER *)pItem)->Type[0];
+
+	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: AttributeSize:%X Attribute: %X ResidentFlag: %X\n", __LINE__, AttributeSize, Attribute, ResidentFlag);
+
+	// 是否是常驻属性（0常驻 1非常驻）
+	switch (ResidentFlag)
+	{
+		case 0:
+			L2_FILE_NTFS_FileItemResidentAttributeAnalysis();
+			break;
+
+		case 1:
+			L2_FILE_NTFS_FileItemNonResidentAttributeAnalysis();
+			break;
+
+		default:;
+	}		 
+
+	return AttributeSize;
+}
+
+
+//File record in NTFS file system means data on disk, not file in folder.. 
+//L2_FILE_NTFS_MFTDollarRootFileAnalysis
+EFI_STATUS  L2_FILE_NTFS_FileItemBufferAnalysis(UINT8 *pBuffer)
+{
+	UINT16 AttributeSize;
+	UINT8 *p = (UINT8 *)AllocateZeroPool(DISK_BUFFER_SIZE * 2);
+	if (p == NULL)
+	{
+		L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: p == NULL \n", __LINE__);
+		return EFI_SUCCESS;
+	}
+	
+	for (UINT16 i = 0; i < DISK_BUFFER_SIZE * 2; i++)
+		p[i] = pBuffer[i];
+	
+	// 通过属性头计算第一个属性偏移
+	// 获取文件头信息
+	UINT16 Offset = L2_FILE_NTFS_FileItemHeaderAnalysis(p);
+
+	// 获取每个属性信息
+	for (UINT16 i = 0; i < 10; i++)
+	{
+		AttributeSize = L2_FILE_NTFS_FileItemAttributeAnalysis(pBuffer, Offset);
+		
+	    Offset += AttributeSize;
+	}
+}
+
+
+
 
