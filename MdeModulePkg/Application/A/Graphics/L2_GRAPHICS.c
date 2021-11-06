@@ -1155,13 +1155,7 @@ EFI_STATUS L2_GRAPHICS_ScreenInit()
     L2_GRAPHICS_ChineseCharDraw(pMouseBuffer, 0, 0, 11 * 94 + 42, MouseColor, 16);
     //L2_DEBUG_Print1(DISPLAY_X, DISPLAY_Y, "%d: GraphicsLayerCompute\n", __LINE__);
     
-    GraphicsOutput->Blt(
-                GraphicsOutput, 
-                (EFI_GRAPHICS_OUTPUT_BLT_PIXEL *) pDeskBuffer,
-                EfiBltBufferToVideo,
-                0, 0, 
-                0, 0, 
-                ScreenWidth, ScreenHeight, 0);   
+	L2_SCREEN_Draw(pDeskBuffer, 0, 0, 0, 0, ScreenWidth, ScreenHeight);	   
 
     // Desk graphics layer, buffer can not free!!
     //FreePool(pDeskBuffer);
@@ -1391,14 +1385,7 @@ EFI_STATUS L2_GRAPHICS_SayGoodBye()
     L2_GRAPHICS_ChineseCharDraw(pDeskBuffer,  x, y, (32 - 1) * 94 + 20 - 1, Color, ScreenWidth);
     x += 16;
 
-    GraphicsOutput->Blt(
-                GraphicsOutput, 
-                (EFI_GRAPHICS_OUTPUT_BLT_PIXEL *) pDeskBuffer,
-                EfiBltBufferToVideo,
-                0, 0, 
-                0, 0, 
-                ScreenWidth, ScreenHeight, 0);   
-
+	L2_SCREEN_Draw(pDeskBuffer, 0, 0, 0, 0, ScreenWidth, ScreenHeight);	  
 }
 
 
@@ -2557,12 +2544,8 @@ VOID L2_GRAPHICS_LayerCompute(UINT16 iMouseX, UINT16 iMouseY, UINT8 MouseClickFl
 
     if (TRUE == SystemQuitFlag)
     {
-       GraphicsOutput->Blt(GraphicsOutput, 
-                    (EFI_GRAPHICS_OUTPUT_BLT_PIXEL *) pDeskDisplayBuffer,
-                    EfiBltBufferToVideo,
-                    0, 0, 
-                    0, 0, 
-                    ScreenWidth, ScreenHeight, 0);
+    
+		L2_SCREEN_Draw(pDeskDisplayBuffer, 0, 0, 0, 0, ScreenWidth, ScreenHeight);	
                     
         return;
     }
@@ -2599,13 +2582,8 @@ VOID L2_GRAPHICS_LayerCompute(UINT16 iMouseX, UINT16 iMouseY, UINT8 MouseClickFl
     
     L2_GRAPHICS_CopyNoReserved(pDeskDisplayBuffer, pMouseBuffer, ScreenWidth, ScreenHeight, 16, 16, iMouseX, iMouseY);
     //L2_DEBUG_Print1(DISPLAY_X, DISPLAY_Y, "%d: GraphicsLayerCompute\n", __LINE__);
-
-    GraphicsOutput->Blt(GraphicsOutput, 
-                        (EFI_GRAPHICS_OUTPUT_BLT_PIXEL *) pDeskDisplayBuffer,
-                        EfiBltBufferToVideo,
-                        0, 0, 
-                        0, 0, 
-                        ScreenWidth, ScreenHeight, 0);
+	
+	L2_SCREEN_Draw(pDeskDisplayBuffer, 0, 0, 0, 0, ScreenWidth, ScreenHeight);	
 }
 
 

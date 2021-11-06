@@ -31,6 +31,7 @@
 #include <Library/UefiRuntimeServicesTableLib.h>
 
 #include <Processes/L2_PROCESS_Multi.h>
+#include <Devices/Screen/L2_DEVICE_Screen.h>
 
 #include <Graphics/L2_GRAPHICS.h>
 #include "L2_DEVICE_Timer.h"
@@ -124,12 +125,8 @@ EFI_STATUS L2_TIMER_IntervalInit()
                     pDeskBuffer[(j * ScreenWidth + i) * 4 + 2] = 0;
                 }
             }
-            GraphicsOutput->Blt(GraphicsOutput, 
-                                (EFI_GRAPHICS_OUTPUT_BLT_PIXEL *) pDeskBuffer,
-                                EfiBltBufferToVideo,
-                                0, 0, 
-                                0, 0, 
-                                ScreenWidth, ScreenHeight, 0);   
+			
+			L2_SCREEN_Draw(pDeskBuffer, 0, 0, 0, 0, ScreenWidth, ScreenHeight);	   
         }
 
         if ((TRUE == SystemQuitFlag) && ( SystemQuitCount >= ScreenWidth))
