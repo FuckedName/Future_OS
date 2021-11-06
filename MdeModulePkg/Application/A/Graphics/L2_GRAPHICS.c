@@ -260,6 +260,20 @@ const UINT8 sASCII[][16] =
     {0x00,0x00,0xCC,0x00,0x00,0x78,0x0C,0x7C,0xCC,0xCC,0xCC,0x76,0x00,0x00,0x00,0x00},       
 };
 
+
+
+
+/****************************************************************************
+*
+*  描述:   xxxxx
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
 VOID L3_GRAPHICS_ItemPrint(UINT8 *pDestBuffer, UINT8 *pSourceBuffer, UINT16 pDestWidth, UINT16 pDestHeight, 
                               UINT16 pSourceWidth, UINT16 pSourceHeight, UINT16 x, UINT16 y, CHAR8 *pNameString, CHAR16 StringType, UINT16 DestLayerID)
 {
@@ -283,6 +297,20 @@ VOID L3_GRAPHICS_ItemPrint(UINT8 *pDestBuffer, UINT8 *pSourceBuffer, UINT16 pDes
 
 
 
+
+
+
+/****************************************************************************
+*
+*  描述:   xxxxx
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
 VOID L2_GRAPHICS_Copy(UINT8 *pDest, UINT8 *pSource, 
                            UINT16 DestWidth, UINT16 DestHeight, 
                            UINT16 SourceWidth, UINT16 SourceHeight, 
@@ -303,6 +331,20 @@ VOID L2_GRAPHICS_Copy(UINT8 *pDest, UINT8 *pSource,
 
 
 
+
+
+
+/****************************************************************************
+*
+*  描述:   xxxxx
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
 EFI_STATUS L2_GRAPHICS_LineDraw(UINT8 *pBuffer,
         IN UINTN x0, UINTN y0, UINTN x1, UINTN y1, 
         IN UINTN BorderWidth,
@@ -330,6 +372,20 @@ EFI_STATUS L2_GRAPHICS_LineDraw(UINT8 *pBuffer,
 
 
 // draw rectangle borders
+
+
+
+/****************************************************************************
+*
+*  描述:   xxxxx
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
 void L2_GRAPHICS_RectangleDraw(UINT8 *pBuffer,
         IN UINTN x0, UINTN y0, UINTN x1, UINTN y1, 
         IN UINTN BorderWidth,
@@ -349,6 +405,20 @@ void L2_GRAPHICS_RectangleDraw(UINT8 *pBuffer,
 
 
 // fill into rectangle
+
+
+
+/****************************************************************************
+*
+*  描述:   xxxxx
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
 void L1_MEMORY_RectangleFill(UINT8 *pBuffer,
         IN UINTN x0, UINTN y0, UINTN x1, UINTN y1, 
         IN UINTN BorderWidth,
@@ -377,6 +447,20 @@ void L1_MEMORY_RectangleFill(UINT8 *pBuffer,
 }
 
 
+
+
+
+/****************************************************************************
+*
+*  描述:   xxxxx
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
 VOID L2_MOUSE_MyComputerCloseClicked()
 {
     L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d L2_MOUSE_MyComputerCloseClicked\n", __LINE__);
@@ -389,6 +473,20 @@ VOID L2_MOUSE_MyComputerCloseClicked()
     }
 }
 
+
+
+
+/****************************************************************************
+*
+*  描述:   xxxxx
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
 VOID L2_MOUSE_MyComputerPartitionItemClicked()
 {
     L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d L2_MOUSE_MyComputerPartitionItemClicked\n", __LINE__);
@@ -403,6 +501,20 @@ VOID L2_MOUSE_MyComputerPartitionItemClicked()
     L2_STORE_PartitionItemsPrint(PartitionItemID);
 }
 
+
+
+
+/****************************************************************************
+*
+*  描述:   xxxxx
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
 VOID L2_PARTITION_FileContentPrint(UINT8 *Buffer)
 {	
 	for (int j = 0; j < 250; j++)
@@ -416,6 +528,20 @@ VOID L2_PARTITION_FileContentPrint(UINT8 *Buffer)
 // 2. Get StartClusterHigh2B and StartClusterLow2B and computer the next read sector id number
 // 3. Read sector id number sector content from partition
 // 4. Analysis content and print result 
+
+
+
+/****************************************************************************
+*
+*  描述:   xxxxx
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
 EFI_STATUS L2_MOUSE_MyComputerFolderItemClicked()
 {
     L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d L2_MOUSE_MyComputerFolderItemClicked\n", __LINE__);
@@ -481,6 +607,20 @@ START_MENU_STATE_TRANSFORM MyComputerStateTransformTable[] =
     {MY_COMPUTER_FOLDER_CLICKED_STATE, 	  MY_COMPUTER_FOLDER_ITEM_CLICKED_EVENT,      MY_COMPUTER_FOLDER_CLICKED_STATE,     L2_MOUSE_MyComputerFolderItemClicked},
 };
 
+
+
+
+/****************************************************************************
+*
+*  描述:   xxxxx
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
 VOID L1_GRAPHICS_UpdateWindowLayer(UINT16 layer)
 {	
     for (UINT16 i = 0; i < WindowLayers.LayerCount; i++)
@@ -500,6 +640,20 @@ VOID L1_GRAPHICS_UpdateWindowLayer(UINT16 layer)
 }
 
 
+
+
+
+/****************************************************************************
+*
+*  描述:   xxxxx
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
 VOID L2_MOUSE_MyComputerClicked()
 {       
     L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d L2_MOUSE_MyComputerClicked\n", __LINE__);
@@ -517,6 +671,20 @@ VOID L2_MOUSE_MyComputerClicked()
 }
 
 
+
+
+
+/****************************************************************************
+*
+*  描述:   xxxxx
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
 VOID L2_MOUSE_SystemSettingClicked()
 {   
     L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d L2_MOUSE_SettingClicked\n", __LINE__);
@@ -530,6 +698,20 @@ VOID L2_MOUSE_SystemSettingClicked()
     L1_GRAPHICS_UpdateWindowLayer(GRAPHICS_LAYER_SYSTEM_SETTING_WINDOW);
 }
 
+
+
+
+/****************************************************************************
+*
+*  描述:   xxxxx
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
 VOID L2_MOUSE_MemoryInformationClicked()
 {   
     L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d L2_MOUSE_MemoryInformationClicked\n", __LINE__);
@@ -543,6 +725,20 @@ VOID L2_MOUSE_MemoryInformationClicked()
     L1_GRAPHICS_UpdateWindowLayer(GRAPHICS_LAYER_MEMORY_INFORMATION_WINDOW);
 }
 
+
+
+
+/****************************************************************************
+*
+*  描述:   xxxxx
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
 VOID L2_MOUSE_SystemLogClicked()
 {   
     L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d L2_MOUSE_SystemLogClicked\n", __LINE__);
@@ -558,6 +754,20 @@ VOID L2_MOUSE_SystemLogClicked()
     L1_GRAPHICS_UpdateWindowLayer(GRAPHICS_LAYER_SYSTEM_LOG_WINDOW);
 }
 
+
+
+
+/****************************************************************************
+*
+*  描述:   xxxxx
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
 VOID L2_MOUSE_SystemQuitClicked()
 {   
     L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d L2_MOUSE_SystemQuitClicked\n", __LINE__);
@@ -565,6 +775,20 @@ VOID L2_MOUSE_SystemQuitClicked()
 }
 
 
+
+
+
+/****************************************************************************
+*
+*  描述:   xxxxx
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
 VOID L2_MOUSE_WallpaperSettingClicked()
 {   
     L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d L2_MOUSE_WallpaperSettingClicked\n", __LINE__);
@@ -643,6 +867,20 @@ VOID L2_MOUSE_WallpaperSettingClicked()
 }
 
 
+
+
+
+/****************************************************************************
+*
+*  描述:   xxxxx
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
 VOID L2_MOUSE_WallpaperResetClicked()
 {   
     L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d L2_MOUSE_WallpaperResetClicked\n", __LINE__);
@@ -664,6 +902,20 @@ START_MENU_STATE_TRANSFORM StartMenuStateTransformTable[] =
 };
 
 
+
+
+
+/****************************************************************************
+*
+*  描述:   xxxxx
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
 void L2_GRAPHICS_ParameterInit()
 {
     WindowLayers.LayerCount = 0;
@@ -805,6 +1057,20 @@ VOID EFIAPI L2_DEBUG_Print1 (UINT16 x, UINT16 y,  IN  CONST CHAR8  *Format, ...)
     VA_END (VaList);
 }
 
+
+
+
+/****************************************************************************
+*
+*  描述:   xxxxx
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
 EFI_STATUS L2_GRAPHICS_ScreenInit()
 {
     EFI_STATUS Status = 0;
@@ -873,6 +1139,20 @@ EFI_STATUS L2_GRAPHICS_ScreenInit()
     return EFI_SUCCESS;
 }
 
+
+
+
+/****************************************************************************
+*
+*  描述:   xxxxx
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
 EFI_STATUS L2_GRAPHICS_StartMenuInit()
 {
     EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
@@ -960,6 +1240,20 @@ EFI_STATUS L2_GRAPHICS_StartMenuInit()
 }
 
 
+
+
+
+/****************************************************************************
+*
+*  描述:   xxxxx
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
 EFI_STATUS L2_GRAPHICS_SystemSettingInit()
 {
     EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
@@ -1002,6 +1296,20 @@ EFI_STATUS L2_GRAPHICS_SystemSettingInit()
 }
 
 
+
+
+
+/****************************************************************************
+*
+*  描述:   xxxxx
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
 EFI_STATUS L2_GRAPHICS_SayGoodBye()
 {
     for (int i = 0; i < ScreenHeight; i++)
@@ -1063,12 +1371,40 @@ EFI_STATUS L2_GRAPHICS_SayGoodBye()
 
 }
 
+
+
+
+/****************************************************************************
+*
+*  描述:   xxxxx
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
 BOOLEAN L1_GRAPHICS_InsideRectangle(UINT16 StartX, UINT16 EndX, UINT16 StartY, UINT16 EndY)
 {
 	return (iMouseX >= StartX && iMouseX <= EndX && iMouseY >= StartY && iMouseY <= EndY);
 }
 
 
+
+
+
+/****************************************************************************
+*
+*  描述:   xxxxx
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
 MOUSE_CLICK_EVENT L2_GRAPHICS_DeskLayerClickEventGet()
 {
 	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: L2_GRAPHICS_DeskLayerClickEventGet\n", __LINE__);
@@ -1084,6 +1420,20 @@ MOUSE_CLICK_EVENT L2_GRAPHICS_DeskLayerClickEventGet()
 
 
 
+
+
+
+/****************************************************************************
+*
+*  描述:   xxxxx
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
 MOUSE_CLICK_EVENT L2_GRAPHICS_StartMenuLayerClickEventGet()
 {
 	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: L2_GRAPHICS_StartMenuLayerClickEventGet\n", __LINE__);
@@ -1134,6 +1484,20 @@ MOUSE_CLICK_EVENT L2_GRAPHICS_StartMenuLayerClickEventGet()
 	return MAX_CLICKED_EVENT;
 }
 
+
+
+
+/****************************************************************************
+*
+*  描述:   xxxxx
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
 MOUSE_CLICK_EVENT L2_GRAPHICS_SystemSettingLayerClickEventGet()
 {
 	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: L2_GRAPHICS_SystemSettingLayerClickEventGet\n", __LINE__);
@@ -1171,6 +1535,20 @@ MOUSE_CLICK_EVENT L2_GRAPHICS_SystemSettingLayerClickEventGet()
 
 
 
+
+
+
+/****************************************************************************
+*
+*  描述:   xxxxx
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
 MOUSE_CLICK_EVENT L2_GRAPHICS_MyComputerLayerClickEventGet()
 {
 	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: L2_GRAPHICS_MyComputerLayerClickEventGet\n", __LINE__);
@@ -1222,6 +1600,20 @@ MOUSE_CLICK_EVENT L2_GRAPHICS_MyComputerLayerClickEventGet()
 }
 
 
+
+
+
+/****************************************************************************
+*
+*  描述:   xxxxx
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
 MOUSE_CLICK_EVENT L2_GRAPHICS_SystemLogLayerClickEventGet()
 {	
 	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: L2_GRAPHICS_SystemLogLayerClickEventGet\n", __LINE__);
@@ -1240,6 +1632,20 @@ MOUSE_CLICK_EVENT L2_GRAPHICS_SystemLogLayerClickEventGet()
 }
 
 
+
+
+
+/****************************************************************************
+*
+*  描述:   xxxxx
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
 MOUSE_CLICK_EVENT L2_GRAPHICS_MemoryInformationLayerClickEventGet()
 {
 	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: L2_GRAPHICS_MemoryInformationLayerClickEventGet\n", __LINE__);
@@ -1258,6 +1664,20 @@ MOUSE_CLICK_EVENT L2_GRAPHICS_MemoryInformationLayerClickEventGet()
 	return MAX_CLICKED_EVENT;
 }
 
+
+
+
+/****************************************************************************
+*
+*  描述:   xxxxx
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
 VOID L3_GRAPHICS_StartMenuClicked()
 {
     L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d L3_GRAPHICS_StartMenuClicked\n", __LINE__);
@@ -1289,6 +1709,20 @@ VOID L3_GRAPHICS_StartMenuClicked()
 
 }
 
+
+
+
+/****************************************************************************
+*
+*  描述:   xxxxx
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
 VOID L3_GRAPHICS_DeskClickEventHandle(MOUSE_CLICK_EVENT event)
 {
 	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: event: %d\n", __LINE__, event);
@@ -1303,6 +1737,20 @@ VOID L3_GRAPHICS_DeskClickEventHandle(MOUSE_CLICK_EVENT event)
 }
 
 
+
+
+
+/****************************************************************************
+*
+*  描述:   xxxxx
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
 VOID L3_GRAPHICS_StartMenuClickEventHandle(MOUSE_CLICK_EVENT event)
 { 
     L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: event: %d StartMenuNextState: %d\n", __LINE__, event, StartMenuNextState);
@@ -1325,12 +1773,40 @@ VOID L3_GRAPHICS_StartMenuClickEventHandle(MOUSE_CLICK_EVENT event)
 }
 
 
+
+
+
+/****************************************************************************
+*
+*  描述:   xxxxx
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
 VOID L3_GRAPHICS_SystemSettingClickEventHandle(MOUSE_CLICK_EVENT event)
 {
 
 }
 
 
+
+
+
+/****************************************************************************
+*
+*  描述:   xxxxx
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
 VOID L3_GRAPHICS_MyComupterClickEventHandle(MOUSE_CLICK_EVENT event)
 {
 	
@@ -1354,12 +1830,40 @@ VOID L3_GRAPHICS_MyComupterClickEventHandle(MOUSE_CLICK_EVENT event)
 
 
 
+
+
+
+/****************************************************************************
+*
+*  描述:   xxxxx
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
 VOID L3_GRAPHICS_SystemLogClickEventHandle(MOUSE_CLICK_EVENT event)
 {
 
 }
 
 
+
+
+
+/****************************************************************************
+*
+*  描述:   xxxxx
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
 VOID L3_GRAPHICS_MemoryInformationClickEventHandle(MOUSE_CLICK_EVENT event)
 {
 
@@ -1378,6 +1882,20 @@ GRAPHICS_LAYER_EVENT_GET GraphicsLayerEventHandle[] =
 };
 
 
+
+
+
+/****************************************************************************
+*
+*  描述:   xxxxx
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
 UINT16 L2_MOUSE_ClickEventHandle()
 {   
 	UINT16 LayerID = pDeskDisplayBuffer[(iMouseY * ScreenWidth + iMouseX) * 4 + 3];
@@ -1407,6 +1925,20 @@ UINT16 L2_MOUSE_ClickEventHandle()
 }
 
 
+
+
+
+/****************************************************************************
+*
+*  描述:   xxxxx
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
 VOID L2_MOUSE_Click()
 {
     //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: iMouseX: %d iMouseY: %d \n",  __LINE__, iMouseX, iMouseY);
@@ -1493,6 +2025,20 @@ VOID L2_MOUSE_Click()
 
 
 
+
+
+
+/****************************************************************************
+*
+*  描述:   xxxxx
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
 EFI_STATUS L2_GRAPHICS_ButtonDraw()
 {
     EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
@@ -1523,6 +2069,20 @@ EFI_STATUS L2_GRAPHICS_ButtonDraw()
 
 
 //                                                 16 * 4,        16 * 7,       16 * 4,        16 * 2
+
+
+
+/****************************************************************************
+*
+*  描述:   xxxxx
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
 EFI_STATUS L2_GRAPHICS_ButtonDraw2(UINT16 StartX, UINT16 StartY, UINT16 Width, UINT16 Height)
 {
     EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
@@ -1548,6 +2108,20 @@ EFI_STATUS L2_GRAPHICS_ButtonDraw2(UINT16 StartX, UINT16 StartY, UINT16 Width, U
     L1_MEMORY_RectangleFill(pDeskBuffer, StartX + Width + 1, StartY + 1 , StartX + Width + 2, StartY + Height + 1, 1, Color); // line right
 }
 
+
+
+
+/****************************************************************************
+*
+*  描述:   xxxxx
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
 EFI_STATUS L2_GRAPHICS_DeskInit()
 {
     
@@ -1783,6 +2357,20 @@ EFI_STATUS L2_GRAPHICS_DeskInit()
 
 
 
+
+
+
+/****************************************************************************
+*
+*  描述:   xxxxx
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
 EFI_STATUS L2_GRAPHICS_AsciiCharDraw3(UINT8 *pBuffer,
         IN UINTN x0, UINTN y0,UINT8 c,
         IN EFI_GRAPHICS_OUTPUT_BLT_PIXEL BorderColor, UINT16 AreaWidth)
@@ -1830,6 +2418,20 @@ EFI_STATUS L2_GRAPHICS_AsciiCharDraw3(UINT8 *pBuffer,
 
 
 // Draw 8 X 16 point
+
+
+
+/****************************************************************************
+*
+*  描述:   xxxxx
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
 EFI_STATUS L2_GRAPHICS_ChineseHalfDraw(UINT8 *pBuffer,UINT8 d,
         IN UINTN x0, UINTN y0,
         UINT8 width,
@@ -1865,6 +2467,20 @@ EFI_STATUS L2_GRAPHICS_ChineseHalfDraw(UINT8 *pBuffer,UINT8 d,
 
 
 // Note: Do not copy Color's reserved member
+
+
+
+/****************************************************************************
+*
+*  描述:   xxxxx
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
 VOID L2_GRAPHICS_CopyNoReserved(UINT8 *pDest, UINT8 *pSource, 
                            UINT16 DestWidth, UINT16 DestHeight, 
                            UINT16 SourceWidth, UINT16 SourceHeight, 
@@ -1882,6 +2498,20 @@ VOID L2_GRAPHICS_CopyNoReserved(UINT8 *pDest, UINT8 *pSource,
     }
 }
 
+
+
+
+/****************************************************************************
+*
+*  描述:   xxxxx
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
 VOID L2_GRAPHICS_LayerCompute(UINT16 iMouseX, UINT16 iMouseY, UINT8 MouseClickFlag)
 {
     /*L2_DEBUG_Print1(DISPLAY_X, DISPLAY_Y, "%d: pDeskDisplayBuffer: %X pDeskBuffer: %X ScreenWidth: %d ScreenHeight: %d pMouseBuffer: %X\n", __LINE__, 
@@ -1948,6 +2578,20 @@ VOID L2_GRAPHICS_LayerCompute(UINT16 iMouseX, UINT16 iMouseY, UINT8 MouseClickFl
                         ScreenWidth, ScreenHeight, 0);
 }
 
+
+
+
+/****************************************************************************
+*
+*  描述:   xxxxx
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
 VOID L2_STORE_FolderItemsPrint()
 {
     UINT16 valid_count = 0;
@@ -2038,6 +2682,20 @@ VOID L2_STORE_FolderItemsPrint()
 }
 
 
+
+
+
+/****************************************************************************
+*
+*  描述:   xxxxx
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
 void L2_GRAPHICS_CopyBufferFromWindowsToDesk()
 {
     for (UINT16 i = 0; i < WindowLayers.LayerCount; i++)
@@ -2066,6 +2724,20 @@ void L2_GRAPHICS_CopyBufferFromWindowsToDesk()
     */
 }
 							  
+
+
+
+/****************************************************************************
+*
+*  描述:   xxxxx
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
 VOID L2_STORE_PartitionItemsPrint(UINT16 Index)
 {
     //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: \n",  __LINE__);
@@ -2099,6 +2771,20 @@ VOID L2_STORE_PartitionItemsPrint(UINT16 Index)
 
 
 
+
+
+
+/****************************************************************************
+*
+*  描述:   xxxxx
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
 EFI_STATUS L2_GRAPHICS_AsciiCharDraw(UINT8 *pBufferDest,
         IN UINTN x0, UINTN y0, UINT8 c,
         IN EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color)
@@ -2159,6 +2845,20 @@ EFI_STATUS L2_GRAPHICS_AsciiCharDraw(UINT8 *pBufferDest,
     return EFI_SUCCESS;
 }
 
+
+
+
+/****************************************************************************
+*
+*  描述:   xxxxx
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
 EFI_STATUS L2_GRAPHICS_AsciiCharDraw2(WINDOW_LAYER_ITEM layer,
         IN UINTN x0, UINTN y0, UINT8 c,
         IN EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color)
@@ -2221,6 +2921,20 @@ EFI_STATUS L2_GRAPHICS_AsciiCharDraw2(WINDOW_LAYER_ITEM layer,
 
 // iMouseX: left top
 // iMouseY: left top
+
+
+
+/****************************************************************************
+*
+*  描述:   xxxxx
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
 VOID L2_GRAPHICS_RightClickMenu(UINT16 iMouseX, UINT16 iMouseY)
 {
 	INT16 i;	
@@ -2255,6 +2969,20 @@ VOID L2_GRAPHICS_RightClickMenu(UINT16 iMouseX, UINT16 iMouseY)
 
 
 
+
+
+
+/****************************************************************************
+*
+*  描述:   xxxxx
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
 VOID L2_MOUSE_MoveOver()
 {    
 	//L3_PARTITION_RootPathAccess();
@@ -2275,6 +3003,20 @@ VOID L2_MOUSE_MoveOver()
 
 }
 
+
+
+
+/****************************************************************************
+*
+*  描述:   xxxxx
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
 void L1_MEMORY_CopyColor1(UINT8 *pBuffer, EFI_GRAPHICS_OUTPUT_BLT_PIXEL color, UINT16 x0, UINT16 y0, UINT16 AreaWidth)
 {
     pBuffer[y0 * AreaWidth * 4 + x0 * 4]     = color.Blue;
@@ -2284,6 +3026,20 @@ void L1_MEMORY_CopyColor1(UINT8 *pBuffer, EFI_GRAPHICS_OUTPUT_BLT_PIXEL color, U
 
 }
 
+
+
+
+/****************************************************************************
+*
+*  描述:   xxxxx
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
 void L1_MEMORY_CopyColor2(UINT8 *pBuffer, EFI_GRAPHICS_OUTPUT_BLT_PIXEL color, UINT16 x0, UINT16 y0)
 {
     pBuffer[y0 * 8 * 4 + x0 * 4]     = color.Blue;
@@ -2292,6 +3048,20 @@ void L1_MEMORY_CopyColor2(UINT8 *pBuffer, EFI_GRAPHICS_OUTPUT_BLT_PIXEL color, U
     pBuffer[y0 * 8 * 4 + x0 * 4 + 3] = color.Reserved;
 }
 
+
+
+
+/****************************************************************************
+*
+*  描述:   xxxxx
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
 void L1_MEMORY_CopyColor3(UINT8 *pBuffer, EFI_GRAPHICS_OUTPUT_BLT_PIXEL color, UINT16 x0, UINT16 y0, UINT8 AreaWidth)
 {
     pBuffer[y0 * AreaWidth * 4 + x0 * 4]     = color.Blue;
@@ -2301,6 +3071,20 @@ void L1_MEMORY_CopyColor3(UINT8 *pBuffer, EFI_GRAPHICS_OUTPUT_BLT_PIXEL color, U
 }
 
 // Draw 8 X 16 point
+
+
+
+/****************************************************************************
+*
+*  描述:   xxxxx
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
 EFI_STATUS L2_GRAPHICS_ChineseHalfDraw2(UINT8 *pBuffer,UINT8 d,
         IN UINTN x0, UINTN y0,
         UINT8 width,
@@ -2340,6 +3124,20 @@ EFI_STATUS L2_GRAPHICS_ChineseHalfDraw2(UINT8 *pBuffer,UINT8 d,
     return EFI_SUCCESS;
 }
 
+
+
+
+/****************************************************************************
+*
+*  描述:   xxxxx
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
 EFI_STATUS L2_GRAPHICS_ChineseCharDraw(UINT8 *pBuffer,
         IN UINTN x0, UINTN y0, UINT32 offset,
         IN EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color , UINT16 AreaWidth)
@@ -2373,6 +3171,20 @@ EFI_STATUS L2_GRAPHICS_ChineseCharDraw(UINT8 *pBuffer,
 
 
 UINT16 GraphicsLayerIDCount = 0;
+
+
+
+/****************************************************************************
+*
+*  描述:   xxxxx
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
 VOID L2_MOUSE_Move()
 {   
     //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: GraphicsLayerMouseMove\n",  __LINE__);
@@ -2388,6 +3200,20 @@ VOID L2_MOUSE_Move()
 // display system date & time
 VOID
 EFIAPI
+
+
+
+/****************************************************************************
+*
+*  描述:   xxxxx
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
 L2_TIMER_Print (
   IN EFI_EVENT Event,
   IN VOID      *Context

@@ -51,6 +51,20 @@ UINT16 keyboard_count = 0;
 char pKeyboardInputBuffer[KEYBOARD_BUFFER_LENGTH] = {0};
 
 
+
+
+
+/****************************************************************************
+*
+*  描述:   xxxxx
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
 VOID L2_KEYBOARD_KeyPressed()
 {
     //DEBUG ((EFI_D_INFO, "%d HandleEnterPressed\n", __LINE__));
@@ -67,6 +81,20 @@ VOID L2_KEYBOARD_KeyPressed()
 
 VOID
 EFIAPI
+
+
+
+/****************************************************************************
+*
+*  描述:   xxxxx
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
 L2_KEYBOARD_Event (
   IN EFI_EVENT Event,
   IN VOID      *Context

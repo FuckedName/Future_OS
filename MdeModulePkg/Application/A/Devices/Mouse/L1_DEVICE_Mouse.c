@@ -37,6 +37,20 @@ INT16 iMouseY = 0;
 UINT16 MouseClickWindowWidth = 300;
 UINT16 MouseClickWindowHeight = 400;
 
+
+
+
+/****************************************************************************
+*
+*  描述:   xxxxx
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
 EFI_STATUS L2_MOUSE_Init()
 {
     EFI_STATUS                         Status;

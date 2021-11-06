@@ -37,6 +37,20 @@ unsigned char L1_BIT_Set(unsigned char *pMapper, unsigned long long StartPageID,
     unsigned long ByteCount = Size / 8 + AddOneFlag;
 }
 
+
+
+
+/****************************************************************************
+*
+*  描述:   xxxxx
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
 int L1_LIBRARY_StackPush(char* a, int top, char elem)
 {
     a[++top]=elem;
@@ -44,6 +58,20 @@ int L1_LIBRARY_StackPush(char* a, int top, char elem)
 }
 
 
+
+
+
+/****************************************************************************
+*
+*  描述:   xxxxx
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
 int L1_LIBRARY_StackPop(char * a,int top)
 {
     if (top==-1) 
@@ -57,6 +85,20 @@ int L1_LIBRARY_StackPop(char * a,int top)
 }
 
 
+
+
+
+/****************************************************************************
+*
+*  描述:   xxxxx
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
 void L1_LIBRARY_QueueInit(QUEUE *pQueue, unsigned long LineCount)
 {
 	// Todo: need to allocate buffer before set zero..
@@ -66,6 +108,20 @@ void L1_LIBRARY_QueueInit(QUEUE *pQueue, unsigned long LineCount)
     pQueue->LineCount = 0;
 }
 
+
+
+
+/****************************************************************************
+*
+*  描述:   xxxxx
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
 void L1_LIBRARY_QueueIn(QUEUE *pQueue , unsigned char *s, unsigned int Size)
 {
 	UINT16 i;
@@ -90,6 +146,20 @@ void L1_LIBRARY_QueueIn(QUEUE *pQueue , unsigned char *s, unsigned int Size)
 	}
 }
 
+
+
+
+/****************************************************************************
+*
+*  描述:   xxxxx
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
 int L1_STACK_Push(char* a,int top,char elem)
 {
     a[++top]=elem;
@@ -97,6 +167,20 @@ int L1_STACK_Push(char* a,int top,char elem)
 }
 
 
+
+
+
+/****************************************************************************
+*
+*  描述:   xxxxx
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
 int L1_STACK_Pop(char * a,int top)
 {
     if (top==-1) 

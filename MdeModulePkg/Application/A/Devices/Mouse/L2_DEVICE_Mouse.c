@@ -35,6 +35,20 @@
 // for mouse move & click
 VOID
 EFIAPI
+
+
+
+/****************************************************************************
+*
+*  描述:   xxxxx
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
 L2_MOUSE_Event (IN EFI_EVENT Event, IN VOID *Context)
 {
     mouse_count++;
@@ -127,6 +141,20 @@ L2_MOUSE_Event (IN EFI_EVENT Event, IN VOID *Context)
 
 
 
+
+
+
+/****************************************************************************
+*
+*  描述:   xxxxx
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
 EFI_STATUS L2_DEVICE_MouseInit()
 {
     EFI_STATUS                         Status;

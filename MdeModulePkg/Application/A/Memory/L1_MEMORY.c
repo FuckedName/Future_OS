@@ -133,6 +133,20 @@ UINT8 *L2_MEMORY_MapperInitial()
 extern UINT8 BufferMFT[DISK_BUFFER_SIZE * 2];
 
 
+
+
+
+/****************************************************************************
+*
+*  描述:   xxxxx
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
 EFI_STATUS L2_COMMON_MemoryAllocate()
 {
     EFI_STATUS  Status;

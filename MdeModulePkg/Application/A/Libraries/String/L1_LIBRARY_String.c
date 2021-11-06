@@ -36,6 +36,20 @@ unsigned long long L1_STRING_Length(char *String)
     return Length;
 }
 
+
+
+
+/****************************************************************************
+*
+*  描述:   xxxxx
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
 int L1_STRING_Compare(unsigned char *p1, unsigned char *p2, unsigned int length)
 {
     //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: StrCmpSelf\n", __LINE__);
@@ -58,6 +72,20 @@ int L1_STRING_IsAllNumber (int c)
 }
 
 
+
+
+
+/****************************************************************************
+*
+*  描述:   xxxxx
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
 int L1_STRING_ToUpper( int c  )
 {
 	if ( (c >= 'a') && (c <= 'z') ) 

@@ -28,6 +28,20 @@
 #include <Library/BaseLib.h>
 
 
+
+
+
+/****************************************************************************
+*
+*  描述:   xxxxx
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
 VOID L1_MEMORY_Memset(void *s, UINT8 c, UINT32 n)
 {
   UINT8 *d;
@@ -44,6 +58,20 @@ VOID L1_MEMORY_Memset(void *s, UINT8 c, UINT32 n)
 
 
 //InternalMemSetMem
+
+
+
+/****************************************************************************
+*
+*  描述:   xxxxx
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
 void L1_MEMORY_SetValue(UINT8 *pBuffer, UINT8 Value, UINT32 Length)
 {
     //
