@@ -152,11 +152,12 @@ VOID EFIAPI L2_MOUSE_Event (IN EFI_EVENT Event, IN VOID *Context)
 *  返回值： 成功：XXXX，失败：XXXXX
 *
 *****************************************************************************/
-EFI_STATUS L2_DEVICE_MouseInit()
+EFI_STATUS L2_MOUSE_Init()
 {
     EFI_STATUS                         Status;
     EFI_HANDLE                         *PointerHandleBuffer = NULL;
     UINTN                              i = 0;
+	MouseClickFlag 					   = MOUSE_NO_CLICKED;
     UINTN                              HandleCount = 0;
     
     //get the handles which supports
@@ -188,4 +189,5 @@ EFI_STATUS L2_DEVICE_MouseInit()
     return EFI_SUCCESS;
 
 }
+
 

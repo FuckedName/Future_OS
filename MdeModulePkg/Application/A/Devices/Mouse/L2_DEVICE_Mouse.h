@@ -34,5 +34,5 @@ EFIAPI
 L2_MOUSE_Event (IN EFI_EVENT Event, IN VOID *Context);
 
 
-EFI_STATUS L2_DEVICE_MouseInit();
+EFI_STATUS L2_MOUSE_Init();
 

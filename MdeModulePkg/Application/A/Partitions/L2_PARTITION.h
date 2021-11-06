@@ -42,3 +42,5 @@ typedef struct
 
 EFI_STATUS L2_FILE_PartitionTypeAnalysis(UINT16 DeviceID);
 
+EFI_STATUS L2_STORE_PartitionAnalysis();
+

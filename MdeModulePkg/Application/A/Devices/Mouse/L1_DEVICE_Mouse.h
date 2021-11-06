@@ -32,8 +32,3 @@
 #include <Global/Global.h>
 
 
-
-
-
-EFI_STATUS L2_MOUSE_Init();
-

@@ -36,7 +36,7 @@
 #include <Libraries/DataStructure/L1_LIBRARY_DataStructure.h>
 #include <Partitions/FAT32/L2_PARTITION_FAT32.h>
 #include <Graphics/L3_GRAPHICS.h>
-#include <Devices/Mouse/L1_DEVICE_Mouse.h>
+#include <Devices/Mouse/L2_DEVICE_Mouse.h>
 #include <Devices/Keyboard/L2_DEVICE_Keyboard.h>
 #include <Devices/Timer/L2_DEVICE_Timer.h>
 #include <Devices/Store/L2_DEVICE_Store.h>
