@@ -40,6 +40,8 @@
 #include <Devices/Keyboard/L2_DEVICE_Keyboard.h>
 #include <Devices/Timer/L2_DEVICE_Timer.h>
 #include <Devices/Store/L2_DEVICE_Store.h>
+#include <Devices/Screen/L2_DEVICE_Screen.h>
+
 #include <Memory/L2_MEMORY.h>
 #include <Memory/L1_MEMORY.h>
 #include <Global/Global.h>
@@ -87,7 +89,7 @@ EFI_STATUS EFIAPI Main (
 	// 测试内存地址
     INFO_SELF(L"Main: 0x%X Status: 0x%X sASCII: 0x%X p1: 0x%X pBuffer: 0x%X \r\n", Main, &Status, sASCII, p1, pBuffer);  
 
-	L2_GRAPHICS_Init();
+	L2_SCREEN_Init();
 	
     L2_COMMON_MemoryAllocate();
 

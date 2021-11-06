@@ -29,18 +29,15 @@
 #include <Library/BaseLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 
-#include <Library/UefiRuntimeServicesTableLib.h>
-
 #include <L2_GRAPHICS.h>
 #include <string.h>
 #include <Libraries/Math/L1_LIBRARY_Math.h>
 #include <Libraries/Network/L1_LIBRARY_Network.h>
 #include <Libraries/Memory/L1_LIBRARY_Memory.h>
 
+#include <Devices/Screen/L2_DEVICE_Screen.h>
+
 #include <Devices/Store/L2_DEVICE_Store.h>
-
-
-
 
 #include <Libraries/String/L2_LIBRARY_String.h>
 #include <Partitions/FAT32/L2_PARTITION_FAT32.h>
@@ -906,19 +903,6 @@ START_MENU_STATE_TRANSFORM StartMenuStateTransformTable[] =
 
 void L2_GRAPHICS_Init()
 {
-	//初始化图形输出句柄
-    EFI_STATUS Status = gBS->LocateProtocol(&gEfiGraphicsOutputProtocolGuid, NULL, (VOID **) &GraphicsOutput);  
-	
-    //INFO_SELF(L"\r\n");    
-    if (EFI_ERROR (Status)) 
-    {
-        INFO_SELF(L"%X\n", Status);
-        return EFI_UNSUPPORTED;
-    }
-
-	//获取屏幕的水平分辨率和垂直分辨率
-    ScreenWidth  = GraphicsOutput->Mode->Info->HorizontalResolution;
-    ScreenHeight = GraphicsOutput->Mode->Info->VerticalResolution;	
 
 }
 
@@ -946,14 +930,8 @@ void L2_GRAPHICS_BootScreenInit()
             pDeskBuffer[(j * ScreenWidth + i) * 4 + 2] = 0x00;
         }
     }       
-	
-    GraphicsOutput->Blt(
-                GraphicsOutput, 
-                (EFI_GRAPHICS_OUTPUT_BLT_PIXEL *) pDeskBuffer,
-                EfiBltBufferToVideo,
-                0, 0, 
-                0, 0, 
-                ScreenWidth, ScreenHeight, 0);   
+
+	L2_SCREEN_Draw(pDeskBuffer, 0, 0, 0, 0, ScreenWidth, ScreenHeight);	 
 }
 
 
