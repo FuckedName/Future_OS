@@ -145,6 +145,10 @@ VOID L2_GRAPHICS_LayerCompute(UINT16 iMouseX, UINT16 iMouseY, UINT8 MouseClickFl
 
 VOID L2_STORE_FolderItemsPrint();
 
+void L2_GRAPHICS_BootScreenInit();
+
+void L2_GRAPHICS_Init();
+
 void L2_GRAPHICS_CopyBufferFromWindowsToDesk();
 
 VOID L2_STORE_PartitionItemsPrint(UINT16 Index);

@@ -25,7 +25,6 @@
 
 #define Note ""
 
-#include <Library/UefiRuntimeServicesTableLib.h>
 #include <Library/MemoryAllocationLib.h>
 
 
@@ -52,17 +51,16 @@
 //注意：FAT32分区的卷标存放在第2个簇前几个字符
 //      NTFS分区的卷标存放在MFT表项$VOLUME表里
 
+// 用于测试内存分配的地址测试
 char *p1;   
 extern const UINT8 sASCII[][16];
 
-EFI_STATUS
-EFIAPI
 
 
 
 /****************************************************************************
 *
-*  描述:   xxxxx
+*  描述:     整个系统总入口函数
 *
 *  参数1： xxxxx
 *  参数2： xxxxx
@@ -71,7 +69,7 @@ EFIAPI
 *  返回值： 成功：XXXX，失败：XXXXX
 *
 *****************************************************************************/
-Main (
+EFI_STATUS EFIAPI Main (
   IN EFI_HANDLE        ImageHandle,
   IN EFI_SYSTEM_TABLE  *SystemTable
   )
@@ -89,40 +87,13 @@ Main (
 	// 测试内存地址
     INFO_SELF(L"Main: 0x%X Status: 0x%X sASCII: 0x%X p1: 0x%X pBuffer: 0x%X \r\n", Main, &Status, sASCII, p1, pBuffer);  
 
-    Status = gBS->LocateProtocol(&gEfiGraphicsOutputProtocolGuid, NULL, (VOID **) &GraphicsOutput);    
-    //INFO_SELF(L"\r\n");    
-    if (EFI_ERROR (Status)) 
-    {
-         INFO_SELF(L"%X\n", Status);
-        return EFI_UNSUPPORTED;
-    }
-    
-    ScreenWidth  = GraphicsOutput->Mode->Info->HorizontalResolution;
-    ScreenHeight = GraphicsOutput->Mode->Info->VerticalResolution;
-    
+	L2_GRAPHICS_Init();
+	
     L2_COMMON_MemoryAllocate();
 
-    L2_GRAPHICS_ParameterInit();
+	L2_GRAPHICS_BootScreenInit();
 
-    //如果不加下面这几行，则是直接显示内存信息，看起来有点像雪花
-    
-    for (int j = 0; j < ScreenHeight; j++)
-    {
-        for (int i = 0; i < ScreenWidth; i++)
-        {
-            pDeskBuffer[(j * ScreenWidth + i) * 4]     = 0xff;
-            pDeskBuffer[(j * ScreenWidth + i) * 4 + 1] = 0x00;
-            pDeskBuffer[(j * ScreenWidth + i) * 4 + 2] = 0x00;
-        }
-    }       
-	
-    GraphicsOutput->Blt(
-                GraphicsOutput, 
-                (EFI_GRAPHICS_OUTPUT_BLT_PIXEL *) pDeskBuffer,
-                EfiBltBufferToVideo,
-                0, 0, 
-                0, 0, 
-                ScreenWidth, ScreenHeight, 0);   
+    L2_GRAPHICS_ParameterInit();
 
     L2_MOUSE_Init();
         

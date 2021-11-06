@@ -32,15 +32,12 @@
 
 #include <Graphics/L2_GRAPHICS.h>
 
-// for mouse move & click
-VOID
-EFIAPI
 
 
 
 /****************************************************************************
 *
-*  描述:   xxxxx
+*  描述:   鼠标事件的总入口，当鼠标有点击、移动事件时State值不为空，可以触发后续相关的绘图事件
 *
 *  参数1： xxxxx
 *  参数2： xxxxx
@@ -49,7 +46,7 @@ EFIAPI
 *  返回值： 成功：XXXX，失败：XXXXX
 *
 *****************************************************************************/
-L2_MOUSE_Event (IN EFI_EVENT Event, IN VOID *Context)
+VOID EFIAPI L2_MOUSE_Event (IN EFI_EVENT Event, IN VOID *Context)
 {
     mouse_count++;
     //L2_DEBUG_Print1(DISPLAY_X, DISPLAY_Y, "%d: HandleMouseEvent\n", __LINE__);
@@ -146,7 +143,7 @@ L2_MOUSE_Event (IN EFI_EVENT Event, IN VOID *Context)
 
 /****************************************************************************
 *
-*  描述:   xxxxx
+*  描述:   鼠标设备初始化，后续可以接收鼠标相关移动、点击事件
 *
 *  参数1： xxxxx
 *  参数2： xxxxx

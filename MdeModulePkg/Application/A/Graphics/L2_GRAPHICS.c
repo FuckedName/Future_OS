@@ -27,6 +27,9 @@
 #include <Library/UefiRuntimeLib.h>
 #include <Library/UefiRuntimeServicesTableLib.h>
 #include <Library/BaseLib.h>
+#include <Library/UefiBootServicesTableLib.h>
+
+#include <Library/UefiRuntimeServicesTableLib.h>
 
 #include <L2_GRAPHICS.h>
 #include <string.h>
@@ -901,13 +904,62 @@ START_MENU_STATE_TRANSFORM StartMenuStateTransformTable[] =
     {SYSTEM_SETTING_CLICKED_STATE,  WALLPAPER_RESET_CLICKED_EVENT,      		CLICK_INIT_STATE,                   	L2_MOUSE_WallpaperResetClicked},
 };
 
+void L2_GRAPHICS_Init()
+{
+	//初始化图形输出句柄
+    EFI_STATUS Status = gBS->LocateProtocol(&gEfiGraphicsOutputProtocolGuid, NULL, (VOID **) &GraphicsOutput);  
+	
+    //INFO_SELF(L"\r\n");    
+    if (EFI_ERROR (Status)) 
+    {
+        INFO_SELF(L"%X\n", Status);
+        return EFI_UNSUPPORTED;
+    }
 
+	//获取屏幕的水平分辨率和垂直分辨率
+    ScreenWidth  = GraphicsOutput->Mode->Info->HorizontalResolution;
+    ScreenHeight = GraphicsOutput->Mode->Info->VerticalResolution;	
 
+}
 
 
 /****************************************************************************
 *
-*  描述:   xxxxx
+*  描述:   图层参数初始化
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
+void L2_GRAPHICS_BootScreenInit()
+{
+    //如果不加下面这几行，则是直接显示内存信息，看起来有点像雪花    
+    for (int j = 0; j < ScreenHeight; j++)
+    {
+        for (int i = 0; i < ScreenWidth; i++)
+        {
+            pDeskBuffer[(j * ScreenWidth + i) * 4]     = 0xff;
+            pDeskBuffer[(j * ScreenWidth + i) * 4 + 1] = 0x00;
+            pDeskBuffer[(j * ScreenWidth + i) * 4 + 2] = 0x00;
+        }
+    }       
+	
+    GraphicsOutput->Blt(
+                GraphicsOutput, 
+                (EFI_GRAPHICS_OUTPUT_BLT_PIXEL *) pDeskBuffer,
+                EfiBltBufferToVideo,
+                0, 0, 
+                0, 0, 
+                ScreenWidth, ScreenHeight, 0);   
+}
+
+
+/****************************************************************************
+*
+*  描述:   图层参数初始化
 *
 *  参数1： xxxxx
 *  参数2： xxxxx
@@ -3197,15 +3249,12 @@ VOID L2_MOUSE_Move()
     L2_MOUSE_Click();
 }
 
-// display system date & time
-VOID
-EFIAPI
 
 
 
 /****************************************************************************
 *
-*  描述:   xxxxx
+*  描述:     显示日期、时间、星期几
 *
 *  参数1： xxxxx
 *  参数2： xxxxx
@@ -3214,7 +3263,7 @@ EFIAPI
 *  返回值： 成功：XXXX，失败：XXXXX
 *
 *****************************************************************************/
-L2_TIMER_Print (
+VOID EFIAPI L2_TIMER_Print (
   IN EFI_EVENT Event,
   IN VOID      *Context
   )

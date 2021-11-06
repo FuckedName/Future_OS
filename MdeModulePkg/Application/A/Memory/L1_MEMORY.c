@@ -40,6 +40,18 @@ UINT8 *FAT32_Table = NULL;
 UINT8 *pDateTimeBuffer = NULL; //Mouse layer: 3
 
 // size: the one unit size is Bytes 
+/****************************************************************************
+*
+*  描述:   内存分配接口，当前是从PHYSICAL_ADDRESS_START+ALL_PAGE_COUNT这个地址开始分配内存，
+*  PHYSICAL_ADDRESS_START这个地址到PHYSICAL_ADDRESS_START+ALL_PAGE_COUNT，是存放内存是否使用的Map表
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
 UINT8 *L2_MEMORY_Allocate(char *pApplicationName, UINT16 type, UINT32 SizeRequired)
 {
     // Allocate minimize unit is 4K
@@ -120,6 +132,17 @@ UINT8 *L2_MEMORY_Allocate(char *pApplicationName, UINT16 type, UINT32 SizeRequir
 
 
 
+/****************************************************************************
+*
+*  描述:   PHYSICAL_ADDRESS_START这个地址到PHYSICAL_ADDRESS_START+ALL_PAGE_COUNT，是存放内存是否使用的Map表
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
 UINT8 *L2_MEMORY_MapperInitial()
 {
 
@@ -138,7 +161,7 @@ extern UINT8 BufferMFT[DISK_BUFFER_SIZE * 2];
 
 /****************************************************************************
 *
-*  描述:   xxxxx
+*  描述:   为系统显示使用的一些图层分配内存
 *
 *  参数1： xxxxx
 *  参数2： xxxxx
