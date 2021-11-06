@@ -32,19 +32,17 @@
 
 #include <Processes/L2_PROCESS_Multi.h>
 #include <Devices/Screen/L2_DEVICE_Screen.h>
+#include <Devices/System/L2_DEVICE_System.h>
 
 #include <Graphics/L2_GRAPHICS.h>
 #include "L2_DEVICE_Timer.h"
-//#include "L2_DEVICE_Screen.h"
-//#include <Process/L2_PROCESS_Multi.h>
-
 
 
 
 
 /****************************************************************************
 *
-*  描述:   xxxxx
+*  描述:   定时器初始化，这个函数写的不好，功能太杂了，有机会优化下。
 *
 *  参数1： xxxxx
 *  参数2： xxxxx
@@ -69,6 +67,7 @@ EFI_STATUS L2_TIMER_IntervalInit()
         return -1;
     }
 
+	//设置时间片回调函数L2_TIMER_Slice
     Status = gBS->CreateEvent(EVT_NOTIFY_SIGNAL | EVT_TIMER,
                             TPL_CALLBACK,
                             L2_TIMER_Slice,
@@ -99,6 +98,7 @@ EFI_STATUS L2_TIMER_IntervalInit()
         //if (*TimerCount % 1000000 == 0)
         L2_DEBUG_Print1(0, ScreenHeight - 30 - 4 * 16, "%d: L2_TIMER_IntervalInit p:%x %lu %llu\n", __LINE__, TimerCount, *TimerCount, QuitTimerCount);
 
+		//关机画面
         if (TRUE == SystemQuitFlag)
         {   
             if (QuitTimerCount == 0)
@@ -110,6 +110,7 @@ EFI_STATUS L2_TIMER_IntervalInit()
 
         SystemQuitCount = *TimerCount - QuitTimerCount;
 
+		//关机画面
         if ((TRUE == SystemQuitFlag) && ( SystemQuitCount % 100 == 0))
         {
             UINT16 count = SystemQuitCount / 100;
@@ -129,13 +130,14 @@ EFI_STATUS L2_TIMER_IntervalInit()
 			L2_SCREEN_Draw(pDeskBuffer, 0, 0, 0, 0, ScreenWidth, ScreenHeight);	   
         }
 
+		//关机画面完成后的关机操作
         if ((TRUE == SystemQuitFlag) && ( SystemQuitCount >= ScreenWidth))
         {
             L2_DEBUG_Print1(0, ScreenHeight - 30 - 6 * 16, "%d: L2_TIMER_IntervalInit p:%x %lu \n", __LINE__, TimerCount, *TimerCount);
             
             gBS->SetTimer( TimerOne, TimerCancel, 0 );
             gBS->CloseEvent( TimerOne );  
-            gRT->ResetSystem (EfiResetShutdown, EFI_SUCCESS, 0, NULL);  
+            L2_System_Shutdown();  
         }
                    
     }

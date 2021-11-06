@@ -1033,7 +1033,19 @@ void L2_GRAPHICS_ParameterInit()
     
 }
 
-/* Display a string */
+
+
+/****************************************************************************
+*
+*  描述: 在指定图层打印指定字符串。其中layer是目标图层
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
 VOID EFIAPI L2_DEBUG_Print3 (UINT16 x, UINT16 y, WINDOW_LAYER_ITEM layer, IN  CONST CHAR8  *Format, ...)
 {
     if (y > layer.WindowHeight - 16 || x > layer.WindowWidth- 8)
@@ -1071,7 +1083,17 @@ VOID EFIAPI L2_DEBUG_Print3 (UINT16 x, UINT16 y, WINDOW_LAYER_ITEM layer, IN  CO
 }
 
 
-/* Display a string */
+/****************************************************************************
+*
+*  描述:   英文字符串显示函数，需要注意的是这个函数打印的信息都在桌面上，由WindowLayers.item[GRAPHICS_LAYER_DESK]控制
+*
+*  参数x： 显示的屏幕的X坐标
+*  参数y： 显示到屏幕的Y坐标
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
 VOID EFIAPI L2_DEBUG_Print1 (UINT16 x, UINT16 y,  IN  CONST CHAR8  *Format, ...)
 {
     if (y > ScreenHeight - 16 || x > ScreenWidth - 8)
@@ -1080,10 +1102,24 @@ VOID EFIAPI L2_DEBUG_Print1 (UINT16 x, UINT16 y,  IN  CONST CHAR8  *Format, ...)
     if (NULL == pDeskBuffer)
         return;
 
+    EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
+    UINT32 i = 0;
+
+    for (i = 0; i < 0x100; i++)
+        AsciiBuffer[i] = 0;
+        
+	
+    Color.Blue = 0x00;
+    Color.Red = 0x00;
+    Color.Green = 0x00;
+
     VA_LIST         VaList;
     VA_START (VaList, Format);
     L2_STRING_Maker(x, y, Format, VaList);
     VA_END (VaList);
+
+    for (i = 0; i < sizeof(AsciiBuffer) /sizeof(CHAR8); i++)
+        L2_GRAPHICS_AsciiCharDraw(WindowLayers.item[GRAPHICS_LAYER_DESK].pBuffer, x + i * 8, y, AsciiBuffer[i], Color);
 }
 
 
@@ -3252,7 +3288,9 @@ VOID EFIAPI L2_TIMER_Print (
     //Display system date time weekday.
     L2_DEBUG_Print1(x, y, "%04d-%02d-%02d %02d:%02d:%02d ", 
                   EFITime.Year, EFITime.Month, EFITime.Day, EFITime.Hour, EFITime.Minute, EFITime.Second);
-    //  星   4839    期   3858
+
+	//这边实际上有可以优化的空间，因为年月日和星期几每天只需要更新一次就行
+	//  星   4839    期   3858
     x += 21 * 8 + 3;
     L2_GRAPHICS_ChineseCharDraw(pDeskBuffer, x, y,  (48 - 1) * 94 + 39 - 1, Color, ScreenWidth); 
     
