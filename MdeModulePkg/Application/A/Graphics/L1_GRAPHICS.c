@@ -54,7 +54,7 @@ double L1_GRAPHICS_Bilinear(double a, double blue, int uv, int u1v, int uv1, int
 
 /****************************************************************************
 *
-*  描述:   xxxxx
+*  描述: 图片缩小算法，把pSource图片宽度、高度缩小到pDest的宽度和高度
 *
 *  参数1： xxxxx
 *  参数2： xxxxx

@@ -272,6 +272,17 @@ EFI_STATUS L2_FILE_PartitionNameGet(UINT16 DeviceID)
 
 
 
+/****************************************************************************
+*
+*  描述:   xxxxx
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
 EFI_STATUS L2_STORE_PartitionAnalysis()
 {
 	L2_STORE_PartitionsParameterGet();

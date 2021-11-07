@@ -99,7 +99,6 @@ EFI_STATUS EFIAPI Main (
 
     L2_MOUSE_Init();
         
-    // get partitions use api
     L2_STORE_PartitionAnalysis();
     
     L2_COMMON_MultiProcessInit();

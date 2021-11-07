@@ -409,7 +409,7 @@ void L2_GRAPHICS_RectangleDraw(UINT8 *pBuffer,
 
 /****************************************************************************
 *
-*  描述:   xxxxx
+*  描述:   矩形填充
 *
 *  参数1： xxxxx
 *  参数2： xxxxx
@@ -1127,7 +1127,7 @@ VOID EFIAPI L2_DEBUG_Print1 (UINT16 x, UINT16 y,  IN  CONST CHAR8  *Format, ...)
 
 /****************************************************************************
 *
-*  描述:   xxxxx
+*  描述:   显示器屏幕初始化，把U盘里边的桌面背景图片，我的电脑、回收站、系统设置、文件、文件夹图标都读取到缓存供桌面显示用
 *
 *  参数1： xxxxx
 *  参数2： xxxxx
@@ -1186,10 +1186,11 @@ EFI_STATUS L2_GRAPHICS_ScreenInit()
     
     L2_GRAPHICS_DeskInit();
 
-    // init mouse buffer with cursor
+    // 初始化鼠标显示缓存
     L2_GRAPHICS_ChineseCharDraw(pMouseBuffer, 0, 0, 11 * 94 + 42, MouseColor, 16);
     //L2_DEBUG_Print1(DISPLAY_X, DISPLAY_Y, "%d: GraphicsLayerCompute\n", __LINE__);
-    
+
+	//把上面初始化好的缓冲显示出来
 	L2_SCREEN_Draw(pDeskBuffer, 0, 0, 0, 0, ScreenWidth, ScreenHeight);	   
 
     // Desk graphics layer, buffer can not free!!
@@ -1203,7 +1204,7 @@ EFI_STATUS L2_GRAPHICS_ScreenInit()
 
 /****************************************************************************
 *
-*  描述:   xxxxx
+*  描述:   开始菜单内容项添加
 *
 *  参数1： xxxxx
 *  参数2： xxxxx
@@ -1304,7 +1305,7 @@ EFI_STATUS L2_GRAPHICS_StartMenuInit()
 
 /****************************************************************************
 *
-*  描述:   xxxxx
+*  描述:   系统设置缓存区初始化
 *
 *  参数1： xxxxx
 *  参数2： xxxxx
@@ -2082,7 +2083,7 @@ VOID L2_MOUSE_Click()
 
 /****************************************************************************
 *
-*  描述:   xxxxx
+*  描述:   绘制按钮
 *
 *  参数1： xxxxx
 *  参数2： xxxxx
@@ -2126,7 +2127,7 @@ EFI_STATUS L2_GRAPHICS_ButtonDraw()
 
 /****************************************************************************
 *
-*  描述:   xxxxx
+*  描述:   绘制按钮
 *
 *  参数1： xxxxx
 *  参数2： xxxxx
@@ -2183,7 +2184,8 @@ EFI_STATUS L2_GRAPHICS_DeskInit()
     UINT32 y = ScreenHeight;
 
 	Color.Reserved = GRAPHICS_LAYER_DESK;
-    
+
+	//把读取的zhufeng.bmp格式文件显示到桌面，0x36是指BMP格式图片文件的头
     for (int i = 0; i < ScreenHeight; i++)
     {
         for (int j = 0; j < ScreenWidth; j++)
@@ -2226,11 +2228,13 @@ EFI_STATUS L2_GRAPHICS_DeskInit()
     for (UINT32 i = 0; i < 384000; i++)
         pSystemIconTempBuffer2[i] = pSystemIconBuffer[SYSTEM_ICON_MYCOMPUTER][0x36 + i];
 
+	//默认提供的BMG图标太大，所以在显示之前把图片缩小了下
     L1_GRAPHICS_ZoomImage(pSystemIconMyComputerBuffer, WidthNew, HeightNew, pSystemIconTempBuffer2, SYSTEM_ICON_WIDTH, SYSTEM_ICON_HEIGHT);
     
     int x1, y1;
     x1 = 20;
     y1 = 20;
+	//在桌面显示我的电脑图标
     L3_GRAPHICS_ItemPrint(pDeskBuffer, pSystemIconMyComputerBuffer, ScreenWidth, ScreenHeight, WidthNew, HeightNew, x1, y1, "", 1, GRAPHICS_LAYER_DESK);
 
     
@@ -2273,6 +2277,7 @@ EFI_STATUS L2_GRAPHICS_DeskInit()
     L1_GRAPHICS_ZoomImage(pSystemIconMySettingBuffer, WidthNew, HeightNew, pSystemIconTempBuffer2, SYSTEM_ICON_WIDTH, SYSTEM_ICON_HEIGHT);
     
     x1 = 20;
+	//在桌面显示系统设置图标
     L3_GRAPHICS_ItemPrint(pDeskBuffer, pSystemIconMySettingBuffer, ScreenWidth, ScreenHeight, WidthNew, HeightNew, x1, y1, "", 1, GRAPHICS_LAYER_DESK);
 
     
@@ -2322,7 +2327,7 @@ EFI_STATUS L2_GRAPHICS_DeskInit()
     */
         
     x1 = 20;
-
+	//在桌面显示回收站图标
     L3_GRAPHICS_ItemPrint(pDeskBuffer, pSystemIconRecycleBuffer, ScreenWidth, ScreenHeight, WidthNew, HeightNew, x1, y1, "", 1, GRAPHICS_LAYER_DESK);
 
     
@@ -2402,7 +2407,7 @@ EFI_STATUS L2_GRAPHICS_DeskInit()
         //L2_DEBUG_Print1(DISK_READ_BUFFER_X + (j % 16) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 16), "%02X ", sChineseChar[j] & 0xff);
     }
 
-    // menu chinese
+    //在桌面左下角显示中文件“菜单”字样
     L2_GRAPHICS_ChineseCharDraw(pDeskBuffer,  16, ScreenHeight - 21,     (18 - 1) * 94 + 43 - 1, Color, ScreenWidth);
     L2_GRAPHICS_ChineseCharDraw(pDeskBuffer,  16 * 2, ScreenHeight - 21, (21 - 1) * 94 + 05 - 1, Color, ScreenWidth);
 }
@@ -3119,7 +3124,7 @@ void L1_MEMORY_CopyColor3(UINT8 *pBuffer, EFI_GRAPHICS_OUTPUT_BLT_PIXEL color, U
 
 /****************************************************************************
 *
-*  描述:   xxxxx
+*  描述:   中文绘制
 *
 *  参数1： xxxxx
 *  参数2： xxxxx
@@ -3172,11 +3177,14 @@ EFI_STATUS L2_GRAPHICS_ChineseHalfDraw2(UINT8 *pBuffer,UINT8 d,
 
 /****************************************************************************
 *
-*  描述:   xxxxx
+*  描述:   中文字符绘制函数，绘制结果是16*16像素大小
 *
-*  参数1： xxxxx
-*  参数2： xxxxx
-*  参数n： xxxxx
+*  参数pBuffer： 		把中文字符写到的目标缓存
+*  参数x0： 			把中文字符写到的X目标
+*  参数y0： 			把中文字符写到的Y目标
+*  参数offset： 		汉字库编码位移
+*  参数Color： 		字体颜色
+*  参数AreaWidth： 	目标缓存宽度，比如：在桌面上绘制传桌面的宽度，在我的电脑绘制传我的电脑宽度等等
 *
 *  返回值： 成功：XXXX，失败：XXXXX
 *

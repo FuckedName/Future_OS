@@ -46,11 +46,12 @@
 
 /****************************************************************************
 *
-*  描述:   xxxxx
+*  描述:   磁盘或优盘分区读取，以ReadSize * 512为读取大小
 *
-*  参数1： xxxxx
-*  参数2： xxxxx
-*  参数n： xxxxx
+*  参数deviceID： 待读取分区对应的设备ID
+*  参数StartSectorNumber：开始读取的扇区号，实际读取时会 * 512，转化为从多少字节读取
+*  参数ReadSize： 读取ReadSize * 512为读取大小
+*  参数pBuffer：     数据读取后存放的buffer，注：由调用者申请和释放
 *
 *  返回值： 成功：XXXX，失败：XXXXX
 *
@@ -184,7 +185,7 @@ EFI_STATUS L1_STORE_Write(UINT8 deviceID, UINT64 StartSectorNumber, UINT16 Write
 
 /****************************************************************************
 *
-*  描述:   xxxxx
+*  描述:   对分区字符串分析。不过怀疑这里边可能有BUG
 *
 *  参数1： xxxxx
 *  参数2： xxxxx
@@ -325,7 +326,8 @@ void L2_STORE_TextDevicePathAnalysis(CHAR16 *p, DEVICE_PARAMETER *device, UINTN 
 
 /****************************************************************************
 *
-*  描述:   xxxxx
+*  描述: 外部存储设备如磁盘、U盘分区参数，注：同一个磁盘、U盘可能有多个分区。
+*  这个代码写的不太好，正常情况下，不应该对取出来的这个值：TextDevicePath，解析，单一职责。
 *
 *  参数1： xxxxx
 *  参数2： xxxxx
