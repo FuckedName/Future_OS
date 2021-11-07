@@ -40,7 +40,7 @@ UINT16 MyComputerHeight = 16 * 50;
 
 /****************************************************************************
 *
-*  描述:   xxxxx
+*  描述: 创建窗口
 *
 *  参数1： xxxxx
 *  参数2： xxxxx
@@ -106,7 +106,7 @@ EFI_STATUS L3_WINDOW_Create(UINT8 *pBuffer, UINT8 *pParent, UINT16 Width, UINT16
 
 /****************************************************************************
 *
-*  描述:   xxxxx
+*  描述:   创建我的电脑窗口
 *
 *  参数1： xxxxx
 *  参数2： xxxxx
@@ -334,7 +334,7 @@ VOID L3_APPLICATION_MyComputerWindow(UINT16 StartX, UINT16 StartY)
 
 /****************************************************************************
 *
-*  描述:   xxxxx
+*  描述:   创建内存详细使用信息窗口，当前显示只包含L2_MEMORY_Allocate分配的内存信息
 *
 *  参数1： xxxxx
 *  参数2： xxxxx
@@ -460,7 +460,7 @@ VOID L3_APPLICATION_MemoryInformationWindow(UINT16 StartX, UINT16 StartY)
 
 /****************************************************************************
 *
-*  描述:   xxxxx
+*  描述:   创建系统日志窗口，用于显示系统运行时调试日志显示，对应的图层：WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW]
 *
 *  参数1： xxxxx
 *  参数2： xxxxx
@@ -539,21 +539,7 @@ VOID L3_APPLICATION_SystemLogWindow(UINT16 StartX, UINT16 StartY)
         }
     }
     
-    int x = 0, y = 0;
     
-    y += 16;
-    y += 16;
-    
-    x = 50;
-    //3658
-    //内
-    //2070
-    //存
-    L2_GRAPHICS_ChineseCharDraw(pBuffer, x, y,          (36 - 1 ) * 94 + 58 - 1, Color, Width);  
-    x += 16;
-    
-    L2_GRAPHICS_ChineseCharDraw(pBuffer, x, y,          (20 - 1 ) * 94 + 70 - 1, Color, Width);  
-    x += 16;
     
     return EFI_SUCCESS;
 }

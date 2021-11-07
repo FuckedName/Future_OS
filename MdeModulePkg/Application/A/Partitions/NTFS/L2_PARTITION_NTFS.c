@@ -100,6 +100,9 @@ EFI_STATUS L2_FILE_NTFS_MFT_Item_Read(UINT16 DeviceID, UINT64 SectorStartNumber)
 }
 
 
+UINT16 Index = 0;
+
+
 // Find $Root file from all MFT(may be 15 file,)
 // pBuffer store all MFT
 //比较重要的几个属性如0X30文件名属性，其中记录着该目录或者文件的文件名；
@@ -120,6 +123,7 @@ EFI_STATUS  L2_FILE_NTFS_MFTDollarRootFileAnalysis(UINT8 *pBuffer)
     for (int i = 0; i < DISK_BUFFER_SIZE * 2; i++)
         p[i] = pBuffer[i];
 
+	Index = 0;
     
     // File header length
     UINT16 AttributeOffset = L1_NETWORK_2BytesToUINT16(((NTFS_FILE_HEADER *)p)->AttributeOffset);
@@ -163,14 +167,14 @@ EFI_STATUS  L2_FILE_NTFS_MFTDollarRootFileAnalysis(UINT8 *pBuffer)
                 L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: DataRunsSize illegal.", __LINE__);
                 return ;
             }
-            UINT8 DataRuns[20] = {0};
             L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: A0 attribute has been found: ", __LINE__);
-            for (int i = NameOffset; i < NameOffset + NameSize * 2; i++)
-                L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: %02X ", __LINE__, pItem[i] & 0xff);
+            //for (int i = NameOffset; i < NameOffset + NameSize * 2; i++)
+            //    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: %02X ", __LINE__, pItem[i] & 0xff);
 
             int j = 0;
 
             //get data runs
+            UINT8 DataRuns[20] = {0};
             for (int i = NameOffset + NameSize * 2; i < AttributeSize; i++)
             {           
                 DataRuns[j] = pItem[i] & 0xff;
@@ -295,15 +299,17 @@ EFI_STATUS  L2_FILE_NTFS_DollarRootA0DatarunAnalysis(UINT8 *p)
     L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: string length: %d\n", __LINE__,  L1_STRING_Length(p));
 
     UINT16 length = L1_STRING_Length(p);
-    UINT8 occupyCluster = 0;
-    UINT16 offset = 0;
+    UINT8  occupyCluster = 0;
+    UINT32 offset = 0;
 
-    UINT16 Index = 0;
 	UINT16 i = 0;
     while(i < length)
     {
     	// for exampleData runs:11 01 24
+    	// Hight 4 bit
         UINT8  offsetLength  = p[i] >> 4;
+
+		//Low 4bit
         UINT8  occupyClusterLength = p[i] & 0x0f;
         L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: OccupyClusterLength: %d offsetLength: %d\n", __LINE__,  occupyClusterLength, offsetLength);
         
@@ -318,6 +324,13 @@ EFI_STATUS  L2_FILE_NTFS_DollarRootA0DatarunAnalysis(UINT8 *p)
         if (offsetLength == 1)
         {
         	offset = p[i];
+        }
+		else if (offsetLength == 2)
+        {
+            UINT8 size[2];
+            size[0] = p[i];
+            size[1] = p[i + 1];
+            offset = L1_NETWORK_2BytesToUINT16(size);
         }
 		else if (offsetLength == 3)
         {

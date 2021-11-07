@@ -35,7 +35,7 @@ WINDOW_LAYERS WindowLayers;
 
 /****************************************************************************
 *
-*  描述:   xxxxx
+*  描述:   双线性插值Bilinear Interpolation算法
 *
 *  参数1： xxxxx
 *  参数2： xxxxx

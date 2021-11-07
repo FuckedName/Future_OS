@@ -5,7 +5,7 @@
     Author：	        	任启红
     ID：					00001
     Date:          		202107
-    Description:    	定义系统的一些全局变量
+    Description:    	定义系统的一些全局变量，这里边很多全局变量是需要干掉的。
     Others:         	无
 
     History:        	无

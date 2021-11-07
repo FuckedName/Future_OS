@@ -2486,7 +2486,7 @@ VOID L2_GRAPHICS_CopyNoReserved(UINT8 *pDest, UINT8 *pSource,
 
 /****************************************************************************
 *
-*  描述:   xxxxx
+*  描述:   把所有图层叠加起来显示
 *
 *  参数1： xxxxx
 *  参数2： xxxxx
@@ -2532,8 +2532,10 @@ VOID L2_GRAPHICS_LayerCompute(UINT16 iMouseX, UINT16 iMouseY, UINT8 MouseClickFl
     
     int i, j;
 
+	//这行代码为啥添加，不太记得了
     L2_MOUSE_Move();
-	
+
+	//为了让鼠标光标透明，需要把图层对应的像素点拷贝到鼠标显示内存缓冲
     for (UINT8 i = 0; i < 16; i++)
     {
         for (UINT8 j = 0; j < 16; j++)
@@ -2543,12 +2545,15 @@ VOID L2_GRAPHICS_LayerCompute(UINT16 iMouseX, UINT16 iMouseY, UINT8 MouseClickFl
 			pMouseBuffer[(i * 16 + j) * 4 + 2] = pDeskDisplayBuffer[((iMouseY + i) * ScreenWidth + iMouseX + j) * 4 + 2];
         }
 	}
-	
+
+	//然后绘制鼠标光标
     L2_GRAPHICS_ChineseCharDraw(pMouseBuffer, 0, 0, 11 * 94 + 42, MouseColor, 16);
-    
+
+	//把鼠标光标显示到桌面
     L2_GRAPHICS_CopyNoReserved(pDeskDisplayBuffer, pMouseBuffer, ScreenWidth, ScreenHeight, 16, 16, iMouseX, iMouseY);
     //L2_DEBUG_Print1(DISPLAY_X, DISPLAY_Y, "%d: GraphicsLayerCompute\n", __LINE__);
-	
+
+	//把准备好的桌面缓冲区显示到屏幕
 	L2_SCREEN_Draw(pDeskDisplayBuffer, 0, 0, 0, 0, ScreenWidth, ScreenHeight);	
 }
 
@@ -2661,7 +2666,7 @@ VOID L2_STORE_FolderItemsPrint()
 
 /****************************************************************************
 *
-*  描述:   xxxxx
+*  描述:   多个图层叠加
 *
 *  参数1： xxxxx
 *  参数2： xxxxx

@@ -86,7 +86,7 @@ EFIAPI
 
 /****************************************************************************
 *
-*  描述:   键盘总入口函数
+*  描述:   键盘按键事件响应总入口函数
 *
 *  参数1： xxxxx
 *  参数2： xxxxx
@@ -184,13 +184,15 @@ L2_KEYBOARD_Event (
         }
         else
         {
+        	//显示输入的按键
             L2_DEBUG_Print1(DISPLAY_KEYBOARD_X, DISPLAY_KEYBOARD_Y, "%a keyboard_input_count: %04d ", pKeyboardInputBuffer, keyboard_input_count);
         }
        
     }  
     
      //DrawAsciiCharUseBuffer(pDeskBuffer, DISPLAY_KEYBOARD_X, DISPLAY_KEYBOARD_Y, uniChar, Color);
-     
+
+	//更新图层信息，这里可以稍优化下，如果没有按键事件，则可以不更新图层，以节省CPU资源
     L2_GRAPHICS_LayerCompute(iMouseX, iMouseY, 0);
 }
 

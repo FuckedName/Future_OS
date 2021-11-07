@@ -33,6 +33,17 @@
 #include <Graphics/L1_GRAPHICS.h>
 
 
+/****************************************************************************
+*
+*  描述:   生成字符串
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
 VOID L2_STRING_Maker (UINT16 x, UINT16 y,
   IN  CONST CHAR8   *Format,
   IN  VA_LIST       VaList
@@ -45,6 +56,19 @@ VOID L2_STRING_Maker (UINT16 x, UINT16 y,
 	
 }
 
+
+
+/****************************************************************************
+*
+*  描述:   生成字符串
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
 VOID L2_STRING_Maker2 (UINT16 x, UINT16 y, WINDOW_LAYER_ITEM layer,
   IN  CONST CHAR8   *Format,
   IN  VA_LIST       VaList
@@ -57,6 +81,19 @@ VOID L2_STRING_Maker2 (UINT16 x, UINT16 y, WINDOW_LAYER_ITEM layer,
 }
 
 
+
+
+/****************************************************************************
+*
+*  描述:   生成字符串
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
 VOID L2_STRING_Maker3 (UINT16 x, UINT16 y, WINDOW_LAYER_ITEM layer,
   IN  CONST CHAR8   *Format,
   IN  VA_LIST       VaList

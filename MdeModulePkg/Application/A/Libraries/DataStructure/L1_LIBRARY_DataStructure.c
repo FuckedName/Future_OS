@@ -5,7 +5,7 @@
     Author：	        	任启红
     ID：					00001
     Date:          		202107
-    Description:    	
+    Description:    	基础数据结构
     Others:         	无
 
     History:        	无
@@ -42,7 +42,7 @@ unsigned char L1_BIT_Set(unsigned char *pMapper, unsigned long long StartPageID,
 
 /****************************************************************************
 *
-*  描述:   xxxxx
+*  描述:   栈数据结构压栈
 *
 *  参数1： xxxxx
 *  参数2： xxxxx
@@ -63,7 +63,7 @@ int L1_LIBRARY_StackPush(char* a, int top, char elem)
 
 /****************************************************************************
 *
-*  描述:   xxxxx
+*  描述:   栈数据结构出栈
 *
 *  参数1： xxxxx
 *  参数2： xxxxx
@@ -90,7 +90,7 @@ int L1_LIBRARY_StackPop(char * a,int top)
 
 /****************************************************************************
 *
-*  描述:   xxxxx
+*  描述:   队列数据结构初始化
 *
 *  参数1： xxxxx
 *  参数2： xxxxx
@@ -113,7 +113,7 @@ void L1_LIBRARY_QueueInit(QUEUE *pQueue, unsigned long LineCount)
 
 /****************************************************************************
 *
-*  描述:   xxxxx
+*  描述: 队列数据结构入队
 *
 *  参数1： xxxxx
 *  参数2： xxxxx

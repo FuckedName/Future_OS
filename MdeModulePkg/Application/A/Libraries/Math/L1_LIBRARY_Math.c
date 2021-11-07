@@ -5,7 +5,7 @@
     Author：	        	任启红
     ID：					00001
     Date:          		202107
-    Description:    	
+    Description:    	数学相关基础库
     Others:         	无
 
     History:        	无
@@ -34,6 +34,19 @@
 #define ByteClear(x)  x |= 0x00
 
 
+
+/****************************************************************************
+*
+*  描述:   两个32位数字相乘
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
+
 long long L1_MATH_Multi(long x, long y)
 {
     return x * y;
@@ -44,7 +57,7 @@ long long L1_MATH_Multi(long x, long y)
 
 /****************************************************************************
 *
-*  描述:   xxxxx
+*  描述:   十六进制的字符转成数字
 *
 *  参数1： xxxxx
 *  参数2： xxxxx
@@ -55,19 +68,29 @@ long long L1_MATH_Multi(long x, long y)
 *****************************************************************************/
 int L1_MATH_DigitToInteger( int c)
 {
-  if (((c >= 'a') && (c <= 'z')) || ((c >= 'A') && (c <= 'Z'))) 
-  {  
-    /* If c is one of [A-Za-z]... */
-    c = L1_STRING_ToUpper(c) - 7;   // Adjust so 'A' is ('9' + 1)
-  }
-  
-  return c - '0';   // Value returned is between 0 and 35, inclusive.
+	if (((c >= 'a') && (c <= 'z')) || ((c >= 'A') && (c <= 'Z'))) 
+	{  
+		/* If c is one of [A-Za-z]... */
+		c = L1_STRING_ToUpper(c) - 7;   // Adjust so 'A' is ('9' + 1)
+	}
+
+	return c - '0';   // Value returned is between 0 and 35, inclusive.
 }
 
 
-// string transform into long long
-long long
-L1_MATH_StringToLongLong(const char * nptr, char ** endptr, int base)
+
+/****************************************************************************
+*
+*  描述:   字符串转成64位整数
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
+long long L1_MATH_StringToLongLong(const char * nptr, char ** endptr, int base)
 {
   const char *pEnd;
   long long   Result = 0;
@@ -126,7 +149,7 @@ L1_MATH_StringToLongLong(const char * nptr, char ** endptr, int base)
 
 /****************************************************************************
 *
-*  描述:   xxxxx
+*  描述:   求绝对值
 *
 *  参数1： xxxxx
 *  参数2： xxxxx
