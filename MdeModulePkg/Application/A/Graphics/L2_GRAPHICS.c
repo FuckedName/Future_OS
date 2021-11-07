@@ -611,7 +611,7 @@ START_MENU_STATE_TRANSFORM MyComputerStateTransformTable[] =
 
 /****************************************************************************
 *
-*  描述:   xxxxx
+*  描述:   用于处理鼠标在不同窗口点击事件的处理，被点击窗口会到所有图层最上层。
 *
 *  参数1： xxxxx
 *  参数2： xxxxx
@@ -888,7 +888,7 @@ VOID L2_MOUSE_WallpaperResetClicked()
 }
 
 
-// For start menu state transform
+// 开始菜单状态转换表
 START_MENU_STATE_TRANSFORM StartMenuStateTransformTable[] =
 {
     {MENU_CLICKED_STATE,            MY_COMPUTER_CLICKED_EVENT,          		CLICK_INIT_STATE,          				L2_MOUSE_MyComputerClicked},
@@ -1795,7 +1795,7 @@ VOID L3_GRAPHICS_DeskClickEventHandle(MOUSE_CLICK_EVENT event)
 
 /****************************************************************************
 *
-*  描述:   xxxxx
+*  描述:   开始菜单事件处理状态机
 *
 *  参数1： xxxxx
 *  参数2： xxxxx
@@ -1922,8 +1922,9 @@ VOID L3_GRAPHICS_MemoryInformationClickEventHandle(MOUSE_CLICK_EVENT event)
 
 }
 
-
-//Get click event from different graphics layer.
+//第一列：不同图层走到对应处理函数
+//第二列：根据图层ID获取不同图层的点击事件XXXXXClickEventGet
+//第三列：处理不同事件XXXXXClickEventHandle
 GRAPHICS_LAYER_EVENT_GET GraphicsLayerEventHandle[] =
 {
     {GRAPHICS_LAYER_DESK,       					 L2_GRAPHICS_DeskLayerClickEventGet, 				L3_GRAPHICS_DeskClickEventHandle},
@@ -1940,7 +1941,7 @@ GRAPHICS_LAYER_EVENT_GET GraphicsLayerEventHandle[] =
 
 /****************************************************************************
 *
-*  描述:   xxxxx
+*  描述:   鼠标点击事件处理，这个函数比较重要
 *
 *  参数1： xxxxx
 *  参数2： xxxxx
@@ -1951,6 +1952,7 @@ GRAPHICS_LAYER_EVENT_GET GraphicsLayerEventHandle[] =
 *****************************************************************************/
 UINT16 L2_MOUSE_ClickEventHandle()
 {   
+	//获取鼠标光标所在的图层，窗口、图层在初始化的时候把第4个字节用于存放图层ID
 	UINT16 LayerID = pDeskDisplayBuffer[(iMouseY * ScreenWidth + iMouseX) * 4 + 3];
 
 	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: iMouseX: %d iMouseY: %d ClickFlag: %d, LayerID: %d\n", __LINE__, iMouseX, iMouseY, MouseClickFlag, LayerID);
@@ -1962,19 +1964,7 @@ UINT16 L2_MOUSE_ClickEventHandle()
 	// Handle click event
 	GraphicsLayerEventHandle[LayerID].pClickEventHandle(event);
 
-	return;
-	
-    WindowLayers.item[GRAPHICS_LAYER_SYSTEM_SETTING_WINDOW].DisplayFlag = FALSE;
-    
-    if (TRUE  == WindowLayers.item[GRAPHICS_LAYER_START_MENU].DisplayFlag)
-    {
-        WindowLayers.ActiveWindowCount--;
-        WindowLayers.item[GRAPHICS_LAYER_START_MENU].DisplayFlag = FALSE;
-    }
-    
-    StartMenuNextState = CLICK_INIT_STATE;
-
-    return START_MENU_INIT_CLICKED_EVENT;
+	return;	
 }
 
 
@@ -1983,7 +1973,7 @@ UINT16 L2_MOUSE_ClickEventHandle()
 
 /****************************************************************************
 *
-*  描述:   xxxxx
+*  描述:   鼠标左键点击事件处理
 *
 *  参数1： xxxxx
 *  参数2： xxxxx
@@ -2007,73 +1997,7 @@ VOID L2_MOUSE_Click()
 
     L2_MOUSE_ClickEventHandle();
 	
-    return;
-	
-    if (START_MENU_INIT_CLICKED_EVENT == MouseClickEvent)
-        
-    
-    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: MouseClickEvent: %d \n", __LINE__, MouseClickEvent);
-
-    MouseClickFlag = MOUSE_NO_CLICKED;
-    EFI_STATUS Status;
-
-    if (MouseClickEvent == MY_COMPUTER_CLOSE_CLICKED_EVENT)
-    {
-        //DisplayMyComputerFlag = 0;
-        if (TRUE  == WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].DisplayFlag)
-        {
-            WindowLayers.ActiveWindowCount--;
-            WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].DisplayFlag = FALSE;
-        }
-        return;
-    }
-
-    if (MouseClickEvent == SYSTEM_LOG_CLOSE_CLICKED_EVENT)
-    {
-        //DisplaySystemLogWindowFlag = 0;
-        
-        if (TRUE  == WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW].DisplayFlag)
-        {
-            WindowLayers.ActiveWindowCount--;
-            WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW].DisplayFlag = FALSE;
-        }
-    
-        return;
-    }
-
-    if (MouseClickEvent == SYSTEM_SETTING_CLOSE_CLICKED_EVENT)
-    {
-        //DisplaySystemSettingWindowFlag = 0;
-        if (TRUE  == WindowLayers.item[GRAPHICS_LAYER_SYSTEM_SETTING_WINDOW].DisplayFlag)
-        {
-            WindowLayers.ActiveWindowCount--;
-            WindowLayers.item[GRAPHICS_LAYER_SYSTEM_SETTING_WINDOW].DisplayFlag = FALSE;
-        }
-        return;
-    }
-
-    if (MouseClickEvent == MEMORY_INFORMATION_CLOSE_CLICKED_EVENT)
-    {
-        //DisplayMemoryInformationWindowFlag = 0;
-        if (TRUE  == WindowLayers.item[GRAPHICS_LAYER_MEMORY_INFORMATION_WINDOW].DisplayFlag)
-        {
-            WindowLayers.ActiveWindowCount--;
-            WindowLayers.item[GRAPHICS_LAYER_MEMORY_INFORMATION_WINDOW].DisplayFlag = FALSE;
-        }
-        return;
-    }
-
-    if (MouseClickEvent == MY_COMPUTER_CLICKED_EVENT || MouseClickEvent == MEMORY_INFORMATION_CLICKED_EVENT  || MouseClickEvent == SYSTEM_LOG_CLICKED_EVENT
-        || MouseClickEvent == WALLPAPER_RESET_CLICKED_EVENT  || MouseClickEvent == WALLPAPER_SETTING_CLICKED_EVENT)
-    {
-        //DisplayStartMenuFlag = 0;
-        //WindowLayers.item[2].DisplayFlag = 0;
-        if (TRUE  == WindowLayers.item[GRAPHICS_LAYER_START_MENU].DisplayFlag)
-        {
-            WindowLayers.ActiveWindowCount--;
-            WindowLayers.item[GRAPHICS_LAYER_START_MENU].DisplayFlag = FALSE;
-        }
-    }    
+    return;	
 }
 
 
@@ -3022,7 +2946,7 @@ VOID L2_GRAPHICS_RightClickMenu(UINT16 iMouseX, UINT16 iMouseY)
 
 /****************************************************************************
 *
-*  描述:   xxxxx
+*  描述:   如果鼠标处于左击，并且鼠标在移动，并且鼠标所在的图层不在桌面层，那么移动鼠标所在的图层，类似窗口移动。
 *
 *  参数1： xxxxx
 *  参数2： xxxxx
@@ -3227,7 +3151,7 @@ UINT16 GraphicsLayerIDCount = 0;
 
 /****************************************************************************
 *
-*  描述:   xxxxx
+*  描述:   鼠标移动事件，其实可以添加鼠标移动到菜单的特效，不过当前暂时没空添加
 *
 *  参数1： xxxxx
 *  参数2： xxxxx
