@@ -117,20 +117,9 @@ EFI_STATUS  L2_FILE_NTFS_MFTDollarRootFileAnalysis(UINT8 *pBuffer)
         return EFI_SUCCESS;
     }
 
-    // Root file buffer copy
-//  memcpy(p, pBuffer[512 * 2 * 5], DISK_BUFFER_SIZE * 2);
-
     for (int i = 0; i < DISK_BUFFER_SIZE * 2; i++)
         p[i] = pBuffer[i];
 
-    //for (int i = 0; i < 7; i++)
-    //{
-        //for (int j = 0; j < 512; j++)
-        //{
-           //%02X: 8 * 3, 
-          //L2_DEBUG_Print1(DISK_READ_BUFFER_X + (j % 16) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 16), "%02X ", p[j] & 0xff);
-        //}
-    //}
     
     // File header length
     UINT16 AttributeOffset = L1_NETWORK_2BytesToUINT16(((NTFS_FILE_HEADER *)p)->AttributeOffset);

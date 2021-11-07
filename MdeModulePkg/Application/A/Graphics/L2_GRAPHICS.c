@@ -1593,7 +1593,7 @@ MOUSE_CLICK_EVENT L2_GRAPHICS_SystemSettingLayerClickEventGet()
 
 /****************************************************************************
 *
-*  描述:   xxxxx
+*  描述:   通过鼠标光标位置获取我的电脑图层点击事件
 *
 *  参数1： xxxxx
 *  参数2： xxxxx
@@ -1616,7 +1616,8 @@ MOUSE_CLICK_EVENT L2_GRAPHICS_MyComputerLayerClickEventGet()
         L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: MY_COMPUTER_CLOSE_CLICKED_EVENT\n", __LINE__);
         return MY_COMPUTER_CLOSE_CLICKED_EVENT;
     }
-	
+
+	//分区被点击事件
     for (UINT16 i = 0 ; i < PartitionCount; i++)
     {
 		UINT16 StartX = MyComputerPositionX + 50;
@@ -1635,6 +1636,7 @@ MOUSE_CLICK_EVENT L2_GRAPHICS_MyComputerLayerClickEventGet()
     UINT16 WidthNew = SYSTEM_ICON_WIDTH / 8;
 
 	//Only 6 item, need to fix after test.
+	//分区的文件或文件夹被点击事件
     for (UINT16 i = 0 ; i < 6; i++)
     {
 		UINT16 StartX = MyComputerPositionX + 130;
