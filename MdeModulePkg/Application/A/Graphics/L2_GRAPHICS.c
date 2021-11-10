@@ -264,7 +264,7 @@ const UINT8 sASCII[][16] =
 
 /****************************************************************************
 *
-*  描述:   xxxxx
+*  描述:   把原内存拷贝到目的内存的指定位置。当前还缺少一些合法性判断
 *
 *  参数1： xxxxx
 *  参数2： xxxxx
@@ -301,7 +301,7 @@ VOID L3_GRAPHICS_ItemPrint(UINT8 *pDestBuffer, UINT8 *pSourceBuffer, UINT16 pDes
 
 /****************************************************************************
 *
-*  描述:   xxxxx
+*  描述:   图片的内存拷贝，感觉跟L3_GRAPHICS_ItemPrint有些是重复的。
 *
 *  参数1： xxxxx
 *  参数2： xxxxx
@@ -335,7 +335,7 @@ VOID L2_GRAPHICS_Copy(UINT8 *pDest, UINT8 *pSource,
 
 /****************************************************************************
 *
-*  描述:   xxxxx
+*  描述:   画直线
 *
 *  参数1： xxxxx
 *  参数2： xxxxx
@@ -376,7 +376,7 @@ EFI_STATUS L2_GRAPHICS_LineDraw(UINT8 *pBuffer,
 
 /****************************************************************************
 *
-*  描述:   xxxxx
+*  描述:   画矩形，当前线的宽度还未使用，比较粗糙
 *
 *  参数1： xxxxx
 *  参数2： xxxxx
@@ -451,7 +451,7 @@ void L1_MEMORY_RectangleFill(UINT8 *pBuffer,
 
 /****************************************************************************
 *
-*  描述:   xxxxx
+*  描述:   我的电脑窗口点击事件中关闭窗口事件响应，注：未进行内存释放，有优化的空间
 *
 *  参数1： xxxxx
 *  参数2： xxxxx
@@ -477,7 +477,7 @@ VOID L2_MOUSE_MyComputerCloseClicked()
 
 /****************************************************************************
 *
-*  描述:   xxxxx
+*  描述:   分区被点击事件
 *
 *  参数1： xxxxx
 *  参数2： xxxxx
@@ -505,7 +505,7 @@ VOID L2_MOUSE_MyComputerPartitionItemClicked()
 
 /****************************************************************************
 *
-*  描述:   xxxxx
+*  描述:   文件内容显示
 *
 *  参数1： xxxxx
 *  参数2： xxxxx
@@ -532,7 +532,7 @@ VOID L2_PARTITION_FileContentPrint(UINT8 *Buffer)
 
 /****************************************************************************
 *
-*  描述:   xxxxx
+*  描述:   文件夹被点击事件
 *
 *  参数1： xxxxx
 *  参数2： xxxxx
@@ -597,7 +597,17 @@ EFI_STATUS L2_MOUSE_MyComputerFolderItemClicked()
 }
 
 
-// For my computer window state transform.
+/****************************************************************************
+*
+*  描述:   我的电脑窗口状态转换的状态机，包含窗口关闭、分区点击、文件夹点击、文件点击事件。
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
 START_MENU_STATE_TRANSFORM MyComputerStateTransformTable[] =
 {
     {MY_COMPUTER_CLICKED_STATE,           MY_COMPUTER_CLOSE_CLICKED_EVENT,    	   	  CLICK_INIT_STATE,                   	L2_MOUSE_MyComputerCloseClicked},
@@ -644,7 +654,7 @@ VOID L1_GRAPHICS_UpdateWindowLayer(UINT16 layer)
 
 /****************************************************************************
 *
-*  描述:   xxxxx
+*  描述:   点击“我的电脑”事件，会显示我的电脑窗口
 *
 *  参数1： xxxxx
 *  参数2： xxxxx
@@ -675,7 +685,7 @@ VOID L2_MOUSE_MyComputerClicked()
 
 /****************************************************************************
 *
-*  描述:   xxxxx
+*  描述:   点击“系统设置”事件
 *
 *  参数1： xxxxx
 *  参数2： xxxxx
@@ -702,7 +712,7 @@ VOID L2_MOUSE_SystemSettingClicked()
 
 /****************************************************************************
 *
-*  描述:   xxxxx
+*  描述:   点击“内存信息”事件，会显示内存信息窗口
 *
 *  参数1： xxxxx
 *  参数2： xxxxx
@@ -729,7 +739,9 @@ VOID L2_MOUSE_MemoryInformationClicked()
 
 /****************************************************************************
 *
-*  描述:   xxxxx
+*  描述:   点击“系统日志”事件，会显示系统日志窗口，这样比较方便系统开发，问题定位
+*        注意：系统日志窗口，显示的是L2_DEBUG_Print3函数打印的日志
+*
 *
 *  参数1： xxxxx
 *  参数2： xxxxx
@@ -758,7 +770,7 @@ VOID L2_MOUSE_SystemLogClicked()
 
 /****************************************************************************
 *
-*  描述:   xxxxx
+*  描述: 点击“系统退出”事件，电脑会关机
 *
 *  参数1： xxxxx
 *  参数2： xxxxx
@@ -779,7 +791,7 @@ VOID L2_MOUSE_SystemQuitClicked()
 
 /****************************************************************************
 *
-*  描述:   xxxxx
+*  描述:   点击“桌面壁纸设置”事件，桌面壁纸会变灰，颜色可以自已在for循环里控制
 *
 *  参数1： xxxxx
 *  参数2： xxxxx
@@ -871,7 +883,7 @@ VOID L2_MOUSE_WallpaperSettingClicked()
 
 /****************************************************************************
 *
-*  描述:   xxxxx
+*  描述:   点击“桌面背景图片恢复”事件，背景图片会恢复成珠峰图片
 *
 *  参数1： xxxxx
 *  参数2： xxxxx
@@ -888,7 +900,17 @@ VOID L2_MOUSE_WallpaperResetClicked()
 }
 
 
-// 开始菜单状态转换表
+/****************************************************************************
+*
+*  描述:   开始菜单状态转换表，很重要
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
 START_MENU_STATE_TRANSFORM StartMenuStateTransformTable[] =
 {
     {MENU_CLICKED_STATE,            MY_COMPUTER_CLICKED_EVENT,          		CLICK_INIT_STATE,          				L2_MOUSE_MyComputerClicked},
@@ -1361,7 +1383,7 @@ EFI_STATUS L2_GRAPHICS_SystemSettingInit()
 
 /****************************************************************************
 *
-*  描述:   xxxxx
+*  描述:   关机屏幕
 *
 *  参数1： xxxxx
 *  参数2： xxxxx
@@ -1429,7 +1451,7 @@ EFI_STATUS L2_GRAPHICS_SayGoodBye()
 
 /****************************************************************************
 *
-*  描述:   xxxxx
+*  描述:   判断当前鼠标坐标是否在矩形区域内
 *
 *  参数1： xxxxx
 *  参数2： xxxxx
@@ -1449,7 +1471,7 @@ BOOLEAN L1_GRAPHICS_InsideRectangle(UINT16 StartX, UINT16 EndX, UINT16 StartY, U
 
 /****************************************************************************
 *
-*  描述:   xxxxx
+*  描述:   桌面图层点击事件，当前只有左下角的开始菜单点击事件
 *
 *  参数1： xxxxx
 *  参数2： xxxxx
@@ -1478,7 +1500,7 @@ MOUSE_CLICK_EVENT L2_GRAPHICS_DeskLayerClickEventGet()
 
 /****************************************************************************
 *
-*  描述:   xxxxx
+*  描述:   开始菜单图层点击事件获取
 *
 *  参数1： xxxxx
 *  参数2： xxxxx
@@ -1542,7 +1564,7 @@ MOUSE_CLICK_EVENT L2_GRAPHICS_StartMenuLayerClickEventGet()
 
 /****************************************************************************
 *
-*  描述:   xxxxx
+*  描述:   系统设置图层点击事件获取
 *
 *  参数1： xxxxx
 *  参数2： xxxxx
@@ -1660,7 +1682,7 @@ MOUSE_CLICK_EVENT L2_GRAPHICS_MyComputerLayerClickEventGet()
 
 /****************************************************************************
 *
-*  描述:   xxxxx
+*  描述:   系统日志图层点击事件获取
 *
 *  参数1： xxxxx
 *  参数2： xxxxx
@@ -1692,7 +1714,7 @@ MOUSE_CLICK_EVENT L2_GRAPHICS_SystemLogLayerClickEventGet()
 
 /****************************************************************************
 *
-*  描述:   xxxxx
+*  描述:   内存信息窗口图层点击事件获取
 *
 *  参数1： xxxxx
 *  参数2： xxxxx
@@ -1724,7 +1746,7 @@ MOUSE_CLICK_EVENT L2_GRAPHICS_MemoryInformationLayerClickEventGet()
 
 /****************************************************************************
 *
-*  描述:   xxxxx
+*  描述:   开始菜单被点击，处理函数
 *
 *  参数1： xxxxx
 *  参数2： xxxxx
@@ -1769,7 +1791,7 @@ VOID L3_GRAPHICS_StartMenuClicked()
 
 /****************************************************************************
 *
-*  描述:   xxxxx
+*  描述:   桌面图层被点击处理函数
 *
 *  参数1： xxxxx
 *  参数2： xxxxx
@@ -1853,7 +1875,7 @@ VOID L3_GRAPHICS_SystemSettingClickEventHandle(MOUSE_CLICK_EVENT event)
 
 /****************************************************************************
 *
-*  描述:   xxxxx
+*  描述:   我的电脑被点击，显示我的窗口，并且进入我的电脑窗口状态机
 *
 *  参数1： xxxxx
 *  参数2： xxxxx
@@ -1924,9 +1946,20 @@ VOID L3_GRAPHICS_MemoryInformationClickEventHandle(MOUSE_CLICK_EVENT event)
 
 }
 
-//第一列：不同图层走到对应处理函数
-//第二列：根据图层ID获取不同图层的点击事件XXXXXClickEventGet
-//第三列：处理不同事件XXXXXClickEventHandle
+
+/****************************************************************************
+*
+*  描述:   根据鼠标光标所在图层，找到图层点击事件，并根据点击事件找到对应的响应处理函数。
+*  第一列：不同图层走到对应处理函数
+*  第二列：根据图层ID获取不同图层的点击事件XXXXXClickEventGet
+*  第三列：处理不同事件XXXXXClickEventHandle
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
 GRAPHICS_LAYER_EVENT_GET GraphicsLayerEventHandle[] =
 {
     {GRAPHICS_LAYER_DESK,       					 L2_GRAPHICS_DeskLayerClickEventGet, 				L3_GRAPHICS_DeskClickEventHandle},
@@ -1943,7 +1976,7 @@ GRAPHICS_LAYER_EVENT_GET GraphicsLayerEventHandle[] =
 
 /****************************************************************************
 *
-*  描述:   鼠标点击事件处理，这个函数比较重要
+*  描述:   【图层点击与事件处理核心处理函数】鼠标点击事件处理，这个函数比较重要
 *
 *  参数1： xxxxx
 *  参数2： xxxxx
@@ -2092,7 +2125,7 @@ EFI_STATUS L2_GRAPHICS_ButtonDraw2(UINT16 StartX, UINT16 StartY, UINT16 Width, U
 
 /****************************************************************************
 *
-*  描述:   xxxxx
+*  描述:   桌面初始化，还比较粗糙
 *
 *  参数1： xxxxx
 *  参数2： xxxxx
@@ -2154,7 +2187,7 @@ EFI_STATUS L2_GRAPHICS_DeskInit()
     for (UINT32 i = 0; i < 384000; i++)
         pSystemIconTempBuffer2[i] = pSystemIconBuffer[SYSTEM_ICON_MYCOMPUTER][0x36 + i];
 
-	//默认提供的BMG图标太大，所以在显示之前把图片缩小了下
+	//默认提供的BMP图标太大，所以在显示之前把图片缩小了下
     L1_GRAPHICS_ZoomImage(pSystemIconMyComputerBuffer, WidthNew, HeightNew, pSystemIconTempBuffer2, SYSTEM_ICON_WIDTH, SYSTEM_ICON_HEIGHT);
     
     int x1, y1;
@@ -2455,7 +2488,7 @@ EFI_STATUS L2_GRAPHICS_ChineseHalfDraw(UINT8 *pBuffer,UINT8 d,
 
 /****************************************************************************
 *
-*  描述:   xxxxx
+*  描述:   图像素点拷贝不带reserved字段，前三个字段包含红、绿、蓝三种颜色，最后一种颜色是图层ID，因为鼠标是图层最上层，所以不需要图层ID
 *
 *  参数1： xxxxx
 *  参数2： xxxxx
@@ -2562,7 +2595,7 @@ VOID L2_GRAPHICS_LayerCompute(UINT16 iMouseX, UINT16 iMouseY, UINT8 MouseClickFl
 
 /****************************************************************************
 *
-*  描述:   xxxxx
+*  描述:   把文件夹目录下的文件和文件夹显示到我的电脑图层，当前这里边很多固定的值，不太好
 *
 *  参数1： xxxxx
 *  参数2： xxxxx
@@ -2617,7 +2650,7 @@ VOID L2_STORE_FolderItemsPrint()
                 
         if (pItems[i].Attribute[0] == 0x10) //Folder
         {
-            ;
+            //显示文件夹小图标
             L3_GRAPHICS_ItemPrint(pMyComputerBuffer, pSystemIconFolderBuffer, MyComputerWidth, MyComputerHeight, WidthNew, HeightNew, x, y, "111", 2, GRAPHICS_LAYER_MY_COMPUTER_WINDOW);
             /*
             for (int j = 0; j < HeightNew; j++)
@@ -2652,6 +2685,7 @@ VOID L2_STORE_FolderItemsPrint()
                                             name,
                                             L1_NETWORK_4BytesToUINT32(pItems[i].FileLength));
             
+            //显示文件小图标
             L3_GRAPHICS_ItemPrint(pMyComputerBuffer, pSystemIconTextBuffer, MyComputerWidth, MyComputerHeight, WidthNew, HeightNew, x, y, "222", 2, GRAPHICS_LAYER_MY_COMPUTER_WINDOW);
 			FolderItemValidIndexArray[valid_count] = i;
             valid_count++;
@@ -2666,7 +2700,7 @@ VOID L2_STORE_FolderItemsPrint()
 
 /****************************************************************************
 *
-*  描述:   多个图层叠加
+*  描述:   多个图层叠加，根据图层从下往上，依次叠加起来，不过这里边涉及多图层，效率会比较底，另外，未判断图层未修改的部分不需要重新叠加。
 *
 *  参数1： xxxxx
 *  参数2： xxxxx
@@ -2708,7 +2742,7 @@ void L2_GRAPHICS_CopyBufferFromWindowsToDesk()
 
 /****************************************************************************
 *
-*  描述:   xxxxx
+*  描述:   显示分区根据下的文件和目录，当前支持FAT32和NTFS两种格式
 *
 *  参数1： xxxxx
 *  参数2： xxxxx
@@ -2755,7 +2789,7 @@ VOID L2_STORE_PartitionItemsPrint(UINT16 Index)
 
 /****************************************************************************
 *
-*  描述:   xxxxx
+*  描述:   在内存区域绘制Ascii字符，建议使用：L2_GRAPHICS_AsciiCharDraw2
 *
 *  参数1： xxxxx
 *  参数2： xxxxx
@@ -2811,7 +2845,8 @@ EFI_STATUS L2_GRAPHICS_AsciiCharDraw(UINT8 *pBufferDest,
     }
 
     L2_GRAPHICS_Copy(pBufferDest, pBuffer, ScreenWidth, ScreenHeight, 8, 16, x0, y0);
-    
+
+	//注：下边注释掉这几部分代码由于涉及太多IO操作，对效率影响较高，基本废弃。
     /*
     GraphicsOutput->Blt(GraphicsOutput, 
                         (EFI_GRAPHICS_OUTPUT_BLT_PIXEL *) pBuffer,
@@ -2829,7 +2864,7 @@ EFI_STATUS L2_GRAPHICS_AsciiCharDraw(UINT8 *pBufferDest,
 
 /****************************************************************************
 *
-*  描述:   xxxxx
+*  描述:   在内存区域绘制Ascii字符
 *
 *  参数1： xxxxx
 *  参数2： xxxxx
@@ -2905,7 +2940,7 @@ EFI_STATUS L2_GRAPHICS_AsciiCharDraw2(WINDOW_LAYER_ITEM layer,
 
 /****************************************************************************
 *
-*  描述:   xxxxx
+*  描述:   鼠标右击显示一个小的窗口
 *
 *  参数1： xxxxx
 *  参数2： xxxxx
@@ -2987,7 +3022,7 @@ VOID L2_MOUSE_MoveOver()
 
 /****************************************************************************
 *
-*  描述:   xxxxx
+*  描述:   内存拷贝，颜色在本质上来讲，也就是内存
 *
 *  参数1： xxxxx
 *  参数2： xxxxx
@@ -3010,11 +3045,11 @@ void L1_MEMORY_CopyColor1(UINT8 *pBuffer, EFI_GRAPHICS_OUTPUT_BLT_PIXEL color, U
 
 /****************************************************************************
 *
-*  描述:   xxxxx
+*  描述:   内存拷贝，颜色在本质上来讲，也就是内存
 *
 *  参数1： xxxxx
 *  参数2： xxxxx
-*  参数n： xxxxx
+*  参数n： 目标内存区域宽度固定
 *
 *  返回值： 成功：XXXX，失败：XXXXX
 *
@@ -3032,11 +3067,11 @@ void L1_MEMORY_CopyColor2(UINT8 *pBuffer, EFI_GRAPHICS_OUTPUT_BLT_PIXEL color, U
 
 /****************************************************************************
 *
-*  描述:   xxxxx
+*  描述:   内存拷贝，颜色在本质上来讲，也就是内存
 *
 *  参数1： xxxxx
 *  参数2： xxxxx
-*  参数n： xxxxx
+*  参数n： AreaWidth：目标内存区域的宽度
 *
 *  返回值： 成功：XXXX，失败：XXXXX
 *
@@ -3055,7 +3090,7 @@ void L1_MEMORY_CopyColor3(UINT8 *pBuffer, EFI_GRAPHICS_OUTPUT_BLT_PIXEL color, U
 
 /****************************************************************************
 *
-*  描述:   中文绘制
+*  描述:   中文字符绘制
 *
 *  参数1： xxxxx
 *  参数2： xxxxx
