@@ -2767,6 +2767,7 @@ VOID L2_STORE_PartitionItemsPrint(UINT16 Index)
     else if (FileSystemType == FILE_SYSTEM_NTFS)
     {
     	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: %d\n",  __LINE__, device[Index].StartSectorNumber + MFT_ITEM_DOLLAR_ROOT * 2);
+		
         // get MFT $ROOT item. 
         L2_FILE_NTFS_MFT_Item_Read(Index, device[Index].StartSectorNumber + MFT_ITEM_DOLLAR_ROOT * 2);
 

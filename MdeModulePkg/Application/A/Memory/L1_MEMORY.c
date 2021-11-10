@@ -69,7 +69,7 @@ UINT8 *L2_MEMORY_Allocate(char *pApplicationName, UINT16 type, UINT32 SizeRequir
     
     MemoryAllocatedCurrent.AllocatedSliceCount++;
     
-    INFO_SELF(L"Name: %a, Size: 0x%X, Pages: 0x%X \r\n", pApplicationName, SizeRequired, PagesRequired);  
+    //INFO_SELF(L"Name: %a, Size: 0x%X, Pages: 0x%X \r\n", pApplicationName, SizeRequired, PagesRequired);  
 
     UINT64 j = 0;
     UINT64 k = 0;
@@ -98,7 +98,7 @@ UINT8 *L2_MEMORY_Allocate(char *pApplicationName, UINT16 type, UINT32 SizeRequir
             if (k >= PagesRequired)
             {
                 //INFO_SELF(L"k: %d \r\n", k);  
-                INFO_SELF(L"Block j: 0x%X, k: 0x%X, Allocated: 0x%X \r\n", j, k, SystemAllPagesAllocated); 
+                //INFO_SELF(L"Block j: 0x%X, k: 0x%X, Allocated: 0x%X \r\n", j, k, SystemAllPagesAllocated); 
                 SystemAllPagesAllocated += k;
 
                 // Update mapper array from j to j + PagesRequired - 1
@@ -107,16 +107,16 @@ UINT8 *L2_MEMORY_Allocate(char *pApplicationName, UINT16 type, UINT32 SizeRequir
 
                 FreeNumberOfPages -= PagesRequired;
                 
-                INFO_SELF(L"Success: 0x%X, Start: 0x%X, Required: 0x%X, Physical: 0x%X, Free: 0x%X\r\n", 
+                /*INFO_SELF(L"Success: 0x%X, Start: 0x%X, Required: 0x%X, Physical: 0x%X, Free: 0x%X\r\n", 
                             pData, 
                             j, 
                             PagesRequired, 
                             pData + j * ALLOCATE_UNIT_SIZE, 
-                            FreeNumberOfPages);  
+                            FreeNumberOfPages);  */
 
                 L1_MEMORY_Memset(pData + j * ALLOCATE_UNIT_SIZE, 0, SizeRequired);
                 
-                INFO_SELF(L"\r\n");
+                //INFO_SELF(L"\r\n");
 
                 // start physical address
                 return pData + j * ALLOCATE_UNIT_SIZE;

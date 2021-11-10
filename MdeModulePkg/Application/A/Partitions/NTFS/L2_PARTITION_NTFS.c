@@ -501,12 +501,14 @@ EFI_STATUS  L2_FILE_NTFS_IndexItemBufferAnalysis(UINT8 *pBuffer)
 *  返回值： 成功：XXXX，失败：XXXXX
 *
 *****************************************************************************/
-UINT16 L2_FILE_NTFS_FileItemHeaderAnalysis(UINT8 *pBuffer)
+UINT16 L2_FILE_NTFS_FileItemHeaderAnalysis(UINT8 *pBuffer, NTFS_FILE_SWITCHED *pNTFSFileSwitched)
 {
 	// File header length
 	UINT16 AttributeOffset = L1_NETWORK_2BytesToUINT16(((NTFS_FILE_HEADER *)pBuffer)->AttributeOffset);
 	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: AttributeOffset:%X \n", __LINE__, AttributeOffset);
 
+	pNTFSFileSwitched->NTFSFileHeaderSwitched.AttributeOffset = AttributeOffset;
+	
 	return AttributeOffset;
 }
 
@@ -521,13 +523,20 @@ EFI_STATUS  L2_FILE_NTFS_FileItemResidentAttributeAnalysis(pBuffer, Offset)
 	ResidentAttributeHeader;
 }
 
+
+EFI_STATUS  L2_FILE_NTFS_DollarVolumeNameAttributeAnalysis(UINT8 *pBuffer, UINT8 *pData)
+{
+	NTFS_FILE_ATTRIBUTE_HEADER;
+}
+
+
 //比较重要的几个属性如0X30文件名属性，其中记录着该目录或者文件的文件名；
 //0X80数据属性记录着文件中的数据；
 //0X90索引根属性，存放着该目录下的子目录和子文件的索引项；当某个目录下的内容比较多，从而导致0X90属性无法完全存放时，
 //0XA0属性会指向一个索引区域，这个索引区域包含了该目录下所有剩余内容的索引项。
 //属性有常驻属性和非常驻属性之分，当一个属性的数据能够在1KB的文件记录中保存的时候，该属性为常驻属性；
 //而当属性的数据无法在文件记录中存放，需要存放到MFT外的其他位置时，该属性为非常驻属性。常驻属性和非常驻属性的头部结构定义如下：
-UINT16  L2_FILE_NTFS_FileItemAttributeAnalysis(UINT8 *p, UINT16 AttributeOffset)
+UINT16  L2_FILE_NTFS_FileItemAttributeAnalysis(UINT8 *p, UINT16 AttributeOffset, NTFS_FILE_ATTRIBUTE_HEADER_SWITCHED *pAttributeHeaderSwitched)
 {
 	UINT8 pItem[200] = {0};
     UINT8 size[4];
@@ -544,25 +553,28 @@ UINT16  L2_FILE_NTFS_FileItemAttributeAnalysis(UINT8 *p, UINT16 AttributeOffset)
         pItem[i] = p[AttributeOffset + i];
 
     // after buffer copied, we can get information in item
-    UINT16 NameSize = ((NTFS_FILE_ATTRIBUTE_HEADER *)pItem)->NameSize;
+    pAttributeHeaderSwitched->NameSize = ((NTFS_FILE_ATTRIBUTE_HEADER *)pItem)->NameSize;
     
-    UINT16 NameOffset = L1_NETWORK_2BytesToUINT16(((NTFS_FILE_ATTRIBUTE_HEADER *)pItem)->NameOffset);
+    pAttributeHeaderSwitched->NameOffset = L1_NETWORK_2BytesToUINT16(((NTFS_FILE_ATTRIBUTE_HEADER *)pItem)->NameOffset);
                                                         
-    UINT16 ResidentFlag = L1_NETWORK_2BytesToUINT16(((NTFS_FILE_ATTRIBUTE_HEADER *)pItem)->ResidentFlag);
+    pAttributeHeaderSwitched->ResidentFlag = L1_NETWORK_2BytesToUINT16(((NTFS_FILE_ATTRIBUTE_HEADER *)pItem)->ResidentFlag);
 	
-    UINT16 Attribute = ((NTFS_FILE_ATTRIBUTE_HEADER *)pItem)->Type[0];
+    pAttributeHeaderSwitched->Type = ((NTFS_FILE_ATTRIBUTE_HEADER *)pItem)->Type[0];
 
-	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: AttributeSize:%X Attribute: %X ResidentFlag: %X\n", __LINE__, AttributeSize, Attribute, ResidentFlag);
+	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: AttributeSize:%X Type: %X\n", __LINE__, AttributeSize, pAttributeHeaderSwitched->Type);
 
 	// 是否是常驻属性（0常驻 1非常驻）
-	switch (ResidentFlag)
+	switch (pAttributeHeaderSwitched->Type)
 	{
 		case 0:
 			L2_FILE_NTFS_FileItemResidentAttributeAnalysis();
 			break;
 
-		case 1:
-			L2_FILE_NTFS_FileItemNonResidentAttributeAnalysis();
+		case MFT_ATTRIBUTE_DOLLAR_VOLUME_NAME:
+			for(UINT8 i = 0; i * 2 < AttributeSize - pAttributeHeaderSwitched->NameOffset; i++)
+			{
+				pAttributeHeaderSwitched->Data[i] = pItem[pAttributeHeaderSwitched->NameOffset + i * 2];
+			}
 			break;
 
 		default:;
@@ -574,8 +586,9 @@ UINT16  L2_FILE_NTFS_FileItemAttributeAnalysis(UINT8 *p, UINT16 AttributeOffset)
 
 //File record in NTFS file system means data on disk, not file in folder.. 
 //L2_FILE_NTFS_MFTDollarRootFileAnalysis
-EFI_STATUS  L2_FILE_NTFS_FileItemBufferAnalysis(UINT8 *pBuffer)
+EFI_STATUS  L2_FILE_NTFS_FileItemBufferAnalysis(UINT8 *pBuffer, NTFS_FILE_SWITCHED *pNTFSFileSwitched)
 {
+	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%a: p == NULL \n", __FUNCTION__);
 	UINT16 AttributeSize;
 	UINT8 *p = (UINT8 *)AllocateZeroPool(DISK_BUFFER_SIZE * 2);
 	if (p == NULL)
@@ -589,12 +602,12 @@ EFI_STATUS  L2_FILE_NTFS_FileItemBufferAnalysis(UINT8 *pBuffer)
 	
 	// 通过属性头计算第一个属性偏移
 	// 获取文件头信息
-	UINT16 Offset = L2_FILE_NTFS_FileItemHeaderAnalysis(p);
+	UINT16 Offset = L2_FILE_NTFS_FileItemHeaderAnalysis(p, pNTFSFileSwitched);
 
 	// 获取每个属性信息
 	for (UINT16 i = 0; i < 10; i++)
 	{
-		AttributeSize = L2_FILE_NTFS_FileItemAttributeAnalysis(pBuffer, Offset);
+		AttributeSize = L2_FILE_NTFS_FileItemAttributeAnalysis(pBuffer, Offset, &(pNTFSFileSwitched->NTFSFileAttributeHeaderSwitched[i]));
 		
 	    Offset += AttributeSize;
 	}

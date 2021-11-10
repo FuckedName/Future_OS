@@ -29,6 +29,7 @@
 #include <Protocol/DevicePath.h>
 #include <Protocol/DevicePathToText.h>
 #include <L2_PARTITION.h>
+#include <Partitions/NTFS/L2_PARTITION_NTFS.h>
 
 #include <Library/UefiBootServicesTableLib.h>
 #include <Protocol/DevicePathToText.h>
@@ -45,6 +46,8 @@ DEVICE_PARAMETER device[10] = {0};
 UINT32 FileBlockStart = 0;
 MasterBootRecordSwitched MBRSwitched;
 DollarBootSwitched NTFSBootSwitched;
+
+
 
 // all partitions analysis
 
@@ -167,7 +170,7 @@ UINT64 L2_PARTITION_NameFAT32StartSectorNumberGet(UINT16 DeviceID)
 
 /****************************************************************************
 *
-*  描述:   xxxxx
+*  描述:   获取卷标所在的MFT,即第四项元数据文件：MFT_ITEM_DOLLAR_VOLUME。
 *
 *  参数1： xxxxx
 *  参数2： xxxxx
@@ -187,7 +190,7 @@ UINT64 L2_PARTITION_NameNTFSStartSectorNumberGet(UINT16 DeviceID)
 
 /****************************************************************************
 *
-*  描述:   xxxxx
+*  描述:   
 *
 *  参数1： xxxxx
 *  参数2： xxxxx
@@ -200,8 +203,10 @@ EFI_STATUS L2_PARTITION_NameFAT32Analysis(UINT16 DeviceID, UINT8 *Buffer)
 {
 	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d %X %X %X %X\n", __LINE__, device[DeviceID].PartitionName[0], device[DeviceID].PartitionName[1], device[DeviceID].PartitionName[2], device[DeviceID].PartitionName[3]);
 
+	//第二个簇区前几个字符就是FAT32分区的名字，并且第一个簇就是第二个簇，因为没有0，1号
 	for (UINT16 i = 0; i < 6; i++)
 		device[DeviceID].PartitionName[i] = Buffer[i];
+	
 	device[DeviceID].PartitionName[6] = '\0';
 }
 
@@ -221,6 +226,22 @@ EFI_STATUS L2_PARTITION_NameFAT32Analysis(UINT16 DeviceID, UINT8 *Buffer)
 *****************************************************************************/
 EFI_STATUS L2_PARTITION_NameNTFSAnalysis(UINT16 DeviceID, UINT8 *Buffer)
 {
+	NTFS_FILE_SWITCHED NTFSFileSwitched = {0};
+
+
+	if (3 == DeviceID)
+		L2_PARTITION_FileContentPrint(Buffer);
+	
+	L2_FILE_NTFS_FileItemBufferAnalysis(Buffer, &NTFSFileSwitched);
+
+	for (UINT8 i = 0; i < 5; i++)
+	{
+		if (NTFSFileSwitched.NTFSFileAttributeHeaderSwitched[i].Type == MFT_ATTRIBUTE_DOLLAR_VOLUME_NAME)
+		{
+			for (UINT8 j = 0; j < 5; j++)				
+				device[DeviceID].PartitionName[j] = NTFSFileSwitched.NTFSFileAttributeHeaderSwitched[i].Data[j];
+		}
+	}
 	device[DeviceID].PartitionName[6] = '\0';
 }
 
@@ -236,7 +257,7 @@ PARTITION_NAME_GET PartitionNameGet[]=
 
 /****************************************************************************
 *
-*  描述:   xxxxx
+*  描述:   获取分区的名字，这个从WINDOWS操作系统看到的类似C盘、D盘等等盘的名称（比如软件分区，资料分区等等，当前暂不支持中文件）
 *
 *  参数1： xxxxx
 *  参数2： xxxxx
@@ -247,8 +268,8 @@ PARTITION_NAME_GET PartitionNameGet[]=
 *****************************************************************************/
 EFI_STATUS L2_FILE_PartitionNameGet(UINT16 DeviceID)
 {
-	//L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d DeviceID: %X\n", __LINE__, DeviceID);
-	UINT8 Buffer[DISK_BUFFER_SIZE] = {0};
+	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d DeviceID: %X\n", __LINE__, DeviceID);
+	UINT8 Buffer[DISK_BUFFER_SIZE * 2] = {0};
 	UINT64 StartSectorNumber = 0;
 	EFI_STATUS Status;
 	UINT16 FileSystemType = device[DeviceID].FileSystemType;
@@ -256,9 +277,10 @@ EFI_STATUS L2_FILE_PartitionNameGet(UINT16 DeviceID)
 
 	StartSectorNumber = PartitionNameGet[FileSystemType].pFunctionStartSectorNumberGet(DeviceID);
 
-	//L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d StartSectorNumber: %llu\n", __LINE__, StartSectorNumber);
-	
-	Status = L1_STORE_READ(DeviceID, StartSectorNumber, 1, Buffer);  
+	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d DeviceID: %d, StartSectorNumber: %llu\n", __LINE__, DeviceID, StartSectorNumber);
+
+	//一个元数据是读取两个扇区
+	Status = L1_STORE_READ(DeviceID, StartSectorNumber, 2, Buffer);  
 	if (EFI_ERROR(Status))
 	{
 		L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d Status: %X\n", __LINE__, Status);

@@ -402,3 +402,29 @@ typedef struct _EA
 	UINT8 EA_NameVal[0];//名字数据和值数据
 }EA,*pEA;
 
+
+//NTFS_FILE_HEADER Switched
+typedef struct 
+{
+    UINT16 AttributeOffset;
+}NTFS_FILE_HEADER_SWITCHED;    
+
+
+//NTFS_FILE_ATTRIBUTE_HEADER
+typedef struct 
+{
+    UINT8 Type;
+    UINT32 Size;
+    UINT8 ResidentFlag; //是否是常驻属性（0常驻 1非常驻）
+    UINT8 NameSize;   //属性名的长度
+    UINT16 NameOffset; //属性名的偏移 相对于属性头
+    UINT8 Data[10]; //用于存放属性的数据
+}NTFS_FILE_ATTRIBUTE_HEADER_SWITCHED;    
+
+
+typedef struct 
+{
+    NTFS_FILE_HEADER_SWITCHED NTFSFileHeaderSwitched;
+    NTFS_FILE_ATTRIBUTE_HEADER_SWITCHED NTFSFileAttributeHeaderSwitched[10];
+}NTFS_FILE_SWITCHED;    
+
