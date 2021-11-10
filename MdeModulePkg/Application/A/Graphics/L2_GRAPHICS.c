@@ -2788,6 +2788,7 @@ VOID L2_STORE_PartitionItemsPrint(UINT16 Index)
 		{
 			if (NTFSFileSwitched.NTFSFileAttributeHeaderSwitched[i].Type == MFT_ATTRIBUTE_DOLLAR_INDEX_ALLOCATION)
 			{
+				// Analysis data runs
 				L2_FILE_NTFS_DollarRootA0DatarunAnalysis(NTFSFileSwitched.NTFSFileAttributeHeaderSwitched[i].Data);
 				L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: %02X %02X %02X %02X %02X  %02X\n",  __LINE__, NTFSFileSwitched.NTFSFileAttributeHeaderSwitched[i].Data[0],
 								NTFSFileSwitched.NTFSFileAttributeHeaderSwitched[i].Data[1],

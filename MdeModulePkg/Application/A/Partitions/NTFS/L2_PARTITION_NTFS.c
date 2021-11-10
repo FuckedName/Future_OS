@@ -231,7 +231,20 @@ EFI_STATUS L2_FILE_NTFS_RootPathItemsRead(UINT8 PartitionID)
     return EFI_SUCCESS;
 }
 
+
+
 //Print ROOT Path items.
+/****************************************************************************
+*
+*  描述:   分析NTFS文件系统的索引项
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
 EFI_STATUS  L2_FILE_NTFS_MFTIndexItemsAnalysis(UINT8 *pBuffer, UINT8 DeviceID)
 {
     UINT8 *p = NULL;
@@ -254,9 +267,10 @@ EFI_STATUS  L2_FILE_NTFS_MFTIndexItemsAnalysis(UINT8 *pBuffer, UINT8 DeviceID)
                                                                      L1_NETWORK_4BytesToUINT32(((NTFS_INDEX_HEADER *)p)->IndexEntrySize));
 
     // 相对于当前位置 need to add size before this Byte.
-    UINT8 length = L1_NETWORK_4BytesToUINT32(((NTFS_INDEX_HEADER *)p)->IndexEntryOffset) + 24;
+    // 获取索引头里边的索引项偏移字段。
+    UINT8 IndexEntryOffset = L1_NETWORK_4BytesToUINT32(((NTFS_INDEX_HEADER *)p)->IndexEntryOffset) + 24;
     UINT8 pItem[200] = {0};
-    UINT16 index = length;
+    UINT16 index = IndexEntryOffset;
 
 	//
     for (UINT8 i = 0; ; i++)
@@ -266,10 +280,10 @@ EFI_STATUS  L2_FILE_NTFS_MFTIndexItemsAnalysis(UINT8 *pBuffer, UINT8 DeviceID)
             
          //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: index: %d\n", __LINE__,  index);  
          // length use 2b at 8, 9 bit
-         UINT16 length2 = pBuffer[index + 8] + pBuffer[index + 9] * 16;
+         UINT16 IndexItemLength = pBuffer[index + 8] + pBuffer[index + 9] * 16;
 
 		 // copy item into pItem buffer
-        for (int i = 0; i < length2; i++)
+        for (int i = 0; i < IndexItemLength; i++)
             pItem[i] = pBuffer[index + i];
             
          UINT8 FileNameSize = ((NTFS_INDEX_ITEM *)pItem)->FileNameSize;
@@ -288,7 +302,8 @@ EFI_STATUS  L2_FILE_NTFS_MFTIndexItemsAnalysis(UINT8 *pBuffer, UINT8 DeviceID)
 		 UINT8 IndexFlag = L1_NETWORK_2BytesToUINT16(((NTFS_INDEX_ITEM *)pItem)->IndexFlag);
          L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: Name: %a, RelativeSector: %llu, IndexFlag: %d\n", __LINE__, attributeName, FileContentRelativeSector, IndexFlag);
          //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%s attributeName: %a\n", __LINE__,  attributeName);  
-         index += length2;
+         
+         index += IndexItemLength;
     }
 }
 
