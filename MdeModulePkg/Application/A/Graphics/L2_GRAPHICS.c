@@ -39,8 +39,10 @@
 
 #include <Devices/Store/L2_DEVICE_Store.h>
 
+
 #include <Libraries/String/L2_LIBRARY_String.h>
 #include <Partitions/FAT32/L2_PARTITION_FAT32.h>
+#include <Partitions/NTFS/L2_PARTITION_NTFS.h>
 
 UINTN ScreenWidth, ScreenHeight;
 
@@ -2772,8 +2774,31 @@ VOID L2_STORE_PartitionItemsPrint(UINT16 Index)
         L2_FILE_NTFS_MFT_Item_Read(Index, device[Index].StartSectorNumber + MFT_ITEM_DOLLAR_ROOT * 2);
 
         // get data runs
-        L2_FILE_NTFS_MFTDollarRootFileAnalysis(BufferMFT);      
+        //L2_FILE_NTFS_MFTDollarRootFileAnalysis(BufferMFT);      
 
+		NTFS_FILE_SWITCHED NTFSFileSwitched = {0};
+
+		//当前测试，只显示一个设备，显示多个设备测试会比较麻烦
+		//if (3 == DeviceID)
+		L2_PARTITION_FileContentPrint(BufferMFT);
+
+		L2_FILE_NTFS_FileItemBufferAnalysis(BufferMFT, &NTFSFileSwitched);
+
+		for (UINT16 i = 0; i < 10; i++)
+		{
+			if (NTFSFileSwitched.NTFSFileAttributeHeaderSwitched[i].Type == MFT_ATTRIBUTE_DOLLAR_INDEX_ALLOCATION)
+			{
+				L2_FILE_NTFS_DollarRootA0DatarunAnalysis(NTFSFileSwitched.NTFSFileAttributeHeaderSwitched[i].Data);
+				L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: %02X %02X %02X %02X %02X  %02X\n",  __LINE__, NTFSFileSwitched.NTFSFileAttributeHeaderSwitched[i].Data[0],
+								NTFSFileSwitched.NTFSFileAttributeHeaderSwitched[i].Data[1],
+								NTFSFileSwitched.NTFSFileAttributeHeaderSwitched[i].Data[2],
+								NTFSFileSwitched.NTFSFileAttributeHeaderSwitched[i].Data[3],
+								NTFSFileSwitched.NTFSFileAttributeHeaderSwitched[i].Data[4],
+								NTFSFileSwitched.NTFSFileAttributeHeaderSwitched[i].Data[5]);
+				break;
+			}
+		}
+		
         // use data run get root path item index
         L2_FILE_NTFS_RootPathItemsRead(Index);
     }

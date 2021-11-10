@@ -471,6 +471,10 @@ EFI_STATUS L2_STORE_ReadFileFSM()
 }
 
 
+
+
+
+//可优化，同一个分区，第一次读入后，不需要再初始化一遍
 STATE_TRANS StatusTransitionTable[] =
 {
     { INIT_STATE,                READ_PATITION_EVENT,   GET_PARTITION_INFO_STATE, L2_STORE_PartitionAnalysisFSM},
