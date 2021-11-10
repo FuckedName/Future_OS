@@ -418,7 +418,7 @@ typedef struct
     UINT8 ResidentFlag; //是否是常驻属性（0常驻 1非常驻）
     UINT8 NameSize;   //属性名的长度
     UINT16 NameOffset; //属性名的偏移 相对于属性头
-    UINT8 Data[10]; //用于存放属性的数据
+    UINT8 Data[20]; //用于存放属性的数据
 }NTFS_FILE_ATTRIBUTE_HEADER_SWITCHED;    
 
 

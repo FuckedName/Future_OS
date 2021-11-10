@@ -229,20 +229,25 @@ EFI_STATUS L2_PARTITION_NameNTFSAnalysis(UINT16 DeviceID, UINT8 *Buffer)
 	NTFS_FILE_SWITCHED NTFSFileSwitched = {0};
 
 
-	if (3 == DeviceID)
+	//当前测试，只显示一个设备，显示多个设备测试会比较麻烦
+	//if (3 == DeviceID)
 		L2_PARTITION_FileContentPrint(Buffer);
 	
 	L2_FILE_NTFS_FileItemBufferAnalysis(Buffer, &NTFSFileSwitched);
+
+	UINT8 j;
 
 	for (UINT8 i = 0; i < 5; i++)
 	{
 		if (NTFSFileSwitched.NTFSFileAttributeHeaderSwitched[i].Type == MFT_ATTRIBUTE_DOLLAR_VOLUME_NAME)
 		{
-			for (UINT8 j = 0; j < 5; j++)				
+			for (j = 0; NTFSFileSwitched.NTFSFileAttributeHeaderSwitched[i].Data[j] != '\0'; j++)				
 				device[DeviceID].PartitionName[j] = NTFSFileSwitched.NTFSFileAttributeHeaderSwitched[i].Data[j];
+
+			break;
 		}
 	}
-	device[DeviceID].PartitionName[6] = '\0';
+	device[DeviceID].PartitionName[j] = '\0';
 }
 
 

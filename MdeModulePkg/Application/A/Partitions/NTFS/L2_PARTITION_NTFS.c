@@ -530,12 +530,24 @@ EFI_STATUS  L2_FILE_NTFS_DollarVolumeNameAttributeAnalysis(UINT8 *pBuffer, UINT8
 }
 
 
-//比较重要的几个属性如0X30文件名属性，其中记录着该目录或者文件的文件名；
-//0X80数据属性记录着文件中的数据；
-//0X90索引根属性，存放着该目录下的子目录和子文件的索引项；当某个目录下的内容比较多，从而导致0X90属性无法完全存放时，
-//0XA0属性会指向一个索引区域，这个索引区域包含了该目录下所有剩余内容的索引项。
-//属性有常驻属性和非常驻属性之分，当一个属性的数据能够在1KB的文件记录中保存的时候，该属性为常驻属性；
-//而当属性的数据无法在文件记录中存放，需要存放到MFT外的其他位置时，该属性为非常驻属性。常驻属性和非常驻属性的头部结构定义如下：
+/****************************************************************************
+*
+*  描述: 分析NTFS的磁盘FILE项（注意不是目录下的文件）里边的属性，每个FILE项一般有很多个属性，到少有4，5个
+*
+*  //比较重要的几个属性如0X30文件名属性，其中记录着该目录或者文件的文件名；
+*  //0X80数据属性记录着文件中的数据；
+*  //0X90索引根属性，存放着该目录下的子目录和子文件的索引项；当某个目录下的内容比较多，从而导致0X90属性无法完全存放时，
+*  //0XA0属性会指向一个索引区域，这个索引区域包含了该目录下所有剩余内容的索引项。
+*  //属性有常驻属性和非常驻属性之分，当一个属性的数据能够在1KB的文件记录中保存的时候，该属性为常驻属性；
+*  //而当属性的数据无法在文件记录中存放，需要存放到MFT外的其他位置时，该属性为非常驻属性。常驻属性和非常驻属性的头部结构定义如下：
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX  
+*
+*
+*****************************************************************************/
 UINT16  L2_FILE_NTFS_FileItemAttributeAnalysis(UINT8 *p, UINT16 AttributeOffset, NTFS_FILE_ATTRIBUTE_HEADER_SWITCHED *pAttributeHeaderSwitched)
 {
 	UINT8 pItem[200] = {0};
@@ -563,11 +575,23 @@ UINT16  L2_FILE_NTFS_FileItemAttributeAnalysis(UINT8 *p, UINT16 AttributeOffset,
 
 	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: AttributeSize:%X Type: %X\n", __LINE__, AttributeSize, pAttributeHeaderSwitched->Type);
 
-	// 是否是常驻属性（0常驻 1非常驻）
 	switch (pAttributeHeaderSwitched->Type)
 	{
-		case 0:
-			L2_FILE_NTFS_FileItemResidentAttributeAnalysis();
+		//A0 Attribute
+		case MFT_ATTRIBUTE_DOLLAR_INDEX_ALLOCATION:
+			{
+				UINT16 NameOffset = pAttributeHeaderSwitched->NameOffset;
+				UINT8 NameSize = pAttributeHeaderSwitched->NameSize;
+
+				//每个字符占用两个字节
+				for(UINT8 i = 0; i < AttributeSize - NameOffset - NameSize * 2; i++)
+				{
+					//Get data runs data
+					pAttributeHeaderSwitched->Data[i] = pItem[NameOffset + NameSize * 2 + i];
+				}
+
+				//L2_FILE_NTFS_A0AttributeAnalysis();
+			}
 			break;
 
 		case MFT_ATTRIBUTE_DOLLAR_VOLUME_NAME:
@@ -586,6 +610,17 @@ UINT16  L2_FILE_NTFS_FileItemAttributeAnalysis(UINT8 *p, UINT16 AttributeOffset,
 
 //File record in NTFS file system means data on disk, not file in folder.. 
 //L2_FILE_NTFS_MFTDollarRootFileAnalysis
+/****************************************************************************
+*
+*  描述: 分析NTFS的磁盘FILE项（注意不是目录下的文件），每个FILE项一般占用两个扇区
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
 EFI_STATUS  L2_FILE_NTFS_FileItemBufferAnalysis(UINT8 *pBuffer, NTFS_FILE_SWITCHED *pNTFSFileSwitched)
 {
 	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%a: p == NULL \n", __FUNCTION__);
@@ -605,6 +640,7 @@ EFI_STATUS  L2_FILE_NTFS_FileItemBufferAnalysis(UINT8 *pBuffer, NTFS_FILE_SWITCH
 	UINT16 Offset = L2_FILE_NTFS_FileItemHeaderAnalysis(p, pNTFSFileSwitched);
 
 	// 获取每个属性信息
+	// 当前只计算10个属性，其实是有缺陷的
 	for (UINT16 i = 0; i < 10; i++)
 	{
 		AttributeSize = L2_FILE_NTFS_FileItemAttributeAnalysis(pBuffer, Offset, &(pNTFSFileSwitched->NTFSFileAttributeHeaderSwitched[i]));
