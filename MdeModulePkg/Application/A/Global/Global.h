@@ -136,6 +136,26 @@ typedef struct
 }DOLLAR_BOOT;
 
 
+// To save folder or file after read from file system.
+typedef struct
+{
+	UINT8 Name[100]; 
+	UINT8 Type; // 1 file; 2 folder; 
+	UINT16 Size;
+	UINT16 CreateTime;
+	UINT16 LatestModifiedTime;
+	UINT16 ItemCount;
+}COMMON_STORAGE_ITEM;
+
+
+typedef enum
+{
+	COMMON_STORAGE_ITEM_FILE = 0,
+	COMMON_STORAGE_ITEM_FOLDER,
+	COMMON_STORAGE_ITEM_MAX = 0
+}COMMON_STORAGE_ITEM_TYPE;
+
+
 extern QUEUE Queue;
 
 extern FAT32_ROOTPATH_SHORT_FILE_ITEM pItems[32];
@@ -148,6 +168,7 @@ extern float MemorySize;
 #define DISPLAY_DESK_DATE_TIME_Y (ScreenHeight - 21)
 
 extern DollarBootSwitched NTFSBootSwitched;
+extern COMMON_STORAGE_ITEM pCommonStorageItems[32];
 
 #define DISK_BUFFER_SIZE (512)
 

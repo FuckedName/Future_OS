@@ -38,11 +38,12 @@
 #include <Devices/Screen/L2_DEVICE_Screen.h>
 
 #include <Devices/Store/L2_DEVICE_Store.h>
-
+#include <Global/Global.h>
 
 #include <Libraries/String/L2_LIBRARY_String.h>
 #include <Partitions/FAT32/L2_PARTITION_FAT32.h>
 #include <Partitions/NTFS/L2_PARTITION_NTFS.h>
+#include <Partitions/L2_PARTITION.h>
 
 UINTN ScreenWidth, ScreenHeight;
 
@@ -116,7 +117,10 @@ START_MENU_STATE 	StartMenuNextState = CLICK_INIT_STATE;
 
 START_MENU_STATE 	 MyComputerNextState = CLICK_INIT_STATE;
 
+// FAT32 文件或者目录
 FAT32_ROOTPATH_SHORT_FILE_ITEM pItems[32];
+
+
 
 //Line 0
 #define DISPLAY_DESK_HEIGHT_WEIGHT_X (date_time_count % 30) 
@@ -2697,6 +2701,96 @@ VOID L2_STORE_FolderItemsPrint()
 }
 
 
+/****************************************************************************
+*
+*  描述:   把文件夹目录下的文件和文件夹显示到我的电脑图层，当前这里边很多固定的值，不太好
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
+VOID L2_STORE_FolderItemsPrint2()
+{
+    UINT16 valid_count = 0;
+    UINT16 HeightNew = SYSTEM_ICON_HEIGHT / 8;
+    UINT16 WidthNew = SYSTEM_ICON_WIDTH / 8;
+    UINT16 x;
+    UINT16 y;
+	
+	pMyComputerBuffer = WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].pBuffer;
+
+	UINT16 StartX = WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].StartX + 130;
+	UINT16 StartY = WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].StartY + 6  * (HeightNew + 16 * 2) + 200;
+
+	UINT16 Width = WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].WindowWidth;
+	UINT16 Height = WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].WindowHeight;
+
+	// Clear old display items
+	for (UINT16 i = 200; i < Height; i++)
+    {
+        for (UINT16 j = 130; j < Width; j++)
+        {
+            pMyComputerBuffer[(i * Width + j) * 4]     = 0xff;
+            pMyComputerBuffer[(i * Width + j) * 4 + 1] = 0xff;
+            pMyComputerBuffer[(i * Width + j) * 4 + 2] = 0xff;
+            pMyComputerBuffer[(i * Width + j) * 4 + 3] = GRAPHICS_LAYER_MY_COMPUTER_WINDOW;
+        }
+    }	
+	
+    for (UINT16 i = 0; i < 7; i++)
+    {                   
+        x = 130;
+
+        y = valid_count * (HeightNew + 16 * 2) + 200;
+                
+        if (pCommonStorageItems[i].Type == COMMON_STORAGE_ITEM_FOLDER) //Folder
+        {
+            //显示文件夹小图标
+            L3_GRAPHICS_ItemPrint(pMyComputerBuffer, pSystemIconFolderBuffer, MyComputerWidth, MyComputerHeight, WidthNew, HeightNew, x, y, "111", 2, GRAPHICS_LAYER_MY_COMPUTER_WINDOW);
+            /*
+            for (int j = 0; j < HeightNew; j++)
+            {
+                for (int k = 0; k < WidthNew; k++)
+                {
+                    pMyComputerBuffer[((valid_count * (HeightNew + 16 * 2) + 200 + j) * MyComputerWidth + 130 + k) * 4 ]     = pSystemIconFolderBuffer[((HeightNew - j) * WidthNew + k) * 3 ];
+                    pMyComputerBuffer[((valid_count * (HeightNew + 16 * 2) + 200 + j) * MyComputerWidth + 130 + k) * 4 + 1 ] = pSystemIconFolderBuffer[((HeightNew - j) * WidthNew + k) * 3 + 1 ];
+                    pMyComputerBuffer[((valid_count * (HeightNew + 16 * 2) + 200 + j) * MyComputerWidth + 130 + k) * 4 + 2 ] = pSystemIconFolderBuffer[((HeightNew - j) * WidthNew + k) * 3 + 2 ];
+                }
+            }
+            */
+            L2_DEBUG_Print3(x, y + HeightNew, WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW], "%a %d Bytes",
+                                            pCommonStorageItems[i].Name,
+                                            L1_NETWORK_4BytesToUINT32(pCommonStorageItems[i].Size));
+            FolderItemValidIndexArray[valid_count] = i;
+            valid_count++;
+        }
+        else if (pCommonStorageItems[i].Type == COMMON_STORAGE_ITEM_FILE) //File
+        {
+            
+            /*for (int j = 0; j < HeightNew; j++)
+            {
+                for (int k = 0; k < WidthNew; k++)
+                {
+                    pMyComputerBuffer[((valid_count * (HeightNew + 16 * 2) + 200 + j) * MyComputerWidth + 130 + k) * 4 ]     = pSystemIconTextBuffer[((HeightNew - j) * WidthNew + k) * 3 ];
+                    pMyComputerBuffer[((valid_count * (HeightNew + 16 * 2) + 200 + j) * MyComputerWidth + 130 + k) * 4 + 1 ] = pSystemIconTextBuffer[((HeightNew - j) * WidthNew + k) * 3 + 1 ];
+                    pMyComputerBuffer[((valid_count * (HeightNew + 16 * 2) + 200 + j) * MyComputerWidth + 130 + k) * 4 + 2 ] = pSystemIconTextBuffer[((HeightNew - j) * WidthNew + k) * 3 + 2 ];
+                }
+            }*/
+            L2_DEBUG_Print3(x, y + HeightNew, WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW], "%a %d Bytes",
+                                            pCommonStorageItems[i].Name,
+                                            pCommonStorageItems[i].Size);
+            
+            //显示文件小图标
+            L3_GRAPHICS_ItemPrint(pMyComputerBuffer, pSystemIconTextBuffer, MyComputerWidth, MyComputerHeight, WidthNew, HeightNew, x, y, "222", 2, GRAPHICS_LAYER_MY_COMPUTER_WINDOW);
+			FolderItemValidIndexArray[valid_count] = i;
+            valid_count++;
+        }
+    }       
+
+}
 
 
 
@@ -2780,7 +2874,7 @@ VOID L2_STORE_PartitionItemsPrint(UINT16 Index)
 
 		//当前测试，只显示一个设备，显示多个设备测试会比较麻烦
 		//if (3 == DeviceID)
-		L2_PARTITION_FileContentPrint(BufferMFT);
+		//L2_PARTITION_FileContentPrint(BufferMFT);
 
 		L2_FILE_NTFS_FileItemBufferAnalysis(BufferMFT, &NTFSFileSwitched);
 
@@ -2790,6 +2884,7 @@ VOID L2_STORE_PartitionItemsPrint(UINT16 Index)
 			{
 				// Analysis data runs
 				L2_FILE_NTFS_DollarRootA0DatarunAnalysis(NTFSFileSwitched.NTFSFileAttributeHeaderSwitched[i].Data);
+				
 				L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: %02X %02X %02X %02X %02X  %02X\n",  __LINE__, NTFSFileSwitched.NTFSFileAttributeHeaderSwitched[i].Data[0],
 								NTFSFileSwitched.NTFSFileAttributeHeaderSwitched[i].Data[1],
 								NTFSFileSwitched.NTFSFileAttributeHeaderSwitched[i].Data[2],
@@ -2802,6 +2897,9 @@ VOID L2_STORE_PartitionItemsPrint(UINT16 Index)
 		
         // use data run get root path item index
         L2_FILE_NTFS_RootPathItemsRead(Index);
+		
+
+		L2_STORE_FolderItemsPrint2();
     }
     else if (FileSystemType == FILE_SYSTEM_MAX)
     {

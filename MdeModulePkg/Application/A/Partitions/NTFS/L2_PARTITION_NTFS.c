@@ -272,6 +272,10 @@ EFI_STATUS  L2_FILE_NTFS_MFTIndexItemsAnalysis(UINT8 *pBuffer, UINT8 DeviceID)
     UINT8 pItem[200] = {0};
     UINT16 index = IndexEntryOffset;
 
+	//L1_MEMORY_Memset(&pItems, 0, sizeof(pItems));
+	UINT8 j = 0;
+
+	pCommonStorageItems[0].ItemCount = 0;
 	//
     for (UINT8 i = 0; ; i++)
     {    
@@ -299,13 +303,37 @@ EFI_STATUS  L2_FILE_NTFS_MFTIndexItemsAnalysis(UINT8 *pBuffer, UINT8 DeviceID)
             attributeName[i] = pItem[82 + 2 * i];
          }
 
-		 UINT8 IndexFlag = L1_NETWORK_2BytesToUINT16(((NTFS_INDEX_ITEM *)pItem)->IndexFlag);
-         L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: Name: %a, RelativeSector: %llu, IndexFlag: %d\n", __LINE__, attributeName, FileContentRelativeSector, IndexFlag);
+		 UINT64 FileFlag = L1_NETWORK_8BytesToUINT64(((NTFS_INDEX_ITEM *)pItem)->FileFlag);
+         L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: Name: %a, Sector: %llu, FileFlag: %llX\n", __LINE__, attributeName, FileContentRelativeSector, FileFlag);
          //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%s attributeName: %a\n", __LINE__,  attributeName);  
-         
-         index += IndexItemLength;
+
+		if (FileFlag == 0x20) //File
+		{ 
+			pCommonStorageItems[j].Type = COMMON_STORAGE_ITEM_FILE;
+			L1_MEMORY_Copy(pCommonStorageItems[j].Name, attributeName, L1_STRING_Length(attributeName));
+			pCommonStorageItems[j].Name[L1_STRING_Length(attributeName)] = 0;
+			pCommonStorageItems[j].Size = 100;
+			
+			pCommonStorageItems[0].ItemCount++;
+			j++;
+		}
+		else if (FileFlag == 0x10000000) //Folder
+		{
+			pCommonStorageItems[j].Type = COMMON_STORAGE_ITEM_FOLDER;
+			L1_MEMORY_Copy(pCommonStorageItems[j].Name, attributeName, L1_STRING_Length(attributeName));
+			pCommonStorageItems[j].Name[L1_STRING_Length(attributeName)] = 0;
+			pCommonStorageItems[j].Size = 200;
+			pCommonStorageItems[0].ItemCount++;
+			j++;
+		}
+				
+        index += IndexItemLength;
     }
+
+	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: ItemCount: %d\n", __LINE__, pCommonStorageItems[0].ItemCount);
+         
 }
+
 
 
 // Analysis attribut A0 of $Root

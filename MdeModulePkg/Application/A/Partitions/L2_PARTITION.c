@@ -49,6 +49,13 @@ DollarBootSwitched NTFSBootSwitched;
 
 
 
+
+
+
+//通用文件系统文件或者目录
+COMMON_STORAGE_ITEM pCommonStorageItems[32];
+
+
 // all partitions analysis
 
 
