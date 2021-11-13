@@ -74,8 +74,8 @@ UINT8 *pSystemSettingWindowBuffer = NULL;
 UINT16 StartMenuWidth = 16 * 10;
 UINT16 StartMenuHeight = 16 * 20;
 UINT16 StatusErrorCount = 0;
-UINT16 SystemLogWindowWidth = 16 * 30;
-UINT16 SystemLogWindowHeight = 16 * 40;
+UINT16 SystemLogWindowWidth = 16 * 40;
+UINT16 SystemLogWindowHeight = 16 * 60;
 UINT16 SystemSettingWindowWidth = 16 * 10;
 UINT16 SystemSettingWindowHeight = 16 * 10;
 
@@ -522,7 +522,7 @@ VOID L2_MOUSE_MyComputerPartitionItemClicked()
 *****************************************************************************/
 VOID L2_PARTITION_FileContentPrint(UINT8 *Buffer)
 {	
-	for (int j = 0; j < 250; j++)
+	for (int j = 0; j < 512; j++)
     {
         L2_DEBUG_Print1(DISK_READ_BUFFER_X + (j % 16) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 16), "%02X ", Buffer[j] & 0xff);
     }
@@ -538,7 +538,7 @@ VOID L2_PARTITION_FileContentPrint(UINT8 *Buffer)
 
 /****************************************************************************
 *
-*  描述:   文件夹被点击事件
+*  描述:   文件夹中文件或者目录被点击后显示文件或者显示子目录操作
 *
 *  参数1： xxxxx
 *  参数2： xxxxx
@@ -564,40 +564,115 @@ EFI_STATUS L2_MOUSE_MyComputerFolderItemClicked()
 	}
 
 	UINT16 index = FolderItemValidIndexArray[FolderItemID];
-
-	UINT16 High2B = L1_NETWORK_2BytesToUINT16(pItems[index].StartClusterHigh2B);
-	UINT16 Low2B  = L1_NETWORK_2BytesToUINT16(pItems[index].StartClusterLow2B);
-	UINT32 StartCluster = High2B * 16 * 16 * 16 * 16 + Low2B;
-
-	// Start cluster id is 2, exclude 0,1
-	UINT32 StartSectorNumber = 8192 + (StartCluster - 2) * 8;
-	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], 
-					"%d High2B: %X Low2B: %X StartCluster: %X StartSectorNumber: %X\n", 
-					__LINE__, 
-					High2B,
-					Low2B,
-					StartCluster,
-					StartSectorNumber);
-
-	// Read data from partition(disk or USB etc..)					
-    Status = L1_STORE_READ(PartitionItemID, StartSectorNumber, 1, Buffer); 
-    if (EFI_ERROR(Status))
-    {
-        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d Status: %X\n", __LINE__, Status);
-        return Status;
-    }
-
-	switch(pItems[index].Attribute[0])
-	{
-		case 0x10:  L1_MEMORY_Memset(&pItems, 0, sizeof(pItems));
-				    L1_MEMORY_Copy(&pItems, Buffer, DISK_BUFFER_SIZE);
-					L2_STORE_FolderItemsPrint();
-					break;
+	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d index: %d\n", __LINE__, index);
 		
-		case 0x20: L2_PARTITION_FileContentPrint(Buffer); break;
 
-		default: break;
-	}
+	if (device[PartitionItemID].FileSystemType == FILE_SYSTEM_FAT32)
+    {    	
+
+		UINT16 High2B = L1_NETWORK_2BytesToUINT16(pItems[index].StartClusterHigh2B);
+		UINT16 Low2B  = L1_NETWORK_2BytesToUINT16(pItems[index].StartClusterLow2B);
+		UINT32 StartCluster = High2B * 16 * 16 * 16 * 16 + Low2B;
+
+		// Start cluster id is 2, exclude 0,1
+		//这样写死8192，会有BUG
+		UINT32 StartSectorNumber = 8192 + (StartCluster - 2) * 8;
+		L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], 
+						"%d High2B: %X Low2B: %X StartCluster: %X StartSectorNumber: %X\n", 
+						__LINE__, 
+						High2B,
+						Low2B,
+						StartCluster,
+						StartSectorNumber);
+
+		// Read data from partition(disk or USB etc..)					
+	    Status = L1_STORE_READ(PartitionItemID, StartSectorNumber, 1, Buffer); 
+	    if (EFI_ERROR(Status))
+	    {
+	        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d Status: %X\n", __LINE__, Status);
+	        return Status;
+	    }
+
+		switch(pItems[index].Attribute[0])
+		{
+			case 0x10:  L1_MEMORY_Memset(&pItems, 0, sizeof(pItems));
+					    L1_MEMORY_Copy(&pItems, Buffer, DISK_BUFFER_SIZE);
+						L2_STORE_FolderItemsPrint();
+						break;
+			
+			case 0x20: L2_PARTITION_FileContentPrint(Buffer); break;
+
+			default: break;
+		}
+	    
+    }
+    else if (device[PartitionItemID].FileSystemType == FILE_SYSTEM_NTFS)
+    {
+		//这样写死8192，可能会有BUG 6291456=786432 * 8
+		UINT32 StartSectorNumber = 6291456 + pCommonStorageItems[index].FileContentRelativeSector * 2;
+		L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: StartSector: %llu Sector: %llu",  __LINE__, StartSectorNumber, pCommonStorageItems[index].FileContentRelativeSector);
+
+		// Read data from partition(disk or USB etc..)					
+	    Status = L1_STORE_READ(PartitionItemID, StartSectorNumber, 2, BufferMFT); 
+	    if (EFI_ERROR(Status))
+	    {
+	        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d Status: %X\n", __LINE__, Status);
+	        return Status;
+	    }
+		
+		NTFS_FILE_SWITCHED NTFSFileSwitched = {0};
+		
+		//当前测试，只显示一个设备，显示多个设备测试会比较麻烦
+		//if (1 == FolderItemID)
+		L2_PARTITION_FileContentPrint(BufferMFT);
+		
+		L2_FILE_NTFS_FileItemBufferAnalysis2(BufferMFT, &NTFSFileSwitched);
+
+		return;
+		
+		for (UINT16 i = 0; i < 3; i++)
+		{
+			UINT8 type = NTFSFileSwitched.NTFSFileAttributeHeaderSwitched[i].Type;
+			L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: type: %d",  __LINE__, type);
+		
+			if (0 == type || MFT_ATTRIBUTE_INVALID == type)
+			{
+				break;
+			}
+			/*
+			if (type == MFT_ATTRIBUTE_DOLLAR_INDEX_ALLOCATION)
+			{
+				// Analysis data runs
+				L2_FILE_NTFS_DollarRootA0DatarunAnalysis(NTFSFileSwitched.NTFSFileAttributeHeaderSwitched[i].Data);
+				
+				L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: %02X %02X %02X %02X %02X	%02X\n",  __LINE__, NTFSFileSwitched.NTFSFileAttributeHeaderSwitched[i].Data[0],
+								NTFSFileSwitched.NTFSFileAttributeHeaderSwitched[i].Data[1],
+								NTFSFileSwitched.NTFSFileAttributeHeaderSwitched[i].Data[2],
+								NTFSFileSwitched.NTFSFileAttributeHeaderSwitched[i].Data[3],
+								NTFSFileSwitched.NTFSFileAttributeHeaderSwitched[i].Data[4],
+								NTFSFileSwitched.NTFSFileAttributeHeaderSwitched[i].Data[5]);
+				// use data run get root path item index
+				//L2_FILE_NTFS_RootPathItemsRead(PartitionItemID);
+				
+				
+				//L2_STORE_FolderItemsPrint2();
+				break;
+			}
+			// Only file item have MFT_ATTRIBUTE_DOLLAR_DATA attribute.
+			else if (type == MFT_ATTRIBUTE_DOLLAR_DATA)
+			{
+	            L2_DEBUG_Print3(300, 300, WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW], "%d: %02X %02X %02X %02X", __LINE__, 
+                                NTFSFileSwitched.NTFSFileAttributeHeaderSwitched[i].Data[0],
+                                NTFSFileSwitched.NTFSFileAttributeHeaderSwitched[i].Data[1],
+                                NTFSFileSwitched.NTFSFileAttributeHeaderSwitched[i].Data[2],
+                                NTFSFileSwitched.NTFSFileAttributeHeaderSwitched[i].Data[3]);
+				break;
+			}
+			*/
+		}
+		
+    }
+	
 
 	return EFI_SUCCESS;
 }
@@ -1665,7 +1740,7 @@ MOUSE_CLICK_EVENT L2_GRAPHICS_MyComputerLayerClickEventGet()
 
 	//Only 6 item, need to fix after test.
 	//分区的文件或文件夹被点击事件
-    for (UINT16 i = 0 ; i < 6; i++)
+    for (UINT16 i = 0 ; i < 8; i++)
     {
 		UINT16 StartX = MyComputerPositionX + 130;
 		UINT16 StartY = MyComputerPositionY + i  * (HeightNew + 16 * 2) + 200;
@@ -2847,25 +2922,27 @@ void L2_GRAPHICS_CopyBufferFromWindowsToDesk()
 *  返回值： 成功：XXXX，失败：XXXXX
 *
 *****************************************************************************/
-VOID L2_STORE_PartitionItemsPrint(UINT16 Index)
+VOID L2_STORE_PartitionItemsPrint(UINT16 PartitionItemID)
 {
     //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: \n",  __LINE__);
     
     // this code may be have some problems, because my USB file system is FAT32, my Disk file system is NTFS.
     // others use this code must be careful...
-    UINT8 FileSystemType = L2_FILE_PartitionTypeAnalysis(Index);
+    UINT8 FileSystemType = L2_FILE_PartitionTypeAnalysis(PartitionItemID);
 
     if (FileSystemType == FILE_SYSTEM_FAT32)
     {
-        L2_FILE_FAT32_DataSectorHandle(Index);
+		device[PartitionItemID].FileSystemType = FILE_SYSTEM_FAT32;
+        L2_FILE_FAT32_DataSectorHandle(PartitionItemID);
         L2_STORE_FolderItemsPrint();
     }
     else if (FileSystemType == FILE_SYSTEM_NTFS)
     {
-    	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: %d\n",  __LINE__, device[Index].StartSectorNumber + MFT_ITEM_DOLLAR_ROOT * 2);
+		device[PartitionItemID].FileSystemType = FILE_SYSTEM_NTFS;
+    	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%a %d: %d\n",  __FUNCTION__,  __LINE__, device[PartitionItemID].StartSectorNumber + MFT_ITEM_DOLLAR_ROOT * 2);
 		
         // get MFT $ROOT item. 
-        L2_FILE_NTFS_MFT_Item_Read(Index, device[Index].StartSectorNumber + MFT_ITEM_DOLLAR_ROOT * 2);
+        L2_FILE_NTFS_MFT_Item_Read(PartitionItemID, device[PartitionItemID].StartSectorNumber + MFT_ITEM_DOLLAR_ROOT * 2);
 
         // get data runs
         //L2_FILE_NTFS_MFTDollarRootFileAnalysis(BufferMFT);      
@@ -2896,7 +2973,7 @@ VOID L2_STORE_PartitionItemsPrint(UINT16 Index)
 		}
 		
         // use data run get root path item index
-        L2_FILE_NTFS_RootPathItemsRead(Index);
+        L2_FILE_NTFS_RootPathItemsRead(PartitionItemID);
 		
 
 		L2_STORE_FolderItemsPrint2();

@@ -40,6 +40,9 @@ extern UINT8 BufferMFT[DISK_BUFFER_SIZE * 2];
 // Index of A0 attribute
 IndexInformation A0Indexes[10] = {0};
 
+//用于分析文件系统使用，避免每次都申请释放，浪费时间，所以建一个公用的buffer
+UINT8 pBufferTemp[DISK_BUFFER_SIZE * 2];
+
 UINT64 FileContentRelativeSector;
 
 // NTFS Main File Table items analysis
@@ -285,6 +288,10 @@ EFI_STATUS  L2_FILE_NTFS_MFTIndexItemsAnalysis(UINT8 *pBuffer, UINT8 DeviceID)
          //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: index: %d\n", __LINE__,  index);  
          // length use 2b at 8, 9 bit
          UINT16 IndexItemLength = pBuffer[index + 8] + pBuffer[index + 9] * 16;
+		 if (0 == IndexItemLength)
+		 {
+		 	return;
+		 }
 
 		 // copy item into pItem buffer
         for (int i = 0; i < IndexItemLength; i++)
@@ -313,7 +320,7 @@ EFI_STATUS  L2_FILE_NTFS_MFTIndexItemsAnalysis(UINT8 *pBuffer, UINT8 DeviceID)
 			L1_MEMORY_Copy(pCommonStorageItems[j].Name, attributeName, L1_STRING_Length(attributeName));
 			pCommonStorageItems[j].Name[L1_STRING_Length(attributeName)] = 0;
 			pCommonStorageItems[j].Size = 100;
-			
+			pCommonStorageItems[j].FileContentRelativeSector = FileContentRelativeSector;
 			pCommonStorageItems[0].ItemCount++;
 			j++;
 		}
@@ -324,6 +331,7 @@ EFI_STATUS  L2_FILE_NTFS_MFTIndexItemsAnalysis(UINT8 *pBuffer, UINT8 DeviceID)
 			pCommonStorageItems[j].Name[L1_STRING_Length(attributeName)] = 0;
 			pCommonStorageItems[j].Size = 200;
 			pCommonStorageItems[0].ItemCount++;
+			pCommonStorageItems[j].FileContentRelativeSector = FileContentRelativeSector;
 			j++;
 		}
 				
@@ -593,6 +601,8 @@ EFI_STATUS  L2_FILE_NTFS_DollarVolumeNameAttributeAnalysis(UINT8 *pBuffer, UINT8
 *****************************************************************************/
 UINT16  L2_FILE_NTFS_FileItemAttributeAnalysis(UINT8 *p, UINT16 AttributeOffset, NTFS_FILE_ATTRIBUTE_HEADER_SWITCHED *pAttributeHeaderSwitched)
 {
+	//L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: FUNCTION: %a", __LINE__, __FUNCTION__);
+	
 	UINT8 pItem[200] = {0};
     UINT8 size[4];
 	UINT16 AttributeSize;
@@ -603,6 +613,10 @@ UINT16  L2_FILE_NTFS_FileItemAttributeAnalysis(UINT8 *p, UINT16 AttributeOffset,
         size[i] = p[AttributeOffset + 4 + i];
         
     AttributeSize = L1_NETWORK_4BytesToUINT32(size);
+	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: FUNCTION: %a AttributeSize: %d", __LINE__, __FUNCTION__, AttributeSize);
+	if (0 == AttributeSize)
+		return AttributeSize;
+	
     // Copy attribute to buffer
     for (i = 0; i < AttributeSize; i++)
         pItem[i] = p[AttributeOffset + i];
@@ -615,9 +629,12 @@ UINT16  L2_FILE_NTFS_FileItemAttributeAnalysis(UINT8 *p, UINT16 AttributeOffset,
     pAttributeHeaderSwitched->ResidentFlag = L1_NETWORK_2BytesToUINT16(((NTFS_FILE_ATTRIBUTE_HEADER *)pItem)->ResidentFlag);
 	
     pAttributeHeaderSwitched->Type = ((NTFS_FILE_ATTRIBUTE_HEADER *)pItem)->Type[0];
+	if (0 == pAttributeHeaderSwitched->Type)
+		return;
 	
 	UINT16 NameOffset = pAttributeHeaderSwitched->NameOffset;
 	UINT8 NameSize = pAttributeHeaderSwitched->NameSize;
+	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: Type: %02X", __LINE__, pAttributeHeaderSwitched->Type);
 
 	switch (pAttributeHeaderSwitched->Type)
 	{
@@ -625,7 +642,7 @@ UINT16  L2_FILE_NTFS_FileItemAttributeAnalysis(UINT8 *p, UINT16 AttributeOffset,
 		case MFT_ATTRIBUTE_DOLLAR_INDEX_ALLOCATION:
 			{
 				UINT8 DataRunSize = AttributeSize - NameOffset - NameSize * 2;
-				L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: %02X", __LINE__, DataRunSize);
+				L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: DataRunSize:%02X", __LINE__, DataRunSize);
 				//每个字符占用两个字节
 				for(UINT8 i = 0; i < DataRunSize; i++)
 				{
@@ -654,7 +671,22 @@ UINT16  L2_FILE_NTFS_FileItemAttributeAnalysis(UINT8 *p, UINT16 AttributeOffset,
 				pAttributeHeaderSwitched->Data[i] = pItem[pAttributeHeaderSwitched->NameOffset + i * 2];
 			}
 			break;
-
+			
+		case MFT_ATTRIBUTE_DOLLAR_DATA:
+			for(UINT8 i = 0; i < AttributeSize - pAttributeHeaderSwitched->NameOffset; i++)
+			{
+				pAttributeHeaderSwitched->Data[i] = pItem[pAttributeHeaderSwitched->NameOffset + i];
+			}
+			pAttributeHeaderSwitched->DataSize = AttributeSize - pAttributeHeaderSwitched->NameOffset;
+			L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: %02X %02X %02X %02X %02X %02X",
+								pItem[pAttributeHeaderSwitched->NameOffset + 0],
+								pItem[pAttributeHeaderSwitched->NameOffset + 1],
+								pItem[pAttributeHeaderSwitched->NameOffset + 2],
+								pItem[pAttributeHeaderSwitched->NameOffset + 3],
+								pItem[pAttributeHeaderSwitched->NameOffset + 4],
+								pItem[pAttributeHeaderSwitched->NameOffset + 5]);
+			break;
+			
 		default:;
 	}		 
 
@@ -675,29 +707,27 @@ UINT16  L2_FILE_NTFS_FileItemAttributeAnalysis(UINT8 *p, UINT16 AttributeOffset,
 *  返回值： 成功：XXXX，失败：XXXXX
 *
 *****************************************************************************/
+
 EFI_STATUS  L2_FILE_NTFS_FileItemBufferAnalysis(UINT8 *pBuffer, NTFS_FILE_SWITCHED *pNTFSFileSwitched)
 {
-	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%a\n", __FUNCTION__);
+	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: ", __LINE__);
 	UINT16 AttributeSize;
-	UINT8 *p = (UINT8 *)AllocateZeroPool(DISK_BUFFER_SIZE * 2);
-	if (p == NULL)
-	{
-		L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: p == NULL \n", __LINE__);
-		return EFI_SUCCESS;
-	}
 	
 	for (UINT16 i = 0; i < DISK_BUFFER_SIZE * 2; i++)
-		p[i] = pBuffer[i];
+		pBufferTemp[i] = pBuffer[i];
 	
 	// 通过属性头计算第一个属性偏移
 	// 获取文件头信息
-	UINT16 Offset = L2_FILE_NTFS_FileItemHeaderAnalysis(p, pNTFSFileSwitched);
-
+	UINT16 Offset = L2_FILE_NTFS_FileItemHeaderAnalysis(pBufferTemp, pNTFSFileSwitched);
+	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: Offset: %d", __LINE__, Offset);
+		
 	// 获取每个属性信息
 	// 当前只计算10个属性，其实是有缺陷的
 	for (UINT16 i = 0; i < 10; i++)
 	{
 		AttributeSize = L2_FILE_NTFS_FileItemAttributeAnalysis(pBuffer, Offset, &(pNTFSFileSwitched->NTFSFileAttributeHeaderSwitched[i]));
+		if (AttributeSize == 0)
+			break;
 		
 	    Offset += AttributeSize;
 	}
@@ -705,4 +735,138 @@ EFI_STATUS  L2_FILE_NTFS_FileItemBufferAnalysis(UINT8 *pBuffer, NTFS_FILE_SWITCH
 
 
 
+UINT16 L2_FILE_NTFS_FileItemHeaderAnalysis2(UINT8 *pBuffer, NTFS_FILE_SWITCHED *pNTFSFileSwitched)
+{
+	// File header length
+	UINT16 AttributeOffset = L1_NETWORK_2BytesToUINT16(((NTFS_FILE_HEADER *)pBuffer)->AttributeOffset);
+	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: AttributeOffset:%X \n", __LINE__, AttributeOffset);
+
+	pNTFSFileSwitched->NTFSFileHeaderSwitched.AttributeOffset = AttributeOffset;
+	
+	return AttributeOffset;
+}
+
+UINT16  L2_FILE_NTFS_FileItemAttributeAnalysis2(UINT8 *p, UINT16 AttributeOffset, NTFS_FILE_ATTRIBUTE_HEADER_SWITCHED *pAttributeHeaderSwitched)
+{
+	//L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: FUNCTION: %a", __LINE__, __FUNCTION__);
+	
+	UINT8 pItem[200] = {0};
+    UINT8 size[4];
+	UINT16 AttributeSize;
+	UINT16 i;
+
+    // 属性头和属性体总长度
+    for (i = 0; i < 4; i++)
+        size[i] = p[AttributeOffset + 4 + i];
+        
+    AttributeSize = L1_NETWORK_4BytesToUINT32(size);
+	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: FUNCTION: %a AttributeSize: %d", __LINE__, __FUNCTION__, AttributeSize);
+	if (0 == AttributeSize)
+		return AttributeSize;
+	
+    // Copy attribute to buffer
+    for (i = 0; i < AttributeSize; i++)
+        pItem[i] = p[AttributeOffset + i];
+
+    pAttributeHeaderSwitched->Type = ((NTFS_FILE_ATTRIBUTE_HEADER *)pItem)->Type[0];
+	if (0 == pAttributeHeaderSwitched->Type || MFT_ATTRIBUTE_INVALID == pAttributeHeaderSwitched->Type)
+		return 0;
+
+    // after buffer copied, we can get information in item
+    pAttributeHeaderSwitched->NameSize = ((NTFS_FILE_ATTRIBUTE_HEADER *)pItem)->NameSize;
+    
+    pAttributeHeaderSwitched->NameOffset = L1_NETWORK_2BytesToUINT16(((NTFS_FILE_ATTRIBUTE_HEADER *)pItem)->NameOffset);
+                                                        
+    pAttributeHeaderSwitched->ResidentFlag = L1_NETWORK_2BytesToUINT16(((NTFS_FILE_ATTRIBUTE_HEADER *)pItem)->ResidentFlag);
+	
+	
+	UINT16 NameOffset = pAttributeHeaderSwitched->NameOffset;
+	UINT8 NameSize = pAttributeHeaderSwitched->NameSize;
+	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: Type: %02X", __LINE__, pAttributeHeaderSwitched->Type);
+
+	switch (pAttributeHeaderSwitched->Type)
+	{
+		//A0 Attribute
+		case MFT_ATTRIBUTE_DOLLAR_INDEX_ALLOCATION:
+			{
+				UINT8 DataRunSize = AttributeSize - NameOffset - NameSize * 2;
+				L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: DataRunSize:%02X", __LINE__, DataRunSize);
+				//每个字符占用两个字节
+				for(UINT8 i = 0; i < DataRunSize; i++)
+				{
+					//Get data runs data
+					pAttributeHeaderSwitched->Data[i] = pItem[pAttributeHeaderSwitched->NameOffset + pAttributeHeaderSwitched->NameSize * 2 + i];
+				}
+
+				//用于测试获取的值是否正确
+				/*L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: %02X %02X %02X %02X %02X %02X %02X %02X\n", __LINE__, 
+															pItem[pAttributeHeaderSwitched->NameOffset + pAttributeHeaderSwitched->NameSize * 2 + 0],
+															pItem[pAttributeHeaderSwitched->NameOffset + pAttributeHeaderSwitched->NameSize * 2 + 1],
+															pItem[pAttributeHeaderSwitched->NameOffset + pAttributeHeaderSwitched->NameSize * 2 + 2],
+															pItem[pAttributeHeaderSwitched->NameOffset + pAttributeHeaderSwitched->NameSize * 2 + 3],
+															pItem[pAttributeHeaderSwitched->NameOffset + pAttributeHeaderSwitched->NameSize * 2 + 4],
+															pItem[pAttributeHeaderSwitched->NameOffset + pAttributeHeaderSwitched->NameSize * 2 + 5],
+															pItem[pAttributeHeaderSwitched->NameOffset + pAttributeHeaderSwitched->NameSize * 2 + 6],
+															pItem[pAttributeHeaderSwitched->NameOffset + pAttributeHeaderSwitched->NameSize * 2 + 7]);
+				*/
+				//L2_FILE_NTFS_A0AttributeAnalysis();
+			}
+			break;
+
+		case MFT_ATTRIBUTE_DOLLAR_VOLUME_NAME:
+			for(UINT8 i = 0; i * 2 < AttributeSize - pAttributeHeaderSwitched->NameOffset; i++)
+			{
+				pAttributeHeaderSwitched->Data[i] = pItem[pAttributeHeaderSwitched->NameOffset + i * 2];
+			}
+			break;
+			
+		case MFT_ATTRIBUTE_DOLLAR_DATA:
+			for(UINT8 i = 0; i < AttributeSize - pAttributeHeaderSwitched->NameOffset; i++)
+			{
+				pAttributeHeaderSwitched->Data[i] = pItem[pAttributeHeaderSwitched->NameOffset + i];
+			}
+			
+			pAttributeHeaderSwitched->DataSize = AttributeSize - pAttributeHeaderSwitched->NameOffset;
+
+			L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: Name Size:%d", __LINE__, AttributeSize - pAttributeHeaderSwitched->NameOffset);
+			L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: %02X %02X %02X %02X %02X %02X", __LINE__, 
+								pItem[pAttributeHeaderSwitched->NameOffset + 0],
+								pItem[pAttributeHeaderSwitched->NameOffset + 1],
+								pItem[pAttributeHeaderSwitched->NameOffset + 2],
+								pItem[pAttributeHeaderSwitched->NameOffset + 3],
+								pItem[pAttributeHeaderSwitched->NameOffset + 4],
+								pItem[pAttributeHeaderSwitched->NameOffset + 5]);
+			
+			return;
+			break;
+		default:;
+	}		 
+
+	return AttributeSize;
+}
+
+EFI_STATUS  L2_FILE_NTFS_FileItemBufferAnalysis2(UINT8 *pBuffer, NTFS_FILE_SWITCHED *pNTFSFileSwitched)
+{
+	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: ", __LINE__);
+	UINT16 AttributeSize;
+	
+	for (UINT16 i = 0; i < DISK_BUFFER_SIZE * 2; i++)
+		pBufferTemp[i] = pBuffer[i];
+	
+	// 通过属性头计算第一个属性偏移
+	// 获取文件头信息
+	UINT16 Offset = L2_FILE_NTFS_FileItemHeaderAnalysis2(pBufferTemp, pNTFSFileSwitched);
+	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: Offset: %d", __LINE__, Offset);
+	
+	// 获取每个属性信息
+	// 当前只计算10个属性，其实是有缺陷的
+	for (UINT16 i = 0; i < 10; i++)
+	{
+		AttributeSize = L2_FILE_NTFS_FileItemAttributeAnalysis2(pBuffer, Offset, &(pNTFSFileSwitched->NTFSFileAttributeHeaderSwitched[i]));
+		if (AttributeSize == 0)
+			break;
+		
+	    Offset += AttributeSize;
+	}
+}
 

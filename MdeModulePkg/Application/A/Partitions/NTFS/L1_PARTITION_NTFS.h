@@ -198,6 +198,7 @@ typedef enum
 	MFT_ATTRIBUTE_DOLLAR_REPARSE_POINT				= 0xC0,
 	MFT_ATTRIBUTE_DOLLAR_EA_INFORMATION				= 0xD0,
 	MFT_ATTRIBUTE_DOLLAR_EA							= 0xE0,
+	MFT_ATTRIBUTE_INVALID							= 0xFF,
 	MFT_ATTRIBUTE_DOLLAR_LOGGED_UTILITY_STREAM		= 0x100,
 	MFT_ATTRIBUTE_DOLLAR_MAX						
 }MFT_ATTRIBUTE_TYPE;
@@ -419,6 +420,7 @@ typedef struct
     UINT8 NameSize;   //属性名的长度
     UINT16 NameOffset; //属性名的偏移 相对于属性头
     UINT8 Data[20]; //用于存放属性的数据
+    UINT16 DataSize; //用于存放属性的数据
 }NTFS_FILE_ATTRIBUTE_HEADER_SWITCHED;    
 
 

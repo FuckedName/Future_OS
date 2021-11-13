@@ -561,9 +561,9 @@ VOID L3_APPLICATION_SystemLogWindow(UINT16 StartX, UINT16 StartY)
 *****************************************************************************/
 VOID L3_APPLICATION_WindowsInitial()
 {    
-    L3_APPLICATION_MyComputerWindow(100, 100);
+    L3_APPLICATION_MyComputerWindow(390, 50);
         
-    L3_APPLICATION_SystemLogWindow(ScreenWidth / 2, 10);
+    L3_APPLICATION_SystemLogWindow(1040, 10);
     
     L3_APPLICATION_MemoryInformationWindow(600, 100);
 }

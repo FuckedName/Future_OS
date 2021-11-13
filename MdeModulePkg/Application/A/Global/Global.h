@@ -145,6 +145,8 @@ typedef struct
 	UINT16 CreateTime;
 	UINT16 LatestModifiedTime;
 	UINT16 ItemCount;
+	UINT64 FileContentRelativeSector; // NTFS relative sector of item 0x26 = 38 (six of header)
+									  // 38 * 2 + 6,291,456 = 6291532
 }COMMON_STORAGE_ITEM;
 
 
@@ -236,7 +238,7 @@ typedef enum
 typedef struct
 {
 	
-	UINT16 FileSystemType; //
+	UINT16 FileSystemType; //FILE_SYSTEM_FAT32 FILE_SYSTEM_NTFS
     UINT16 DeviceType; // 0 Disk, 1: USB, 2: Sata;
     UINT16 PartitionType; // 0 MBR, 1 GPT;
     UINT16 PartitionID; // a physics device consist of Several parts like c: d: e:
@@ -298,9 +300,6 @@ extern UINT8 *pSystemIconRecycleBuffer;
 extern UINT8 *pSystemLogWindowBuffer;
 extern UINT8 *pSystemSettingWindowBuffer;
 extern UINT16 SystemLogWindowHeight;
-
-extern UINTN PartitionCount; 
-   
 
 extern MasterBootRecordSwitched MBRSwitched;;                                   
 extern UINT32 BlockSize;                                     
@@ -373,7 +372,7 @@ extern UINT16 StatusErrorCount;
 extern UINT16 LogStatusErrorCount;
 
 #define DISPLAY_LOG_ERROR_STATUS_X (4) 
-#define DISPLAY_LOG_ERROR_STATUS_Y (16 * (LogStatusErrorCount++ % (SystemLogWindowHeight / 16 + 2)) )
+#define DISPLAY_LOG_ERROR_STATUS_Y (16 * (LogStatusErrorCount++ % (SystemLogWindowHeight / 16) + 2) )
 
 extern UINTN ScreenWidth, ScreenHeight;
 
