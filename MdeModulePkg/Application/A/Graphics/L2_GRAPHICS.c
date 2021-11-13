@@ -625,20 +625,28 @@ EFI_STATUS L2_MOUSE_MyComputerFolderItemClicked()
 		//当前测试，只显示一个设备，显示多个设备测试会比较麻烦
 		//if (1 == FolderItemID)
 		L2_PARTITION_FileContentPrint(BufferMFT);
-		
+
+		//从分区读取到的磁盘用于FILE分析，分析所有属性项，文件和文件夹拥有的属性项不相同
 		L2_FILE_NTFS_FileItemBufferAnalysis(BufferMFT, &NTFSFileSwitched);
 		
 		for (UINT16 i = 0; i < 10; i++)
 		{
 			UINT8 type = NTFSFileSwitched.NTFSFileAttributeHeaderSwitched[i].Type;
+			
 			L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: type: %02X",  __LINE__, type);
 		
 			if (0 == type || MFT_ATTRIBUTE_INVALID == type)
 			{
 				break;
 			}
-			
-			if (type == MFT_ATTRIBUTE_DOLLAR_INDEX_ALLOCATION)
+
+			// Only Folder file item have MFT_ATTRIBUTE_DOLLAR_INDEX_ROOT and MFT_ATTRIBUTE_DOLLAR_INDEX_ALLOCATION attribute.
+			if (type == MFT_ATTRIBUTE_DOLLAR_INDEX_ROOT)
+			{
+
+			} 
+			// Only Folder file item have MFT_ATTRIBUTE_DOLLAR_INDEX_ALLOCATION attribute.
+			else if (type == MFT_ATTRIBUTE_DOLLAR_INDEX_ALLOCATION)
 			{
 				// Analysis data runs
 				L2_FILE_NTFS_DollarRootA0DatarunAnalysis(NTFSFileSwitched.NTFSFileAttributeHeaderSwitched[i].Data);

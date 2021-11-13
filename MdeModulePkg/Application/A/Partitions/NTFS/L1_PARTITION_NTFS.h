@@ -102,8 +102,8 @@ typedef struct _INDEX_HEADER
 	UINT32 IH_TalSzOfEntries;//目录项的总尺寸(包括索引头和下面的索引项)
 	UINT32 IH_AllocSize;//目录项分配的尺寸
 	UINT8 IH_Flags;/*标志位，此值可能是以下和值之一：
-	0x00 小目录(数据存放在根节点的数据区中)
-	0x01 大目录(需要目录项存储区和索引项位图)*/
+					0x00 小目录(数据存放在根节点的数据区中)
+					0x01 大目录(需要目录项存储区和索引项位图)*/
 	UINT8 IH_Resvd[3];
 }INDEX_HEADER,*pINDEX_HEADER;
 
