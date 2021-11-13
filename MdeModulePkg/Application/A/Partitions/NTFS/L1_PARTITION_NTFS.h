@@ -345,7 +345,149 @@ typedef struct _INDEX_ENTRY
 	//UINT8 IE_Stream[0];//目录项数据，结构与文件名属性的数据相同
 	//UINT64 IE_SubNodeFR;//子项的记录索引。该值的低6字节是MFT记录号，高2字节是该MFT记录的序列号
 }INDEX_ENTRY,*pINDEX_ENTRY;
-	
+
+/*     0  1  2  3  4  5  6  7  8  9  A  B  C  D  E  F  0123456789ABCDEF
+00   90 00 00 00 B8 00 00 00 00 04 18 00 00 00 01 00  ................
+10   98 00 00 00 20 00 00 00 24 00 49 00 33 00 30 00  .... ...$.I.3.0.
+20   30 00 00 00 01 00 00 00 00 10 00 00 01 00 00 00  0...............
+30   10 00 00 00 88 00 00 00 88 00 00 00 00 00 00 00  ................
+偏移 大小 意义
+0X00 4 属性号 90 00 00 00 
+0X04 4 属性长度 B8 00 00 00
+0X08 1 常驻标志 00
+0X09 1 名称长度 04
+0X0A 2 名称偏移 18 00
+0X0C 2 标志(常驻属性不能压缩) 00 00 
+0X0E 2 属性ID 01 00
+0X10 4 属性长度(不含头) 98 00 00 00
+0X14 2 属性偏移 20 00 00 00
+0X16 1 索引标志 00
+0X17 1 填充  00
+0X18 8 属性名 24 00 49 00 33 00 30 00
+0X20 4 索引属性类型 30 00 00 00
+0X24 4 排序规则 01 00 00 00
+0X28 4 索引项分配大小 00 10 00 00
+0X2C 1 每索引记录的簇数 01
+0X2D 3 填充  00 00 00
+0X30 4 每索引的偏移 10 00 00 00 
+0X34 4 索引项的总大小 88 00 00 00
+0X38 4 索引项的分配 88 00 00 00
+0X3C 1 标志，（0X01大索引）  00
+0X3C 3 填充 00 00 00
+
+// NTFS FILE 属性头
+typedef struct  
+{
+    UINT8 Type[4];   //属性类型 90 00 00 00
+    UINT8 Size[4];   //属性头和属性体的总长度 B8 00 00 00
+    UINT8 ResidentFlag; //是否是常驻属性（0常驻 1非常驻） 00
+    UINT8 NameSize;   //属性名的长度 04 
+    UINT8 NameOffset[2]; //属性名的偏移 相对于属性头 18 00
+    UINT8 Flags[2]; //标志（0x0001压缩 0x4000加密 0x8000稀疏） 00 00
+    UINT8 Id[2]; //属性唯一ID 01 00
+}NTFS_FILE_ATTRIBUTE_HEADER;
+
+//常驻属性 属性头
+typedef struct _ResidentAttributeHeader 
+{
+	NTFS_FILE_ATTRIBUTE_HEADER ATTR_Common;
+	UINT32 ATTR_DatSz; //属性数据的长度 98 00 00 00
+	UINT16 ATTR_DatOff; //属性数据相对于属性头的偏移 20 00
+	UINT8 ATTR_Indx; //索引 00
+	UINT8 ATTR_Resvd; //保留 00
+	UINT8 ATTR_AttrNam[8];//属性名，Unicode，结尾无0 24
+}ResidentAttributeHeader, *pResidentAttributeHeader;
+
+//INDEX_ROOT 0X90属性体
+typedef struct _INDEX_ROOT 
+{
+	//索引根
+	UINT32 IR_AttrType;//属性的类型  30 00 00 00
+	UINT32 IR_ColRule;//整理规则 01 00 00 00
+	UINT32 IR_EntrySz;//目录项分配尺寸 00 10 00 00
+	UINT8 IR_ClusPerRec;//每个目录项占用的簇数 01
+	UINT8 IR_Resvd[3]; 00 00 00 
+	//索引头
+	INDEX_HEADER IH;
+	//索引项 可能不存在
+	UINT8 IR_IndexEntry[0];
+}INDEX_ROOT,*pINDEX_ROOT;
+
+
+
+// 90属性的属性体由3部分构成：索引根、索引头和索引项。但是有些情况下90属性中是不存在索引项的(上图的90属性不包含索引项，
+// 图8中的90属性包含2个索引项)，这个时候该目录的索引项由A0属性中的data runs指出。90属性体的结构如下(不包含属性头)：
+typedef struct _INDEX_HEADER 
+{
+	UINT32 IH_EntryOff;//第一个目录项的偏移 10 00 00
+	UINT32 IH_TalSzOfEntries;//目录项的总尺寸(包括索引头和下面的索引项) 88 00 00 00
+	UINT32 IH_AllocSize;//目录项分配的尺寸 88 00 00 00
+	UINT8 IH_Flags;标志位，此值可能是以下和值之一：
+					0x00 小目录(数据存放在根节点的数据区中)
+					0x01 大目录(需要目录项存储区和索引项位图) 00
+	UINT8 IH_Resvd[3]; 00 00 00
+}INDEX_HEADER,*pINDEX_HEADER;
+
+
+     0  1  2  3  4  5  6  7  8  9  A  B  C  D  E  F  0123456789ABCDEF
+00   27 00 00 00 00 00 01 00 68 00 54 00 00 00 00 00  '.......h.T.....
+10   26 00 00 00 00 00 01 00 5B AE 88 D6 EE D6 04 00  &.......[.......
+20   C5 F9 BC 2E E6 C0 D7 01 C5 F9 BC 2E E6 C0 D7 01  ................
+30   5B AE 88 D6 EE D6 D7 01 18 00 00 00 00 00 00 00  [...............
+40   18 00 00 00 00 00 00 00 20 00 00 00 00 00 00 00  ........ .......
+50   09 03 74 00 65 00 73 00 74 00 32 00 2E 00 74 00  ..t.e.s.t.2...t.
+60   78 00 74 00 00 00 00 00 00 00 00 00 00 00 00 00  x.t.............
+70   10 00 00 00 02 00 00 00 
+表11 索引根属性中索引头部分结构
+偏移 大小 意义
+0X00 8 文件的MFT记录号 27 00 00 00 00 00 01 00
+0X08 2 索引项大小 68 00
+0X0A 2 名称偏移 54 00
+0X0C 4 索引标志＋填充  00 00 00 00
+0X10 8 父目录的MFT文件参考号 26 00 00 00 00 00 01 00
+0X18 8 文件创建时间 5B AE 88 D6 EE D6 04 00
+0X20 8 文件修改时间 C5 F9 BC 2E E6 C0 D7 01
+0X28 8 文件最后修改时间 C5 F9 BC 2E E6 C0 D7 01
+0X30 8 文件最后访问时间 5B AE 88 D6 EE D6 D7 01
+0X38 8 文件分配大小 18 00 00 00 00 00 00 00
+0X40 8 文件实际大小 18 00 00 00 00 00 00 00
+0X48 8 文件标志 20 00 00 00 00 00 00 00 文件还是文件夹
+0X50 1 文件名长度（F） 09 
+0X51 1 文件名命名空间 03 
+0X52 2F 文件名（填充到8字节）
+0X52+2F P
+0X52 +P+2F 8 子节点索引缓存的VCL
+表12 索引项结构
+索引根属性就是由索引头和这
+
+
+typedef struct _INDEX_ENTRY 
+{
+	UINT64 IE_MftReferNumber;该文件的MFT参考号。注意：该值的低6字节是MFT记录号，高2字节是该MFT记录的序列号
+	UINT16 IE_Size;//索引项的大小 相对于索引项开始的偏移量
+	UINT16 IE_FileNAmeAttriBodySize;//文件名属性体的大小
+	UINT16 IE_Flags;标志。该值可能是以下值之一：
+                    0x00 普通文件项
+                    0x01 有子项
+                    0x02 当前项是最后一个目录项
+                    在读取索引项数据时应该首先检查该成员的值以确定当前项的类型
+	UINT16 IE_Fill;//填充 无意义
+	UINT64 IE_FatherDirMftReferNumber;//父目录的MFT文件参考号
+	UINT8 IE_CreatTime[4];//文件创建时间
+	UINT8 IE_AlterTime[4];//文件最后修改时间
+	UINT8 IE_MFTChgTime[4];//文件记录最后修改时间
+	UINT8 IE_ReadTime[4];//文件最后访问时间
+	UINT64 IE_FileAllocSize;//文件分配大小
+	UINT64 IE_FileRealSize;//文件实际大小
+	UINT64 IE_FileFlag;//文件标志
+	UINT8 IE_FileNameSize;//文件名长度
+	UINT8 IE_FileNamespace;//文件命名空间
+	UINT8 IE_FileNameAndFill[0];//文件名和填充
+	//UINT8 IE_Stream[0];//目录项数据，结构与文件名属性的数据相同
+	//UINT64 IE_SubNodeFR;//子项的记录索引。该值的低6字节是MFT记录号，高2字节是该MFT记录的序列号
+}INDEX_ENTRY,*pINDEX_ENTRY;
+*/
+
 
 //INDEX_ALLOCATION 0XA0属性体
 typedef struct _INDEX_ALLOCATION 
