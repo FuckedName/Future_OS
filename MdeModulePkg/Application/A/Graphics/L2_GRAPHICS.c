@@ -626,20 +626,18 @@ EFI_STATUS L2_MOUSE_MyComputerFolderItemClicked()
 		//if (1 == FolderItemID)
 		L2_PARTITION_FileContentPrint(BufferMFT);
 		
-		L2_FILE_NTFS_FileItemBufferAnalysis2(BufferMFT, &NTFSFileSwitched);
-
-		return;
+		L2_FILE_NTFS_FileItemBufferAnalysis(BufferMFT, &NTFSFileSwitched);
 		
-		for (UINT16 i = 0; i < 3; i++)
+		for (UINT16 i = 0; i < 10; i++)
 		{
 			UINT8 type = NTFSFileSwitched.NTFSFileAttributeHeaderSwitched[i].Type;
-			L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: type: %d",  __LINE__, type);
+			L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: type: %02X",  __LINE__, type);
 		
 			if (0 == type || MFT_ATTRIBUTE_INVALID == type)
 			{
 				break;
 			}
-			/*
+			
 			if (type == MFT_ATTRIBUTE_DOLLAR_INDEX_ALLOCATION)
 			{
 				// Analysis data runs
@@ -668,7 +666,7 @@ EFI_STATUS L2_MOUSE_MyComputerFolderItemClicked()
                                 NTFSFileSwitched.NTFSFileAttributeHeaderSwitched[i].Data[3]);
 				break;
 			}
-			*/
+			
 		}
 		
     }
