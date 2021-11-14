@@ -528,13 +528,15 @@ VOID L2_PARTITION_FileContentPrint(UINT8 *Buffer)
     }
 }
 
+EFI_STATUS L2_FILE_NTFS_90AttributeAnalysis()
+{
+}
+
 
 // 1. To judge folder item is file or folder
 // 2. Get StartClusterHigh2B and StartClusterLow2B and computer the next read sector id number
 // 3. Read sector id number sector content from partition
 // 4. Analysis content and print result 
-
-
 
 /****************************************************************************
 *
@@ -640,10 +642,17 @@ EFI_STATUS L2_MOUSE_MyComputerFolderItemClicked()
 				break;
 			}
 
-			// Only Folder file item have MFT_ATTRIBUTE_DOLLAR_INDEX_ROOT and MFT_ATTRIBUTE_DOLLAR_INDEX_ALLOCATION attribute.
+			// 90 attribute Only Folder file item have MFT_ATTRIBUTE_DOLLAR_INDEX_ROOT and MFT_ATTRIBUTE_DOLLAR_INDEX_ALLOCATION attribute.
 			if (type == MFT_ATTRIBUTE_DOLLAR_INDEX_ROOT)
-			{
-
+			{				
+				L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: %02X %02X %02X %02X %02X %02X\n",  __LINE__, NTFSFileSwitched.NTFSFileAttributeHeaderSwitched[i].Data[0],
+								NTFSFileSwitched.NTFSFileAttributeHeaderSwitched[i].Data[1],
+								NTFSFileSwitched.NTFSFileAttributeHeaderSwitched[i].Data[2],
+								NTFSFileSwitched.NTFSFileAttributeHeaderSwitched[i].Data[3],
+								NTFSFileSwitched.NTFSFileAttributeHeaderSwitched[i].Data[4],
+								NTFSFileSwitched.NTFSFileAttributeHeaderSwitched[i].Data[5]);
+				
+				L2_STORE_FolderItemsPrint2();
 			} 
 			// Only Folder file item have MFT_ATTRIBUTE_DOLLAR_INDEX_ALLOCATION attribute.
 			else if (type == MFT_ATTRIBUTE_DOLLAR_INDEX_ALLOCATION)

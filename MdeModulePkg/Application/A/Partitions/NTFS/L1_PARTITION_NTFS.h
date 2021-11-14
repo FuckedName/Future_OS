@@ -71,12 +71,12 @@ typedef struct
 //常驻属性 属性头
 typedef struct _ResidentAttributeHeader 
 {
-	NTFS_FILE_ATTRIBUTE_HEADER ATTR_Common;
-	UINT32 ATTR_DatSz; //属性数据的长度
-	UINT16 ATTR_DatOff; //属性数据相对于属性头的偏移
-	UINT8 ATTR_Indx; //索引
-	UINT8 ATTR_Resvd; //保留
-	UINT8 ATTR_AttrNam[0];//属性名，Unicode，结尾无0
+	//NTFS_FILE_ATTRIBUTE_HEADER ATTR_Common;
+	UINT8 ATTR_DataSize[4]; //属性数据的长度
+	UINT8 ATTR_DataOffset[2]; //属性数据相对于属性头的偏移
+	UINT8 ATTR_Index; //索引
+	UINT8 ATTR_Reserved; //保留
+	UINT8 ATTR_AttrName[8];//属性名，Unicode，结尾无0
 }ResidentAttributeHeader, *pResidentAttributeHeader;
 
 //非常驻属性 属性头
@@ -98,9 +98,9 @@ typedef struct _NonResidentAttributeHeader
 // 图8中的90属性包含2个索引项)，这个时候该目录的索引项由A0属性中的data runs指出。90属性体的结构如下(不包含属性头)：
 typedef struct _INDEX_HEADER 
 {
-	UINT32 IH_EntryOff;//第一个目录项的偏移
-	UINT32 IH_TalSzOfEntries;//目录项的总尺寸(包括索引头和下面的索引项)
-	UINT32 IH_AllocSize;//目录项分配的尺寸
+	UINT8 IH_EntryOff[4];//第一个目录项的偏移
+	UINT8 IH_TalSzOfEntries[4];//目录项的总尺寸(包括索引头和下面的索引项)
+	UINT8 IH_AllocSize[4];//目录项分配的尺寸
 	UINT8 IH_Flags;/*标志位，此值可能是以下和值之一：
 					0x00 小目录(数据存放在根节点的数据区中)
 					0x01 大目录(需要目录项存储区和索引项位图)*/
@@ -111,13 +111,13 @@ typedef struct _INDEX_HEADER
 typedef struct _INDEX_ROOT 
 {
 	//索引根
-	UINT32 IR_AttrType;//属性的类型
-	UINT32 IR_ColRule;//整理规则
-	UINT32 IR_EntrySz;//目录项分配尺寸
-	UINT8 IR_ClusPerRec;//每个目录项占用的簇数
-	UINT8 IR_Resvd[3];
+	UINT8 IR_AttributeType[4];//属性的类型
+	UINT8 IR_ColRule[4];//整理规则
+	UINT8 IR_EntrySize[4];//目录项分配尺寸
+	UINT8 IR_ClusterPerRec;//每个目录项占用的簇数
+	UINT8 IR_Reserved[3];
 	//索引头
-	INDEX_HEADER IH;
+	INDEX_HEADER IndexHeader;
 	//索引项 可能不存在
 	UINT8 IR_IndexEntry[0];
 }INDEX_ROOT,*pINDEX_ROOT;
@@ -322,23 +322,23 @@ typedef struct _DATA
 
 typedef struct _INDEX_ENTRY 
 {
-	UINT64 IE_MftReferNumber;/*该文件的MFT参考号。注意：该值的低6字节是MFT记录号，高2字节是该MFT记录的序列号*/
-	UINT16 IE_Size;//索引项的大小 相对于索引项开始的偏移量
-	UINT16 IE_FileNAmeAttriBodySize;//文件名属性体的大小
-	UINT16 IE_Flags;/*标志。该值可能是以下值之一：
+	UINT8 IE_MftReferNumber[8];/*该文件的MFT参考号。注意：该值的低6字节是MFT记录号，高2字节是该MFT记录的序列号*/
+	UINT8 IE_Size[2];//索引项的大小 相对于索引项开始的偏移量
+	UINT8 IE_FileNAmeAttriBodySize[2];//文件名属性体的大小
+	UINT8 IE_Flags[2];/*标志。该值可能是以下值之一：
 	0x00 普通文件项
 	0x01 有子项
 	0x02 当前项是最后一个目录项
 	在读取索引项数据时应该首先检查该成员的值以确定当前项的类型*/
-	UINT16 IE_Fill;//填充 无意义
-	UINT64 IE_FatherDirMftReferNumber;//父目录的MFT文件参考号
+	UINT8 IE_Fill[2];//填充 无意义
+	UINT8 IE_FatherDirMftReferNumber[8];//父目录的MFT文件参考号
 	UINT8 IE_CreatTime[4];//文件创建时间
 	UINT8 IE_AlterTime[4];//文件最后修改时间
 	UINT8 IE_MFTChgTime[4];//文件记录最后修改时间
 	UINT8 IE_ReadTime[4];//文件最后访问时间
-	UINT64 IE_FileAllocSize;//文件分配大小
-	UINT64 IE_FileRealSize;//文件实际大小
-	UINT64 IE_FileFlag;//文件标志
+	UINT8 IE_FileAllocSize[8];//文件分配大小
+	UINT8 IE_FileRealSize[8];//文件实际大小
+	UINT8 IE_FileFlag[8];//文件标志
 	UINT8 IE_FileNameSize;//文件名长度
 	UINT8 IE_FileNamespace;//文件命名空间
 	UINT8 IE_FileNameAndFill[0];//文件名和填充
