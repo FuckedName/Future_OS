@@ -659,7 +659,7 @@ EFI_STATUS L2_MOUSE_MyComputerFolderItemClicked()
 		//从分区读取到的磁盘用于FILE分析，分析所有属性项，文件和文件夹拥有的属性项不相同
 		//L2_FILE_NTFS_FileItemBufferAnalysis(BufferMFT, &NTFSFileSwitched);
 		L2_FILE_NTFS_FileItemBufferAnalysis2(BufferMFT, &NTFSFileSwitched);
-		return;
+		//return;
 		for (UINT16 i = 0; i < 10; i++)
 		{
 			UINT8 type = NTFSFileSwitched.NTFSFileAttributeHeaderSwitched[i].Type;
@@ -2862,6 +2862,10 @@ VOID L2_STORE_FolderItemsPrint2()
 	//根目录显示的项数
     for (UINT16 i = 0; i < 7; i++)
     {                   
+    	if (pCommonStorageItems[i].Type == COMMON_STORAGE_ITEM_MAX) //over
+        {
+        	break;
+    	}
         x = 130;
 
         y = valid_count * (HeightNew + 16 * 2) + 200;

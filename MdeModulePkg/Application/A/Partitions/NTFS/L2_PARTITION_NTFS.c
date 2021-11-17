@@ -45,7 +45,7 @@ UINT8 pBufferTemp[DISK_BUFFER_SIZE * 2];
 
 UINT64 FileContentRelativeSector;
 
-UINT8 pItem[200] = {0};
+UINT8 pItem[DISK_BUFFER_SIZE] = {0};
 
 // NTFS Main File Table items analysis
 // MFT_Item_ID: 0 $MFT
@@ -879,7 +879,7 @@ UINT16  L2_FILE_NTFS_FileItemAttributeAnalysis2(UINT8 *p, UINT16 AttributeOffset
 	UINT16 AttributeSize;
 	UINT16 i;
 
-	L1_MEMORY_Memset(pItem, 0, 200);
+	L1_MEMORY_Memset(pItem, 0, DISK_BUFFER_SIZE);
 
     pAttributeHeaderSwitched->Type = p[AttributeOffset];
 	if (0 == pAttributeHeaderSwitched->Type || MFT_ATTRIBUTE_DOLLAR_EA <= pAttributeHeaderSwitched->Type)
@@ -933,7 +933,7 @@ UINT16  L2_FILE_NTFS_FileItemAttributeAnalysis2(UINT8 *p, UINT16 AttributeOffset
 	UINT8 NameSize = pAttributeHeaderSwitched->NameSize;
 	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: Type: %02X ResidentFlag: %d ", __LINE__, pAttributeHeaderSwitched->Type, pAttributeHeaderSwitched->ResidentFlag);
     
-	return AttributeSize;     
+	//return AttributeSize;     
 
 	switch (pAttributeHeaderSwitched->Type)
 	{
@@ -991,9 +991,9 @@ UINT16  L2_FILE_NTFS_FileItemAttributeAnalysis2(UINT8 *p, UINT16 AttributeOffset
 		case MFT_ATTRIBUTE_DOLLAR_INDEX_ROOT:
 			{				
 			
-				return AttributeSize;
+				//return AttributeSize;
 				//L2_PARTITION_BufferPrint(pItem, 0x120);
-				//L1_MEMORY_Memset((void *)pCommonStorageItems, 0, 10 * sizeof(COMMON_STORAGE_ITEM));
+				L1_MEMORY_Memset((void *)pCommonStorageItems, 0, 10 * sizeof(COMMON_STORAGE_ITEM));
 				for (UINT8 i = 0; i < 10 ; i++)
 				{
 					for (UINT8 j = 0; j < 100; j++)
@@ -1004,7 +1004,9 @@ UINT16  L2_FILE_NTFS_FileItemAttributeAnalysis2(UINT8 *p, UINT16 AttributeOffset
 					pCommonStorageItems[i].ItemCount = 0;
 					pCommonStorageItems[i].Type = COMMON_STORAGE_ITEM_MAX;
 				}
-						
+
+				L2_PARTITION_BufferPrint(pItem, AttributeSize);
+				
 				if (pAttributeHeaderSwitched->ResidentFlag == 0) //常驻
 				{
 					UINT16 AttributeHeaderSize = sizeof(NTFS_FILE_ATTRIBUTE_HEADER);
@@ -1025,17 +1027,32 @@ UINT16  L2_FILE_NTFS_FileItemAttributeAnalysis2(UINT8 *p, UINT16 AttributeOffset
 					Offset += IndexRootSize;		
 					L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: Offset: %d ", __LINE__, Offset);
 						
-					UINT8 j = 0;
-					UINT64 IE_MftReferNumber = L1_NETWORK_8BytesToUINT64(((INDEX_ENTRY *)pItem[Offset])->IE_MftReferNumber);
 					
-					while (IE_MftReferNumber != 0)
+					// 取前六位
+					UINT64 IE_MftReferNumber = L1_NETWORK_6BytesToUINT64(((INDEX_ENTRY *)pItem[Offset])->IE_MftReferNumber);
+					L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: IE_MftReferNumber: %X ", __LINE__, IE_MftReferNumber);
+					
+					L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: %02X %02X %02X %02X %02X %02X %02X %02X %02X ", __LINE__, 
+																															pItem[Offset + 0], 
+																															pItem[Offset + 1], 
+																															pItem[Offset + 2], 
+																															pItem[Offset + 3], 
+																															pItem[Offset + 4], 
+																															pItem[Offset + 5], 
+																															pItem[Offset + 6], 
+																															pItem[Offset + 7], 
+																															pItem[Offset + 8]);
+					
+					UINT8 j = 0;
+					
+					while (IE_MftReferNumber != 0xffffff)
 					{						
-						UINT8 IE_FileNameSize = ((INDEX_ENTRY *)pItem[Offset])->IE_FileNameSize;
-						UINT8 IE_FileNamespace = ((INDEX_ENTRY *)pItem[Offset])->IE_FileNamespace;
-						UINT64 IE_FileFlag = L1_NETWORK_8BytesToUINT64(((INDEX_ENTRY *)pItem[Offset])->IE_FileFlag);
-						UINT16 IE_Size = L1_NETWORK_2BytesToUINT16(((INDEX_ENTRY *)pItem[Offset])->IE_Size);
+						UINT8 IE_FileNameSize = pItem[Offset + 0x50];
+						UINT8 IE_FileNamespace = pItem[Offset + 0x51];
+						UINT64 IE_FileFlag = L1_NETWORK_8BytesToUINT64(pItem[Offset + 0x48]);
+						UINT16 IE_Size = pItem[Offset + 0x8] + pItem[Offset + 0x9] * 16 * 16;
 	
-						L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: NameSize: %d Namespace: %d IE_FileFlag: %X IE_MftReferNumber: %X ", __LINE__, IE_FileNameSize, IE_FileNamespace, IE_FileFlag, IE_MftReferNumber);
+						L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: NameSize: %02X Namespace: %02X IE_FileFlag: %X IE_Size: %X ", __LINE__, IE_FileNameSize, IE_FileNamespace, IE_FileFlag, IE_Size);
 							
 						for(UINT8 i = 0; i < IE_FileNameSize; i++)
 						{
@@ -1063,7 +1080,7 @@ UINT16  L2_FILE_NTFS_FileItemAttributeAnalysis2(UINT8 *p, UINT16 AttributeOffset
 						Offset += IE_Size;
 						IE_MftReferNumber = L1_NETWORK_8BytesToUINT64(((INDEX_ENTRY *)pItem[Offset])->IE_MftReferNumber);
 						j++;
-						if (j > 0)
+						if (j > 1)
 						{
 							break;
 						}
