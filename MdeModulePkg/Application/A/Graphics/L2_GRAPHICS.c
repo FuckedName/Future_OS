@@ -590,7 +590,7 @@ EFI_STATUS L2_MOUSE_MyComputerFolderItemClicked()
 	UINT16 index = FolderItemValidIndexArray[FolderItemID];
 	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d index: %d\n", __LINE__, index);
 		
-
+	//FAT32文件系统格式
 	if (device[PartitionItemID].FileSystemType == FILE_SYSTEM_FAT32)
     {    	
 
@@ -630,7 +630,7 @@ EFI_STATUS L2_MOUSE_MyComputerFolderItemClicked()
 		}
 	    
     }
-    else if (device[PartitionItemID].FileSystemType == FILE_SYSTEM_NTFS)
+    else if (device[PartitionItemID].FileSystemType == FILE_SYSTEM_NTFS) //NTFS文件系统格式
     {
 		//可能会有BUG 6291456=786432 * 8，有的MFT不在786432
 		UINT32 StartSectorNumber = 6291456 + pCommonStorageItems[index].FileContentRelativeSector * 2;
@@ -653,7 +653,7 @@ EFI_STATUS L2_MOUSE_MyComputerFolderItemClicked()
 		//从分区读取到的磁盘用于FILE分析，分析所有属性项，文件和文件夹拥有的属性项不相同
 		//L2_FILE_NTFS_FileItemBufferAnalysis(BufferMFT, &NTFSFileSwitched);
 		L2_FILE_NTFS_FileItemBufferAnalysis2(BufferMFT, &NTFSFileSwitched);
-		
+		return;
 		for (UINT16 i = 0; i < 10; i++)
 		{
 			UINT8 type = NTFSFileSwitched.NTFSFileAttributeHeaderSwitched[i].Type;
@@ -2852,7 +2852,8 @@ VOID L2_STORE_FolderItemsPrint2()
             pMyComputerBuffer[(i * Width + j) * 4 + 3] = GRAPHICS_LAYER_MY_COMPUTER_WINDOW;
         }
     }	
-	
+
+	//根目录显示的项数
     for (UINT16 i = 0; i < 7; i++)
     {                   
         x = 130;

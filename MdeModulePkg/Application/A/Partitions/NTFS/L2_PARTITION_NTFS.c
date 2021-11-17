@@ -884,12 +884,14 @@ UINT16  L2_FILE_NTFS_FileItemAttributeAnalysis2(UINT8 *p, UINT16 AttributeOffset
 		L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: MFT_ATTRIBUTE_INVALID: %X ", __LINE__, __FUNCTION__, pAttributeHeaderSwitched->Type);
 		return 0;
 	}
+	
     // 属性头和属性体总长度
     for (i = 0; i < 4; i++)
         size[i] = p[AttributeOffset + 4 + i];
         
     AttributeSize = L1_NETWORK_4BytesToUINT32(size);
-	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: AttributeSize: %02X AttributeType: %02X", __LINE__, AttributeSize, p[AttributeOffset]);
+
+	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: AttributeType: %02X AttributeSize: %02X ", __LINE__, p[AttributeOffset], AttributeSize);
 	if (0 == AttributeSize)
 		return AttributeSize;
 	
@@ -897,7 +899,7 @@ UINT16  L2_FILE_NTFS_FileItemAttributeAnalysis2(UINT8 *p, UINT16 AttributeOffset
     for (i = 0; i < AttributeSize; i++)
         pItem[i] = p[AttributeOffset + i];
 	
-	
+	/*
 	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X ", __LINE__, pItem[0], 
 					pItem[1],
 					pItem[2],
@@ -914,8 +916,9 @@ UINT16  L2_FILE_NTFS_FileItemAttributeAnalysis2(UINT8 *p, UINT16 AttributeOffset
 					pItem[13],
 					pItem[14],
 					pItem[15]);
-							
+	*/						
     // after buffer copied, we can get information in item
+	return AttributeSize;
     pAttributeHeaderSwitched->NameSize = ((NTFS_FILE_ATTRIBUTE_HEADER *)pItem)->NameSize;
     
     pAttributeHeaderSwitched->NameOffset = L1_NETWORK_2BytesToUINT16(((NTFS_FILE_ATTRIBUTE_HEADER *)pItem)->NameOffset);
@@ -927,8 +930,7 @@ UINT16  L2_FILE_NTFS_FileItemAttributeAnalysis2(UINT8 *p, UINT16 AttributeOffset
 	UINT8 NameSize = pAttributeHeaderSwitched->NameSize;
 	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: Type: %02X ResidentFlag: %d ", __LINE__, pAttributeHeaderSwitched->Type, pAttributeHeaderSwitched->ResidentFlag);
 
-	return;
-
+	
 	switch (pAttributeHeaderSwitched->Type)
 	{
 		//A0 Attribute
@@ -985,7 +987,7 @@ UINT16  L2_FILE_NTFS_FileItemAttributeAnalysis2(UINT8 *p, UINT16 AttributeOffset
 		case MFT_ATTRIBUTE_DOLLAR_INDEX_ROOT:
 			{				
 			
-					return;
+				return AttributeSize;
 				//L2_PARTITION_BufferPrint(pItem, 0x120);
 				//L1_MEMORY_Memset((void *)pCommonStorageItems, 0, 10 * sizeof(COMMON_STORAGE_ITEM));
 				for (UINT8 i = 0; i < 10 ; i++)
@@ -1071,7 +1073,7 @@ UINT16  L2_FILE_NTFS_FileItemAttributeAnalysis2(UINT8 *p, UINT16 AttributeOffset
 			}
 					
 			
-		default:;
+		default: ;
 	}		 
 
 	return AttributeSize;
@@ -1089,15 +1091,19 @@ EFI_STATUS  L2_FILE_NTFS_FileItemBufferAnalysis2(UINT8 *pBuffer, NTFS_FILE_SWITC
 	// 通过属性头计算第一个属性偏移
 	// 获取文件头信息
 	UINT16 Offset = L2_FILE_NTFS_FileItemHeaderAnalysis2(pBufferTemp, pNTFSFileSwitched);
-	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: Offset: %d", __LINE__, Offset);
+	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: Offset: %d ", __LINE__, Offset);
 	
 	// 获取每个属性信息
 	// 当前只计算10个属性，其实是有缺陷的
 	for (UINT16 i = 0; ; i++)
 	{
+		L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: For loop analysis attribute count: %d ", __LINE__, i + 1);
 		AttributeSize = L2_FILE_NTFS_FileItemAttributeAnalysis2(pBuffer, Offset, &(pNTFSFileSwitched->NTFSFileAttributeHeaderSwitched[i]));
 		if (AttributeSize == 0 || AttributeSize > 0x200 || Offset >= DISK_BUFFER_SIZE * 2)
+		{
+			L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: For loop end AttributeSize: %d ", __LINE__, AttributeSize);
 			break;
+		}			
 		
 	    Offset += AttributeSize;
 	}

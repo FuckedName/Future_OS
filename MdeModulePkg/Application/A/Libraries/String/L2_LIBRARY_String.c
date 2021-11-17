@@ -121,6 +121,7 @@ VOID L2_STRING_Maker3 (UINT16 x, UINT16 y, WINDOW_LAYER_ITEM layer,
 	for (UINT16 line = 0; line < PrintLineCount; line++)
 	{
 		UINT16 temp = (line + Queue.Front) % Queue.Size;
+
 		for (i = 0; i < sizeof(Queue.Buffer[temp]) / sizeof(CHAR8); i++)
     	{
     		L2_GRAPHICS_AsciiCharDraw2(layer, i * 8, line * 16, Queue.Buffer[temp][i], Color);
@@ -128,5 +129,4 @@ VOID L2_STRING_Maker3 (UINT16 x, UINT16 y, WINDOW_LAYER_ITEM layer,
 	}
 
 }
-
 

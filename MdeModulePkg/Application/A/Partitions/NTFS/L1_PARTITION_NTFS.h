@@ -569,6 +569,6 @@ typedef struct
 typedef struct 
 {
     NTFS_FILE_HEADER_SWITCHED NTFSFileHeaderSwitched;
-    NTFS_FILE_ATTRIBUTE_HEADER_SWITCHED NTFSFileAttributeHeaderSwitched[10];
+    NTFS_FILE_ATTRIBUTE_HEADER_SWITCHED NTFSFileAttributeHeaderSwitched[30];
 }NTFS_FILE_SWITCHED;    
 

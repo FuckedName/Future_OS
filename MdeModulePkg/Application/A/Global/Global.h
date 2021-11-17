@@ -140,7 +140,7 @@ typedef struct
 typedef struct
 {
 	UINT8 Name[100]; 
-	UINT8 Type; // 1 file; 2 folder; 
+	UINT8 Type; // COMMON_STORAGE_ITEM_FOLDER; COMMON_STORAGE_ITEM_FILE; 
 	UINT16 Size;
 	UINT16 CreateTime;
 	UINT16 LatestModifiedTime;

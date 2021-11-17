@@ -169,8 +169,7 @@ L2_KEYBOARD_Event (
             display_sector_number = 0;
         }
 
-        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: uniChar: %d display_sector_number: %d \n", __LINE__, uniChar, display_sector_number);
-
+        //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: uniChar: %d display_sector_number: %d \n", __LINE__, uniChar, display_sector_number);
 
         // Enter pressed
         if (0x0D == uniChar)
@@ -181,6 +180,22 @@ L2_KEYBOARD_Event (
             //L2_DEBUG_Print1(DISPLAY_KEYBOARD_X, DISPLAY_KEYBOARD_Y, "%a keyboard_input_count: %04d enter pressed", pKeyboardInputBuffer, keyboard_input_count);
 
             L2_KEYBOARD_KeyPressed();
+        }
+        else if ('a' == uniChar)
+        {
+        	for (UINT8 i = 0; i < SystemLogWindowHeight; i++)
+	        {
+	        	for (UINT8 j = 0; j < SystemLogWindowWidth; j++)
+	        	{
+	        		pSystemLogWindowBuffer[4 * (i * SystemLogWindowWidth + j)] = 0;
+	        		pSystemLogWindowBuffer[4 * (i * SystemLogWindowWidth + j) + 1] = 0;
+	        		pSystemLogWindowBuffer[4 * (i * SystemLogWindowWidth + j) + 2] = 0;
+	        	}
+        	}		
+
+			//L1_LIBRARY_QueueInit(&Queue, 0);
+        	//显示输入的按键
+            L2_DEBUG_Print1(DISPLAY_KEYBOARD_X, DISPLAY_KEYBOARD_Y, "%a keyboard_input_count: %04d ", pKeyboardInputBuffer, keyboard_input_count);
         }
         else
         {
