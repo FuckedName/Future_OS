@@ -45,6 +45,8 @@ UINT8 pBufferTemp[DISK_BUFFER_SIZE * 2];
 
 UINT64 FileContentRelativeSector;
 
+UINT8 pItem[200] = {0};
+
 // NTFS Main File Table items analysis
 // MFT_Item_ID: 0 $MFT
 /*             1 $MFTMirr
@@ -873,10 +875,11 @@ UINT16  L2_FILE_NTFS_FileItemAttributeAnalysis2(UINT8 *p, UINT16 AttributeOffset
 {
 	//L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: FUNCTION: %a", __LINE__, __FUNCTION__);
 	
-	UINT8 pItem[200] = {0};
     UINT8 size[4];
 	UINT16 AttributeSize;
 	UINT16 i;
+
+	L1_MEMORY_Memset(pItem, 0, 200);
 
     pAttributeHeaderSwitched->Type = p[AttributeOffset];
 	if (0 == pAttributeHeaderSwitched->Type || MFT_ATTRIBUTE_DOLLAR_EA <= pAttributeHeaderSwitched->Type)
@@ -918,19 +921,20 @@ UINT16  L2_FILE_NTFS_FileItemAttributeAnalysis2(UINT8 *p, UINT16 AttributeOffset
 					pItem[15]);
 	*/						
     // after buffer copied, we can get information in item
-	return AttributeSize;
-    pAttributeHeaderSwitched->NameSize = ((NTFS_FILE_ATTRIBUTE_HEADER *)pItem)->NameSize;
-    
+	//return AttributeSize;
     pAttributeHeaderSwitched->NameOffset = L1_NETWORK_2BytesToUINT16(((NTFS_FILE_ATTRIBUTE_HEADER *)pItem)->NameOffset);
-                                                        
+                                                   
     pAttributeHeaderSwitched->ResidentFlag = ((NTFS_FILE_ATTRIBUTE_HEADER *)pItem)->ResidentFlag;
 	
 	
 	UINT16 NameOffset = pAttributeHeaderSwitched->NameOffset;
+	
+    pAttributeHeaderSwitched->NameSize = ((NTFS_FILE_ATTRIBUTE_HEADER *)pItem)->NameSize;
 	UINT8 NameSize = pAttributeHeaderSwitched->NameSize;
 	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: Type: %02X ResidentFlag: %d ", __LINE__, pAttributeHeaderSwitched->Type, pAttributeHeaderSwitched->ResidentFlag);
+    
+	return AttributeSize;     
 
-	
 	switch (pAttributeHeaderSwitched->Type)
 	{
 		//A0 Attribute

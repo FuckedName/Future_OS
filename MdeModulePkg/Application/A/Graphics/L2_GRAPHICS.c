@@ -121,6 +121,8 @@ START_MENU_STATE 	 MyComputerNextState = CLICK_INIT_STATE;
 FAT32_ROOTPATH_SHORT_FILE_ITEM pItems[32];
 
 
+NTFS_FILE_SWITCHED NTFSFileSwitched = {0};
+
 
 //Line 0
 #define DISPLAY_DESK_HEIGHT_WEIGHT_X (date_time_count % 30) 
@@ -644,7 +646,11 @@ EFI_STATUS L2_MOUSE_MyComputerFolderItemClicked()
 	        return Status;
 	    }
 		
-		NTFS_FILE_SWITCHED NTFSFileSwitched = {0};
+		L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d pNTFSFileSwitched Allocate memory: %d.\n", __LINE__, sizeof(NTFS_FILE_SWITCHED));
+		
+		L1_MEMORY_Memset(&NTFSFileSwitched, 0, sizeof(NTFSFileSwitched)); 
+		
+    	//pSystemIconTextBuffer   = L2_MEMORY_Allocate("System pSystemIconText Buffer", MEMORY_TYPE_GRAPHICS, 384054);
 		
 		//当前测试，只显示一个设备，显示多个设备测试会比较麻烦
 		//if (1 == FolderItemID)
@@ -2986,8 +2992,8 @@ VOID L2_STORE_PartitionItemsPrint(UINT16 PartitionItemID)
         // get data runs
         //L2_FILE_NTFS_MFTDollarRootFileAnalysis(BufferMFT);      
 
-		NTFS_FILE_SWITCHED NTFSFileSwitched = {0};
-
+		L1_MEMORY_Memset(&NTFSFileSwitched, 0, sizeof(NTFSFileSwitched)); 
+		
 		//当前测试，只显示一个设备，显示多个设备测试会比较麻烦
 		//if (3 == DeviceID)
 		//L2_PARTITION_FileContentPrint(BufferMFT);
