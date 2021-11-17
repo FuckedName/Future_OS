@@ -53,6 +53,7 @@ DollarBootSwitched NTFSBootSwitched;
 
 
 //通用文件系统文件或者目录
+//因为当前系统支持NTFS和FAT32，实际上后边可能会支持其他类型的文件系统，不同文件系统，读取出来的文件都会有文件名、大小、类型等等，所以抽象出来一个公共的数据结构。
 COMMON_STORAGE_ITEM pCommonStorageItems[32];
 
 
@@ -244,6 +245,7 @@ EFI_STATUS L2_PARTITION_NameNTFSAnalysis(UINT16 DeviceID, UINT8 *Buffer)
 
 	UINT8 j;
 
+	//一个FILE里边有很多个属性，正常VOLUME属性在在6个左右，不过有些属性不一定有，所以这里取小于等于5，有一定的风险
 	for (UINT8 i = 0; i < 5; i++)
 	{
 		if (NTFSFileSwitched.NTFSFileAttributeHeaderSwitched[i].Type == MFT_ATTRIBUTE_DOLLAR_VOLUME_NAME)
@@ -258,6 +260,19 @@ EFI_STATUS L2_PARTITION_NameNTFSAnalysis(UINT16 DeviceID, UINT8 *Buffer)
 }
 
 
+
+
+/****************************************************************************
+*
+*  描述: 第一列是不同的文件系统类型，第二列是需要读取扇区号，第三列是解析从存储分区的内存。
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
 PARTITION_NAME_GET PartitionNameGet[]=
 {
 	{FILE_SYSTEM_FAT32, L2_PARTITION_NameFAT32StartSectorNumberGet,  L2_PARTITION_NameFAT32Analysis},  

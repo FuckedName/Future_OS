@@ -528,6 +528,27 @@ VOID L2_PARTITION_FileContentPrint(UINT8 *Buffer)
     }
 }
 
+
+
+/****************************************************************************
+*
+*  描述:   文件内容显示
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
+VOID L2_PARTITION_BufferPrint(UINT8 *Buffer, UINT16 Length)
+{	
+	for (int j = 0; j < Length; j++)
+    {
+        L2_DEBUG_Print1(DISK_READ_BUFFER_X + (j % 16) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 16), "%02X ", Buffer[j] & 0xff);
+    }
+}
+
 EFI_STATUS L2_FILE_NTFS_90AttributeAnalysis()
 {
 }
@@ -565,6 +586,7 @@ EFI_STATUS L2_MOUSE_MyComputerFolderItemClicked()
 		return -1;
 	}
 
+	//需要找获取有效的项索引
 	UINT16 index = FolderItemValidIndexArray[FolderItemID];
 	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d index: %d\n", __LINE__, index);
 		
@@ -610,7 +632,7 @@ EFI_STATUS L2_MOUSE_MyComputerFolderItemClicked()
     }
     else if (device[PartitionItemID].FileSystemType == FILE_SYSTEM_NTFS)
     {
-		//这样写死8192，可能会有BUG 6291456=786432 * 8
+		//可能会有BUG 6291456=786432 * 8，有的MFT不在786432
 		UINT32 StartSectorNumber = 6291456 + pCommonStorageItems[index].FileContentRelativeSector * 2;
 		L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: StartSector: %llu Sector: %llu",  __LINE__, StartSectorNumber, pCommonStorageItems[index].FileContentRelativeSector);
 
@@ -629,7 +651,8 @@ EFI_STATUS L2_MOUSE_MyComputerFolderItemClicked()
 		L2_PARTITION_FileContentPrint(BufferMFT);
 
 		//从分区读取到的磁盘用于FILE分析，分析所有属性项，文件和文件夹拥有的属性项不相同
-		L2_FILE_NTFS_FileItemBufferAnalysis(BufferMFT, &NTFSFileSwitched);
+		//L2_FILE_NTFS_FileItemBufferAnalysis(BufferMFT, &NTFSFileSwitched);
+		L2_FILE_NTFS_FileItemBufferAnalysis2(BufferMFT, &NTFSFileSwitched);
 		
 		for (UINT16 i = 0; i < 10; i++)
 		{
@@ -2113,7 +2136,7 @@ UINT16 L2_MOUSE_ClickEventHandle()
 *  返回值： 成功：XXXX，失败：XXXXX
 *
 *****************************************************************************/
-VOID L2_MOUSE_Click()
+VOID L2_MOUSE_LeftClick()
 {
     //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: iMouseX: %d iMouseY: %d \n",  __LINE__, iMouseX, iMouseY);
     EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
@@ -2928,7 +2951,7 @@ void L2_GRAPHICS_CopyBufferFromWindowsToDesk()
 
 /****************************************************************************
 *
-*  描述:   显示分区根据下的文件和目录，当前支持FAT32和NTFS两种格式
+*  描述:   显示分区根目录下的文件和目录，当前支持FAT32和NTFS两种格式
 *
 *  参数1： xxxxx
 *  参数2： xxxxx
@@ -2972,6 +2995,7 @@ VOID L2_STORE_PartitionItemsPrint(UINT16 PartitionItemID)
 
 		for (UINT16 i = 0; i < 10; i++)
 		{
+			//找到A0属性
 			if (NTFSFileSwitched.NTFSFileAttributeHeaderSwitched[i].Type == MFT_ATTRIBUTE_DOLLAR_INDEX_ALLOCATION)
 			{
 				// Analysis data runs
@@ -3428,7 +3452,7 @@ VOID L2_MOUSE_Move()
     L2_DEBUG_Print1(0, ScreenHeight - 30 -  7 * 16, "%d: iMouseX: %d iMouseY: %d Graphics Layer id: %d GraphicsLayerIDCount: %u", __LINE__, iMouseX, iMouseY, pDeskDisplayBuffer[(iMouseY * ScreenWidth + iMouseX) * 4 + 3], GraphicsLayerIDCount++);
     L2_MOUSE_MoveOver();
     
-    L2_MOUSE_Click();
+    L2_MOUSE_LeftClick();
 }
 
 

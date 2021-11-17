@@ -325,17 +325,17 @@ typedef struct _INDEX_ENTRY
 	UINT8 IE_MftReferNumber[8];/*该文件的MFT参考号。注意：该值的低6字节是MFT记录号，高2字节是该MFT记录的序列号*/
 	UINT8 IE_Size[2];//索引项的大小 相对于索引项开始的偏移量
 	UINT8 IE_FileNAmeAttriBodySize[2];//文件名属性体的大小
-	UINT8 IE_Flags[2];/*标志。该值可能是以下值之一：
-	0x00 普通文件项
-	0x01 有子项
-	0x02 当前项是最后一个目录项
-	在读取索引项数据时应该首先检查该成员的值以确定当前项的类型*/
+	UINT8 IE_Flags[2];	/*标志。该值可能是以下值之一：
+						0x00 普通文件项
+						0x01 有子项
+						0x02 当前项是最后一个目录项
+						在读取索引项数据时应该首先检查该成员的值以确定当前项的类型*/
 	UINT8 IE_Fill[2];//填充 无意义
 	UINT8 IE_FatherDirMftReferNumber[8];//父目录的MFT文件参考号
-	UINT8 IE_CreatTime[4];//文件创建时间
-	UINT8 IE_AlterTime[4];//文件最后修改时间
-	UINT8 IE_MFTChgTime[4];//文件记录最后修改时间
-	UINT8 IE_ReadTime[4];//文件最后访问时间
+	UINT8 IE_CreatTime[8];//文件创建时间
+	UINT8 IE_AlterTime[8];//文件最后修改时间
+	UINT8 IE_MFTChgTime[8];//文件记录最后修改时间
+	UINT8 IE_ReadTime[8];//文件最后访问时间
 	UINT8 IE_FileAllocSize[8];//文件分配大小
 	UINT8 IE_FileRealSize[8];//文件实际大小
 	UINT8 IE_FileFlag[8];//文件标志
