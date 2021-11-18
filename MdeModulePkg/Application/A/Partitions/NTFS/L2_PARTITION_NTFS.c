@@ -1028,15 +1028,13 @@ UINT16  L2_FILE_NTFS_FileItemAttributeAnalysis2(UINT8 *p, UINT16 AttributeOffset
 					L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: Offset: %d ", __LINE__, Offset);
 						
 					
-					// 取前六位
-					UINT8 *pTemp = pItem[Offset];
-					UINT64 IE_MftReferNumber = L1_NETWORK_6BytesToUINT64(((INDEX_ENTRY *)pItem[Offset])->IE_MftReferNumber);
-					L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: IE_MftReferNumber: %X ", __LINE__, IE_MftReferNumber);
-										
 					UINT8 j = 0;
-					
+
+					// INDEX_ENTRY
+					INDEX_ENTRY;
 					while (TRUE)
 					{			
+						UINT64 IE_MftReferNumber = L1_NETWORK_8BytesToUINT64(pItem[Offset]);
 						UINT8 IE_FileNameSize = pItem[Offset + 0x50];
 						UINT8 IE_FileNamespace = pItem[Offset + 0x51];
 						UINT64 IE_FileFlag = L1_NETWORK_8BytesToUINT64(pItem[Offset + 0x48]);
@@ -1050,9 +1048,20 @@ UINT16  L2_FILE_NTFS_FileItemAttributeAnalysis2(UINT8 *p, UINT16 AttributeOffset
 							pCommonStorageItems[j].Name[i] = pItem[Offset + 0x52 + i * 2];
 						}
 						
+						L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: %c%c%c%c%c%c%c%c%c ", __LINE__, 
+																																pCommonStorageItems[j].Name[0], 
+																																pCommonStorageItems[j].Name[1], 
+																																pCommonStorageItems[j].Name[2], 
+																																pCommonStorageItems[j].Name[3], 
+																																pCommonStorageItems[j].Name[4], 
+																																pCommonStorageItems[j].Name[5], 
+																																pCommonStorageItems[j].Name[6], 
+																																pCommonStorageItems[j].Name[7], 
+																																pCommonStorageItems[j].Name[8]);
 						pCommonStorageItems[j].Type = COMMON_STORAGE_ITEM_FILE;
 						pCommonStorageItems[j].FileContentRelativeSector = IE_MftReferNumber;
-	
+
+						//这边好像有点BUG，IE_FileFlag获取的值不太对
 						switch (IE_FileFlag)
 						{
 							case 0x20:
@@ -1068,7 +1077,7 @@ UINT16  L2_FILE_NTFS_FileItemAttributeAnalysis2(UINT8 *p, UINT16 AttributeOffset
 						}
 						
 						Offset += IE_Size;
-						IE_MftReferNumber = L1_NETWORK_8BytesToUINT64(((INDEX_ENTRY *)pItem[Offset])->IE_MftReferNumber);
+						L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: %X ", __LINE__, pItem[Offset]);
 						
 						L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: %02X %02X %02X %02X ", __LINE__, 
 																																pItem[Offset + 0], 
