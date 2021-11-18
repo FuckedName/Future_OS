@@ -1029,29 +1029,14 @@ UINT16  L2_FILE_NTFS_FileItemAttributeAnalysis2(UINT8 *p, UINT16 AttributeOffset
 						
 					
 					// 取前六位
+					UINT8 *pTemp = pItem[Offset];
 					UINT64 IE_MftReferNumber = L1_NETWORK_6BytesToUINT64(((INDEX_ENTRY *)pItem[Offset])->IE_MftReferNumber);
 					L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: IE_MftReferNumber: %X ", __LINE__, IE_MftReferNumber);
-					
-					L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: %02X %02X %02X %02X %02X %02X %02X %02X %02X ", __LINE__, 
-																															pItem[Offset + 0], 
-																															pItem[Offset + 1], 
-																															pItem[Offset + 2], 
-																															pItem[Offset + 3], 
-																															pItem[Offset + 4], 
-																															pItem[Offset + 5], 
-																															pItem[Offset + 6], 
-																															pItem[Offset + 7], 
-																															pItem[Offset + 8]);
-					
+										
 					UINT8 j = 0;
 					
-					while (IE_MftReferNumber != 0xffffff)
-					{						
-						if (0xff == pItem[Offset] && 0xff == pItem[Offset + 1] && 0xff == pItem[Offset + 2] && 0xff == pItem[Offset + 3])
-						{
-							L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: end item, j: %d", j);
-							return AttributeSize;
-						}
+					while (TRUE)
+					{			
 						UINT8 IE_FileNameSize = pItem[Offset + 0x50];
 						UINT8 IE_FileNamespace = pItem[Offset + 0x51];
 						UINT64 IE_FileFlag = L1_NETWORK_8BytesToUINT64(pItem[Offset + 0x48]);
@@ -1084,10 +1069,16 @@ UINT16  L2_FILE_NTFS_FileItemAttributeAnalysis2(UINT8 *p, UINT16 AttributeOffset
 						
 						Offset += IE_Size;
 						IE_MftReferNumber = L1_NETWORK_8BytesToUINT64(((INDEX_ENTRY *)pItem[Offset])->IE_MftReferNumber);
+						
+						L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: %02X %02X %02X %02X ", __LINE__, 
+																																pItem[Offset + 0], 
+																																pItem[Offset + 1], 
+																																pItem[Offset + 2], 
+																																pItem[Offset + 3]);
 						j++;
-						if (j > 3)
+						if (0 == pItem[Offset + 0] && 0 == pItem[Offset + 1] && 0 == pItem[Offset + 2] && 0 == pItem[Offset + 3])
 						{
-							break;
+							return 0;
 						}
 					}
 
