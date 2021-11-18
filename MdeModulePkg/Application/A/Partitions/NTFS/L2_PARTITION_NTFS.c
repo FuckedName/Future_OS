@@ -1059,7 +1059,11 @@ UINT16  L2_FILE_NTFS_FileItemAttributeAnalysis2(UINT8 *p, UINT16 AttributeOffset
 																																pCommonStorageItems[j].Name[7], 
 																																pCommonStorageItems[j].Name[8]);
 						pCommonStorageItems[j].Type = COMMON_STORAGE_ITEM_FILE;
-						pCommonStorageItems[j].FileContentRelativeSector = IE_MftReferNumber;
+						UINT64 RelativeSector = pItem[Offset] + (UINT64)pItem[Offset + 1] * 256 + (UINT64)pItem[Offset + 2] * 256 * 256 + (UINT64)pItem[Offset + 3] * 256 * 256 * 256 + (UINT64)pItem[Offset + 4] * 256 * 256 * 256 * 256 + (UINT64)pItem[Offset + 5] * 256 * 256 * 256 * 256 * 256;
+						L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: RelativeSector: %LLX", __LINE__, 
+																																RelativeSector);
+						pCommonStorageItems[j].FileContentRelativeSector = RelativeSector;
+						
 
 						//这边好像有点BUG，IE_FileFlag获取的值不太对
 						switch (IE_FileFlag)
