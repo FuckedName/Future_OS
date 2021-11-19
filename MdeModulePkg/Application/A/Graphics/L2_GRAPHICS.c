@@ -649,16 +649,14 @@ EFI_STATUS L2_MOUSE_MyComputerFolderItemClicked()
 		L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d pNTFSFileSwitched Allocate memory: %d.\n", __LINE__, sizeof(NTFS_FILE_SWITCHED));
 		
 		L1_MEMORY_Memset(&NTFSFileSwitched, 0, sizeof(NTFSFileSwitched)); 
-		
-    	//pSystemIconTextBuffer   = L2_MEMORY_Allocate("System pSystemIconText Buffer", MEMORY_TYPE_GRAPHICS, 384054);
-		
-		//当前测试，只显示一个设备，显示多个设备测试会比较麻烦
-		//if (1 == FolderItemID)
+				
 		L2_PARTITION_FileContentPrint(BufferMFT);
 
 		//从分区读取到的磁盘用于FILE分析，分析所有属性项，文件和文件夹拥有的属性项不相同
-		//L2_FILE_NTFS_FileItemBufferAnalysis(BufferMFT, &NTFSFileSwitched);
-		L2_FILE_NTFS_FileItemBufferAnalysis2(BufferMFT, &NTFSFileSwitched);
+		
+		L2_FILE_NTFS_FileItemBufferAnalysis(BufferMFT, &NTFSFileSwitched);
+
+		
 		//return;
 		for (UINT16 i = 0; i < 10; i++)
 		{
@@ -686,25 +684,30 @@ EFI_STATUS L2_MOUSE_MyComputerFolderItemClicked()
 			// Only Folder file item have MFT_ATTRIBUTE_DOLLAR_INDEX_ALLOCATION attribute.
 			else if (type == MFT_ATTRIBUTE_DOLLAR_INDEX_ALLOCATION)
 			{
-				// Analysis data runs
-				L2_FILE_NTFS_DollarRootA0DatarunAnalysis(NTFSFileSwitched.NTFSFileAttributeHeaderSwitched[i].Data);
+				IndexInformation *pA0Indexes = L2_FILE_NTFS_GetA0Indexes();
+				if (pA0Indexes[0].Offset != 0)
+				{
+				    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d Status: %X\n", __LINE__, Status);
+					// Read data from partition(disk or USB etc..)					
+				    Status = L1_STORE_READ(PartitionItemID, 8 * pA0Indexes[0].Offset, 2, BufferMFT); 
+				    if (EFI_ERROR(Status))
+				    {
+				        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d Status: %X\n", __LINE__, Status);
+				        return Status;
+				    }
+					
+    				L2_FILE_NTFS_MFTIndexItemsAnalysis(BufferMFT, PartitionItemID);    
+					//L1_MEMORY_Memset(&NTFSFileSwitched, 0, sizeof(NTFSFileSwitched)); 
+					//L2_FILE_NTFS_FileItemBufferAnalysis(BufferMFT, &NTFSFileSwitched);
+				}				
 				
-				L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: %02X %02X %02X %02X %02X	%02X\n",  __LINE__, NTFSFileSwitched.NTFSFileAttributeHeaderSwitched[i].Data[0],
-								NTFSFileSwitched.NTFSFileAttributeHeaderSwitched[i].Data[1],
-								NTFSFileSwitched.NTFSFileAttributeHeaderSwitched[i].Data[2],
-								NTFSFileSwitched.NTFSFileAttributeHeaderSwitched[i].Data[3],
-								NTFSFileSwitched.NTFSFileAttributeHeaderSwitched[i].Data[4],
-								NTFSFileSwitched.NTFSFileAttributeHeaderSwitched[i].Data[5]);
-				// use data run get root path item index
-				//L2_FILE_NTFS_RootPathItemsRead(PartitionItemID);
-				
-				
-				//L2_STORE_FolderItemsPrint2();
+				L2_STORE_FolderItemsPrint2();
 				break;
 			}
 			// Only file item have MFT_ATTRIBUTE_DOLLAR_DATA attribute.
 			else if (type == MFT_ATTRIBUTE_DOLLAR_DATA)
 			{
+				//显示文件内容时会走这个分支。
 	            L2_DEBUG_Print3(300, 300, WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW], "%d: %02X %02X %02X %02X", __LINE__, 
                                 NTFSFileSwitched.NTFSFileAttributeHeaderSwitched[i].Data[0],
                                 NTFSFileSwitched.NTFSFileAttributeHeaderSwitched[i].Data[1],
