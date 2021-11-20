@@ -49,14 +49,17 @@ EFI_STATUS InitTcp4SocketFd(INTN index)
     {
     	return;
     }
+    
     // CurSocket->stub = 0x1212;
     // 2 Create Connect Event
     // CurSocket->ConnectToken.CompletionToken.Status = EFI_ABORTED;
     Status = gBS->CreateEvent(EVT_NOTIFY_SIGNAL, TPL_CALLBACK, (EFI_EVENT_NOTIFY)NopNoify , (VOID*)&CurSocket->ConnectToken, &CurSocket->ConnectToken.CompletionToken.Event );
-    INFO(L"%d\n", Status);
+    INFO(L"%d\n", Status);    
+    if(EFI_ERROR(Status)) 
+    {
+        return Status;  
+    }
     
-    if(EFI_ERROR(Status)) return Status;  
-
     // 3 Create Transmit Event
     Status = gBS->CreateEvent(EVT_NOTIFY_WAIT, TPL_CALLBACK, (EFI_EVENT_NOTIFY)Tcp4SendNotify , (VOID*)CurSocket, &CurSocket->SendToken.CompletionToken.Event);
     INFO(L"%d Init: CurSocket=%p TCP4SocketFd[index]=%p\n", __LINE__, CurSocket,TCP4SocketFd[index]);
@@ -65,6 +68,7 @@ EFI_STATUS InitTcp4SocketFd(INTN index)
         INFO(L"%d Init: Create Send Event fail!\n\r", __LINE__);
         return Status;     
     }
+    
     // CurSocket->SendToken.CompletionToken.Status  =EFI_ABORTED; 
     CurSocket->m_TransData = (EFI_TCP4_TRANSMIT_DATA*)AllocatePool(sizeof(EFI_TCP4_TRANSMIT_DATA));
 	INFO(L"%x\n", CurSocket->m_TransData);
@@ -101,7 +105,9 @@ UINTN CreateTCP4Socket(VOID)
     MYTCP4SOCKET *CurSocket = NULL;
     INTN i;
     INTN MyFd = -1;
+    
 	INFO(L"11\n");
+	
     for (i = 0; i < 32; i++)
     {
 		INFO(L"11\n");
@@ -120,23 +126,30 @@ UINTN CreateTCP4Socket(VOID)
             break;
         }
     }
+    
     if(CurSocket==NULL)
+    {
         return MyFd;
+    }
     
     gBS->SetMem((void*)CurSocket, 0, sizeof(MYTCP4SOCKET));        
     CurSocket->m_SocketHandle  = NULL;
     Status = gBS->LocateProtocol (&gEfiTcp4ServiceBindingProtocolGuid,
 							        NULL,
-							        (VOID **)&pTcpServiceBinding );
+							        (VOID **)&pTcpServiceBinding);
 	INFO(L"%d\n", Status);
     if(EFI_ERROR(Status))
+    {
         return Status;
-
+    }
+    
     Status = pTcpServiceBinding->CreateChild ( pTcpServiceBinding,
 										         &CurSocket->m_SocketHandle );
     INFO(L"%d\n", Status);
     if(EFI_ERROR(Status))
+    {
         return Status;
+    }
 
     Status = gBS->OpenProtocol ( CurSocket->m_SocketHandle,
 							        &gEfiTcp4ProtocolGuid,
@@ -146,10 +159,14 @@ UINTN CreateTCP4Socket(VOID)
 							        EFI_OPEN_PROTOCOL_BY_HANDLE_PROTOCOL );
     INFO(L"%d\n", Status);
     if(EFI_ERROR(Status))
-         return Status;
+    {
+        return Status;
+    }
+    
     InitTcp4SocketFd(MyFd);
     
 	INFO(L"%d\n", Status);
+	
     return MyFd;
 }
 
@@ -160,7 +177,10 @@ EFI_STATUS ConfigTCP4Socket(UINTN index, UINT32 Ip32, UINT16 Port)
     MYTCP4SOCKET *CurSocket = TCP4SocketFd[index];
 
     if(CurSocket->m_pTcp4ConfigData == NULL)
+    {
         return Status;
+    }
+    
     CurSocket->m_pTcp4ConfigData->TypeOfService = 0;
     CurSocket->m_pTcp4ConfigData->TimeToLive = 16;    
     *(UINTN*)(CurSocket->m_pTcp4ConfigData->AccessPoint.RemoteAddress.Addr) = Ip32;
@@ -173,7 +193,8 @@ EFI_STATUS ConfigTCP4Socket(UINTN index, UINT32 Ip32, UINT16 Port)
     CurSocket->m_pTcp4ConfigData->AccessPoint.StationPort = 61558;
     CurSocket->m_pTcp4ConfigData->AccessPoint.ActiveFlag = TRUE;
     CurSocket->m_pTcp4ConfigData->ControlOption = NULL;
-    Status = CurSocket->m_pTcp4Protocol ->Configure(CurSocket->m_pTcp4Protocol, CurSocket->m_pTcp4ConfigData);    
+    Status = CurSocket->m_pTcp4Protocol ->Configure(CurSocket->m_pTcp4Protocol, CurSocket->m_pTcp4ConfigData);
+    
     return Status;
 }
 
@@ -188,6 +209,7 @@ EFI_STATUS SendTCP4Socket(UINTN index, CHAR8* Data, UINTN Lenth)
         gST->ConOut->OutputString(gST->ConOut,L"Send: m_Tcp4Protocol is NULL\n\r");
         return Status;  
     }
+    
     CurSocket->m_TransData->Push = TRUE;
     CurSocket->m_TransData->Urgent = TRUE;
     CurSocket->m_TransData->DataLength = (UINT32)Lenth;
@@ -206,6 +228,7 @@ EFI_STATUS SendTCP4Socket(UINTN index, CHAR8* Data, UINTN Lenth)
         
 	Status = gBS->WaitForEvent(1, &(CurSocket->SendToken.CompletionToken.Event), &waitIndex);
     INFO(L"%d Send: WaitForEvent, %r\n", __LINE__, Status);
+    
     return CurSocket->SendToken.CompletionToken.Status;
 }
 
@@ -215,7 +238,10 @@ EFI_STATUS RecvTCP4Socket(IN UINTN index, IN CHAR8* Buffer, IN UINTN Length, OUT
     MYTCP4SOCKET *CurSocket = TCP4SocketFd[index];
     UINTN waitIndex = 0;
 
-    if(CurSocket->m_pTcp4Protocol == NULL) return Status;
+    if(CurSocket->m_pTcp4Protocol == NULL) 
+    {
+        return Status;
+    }
 
     CurSocket->m_RecvData->UrgentFlag = TRUE;
     CurSocket->m_RecvData->DataLength = (UINT32)Length;
@@ -224,11 +250,13 @@ EFI_STATUS RecvTCP4Socket(IN UINTN index, IN CHAR8* Buffer, IN UINTN Length, OUT
     CurSocket->m_RecvData->FragmentTable[0].FragmentBuffer = (void*)Buffer;
     CurSocket->RecvToken.Packet.RxData=  CurSocket->m_RecvData;
     Status = CurSocket->m_pTcp4Protocol -> Receive(CurSocket->m_pTcp4Protocol, &CurSocket->RecvToken);
+    
     if(EFI_ERROR(Status))
     {
         gST->ConOut->OutputString(gST->ConOut,L"Recv: Receive fail!\n\r");
         return Status;
     }
+    
     Status = gBS->WaitForEvent(1, &(CurSocket->RecvToken.CompletionToken.Event), &waitIndex);
     INFO(L"%d Recv: WaitForEvent, %r\n", __LINE__, Status);
     *recvLength = CurSocket->m_RecvData->DataLength;
@@ -244,10 +272,16 @@ EFI_STATUS ConnectTCP4Socket(UINTN index, UINT32 Ip32, UINT16 Port)
 
     ConfigTCP4Socket(index, Ip32, Port);
 
-    if(CurSocket->m_pTcp4Protocol == NULL) return Status; 
-    Status = CurSocket->m_pTcp4Protocol -> Connect(CurSocket->m_pTcp4Protocol, &CurSocket->ConnectToken);
-    if(EFI_ERROR(Status))
+    if(CurSocket->m_pTcp4Protocol == NULL) 
+    {
         return Status;
+    }
+    
+    Status = CurSocket->m_pTcp4Protocol -> Connect(CurSocket->m_pTcp4Protocol, &CurSocket->ConnectToken);
+    if(EFI_ERROR(Status))    
+    {
+        return Status;
+    }
 
     Status = gBS->WaitForEvent(1, &(CurSocket->ConnectToken.CompletionToken.Event), &waitIndex);
     INFO(L"%d Connect: WaitForEvent, %r\n", __LINE__, Status);
@@ -263,28 +297,42 @@ INTN DestroyTCP4Socket(UINTN index)
     EFI_STATUS Status;
     MYTCP4SOCKET *CurSocket = TCP4SocketFd[index];
     
-    if(CurSocket->m_SocketHandle){
+    if(CurSocket->m_SocketHandle)
+    {
         EFI_SERVICE_BINDING_PROTOCOL*  pTcpServiceBinding;
-        Status = gBS->LocateProtocol ( &gEfiTcp4ServiceBindingProtocolGuid,
-                NULL, (VOID **)&pTcpServiceBinding );
-        Status = pTcpServiceBinding->DestroyChild ( pTcpServiceBinding,
-                CurSocket->m_SocketHandle );
+        Status = gBS->LocateProtocol(&gEfiTcp4ServiceBindingProtocolGuid, NULL, (VOID **)&pTcpServiceBinding );
+                
+        Status = pTcpServiceBinding->DestroyChild ( pTcpServiceBinding, CurSocket->m_SocketHandle);
     }
-    if(CurSocket->ConnectToken.CompletionToken.Event)
-        gBS->CloseEvent(CurSocket->ConnectToken.CompletionToken.Event);    
-    if(CurSocket->SendToken.CompletionToken.Event)
-        gBS->CloseEvent(CurSocket->SendToken.CompletionToken.Event);    
-    if(CurSocket->RecvToken.CompletionToken.Event)
-        gBS->CloseEvent(CurSocket->RecvToken.CompletionToken.Event);
     
-    if(CurSocket->m_pTcp4ConfigData){
+    if(CurSocket->ConnectToken.CompletionToken.Event)
+    {
+        gBS->CloseEvent(CurSocket->ConnectToken.CompletionToken.Event);    
+    }
+    
+    if(CurSocket->SendToken.CompletionToken.Event)
+    {
+        gBS->CloseEvent(CurSocket->SendToken.CompletionToken.Event);    
+    }
+    
+    if(CurSocket->RecvToken.CompletionToken.Event)
+    {
+        gBS->CloseEvent(CurSocket->RecvToken.CompletionToken.Event);
+    }    
+    
+    if(CurSocket->m_pTcp4ConfigData)
+    {
 	    FreePool(CurSocket->m_pTcp4ConfigData);
     }
-    if(CurSocket->SendToken.Packet.TxData){
+    
+    if(CurSocket->SendToken.Packet.TxData)
+    {
 	    FreePool(CurSocket->SendToken.Packet.TxData);
 	    CurSocket->SendToken.Packet.TxData = NULL;
     }
-    if(CurSocket->RecvToken.Packet.RxData){
+    
+    if(CurSocket->RecvToken.Packet.RxData)
+    {
 	    FreePool(CurSocket->RecvToken.Packet.RxData);
 	    CurSocket->RecvToken.Packet.RxData = NULL;
     }

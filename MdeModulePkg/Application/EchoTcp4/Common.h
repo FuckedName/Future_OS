@@ -30,7 +30,8 @@
 
 #define INFO(...)   \
 				do {   \
-					 Print(L"[INFO] %a %d: ", __FUNCTION__, __LINE__);  \
+					 /*Print(L"[INFO %a %a %d] ", __FILE__, __FUNCTION__, __LINE__);  */ \
+					 Print(L"[INFO %a %d ] ", __FUNCTION__, __LINE__);  \
 				     Print(__VA_ARGS__); \
 				}while(0);
 

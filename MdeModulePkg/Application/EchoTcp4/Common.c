@@ -25,7 +25,7 @@ EFI_RNG_PROTOCOL *gRNGOut;			//Handle of Generating random number 2019-08-31 11:
 UINT64 InintGloabalProtocols(UINT64 flag)
 {
 	
-	INFO(L"%d flag=%x\n", __LINE__, flag);
+	INFO(L"flag=%x\n", flag);
 	EFI_STATUS                        Status;
 	UINT64	retVal=0;
 	
@@ -33,54 +33,68 @@ UINT64 InintGloabalProtocols(UINT64 flag)
 	if((flag&S_TEXT_INPUT_EX) == S_TEXT_INPUT_EX)
 	{
 		Status = LocateSimpleTextInputEx();
-		INFO(L"%d Status=%x\n", __LINE__, Status);
+		INFO(L"Status=%x\n", Status);
 		if (EFI_ERROR (Status)) 
+		{
 			retVal|=S_TEXT_INPUT_EX;
+		}
 	}
 	
 	//Locate GraphicsOutput protocol
 	if((flag&GRAPHICS_OUTPUT) == GRAPHICS_OUTPUT)
 	{
 		Status = LocateGraphicsOutput();
-		INFO(L"%d Status=%x\n", __LINE__, Status);
+		INFO(L"Status=%x\n", Status);
 		if (EFI_ERROR (Status)) 
+		{
 			retVal|=GRAPHICS_OUTPUT;
+		}
 	}
 	
 	//Locate PCIRootBridgeIO protocol
 	if((flag&PCI_ROOTBRIDGE_IO) == PCI_ROOTBRIDGE_IO)
 	{
 		Status = LocatePCIRootBridgeIO();
-		INFO(L"%d Status=%x\n", __LINE__, Status);
+		INFO(L"Status=%x\n", Status);
 		if (EFI_ERROR (Status)) 
+		{
 			retVal|=PCI_ROOTBRIDGE_IO;
+		}			
 	}
 	
 	//Locate PCIIO protocol
 	if((flag&PCI_IO) == PCI_IO)
 	{
 		Status = LocatePCIIO();
-		INFO(L"%d Status=%x\n", __LINE__, Status);
+		INFO(L"Status=%x\n", Status);
+		
 		if (EFI_ERROR (Status)) 
+		{
 			retVal|=PCI_IO;
+		}
 	}
 
 	//Locate FileIO protocol
 	if((flag&FILE_IO) == FILE_IO)
 	{
 		Status = LocateFileRoot();
-		INFO(L"%d Status=%x\n", __LINE__, Status);
+		INFO(L"Status=%x\n", Status);
+		
 		if (EFI_ERROR (Status)) 
+		{
 			retVal|=FILE_IO;
+		}
 	}
 	
 	//Locate RNGOut protocol
 	if((flag&RNG_OUT) == RNG_OUT)
 	{
 		Status = LocateRNGOut();
-		INFO(L"%d Status=%x\n", __LINE__, Status);
+		INFO(L"Status=%x\n", Status);
 		if (EFI_ERROR (Status)) 
+		{
 			retVal|=RNG_OUT;
+		}			
 	}
 	return retVal;
 }
@@ -92,32 +106,37 @@ UINT64 InintGloabalProtocols(UINT64 flag)
 EFI_STATUS LocateSimpleTextInputEx(void)
 {
 	EFI_STATUS                        Status;
-  EFI_HANDLE                        *Handles;
-  UINTN                             HandleCount;
-  UINTN                             HandleIndex;
+    EFI_HANDLE                        *Handles;
+    UINTN                             HandleCount;
+    UINTN                             HandleIndex;
 
-  
-  Status = gBS->LocateHandleBuffer (
-              ByProtocol,
-              &gEfiSimpleTextInputExProtocolGuid,
-              NULL,
-              &HandleCount,
-              &Handles
-              );
-  INFO(L"Status=%x\n", Status);
-  if(EFI_ERROR (Status))
-  	return Status;
 
-  for (HandleIndex = 0; HandleIndex < HandleCount; HandleIndex++) {
-    Status = gBS->HandleProtocol (Handles[HandleIndex], &gEfiSimpleTextInputExProtocolGuid, (VOID **) &gSimpleTextInputEx);
-    
-    if (EFI_ERROR(Status))	
-    	continue;
-		else
+    Status = gBS->LocateHandleBuffer(ByProtocol,
+					               &gEfiSimpleTextInputExProtocolGuid,
+					               NULL,
+					               &HandleCount,
+					               &Handles);
+					               
+    INFO(L"Status=%x\n", Status);
+
+    if(EFI_ERROR (Status))
+    {
+        return Status;
+    }
+
+    for (HandleIndex = 0; HandleIndex < HandleCount; HandleIndex++) 
+    {
+        Status = gBS->HandleProtocol (Handles[HandleIndex], &gEfiSimpleTextInputExProtocolGuid, (VOID **) &gSimpleTextInputEx);
+        
+        if (EFI_ERROR(Status))	
+        {
+            continue;
+    	}
+    	else
 		{
 			return EFI_SUCCESS;
-  	}
-  }	 
+      	}
+    }	 
 	return Status;
 }
 //Name: LocateGraphicsOutput
@@ -130,30 +149,39 @@ EFI_STATUS LocateGraphicsOutput (void)
 	EFI_HANDLE                         *GraphicsOutputControllerHandles = NULL;
 	UINTN                              HandleIndex = 0;
 	UINTN                              HandleCount = 0;
+
+	
 	//get the handles which supports GraphicsOutputProtocol
-	Status = gBS->LocateHandleBuffer(
-		ByProtocol,
-		&gEfiGraphicsOutputProtocolGuid,
-		NULL,
-		&HandleCount,
-		&GraphicsOutputControllerHandles
-		);
-  INFO(L"Status=%x\n", Status);
-	if (EFI_ERROR(Status))	return Status;		//unsupport
+	Status = gBS->LocateHandleBuffer(ByProtocol,
+									 &gEfiGraphicsOutputProtocolGuid,
+									 NULL,
+									 &HandleCount,
+									 &GraphicsOutputControllerHandles);
+	
+  	INFO(L"Status=%x\n", Status);
+	if (EFI_ERROR(Status))	
+	{
+		return Status;		//unsupport
+	}
+	
 	for (HandleIndex = 0; HandleIndex < HandleCount; HandleIndex++)
 	{
-		Status = gBS->HandleProtocol(
-			GraphicsOutputControllerHandles[HandleIndex],
-			&gEfiGraphicsOutputProtocolGuid,
-			(VOID**)&gGraphicsOutput);
-  INFO(L"Status=%x\n", Status);
-		if (EFI_ERROR(Status))	continue;
-
+		Status = gBS->HandleProtocol(GraphicsOutputControllerHandles[HandleIndex],
+									 &gEfiGraphicsOutputProtocolGuid,
+									 (VOID**)&gGraphicsOutput);
+		
+  		INFO(L"Status=%x\n", Status);
+  
+		if (EFI_ERROR(Status))	
+		{
+			continue;
+		}
 		else
 		{
 			return EFI_SUCCESS;
 		}
 	}
+	
 	return Status;
 }
 //Name: LocatePCIRootBridgeIO
@@ -167,23 +195,31 @@ EFI_STATUS LocatePCIRootBridgeIO(void)
 	UINTN                              HandleIndex = 0;
 	UINTN                              HandleCount = 0;
 	//get the handles which supports 
-	Status = gBS->LocateHandleBuffer(
-		ByProtocol,
-		&gEfiPciRootBridgeIoProtocolGuid,
-		NULL,
-		&HandleCount,
-		&PciHandleBuffer
-		);
-  INFO(L"Status=%x\n", Status);
-	if (EFI_ERROR(Status))	return Status;		//unsupport
+	Status = gBS->LocateHandleBuffer(ByProtocol,
+									 &gEfiPciRootBridgeIoProtocolGuid,
+									 NULL,
+									 &HandleCount,
+									 &PciHandleBuffer);
+	
+  	INFO(L"Status=%x\n", Status);
+	
+	if (EFI_ERROR(Status))	
+	{
+		return Status;		//unsupport
+	}
+	
 	for (HandleIndex = 0; HandleIndex < HandleCount; HandleIndex++)
 	{
-		Status = gBS->HandleProtocol(
-			PciHandleBuffer[HandleIndex],
-			&gEfiPciRootBridgeIoProtocolGuid,
-			(VOID**)&gPCIRootBridgeIO);
-  INFO(L"Status=%x\n", Status);
-		if (EFI_ERROR(Status))	continue;
+		Status = gBS->HandleProtocol(PciHandleBuffer[HandleIndex],
+									 &gEfiPciRootBridgeIoProtocolGuid,
+									 (VOID**)&gPCIRootBridgeIO);
+		
+  		INFO(L"Status=%x\n", Status);
+			
+		if (EFI_ERROR(Status))	
+		{
+			continue;
+		}
 		else
 		{
 			return EFI_SUCCESS;
@@ -201,23 +237,31 @@ EFI_STATUS LocatePCIIO(void)
 	EFI_HANDLE                         *PciHandleBuffer = NULL;
 	UINTN                              HandleIndex = 0;
 	UINTN                              HandleCount = 0;
+	
 	//get the handles which supports 
-	Status = gBS->LocateHandleBuffer(
-		ByProtocol,
-		&gEfiPciIoProtocolGuid,
-		NULL,
-		&HandleCount,
-		&PciHandleBuffer
-		);
-  INFO(L"Status=%x\n", Status);
-	if (EFI_ERROR(Status))	return Status;		//unsupport
+	Status = gBS->LocateHandleBuffer(ByProtocol,
+									 &gEfiPciIoProtocolGuid,
+									 NULL,
+									 &HandleCount,
+									 &PciHandleBuffer);
+	
+  	INFO(L"Status=%x\n", Status);
+	
+	if (EFI_ERROR(Status))	
+	{
+		return Status;		//unsupport
+	}
+	
 	for (HandleIndex = 0; HandleIndex < HandleCount; HandleIndex++)
 	{
-		Status = gBS->HandleProtocol(
-			PciHandleBuffer[HandleIndex],
-			&gEfiPciIoProtocolGuid,
-			(VOID**)&gPCIIO);
-		if (EFI_ERROR(Status))	continue;
+		Status = gBS->HandleProtocol(PciHandleBuffer[HandleIndex],
+									 &gEfiPciIoProtocolGuid,
+									 (VOID**)&gPCIIO);
+		
+		if (EFI_ERROR(Status))	
+		{
+			continue;
+		}
 		else
 		{
 			return EFI_SUCCESS;
@@ -234,22 +278,20 @@ EFI_STATUS LocateFileRoot(void)
 {
 	EFI_STATUS  Status = 0;
 	
-	 Status = gBS->LocateProtocol(
-            &gEfiSimpleFileSystemProtocolGuid,
-            NULL,
-            (VOID**)&gSimpleFileSystem //实际程序中用不到，还是预留了这个接口 2019-06-10 19:51:02 luobing
-    );
-    if (EFI_ERROR(Status)) {
-     //未找到EFI_SIMPLE_FILE_SYSTEM_PROTOCOL
+	Status = gBS->LocateProtocol(&gEfiSimpleFileSystemProtocolGuid,
+					              NULL,
+					              (VOID**)&gSimpleFileSystem);
+	 
+    if (EFI_ERROR(Status)) 
+	{
+     	//未找到EFI_SIMPLE_FILE_SYSTEM_PROTOCOL
         return Status;
     }
+	
     Status = gSimpleFileSystem->OpenVolume(gSimpleFileSystem, &gFileRoot);
 
 	return Status;
 }
-
-
-
 
 //Name: LocateRNGOut
 //Input: 
@@ -262,21 +304,27 @@ EFI_STATUS LocateRNGOut(void)
 	UINTN                              HandleIndex = 0;
 	UINTN                              HandleCount = 0;
 	//get the handles which supports 
-	Status = gBS->LocateHandleBuffer(
-		ByProtocol,
-		&gEfiRngProtocolGuid,
-		NULL,
-		&HandleCount,
-		&RngHandleBuffer
-		);
-	if (EFI_ERROR(Status))	return Status;		//unsupport
+	Status = gBS->LocateHandleBuffer(ByProtocol,
+									 &gEfiRngProtocolGuid,
+									 NULL,
+									 &HandleCount,
+									 &RngHandleBuffer);
+	
+	if (EFI_ERROR(Status))	
+	{
+		return Status;		//unsupport
+	}
+	
 	for (HandleIndex = 0; HandleIndex < HandleCount; HandleIndex++)
 	{
-		Status = gBS->HandleProtocol(
-			RngHandleBuffer[HandleIndex],
-			&gEfiRngProtocolGuid,
-			(VOID**)&gRNGOut);
-		if (EFI_ERROR(Status))	continue;
+		Status = gBS->HandleProtocol(RngHandleBuffer[HandleIndex],
+									 &gEfiRngProtocolGuid,
+									 (VOID**)&gRNGOut);
+		
+		if (EFI_ERROR(Status))	
+		{
+			continue;
+		}
 		else
 		{
 			return EFI_SUCCESS;

@@ -13,46 +13,56 @@ extern EFI_SIMPLE_TEXT_INPUT_EX_PROTOCOL *gSimpleTextInputEx;
 EFI_STATUS GetKeyEx(UINT16 *ScanCode, UINT16 *UniChar, UINT32 *ShiftState, EFI_KEY_TOGGLE_STATE * ToggleState)
 {
 	EFI_STATUS                        Status;
-  EFI_KEY_DATA                      KeyData;
- 	UINTN															Index;
+    EFI_KEY_DATA                      KeyData;
+ 	UINTN							  Index;
 	  
 	gBS->WaitForEvent(1,&(gSimpleTextInputEx->WaitForKeyEx),&Index);
 	Status = gSimpleTextInputEx->ReadKeyStrokeEx(gSimpleTextInputEx,&KeyData);
+	
 	if(!EFI_ERROR(Status))
 	{
  		*ScanCode=KeyData.Key.ScanCode;
 		*UniChar=KeyData.Key.UnicodeChar;
 		*ShiftState=KeyData.KeyState.KeyShiftState;
 		*ToggleState=KeyData.KeyState.KeyToggleState;
+		
 		return EFI_SUCCESS;
 	} 
+	
 	return Status;
 }
+
+
 //Function Name: FlushKeyBuffer
 //Input: none
 //Output: none
 //Description: Flush all keyboard buffer
 VOID FlushKeyBuffer(VOID)
 {
-  EFI_INPUT_KEY     Key;
- 
-  // flush keyboard buffer
-  while ( gST->ConIn->ReadKeyStroke(gST->ConIn,&Key) == EFI_SUCCESS );
+    EFI_INPUT_KEY     Key;
+
+    // flush keyboard buffer
+    while ( gST->ConIn->ReadKeyStroke(gST->ConIn,&Key) == EFI_SUCCESS );
 }
+
+
 //Function Name: WaitKey
 //Input: none
 //Output: none
 //Description: Wait any key press
 VOID WaitKey(VOID)
 {
-  EFI_INPUT_KEY     Key;
-  UINTN Index;
+    EFI_INPUT_KEY     Key;
+    UINTN Index;
 
-  // flush keyboard buffer
-  while ( gST->ConIn->ReadKeyStroke(gST->ConIn,&Key) == EFI_SUCCESS );
-  gBS->WaitForEvent( 1, &gST->ConIn->WaitForKey, &Index );
-  return;
+    // flush keyboard buffer
+    while( gST->ConIn->ReadKeyStroke(gST->ConIn,&Key) == EFI_SUCCESS );
+    
+    gBS->WaitForEvent( 1, &gST->ConIn->WaitForKey, &Index );
+    
+    return;    
 }
+
 //Function Name: GetKey
 //Input: none
 //Output: none
@@ -60,6 +70,8 @@ VOID WaitKey(VOID)
 EFI_STATUS GetKey(EFI_INPUT_KEY *key)
 {
 	UINTN Index;
+	
 	gBS->WaitForEvent( 1, &gST->ConIn->WaitForKey, &Index );
-  return gST->ConIn->ReadKeyStroke(gST->ConIn,key);  
+	
+    return gST->ConIn->ReadKeyStroke(gST->ConIn,key);  
 }
