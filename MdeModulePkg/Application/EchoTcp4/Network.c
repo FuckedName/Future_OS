@@ -131,7 +131,7 @@ UINTN CreateTCP4Socket(VOID)
         return Status;
     }
 
-    Status = gBS->OpenProtocol ( TCP4SocketFd->m_SocketHandle,
+    Status = gBS->OpenProtocol(TCP4SocketFd->m_SocketHandle,
 							        &gEfiTcp4ProtocolGuid,
 							        (VOID **)&TCP4SocketFd->m_pTcp4Protocol,
 							        gImageHandle,
@@ -142,7 +142,9 @@ UINTN CreateTCP4Socket(VOID)
     {
         return Status;
     }
-    
+
+
+    //给初始化结构体指针分配内存
     InitTcp4SocketFd();
     
 	INFO(L"%d\n", Status);
@@ -259,14 +261,12 @@ EFI_STATUS RecvTCP4Socket(IN CHAR8* Buffer, IN UINTN Length, OUT UINTN *recvLeng
 }
 
 //连接服务器端
-EFI_STATUS ConnectTCP4Socket(UINT32 Ip32, UINT16 Port)
+EFI_STATUS ConnectTCP4Socket()
 {
     EFI_STATUS Status = EFI_NOT_FOUND;
     MYTCP4SOCKET *CurSocket = TCP4SocketFd;
     UINTN waitIndex=0;
 
-    //参数配置
-    ConfigTCP4Socket(Ip32, Port);
 
     if(CurSocket->m_pTcp4Protocol == NULL) 
     {

@@ -32,7 +32,7 @@ UINTN CreateTCP4Socket(VOID);
 EFI_STATUS ConfigTCP4Socket(UINT32 Ip32, UINT16 Port);
 EFI_STATUS SendTCP4Socket(CHAR8 *Data, UINTN Lenth);
 EFI_STATUS RecvTCP4Socket(IN CHAR8 *Buffer, IN UINTN Length, OUT UINTN *recvLength);
-EFI_STATUS ConnectTCP4Socket(UINT32 Ip32, UINT16 Port);
+EFI_STATUS ConnectTCP4Socket();
 INTN DestroyTCP4Socket();
 EFI_STATUS CloseTCP4Socket();
 

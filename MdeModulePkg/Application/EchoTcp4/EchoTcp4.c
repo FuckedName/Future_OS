@@ -59,13 +59,12 @@ mainEchoTcp4(
 	flag = InintGloabalProtocols(S_TEXT_INPUT_EX | GRAPHICS_OUTPUT | PCI_ROOTBRIDGE_IO | PCI_IO | FILE_IO | RNG_OUT);
 	INFO(L"flag=%x\n", flag);
 	WaitKey();
-	 //DEBUG(());
+	//DEBUG(());
 	 
 	//text out test
     INFO(L"Please input any key to continue....\n");
     
-	//Testnetwork
-	
+	//Testnetwork	
     TCP4Test(MYIPV4(192, 168, 3, 2), 8888);
     return 0;
 }
@@ -80,8 +79,11 @@ EFI_STATUS TCP4Test(UINT32 Ip32,UINT16 Port)
     INFO(L"%d TCP4Test: SendTCP4Socket, %r\n", __LINE__, Status);
     
     CreateTCP4Socket();
+
+    //参数配置
+    ConfigTCP4Socket(Ip32, Port);   
         
-    Status = ConnectTCP4Socket(Ip32, Port);    
+    Status = ConnectTCP4Socket();    
     INFO(L"%x\n", Status);
     
     //可以继续执行
