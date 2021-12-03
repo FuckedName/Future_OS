@@ -70,7 +70,8 @@ EFI_STATUS L2_STORE_PartitionAnalysisFSM()
     
     for (int i = 0; i < PartitionCount; i++)
     {
-        if (device[i].DeviceType == 1 && device[i].SectorCount == STORE_EFI_PATH_PARTITION_SECTOR_COUNT)
+        if (device[i].DeviceType == 1 && device[i].PartitionName[0] == EFI_FILE_STORE_PATH_PARTITION_NAME[0] 
+                                      && device[i].PartitionName[1] == EFI_FILE_STORE_PATH_PARTITION_NAME[1])
         {
              Status = L1_STORE_READ(i, sector_count, 1, Buffer1); 
              if ( EFI_SUCCESS == Status )
@@ -264,7 +265,8 @@ EFI_STATUS L2_STORE_RootPathAnalysisFSM()
     
     for (int i = 0; i < PartitionCount; i++)
     {
-        if (device[i].DeviceType == 1 && device[i].SectorCount == STORE_EFI_PATH_PARTITION_SECTOR_COUNT)
+        if (device[i].DeviceType == 1 && device[i].PartitionName[0] == EFI_FILE_STORE_PATH_PARTITION_NAME[0] 
+                                      && device[i].PartitionName[1] == EFI_FILE_STORE_PATH_PARTITION_NAME[1])
         {
             Status = L1_STORE_READ(i, sector_count, 1, Buffer1); 
             if ( EFI_SUCCESS == Status )
@@ -319,7 +321,8 @@ EFI_STATUS L2_STORE_GetFatTableFSM()
     
     for (int i = 0; i < PartitionCount; i++)
     {
-        if (device[i].DeviceType == 1 && device[i].SectorCount == STORE_EFI_PATH_PARTITION_SECTOR_COUNT)
+        if (device[i].DeviceType == 1 && device[i].PartitionName[0] == EFI_FILE_STORE_PATH_PARTITION_NAME[0] 
+                                      && device[i].PartitionName[1] == EFI_FILE_STORE_PATH_PARTITION_NAME[1])
         {
              //start block need to recompute depends on file block start number 
              //FileBlockStart;
@@ -414,7 +417,8 @@ EFI_STATUS L2_STORE_ReadFileFSM()
             
     for (int i = 0; i < PartitionCount; i++)
     {
-        if (device[i].DeviceType == 1 && device[i].SectorCount == STORE_EFI_PATH_PARTITION_SECTOR_COUNT)
+        if (device[i].DeviceType == 1 && device[i].PartitionName[0] == EFI_FILE_STORE_PATH_PARTITION_NAME[0] 
+                                      && device[i].PartitionName[1] == EFI_FILE_STORE_PATH_PARTITION_NAME[1])
         {
             // read from USB by block(512 * 8)
             // Read file content from FAT32(USB), minimum unit is block
