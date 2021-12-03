@@ -2119,6 +2119,13 @@ UINT16 L2_MOUSE_ClickEventHandle()
 	UINT16 LayerID = pDeskDisplayBuffer[(iMouseY * ScreenWidth + iMouseX) * 4 + 3];
 
 	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: iMouseX: %d iMouseY: %d ClickFlag: %d, LayerID: %d\n", __LINE__, iMouseX, iMouseY, MouseClickFlag, LayerID);
+    
+    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: Name: %d %d\n", __LINE__, EFI_FILE_STORE_PATH_PARTITION_NAME[0], EFI_FILE_STORE_PATH_PARTITION_NAME[1]);
+        
+    for (UINT16 i = 0; i < PartitionCount; i++)
+    {
+	    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: i:%d Name: %d %d\n", __LINE__, i, device[i].PartitionName[0], device[i].PartitionName[1]);
+    }
 
 	// Get click event
 	MOUSE_CLICK_EVENT event = GraphicsLayerEventHandle[LayerID].pClickEventGet();
@@ -2980,15 +2987,15 @@ VOID L2_STORE_PartitionItemsPrint(UINT16 PartitionItemID)
     
     // this code may be have some problems, because my USB file system is FAT32, my Disk file system is NTFS.
     // others use this code must be careful...
-    UINT8 FileSystemType = L2_FILE_PartitionTypeAnalysis(PartitionItemID);
+    //UINT8 FileSystemType = L2_FILE_PartitionTypeAnalysis(PartitionItemID);
 
-    if (FileSystemType == FILE_SYSTEM_FAT32)
+    if (device[PartitionItemID].FileSystemType == FILE_SYSTEM_FAT32)
     {
 		device[PartitionItemID].FileSystemType = FILE_SYSTEM_FAT32;
         L2_FILE_FAT32_DataSectorHandle(PartitionItemID);
         L2_STORE_FolderItemsPrint();
     }
-    else if (FileSystemType == FILE_SYSTEM_NTFS)
+    else if (device[PartitionItemID].FileSystemType == FILE_SYSTEM_NTFS)
     {
 		device[PartitionItemID].FileSystemType = FILE_SYSTEM_NTFS;
     	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%a %d: %d\n",  __FUNCTION__,  __LINE__, device[PartitionItemID].StartSectorNumber + MFT_ITEM_DOLLAR_ROOT * 2);
@@ -3031,7 +3038,7 @@ VOID L2_STORE_PartitionItemsPrint(UINT16 PartitionItemID)
 
 		L2_STORE_FolderItemsPrint2();
     }
-    else if (FileSystemType == FILE_SYSTEM_MAX)
+    else if (device[PartitionItemID].FileSystemType == FILE_SYSTEM_MAX)
     {
         return;
     }

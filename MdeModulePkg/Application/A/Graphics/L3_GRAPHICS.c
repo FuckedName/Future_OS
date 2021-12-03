@@ -277,8 +277,8 @@ VOID L3_APPLICATION_MyComputerWindow(UINT16 StartX, UINT16 StartY)
         x += 64;
 
         char type[10] = "OTHER";
-        UINT8 FileSystemType = L2_FILE_PartitionTypeAnalysis(i);
-        if (FILE_SYSTEM_FAT32 == FileSystemType)
+        //UINT8 FileSystemType = L2_FILE_PartitionTypeAnalysis(i);
+        if (FILE_SYSTEM_FAT32 == device[i].FileSystemType)
         {
             type[0] = 'F';
             type[1] = 'A';
@@ -287,7 +287,7 @@ VOID L3_APPLICATION_MyComputerWindow(UINT16 StartX, UINT16 StartY)
             type[4] = '2';
             type[5] = '\0';
         }
-        else if(FILE_SYSTEM_NTFS == FileSystemType) 
+        else if(FILE_SYSTEM_NTFS == device[i].FileSystemType) 
         {   
             type[0] = 'N';
             type[1] = 'T';

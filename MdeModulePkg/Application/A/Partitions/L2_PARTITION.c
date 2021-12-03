@@ -47,6 +47,7 @@ UINT32 FileBlockStart = 0;
 MasterBootRecordSwitched MBRSwitched;
 DollarBootSwitched NTFSBootSwitched;
 
+UINT8 EFI_FILE_STORE_PATH_PARTITION_NAME[50] = "OS";
 
 
 
@@ -301,6 +302,8 @@ EFI_STATUS L2_FILE_PartitionNameGet(UINT16 DeviceID)
 	EFI_STATUS Status;
 	UINT16 FileSystemType = device[DeviceID].FileSystemType;
 	//L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d FileSystemType: %llu\n", __LINE__, FileSystemType);
+
+    L2_FILE_PartitionTypeAnalysis(DeviceID);
 
 	StartSectorNumber = PartitionNameGet[FileSystemType].pFunctionStartSectorNumberGet(DeviceID);
 
