@@ -295,7 +295,7 @@ VOID L3_APPLICATION_MyComputerWindow(UINT16 StartX, UINT16 StartY)
             type[3] = 'S';
             type[4] = '\0';
         }
-		L2_FILE_PartitionNameGet(i);
+		//L2_FILE_PartitionNameGet(i);
 		
 		L2_DEBUG_Print3(0, y, WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW], "%a", device[i].PartitionName);
 

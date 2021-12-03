@@ -380,8 +380,11 @@ EFI_STATUS L2_STORE_PartitionsParameterGet()
 
         CHAR16 *TextDevicePath = DevPathToText->ConvertDevicePathToText(DiskDevicePath, TRUE, TRUE);
          L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: Status:%X Partition: %s\n", __LINE__, Status, TextDevicePath);
+
          L2_STORE_TextDevicePathAnalysis(TextDevicePath, &device[i], i);
-                    
+
+         L2_FILE_PartitionNameGet(i);
+         
         if (TextDevicePath) gBS->FreePool(TextDevicePath);       
     }
     return EFI_SUCCESS;
