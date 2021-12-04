@@ -543,8 +543,19 @@ EFI_STATUS L3_APPLICATION_ReadFile(UINT8 *FileName, UINT8 NameLength, UINT8 *pBu
     NextState = INIT_STATE;
     READ_FILE_FSM_Event = 0;
 
-    //默认第一个分区是FAT32，并且跟系统相关的文件都存放在这
-    ReadFilePartitionID = 1;
+    //当前读取系统文件，都是在"OS"这个分区
+    for (int i = 0; i < PartitionCount; i++)
+    {
+        if (device[i].PartitionName[0] == EFI_FILE_STORE_PATH_PARTITION_NAME[0] && device[i].PartitionName[1] == EFI_FILE_STORE_PATH_PARTITION_NAME[1])
+        {
+            ReadFilePartitionID = i;
+            L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: ReadFilePartitionID: %d \n", __LINE__, ReadFilePartitionID);
+            break;
+        }
+    }
+
+    //默认第一个分区是FAT32
+    //ReadFilePartitionID = 1;
 
     for (int i = 0; i < 5; i++)
     {

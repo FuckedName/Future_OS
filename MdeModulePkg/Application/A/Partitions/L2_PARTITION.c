@@ -214,13 +214,12 @@ UINT64 L2_PARTITION_NameNTFSStartSectorNumberGet(UINT16 DeviceID)
 *****************************************************************************/
 EFI_STATUS L2_PARTITION_NameFAT32Analysis(UINT16 DeviceID, UINT8 *Buffer)
 {
-	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d %X %X %X %X\n", __LINE__, device[DeviceID].PartitionName[0], device[DeviceID].PartitionName[1], device[DeviceID].PartitionName[2], device[DeviceID].PartitionName[3]);
-
 	//第二个簇区前几个字符就是FAT32分区的名字，并且第一个簇就是第二个簇，因为没有0，1号
 	for (UINT16 i = 0; i < 6; i++)
 		device[DeviceID].PartitionName[i] = Buffer[i];
 	
-	device[DeviceID].PartitionName[6] = '\0';
+	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d %X %X %X %X\n", __LINE__, device[DeviceID].PartitionName[0], device[DeviceID].PartitionName[1], device[DeviceID].PartitionName[2], device[DeviceID].PartitionName[3]);
+    device[DeviceID].PartitionName[6] = '\0';
 }
 
 
@@ -280,6 +279,7 @@ EFI_STATUS L2_PARTITION_NameNTFSAnalysis(UINT16 DeviceID, UINT8 *Buffer)
 *****************************************************************************/
 PARTITION_NAME_GET PartitionNameGet[]=
 {
+    {FILE_SYSTEM_MIN, NULL, NULL},
 	{FILE_SYSTEM_FAT32, L2_PARTITION_NameFAT32StartSectorNumberGet,  L2_PARTITION_NameFAT32Analysis},  
 	{FILE_SYSTEM_NTFS,  L2_PARTITION_NameNTFSStartSectorNumberGet,   L2_PARTITION_NameNTFSAnalysis}
 };
@@ -309,10 +309,15 @@ EFI_STATUS L2_FILE_PartitionNameGet(UINT16 DeviceID)
 
     
 	FileSystemType = device[DeviceID].FileSystemType;
+	if (FileSystemType == FILE_SYSTEM_MIN || FileSystemType == FILE_SYSTEM_MAX)
+	{
+        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d FileSystemType: %X FileSystemType == FILE_SYSTEM_MIN || FileSystemType == FILE_SYSTEM_MAX\n", __LINE__, FileSystemType);
+        return;
+	}
 
 	StartSectorNumber = PartitionNameGet[FileSystemType].pFunctionStartSectorNumberGet(DeviceID);
 
-	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d DeviceID: %d, StartSectorNumber: %llu\n", __LINE__, DeviceID, StartSectorNumber);
+	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d DeviceID: %d FileSystemType: %d, StartSectorNumber: %llu\n", __LINE__, DeviceID,FileSystemType, StartSectorNumber);
 
 	//一个元数据是读取两个扇区
 	Status = L1_STORE_READ(DeviceID, StartSectorNumber, 2, Buffer);  
