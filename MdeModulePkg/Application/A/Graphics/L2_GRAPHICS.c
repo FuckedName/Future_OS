@@ -2122,10 +2122,25 @@ UINT16 L2_MOUSE_ClickEventHandle()
     
     L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: Name: %d %d\n", __LINE__, EFI_FILE_STORE_PATH_PARTITION_NAME[0], EFI_FILE_STORE_PATH_PARTITION_NAME[1]);
         
-    for (UINT16 i = 0; i < PartitionCount; i++)
+    UINT16 i = 1; 
+    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: Name: %d %d\n", __LINE__, device[i].PartitionName[0], device[i].PartitionName[1]);
+    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: BlockSize: %d StartSector: %llu FileSystemType: %d\n",  __LINE__, BlockSize, device[i].StartSectorNumber, device[i].FileSystemType);
+    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: Reserved: %llu PerFat: %llu NumFATS: %d Start: %llu Cluster: %d",  __LINE__,
+                                                                                                                                   device[i].stMBRSwitched.ReservedSelector, 
+                                                                                                                                   device[i].stMBRSwitched.SectorsPerFat, 
+                                                                                                                                   device[i].stMBRSwitched.NumFATS,
+                                                                                                                                   device[i].stMBRSwitched.BootPathStartCluster,
+                                                                                                                                   device[i].stMBRSwitched.SectorOfCluster);
+
+    EFI_STATUS Status;
+    UINT8 Buffer1[DISK_BUFFER_SIZE] = {0};
+    
+    L1_STORE_READ(1, 0, 1, Buffer1 );  
+    for (int j = 0; j < 512; j++)
     {
-	    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: i:%d Name: %d %d\n", __LINE__, i, device[i].PartitionName[0], device[i].PartitionName[1]);
+        L2_DEBUG_Print1(0 + (j % 16) * 8 * 3, 6 * 56 + 16 * (j / 16), "%02X ", Buffer1[j] & 0xff);
     }
+    
 
 	// Get click event
 	MOUSE_CLICK_EVENT event = GraphicsLayerEventHandle[LayerID].pClickEventGet();
@@ -2991,13 +3006,11 @@ VOID L2_STORE_PartitionItemsPrint(UINT16 PartitionItemID)
 
     if (device[PartitionItemID].FileSystemType == FILE_SYSTEM_FAT32)
     {
-		device[PartitionItemID].FileSystemType = FILE_SYSTEM_FAT32;
         L2_FILE_FAT32_DataSectorHandle(PartitionItemID);
         L2_STORE_FolderItemsPrint();
     }
     else if (device[PartitionItemID].FileSystemType == FILE_SYSTEM_NTFS)
     {
-		device[PartitionItemID].FileSystemType = FILE_SYSTEM_NTFS;
     	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%a %d: %d\n",  __FUNCTION__,  __LINE__, device[PartitionItemID].StartSectorNumber + MFT_ITEM_DOLLAR_ROOT * 2);
 		
         // get MFT $ROOT item. 

@@ -64,7 +64,7 @@ EFI_STATUS L1_STORE_READ(UINT8 deviceID, UINT64 StartSectorNumber, UINT16 ReadSi
         return -1;
     }
 
-    //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: deviceID: %d StartSectorNumber: %ld ReadSize: %d\n", __LINE__, deviceID, StartSectorNumber, ReadSize);
+    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: deviceID: %d StartSectorNumber: %ld ReadSize: %d\n", __LINE__, deviceID, StartSectorNumber, ReadSize);
     EFI_STATUS Status;
     UINTN NumHandles;
     EFI_BLOCK_IO_PROTOCOL *BlockIo;
@@ -379,11 +379,13 @@ EFI_STATUS L2_STORE_PartitionsParameterGet()
         }
 
         CHAR16 *TextDevicePath = DevPathToText->ConvertDevicePathToText(DiskDevicePath, TRUE, TRUE);
-         L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: Status:%X Partition: %s\n", __LINE__, Status, TextDevicePath);
+        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: Status:%X Partition: %s\n", __LINE__, Status, TextDevicePath);
 
-         L2_STORE_TextDevicePathAnalysis(TextDevicePath, &device[i], i);
+        L2_STORE_TextDevicePathAnalysis(TextDevicePath, &device[i], i);
 
-         L2_FILE_PartitionNameGet(i);
+        L2_FILE_PartitionTypeAnalysis(i);
+
+        L2_FILE_PartitionNameGet(i);
          
         if (TextDevicePath) gBS->FreePool(TextDevicePath);       
     }

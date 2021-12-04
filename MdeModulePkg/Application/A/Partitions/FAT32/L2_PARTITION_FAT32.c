@@ -44,8 +44,8 @@
 VOID L2_FILE_Transfer(MasterBootRecord *pSource, MasterBootRecordSwitched *pDest)
 {
     pDest->ReservedSelector = pSource->ReservedSelector[0] + pSource->ReservedSelector[1] * 16 * 16;
-    pDest->SectorsPerFat    = (UINT16)pSource->SectorsPerFat[0] + (UINT16)(pSource->SectorsPerFat[1]) * 16 * 16 + pSource->SectorsPerFat[2] * 16 * 16 * 16 * 16 + pSource->SectorsPerFat[3] * 16 * 16 * 16 * 16 * 16 * 16;
-    pDest->BootPathStartCluster = (UINT16)pSource->BootPathStartCluster[0] + pSource->BootPathStartCluster[1] * 16 * 16 + pSource->BootPathStartCluster[2] * 16 * 16 * 16 * 16, pSource->BootPathStartCluster[3] * 16 * 16 * 16 * 16 * 16 * 16;
+    pDest->SectorsPerFat    = (UINT32)pSource->SectorsPerFat[0] + (UINT32)(pSource->SectorsPerFat[1]) * 16 * 16 + (UINT32)(pSource->SectorsPerFat[2]) * 16 * 16 * 16 * 16 + (UINT32)(pSource->SectorsPerFat[3]) * 16 * 16 * 16 * 16 * 16 * 16;
+    pDest->BootPathStartCluster = (UINT32)pSource->BootPathStartCluster[0] + (UINT32)pSource->BootPathStartCluster[1] * 16 * 16 + (UINT32)pSource->BootPathStartCluster[2] * 16 * 16 * 16 * 16, (UINT32)pSource->BootPathStartCluster[3] * 16 * 16 * 16 * 16 * 16 * 16;
     pDest->NumFATS      = pSource->NumFATS[0];
     pDest->SectorOfCluster = pSource->SectorOfCluster[0];
 
@@ -84,15 +84,15 @@ EFI_STATUS L1_FILE_FAT32_DataSectorAnalysis(UINT8 *p, MasterBootRecordSwitched *
 	
     // 大端字节序：低位字节在高地址，高位字节低地址上。这是人类读写数值的方法。
     // 小端字节序：与上面相反。低位字节在低地址，高位字节在高地址。
-/*
+    /*
     L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d ReservedSelector:%02X%02X SectorsPerFat:%02X%02X%02X%02X BootPathStartCluster:%02X%02X%02X%02X NumFATS: %X", 
                                         __LINE__,
                                         pMBR->ReservedSelector[0], pMBR->ReservedSelector[1], 
                                         pMBR->SectorsPerFat[0], pMBR->SectorsPerFat[1], pMBR->SectorsPerFat[2], pMBR->SectorsPerFat[3],
                                         pMBR->BootPathStartCluster[0], pMBR->BootPathStartCluster[1], pMBR->BootPathStartCluster[2], pMBR->BootPathStartCluster[3],
                                         pMBR->NumFATS[0]);
-
     */
+    
     L2_FILE_Transfer(pMBR, pMBRSwitched);
 
     FreePool(pMBR);
@@ -129,12 +129,12 @@ EFI_STATUS L2_FILE_FAT32_DataSectorHandle(UINT16 DeviceID)
     }
     
     //When get root path data sector start number, we can get content of root path.
-    L1_FILE_FAT32_DataSectorAnalysis(Buffer1, &MBRSwitched);    
+    //L1_FILE_FAT32_DataSectorAnalysis(Buffer1, &device[DeviceID].stMBRSwitched);    
 
     // data area start from 1824, HZK16 file start from     FileBlockStart  block, so need to convert into sector by multi 8, block start number is 2   
     // next state is to read FAT table
-    sector_count = MBRSwitched.ReservedSelector;
-    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: sector_count:%ld FileLength: %d MBRSwitched.ReservedSelector:%ld\n",  __LINE__, sector_count, FileLength, MBRSwitched.ReservedSelector);
+    sector_count = device[DeviceID].stMBRSwitched.ReservedSelector;
+    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: sector_count:%ld FileLength: %d MBRSwitched.ReservedSelector:%ld\n",  __LINE__, sector_count, FileLength, device[DeviceID].stMBRSwitched.ReservedSelector);
 
     return EFI_SUCCESS;
 }

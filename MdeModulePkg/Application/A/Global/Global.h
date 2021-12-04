@@ -35,6 +35,9 @@
 
 #include <Graphics/L1_GRAPHICS.h>
 
+extern UINT8 EFI_FILE_STORE_PATH_PARTITION_NAME[50];
+
+
 #define INFO_SELF(...)   \
             do {   \
                  Print(L"%d ",__LINE__);  \
@@ -181,10 +184,10 @@ extern COMMON_STORAGE_ITEM pCommonStorageItems[32];
 typedef struct 
 {
     UINT16 ReservedSelector;
-    UINT16 SectorsPerFat;   
-    UINT16 BootPathStartCluster;
-    UINT16 NumFATS;
-    UINT16 SectorOfCluster;
+    UINT32 SectorsPerFat;   
+    UINT32 BootPathStartCluster;
+    UINT8 NumFATS;
+    UINT8 SectorOfCluster;
 }MasterBootRecordSwitched;    
 
 typedef struct
@@ -230,23 +233,20 @@ typedef struct
 
 typedef enum
 {
-	FILE_SYSTEM_FAT32 = 0,
+	FILE_SYSTEM_MIN = 0,
+	FILE_SYSTEM_FAT32,
 	FILE_SYSTEM_NTFS,
 	FILE_SYSTEM_MAX
 }FILE_SYSTEM_TYPE;
 
 typedef struct
-{
-	
+{	
 	UINT16 FileSystemType; //FILE_SYSTEM_FAT32 FILE_SYSTEM_NTFS
     UINT16 DeviceType; // 0 Disk, 1: USB, 2: Sata;
     UINT16 PartitionType; // 0 MBR, 1 GPT;
     UINT16 PartitionID; // a physics device consist of Several parts like c: d: e:
-    UINT16 PartitionGUID; // like FA458FD2-4FF7-44D8-B542-BA560A5990B3
-    UINT16 DeviceSquenceID; //0025384961B47ECD
-    long long StartSectorNumber; //0x194000
-    long long SectorCount; //0xC93060
-    UINT8 Signare[50]; // MBR:0x077410A0
+    UINT32 StartSectorNumber; //Very important
+    UINT32 SectorCount; //0xC93060
     UINT8 PartitionName[50];
 
     //Partition parameter
@@ -257,7 +257,6 @@ typedef struct
 
     // Path Stack
     PATH_DETAIL PathStack[12];
-
 }DEVICE_PARAMETER;
 
 extern UINT64 sector_count;
@@ -300,8 +299,7 @@ extern UINT8 *pSystemIconRecycleBuffer;
 extern UINT8 *pSystemLogWindowBuffer;
 extern UINT8 *pSystemSettingWindowBuffer;
 extern UINT16 SystemLogWindowHeight;
-
-extern MasterBootRecordSwitched MBRSwitched;;                                   
+                      
 extern UINT32 BlockSize;                                     
 extern UINTN PartitionCount;                                    
 extern UINT32 FileBlockStart;                               
@@ -362,9 +360,6 @@ extern int READ_FILE_FSM_Event;
 
 extern UINT16 StatusErrorCount; 
 
-extern UINT8 EFI_FILE_STORE_PATH_PARTITION_NAME[50];
-
-#define STORE_EFI_PATH_PARTITION_SECTOR_COUNT 1691648  
 #define DISK_BLOCK_BUFFER_SIZE (512 * 8)
 
 #define ALLOCATE_UNIT_SIZE (8 * 512)

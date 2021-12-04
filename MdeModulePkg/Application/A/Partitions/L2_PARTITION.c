@@ -44,7 +44,6 @@
 UINT32 BlockSize = 0;
 DEVICE_PARAMETER device[10] = {0};
 UINT32 FileBlockStart = 0;
-MasterBootRecordSwitched MBRSwitched;
 DollarBootSwitched NTFSBootSwitched;
 
 UINT8 EFI_FILE_STORE_PATH_PARTITION_NAME[50] = "OS";
@@ -81,7 +80,12 @@ EFI_STATUS L2_FILE_PartitionTypeAnalysis(UINT16 DeviceID)
 
     sector_count = 0;
 
-    Status = L1_STORE_READ(DeviceID, sector_count, 1, Buffer1 );    
+    if (DeviceID != 1)
+    {
+        return;
+    }
+
+    Status = L1_STORE_READ(DeviceID, 0, 1, Buffer1 );  
     if (EFI_ERROR(Status))
     {
         L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d Status: %X\n", __LINE__, Status);
@@ -91,16 +95,16 @@ EFI_STATUS L2_FILE_PartitionTypeAnalysis(UINT16 DeviceID)
     // FAT32 file system
     if (Buffer1[0x52] == 'F' && Buffer1[0x53] == 'A' && Buffer1[0x54] == 'T' && Buffer1[0x55] == '3' && Buffer1[0x56] == '2')   
     {                   
-        //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: FAT32\n",  __LINE__);
+        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: FAT32\n",  __LINE__);
         // analysis data area of patition
-        L1_FILE_FAT32_DataSectorAnalysis(Buffer1, &MBRSwitched); 
+        L1_FILE_FAT32_DataSectorAnalysis(Buffer1, &(device[DeviceID].stMBRSwitched)); 
 
         // data sector number start include: reserved selector, fat sectors(usually is 2: fat1 and fat2), and file system boot path start cluster(usually is 2, data block start number is 2)
-        sector_count = MBRSwitched.ReservedSelector + MBRSwitched.SectorsPerFat * MBRSwitched.NumFATS + (MBRSwitched.BootPathStartCluster - 2) * 8;
-		device[DeviceID].StartSectorNumber = MBRSwitched.ReservedSelector + MBRSwitched.SectorsPerFat * MBRSwitched.NumFATS;
+        device[DeviceID].StartSectorNumber = device[DeviceID].stMBRSwitched.ReservedSelector + device[DeviceID].stMBRSwitched.SectorsPerFat * device[DeviceID].stMBRSwitched.NumFATS;
+		sector_count = device[DeviceID].StartSectorNumber + (device[DeviceID].stMBRSwitched.BootPathStartCluster - 2) * 8;
 		device[DeviceID].FileSystemType = FILE_SYSTEM_FAT32;
-        BlockSize = MBRSwitched.SectorOfCluster * 512;
-        //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: sector_count:%ld BlockSize: %d\n",  __LINE__, sector_count, BlockSize);
+        BlockSize = device[DeviceID].stMBRSwitched.SectorOfCluster * 512; 
+        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: sector_count:%ld BlockSize: %d StartSectorNumber: %llu FileSystemType: %d\n",  __LINE__, sector_count, BlockSize, device[DeviceID].StartSectorNumber, device[DeviceID].FileSystemType);
         return FILE_SYSTEM_FAT32;
     }
     // NTFS
@@ -109,7 +113,7 @@ EFI_STATUS L2_FILE_PartitionTypeAnalysis(UINT16 DeviceID)
         L2_FILE_NTFS_FirstSelectorAnalysis(Buffer1, &NTFSBootSwitched);
 		device[DeviceID].StartSectorNumber = NTFSBootSwitched.MFT_StartCluster * 8;
 		device[DeviceID].FileSystemType = FILE_SYSTEM_NTFS;
-        //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: NTFS sector_count:%llu\n",  __LINE__, sector_count);
+        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: sector_count:%ld BlockSize: %d StartSectorNumber: %llu FileSystemType: %d\n",  __LINE__, sector_count, BlockSize, device[DeviceID].StartSectorNumber, device[DeviceID].FileSystemType);
         return FILE_SYSTEM_NTFS;
     }
     // the other file system can add at this place
@@ -300,10 +304,11 @@ EFI_STATUS L2_FILE_PartitionNameGet(UINT16 DeviceID)
 	UINT8 Buffer[DISK_BUFFER_SIZE * 2] = {0};
 	UINT64 StartSectorNumber = 0;
 	EFI_STATUS Status;
-	UINT16 FileSystemType = device[DeviceID].FileSystemType;
+	UINT16 FileSystemType;
 	//L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d FileSystemType: %llu\n", __LINE__, FileSystemType);
 
-    L2_FILE_PartitionTypeAnalysis(DeviceID);
+    
+	FileSystemType = device[DeviceID].FileSystemType;
 
 	StartSectorNumber = PartitionNameGet[FileSystemType].pFunctionStartSectorNumberGet(DeviceID);
 
