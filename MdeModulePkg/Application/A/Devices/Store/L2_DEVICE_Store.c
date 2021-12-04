@@ -361,8 +361,8 @@ EFI_STATUS L2_STORE_PartitionsParameterGet()
         return EFI_SUCCESS;
     }
 
-    i = 1;
-    //for (i = 0; i < PartitionCount; i++)
+    //i = 1;
+    for (i = 0; i < PartitionCount; i++)
     {
         //L2_DEBUG_Print1(350, 16 * 6, "%d: %x\n", __LINE__, Status);
         EFI_DEVICE_PATH_PROTOCOL *DiskDevicePath;

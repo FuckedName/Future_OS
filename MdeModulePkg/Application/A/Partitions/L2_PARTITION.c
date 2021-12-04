@@ -80,11 +80,6 @@ EFI_STATUS L2_FILE_PartitionTypeAnalysis(UINT16 DeviceID)
 
     sector_count = 0;
 
-    if (DeviceID != 1)
-    {
-        return;
-    }
-
     Status = L1_STORE_READ(DeviceID, 0, 1, Buffer1 );  
     if (EFI_ERROR(Status))
     {
