@@ -384,11 +384,17 @@ EFI_STATUS L2_STORE_PartitionsParameterGet()
 
         L2_STORE_TextDevicePathAnalysis(TextDevicePath, &device[i], i);
 
-        L2_FILE_PartitionTypeAnalysis(i);
+        if (FILE_SYSTEM_MAX == L2_FILE_PartitionTypeAnalysis(i))
+        {
+            continue;
+        }
 
         L2_FILE_PartitionNameGet(i);
-         
-        if (TextDevicePath) gBS->FreePool(TextDevicePath);       
+        //return EFI_SUCCESS;
+        if (TextDevicePath) 
+        {
+            gBS->FreePool(TextDevicePath);       
+        }
     }
     return EFI_SUCCESS;
 }

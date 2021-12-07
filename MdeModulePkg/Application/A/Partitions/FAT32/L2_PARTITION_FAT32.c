@@ -79,7 +79,12 @@ EFI_STATUS L1_FILE_FAT32_DataSectorAnalysis(UINT8 *p, MasterBootRecordSwitched *
 {
     MasterBootRecord *pMBR;
     
-    pMBR = (MasterBootRecord *)AllocateZeroPool(DISK_BUFFER_SIZE);
+    //pMBR = (MasterBootRecord *)AllocateZeroPool(DISK_BUFFER_SIZE);
+    pMBR = (MasterBootRecord *)L2_MEMORY_Allocate("MBR Buffer", MEMORY_TYPE_PARTITION, DISK_BUFFER_SIZE);
+    if (NULL == pMBR)
+    {
+        return EFI_SUCCESS;
+    }
     L1_MEMORY_Copy(pMBR, p, DISK_BUFFER_SIZE);
 	
     // 大端字节序：低位字节在高地址，高位字节低地址上。这是人类读写数值的方法。
@@ -95,7 +100,7 @@ EFI_STATUS L1_FILE_FAT32_DataSectorAnalysis(UINT8 *p, MasterBootRecordSwitched *
     
     L2_FILE_Transfer(pMBR, pMBRSwitched);
 
-    FreePool(pMBR);
+    //FreePool(pMBR);
 }
 
 
