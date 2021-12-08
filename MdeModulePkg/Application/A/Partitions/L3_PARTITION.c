@@ -34,11 +34,11 @@ UINTN PartitionCount = 0;
 
 STATE   NextState = INIT_STATE;
 
-UINT16 FileReadCount = 0;
+UINT64 FileReadCount = 0;
 
-UINT32 FileLength = 0;
+UINT64 FileLength = 0;
 
-UINT32 PreviousBlockNumber = 0;
+UINT64 PreviousBlockNumber = 0;
 
 UINT8 ReadFileNameLength = 0;
 

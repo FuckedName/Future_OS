@@ -188,6 +188,7 @@ typedef struct
     UINT32 BootPathStartCluster;
     UINT8 NumFATS;
     UINT8 SectorOfCluster;
+    UINT8 *FAT32_Table;
 }MasterBootRecordSwitched;    
 
 typedef struct
@@ -262,7 +263,7 @@ typedef struct
 extern UINT64 sector_count;
 
 extern UINT8 *FAT32_Table;
-extern UINT16 FileReadCount;
+extern UINT64 FileReadCount;
 
 extern EFI_SIMPLE_POINTER_PROTOCOL        *gMouse;
 extern UINT16 mouse_count;
@@ -280,6 +281,9 @@ extern EFI_GRAPHICS_OUTPUT_BLT_PIXEL MouseColor;
 extern UINT8 *pDeskBuffer;
 extern UINT8 *pDeskDisplayBuffer;
 extern UINT8 *pDeskWallpaperBuffer;
+extern UINT8 *pDeskWallpaperZoomedBuffer;
+extern UINT8 *pDeskWallpaperTempBuffer;
+
 extern UINT8 *sChineseChar;
 extern UINT8 *pSystemIconBuffer[SYSTEM_ICON_MAX];
 
@@ -302,9 +306,9 @@ extern UINT16 SystemLogWindowHeight;
                       
 extern UINT32 BlockSize;                                     
 extern UINTN PartitionCount;                                    
-extern UINT32 FileBlockStart;                               
-extern UINT32 PreviousBlockNumber;                              
-extern  UINT32 FileLength;                           
+extern UINT64 FileBlockStart;                               
+extern UINT64 PreviousBlockNumber;                              
+extern  UINT64 FileLength;                           
 extern  UINT8 *pReadFileDestBuffer;    
 extern UINT16 PartitionItemID;
 extern UINT16 FolderItemID;
@@ -353,8 +357,8 @@ typedef struct
 extern UINT8 ReadFileName[20];                                
 extern UINT8 *pReadFileDestBuffer;                          
 extern UINT8 ReadFileNameLength;                           
-extern UINT32 PreviousBlockNumber;                          
-extern UINT32 FileBlockStart;                               
+extern UINT64 PreviousBlockNumber;                          
+extern UINT64 FileBlockStart;                               
 extern STATE   NextState;                                    
 extern int READ_FILE_FSM_Event;     
 

@@ -2533,7 +2533,7 @@ EFI_STATUS L2_GRAPHICS_DeskInit()
     x1 += 16;
     L2_GRAPHICS_ChineseCharDraw(pDeskBuffer,  x1, y1, (51 - 1) * 94 + 45 - 1, Color, ScreenWidth);
     x1 += 16;
-    L2_GRAPHICS_ChineseCharDraw(pDeskBuffer,  x1, y1, (3 - 1) * 94 + 3 - 1, Color, ScreenWidth);
+    L2_GRAPHICS_ChineseCharDraw(pDeskBuffer,  x1, y1, (1 - 1) * 94 + 3 - 1, Color, ScreenWidth);
     x1 += 16;
 
 

@@ -43,7 +43,7 @@
 
 UINT32 BlockSize = 0;
 DEVICE_PARAMETER device[10] = {0};
-UINT32 FileBlockStart = 0;
+UINT64 FileBlockStart = 0;
 DollarBootSwitched NTFSBootSwitched;
 
 UINT8 EFI_FILE_STORE_PATH_PARTITION_NAME[50] = "OS";
