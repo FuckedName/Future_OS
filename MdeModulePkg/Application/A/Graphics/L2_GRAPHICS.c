@@ -54,6 +54,7 @@ UINT8 *sChineseChar = NULL;
 UINT8 *pDeskBuffer = NULL; //only Desk layer include wallpaper and button : 1
 UINT8 *pDeskDisplayBuffer = NULL; //desk display after multi graphicses layers compute
 UINT8 *pDeskWallpaperBuffer = NULL;
+UINT8 *pDeskWallpaperZoomedBuffer = NULL;
 UINT8 *pMemoryInformationBuffer = NULL; // MyComputer layer: 2
 UINT8 *pMouseBuffer = NULL; //Mouse layer: 4
 UINT8 *pMouseClickBuffer = NULL; // for mouse click 
@@ -2295,23 +2296,55 @@ EFI_STATUS L2_GRAPHICS_DeskInit()
 
 	Color.Reserved = GRAPHICS_LAYER_DESK;
 
-	//把读取的zhufeng.bmp格式文件显示到桌面，0x36是指BMP格式图片文件的头
-    for (int i = 0; i < ScreenHeight; i++)
-    {
-        for (int j = 0; j < ScreenWidth; j++)
-        {
-            // BMP 3bits, and desk buffer 4bits
-            pDeskBuffer[(i * ScreenWidth + j) * 4]     = pDeskWallpaperBuffer[0x36 + ((ScreenHeight - i) * ScreenWidth + j) * 3 ];
-            pDeskBuffer[(i * ScreenWidth + j) * 4 + 1] = pDeskWallpaperBuffer[0x36 + ((ScreenHeight - i) * ScreenWidth + j) * 3 + 1];
-            pDeskBuffer[(i * ScreenWidth + j) * 4 + 2] = pDeskWallpaperBuffer[0x36 + ((ScreenHeight - i) * ScreenWidth + j) * 3 + 2];
-            pDeskBuffer[(i * ScreenWidth + j) * 4 + 3] = GRAPHICS_LAYER_DESK;
+    //壁纸分辨率1920*1080，每个像素点占三个字节，去掉BMP头部
+    for (int i = 0; i < 1920 * 1080 * 3; i++)
+    	pDeskWallpaperBuffer[i] = pDeskWallpaperBuffer[0x36 + i];
 
-            //white
-            //pDeskBuffer[(i * ScreenWidth + j) * 4]     = 0xff;
-            //pDeskBuffer[(i * ScreenWidth + j) * 4 + 1] = 0xff;
-            //pDeskBuffer[(i * ScreenWidth + j) * 4 + 2] = 0xff;
-        }
-    }
+	if (ScreenHeight != 1080 || ScreenWidth != 1920)
+	{
+	    //默认提供的BMP图标太大，所以在显示之前把图片缩小了下
+        L1_GRAPHICS_ZoomImage(pDeskWallpaperZoomedBuffer, ScreenWidth, ScreenHeight, pDeskWallpaperBuffer, 1920, 1080);  
+
+        //把读取的zhufeng.bmp格式文件显示到桌面，0x36是指BMP格式图片文件的头
+        for (int i = 0; i < ScreenHeight; i++)
+        {
+            for (int j = 0; j < ScreenWidth; j++)
+            {
+                // BMP 3bits, and desk buffer 4bits
+                pDeskBuffer[(i * ScreenWidth + j) * 4]     = pDeskWallpaperZoomedBuffer[((ScreenHeight - i) * ScreenWidth + j) * 3 ];
+                pDeskBuffer[(i * ScreenWidth + j) * 4 + 1] = pDeskWallpaperZoomedBuffer[((ScreenHeight - i) * ScreenWidth + j) * 3 + 1];
+                pDeskBuffer[(i * ScreenWidth + j) * 4 + 2] = pDeskWallpaperZoomedBuffer[((ScreenHeight - i) * ScreenWidth + j) * 3 + 2];
+                pDeskBuffer[(i * ScreenWidth + j) * 4 + 3] = GRAPHICS_LAYER_DESK;
+
+                //white
+                //pDeskBuffer[(i * ScreenWidth + j) * 4]     = 0xff;
+                //pDeskBuffer[(i * ScreenWidth + j) * 4 + 1] = 0xff;
+                //pDeskBuffer[(i * ScreenWidth + j) * 4 + 2] = 0xff;
+            }
+        }  
+	}
+	else
+	{	    
+        //把读取的zhufeng.bmp格式文件显示到桌面，0x36是指BMP格式图片文件的头
+        for (int i = 0; i < ScreenHeight; i++)
+        {
+            for (int j = 0; j < ScreenWidth; j++)
+            {
+                // BMP 3bits, and desk buffer 4bits
+                pDeskBuffer[(i * ScreenWidth + j) * 4]     = pDeskWallpaperBuffer[((ScreenHeight - i) * ScreenWidth + j) * 3 ];
+                pDeskBuffer[(i * ScreenWidth + j) * 4 + 1] = pDeskWallpaperBuffer[((ScreenHeight - i) * ScreenWidth + j) * 3 + 1];
+                pDeskBuffer[(i * ScreenWidth + j) * 4 + 2] = pDeskWallpaperBuffer[((ScreenHeight - i) * ScreenWidth + j) * 3 + 2];
+                pDeskBuffer[(i * ScreenWidth + j) * 4 + 3] = GRAPHICS_LAYER_DESK;
+
+                //white
+                //pDeskBuffer[(i * ScreenWidth + j) * 4]     = 0xff;
+                //pDeskBuffer[(i * ScreenWidth + j) * 4 + 1] = 0xff;
+                //pDeskBuffer[(i * ScreenWidth + j) * 4 + 2] = 0xff;
+            }
+        }  
+	}
+
+	
         
     L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: COMPUTER BMP\n", __LINE__);
     

@@ -184,8 +184,10 @@ EFI_STATUS L2_COMMON_MemoryAllocate()
     
     pDeskDisplayBuffer = L2_MEMORY_Allocate("Desk Display Buffer", MEMORY_TYPE_GRAPHICS, ScreenWidth * ScreenHeight * 4);
 
-    pDeskWallpaperBuffer = L2_MEMORY_Allocate("Desk Wall paper Buffer", MEMORY_TYPE_GRAPHICS, ScreenWidth * ScreenHeight * 3 + 0x36);
-
+    pDeskWallpaperBuffer = L2_MEMORY_Allocate("Desk Wall paper Buffer", MEMORY_TYPE_GRAPHICS, 1920 * 1080 * 3 + 0x36);
+    
+    pDeskWallpaperZoomedBuffer = L2_MEMORY_Allocate("Desk Wall paper Zoomed Buffer", MEMORY_TYPE_GRAPHICS, ScreenWidth * ScreenHeight * 3);
+    
     UINT32 size = 267616;
     
     sChineseChar = (UINT8 *)L2_MEMORY_Allocate("Chinese Char Buffer", MEMORY_TYPE_GRAPHICS, size);
