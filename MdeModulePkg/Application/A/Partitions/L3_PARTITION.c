@@ -313,13 +313,14 @@ EFI_STATUS L2_STORE_GetFatTableFSM()
      L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d MBRSwitched.SectorsPerFat: %d\n", __LINE__, device[i].stMBRSwitched.SectorsPerFat);
     
      // 512 = 16 * 32 = 4 item * 32
-    FAT32_Table = (UINT8 *)AllocateZeroPool(DISK_BUFFER_SIZE * device[i].stMBRSwitched.SectorsPerFat);
+    //FAT32_Table = (UINT8 *)AllocateZeroPool(DISK_BUFFER_SIZE * device[i].stMBRSwitched.SectorsPerFat);
+    FAT32_Table = L2_MEMORY_Allocate("Desk Wall paper Buffer", MEMORY_TYPE_APPLICATION, DISK_BUFFER_SIZE * device[i].stMBRSwitched.SectorsPerFat);
      if (NULL == FAT32_Table)
      {
          L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: NULL == FAT32_Table\n", __LINE__);                             
      }             
      
-    Status = L1_STORE_READ(i, sector_count,  device[i].stMBRSwitched.SectorsPerFat, FAT32_Table); 
+    Status = L1_STORE_READ(i, sector_count,  2000, FAT32_Table); 
     if ( EFI_SUCCESS == Status )
     {
           //CopyMem(FAT32_Table, Buffer1, DISK_BUFFER_SIZE * MBRSwitched.SectorsPerFat);
@@ -327,14 +328,43 @@ EFI_STATUS L2_STORE_GetFatTableFSM()
           {
                 //L2_DEBUG_Print1(DISK_READ_BUFFER_X + (j % 16) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 16), "%02X ", Buffer1[j] & 0xff);
           }
-
-          // start sector of file
-          sector_count = device[i].stMBRSwitched.ReservedSelector + device[i].stMBRSwitched.SectorsPerFat * device[i].stMBRSwitched.NumFATS + device[i].stMBRSwitched.BootPathStartCluster - 2 + (FileBlockStart - 2) * 8;
-
-          // for FAT32_Table get next block number
-          PreviousBlockNumber = FileBlockStart;
-          //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: sector_count:%ld FileLength: %d PreviousBlockNumber: %d\n",  __LINE__, sector_count, FileLength, PreviousBlockNumber);
      }           
+    
+    Status = L1_STORE_READ(i, sector_count,  2000, FAT32_Table + 2000 * DISK_BUFFER_SIZE); 
+    if ( EFI_SUCCESS == Status )
+    {
+          //CopyMem(FAT32_Table, Buffer1, DISK_BUFFER_SIZE * MBRSwitched.SectorsPerFat);
+          for (int j = 0; j < 250; j++)
+          {
+                //L2_DEBUG_Print1(DISK_READ_BUFFER_X + (j % 16) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 16), "%02X ", Buffer1[j] & 0xff);
+          }
+     }    
+     
+    Status = L1_STORE_READ(i, sector_count,  2000, FAT32_Table + 4000 * DISK_BUFFER_SIZE); 
+    if ( EFI_SUCCESS == Status )
+    {
+          //CopyMem(FAT32_Table, Buffer1, DISK_BUFFER_SIZE * MBRSwitched.SectorsPerFat);
+          for (int j = 0; j < 250; j++)
+          {
+                //L2_DEBUG_Print1(DISK_READ_BUFFER_X + (j % 16) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 16), "%02X ", Buffer1[j] & 0xff);
+          }
+     }    
+     
+    Status = L1_STORE_READ(i, sector_count,  1958, FAT32_Table + 6000 * DISK_BUFFER_SIZE); 
+    if ( EFI_SUCCESS == Status )
+    {
+          //CopyMem(FAT32_Table, Buffer1, DISK_BUFFER_SIZE * MBRSwitched.SectorsPerFat);
+          for (int j = 0; j < 250; j++)
+          {
+                //L2_DEBUG_Print1(DISK_READ_BUFFER_X + (j % 16) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 16), "%02X ", Buffer1[j] & 0xff);
+          }
+     }    
+    // start sector of file
+    sector_count = device[i].stMBRSwitched.ReservedSelector + device[i].stMBRSwitched.SectorsPerFat * device[i].stMBRSwitched.NumFATS + device[i].stMBRSwitched.BootPathStartCluster - 2 + (FileBlockStart - 2) * 8;
+    
+    // for FAT32_Table get next block number
+    PreviousBlockNumber = FileBlockStart;
+    //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: sector_count:%ld FileLength: %d PreviousBlockNumber: %d\n",  __LINE__, sector_count, FileLength, PreviousBlockNumber);
 
     return EFI_SUCCESS;
 }
