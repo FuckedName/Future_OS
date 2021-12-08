@@ -2301,9 +2301,9 @@ EFI_STATUS L2_GRAPHICS_DeskInit()
         for (int j = 0; j < ScreenWidth; j++)
         {
             // BMP 3bits, and desk buffer 4bits
-            pDeskBuffer[(i * ScreenWidth + j) * 4]     = pDeskWallpaperBuffer[0x36 + ((ScreenHeight - i) * 1920 + j) * 3 ];
-            pDeskBuffer[(i * ScreenWidth + j) * 4 + 1] = pDeskWallpaperBuffer[0x36 + ((ScreenHeight - i) * 1920 + j) * 3 + 1];
-            pDeskBuffer[(i * ScreenWidth + j) * 4 + 2] = pDeskWallpaperBuffer[0x36 + ((ScreenHeight - i) * 1920 + j) * 3 + 2];
+            pDeskBuffer[(i * ScreenWidth + j) * 4]     = pDeskWallpaperBuffer[0x36 + ((ScreenHeight - i) * ScreenWidth + j) * 3 ];
+            pDeskBuffer[(i * ScreenWidth + j) * 4 + 1] = pDeskWallpaperBuffer[0x36 + ((ScreenHeight - i) * ScreenWidth + j) * 3 + 1];
+            pDeskBuffer[(i * ScreenWidth + j) * 4 + 2] = pDeskWallpaperBuffer[0x36 + ((ScreenHeight - i) * ScreenWidth + j) * 3 + 2];
             pDeskBuffer[(i * ScreenWidth + j) * 4 + 3] = GRAPHICS_LAYER_DESK;
 
             //white
@@ -2516,6 +2516,26 @@ EFI_STATUS L2_GRAPHICS_DeskInit()
     {
         //L2_DEBUG_Print1(DISK_READ_BUFFER_X + (j % 16) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 16), "%02X ", sChineseChar[j] & 0xff);
     }
+
+    x1 = ScreenWidth / 2;
+    y1 = ScreenHeight - 21;
+    
+    //在桌面左下角显示中文件“任启红，加油。”字样，因为在系统实现的过程中，碰到无数的问题，希望自己能坚持下来。
+    L2_GRAPHICS_ChineseCharDraw(pDeskBuffer,  x1, y1, (40 - 1) * 94 + 46 - 1, Color, ScreenWidth);
+    x1 += 16;    
+    L2_GRAPHICS_ChineseCharDraw(pDeskBuffer,  x1, y1, (38 - 1) * 94 + 84 - 1, Color, ScreenWidth);
+    x1 += 16;
+    L2_GRAPHICS_ChineseCharDraw(pDeskBuffer,  x1, y1, (26 - 1) * 94 + 76 - 1, Color, ScreenWidth);
+    x1 += 16;
+    L2_GRAPHICS_ChineseCharDraw(pDeskBuffer,  x1, y1, (3 - 1) * 94 + 12 - 1, Color, ScreenWidth);
+    x1 += 16;
+    L2_GRAPHICS_ChineseCharDraw(pDeskBuffer,  x1, y1, (28 - 1) * 94 + 51 - 1, Color, ScreenWidth);
+    x1 += 16;
+    L2_GRAPHICS_ChineseCharDraw(pDeskBuffer,  x1, y1, (51 - 1) * 94 + 45 - 1, Color, ScreenWidth);
+    x1 += 16;
+    L2_GRAPHICS_ChineseCharDraw(pDeskBuffer,  x1, y1, (3 - 1) * 94 + 3 - 1, Color, ScreenWidth);
+    x1 += 16;
+
 
     //在桌面左下角显示中文件“菜单”字样
     L2_GRAPHICS_ChineseCharDraw(pDeskBuffer,  16, ScreenHeight - 21,     (18 - 1) * 94 + 43 - 1, Color, ScreenWidth);
