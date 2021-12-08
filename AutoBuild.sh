@@ -1,10 +1,10 @@
 clear
 
 rm -rf MdeModulePkg/Application/A/*
-#rm -rf MdeModulePkg/Application/EchoTcp4/*
+rm -rf MdeModulePkg/Application/EchoTcp4/*
 
 cp /mnt/hgfs/Share/code/Split/* -rf MdeModulePkg/Application/A/
-#cp /mnt/hgfs/Share/code/Network/* -rf MdeModulePkg/Application/EchoTcp4/
+cp /mnt/hgfs/Share/code/Network/* -rf MdeModulePkg/Application/EchoTcp4/
 if [ $? -ne 0 ]; then
     exit 0;
 fi

@@ -32,8 +32,8 @@
 #include <Global/Global.h>
 #include <Memory/L1_MEMORY.h>
 
-UINT16 MyComputerWidth = 16 * 40;
-UINT16 MyComputerHeight = 16 * 50;
+UINT16 MyComputerWidth = 16 * 30;
+UINT16 MyComputerHeight = 16 * 30;
 
 
 
@@ -561,10 +561,10 @@ VOID L3_APPLICATION_SystemLogWindow(UINT16 StartX, UINT16 StartY)
 *****************************************************************************/
 VOID L3_APPLICATION_WindowsInitial()
 {    
-    L3_APPLICATION_MyComputerWindow(390, 50);
+    //L3_APPLICATION_MyComputerWindow(0, 50);
         
-    L3_APPLICATION_SystemLogWindow(1040, 10);
+    L3_APPLICATION_SystemLogWindow(10, 10);
     
-    L3_APPLICATION_MemoryInformationWindow(600, 100);
+    //L3_APPLICATION_MemoryInformationWindow(0, 100);
 }
 

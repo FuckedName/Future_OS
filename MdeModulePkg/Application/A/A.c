@@ -103,7 +103,7 @@ EFI_STATUS EFIAPI Main (
     L2_STORE_PartitionAnalysis();
     
     L2_COMMON_MultiProcessInit();
-	
+
     L2_GRAPHICS_ScreenInit();
     
     L2_GRAPHICS_StartMenuInit();

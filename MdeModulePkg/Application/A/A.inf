@@ -43,6 +43,10 @@
   	Devices/Screen/L2_DEVICE_Screen.c
   	Devices/System/L2_DEVICE_System.h
   	Devices/System/L2_DEVICE_System.c
+  	Devices/Network/L2_DEVICE_Network.c
+  	Devices/Network/L2_DEVICE_Network.h
+  	Devices/Network/L1_DEVICE_Network.c
+  	Devices/Network/L1_DEVICE_Network.h
   	Memory/L1_MEMORY.h
   	Memory/L1_MEMORY.c
   	Memory/L2_MEMORY.h
@@ -125,7 +129,9 @@
   gEfiSimpleTextInputExProtocolGuid
   gEfiSmbiosProtocolGuid                  
   gEfiUnicodeCollation2ProtocolGuid   
-  
+  gEfiTcp4ServiceBindingProtocolGuid
+  gEfiTcp4ProtocolGuid
+
 [FeaturePcd]
 
 [Pcd]

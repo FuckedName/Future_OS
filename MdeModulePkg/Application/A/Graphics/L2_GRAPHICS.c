@@ -75,12 +75,12 @@ UINT8 *pSystemSettingWindowBuffer = NULL;
 UINT16 StartMenuWidth = 16 * 10;
 UINT16 StartMenuHeight = 16 * 20;
 UINT16 StatusErrorCount = 0;
-UINT16 SystemLogWindowWidth = 16 * 40;
-UINT16 SystemLogWindowHeight = 16 * 60;
+UINT16 SystemLogWindowWidth = 16 * 30;
+UINT16 SystemLogWindowHeight = 16 * 30;
 UINT16 SystemSettingWindowWidth = 16 * 10;
 UINT16 SystemSettingWindowHeight = 16 * 10;
 
-UINT16 MemoryInformationWindowHeight = 16 * 40;
+UINT16 MemoryInformationWindowHeight = 16 * 30;
 UINT16 MemoryInformationWindowWidth = 16 * 30;
 
 
@@ -1075,13 +1075,14 @@ void L2_GRAPHICS_BootScreenInit()
     {
         for (int i = 0; i < ScreenWidth; i++)
         {
-            pDeskBuffer[(j * ScreenWidth + i) * 4]     = 0xff;
+            pDeskBuffer[(j * ScreenWidth + i) * 4]     = i % 255;
             pDeskBuffer[(j * ScreenWidth + i) * 4 + 1] = 0x00;
             pDeskBuffer[(j * ScreenWidth + i) * 4 + 2] = 0x00;
         }
-    }       
+    }
 
-	L2_SCREEN_Draw(pDeskBuffer, 0, 0, 0, 0, ScreenWidth, ScreenHeight);	 
+	L2_SCREEN_Draw(pDeskBuffer, 0, 0, 0, 0, ScreenWidth, ScreenHeight);	
+
 }
 
 
