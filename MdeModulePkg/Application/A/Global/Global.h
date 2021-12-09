@@ -285,6 +285,7 @@ extern UINT8 *pDeskWallpaperZoomedBuffer;
 extern UINT8 *pDeskWallpaperTempBuffer;
 
 extern UINT8 *sChineseChar;
+extern UINT8 *sChineseChar12;
 extern UINT8 *pSystemIconBuffer[SYSTEM_ICON_MAX];
 
 extern UINT8 *pSystemIconFolderBuffer;

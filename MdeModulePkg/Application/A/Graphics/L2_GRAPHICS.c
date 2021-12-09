@@ -49,7 +49,8 @@ UINTN ScreenWidth, ScreenHeight;
 
 UINT16 LogStatusErrorCount = 0;
 
-UINT8 *sChineseChar = NULL;
+UINT8 *sChineseChar = NULL; // Default chinese char size is 16 * 16 pixel
+UINT8 *sChineseChar12 = NULL; // For chinese char size is 12 * 12 pixel
 
 UINT8 *pDeskBuffer = NULL; //only Desk layer include wallpaper and button : 1
 UINT8 *pDeskDisplayBuffer = NULL; //desk display after multi graphicses layers compute
@@ -1336,6 +1337,11 @@ EFI_STATUS L2_GRAPHICS_ScreenInit()
         L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: ReadFileSelf error\n", __LINE__);
     }
     
+    Status = L3_APPLICATION_ReadFile("HZK12", 5, sChineseChar12);
+    if (EFI_ERROR(Status))
+    {
+        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: L3_APPLICATION_ReadFile error\n", __LINE__);
+    }
     L2_GRAPHICS_DeskInit();
 
     // 初始化鼠标显示缓存
@@ -1449,6 +1455,49 @@ EFI_STATUS L2_GRAPHICS_StartMenuInit()
     x += 16;
     
     L2_GRAPHICS_ChineseCharDraw(pStartMenuBuffer, x , y,     (19 - 1) * 94 + 86 - 1, Color, StartMenuWidth);   
+
+
+    x = 3;
+    y += 16;
+    L2_GRAPHICS_ChineseCharDraw12(pStartMenuBuffer, x , y,     (47 - 1 ) * 94 + 21 - 1, Color, StartMenuWidth);    
+    x += 16;
+    
+    L2_GRAPHICS_ChineseCharDraw12(pStartMenuBuffer, x , y,     (45 - 1) * 94 + 19 - 1, Color, StartMenuWidth);
+    x += 16;
+    
+    L2_GRAPHICS_ChineseCharDraw12(pStartMenuBuffer, x , y,     (45 - 1) * 94 + 43 - 1, Color, StartMenuWidth);
+    x += 16;
+    
+    L2_GRAPHICS_ChineseCharDraw12(pStartMenuBuffer, x , y,     (19 - 1) * 94 + 86 - 1, Color, StartMenuWidth);   
+
+    x = 3;
+    y += 16;
+    L2_GRAPHICS_ChineseCharDraw12(pStartMenuBuffer, x , y,     (47 - 1 ) * 94 + 21 - 1, Color, StartMenuWidth);    
+    x += 16;
+    
+    L2_GRAPHICS_ChineseCharDraw12(pStartMenuBuffer, x , y,     (45 - 1) * 94 + 19 - 1, Color, StartMenuWidth);
+    x += 16;
+    
+    L2_GRAPHICS_ChineseCharDraw12(pStartMenuBuffer, x , y,     (45 - 1) * 94 + 43 - 1, Color, StartMenuWidth);
+    x += 16;
+    
+    L2_GRAPHICS_ChineseCharDraw12(pStartMenuBuffer, x , y,     (19 - 1) * 94 + 86 - 1, Color, StartMenuWidth);   
+    
+    x = 3;
+    y += 16;
+    L2_GRAPHICS_ChineseCharDraw12(pStartMenuBuffer, x , y,     (47 - 1 ) * 94 + 21 - 1, Color, StartMenuWidth);    
+    x += 16;
+    
+    L2_GRAPHICS_ChineseCharDraw12(pStartMenuBuffer, x , y,     (45 - 1) * 94 + 19 - 1, Color, StartMenuWidth);
+    x += 16;
+    
+    L2_GRAPHICS_ChineseCharDraw12(pStartMenuBuffer, x , y,     (45 - 1) * 94 + 43 - 1, Color, StartMenuWidth);
+    x += 16;
+
+    UINT8 word[3] = "我";
+    
+    L2_GRAPHICS_ChineseCharDraw12(pStartMenuBuffer, x , y,     (word[0] - 0xa0- 1) * 94 + word[1] - 0xa0 - 1, Color, StartMenuWidth);   
+
 }
 
 
@@ -3492,6 +3541,55 @@ EFI_STATUS L2_GRAPHICS_ChineseCharDraw(UINT8 *pBuffer,
     
     return EFI_SUCCESS;
 }
+
+
+/****************************************************************************
+*
+*  描述:   中文字符绘制函数，绘制结果是12*12像素大小
+*
+*  参数pBuffer： 		把中文字符写到的目标缓存
+*  参数x0： 			把中文字符写到的X目标
+*  参数y0： 			把中文字符写到的Y目标
+*  参数offset： 		汉字库编码位移
+*  参数Color： 		字体颜色
+*  参数AreaWidth： 	目标缓存宽度，比如：在桌面上绘制传桌面的宽度，在我的电脑绘制传我的电脑宽度等等
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
+EFI_STATUS L2_GRAPHICS_ChineseCharDraw12(UINT8 *pBuffer,
+        IN UINTN x0, UINTN y0, UINT32 offset,
+        IN EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color , UINT16 AreaWidth)
+{
+    INT8 i;
+    //L2_DEBUG_Print1(10, 10, "%X %X %X %X", x0, y0, offset, AreaWidth);
+    ////DEBUG ((EFI_D_INFO, "%X %X %X %X", x0, y0, offset, AreaWidth));
+
+    if (NULL == pBuffer)
+    {
+        //DEBUG ((EFI_D_INFO, "NULL == pBuffer"));
+        return EFI_SUCCESS;
+    }
+
+    if (offset < 1)
+    {
+        //DEBUG ((EFI_D_INFO, "offset < 1 \n"));
+        return EFI_SUCCESS;
+    }
+
+    //12*12
+    for(i = 0; i < 24; i += 2)
+    {
+        //12*12/8=18
+        L2_GRAPHICS_ChineseHalfDraw2(pBuffer, sChineseChar12[offset * 24 + i ],     x0,     y0 + i / 2, 1, Color, AreaWidth);              
+        L2_GRAPHICS_ChineseHalfDraw2(pBuffer, sChineseChar12[offset * 24 + i + 1],  x0 + 8, y0 + i / 2, 1, Color, AreaWidth);      
+    }
+    
+    ////DEBUG ((EFI_D_INFO, "\n"));
+    
+    return EFI_SUCCESS;
+}
+
 
 
 UINT16 GraphicsLayerIDCount = 0;

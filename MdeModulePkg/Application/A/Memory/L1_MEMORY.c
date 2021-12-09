@@ -197,6 +197,14 @@ EFI_STATUS L2_COMMON_MemoryAllocate()
         L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: ChineseCharArrayInit AllocateZeroPool failed\n",  __LINE__);
         return -1;
     }   
+    
+    sChineseChar12 = (UINT8 *)L2_MEMORY_Allocate("Chinese Char Buffer", MEMORY_TYPE_GRAPHICS, 196272);
+    if (NULL == sChineseChar12)
+    {
+        //DEBUG ((EFI_D_INFO, "ChineseCharArrayInit AllocateZeroPool Failed: %x!\n "));
+        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: sChineseChar12 AllocateZeroPool failed\n",  __LINE__);
+        return -1;
+    }   
 
     for (UINT8 i = 0; i < SYSTEM_ICON_MAX; i++)
         pSystemIconBuffer[i] = L2_MEMORY_Allocate("System Icon Buffer", MEMORY_TYPE_GRAPHICS, 384054);
