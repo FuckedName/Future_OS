@@ -26,12 +26,6 @@
 
 [Sources]
     EchoTcp4.c
-    Common.c
-    Common.h
-    Keyboard.c
-    Keyboard.h
-    Network.c
-    Network.h
 
 [Packages]
     #StdLib/StdLib.dec

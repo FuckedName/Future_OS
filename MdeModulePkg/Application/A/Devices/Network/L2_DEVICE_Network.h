@@ -54,22 +54,20 @@ UINTN CreateTCP4Socket(VOID);
 
 EFI_STATUS InitTcp4SocketFd();
 
-VOID  Tcp4SendNotify(IN EFI_EVENT  Event,  IN VOID *Context);
+VOID  Tcp4SendNotify(EFI_EVENT Event,      VOID *Context);
 
+VOID  Tcp4RecvNotify(EFI_EVENT      Event,  VOID *Context);
 
-VOID  Tcp4RecvNotify(IN EFI_EVENT  Event,  IN VOID *Context);
+VOID NopNoify (EFI_EVENT  Event,    VOID *Context);
 
-
-VOID NopNoify(  IN EFI_EVENT  Event, IN VOID *Context);
-
-EFI_STATUS ConfigTCP4Socket(UINT32 Ip32, UINT16 Port);
+EFI_STATUS ConfigTCP4Socket();
 
 EFI_STATUS ConnectTCP4Socket();
 
 EFI_STATUS SendTCP4Socket(CHAR8* Data, UINTN Lenth);
 
-
-EFI_STATUS RecvTCP4Socket(IN CHAR8* Buffer, IN UINTN Length, OUT UINTN *recvLength);
+EFI_STATUS RecvTCP4Socket(CHAR8* Buffer, UINTN Length, UINTN *recvLength);
 
 EFI_STATUS WirelessMAC();
+
 
