@@ -35,12 +35,14 @@
 #include <Devices/Keyboard/L2_DEVICE_Keyboard.h>
 #include <Devices/Mouse/L2_DEVICE_Mouse.h>
 #include <Devices/Timer/L2_DEVICE_Timer.h>
+#include <Devices/Network/L2_DEVICE_Network.h>
 
 
 
 EFI_EVENT MultiTaskTriggerGroup0Event;
 EFI_EVENT MultiTaskTriggerGroup1Event;
 EFI_EVENT MultiTaskTriggerGroup2Event;
+EFI_EVENT MultiTaskTriggerGroup3Event;
 
 
 UINT32 TimerSliceCount = 0;
@@ -91,10 +93,13 @@ VOID EFIAPI L2_TIMER_Slice(
 
 	//第一个事件分组是鼠标、键盘，所以需要频率更高的运行
     if (TimerSliceCount % 10 == 0)
-       gBS->SignalEvent (MultiTaskTriggerGroup1Event);
+    {
+        gBS->SignalEvent (MultiTaskTriggerGroup1Event);
+        gBS->SignalEvent (MultiTaskTriggerGroup3Event);        
+    }
 
 	//第二个事件分组是屏幕右下角显示日期、时间、星期几，所以频率可以低些以节约CPU资源
-    if (TimerSliceCount % 50 == 0)
+    if (TimerSliceCount % 20 == 0)
        gBS->SignalEvent (MultiTaskTriggerGroup2Event);
     
     ////DEBUG ((EFI_D_INFO, "System time slice Loop ...\n"));
@@ -129,6 +134,9 @@ EFI_STATUS L2_COMMON_MultiProcessInit ()
     // task group for display date time
     EFI_GUID gMultiProcessGroup2Guid  = { 0x0579257E, 0x1843, 0x45FB, { 0x83, 0x9D, 0x6B, 0x79, 0x09, 0x38, 0x29, 0xAA } };
     
+    // task group for display date time
+    EFI_GUID gMultiProcessGroup3Guid  = { 0x0579257E, 0x1843, 0x45FB, { 0x83, 0x9D, 0x6B, 0x79, 0x09, 0x38, 0x29, 0xAB } };
+    
     //L2_GRAPHICS_ChineseCharDraw(pMouseBuffer, 0, 0, 11 * 94 + 42, Color, 16);
     
     //DrawChineseCharIntoBuffer(pMouseBuffer, 0, 0, 0, Color, 16);
@@ -136,6 +144,8 @@ EFI_STATUS L2_COMMON_MultiProcessInit ()
     EFI_EVENT_NOTIFY       TaskProcessesGroup1[] = {L2_KEYBOARD_Event, L2_MOUSE_Event, L2_SYSTEM_Start};
 
     EFI_EVENT_NOTIFY       TaskProcessesGroup2[] = {L2_TIMER_Print};
+    
+    EFI_EVENT_NOTIFY       TaskProcessesGroup3[] = {NopNoify, Tcp4RecvNotify, Tcp4SendNotify};
 
     for (i = 0; i < sizeof(TaskProcessesGroup1) / sizeof(EFI_EVENT_NOTIFY); i++)
     {
@@ -145,8 +155,7 @@ EFI_STATUS L2_COMMON_MultiProcessInit ()
                           TaskProcessesGroup1[i],
                           NULL,
                           &gMultiProcessGroup1Guid,
-                          &MultiTaskTriggerGroup1Event
-                          );
+                          &MultiTaskTriggerGroup1Event);
     }    
 
     for (i = 0; i < sizeof(TaskProcessesGroup2) / sizeof(EFI_EVENT_NOTIFY); i++)
@@ -157,8 +166,18 @@ EFI_STATUS L2_COMMON_MultiProcessInit ()
                           TaskProcessesGroup2[i],
                           NULL,
                           &gMultiProcessGroup2Guid,
-                          &MultiTaskTriggerGroup2Event
-                          );
+                          &MultiTaskTriggerGroup2Event);
+    }    
+
+    for (i = 0; i < sizeof(TaskProcessesGroup3) / sizeof(EFI_EVENT_NOTIFY); i++)
+    {
+        gBS->CreateEventEx(
+                          EVT_NOTIFY_SIGNAL,
+                          TPL_NOTIFY,
+                          TaskProcessesGroup3[i],
+                          NULL,
+                          &gMultiProcessGroup3Guid,
+                          &MultiTaskTriggerGroup3Event);
     }    
 
     return EFI_SUCCESS;

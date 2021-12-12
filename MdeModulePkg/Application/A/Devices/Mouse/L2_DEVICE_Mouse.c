@@ -114,6 +114,8 @@ VOID EFIAPI L2_MOUSE_Event (IN EFI_EVENT Event, IN VOID *Context)
         //DEBUG ((EFI_D_INFO, "Left button clicked\n"));
         
         L2_GRAPHICS_RightClickMenu(iMouseX, iMouseY);
+
+        //WirelessMAC();
         
         MouseClickFlag = (MouseClickFlag == MOUSE_NO_CLICKED) ? MOUSE_LEFT_CLICKED : MOUSE_NO_CLICKED;
         
@@ -129,7 +131,7 @@ VOID EFIAPI L2_MOUSE_Event (IN EFI_EVENT Event, IN VOID *Context)
         
         MouseClickFlag = 2;
 
-        TCP4Test();
+        
     }
     //L2_DEBUG_Print1(DISPLAY_X, DISPLAY_Y, "%d: HandleMouseEvent\n", __LINE__);
     ////DEBUG ((EFI_D_INFO, "\n"));

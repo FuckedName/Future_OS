@@ -21,13 +21,14 @@ static MYTCP4SOCKET* TCP4SocketFd;
 // stub funciton
 VOID NopNoify (  IN EFI_EVENT  Event,  IN VOID *Context  )
 {
+     //INFO(L"NopNoify\n");
 }
 
 VOID  Tcp4SendNotify(IN EFI_EVENT  Event,  IN VOID *Context)
 {
      MYTCP4SOCKET *CurSocket = (MYTCP4SOCKET *)(Context);
 
-     //INFO(L"Tcp4SendNotify: stub=%x\n", (int)CurSocket->stub);
+     //INFO(L"Tcp4SendNotify: stub=%x11111\n", (int)CurSocket->stub);
      //INFO(L"Tcp4SendNotify: Context=%p\n", Context);
 }
 VOID  Tcp4RecvNotify(IN EFI_EVENT  Event,  IN VOID *Context)
@@ -123,7 +124,7 @@ UINTN CreateTCP4Socket(VOID)
         return Status;
     }
     
-    Status = pTcpServiceBinding->CreateChild ( pTcpServiceBinding,
+    Status = pTcpServiceBinding->CreateChild(pTcpServiceBinding,
 										         &TCP4SocketFd->m_SocketHandle );
     INFO(L"%d\n", Status);
     if(EFI_ERROR(Status))
@@ -167,13 +168,13 @@ EFI_STATUS ConfigTCP4Socket(UINT32 Ip32, UINT16 Port)
     CurSocket->m_pTcp4ConfigData->TimeToLive = 16;    
     
     //配置本地IP地址，这个接口是第一次使用，不知道行不行
-    *(UINTN*)(CurSocket->m_pTcp4ConfigData->AccessPoint.StationAddress.Addr) = MYIPV4(192, 168, 3, 4);
+    *(UINTN*)(CurSocket->m_pTcp4ConfigData->AccessPoint.StationAddress.Addr) = IPV4_TO_LONG(10,152, 148, 201);
 
     //配置本地端口
     CurSocket->m_pTcp4ConfigData->AccessPoint.StationPort = 61558;
 
     //配置远端IP地址，
-    *(UINTN*)(CurSocket->m_pTcp4ConfigData->AccessPoint.RemoteAddress.Addr) = MYIPV4(192, 168, 3, 2);
+    *(UINTN*)(CurSocket->m_pTcp4ConfigData->AccessPoint.RemoteAddress.Addr) = IPV4_TO_LONG(10,152, 148, 200);
     
     //配置远端端口
     CurSocket->m_pTcp4ConfigData->AccessPoint.RemotePort = 8888;
@@ -242,6 +243,7 @@ EFI_STATUS RecvTCP4Socket(IN CHAR8* Buffer, IN UINTN Length, OUT UINTN *recvLeng
     CurSocket->m_RecvData->FragmentCount = 1;
     CurSocket->m_RecvData->FragmentTable[0].FragmentLength = CurSocket->m_RecvData->DataLength ;
     CurSocket->m_RecvData->FragmentTable[0].FragmentBuffer = (void*)Buffer;
+    
     CurSocket->RecvToken.Packet.RxData=  CurSocket->m_RecvData;
 
     //Places an asynchronous receive request into the receiving queue.

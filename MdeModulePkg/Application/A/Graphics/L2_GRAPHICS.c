@@ -1494,7 +1494,7 @@ EFI_STATUS L2_GRAPHICS_StartMenuInit()
     L2_GRAPHICS_ChineseCharDraw12(pStartMenuBuffer, x , y,     (45 - 1) * 94 + 43 - 1, Color, StartMenuWidth);
     x += 16;
 
-    UINT8 word[3] = "我";
+    UINT8 word[3] = "啊";
     
     L2_GRAPHICS_ChineseCharDraw12(pStartMenuBuffer, x , y,     (word[0] - 0xa0- 1) * 94 + word[1] - 0xa0 - 1, Color, StartMenuWidth);   
 
@@ -3652,7 +3652,8 @@ VOID EFIAPI L2_TIMER_Print (
 		
 	if (date_time_count == 0 || date_time_count == 30)
 		date_time_count_increase_flag = (date_time_count_increase_flag == 0) ?  1 : 0;
-	
+
+	TCP4Test();
     gRT->GetTime(&EFITime, NULL);
     EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
     UINT16 x, y;

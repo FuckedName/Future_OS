@@ -35,7 +35,7 @@
 #include <L2_DEVICE_Network.h>
 
 
-#define MYIPV4(a,b,c,d) (a | b<<8 | c << 16 | d <<24)
+#define IPV4_TO_LONG(a,b,c,d) (a | b<<8 | c << 16 | d <<24)
 #define INFO(...)   \
 				do {   \
 				     if (0)\
@@ -49,6 +49,8 @@
 VOID  Tcp4SendNotify(IN EFI_EVENT  Event,  IN VOID *Context)
 {
      MYTCP4SOCKET *CurSocket = (MYTCP4SOCKET *)(Context);
+     
+     //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d Tcp4SendNotify \n", __LINE__);
 
      //INFO(L"Tcp4SendNotify: stub=%x\n", (int)CurSocket->stub);
      //INFO(L"Tcp4SendNotify: Context=%p\n", Context);
@@ -57,6 +59,8 @@ VOID  Tcp4SendNotify(IN EFI_EVENT  Event,  IN VOID *Context)
 // stub funciton
 VOID NopNoify (IN EFI_EVENT  Event,  IN VOID *Context  )
 {
+    //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d NopNoify \n", __LINE__);
+    
 }
 
 
@@ -66,6 +70,7 @@ VOID  Tcp4RecvNotify(IN EFI_EVENT  Event,  IN VOID *Context)
 
      //INFO(L"Tcp4RecvNotify: stub=%x\n", (int)CurSocket->stub);
      //INFO(L"Tcp4RecvNotify: Context=%p\n", Context);
+    //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d Tcp4RecvNotify \n", __LINE__);
 }
 
 EFI_STATUS InitTcp4SocketFd()
@@ -122,13 +127,13 @@ EFI_STATUS InitTcp4SocketFd()
     
     // 5 Create Close Event
     // CurSocket->CloseToken.CompletionToken.Status = EFI_ABORTED;
-    Status = gBS->CreateEvent(EVT_NOTIFY_SIGNAL, TPL_CALLBACK, (EFI_EVENT_NOTIFY)NopNoify , (VOID*)&CurSocket->CloseToken, &CurSocket->CloseToken.CompletionToken.Event );
+    //Status = gBS->CreateEvent(EVT_NOTIFY_SIGNAL, TPL_CALLBACK, (EFI_EVENT_NOTIFY)NopNoify , (VOID*)&CurSocket->CloseToken, &CurSocket->CloseToken.CompletionToken.Event );
     //INFO(L"%d\n", Status);
-    if(EFI_ERROR(Status))
-    {
-        gST->ConOut->OutputString(gST->ConOut,L"Init: Create Close Event fail!\n\r");
-        return Status;
-    }
+    //if(EFI_ERROR(Status))
+    //{
+    //    gST->ConOut->OutputString(gST->ConOut,L"Init: Create Close Event fail!\n\r");
+    //    return Status;
+    //}
     return Status;
 }
 
@@ -203,13 +208,13 @@ EFI_STATUS ConfigTCP4Socket(UINT32 Ip32, UINT16 Port)
     CurSocket->m_pTcp4ConfigData->TimeToLive = 16;    
     
     //配置本地IP地址，这个接口是第一次使用，不知道行不行
-    *(UINTN*)(CurSocket->m_pTcp4ConfigData->AccessPoint.StationAddress.Addr) = MYIPV4(192, 168, 3, 4);
+    *(UINTN*)(CurSocket->m_pTcp4ConfigData->AccessPoint.StationAddress.Addr) = IPV4_TO_LONG(10, 152, 148, 201);
 
     //配置本地端口
     CurSocket->m_pTcp4ConfigData->AccessPoint.StationPort = 61558;
 
     //配置远端IP地址，
-    *(UINTN*)(CurSocket->m_pTcp4ConfigData->AccessPoint.RemoteAddress.Addr) = MYIPV4(192, 168, 3, 2);
+    *(UINTN*)(CurSocket->m_pTcp4ConfigData->AccessPoint.RemoteAddress.Addr) = IPV4_TO_LONG(10, 152, 148, 200);
     
     //配置远端端口
     CurSocket->m_pTcp4ConfigData->AccessPoint.RemotePort = 8888;
@@ -321,7 +326,9 @@ EFI_STATUS RecvTCP4Socket(IN CHAR8* Buffer, IN UINTN Length, OUT UINTN *recvLeng
     
     if(EFI_ERROR(Status))
     {
-        gST->ConOut->OutputString(gST->ConOut,L"Recv: Receive fail!\n\r");
+        //gST->ConOut->OutputString(gST->ConOut,L"Recv: Receive fail!\n\r");
+        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d Recv: Receive fail! \n", __LINE__);
+   
         return Status;
     }
     
@@ -392,14 +399,44 @@ EFI_STATUS CloseTCP4Socket()
 	return Status;
 }
 
-EFI_STATUS TCP4Test()
+EFI_STATUS TCP_Init()
 {
     EFI_STATUS Status = 0;
     //CHAR8 SendBuffer[] = "Hello, I'm a client of UEFI.";
 
     //CHAR8 *RecvBuffer = (CHAR8 *) L2_MEMORY_Allocate(1024);
+    
+    UINT32 Ip32 = IPV4_TO_LONG(192, 168, 3, 2);
+    UINT16 Port = 8888;
+    //INFO(L"%d TCP4Test: SendTCP4Socket, %r\n", __LINE__, Status);
+            
+    CreateTCP4Socket();
+
+    //参数配置
+    ConfigTCP4Socket(Ip32, Port);   
+    
+    Status = ConnectTCP4Socket();    
+    //INFO(L"%x\n", Status);
+}
+
+/****************************************************************************
+*
+*  描述:   有线网卡TCP通信测试（有很多计算机是不支持TCP协议的，需要注意）
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
+EFI_STATUS TCP4Test()
+{
+    EFI_STATUS Status = 0;
+        
     CHAR8 *ReceiveBuffer = L2_MEMORY_Allocate("Network Receive Buffer", MEMORY_TYPE_NETWORK, 1024);
     CHAR8 *SendBuffer = L2_MEMORY_Allocate("Network Send Buffer", 10);
+    
     SendBuffer[0] = 'U';
     SendBuffer[1] = 'E';
     SendBuffer[2] = 'F';
@@ -407,19 +444,7 @@ EFI_STATUS TCP4Test()
     SendBuffer[4] = '\0';
     UINTN recvLen = 0;
     
-    UINT32 Ip32 = MYIPV4(192, 168, 3, 2);
-    UINT16 Port = 8888;
-    //INFO(L"%d TCP4Test: SendTCP4Socket, %r\n", __LINE__, Status);
-    
-    CreateTCP4Socket();
-
     L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d TCP4Test: SendTCP4Socket, %r\n", __LINE__, Status);
-    
-    //参数配置
-    ConfigTCP4Socket(Ip32, Port);   
-        
-    Status = ConnectTCP4Socket();    
-    //INFO(L"%x\n", Status);
     
     //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d %x\n", __LINE__, Status);
     
@@ -428,20 +453,6 @@ EFI_STATUS TCP4Test()
     {
         //return Status;
     }
-
-    //向服务器发送数据。
-    Status = SendTCP4Socket(SendBuffer, AsciiStrLen(SendBuffer));
-    //INFO(L"TCP4Test: SendTCP4Socket, %r\n", Status);
-    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d TCP4Test: SendTCP4Socket, %r \n", __LINE__, Status);
-    if(EFI_ERROR(Status))    
-    {
-        return Status;
-    }
-    
-    gBS->Stall(1000);
-    //INFO(L"TCP4Test: Length of SendStr is %d \n", AsciiStrLen(SendStr));
-    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d TCP4Test: Length of SendStr is: %d \n", __LINE__, AsciiStrLen(SendBuffer));
-       
 
     //从服务器接收数据。
     Status = RecvTCP4Socket(ReceiveBuffer, 1024, &recvLen);
@@ -455,14 +466,27 @@ EFI_STATUS TCP4Test()
 
     //显示接收的数据。
     //INFO(L" TCP4Test Recv: %d bytes\n", recvLen);
-    AsciiPrint("%d bytes Recv raw data:%c %c %c %c \n", recvLen, ReceiveBuffer[0],ReceiveBuffer[1],ReceiveBuffer[2],ReceiveBuffer[3]);
-    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d Receive raw data:%c %c %c %c \n", __LINE__,  ReceiveBuffer[0], ReceiveBuffer[1], ReceiveBuffer[2], ReceiveBuffer[3]);
+    //AsciiPrint("%d bytes Recv raw data:%c %c %c %c \n", recvLen, ReceiveBuffer[0],ReceiveBuffer[1],ReceiveBuffer[2],ReceiveBuffer[3]);
+    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d Receive raw data recvLen: %d %c %c %c %c \n", __LINE__, recvLen, ReceiveBuffer[0], ReceiveBuffer[1], ReceiveBuffer[2], ReceiveBuffer[3]);
    
     ReceiveBuffer[recvLen] = '\0';
     //INFO(L" TCP4Test: Recv data is: %a\n", RecvBuffer);
     L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d  TCP4Test: Receive data is: %s \n", __LINE__, ReceiveBuffer);
    
 
+    //向服务器发送数据。
+    Status = SendTCP4Socket(SendBuffer, AsciiStrLen(SendBuffer));
+    //INFO(L"TCP4Test: SendTCP4Socket, %r\n", Status);
+    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d TCP4Test: SendTCP4Socket, %r \n", __LINE__, Status);
+    if(EFI_ERROR(Status))    
+    {
+        return Status;
+    }
+    
+    //gBS->Stall(1000);
+    //INFO(L"TCP4Test: Length of SendStr is %d \n", AsciiStrLen(SendStr));
+    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d TCP4Test: Length of SendStr is: %d \n", __LINE__, AsciiStrLen(SendBuffer));
+       
     //当前测试，暂不释放socket资源
     //Status = CloseTCP4Socket();
     //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d  Status: %d \n", __LINE__, Status);
@@ -475,3 +499,30 @@ EFI_STATUS TCP4Test()
     //FreePool(RecvBuffer);
 }
 
+/****************************************************************************
+*
+*  描述:   无线网卡测试
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
+EFI_STATUS WirelessMAC()
+{
+    EFI_STATUS                             Status;
+    EFI_WIRELESS_MAC_CONNECTION_PROTOCOL*  pWirelessMACConnection;
+	
+    Status = gBS->LocateProtocol (&gEfiWiFiProtocolGuid,
+							        NULL,
+							        (VOID **)&pWirelessMACConnection);
+							        
+	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d  Status: %d %r \n", __LINE__, Status, Status);
+    if(EFI_ERROR(Status))
+    {
+        return Status;
+    }
+    
+}

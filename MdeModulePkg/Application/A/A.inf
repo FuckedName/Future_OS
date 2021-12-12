@@ -131,6 +131,7 @@
   gEfiUnicodeCollation2ProtocolGuid   
   gEfiTcp4ServiceBindingProtocolGuid
   gEfiTcp4ProtocolGuid
+  gEfiWiFiProtocolGuid
 
 [FeaturePcd]
 

@@ -28,6 +28,7 @@
 
 
 #include <Protocol/Tcp4.h>
+#include <Protocol/WiFi.h>
 #include <Protocol/ServiceBinding.h>
 
 #include <L1_DEVICE_Network.h>
@@ -69,4 +70,6 @@ EFI_STATUS SendTCP4Socket(CHAR8* Data, UINTN Lenth);
 
 
 EFI_STATUS RecvTCP4Socket(IN CHAR8* Buffer, IN UINTN Length, OUT UINTN *recvLength);
+
+EFI_STATUS WirelessMAC();
 

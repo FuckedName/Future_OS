@@ -23,7 +23,7 @@
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/MemoryAllocationLib.h>
 
-#define MYIPV4(a,b,c,d) (a | b<<8 | c << 16 | d <<24)
+#define IPV4_TO_LONG(a,b,c,d) (a | b<<8 | c << 16 | d <<24)
 
 
 VOID NopNoify(IN EFI_EVENT Event, IN VOID *Context);
