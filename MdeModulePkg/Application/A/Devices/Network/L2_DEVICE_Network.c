@@ -446,7 +446,10 @@ EFI_STATUS TCP4Test()
 {
     UINTN recvLen = 0;
     EFI_STATUS Status = 0;
-        
+
+    for (UINT32 i = 0; i < 1024; i++)
+        ReceiveBuffer[i] = 0;
+            
     //从服务器接收数据。
     Status = RecvTCP4Socket(ReceiveBuffer, 1024, &recvLen);
     //INFO(L"TCP4Test: RecvTCP4Socket, %r\n", Status);
@@ -460,11 +463,11 @@ EFI_STATUS TCP4Test()
     //显示接收的数据。
     //INFO(L" TCP4Test Recv: %d bytes\n", recvLen);
     //AsciiPrint("%d bytes Recv raw data:%c %c %c %c \n", recvLen, ReceiveBuffer[0],ReceiveBuffer[1],ReceiveBuffer[2],ReceiveBuffer[3]);
-    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d Receive raw data recvLen: %d %c %c %c %c \n", __LINE__, recvLen, ReceiveBuffer[0], ReceiveBuffer[1], ReceiveBuffer[2], ReceiveBuffer[3]);
+    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d Receive raw data recvLen: %d %c%c%c%c\n", __LINE__, recvLen, ReceiveBuffer[0], ReceiveBuffer[1], ReceiveBuffer[2], ReceiveBuffer[3]);
    
-    ReceiveBuffer[5] = '\0';
+    ReceiveBuffer[20] = '\0';
     //INFO(L" TCP4Test: Recv data is: %a\n", RecvBuffer);
-    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d  TCP4Test: Receive data is: %s \n", __LINE__, ReceiveBuffer);
+    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d  TCP4Test: Receive data is: %a \n", __LINE__, ReceiveBuffer);
    
 
     //向服务器发送数据。
@@ -478,7 +481,7 @@ EFI_STATUS TCP4Test()
     
     //gBS->Stall(1000);
     //INFO(L"TCP4Test: Length of SendStr is %d \n", AsciiStrLen(SendStr));
-    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d TCP4Test: Length of SendStr is: %d \n", __LINE__, AsciiStrLen(SendBuffer));
+    //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d TCP4Test: Length of SendStr is: %d \n", __LINE__, AsciiStrLen(SendBuffer));
        
     //当前测试，暂不释放socket资源
     //Status = CloseTCP4Socket();
