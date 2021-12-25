@@ -376,7 +376,7 @@ EFI_STATUS L2_TCP4_SocketClose()
 CHAR8 *ReceiveBuffer = NULL;
 CHAR8 *SendBuffer = NULL;
 
-EFI_STATUS L2_TCP_Init()
+EFI_STATUS L2_TCP4_Init()
 {
     EFI_STATUS Status = 0;
     //CHAR8 SendBuffer[] = "Hello, I'm a client of UEFI.";
@@ -413,7 +413,7 @@ EFI_STATUS L2_TCP_Init()
 *  返回值： 成功：XXXX，失败：XXXXX
 *
 *****************************************************************************/
-EFI_STATUS L2_TCP_Receive()
+EFI_STATUS L2_TCP4_Receive()
 {
     UINTN recvLen = 0;
     EFI_STATUS Status = 0;
@@ -451,7 +451,7 @@ EFI_STATUS L2_TCP_Receive()
 *  返回值： 成功：XXXX，失败：XXXXX
 *
 *****************************************************************************/
-EFI_STATUS L2_TCP_Send()
+EFI_STATUS L2_TCP4_Send()
 {
     EFI_STATUS Status = 0;
     

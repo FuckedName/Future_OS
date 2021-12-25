@@ -48,9 +48,9 @@ typedef struct MyTCP4Socket{
 
 static MYTCP4SOCKET* TCP4SocketFd;
 
-EFI_STATUS L2_TCP_Send();
+EFI_STATUS L2_TCP4_Send();
 
-EFI_STATUS L2_TCP_Receive();
+EFI_STATUS L2_TCP4_Receive();
 
 UINTN L2_TCP4_SocketCreate(VOID);
 
