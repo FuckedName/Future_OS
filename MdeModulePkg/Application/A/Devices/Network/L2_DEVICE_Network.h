@@ -48,27 +48,27 @@ typedef struct MyTCP4Socket{
 
 static MYTCP4SOCKET* TCP4SocketFd;
 
-EFI_STATUS TCP_Send();
+EFI_STATUS L2_TCP_Send();
 
-EFI_STATUS TCP_Receive();
+EFI_STATUS L2_TCP_Receive();
 
-UINTN CreateTCP4Socket(VOID);
+UINTN L2_TCP4_SocketCreate(VOID);
 
-EFI_STATUS InitTcp4SocketFd();
+EFI_STATUS L2_TCP4_SocketInit();
 
-VOID  Tcp4SendNotify(EFI_EVENT Event,      VOID *Context);
+VOID  L2_TCP4_SendNotify(EFI_EVENT Event,      VOID *Context);
 
-VOID  Tcp4RecvNotify(EFI_EVENT      Event,  VOID *Context);
+VOID  L2_TCP4_ReceiveNotify(EFI_EVENT      Event,  VOID *Context);
 
-VOID NopNoify (EFI_EVENT  Event,    VOID *Context);
+VOID L2_TCP4_HeartBeatNotify (EFI_EVENT  Event,    VOID *Context);
 
-EFI_STATUS ConfigTCP4Socket();
+EFI_STATUS L2_TCP4_SocketConfig();
 
-EFI_STATUS ConnectTCP4Socket();
+EFI_STATUS L2_TCP4_SocketConnect();
 
-EFI_STATUS SendTCP4Socket(CHAR8* Data, UINTN Lenth);
+EFI_STATUS L2_TCP4_SocketSend(CHAR8* Data, UINTN Lenth);
 
-EFI_STATUS RecvTCP4Socket(CHAR8* Buffer, UINTN Length, UINTN *recvLength);
+EFI_STATUS L2_TCP4_SocketReceive(CHAR8* Buffer, UINTN Length, UINTN *recvLength);
 
 EFI_STATUS WirelessMAC();
 

@@ -145,7 +145,7 @@ EFI_STATUS L2_COMMON_MultiProcessInit ()
 
     EFI_EVENT_NOTIFY       TaskProcessesGroup2[] = {L2_TIMER_Print};
     
-    EFI_EVENT_NOTIFY       TaskProcessesGroup3[] = {NopNoify, Tcp4RecvNotify, Tcp4SendNotify};
+    EFI_EVENT_NOTIFY       TaskProcessesGroup3[] = {L2_TCP4_HeartBeatNotify, L2_TCP4_ReceiveNotify, L2_TCP4_SendNotify};
 
     for (i = 0; i < sizeof(TaskProcessesGroup1) / sizeof(EFI_EVENT_NOTIFY); i++)
     {

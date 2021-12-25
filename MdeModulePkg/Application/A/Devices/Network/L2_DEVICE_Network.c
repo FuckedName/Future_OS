@@ -46,7 +46,7 @@
 				}while(0);
 
 
-VOID  Tcp4SendNotify(EFI_EVENT Event,      VOID *Context)
+VOID  L2_TCP4_SendNotify(EFI_EVENT Event,      VOID *Context)
 {
      MYTCP4SOCKET *CurSocket = (MYTCP4SOCKET *)(Context);
      
@@ -57,14 +57,14 @@ VOID  Tcp4SendNotify(EFI_EVENT Event,      VOID *Context)
 }
 
 // stub funciton
-VOID NopNoify (EFI_EVENT  Event,    VOID *Context)
+VOID L2_TCP4_HeartBeatNotify (EFI_EVENT  Event,    VOID *Context)
 {
     //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d NopNoify \n", __LINE__);
     
 }
 
 
-VOID  Tcp4RecvNotify(EFI_EVENT      Event,  VOID *Context)
+VOID  L2_TCP4_ReceiveNotify(EFI_EVENT      Event,  VOID *Context)
 {
      MYTCP4SOCKET *CurSocket = (MYTCP4SOCKET *)(Context);
 
@@ -73,7 +73,7 @@ VOID  Tcp4RecvNotify(EFI_EVENT      Event,  VOID *Context)
     //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d Tcp4RecvNotify \n", __LINE__);
 }
 
-EFI_STATUS InitTcp4SocketFd()
+EFI_STATUS L2_TCP4_SocketInit()
 {
     EFI_STATUS                           Status;
     MYTCP4SOCKET *CurSocket = TCP4SocketFd;
@@ -86,14 +86,14 @@ EFI_STATUS InitTcp4SocketFd()
     }
     
     // 2 Create Connect Event
-    Status = gBS->CreateEvent(EVT_NOTIFY_SIGNAL, TPL_CALLBACK, (EFI_EVENT_NOTIFY)NopNoify , (VOID*)&CurSocket->ConnectToken, &CurSocket->ConnectToken.CompletionToken.Event );
+    Status = gBS->CreateEvent(EVT_NOTIFY_SIGNAL, TPL_CALLBACK, (EFI_EVENT_NOTIFY)L2_TCP4_HeartBeatNotify , (VOID*)&CurSocket->ConnectToken, &CurSocket->ConnectToken.CompletionToken.Event );
     if(EFI_ERROR(Status)) 
     {
         return Status;  
     }
     
     // 3 Create Transmit Event
-    Status = gBS->CreateEvent(EVT_NOTIFY_WAIT, TPL_CALLBACK, (EFI_EVENT_NOTIFY)Tcp4SendNotify , (VOID*)CurSocket, &CurSocket->SendToken.CompletionToken.Event);
+    Status = gBS->CreateEvent(EVT_NOTIFY_WAIT, TPL_CALLBACK, (EFI_EVENT_NOTIFY)L2_TCP4_SendNotify , (VOID*)CurSocket, &CurSocket->SendToken.CompletionToken.Event);
     if(EFI_ERROR(Status)) 
     {
         return Status;     
@@ -102,7 +102,7 @@ EFI_STATUS InitTcp4SocketFd()
     CurSocket->m_TransData = L2_MEMORY_Allocate("Network TCP4 Transmit Buffer", MEMORY_TYPE_NETWORK, sizeof(EFI_TCP4_TRANSMIT_DATA));
     
     // 4 Create Recv Event
-    Status = gBS->CreateEvent(EVT_NOTIFY_WAIT, TPL_CALLBACK, (EFI_EVENT_NOTIFY)Tcp4RecvNotify , (VOID*)CurSocket, &CurSocket->RecvToken.CompletionToken.Event);
+    Status = gBS->CreateEvent(EVT_NOTIFY_WAIT, TPL_CALLBACK, (EFI_EVENT_NOTIFY)L2_TCP4_ReceiveNotify , (VOID*)CurSocket, &CurSocket->RecvToken.CompletionToken.Event);
     
     CurSocket->m_RecvData = L2_MEMORY_Allocate("Network Receive Buffer", MEMORY_TYPE_NETWORK, sizeof(EFI_TCP4_RECEIVE_DATA));
     if(EFI_ERROR(Status)) 
@@ -123,7 +123,7 @@ EFI_STATUS InitTcp4SocketFd()
 }
 
 
-UINTN CreateTCP4Socket(VOID)
+UINTN L2_TCP4_SocketCreate(VOID)
 {
     EFI_STATUS                           Status;
     EFI_SERVICE_BINDING_PROTOCOL*  pTcpServiceBinding;
@@ -162,13 +162,13 @@ UINTN CreateTCP4Socket(VOID)
     }
 
     //给初始化结构体指针分配内存
-    InitTcp4SocketFd();
+    L2_TCP4_SocketInit();
     	
     return 0;
 }
 
 
-EFI_STATUS ConfigTCP4Socket()
+EFI_STATUS L2_TCP4_SocketConfig()
 {
     EFI_STATUS Status = EFI_NOT_FOUND;
     MYTCP4SOCKET *CurSocket = TCP4SocketFd;
@@ -207,7 +207,7 @@ EFI_STATUS ConfigTCP4Socket()
 }
 
 //连接服务器端
-EFI_STATUS ConnectTCP4Socket()
+EFI_STATUS L2_TCP4_SocketConnect()
 {
     EFI_STATUS Status = EFI_NOT_FOUND;
     MYTCP4SOCKET *CurSocket = TCP4SocketFd;
@@ -242,7 +242,7 @@ EFI_STATUS ConnectTCP4Socket()
 }
 
 
-EFI_STATUS SendTCP4Socket(CHAR8* Data, UINTN Lenth)
+EFI_STATUS L2_TCP4_SocketSend(CHAR8* Data, UINTN Lenth)
 {
     EFI_STATUS Status = EFI_NOT_FOUND;
     MYTCP4SOCKET *CurSocket = TCP4SocketFd;
@@ -276,7 +276,7 @@ EFI_STATUS SendTCP4Socket(CHAR8* Data, UINTN Lenth)
     return CurSocket->SendToken.CompletionToken.Status;
 }
 
-EFI_STATUS RecvTCP4Socket(CHAR8* Buffer, UINTN Length, UINTN *recvLength)
+EFI_STATUS L2_TCP4_SocketReceive(CHAR8* Buffer, UINTN Length, UINTN *recvLength)
 {
     EFI_STATUS Status = EFI_NOT_FOUND;
     MYTCP4SOCKET *CurSocket = TCP4SocketFd;
@@ -313,7 +313,7 @@ EFI_STATUS RecvTCP4Socket(CHAR8* Buffer, UINTN Length, UINTN *recvLength)
     return CurSocket->RecvToken.CompletionToken.Status;
 }
 
-INTN DestroyTCP4Socket()
+INTN L2_TCP4_SocketDestroy()
 {
     EFI_STATUS Status;
     MYTCP4SOCKET *CurSocket = TCP4SocketFd;
@@ -360,13 +360,13 @@ INTN DestroyTCP4Socket()
     return 0;
 }
 
-EFI_STATUS CloseTCP4Socket()
+EFI_STATUS L2_TCP4_SocketClose()
 {
     EFI_STATUS Status;
     MYTCP4SOCKET *CurSocket = TCP4SocketFd;
 	Status = CurSocket->m_pTcp4Protocol->Close(CurSocket->m_pTcp4Protocol, &CurSocket->CloseToken);
 	
-	DestroyTCP4Socket();
+	L2_TCP4_SocketDestroy();
 	//FreePool(CurSocket);
 	TCP4SocketFd = NULL;
 
@@ -376,7 +376,7 @@ EFI_STATUS CloseTCP4Socket()
 CHAR8 *ReceiveBuffer = NULL;
 CHAR8 *SendBuffer = NULL;
 
-EFI_STATUS TCP_Init()
+EFI_STATUS L2_TCP_Init()
 {
     EFI_STATUS Status = 0;
     //CHAR8 SendBuffer[] = "Hello, I'm a client of UEFI.";
@@ -385,12 +385,12 @@ EFI_STATUS TCP_Init()
     
     //INFO(L"%d TCP4Test: SendTCP4Socket, %r\n", __LINE__, Status);
             
-    CreateTCP4Socket();
+    L2_TCP4_SocketCreate();
 
     //参数配置
-    ConfigTCP4Socket();   
+    L2_TCP4_SocketConfig();   
     
-    Status = ConnectTCP4Socket();  
+    Status = L2_TCP4_SocketConnect();  
 
     ReceiveBuffer = L2_MEMORY_Allocate("Network Receive Buffer", MEMORY_TYPE_NETWORK, 1024);
     SendBuffer = L2_MEMORY_Allocate("Network Send Buffer", MEMORY_TYPE_NETWORK, 10);    
@@ -413,7 +413,7 @@ EFI_STATUS TCP_Init()
 *  返回值： 成功：XXXX，失败：XXXXX
 *
 *****************************************************************************/
-EFI_STATUS TCP_Receive()
+EFI_STATUS L2_TCP_Receive()
 {
     UINTN recvLen = 0;
     EFI_STATUS Status = 0;
@@ -422,7 +422,7 @@ EFI_STATUS TCP_Receive()
         ReceiveBuffer[i] = 0;
             
     //从服务器接收数据。
-    Status = RecvTCP4Socket(ReceiveBuffer, 1024, &recvLen);
+    Status = L2_TCP4_SocketReceive(ReceiveBuffer, 1024, &recvLen);
     if(EFI_ERROR(Status))    
     {
         return Status;
@@ -431,7 +431,7 @@ EFI_STATUS TCP_Receive()
     L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d TCP: Receive: %r \n", __LINE__, Status);
    
     //显示接收的数据。
-    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d Receive raw data Length: %d %c%c%c%c\n", __LINE__, recvLen, ReceiveBuffer[0], ReceiveBuffer[1], ReceiveBuffer[2], ReceiveBuffer[3]);
+    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d Receive raw data Length: %d %c%c%c%c \n", __LINE__, recvLen, ReceiveBuffer[0], ReceiveBuffer[1], ReceiveBuffer[2], ReceiveBuffer[3]);
    
     ReceiveBuffer[20] = '\0';
     L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d TCP: Receive data is: %a \n", __LINE__, ReceiveBuffer);
@@ -451,12 +451,12 @@ EFI_STATUS TCP_Receive()
 *  返回值： 成功：XXXX，失败：XXXXX
 *
 *****************************************************************************/
-EFI_STATUS TCP_Send()
+EFI_STATUS L2_TCP_Send()
 {
     EFI_STATUS Status = 0;
     
     //向服务器发送数据。
-    Status = SendTCP4Socket(SendBuffer, AsciiStrLen(SendBuffer));
+    Status = L2_TCP4_SocketSend(SendBuffer, AsciiStrLen(SendBuffer));
     
     L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d TCP: Send: %r \n", __LINE__, Status);
     if(EFI_ERROR(Status))    
@@ -479,7 +479,7 @@ EFI_STATUS TCP_Send()
 *  返回值： 成功：XXXX，失败：XXXXX
 *
 *****************************************************************************/
-EFI_STATUS WirelessMAC()
+EFI_STATUS L2_WirelessMAC()
 {
     EFI_STATUS                             Status;
     EFI_WIRELESS_MAC_CONNECTION_PROTOCOL*  pWirelessMACConnection;

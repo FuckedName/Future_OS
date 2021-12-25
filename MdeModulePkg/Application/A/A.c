@@ -100,7 +100,7 @@ EFI_STATUS EFIAPI Main (
 
     L2_MOUSE_Init();
     
-    TCP_Init();
+    L2_TCP_Init();
         
     L2_STORE_PartitionAnalysis();
     
