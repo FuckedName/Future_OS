@@ -3653,7 +3653,10 @@ VOID EFIAPI L2_TIMER_Print (
 	if (date_time_count == 0 || date_time_count == 30)
 		date_time_count_increase_flag = (date_time_count_increase_flag == 0) ?  1 : 0;
 
-	TCP4Test();
+	TCP_Send();
+	
+	TCP_Receive();
+	
     gRT->GetTime(&EFITime, NULL);
     EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
     UINT16 x, y;
