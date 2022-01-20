@@ -37,18 +37,16 @@
 #include <Devices/Timer/L2_DEVICE_Timer.h>
 #include <Devices/Network/L2_DEVICE_Network.h>
 
+#include "L2_INTERFACES.h"
 
 
-EFI_EVENT MultiTaskTriggerGroup0Event;
 EFI_EVENT MultiTaskTriggerGroup1Event;
 EFI_EVENT MultiTaskTriggerGroup2Event;
 EFI_EVENT MultiTaskTriggerGroup3Event;
+EFI_EVENT MultiTaskTriggerGroup4Event;
 
 
 UINT32 TimerSliceCount = 0;
-
-VOID
-EFIAPI
 
 
 
@@ -101,6 +99,13 @@ VOID EFIAPI L2_TIMER_Slice(
 	//第二个事件分组是屏幕右下角显示日期、时间、星期几，所以频率可以低些以节约CPU资源
     if (TimerSliceCount % 20 == 0)
        gBS->SignalEvent (MultiTaskTriggerGroup2Event);
+
+    //系统调用如果不为零，表示应用层有系统调用，则触发对应的事件组。
+    if (0 != *APPLICATION_CALL_FLAG_ADDRESS)
+    {
+        gBS->SignalEvent (MultiTaskTriggerGroup4Event);
+        *APPLICATION_CALL_FLAG_ADDRESS = 0;
+    }
     
     ////DEBUG ((EFI_D_INFO, "System time slice Loop ...\n"));
     //gBS->SignalEvent (MultiTaskTriggerEvent);
@@ -134,51 +139,66 @@ EFI_STATUS L2_COMMON_MultiProcessInit ()
     // task group for display date time
     EFI_GUID gMultiProcessGroup2Guid  = { 0x0579257E, 0x1843, 0x45FB, { 0x83, 0x9D, 0x6B, 0x79, 0x09, 0x38, 0x29, 0xAA } };
     
-    // task group for display date time
     EFI_GUID gMultiProcessGroup3Guid  = { 0x0579257E, 0x1843, 0x45FB, { 0x83, 0x9D, 0x6B, 0x79, 0x09, 0x38, 0x29, 0xAB } };
     
+    EFI_GUID gMultiProcessGroup4Guid  = { 0x0579257E, 0x1843, 0x45FB, { 0x83, 0x9D, 0x6B, 0x79, 0x09, 0x38, 0x29, 0xAC } };
     //L2_GRAPHICS_ChineseCharDraw(pMouseBuffer, 0, 0, 11 * 94 + 42, Color, 16);
     
     //DrawChineseCharIntoBuffer(pMouseBuffer, 0, 0, 0, Color, 16);
     
-    EFI_EVENT_NOTIFY       TaskProcessesGroup1[] = {L2_KEYBOARD_Event, L2_MOUSE_Event, L2_SYSTEM_Start};
+    EFI_EVENT_NOTIFY       TaskProcessesGroupSystem[] = {L2_KEYBOARD_Event, L2_MOUSE_Event, L2_SYSTEM_Start};
 
-    EFI_EVENT_NOTIFY       TaskProcessesGroup2[] = {L2_TIMER_Print};
+    EFI_EVENT_NOTIFY       TaskProcessesGroupDateTimePrint[] = {L2_TIMER_Print};
     
-    EFI_EVENT_NOTIFY       TaskProcessesGroup3[] = {L2_TCP4_HeartBeatNotify, L2_TCP4_ReceiveNotify, L2_TCP4_SendNotify};
+    EFI_EVENT_NOTIFY       TaskProcessesGroupTCPHandle[] = {L2_TCP4_HeartBeatNotify, L2_TCP4_ReceiveNotify, L2_TCP4_SendNotify};
+    
+    EFI_EVENT_NOTIFY       TaskProcessesGroupApplicationCall[] = {L2_ApplicationCall};
 
-    for (i = 0; i < sizeof(TaskProcessesGroup1) / sizeof(EFI_EVENT_NOTIFY); i++)
+    for (i = 0; i < sizeof(TaskProcessesGroupSystem) / sizeof(EFI_EVENT_NOTIFY); i++)
     {
         gBS->CreateEventEx(
                           EVT_NOTIFY_SIGNAL,
                           TPL_NOTIFY,
-                          TaskProcessesGroup1[i],
+                          TaskProcessesGroupSystem[i],
                           NULL,
                           &gMultiProcessGroup1Guid,
                           &MultiTaskTriggerGroup1Event);
     }    
 
-    for (i = 0; i < sizeof(TaskProcessesGroup2) / sizeof(EFI_EVENT_NOTIFY); i++)
+    for (i = 0; i < sizeof(TaskProcessesGroupDateTimePrint) / sizeof(EFI_EVENT_NOTIFY); i++)
     {
         gBS->CreateEventEx(
                           EVT_NOTIFY_SIGNAL,
                           TPL_NOTIFY,
-                          TaskProcessesGroup2[i],
+                          TaskProcessesGroupDateTimePrint[i],
                           NULL,
                           &gMultiProcessGroup2Guid,
                           &MultiTaskTriggerGroup2Event);
     }    
 
-    for (i = 0; i < sizeof(TaskProcessesGroup3) / sizeof(EFI_EVENT_NOTIFY); i++)
+    for (i = 0; i < sizeof(TaskProcessesGroupTCPHandle) / sizeof(EFI_EVENT_NOTIFY); i++)
     {
         gBS->CreateEventEx(
                           EVT_NOTIFY_SIGNAL,
                           TPL_NOTIFY,
-                          TaskProcessesGroup3[i],
+                          TaskProcessesGroupTCPHandle[i],
                           NULL,
                           &gMultiProcessGroup3Guid,
                           &MultiTaskTriggerGroup3Event);
     }    
+
+    for (i = 0; i < sizeof(TaskProcessesGroupApplicationCall) / sizeof(EFI_EVENT_NOTIFY); i++)
+    {
+        gBS->CreateEventEx(
+                          EVT_NOTIFY_SIGNAL,
+                          TPL_NOTIFY,
+                          TaskProcessesGroupApplicationCall[i],
+                          NULL,
+                          &gMultiProcessGroup4Guid,
+                          &MultiTaskTriggerGroup4Event);
+    }    
+
+    
 
     return EFI_SUCCESS;
 }

@@ -30,6 +30,7 @@
 #include <Protocol/DevicePathToText.h>
 #include <L2_PARTITION.h>
 #include <Partitions/NTFS/L2_PARTITION_NTFS.h>
+#include <Partitions/FAT32/L2_PARTITION_FAT32.h>
 
 #include <Library/UefiBootServicesTableLib.h>
 #include <Protocol/DevicePathToText.h>

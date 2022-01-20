@@ -1072,7 +1072,7 @@ void L2_GRAPHICS_Init()
 void L2_GRAPHICS_BootScreenInit()
 {
     //如果不加下面这几行，则是直接显示内存信息，看起来有点像雪花    
-    for (int j = 0; j < ScreenHeight; j++)
+    for (int j = ScreenHeight / 2; j < ScreenHeight; j++)
     {
         for (int i = 0; i < ScreenWidth; i++)
         {
@@ -1496,7 +1496,9 @@ EFI_STATUS L2_GRAPHICS_StartMenuInit()
 
     UINT8 word[3] = "啊";
     
-    L2_GRAPHICS_ChineseCharDraw12(pStartMenuBuffer, x , y,     (word[0] - 0xa0- 1) * 94 + word[1] - 0xa0 - 1, Color, StartMenuWidth);   
+    //L2_GRAPHICS_ChineseCharDraw12(pStartMenuBuffer, x , y,     (word[0] - 0xa0- 1) * 94 + word[1] - 0xa0 - 1, Color, StartMenuWidth);   
+
+	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: word[0]:%d word[1]:%d word[2]:%d \n", __LINE__, word[0], word[1], word[2]);
 
 }
 
