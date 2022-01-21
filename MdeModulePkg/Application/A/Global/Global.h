@@ -388,6 +388,8 @@ extern UINT8 *pMapper;
 extern UINT64 FreeNumberOfPages;
 extern UINT64 SystemAllPagesAllocated;
 extern DEVICE_PARAMETER device[10];
+extern EFI_HANDLE  TimerOne;
+
 
 // Application call
 extern UINT32 *APPLICATION_CALL_FLAG_ADDRESS;

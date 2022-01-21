@@ -108,6 +108,26 @@ VOID L2_ApplicationCall(APPLICATION_CALL_ID ApplicationCallID)
         return ApplicationCallTable[*APPLICATION_CALL_FLAG_ADDRESS].pApplicationCallFunction();
 }
 
+INT32 (*pApplicationFunction)(); 
+
+
+/****************************************************************************
+*
+*  描述:   给操作系统应用程序提供调用的接口
+*
+*  ApplicationCallID：     应用调用接口编号
+*  pParameters：           参数列表
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
+VOID L2_ApplicationShutdown()
+{
+    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: L2_ApplicationShutdown \n", __LINE__);
+    *APPLICATION_CALL_FLAG_ADDRESS = APPLICATION_CALL_ID_SHUTDOWN;
+}
+
 
 /****************************************************************************
 *

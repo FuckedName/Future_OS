@@ -38,6 +38,7 @@
 #include "L2_DEVICE_Timer.h"
 
 
+EFI_HANDLE  TimerOne    = NULL;
 
 
 /****************************************************************************
@@ -54,7 +55,6 @@
 EFI_STATUS L2_TIMER_IntervalInit()
 {
     EFI_STATUS  Status;
-    EFI_HANDLE  TimerOne    = NULL;
     static const UINTN TimeInterval = 20000;
     
     UINT32 *TimerCount;

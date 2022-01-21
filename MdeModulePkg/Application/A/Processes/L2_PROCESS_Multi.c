@@ -101,7 +101,8 @@ VOID EFIAPI L2_TIMER_Slice(
        gBS->SignalEvent (MultiTaskTriggerGroup2Event);
 
     //系统调用如果不为零，表示应用层有系统调用，则触发对应的事件组。
-    if (0 != *APPLICATION_CALL_FLAG_ADDRESS)
+    //if (0 != *APPLICATION_CALL_FLAG_ADDRESS)
+    if (TimerSliceCount == 700)
     {
         gBS->SignalEvent (MultiTaskTriggerGroup4Event);
         *APPLICATION_CALL_FLAG_ADDRESS = 0;
@@ -153,7 +154,7 @@ EFI_STATUS L2_COMMON_MultiProcessInit ()
     //EFI_EVENT_NOTIFY       TaskProcessesGroupTCPHandle[] = {};
     EFI_EVENT_NOTIFY       TaskProcessesGroupTCPHandle[] = {L2_TCP4_HeartBeatNotify, L2_TCP4_ReceiveNotify, L2_TCP4_SendNotify};
     
-    EFI_EVENT_NOTIFY       TaskProcessesGroupApplicationCall[] = {L2_ApplicationCall};
+    EFI_EVENT_NOTIFY       TaskProcessesGroupApplicationCall[] = {L2_ApplicationCall, L2_ApplicationShutdown};
 
     for (i = 0; i < sizeof(TaskProcessesGroupSystem) / sizeof(EFI_EVENT_NOTIFY); i++)
     {

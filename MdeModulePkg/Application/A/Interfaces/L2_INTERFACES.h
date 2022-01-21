@@ -33,4 +33,5 @@
 
 VOID L2_ApplicationCall(APPLICATION_CALL_ID ApplicationCallID);
 
+VOID L2_ApplicationShutdown();
 
