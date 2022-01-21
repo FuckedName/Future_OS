@@ -388,7 +388,16 @@ extern UINT8 *pMapper;
 extern UINT64 FreeNumberOfPages;
 extern UINT64 SystemAllPagesAllocated;
 extern DEVICE_PARAMETER device[10];
+
+// Application call
 extern UINT32 *APPLICATION_CALL_FLAG_ADDRESS;
+
+typedef enum
+{
+    APPLICATION_CALL_ID_INIT = 0,
+    APPLICATION_CALL_ID_SHUTDOWN,
+    APPLICATION_CALL_ID_MAX
+}APPLICATION_CALL_ID;
 
 
 #define MOUSE_NO_CLICKED 0

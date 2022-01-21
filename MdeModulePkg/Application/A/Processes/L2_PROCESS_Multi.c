@@ -150,6 +150,7 @@ EFI_STATUS L2_COMMON_MultiProcessInit ()
 
     EFI_EVENT_NOTIFY       TaskProcessesGroupDateTimePrint[] = {L2_TIMER_Print};
     
+    //EFI_EVENT_NOTIFY       TaskProcessesGroupTCPHandle[] = {};
     EFI_EVENT_NOTIFY       TaskProcessesGroupTCPHandle[] = {L2_TCP4_HeartBeatNotify, L2_TCP4_ReceiveNotify, L2_TCP4_SendNotify};
     
     EFI_EVENT_NOTIFY       TaskProcessesGroupApplicationCall[] = {L2_ApplicationCall};

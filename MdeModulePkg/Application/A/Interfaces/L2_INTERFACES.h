@@ -30,12 +30,6 @@
 
 #include <Global/Global.h>
 
-typedef enum
-{
-    APPLICATION_CALL_SHUTDOWN = 0,
-    APPLICATION_CALL_MAX
-}APPLICATION_CALL_ID;
-
 
 VOID L2_ApplicationCall(APPLICATION_CALL_ID ApplicationCallID);
 

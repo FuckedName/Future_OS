@@ -47,7 +47,7 @@ UINT32 *APPLICATION_CALL_FLAG_ADDRESS = (UINT32 *)(0x20000000 - 0x1000);
 typedef struct
 {
     APPLICATION_CALL_ID             ApplicationCallID;
-    VOID                            (*pApplicationCallFunction)(); 
+    EFI_STATUS                      (*pApplicationCallFunction)(); 
 }APPLICATION_CALL_TABLE;
 
 
@@ -85,8 +85,9 @@ MOUSE_CLICK_EVENT L2_GRAPHICS_DeskLayerClickEventGet()
 *****************************************************************************/
 APPLICATION_CALL_TABLE ApplicationCallTable[] =
 {
-    {APPLICATION_CALL_SHUTDOWN,       		L2_System_Shutdown},
-    {APPLICATION_CALL_MAX,                  NULL},
+    {APPLICATION_CALL_ID_INIT,       		    NULL},
+    {APPLICATION_CALL_ID_SHUTDOWN,       		L2_System_Shutdown},
+    {APPLICATION_CALL_ID_MAX,                   NULL},
 };
 
 
@@ -104,7 +105,7 @@ APPLICATION_CALL_TABLE ApplicationCallTable[] =
 VOID L2_ApplicationCall(APPLICATION_CALL_ID ApplicationCallID)
 {
     if (0 != *APPLICATION_CALL_FLAG_ADDRESS)
-        return ApplicationCallTable[ApplicationCallID].pApplicationCallFunction();
+        return ApplicationCallTable[*APPLICATION_CALL_FLAG_ADDRESS].pApplicationCallFunction();
 }
 
 
@@ -121,7 +122,7 @@ VOID L2_ApplicationCall(APPLICATION_CALL_ID ApplicationCallID)
 *****************************************************************************/
 VOID L2_ApplicationInitial()
 {
-    *APPLICATION_CALL_FLAG_ADDRESS = 0;
+    *APPLICATION_CALL_FLAG_ADDRESS = APPLICATION_CALL_ID_INIT;
 }
 
 
