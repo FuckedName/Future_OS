@@ -31,10 +31,5 @@
 #include <Global/Global.h>
 
 
-VOID L2_INTERFACES_ApplicationCall(APPLICATION_CALL_ID ApplicationCallID);
-
-VOID L2_INTERFACES_Shutdown();
-
-VOID L2_INTERFACES_Initial();
-
+VOID L2_ApplicationRun(UINT8 *pPath);
 

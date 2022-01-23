@@ -226,8 +226,8 @@ EFI_STATUS L1_FILE_RootPathAnalysis(UINT8 *p)
                                 pItems[i].FileLength[0], pItems[i].FileLength[1], pItems[i].FileLength[2], pItems[i].FileLength[3],
                                 pItems[i].Attribute[0]);
                 
-                FileBlockStart = pItems[i].StartClusterLow2B[0] + (UINT32)pItems[i].StartClusterLow2B[1] * 16 * 16  + (UINT32)pItems[i].StartClusterHigh2B[0] * 16 * 16 * 16 * 16 + (UINT32)pItems[i].StartClusterHigh2B[1] * 16 * 16 * 16 * 16 * 16 * 16;
-                FileLength = pItems[i].FileLength[0] + (UINT32)pItems[i].FileLength[1] * 16 * 16 + (UINT32)pItems[i].FileLength[2] * 16 * 16 * 16 * 16 + (UINT32)pItems[i].FileLength[3] * 16 * 16 * 16 * 16 * 16 * 16;
+                FileBlockStart = (UINT64)pItems[i].StartClusterLow2B[0] | (UINT64)pItems[i].StartClusterLow2B[1] << 8 | (UINT64)pItems[i].StartClusterHigh2B[0] << 16 | (UINT64)pItems[i].StartClusterHigh2B[1] << 24;
+                FileLength = (UINT64)pItems[i].FileLength[0] | (UINT64)pItems[i].FileLength[1] << 8 | (UINT64)pItems[i].FileLength[2] << 16 | (UINT64)pItems[i].FileLength[3] << 24;
 
                 L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: FileBlockStart: %d FileLength: %ld\n", __LINE__, FileBlockStart, FileLength);
             }
@@ -372,7 +372,7 @@ UINT32 L2_FILE_GetNextBlockNumber()
         return 0x0fffffff;
     }
     
-    return FAT32_Table[PreviousBlockNumber  * 4] + (UINT32)FAT32_Table[PreviousBlockNumber * 4 + 1] * 16 * 16 + (UINT32)FAT32_Table[PreviousBlockNumber * 4 + 2] * 16 * 16 * 16 * 16 + (UINT32)FAT32_Table[PreviousBlockNumber * 4 + 3] * 16 * 16 * 16 * 16 * 16 * 16;  
+    return FAT32_Table[PreviousBlockNumber  * 4] | (UINT32)FAT32_Table[PreviousBlockNumber * 4 + 1] << 8 | (UINT32)FAT32_Table[PreviousBlockNumber * 4 + 2] << 16 | (UINT32)FAT32_Table[PreviousBlockNumber * 4 + 3] << 24;  
 }
 
 

@@ -600,7 +600,7 @@ EFI_STATUS L2_MOUSE_MyComputerFolderItemClicked()
 
 		UINT16 High2B = L1_NETWORK_2BytesToUINT16(pItems[index].StartClusterHigh2B);
 		UINT16 Low2B  = L1_NETWORK_2BytesToUINT16(pItems[index].StartClusterLow2B);
-		UINT32 StartCluster = High2B * 16 * 16 * 16 * 16 + Low2B;
+		UINT32 StartCluster = (UINT32)High2B << 64 | (UINT32)Low2B;
 
 		// Start cluster id is 2, exclude 0,1
 		//这样写死8192，会有BUG

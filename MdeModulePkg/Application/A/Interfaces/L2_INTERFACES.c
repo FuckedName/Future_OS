@@ -46,8 +46,8 @@ UINT32 *APPLICATION_CALL_FLAG_ADDRESS = (UINT32 *)(0x20000000 - 0x1000);
 
 typedef struct
 {
-    APPLICATION_CALL_ID             ApplicationCallID;
-    EFI_STATUS                      (*pApplicationCallFunction)(); 
+    APPLICATION_CALL_ID             ApplicationCallID; //类似Linux系统调用
+    EFI_STATUS                      (*pApplicationCallFunction)();  //不用调用ID对应的处理函数
 }APPLICATION_CALL_TABLE;
 
 
@@ -72,10 +72,9 @@ MOUSE_CLICK_EVENT L2_GRAPHICS_DeskLayerClickEventGet()
 
 /****************************************************************************
 *
-*  描述:   根据鼠标光标所在图层，找到图层点击事件，并根据点击事件找到对应的响应处理函数。
-*  第一列：不同图层走到对应处理函数
-*  第二列：根据图层ID获取不同图层的点击事件XXXXXClickEventGet
-*  第三列：处理不同事件XXXXXClickEventHandle
+*  描述:   根据应用调用的接口类型，找到对应的处理函数。
+*  第一列：接口类型定义
+*  第二列：处理函数
 *  参数1： xxxxx
 *  参数2： xxxxx
 *  参数n： xxxxx
@@ -83,7 +82,7 @@ MOUSE_CLICK_EVENT L2_GRAPHICS_DeskLayerClickEventGet()
 *  返回值： 成功：XXXX，失败：XXXXX
 *
 *****************************************************************************/
-APPLICATION_CALL_TABLE ApplicationCallTable[] =
+APPLICATION_CALL_TABLE InterfaceCallTable[] =
 {
     {APPLICATION_CALL_ID_INIT,       		    NULL},
     {APPLICATION_CALL_ID_SHUTDOWN,       		L2_System_Shutdown},
@@ -102,13 +101,18 @@ APPLICATION_CALL_TABLE ApplicationCallTable[] =
 *  返回值： 成功：XXXX，失败：XXXXX
 *
 *****************************************************************************/
-VOID L2_ApplicationCall(APPLICATION_CALL_ID ApplicationCallID)
+VOID L2_INTERFACES_ApplicationCall(APPLICATION_CALL_ID ApplicationCallID)
 {
+    //进入系统调用
     if (0 != *APPLICATION_CALL_FLAG_ADDRESS)
-        return ApplicationCallTable[*APPLICATION_CALL_FLAG_ADDRESS].pApplicationCallFunction();
-}
+    {
+        //执行系统调用
+        InterfaceCallTable[*APPLICATION_CALL_FLAG_ADDRESS].pApplicationCallFunction();
 
-INT32 (*pApplicationFunction)(); 
+        //把系统调用类型设置为初始化，不然会进入死循环
+        *APPLICATION_CALL_FLAG_ADDRESS = APPLICATION_CALL_ID_INIT;
+    }    
+}
 
 
 /****************************************************************************
@@ -122,10 +126,10 @@ INT32 (*pApplicationFunction)();
 *  返回值： 成功：XXXX，失败：XXXXX
 *
 *****************************************************************************/
-VOID L2_ApplicationShutdown()
+VOID L2_INTERFACES_Shutdown()
 {
     L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: L2_ApplicationShutdown \n", __LINE__);
-    *APPLICATION_CALL_FLAG_ADDRESS = APPLICATION_CALL_ID_SHUTDOWN;
+    
 }
 
 
@@ -140,7 +144,7 @@ VOID L2_ApplicationShutdown()
 *  返回值： 成功：XXXX，失败：XXXXX
 *
 *****************************************************************************/
-VOID L2_ApplicationInitial()
+VOID L2_INTERFACES_Initial()
 {
     *APPLICATION_CALL_FLAG_ADDRESS = APPLICATION_CALL_ID_INIT;
 }

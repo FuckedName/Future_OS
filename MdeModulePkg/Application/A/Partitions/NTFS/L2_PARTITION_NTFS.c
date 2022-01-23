@@ -768,11 +768,11 @@ UINT16  L2_FILE_NTFS_FileItemAttributeAnalysis(UINT8 *p, UINT16 AttributeOffset,
 						UINT64 IE_MftReferNumber = L1_NETWORK_8BytesToUINT64(pItem[Offset]);
 						UINT8 IE_FileNameSize = pItem[Offset + 0x50];
 						UINT8 IE_FileNamespace = pItem[Offset + 0x51];
-						UINT64 IE_FileFlag = pItem[Offset + 0x48] + (UINT64)pItem[Offset + 0x48 + 1] * 256 + (UINT64)pItem[Offset + 0x48 + 2] * 256 * 256 + 
-										     (UINT64)pItem[Offset + 0x48 + 3] * 256 * 256 * 256 + (UINT64)pItem[Offset + 0x48 + 4] * 256 * 256 * 256 * 256 + 
-										     (UINT64)pItem[Offset + 0x48 + 5] * 256 * 256 * 256 * 256 * 256 + (UINT64)pItem[Offset + 0x48 + 6] * 256 * 256 * 256 * 256 * 256 * 256 + 
-										     (UINT64)pItem[Offset + 0x48 + 7] * 256 * 256 * 256 * 256 * 256 * 256 * 256;
-						UINT16 IE_Size = pItem[Offset + 0x8] + pItem[Offset + 0x9] * 16 * 16;
+						UINT64 IE_FileFlag = pItem[Offset + 0x48] | (UINT64)pItem[Offset + 0x48 + 1] << 8 | (UINT64)pItem[Offset + 0x48 + 2]  << 16 |  
+										     (UINT64)pItem[Offset + 0x48 + 3]  << 24 | (UINT64)pItem[Offset + 0x48 + 4]  << 32 |  
+										     (UINT64)pItem[Offset + 0x48 + 5]  << 40 | (UINT64)pItem[Offset + 0x48 + 6]  << 48 |  
+										     (UINT64)pItem[Offset + 0x48 + 7]  << 56 ;
+						UINT16 IE_Size = (UINT16)pItem[Offset + 0x8] | (UINT16)pItem[Offset + 0x9] << 8;
 	
 						L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: NameSize: %02X Namespace: %02X IE_FileFlag: %X IE_Size: %X ", __LINE__, IE_FileNameSize, IE_FileNamespace, IE_FileFlag, IE_Size);
 							
@@ -1097,7 +1097,7 @@ UINT16  L2_FILE_NTFS_FileItemAttributeAnalysis2(UINT8 *p, UINT16 AttributeOffset
 						UINT8 IE_FileNameSize = pItem[Offset + 0x50];
 						UINT8 IE_FileNamespace = pItem[Offset + 0x51];
 						UINT64 IE_FileFlag = L1_NETWORK_8BytesToUINT64(pItem[Offset + 0x48]);
-						UINT16 IE_Size = pItem[Offset + 0x8] + pItem[Offset + 0x9] * 16 * 16;
+						UINT16 IE_Size = (UINT16)pItem[Offset + 0x8] | (UINT16)pItem[Offset + 0x9] << 8;
 	
 						L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: NameSize: %02X Namespace: %02X IE_FileFlag: %X IE_Size: %X ", __LINE__, IE_FileNameSize, IE_FileNamespace, IE_FileFlag, IE_Size);
 							

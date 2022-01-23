@@ -115,7 +115,7 @@ VOID EFIAPI L2_TIMER_Slice(
     return;
 }
 
-//2147483648=2G大小内存处
+//操作系统给应用程序分配的内存，以2147483648=2G大小内存处开始，当前只有一个应用程序
 #define APPLICATION_DYNAMIC_MEMORY_ADDRESS_START 0x80000000
 
 
@@ -145,58 +145,57 @@ EFI_STATUS L2_COMMON_MultiProcessInit ()
     EFI_GUID gMultiProcessGroup3Guid  = { 0x0579257E, 0x1843, 0x45FB, { 0x83, 0x9D, 0x6B, 0x79, 0x09, 0x38, 0x29, 0xAB } };
     
     EFI_GUID gMultiProcessGroup4Guid  = { 0x0579257E, 0x1843, 0x45FB, { 0x83, 0x9D, 0x6B, 0x79, 0x09, 0x38, 0x29, 0xAC } };
-    //L2_GRAPHICS_ChineseCharDraw(pMouseBuffer, 0, 0, 11 * 94 + 42, Color, 16);
-    
-    //DrawChineseCharIntoBuffer(pMouseBuffer, 0, 0, 0, Color, 16);
-    
-    EFI_EVENT_NOTIFY       TaskProcessesGroupSystem[] = {L2_KEYBOARD_Event, L2_MOUSE_Event, L2_SYSTEM_Start};
 
+    //系统事件：键盘处理，鼠标处理，
+    EFI_EVENT_NOTIFY       TaskProcessesGroupSystem[] = {L2_KEYBOARD_Event, L2_MOUSE_Event};
+
+    //系统日期和时间在桌面右下角显示
     EFI_EVENT_NOTIFY       TaskProcessesGroupDateTimePrint[] = {L2_TIMER_Print};
-    
-    //EFI_EVENT_NOTIFY       TaskProcessesGroupTCPHandle[] = {};
+
+    //TCP通信处理相关事件
     EFI_EVENT_NOTIFY       TaskProcessesGroupTCPHandle[] = {L2_TCP4_HeartBeatNotify, L2_TCP4_ReceiveNotify, L2_TCP4_SendNotify};
 
-    UINT8 *p = (UINT8 *)APPLICATION_DYNAMIC_MEMORY_ADDRESS_START;
-    p[0] = 0xf3;
-    p[1] = 0x0f;
-    p[2] = 0x1e;
-    p[3] = 0xfa;
+    UINT8 *pApplication = (UINT8 *)APPLICATION_DYNAMIC_MEMORY_ADDRESS_START;
+    pApplication[0] = 0xf3;
+    pApplication[1] = 0x0f;
+    pApplication[2] = 0x1e;
+    pApplication[3] = 0xfa;
     
-    p[4] = 0x55;
+    pApplication[4] = 0x55;
     
-    p[5] = 0x48;
-    p[6] = 0x89;
-    p[7] = 0xe5;
+    pApplication[5] = 0x48;
+    pApplication[6] = 0x89;
+    pApplication[7] = 0xe5;
 
-    p[8] = 0x48;
-    p[9] = 0xc7;
-    p[0xa] = 0x45;
-    p[0xb] = 0xf8;
-    p[0xc] = 0x00;
-    p[0xd] = 0xf0;
-    p[0xe] = 0xff;
+    pApplication[8] = 0x48;
+    pApplication[9] = 0xc7;
+    pApplication[0xa] = 0x45;
+    pApplication[0xb] = 0xf8;
+    pApplication[0xc] = 0x00;
+    pApplication[0xd] = 0xf0;
+    pApplication[0xe] = 0xff;
     
-    p[0xf] = 0x1f;
+    pApplication[0xf] = 0x1f;
     
-    p[0x10] = 0x48;
-    p[0x11] = 0x8b;
-    p[0x12] = 0x45;
-    p[0x13] = 0xf8;
+    pApplication[0x10] = 0x48;
+    pApplication[0x11] = 0x8b;
+    pApplication[0x12] = 0x45;
+    pApplication[0x13] = 0xf8;
     
-    p[0x14] = 0x48;
-    p[0x15] = 0xc7;
-    p[0x16] = 0x00;    
-    p[0x17] = 0x01;
-    p[0x18] = 0x00;
-    p[0x19] = 0x00;
-    p[0x1a] = 0x00;
+    pApplication[0x14] = 0x48;
+    pApplication[0x15] = 0xc7;
+    pApplication[0x16] = 0x00;    
+    pApplication[0x17] = 0x01;
+    pApplication[0x18] = 0x00;
+    pApplication[0x19] = 0x00;
+    pApplication[0x1a] = 0x00;
     
-    p[0x1b] = 0x90;
-    p[0x1c] = 0x5d;
-    p[0x1d] = 0xc3;
+    pApplication[0x1b] = 0x90;
+    pApplication[0x1c] = 0x5d;
+    pApplication[0x1d] = 0xc3;
     
-    
-    EFI_EVENT_NOTIFY       TaskProcessesGroupApplicationCall[] = {L2_ApplicationCall, p};
+    //操作系统运行应用程序对应的事件处理
+    EFI_EVENT_NOTIFY       TaskProcessesGroupApplicationCall[] = {L2_INTERFACES_ApplicationCall, pApplication};
     //EFI_EVENT_NOTIFY       TaskProcessesGroupApplicationCall[] = {L2_ApplicationCall};
 
     for (i = 0; i < sizeof(TaskProcessesGroupSystem) / sizeof(EFI_EVENT_NOTIFY); i++)

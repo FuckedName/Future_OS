@@ -60,6 +60,8 @@
   	Partitions/L3_PARTITION.h
   	Interfaces/L2_INTERFACES.c
   	Interfaces/L2_INTERFACES.h
+  	Applications/L2_APPLICATIONS.c
+  	Applications/L2_APPLICATIONS.h
   	Partitions/NTFS/L2_PARTITION_NTFS.c
 	Partitions/NTFS/L2_PARTITION_NTFS.h
 	Partitions/NTFS/L1_PARTITION_NTFS.c

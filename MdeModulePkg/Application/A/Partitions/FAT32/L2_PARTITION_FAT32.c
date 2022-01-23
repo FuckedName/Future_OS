@@ -43,9 +43,9 @@
 *****************************************************************************/
 VOID L2_FILE_Transfer(MasterBootRecord *pSource, MasterBootRecordSwitched *pDest)
 {
-    pDest->ReservedSelector = pSource->ReservedSelector[0] + pSource->ReservedSelector[1] * 16 * 16;
-    pDest->SectorsPerFat    = (UINT32)pSource->SectorsPerFat[0] + (UINT32)(pSource->SectorsPerFat[1]) * 16 * 16 + (UINT32)(pSource->SectorsPerFat[2]) * 16 * 16 * 16 * 16 + (UINT32)(pSource->SectorsPerFat[3]) * 16 * 16 * 16 * 16 * 16 * 16;
-    pDest->BootPathStartCluster = (UINT32)pSource->BootPathStartCluster[0] + (UINT32)pSource->BootPathStartCluster[1] * 16 * 16 + (UINT32)pSource->BootPathStartCluster[2] * 16 * 16 * 16 * 16, (UINT32)pSource->BootPathStartCluster[3] * 16 * 16 * 16 * 16 * 16 * 16;
+    pDest->ReservedSelector = (UINT16)pSource->ReservedSelector[0] | (UINT16)pSource->ReservedSelector[1] << 8;
+    pDest->SectorsPerFat    = (UINT32)pSource->SectorsPerFat[0] | (UINT32)(pSource->SectorsPerFat[1]) << 8 | (UINT32)(pSource->SectorsPerFat[2]) << 16 | (UINT32)(pSource->SectorsPerFat[3]) << 24;
+    pDest->BootPathStartCluster = (UINT32)pSource->BootPathStartCluster[0] | (UINT32)pSource->BootPathStartCluster[1] << 8 | (UINT32)pSource->BootPathStartCluster[2] << 16 | (UINT32)pSource->BootPathStartCluster[3] << 24;
     pDest->NumFATS      = pSource->NumFATS[0];
     pDest->SectorOfCluster = pSource->SectorOfCluster[0];
 
