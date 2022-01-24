@@ -44,6 +44,7 @@ EFI_EVENT MultiTaskTriggerGroup1Event;
 EFI_EVENT MultiTaskTriggerGroup2Event;
 EFI_EVENT MultiTaskTriggerGroup3Event;
 EFI_EVENT MultiTaskTriggerGroup4Event;
+UINT8 *pApplication = NULL;
 
 
 UINT32 TimerSliceCount = 0;
@@ -105,7 +106,7 @@ VOID EFIAPI L2_TIMER_Slice(
     if (TimerSliceCount == 700)
     {
         gBS->SignalEvent (MultiTaskTriggerGroup4Event);
-        *APPLICATION_CALL_FLAG_ADDRESS = 0;
+        *APPLICATION_CALL_FLAG_ADDRESS = APPLICATION_CALL_ID_INIT;
     }
     
     ////DEBUG ((EFI_D_INFO, "System time slice Loop ...\n"));
@@ -155,8 +156,8 @@ EFI_STATUS L2_COMMON_MultiProcessInit ()
     //TCP通信处理相关事件
     EFI_EVENT_NOTIFY       TaskProcessesGroupTCPHandle[] = {L2_TCP4_HeartBeatNotify, L2_TCP4_ReceiveNotify, L2_TCP4_SendNotify};
 
-    UINT8 *pApplication = (UINT8 *)APPLICATION_DYNAMIC_MEMORY_ADDRESS_START;
-    pApplication[0] = 0xf3;
+    pApplication = (UINT8 *)APPLICATION_DYNAMIC_MEMORY_ADDRESS_START;
+    /*pApplication[0] = 0xf3;
     pApplication[1] = 0x0f;
     pApplication[2] = 0x1e;
     pApplication[3] = 0xfa;
@@ -192,7 +193,7 @@ EFI_STATUS L2_COMMON_MultiProcessInit ()
     
     pApplication[0x1b] = 0x90;
     pApplication[0x1c] = 0x5d;
-    pApplication[0x1d] = 0xc3;
+    pApplication[0x1d] = 0xc3;*/
     
     //操作系统运行应用程序对应的事件处理
     EFI_EVENT_NOTIFY       TaskProcessesGroupApplicationCall[] = {L2_INTERFACES_ApplicationCall, pApplication};

@@ -104,7 +104,7 @@ APPLICATION_CALL_TABLE InterfaceCallTable[] =
 VOID L2_INTERFACES_ApplicationCall(APPLICATION_CALL_ID ApplicationCallID)
 {
     //进入系统调用
-    if (0 != *APPLICATION_CALL_FLAG_ADDRESS)
+    if (APPLICATION_CALL_ID_INIT != *APPLICATION_CALL_FLAG_ADDRESS)
     {
         //执行系统调用
         InterfaceCallTable[*APPLICATION_CALL_FLAG_ADDRESS].pApplicationCallFunction();

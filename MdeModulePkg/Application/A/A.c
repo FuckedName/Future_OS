@@ -47,6 +47,7 @@
 #include <Global/Global.h>
 #include <Partitions/L2_PARTITION.h>
 #include <Processes/L2_PROCESS_Multi.h>
+#include <Applications/L2_APPLICATIONS.h>
 
 
 //https://blog.csdn.net/goodwillyang/article/details/45559925
@@ -115,6 +116,8 @@ EFI_STATUS EFIAPI Main (
     L2_GRAPHICS_SystemSettingInit();
 
 	L3_APPLICATION_WindowsInitial();
+	
+    L2_ApplicationRun(NULL);
     
     L2_TIMER_IntervalInit();    
         

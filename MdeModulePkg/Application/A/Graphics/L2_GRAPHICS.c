@@ -76,8 +76,8 @@ UINT8 *pSystemSettingWindowBuffer = NULL;
 UINT16 StartMenuWidth = 16 * 10;
 UINT16 StartMenuHeight = 16 * 20;
 UINT16 StatusErrorCount = 0;
-UINT16 SystemLogWindowWidth = 16 * 30;
-UINT16 SystemLogWindowHeight = 16 * 30;
+UINT16 SystemLogWindowWidth = 16 * 48;
+UINT16 SystemLogWindowHeight = 16 * 48;
 UINT16 SystemSettingWindowWidth = 16 * 10;
 UINT16 SystemSettingWindowHeight = 16 * 10;
 
@@ -3655,9 +3655,9 @@ VOID EFIAPI L2_TIMER_Print (
 	if (date_time_count == 0 || date_time_count == 30)
 		date_time_count_increase_flag = (date_time_count_increase_flag == 0) ?  1 : 0;
 
-	L2_TCP4_Send();
+	//L2_TCP4_Send();
 	
-	L2_TCP4_Receive();
+	//L2_TCP4_Receive();
 	
     gRT->GetTime(&EFITime, NULL);
     EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
