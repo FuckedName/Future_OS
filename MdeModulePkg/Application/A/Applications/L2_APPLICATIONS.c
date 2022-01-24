@@ -61,25 +61,28 @@ VOID L2_ApplicationRun(UINT8 *pPath)
     } 
     
     L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: L2_ApplicationRun. %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X\n", __LINE__,
-                pApplicationBuffer[0],
-                pApplicationBuffer[1],
-                pApplicationBuffer[2],
-                pApplicationBuffer[3],
-                pApplicationBuffer[4],
-                pApplicationBuffer[5],
-                pApplicationBuffer[6],
-                pApplicationBuffer[7],
-                pApplicationBuffer[8],
-                pApplicationBuffer[9],
-                pApplicationBuffer[10],
-                pApplicationBuffer[11],
-                pApplicationBuffer[12],
-                pApplicationBuffer[13],
-                pApplicationBuffer[14]);
+                pApplicationBuffer[64 + 0],
+                pApplicationBuffer[64 + 1],
+                pApplicationBuffer[64 + 2],
+                pApplicationBuffer[64 + 3],
+                pApplicationBuffer[64 + 4],
+                pApplicationBuffer[64 + 5],
+                pApplicationBuffer[64 + 6],
+                pApplicationBuffer[64 + 7],
+                pApplicationBuffer[64 + 8],
+                pApplicationBuffer[64 + 9],
+                pApplicationBuffer[64 + 10],
+                pApplicationBuffer[64 + 11],
+                pApplicationBuffer[64 + 12],
+                pApplicationBuffer[64 + 13],
+                pApplicationBuffer[64 + 14]);
 
-    for (UINT32 i = 0; i < 0x1f; i++)
+    // Copy asm code into application buffer.
+    for (UINT32 i = 0; i < 0x45; i++)
         pApplication[i] = pApplicationBuffer[64 + i]; // 64:  elf64 header length. 
+        
     return;            
+    
     //2. Analysis Buffer1 ELF and get obj Code1, copy code to pApplication;
     L2_ApplicationAnalysisELF(pApplicationBuffer, pApplication);
     

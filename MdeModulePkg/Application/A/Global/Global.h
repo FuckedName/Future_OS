@@ -390,17 +390,23 @@ extern UINT64 SystemAllPagesAllocated;
 extern DEVICE_PARAMETER device[10];
 extern EFI_HANDLE  TimerOne;
 
-
-// Application call
-extern UINT32 *APPLICATION_CALL_FLAG_ADDRESS;
-
 typedef enum
 {
     APPLICATION_CALL_ID_INIT = 0,
     APPLICATION_CALL_ID_SHUTDOWN,
+    APPLICATION_CALL_ID_PRINT_STRING,
     APPLICATION_CALL_ID_MAX
 }APPLICATION_CALL_ID;
 
+typedef struct
+{
+    APPLICATION_CALL_ID ID;
+    UINT8 pApplicationCallInput[20];
+    UINT8 (*pCallbackFunction)();
+}APPLICATION_CALL_DATA;
+
+// Application call
+extern APPLICATION_CALL_DATA *pApplicationCallData;
 
 #define MOUSE_NO_CLICKED 0
 #define MOUSE_LEFT_CLICKED 1

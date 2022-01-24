@@ -44,6 +44,9 @@ double (*pAPPLICATION_CALL_ID)(double, double);
 UINT32 *APPLICATION_CALL_FLAG_ADDRESS = (UINT32 *)(0x20000000 - 0x1000);
 
 
+APPLICATION_CALL_DATA *pApplicationCallData;
+
+
 typedef struct
 {
     APPLICATION_CALL_ID             ApplicationCallID; //类似Linux系统调用
@@ -68,6 +71,10 @@ MOUSE_CLICK_EVENT L2_GRAPHICS_DeskLayerClickEventGet()
 	return MAX_CLICKED_EVENT;
 }*/
 
+VOID L2_INTERFACES_PrintString()
+{    
+    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d Status: %a\n", __LINE__, pApplicationCallData->pApplicationCallInput);
+}
 
 
 /****************************************************************************
@@ -86,6 +93,7 @@ APPLICATION_CALL_TABLE InterfaceCallTable[] =
 {
     {APPLICATION_CALL_ID_INIT,       		    NULL},
     {APPLICATION_CALL_ID_SHUTDOWN,       		L2_System_Shutdown},
+    {APPLICATION_CALL_ID_PRINT_STRING,       	L2_INTERFACES_PrintString},
     {APPLICATION_CALL_ID_MAX,                   NULL},
 };
 
@@ -104,13 +112,13 @@ APPLICATION_CALL_TABLE InterfaceCallTable[] =
 VOID L2_INTERFACES_ApplicationCall(APPLICATION_CALL_ID ApplicationCallID)
 {
     //进入系统调用
-    if (APPLICATION_CALL_ID_INIT != *APPLICATION_CALL_FLAG_ADDRESS)
+    if (APPLICATION_CALL_ID_INIT != pApplicationCallData->ID)
     {
         //执行系统调用
-        InterfaceCallTable[*APPLICATION_CALL_FLAG_ADDRESS].pApplicationCallFunction();
+        InterfaceCallTable[pApplicationCallData->ID].pApplicationCallFunction();
 
         //把系统调用类型设置为初始化，不然会进入死循环
-        *APPLICATION_CALL_FLAG_ADDRESS = APPLICATION_CALL_ID_INIT;
+        pApplicationCallData->ID = APPLICATION_CALL_ID_INIT;
     }    
 }
 
@@ -146,7 +154,8 @@ VOID L2_INTERFACES_Shutdown()
 *****************************************************************************/
 VOID L2_INTERFACES_Initial()
 {
-    *APPLICATION_CALL_FLAG_ADDRESS = APPLICATION_CALL_ID_INIT;
+    pApplicationCallData = APPLICATION_CALL_FLAG_ADDRESS;
+    pApplicationCallData->ID = APPLICATION_CALL_ID_INIT;
 }
 
 
