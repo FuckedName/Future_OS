@@ -104,12 +104,12 @@ VOID EFIAPI L2_TIMER_Slice(
 
     //系统调用如果不为零，表示应用层有系统调用，则触发对应的事件组。
     //if (0 != *APPLICATION_CALL_FLAG_ADDRESS)
-    if (TimerSliceCount == 300)
+    if (TimerSliceCount == 150)
     {
         gBS->SignalEvent(MultiTaskTriggerGroup4Event);
     }
 
-    if (TimerSliceCount == 400)
+    if (TimerSliceCount == 200)
     {
         gBS->SignalEvent (MultiTaskTriggerGroup5Event);
         pApplicationCallData->ID = APPLICATION_CALL_ID_INIT;
@@ -123,8 +123,28 @@ VOID EFIAPI L2_TIMER_Slice(
 }
 
 //操作系统给应用程序分配的内存，以2147483648=2G大小内存处开始，当前只有一个应用程序
-#define APPLICATION_DYNAMIC_MEMORY_ADDRESS_START 0x80000000
+#define APPLICATION_DYNAMIC_MEMORY_ADDRESS_START 0x40000000
 
+VOID testfunction (EFI_EVENT Event,  VOID      *Context)
+{
+    UINT16 x, y;
+    x = DISPLAY_DESK_DATE_TIME_X - 200;
+    y = DISPLAY_DESK_DATE_TIME_Y - 200;
+    L2_DEBUG_Print1(x, y, "%d testfunction. ",  __LINE__);
+    
+	return;
+    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: test string: %a \n", __LINE__, "TTTT");
+    
+    APPLICATION_CALL_DATA *pApplicationCallData = (unsigned long *)(0x40000000 - 0x1000);
+    pApplicationCallData->ID = APPLICATION_CALL_ID_PRINT_STRING;
+    pApplicationCallData->pApplicationCallInput[0] = 'T';
+    pApplicationCallData->pApplicationCallInput[1] = 'T';
+    pApplicationCallData->pApplicationCallInput[2] = 'T';
+    pApplicationCallData->pApplicationCallInput[3] = 'T';
+    pApplicationCallData->pApplicationCallInput[4] = '\0';
+
+
+}
 
 /****************************************************************************
 *
@@ -153,7 +173,7 @@ EFI_STATUS L2_COMMON_MultiProcessInit ()
     
     EFI_GUID gMultiProcessGroup4Guid  = { 0x0579257E, 0x1843, 0x45FB, { 0x83, 0x9D, 0x6B, 0x79, 0x09, 0x38, 0x29, 0xAC } };
     
-    EFI_GUID gMultiProcessGroup5Guid  = { 0x0579257E, 0x1843, 0x45FB, { 0x83, 0x9D, 0x6B, 0x79, 0x09, 0x38, 0x29, 0xAC } };
+    EFI_GUID gMultiProcessGroup5Guid  = { 0x0579257E, 0x1843, 0x45FB, { 0x83, 0x9D, 0x6B, 0x79, 0x09, 0x38, 0x29, 0xAD } };
 
     //系统事件：键盘处理，鼠标处理，
     EFI_EVENT_NOTIFY       TaskProcessesGroupSystem[] = {L2_KEYBOARD_Event, L2_MOUSE_Event};
@@ -165,7 +185,11 @@ EFI_STATUS L2_COMMON_MultiProcessInit ()
     EFI_EVENT_NOTIFY       TaskProcessesGroupTCPHandle[] = {L2_TCP4_HeartBeatNotify, L2_TCP4_ReceiveNotify, L2_TCP4_SendNotify};
 
     // initial application memory address.
-    pApplication = (UINT8 *)APPLICATION_DYNAMIC_MEMORY_ADDRESS_START;
+    //pApplication = (UINT8 *)APPLICATION_DYNAMIC_MEMORY_ADDRESS_START;
+
+    pApplication = testfunction;
+
+    
     /*pApplication[0] = 0xf3;
     pApplication[1] = 0x0f;
     pApplication[2] = 0x1e;
@@ -207,7 +231,7 @@ EFI_STATUS L2_COMMON_MultiProcessInit ()
     //操作系统运行应用程序对应的事件处理
 
     // run application step 1
-    EFI_EVENT_NOTIFY       TaskProcessesGroupApplicationCall[] = {pApplication};
+    EFI_EVENT_NOTIFY       TaskProcessesGroupApplicationCall[] = {testfunction};
     
     // run application step 2
     EFI_EVENT_NOTIFY       TaskProcessesGroupApplicationCall2[] = {L2_INTERFACES_ApplicationCall};
@@ -247,8 +271,7 @@ EFI_STATUS L2_COMMON_MultiProcessInit ()
 
     for (i = 0; i < sizeof(TaskProcessesGroupApplicationCall) / sizeof(EFI_EVENT_NOTIFY); i++)
     {
-        gBS->CreateEventEx(
-                          EVT_NOTIFY_SIGNAL,
+        gBS->CreateEventEx(EVT_NOTIFY_SIGNAL,
                           TPL_NOTIFY,
                           TaskProcessesGroupApplicationCall[i],
                           NULL,
@@ -258,8 +281,7 @@ EFI_STATUS L2_COMMON_MultiProcessInit ()
  
     for (i = 0; i < sizeof(TaskProcessesGroupApplicationCall2) / sizeof(EFI_EVENT_NOTIFY); i++)
     {
-        gBS->CreateEventEx(
-                          EVT_NOTIFY_SIGNAL,
+        gBS->CreateEventEx(EVT_NOTIFY_SIGNAL,
                           TPL_NOTIFY,
                           TaskProcessesGroupApplicationCall2[i],
                           NULL,

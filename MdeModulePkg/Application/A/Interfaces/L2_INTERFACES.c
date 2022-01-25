@@ -41,7 +41,7 @@ UINT32 *pApplicationCallFlag = 0x20000000;
 
 
 double (*pAPPLICATION_CALL_ID)(double, double);
-UINT32 *APPLICATION_CALL_FLAG_ADDRESS = (UINT32 *)(0x20000000 - 0x1000);
+APPLICATION_CALL_DATA *APPLICATION_CALL_FLAG_ADDRESS = (APPLICATION_CALL_DATA *)(0x40000000 - 0x1000);
 
 
 APPLICATION_CALL_DATA *pApplicationCallData;
@@ -109,8 +109,11 @@ APPLICATION_CALL_TABLE InterfaceCallTable[] =
 *  返回值： 成功：XXXX，失败：XXXXX
 *
 *****************************************************************************/
-VOID L2_INTERFACES_ApplicationCall(APPLICATION_CALL_ID ApplicationCallID)
+VOID L2_INTERFACES_ApplicationCall (EFI_EVENT Event,  VOID           *Context)
 {
+    return;
+    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: L2_ApplicationShutdown pApplicationCallData->ID: %d\n", __LINE__, pApplicationCallData->ID);
+
     //进入系统调用
     if (APPLICATION_CALL_ID_INIT != pApplicationCallData->ID)
     {
@@ -120,6 +123,8 @@ VOID L2_INTERFACES_ApplicationCall(APPLICATION_CALL_ID ApplicationCallID)
         //把系统调用类型设置为初始化，不然会进入死循环
         pApplicationCallData->ID = APPLICATION_CALL_ID_INIT;
     }    
+    
+    return;
 }
 
 

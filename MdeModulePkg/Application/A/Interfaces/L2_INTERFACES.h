@@ -30,8 +30,7 @@
 
 #include <Global/Global.h>
 
-
-VOID L2_INTERFACES_ApplicationCall(APPLICATION_CALL_ID ApplicationCallID);
+VOID L2_INTERFACES_ApplicationCall (EFI_EVENT Event,  VOID           *Context);
 
 VOID L2_INTERFACES_Shutdown();
 

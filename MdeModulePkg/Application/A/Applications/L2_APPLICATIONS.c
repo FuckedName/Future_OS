@@ -47,6 +47,7 @@
 *****************************************************************************/
 VOID L2_ApplicationRun(UINT8 *pPath)
 {
+    return;
     EFI_STATUS Status;
     UINT8 ucCode[0x1f];
 
@@ -107,6 +108,8 @@ VOID L2_ApplicationRun(UINT8 *pPath)
     //4. Copy Code1 into  Buffer2;
     //5. Run Buffer2 after apply cpu time slice;
 }
+
+
 
 
 
