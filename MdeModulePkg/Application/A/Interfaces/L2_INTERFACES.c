@@ -73,7 +73,15 @@ MOUSE_CLICK_EVENT L2_GRAPHICS_DeskLayerClickEventGet()
 
 VOID L2_INTERFACES_PrintString()
 {    
-    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d Status: %a\n", __LINE__, pApplicationCallData->pApplicationCallInput);
+
+    UINT16 x, y;
+    UINT8 S = "Test";
+    x = DISPLAY_DESK_DATE_TIME_X - 200;
+    y = DISPLAY_DESK_DATE_TIME_Y - 200;
+
+    L2_DEBUG_Print1(x, y, "%d testfunction. %a",  __LINE__, pApplicationCallData->pApplicationCallInput);
+
+    //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d Status: %a\n", __LINE__, pApplicationCallData->pApplicationCallInput);
 }
 
 
@@ -111,8 +119,8 @@ APPLICATION_CALL_TABLE InterfaceCallTable[] =
 *****************************************************************************/
 VOID L2_INTERFACES_ApplicationCall (EFI_EVENT Event,  VOID           *Context)
 {
-    return;
-    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: L2_ApplicationShutdown pApplicationCallData->ID: %d\n", __LINE__, pApplicationCallData->ID);
+    //return;
+    //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: L2_ApplicationShutdown pApplicationCallData->ID: %d\n", __LINE__, pApplicationCallData->ID);
 
     //进入系统调用
     if (APPLICATION_CALL_ID_INIT != pApplicationCallData->ID)

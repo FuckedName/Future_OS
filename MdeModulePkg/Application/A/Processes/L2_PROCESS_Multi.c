@@ -127,10 +127,12 @@ VOID EFIAPI L2_TIMER_Slice(
 
 VOID testfunction (EFI_EVENT Event,  VOID      *Context)
 {
-    UINT16 x, y;
-    x = DISPLAY_DESK_DATE_TIME_X - 200;
-    y = DISPLAY_DESK_DATE_TIME_Y - 200;
-    L2_DEBUG_Print1(x, y, "%d testfunction. ",  __LINE__);
+    pApplicationCallData->ID = APPLICATION_CALL_ID_PRINT_STRING;
+    pApplicationCallData->pApplicationCallInput[0] = 'T';
+    pApplicationCallData->pApplicationCallInput[1] = 'T';
+    pApplicationCallData->pApplicationCallInput[2] = 'T';
+    pApplicationCallData->pApplicationCallInput[3] = 'T';
+    pApplicationCallData->pApplicationCallInput[4] = '\0';
     
 	return;
     L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: test string: %a \n", __LINE__, "TTTT");
