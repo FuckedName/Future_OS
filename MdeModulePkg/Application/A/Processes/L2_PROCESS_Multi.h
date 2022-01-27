@@ -39,3 +39,5 @@ VOID
 EFIAPI
 L2_SYSTEM_Start (IN EFI_EVENT Event, IN VOID *Context);
 
+VOID testfunction();
+

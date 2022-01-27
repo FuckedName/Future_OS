@@ -451,6 +451,7 @@ extern UINT16 SystemLogWindowWidth;
 
 extern UINT16 SystemSettingWindowWidth;
 extern UINT16 SystemSettingWindowHeight;
+extern VOID (*pFunction)();
 extern UINT8 *pApplication;
 
 

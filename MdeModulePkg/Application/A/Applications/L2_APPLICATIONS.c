@@ -109,7 +109,12 @@ VOID L2_ApplicationRun(UINT8 *pPath)
     //5. Run Buffer2 after apply cpu time slice;
 }
 
+// Use to load *.efi test
+VOID L2_ApplicationRun2(UINT8 *pPath)
+{
 
-
+    CoreLoadImageCommon();
+    CoreStartImage();
+}
 
 

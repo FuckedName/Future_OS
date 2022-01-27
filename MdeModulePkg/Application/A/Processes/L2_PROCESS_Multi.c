@@ -47,6 +47,7 @@ EFI_EVENT MultiTaskTriggerGroup4Event;
 EFI_EVENT MultiTaskTriggerGroup5Event;
 UINT8 *pApplication = NULL;
 
+VOID (*pFunction)();
 
 UINT32 TimerSliceCount = 0;
 
@@ -104,12 +105,12 @@ VOID EFIAPI L2_TIMER_Slice(
 
     //系统调用如果不为零，表示应用层有系统调用，则触发对应的事件组。
     //if (0 != *APPLICATION_CALL_FLAG_ADDRESS)
-    if (TimerSliceCount == 150)
+    if (TimerSliceCount == 100)
     {
         gBS->SignalEvent(MultiTaskTriggerGroup4Event);
     }
 
-    if (TimerSliceCount == 200)
+    if (TimerSliceCount == 150)
     {
         gBS->SignalEvent (MultiTaskTriggerGroup5Event);
         pApplicationCallData->ID = APPLICATION_CALL_ID_INIT;
@@ -123,9 +124,39 @@ VOID EFIAPI L2_TIMER_Slice(
 }
 
 //操作系统给应用程序分配的内存，以2147483648=2G大小内存处开始，当前只有一个应用程序
-#define APPLICATION_DYNAMIC_MEMORY_ADDRESS_START 0x40000000
 
-VOID testfunction (EFI_EVENT Event,  VOID      *Context)
+VOID testfunction2()
+{    
+    pApplicationCallData->ID = APPLICATION_CALL_ID_PRINT_STRING;
+    pApplicationCallData->pApplicationCallInput[0] = 'S';
+    pApplicationCallData->pApplicationCallInput[1] = 'S';
+    pApplicationCallData->pApplicationCallInput[2] = 'S';
+    pApplicationCallData->pApplicationCallInput[3] = 'S';
+    pApplicationCallData->pApplicationCallInput[4] = 'S';
+    pApplicationCallData->pApplicationCallInput[5] = 'S';
+    pApplicationCallData->pApplicationCallInput[6] = '\0';    
+	return;
+}
+
+
+VOID testfunction()
+{    
+    UINT16 x, y;
+    UINT8 S = "Test";
+    x = DISPLAY_DESK_DATE_TIME_X - 200;
+    y = DISPLAY_DESK_DATE_TIME_Y - 216;
+    
+    UINT8 code[] = {0xf3,0x0f,0x1e,0xfa,0x48,0x8b,0x05,0x00,0x00,0x00,0x00,0xc7,0x00,0x02,0x00,0x00,0x00,0x48,0x8b,0x05,0x00,0x00,0x00,0x00,0xc6,0x40,0x04,0x54,0x48,0x8b,0x05,0x00,0x00,0x00,0x00,0xc6,0x40,0x05,0x54,0x48,0x8b,0x05,0x00,0x00,0x00,0x00,0xc6,0x40,0x06,0x54,0x48,0x8b,0x05,0x00,0x00,0x00,0x00,0xc6,0x40,0x07,0x54,0x48,0x8b,0x05,0x00,0x00,0x00,0x00,0xc6,0x40,0x08,0x00,0xc3};
+    UINT8 *p = testfunction2;
+    
+    //L2_DEBUG_Print1(x, y, "%d testfunction: %02X testfunction2: %02X code: %02X",  __LINE__, testfunction, testfunction2, code);
+    //L1_MEMORY_Copy(p, code, 0x49);
+    testfunction2();
+}
+
+/*
+
+VOID testfunction()
 {
     pApplicationCallData->ID = APPLICATION_CALL_ID_PRINT_STRING;
     pApplicationCallData->pApplicationCallInput[0] = 'T';
@@ -135,18 +166,9 @@ VOID testfunction (EFI_EVENT Event,  VOID      *Context)
     pApplicationCallData->pApplicationCallInput[4] = '\0';
     
 	return;
-    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: test string: %a \n", __LINE__, "TTTT");
-    
-    APPLICATION_CALL_DATA *pApplicationCallData = (unsigned long *)(0x40000000 - 0x1000);
-    pApplicationCallData->ID = APPLICATION_CALL_ID_PRINT_STRING;
-    pApplicationCallData->pApplicationCallInput[0] = 'T';
-    pApplicationCallData->pApplicationCallInput[1] = 'T';
-    pApplicationCallData->pApplicationCallInput[2] = 'T';
-    pApplicationCallData->pApplicationCallInput[3] = 'T';
-    pApplicationCallData->pApplicationCallInput[4] = '\0';
-
-
 }
+*/
+
 
 /****************************************************************************
 *
@@ -189,7 +211,8 @@ EFI_STATUS L2_COMMON_MultiProcessInit ()
     // initial application memory address.
     //pApplication = (UINT8 *)APPLICATION_DYNAMIC_MEMORY_ADDRESS_START;
 
-    pApplication = testfunction;
+    // test ok.
+    pFunction = testfunction;
 
     
     /*pApplication[0] = 0xf3;
@@ -232,6 +255,8 @@ EFI_STATUS L2_COMMON_MultiProcessInit ()
     
     //操作系统运行应用程序对应的事件处理
 
+    //Not ok.
+    //pFunction = code;
     // run application step 1
     EFI_EVENT_NOTIFY       TaskProcessesGroupApplicationCall[] = {testfunction};
     

@@ -1868,7 +1868,7 @@ DEFINE GCC_IA32_CC_FLAGS           = DEF(GCC_ALL_CC_FLAGS) -m32 -malign-double -
 DEFINE GCC_X64_CC_FLAGS            = DEF(GCC_ALL_CC_FLAGS) -mno-red-zone -Wno-address -mno-stack-arg-probe
 DEFINE GCC_ARM_CC_FLAGS            = DEF(GCC_ALL_CC_FLAGS) -mlittle-endian -mabi=aapcs -fno-short-enums -funsigned-char -ffunction-sections -fdata-sections -fomit-frame-pointer -Wno-address -mthumb -mfloat-abi=soft -fno-pic -fno-pie
 DEFINE GCC_ARM_CC_XIPFLAGS         = -mno-unaligned-access
-DEFINE GCC_AARCH64_CC_FLAGS        = DEF(GCC_ALL_CC_FLAGS) -mlittle-endian -fno-short-enums -fverbose-asm -funsigned-char  -ffunction-sections -fdata-sections -Wno-address -fno-asynchronous-unwind-tables -fno-unwind-tables -fno-pic -fno-pie -ffixed-x18
+DEFINE GCC_AARCH64_CC_FLAGS        = DEF(GCC_ALL_CC_FLAGS) -mlittle-endian -fno-short-enums -fverbose-asm -funsigned-char -ffunction-sections -fdata-sections -Wno-address -fno-asynchronous-unwind-tables -z execstack -fno-unwind-tables -fno-pic -fno-pie -ffixed-x18
 DEFINE GCC_AARCH64_CC_XIPFLAGS     = -mstrict-align -mgeneral-regs-only
 DEFINE GCC_DLINK_FLAGS_COMMON      = -nostdlib --pie
 DEFINE GCC_DLINK2_FLAGS_COMMON     = -Wl,--script=$(EDK_TOOLS_PATH)/Scripts/GccBase.lds
@@ -1899,8 +1899,8 @@ DEFINE GCC_DEPS_FLAGS              = -MMD -MF $@.deps
 
 DEFINE GCC48_ALL_CC_FLAGS            = DEF(GCC_ALL_CC_FLAGS) -ffunction-sections -fdata-sections -DSTRING_ARRAY_NAME=$(BASE_NAME)Strings
 DEFINE GCC48_IA32_X64_DLINK_COMMON   = -nostdlib -Wl,-n,-q,--gc-sections -z common-page-size=0x20
-DEFINE GCC48_IA32_CC_FLAGS           = DEF(GCC48_ALL_CC_FLAGS) -m32 -march=i586 -malign-double -fno-stack-protector -D EFI32 -fno-asynchronous-unwind-tables -Wno-address
-DEFINE GCC48_X64_CC_FLAGS            = DEF(GCC48_ALL_CC_FLAGS) -m64 -fno-stack-protector "-DEFIAPI=__attribute__((ms_abi))" -maccumulate-outgoing-args -mno-red-zone -Wno-address -mcmodel=small -fpie -fno-asynchronous-unwind-tables -Wno-address
+DEFINE GCC48_IA32_CC_FLAGS           = DEF(GCC48_ALL_CC_FLAGS) -m32 -march=i586 -malign-double -fno-stack-protector -D EFI32 -fno-asynchronous-unwind-tables -z execstack -Wno-address
+DEFINE GCC48_X64_CC_FLAGS            = DEF(GCC48_ALL_CC_FLAGS) -m64 -fno-stack-protector "-DEFIAPI=__attribute__((ms_abi))" -maccumulate-outgoing-args -mno-red-zone -Wno-address -mcmodel=small -fpie -fno-asynchronous-unwind-tables -z execstack -Wno-address
 DEFINE GCC48_IA32_X64_ASLDLINK_FLAGS = DEF(GCC48_IA32_X64_DLINK_COMMON) -Wl,--entry,ReferenceAcpiTable -u ReferenceAcpiTable
 DEFINE GCC48_IA32_X64_DLINK_FLAGS    = DEF(GCC48_IA32_X64_DLINK_COMMON) -Wl,--entry,$(IMAGE_ENTRY_POINT) -u $(IMAGE_ENTRY_POINT) -Wl,-Map,$(DEST_DIR_DEBUG)/$(BASE_NAME).map,--whole-archive
 DEFINE GCC48_IA32_DLINK2_FLAGS       = -Wl,--defsym=PECOFF_HEADER_SIZE=0x220 DEF(GCC_DLINK2_FLAGS_COMMON)
@@ -1978,7 +1978,7 @@ DEFINE GCC5_RISCV_OPENSBI_TYPES                   = -DOPENSBI_EXTERNAL_SBI_TYPES
 
 DEFINE GCC5_RISCV64_ARCH                   = rv64imafdc
 DEFINE GCC5_RISCV32_RISCV64_ASLDLINK_FLAGS = DEF(GCC5_RISCV_ALL_DLINK_COMMON) -Wl,--entry,ReferenceAcpiTable -u ReferenceAcpiTable
-DEFINE GCC5_RISCV64_CC_FLAGS               = DEF(GCC5_RISCV_ALL_CC_FLAGS) DEF(GCC5_RISCV_ALL_CC_FLAGS_WARNING_DISABLE) DEF(GCC5_RISCV_OPENSBI_TYPES) -march=DEF(GCC5_RISCV64_ARCH) -fno-builtin -fno-builtin-memcpy -fno-stack-protector -Wno-address -fno-asynchronous-unwind-tables -Wno-unused-but-set-variable -fpack-struct=8 -mcmodel=medany -mabi=lp64 -mno-relax
+DEFINE GCC5_RISCV64_CC_FLAGS               = DEF(GCC5_RISCV_ALL_CC_FLAGS) DEF(GCC5_RISCV_ALL_CC_FLAGS_WARNING_DISABLE) DEF(GCC5_RISCV_OPENSBI_TYPES) -march=DEF(GCC5_RISCV64_ARCH) -fno-builtin -fno-builtin-memcpy -fno-stack-protector -Wno-address -fno-asynchronous-unwind-tables -z execstack -Wno-unused-but-set-variable -fpack-struct=8 -mcmodel=medany -mabi=lp64 -mno-relax
 DEFINE GCC5_RISCV64_DLINK_FLAGS            = DEF(GCC5_RISCV_ALL_DLINK_FLAGS) -Wl,-melf64lriscv,--oformat=elf64-littleriscv,--no-relax
 DEFINE GCC5_RISCV64_DLINK2_FLAGS           = DEF(GCC5_RISCV_ALL_DLINK2_FLAGS)
 DEFINE GCC5_RISCV64_ASM_FLAGS              = DEF(GCC5_RISCV_ALL_ASM_FLAGS) -march=DEF(GCC5_RISCV64_ARCH) -mcmodel=medany -mabi=lp64
@@ -2564,7 +2564,7 @@ DEFINE CLANG38_IA32_TARGET          = -target i686-pc-linux-gnu
 DEFINE CLANG38_X64_TARGET           = -target x86_64-pc-linux-gnu
 
 DEFINE CLANG38_WARNING_OVERRIDES    = -Wno-parentheses-equality -Wno-tautological-compare -Wno-tautological-constant-out-of-range-compare -Wno-empty-body -Wno-unused-const-variable -Wno-varargs -Wno-unknown-warning-option
-DEFINE CLANG38_ALL_CC_FLAGS         = DEF(GCC48_ALL_CC_FLAGS) DEF(CLANG38_WARNING_OVERRIDES) -fno-stack-protector -mms-bitfields -Wno-address -Wno-shift-negative-value -Wno-unknown-pragmas -Wno-incompatible-library-redeclaration -fno-asynchronous-unwind-tables -mno-sse -mno-mmx -msoft-float -mno-implicit-float  -ftrap-function=undefined_behavior_has_been_optimized_away_by_clang -funsigned-char -fno-ms-extensions -Wno-null-dereference
+DEFINE CLANG38_ALL_CC_FLAGS         = DEF(GCC48_ALL_CC_FLAGS) DEF(CLANG38_WARNING_OVERRIDES) -fno-stack-protector -mms-bitfields -Wno-address -Wno-shift-negative-value -Wno-unknown-pragmas -Wno-incompatible-library-redeclaration -fno-asynchronous-unwind-tables -z execstack -mno-sse -mno-mmx -msoft-float -mno-implicit-float  -ftrap-function=undefined_behavior_has_been_optimized_away_by_clang -funsigned-char -fno-ms-extensions -Wno-null-dereference
 
 ###########################
 # CLANG38 IA32 definitions
