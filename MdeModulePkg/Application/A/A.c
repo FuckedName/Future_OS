@@ -117,7 +117,7 @@ EFI_STATUS EFIAPI Main (
 
 	L3_APPLICATION_WindowsInitial();
 	
-    L2_ApplicationRun(NULL);
+    L2_ApplicationRun(ImageHandle);
     
     L2_TIMER_IntervalInit();    
         

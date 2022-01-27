@@ -138,6 +138,7 @@
   gEfiTcp4ServiceBindingProtocolGuid
   gEfiTcp4ProtocolGuid
   gEfiWiFiProtocolGuid
+  gEfiShellProtocolGuid
 
 [FeaturePcd]
 

@@ -27,9 +27,10 @@
 
 #include <Protocol/GraphicsOutput.h>
 #include <Library/BaseLib.h>
+#include <Uefi/UefiBaseType.h>
 
 #include <Global/Global.h>
 
 
-VOID L2_ApplicationRun(UINT8 *pPath);
+VOID L2_ApplicationRun(EFI_HANDLE        ImageHandle);
 

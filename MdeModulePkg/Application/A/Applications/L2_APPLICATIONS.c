@@ -20,14 +20,13 @@
 		    Modification:
 *************************************************/
 
-
-
-
-
 #include <Library/UefiRuntimeLib.h>
 #include <Library/UefiRuntimeServicesTableLib.h>
 #include <Library/BaseLib.h>
 #include <Library/UefiBootServicesTableLib.h>
+
+#include <Protocol/LoadedImage.h>
+#include <Protocol/Shell.h>
 
 #include "L2_APPLICATIONS.h"
 
@@ -45,67 +44,37 @@
 *  返回值： 成功：XXXX，失败：XXXXX
 *
 *****************************************************************************/
-VOID L2_ApplicationRun(UINT8 *pPath)
+VOID L2_ApplicationRun(EFI_HANDLE        ImageHandle)
 {
-    return;
-    EFI_STATUS Status;
-    UINT8 ucCode[0x1f];
-
-    //Allocate buffer for test.o
-    UINT8 *pApplicationBuffer = L2_MEMORY_Allocate("System Icon Buffer", MEMORY_TYPE_APPLICATION, 1704);
+    // ASSERT_EFI_ERROR(-1);
+      EFI_SHELL_PROTOCOL    *EfiShellProtocol;
+      EFI_STATUS            Status;
+      //初始化协议
+      Status = gBS->LocateProtocol (&gEfiShellProtocolGuid,
+                                    NULL,
+                                    (VOID **)&EfiShellProtocol);
     
-    //1. Read FileName File into Buffer1;
-    Status = L3_APPLICATION_ReadFile("TESTO", 5, pApplicationBuffer); //test.o
-    if (EFI_ERROR(Status))
-    {
-        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: L2_ApplicationRun.\n", __LINE__);
-    } 
+      //Print(L"%d Status: %d\r\n", __LINE__, Status);
+      L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: L2_ApplicationRun Status: %d\n", __LINE__, Status);
     
-    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: L2_ApplicationRun. %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X\n", __LINE__,
-                pApplicationBuffer[64 + 0],
-                pApplicationBuffer[64 + 1],
-                pApplicationBuffer[64 + 2],
-                pApplicationBuffer[64 + 3],
-                pApplicationBuffer[64 + 4],
-                pApplicationBuffer[64 + 5],
-                pApplicationBuffer[64 + 6],
-                pApplicationBuffer[64 + 7],
-                pApplicationBuffer[64 + 8],
-                pApplicationBuffer[64 + 9],
-                pApplicationBuffer[64 + 10],
-                pApplicationBuffer[64 + 11],
-                pApplicationBuffer[64 + 12],
-                pApplicationBuffer[64 + 13],
-                pApplicationBuffer[64 + 14]);
-
-    // Copy asm code into application buffer.
-    for (UINT32 i = 0; i < 0x45; i++)
-        pApplication[i] = pApplicationBuffer[64 + i]; // 64:  elf64 header length. 
-        
-    return;            
+      if (EFI_ERROR (Status)) 
+      {
+        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: L2_ApplicationRun Status: %d\n", __LINE__, Status);
+        return EFI_SUCCESS; 
+      }
     
-    //2. Analysis Buffer1 ELF and get obj Code1, copy code to pApplication;
-    L2_ApplicationAnalysisELF(pApplicationBuffer, pApplication);
-    
-    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: L2_ApplicationRun. %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X %02X\n", __LINE__,
-                    pApplication[0],
-                    pApplication[1],
-                    pApplication[2],
-                    pApplication[3],
-                    pApplication[4],
-                    pApplication[5],
-                    pApplication[6],
-                    pApplication[7],
-                    pApplication[8],
-                    pApplication[9],
-                    pApplication[10],
-                    pApplication[11],
-                    pApplication[12],
-                    pApplication[13],
-                    pApplication[14]);
-    
-    //3. Allocate Memory Buffer2 for Application;
-    //4. Copy Code1 into  Buffer2;
+      EfiShellProtocol->Execute (&ImageHandle,
+                                 L"fs0:",
+                                 NULL,
+                                 &Status);
+                                 
+      L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: L2_ApplicationRun Status: %d\n", __LINE__, Status);
+      
+      EfiShellProtocol->Execute (&ImageHandle,
+                                 L"H.efi",
+                                 NULL,
+                                 &Status);
+      L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: L2_ApplicationRun Status: %d\n", __LINE__, Status);
     //5. Run Buffer2 after apply cpu time slice;
 }
 

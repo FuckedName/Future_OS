@@ -25,7 +25,6 @@ typedef struct
     UINT8 (*pCallbackFunction)();
 }APPLICATION_CALL_DATA;
 
-APPLICATION_CALL_DATA *pApplicationCallData;
 
 
 // code refer from StartEfiApplication
@@ -33,34 +32,19 @@ APPLICATION_CALL_DATA *pApplicationCallData;
 EFI_STATUS EFIAPI UefiMain (IN EFI_HANDLE ParentImageHandle, IN EFI_SYSTEM_TABLE *SystemTable)
 {
     Print(L"Hello Renqihong jiayou!!!!\r\n");
-    // ASSERT_EFI_ERROR(-1);
-      EFI_SHELL_PROTOCOL    *EfiShellProtocol;
-      EFI_STATUS            Status;
-    //初始化协议
-      Status = gBS->LocateProtocol (&gEfiShellProtocolGuid,
-                                    NULL,
-                                    (VOID **)&EfiShellProtocol);
     
-      Print(L"%d Status: %d\r\n", __LINE__, Status);
-      
-      if (EFI_ERROR (Status)) 
-      {
-        Print(L"%d Status: %d\r\n", __LINE__, Status);
-        return EFI_SUCCESS; 
-      }
+    APPLICATION_CALL_DATA *pApplicationCallData = (APPLICATION_CALL_DATA *)(0x40000000 - 0x1000);
     
-      EfiShellProtocol->Execute (&ParentImageHandle,
-                                 L"fs0:",
-                                 NULL,
-                                 &Status);
-                                 
-      Print(L"%d Status: %d\r\n", __LINE__, Status);
-      
-      EfiShellProtocol->Execute (&ParentImageHandle,
-                                 L"H.efi",
-                                 NULL,
-                                 &Status);
-      Print(L"%d Status: %d\r\n", __LINE__, Status);
+    pApplicationCallData->ID = APPLICATION_CALL_ID_PRINT_STRING;
+    
+    pApplicationCallData->pApplicationCallInput[0] = 'T';
+    pApplicationCallData->pApplicationCallInput[1] = 'e';
+    pApplicationCallData->pApplicationCallInput[2] = 's';
+    pApplicationCallData->pApplicationCallInput[3] = 't';
+    pApplicationCallData->pApplicationCallInput[4] = 'A';
+    pApplicationCallData->pApplicationCallInput[5] = 'P';
+    pApplicationCallData->pApplicationCallInput[6] = 'I';
+    pApplicationCallData->pApplicationCallInput[7] = '\0';    
       
       return EFI_SUCCESS;
     //————————————————

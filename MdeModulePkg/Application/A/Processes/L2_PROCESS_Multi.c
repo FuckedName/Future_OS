@@ -151,7 +151,7 @@ VOID testfunction()
     
     //L2_DEBUG_Print1(x, y, "%d testfunction: %02X testfunction2: %02X code: %02X",  __LINE__, testfunction, testfunction2, code);
     //L1_MEMORY_Copy(p, code, 0x49);
-    testfunction2();
+    //testfunction2();
 }
 
 /*
