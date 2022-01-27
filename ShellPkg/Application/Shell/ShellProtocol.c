@@ -1400,6 +1400,7 @@ InternalShellExecuteDevicePath(
   OUT EFI_STATUS                    *StartImageStatus OPTIONAL
   )
 {
+  Print(L"%d InternalShellExecuteDevicePath\r\n", __LINE__);
   EFI_STATUS                    Status;
   EFI_STATUS                    StartStatus;
   EFI_STATUS                    CleanupStatus;
@@ -1432,6 +1433,8 @@ InternalShellExecuteDevicePath(
     }
   }
 
+  Print(L"%d InternalShellExecuteDevicePath\r\n", __LINE__);
+
   //
   // Load the image with:
   // FALSE - not from boot manager and NULL, 0 being not already in memory
@@ -1458,6 +1461,8 @@ InternalShellExecuteDevicePath(
     gImageHandle,
     NULL,
     EFI_OPEN_PROTOCOL_GET_PROTOCOL);
+
+  Print(L"%d InternalShellExecuteDevicePath\r\n", __LINE__);
 
   if (!EFI_ERROR(Status)) {
     //
@@ -1530,6 +1535,8 @@ InternalShellExecuteDevicePath(
 
     Status = gBS->InstallProtocolInterface(&NewHandle, &gEfiShellParametersProtocolGuid, EFI_NATIVE_INTERFACE, &ShellParamsProtocol);
     ASSERT_EFI_ERROR(Status);
+    
+    Print(L"%d InternalShellExecuteDevicePath\r\n", __LINE__);
 
     ///@todo initialize and install ShellInterface protocol on the new image for compatibility if - PcdGetBool(PcdShellSupportOldProtocols)
 

@@ -328,6 +328,8 @@ UefiMain (
   IN EFI_SYSTEM_TABLE  *SystemTable
   )
 {
+  Print(L"%d: Shell.c UefiMain", __LINE__);
+  
   EFI_STATUS                      Status;
   CHAR16                          *TempString;
   UINTN                           Size;
@@ -1344,6 +1346,7 @@ DoShellPrompt (
   // Read a line from the console
   //
   Status = ShellInfoObject.NewEfiShellProtocol->ReadFile(ShellInfoObject.NewShellParametersProtocol->StdIn, &BufferSize, CmdLine);
+  Print(L"%d DoShellPrompt", __LINE__);
 
   //
   // Null terminate the string and parse it
@@ -2439,6 +2442,8 @@ RunCommandOrFile(
   EFI_DEVICE_PATH_PROTOCOL  *DevPath;
   SHELL_STATUS              CalleeExitStatus;
 
+  Print(L"%d RunCommandOrFile\r\n", __LINE__);
+
   Status            = EFI_SUCCESS;
   CommandWithPath   = NULL;
   DevPath           = NULL;
@@ -2633,6 +2638,8 @@ RunShellCommand(
   CHAR16                    *TempWalker;
   SHELL_OPERATION_TYPES     Type;
   CONST CHAR16              *CurDir;
+  
+  Print(L"%d RunShellCommand", __LINE__);
 
   ASSERT(CmdLine != NULL);
   if (StrLen(CmdLine) == 0) {
