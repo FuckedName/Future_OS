@@ -22,6 +22,12 @@
   UefiLib
   PcdLib
 
+[Guids]
+  gEfiLoadedImageProtocolGuid     
+  
+[Protocols]
+  gEfiShellProtocolGuid
+
 [FeaturePcd]
   gEfiMdeModulePkgTokenSpaceGuid.PcdHelloWorldPrintEnable   ## CONSUMES
 

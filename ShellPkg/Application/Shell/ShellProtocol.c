@@ -1400,7 +1400,8 @@ InternalShellExecuteDevicePath(
   OUT EFI_STATUS                    *StartImageStatus OPTIONAL
   )
 {
-  Print(L"%d InternalShellExecuteDevicePath\r\n", __LINE__);
+  Print(L"%d %a %a \r\n", __LINE__, __FILE__, __FUNCTION__);
+  
   EFI_STATUS                    Status;
   EFI_STATUS                    StartStatus;
   EFI_STATUS                    CleanupStatus;
@@ -1433,19 +1434,20 @@ InternalShellExecuteDevicePath(
     }
   }
 
-  Print(L"%d InternalShellExecuteDevicePath\r\n", __LINE__);
+  Print(L"%d %a %a \r\n", __LINE__, __FILE__, __FUNCTION__);
+
 
   //
   // Load the image with:
   // FALSE - not from boot manager and NULL, 0 being not already in memory
   //
   Status = gBS->LoadImage(
-    FALSE,
-    *ParentImageHandle,
-    (EFI_DEVICE_PATH_PROTOCOL*)DevicePath,
-    NULL,
-    0,
-    &NewHandle);
+                            FALSE,
+                            *ParentImageHandle,
+                            (EFI_DEVICE_PATH_PROTOCOL*)DevicePath,
+                            NULL,
+                            0,
+                            &NewHandle);
 
   if (EFI_ERROR(Status)) {
     if (NewHandle != NULL) {
