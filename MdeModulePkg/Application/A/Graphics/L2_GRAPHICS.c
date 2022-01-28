@@ -77,12 +77,12 @@ UINT16 StartMenuWidth = 16 * 10;
 UINT16 StartMenuHeight = 16 * 20;
 UINT16 StatusErrorCount = 0;
 UINT16 SystemLogWindowWidth = 16 * 48;
-UINT16 SystemLogWindowHeight = 16 * 48;
+UINT16 SystemLogWindowHeight = 16 * 60;
 UINT16 SystemSettingWindowWidth = 16 * 10;
 UINT16 SystemSettingWindowHeight = 16 * 10;
 
-UINT16 MemoryInformationWindowHeight = 16 * 30;
-UINT16 MemoryInformationWindowWidth = 16 * 30;
+UINT16 MemoryInformationWindowHeight = 16 * 60;
+UINT16 MemoryInformationWindowWidth = 16 * 40;
 
 
 EFI_GRAPHICS_OUTPUT_BLT_PIXEL MouseColor;

@@ -32,8 +32,8 @@
 #include <Global/Global.h>
 #include <Memory/L1_MEMORY.h>
 
-UINT16 MyComputerWidth = 16 * 30;
-UINT16 MyComputerHeight = 16 * 30;
+UINT16 MyComputerWidth = 16 * 40;
+UINT16 MyComputerHeight = 16 * 80;
 
 
 
