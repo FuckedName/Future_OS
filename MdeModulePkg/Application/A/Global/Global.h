@@ -34,6 +34,7 @@
 #include <Libraries/DataStructure/L1_LIBRARY_DataStructure.h>
 
 #include <Graphics/L1_GRAPHICS.h>
+#include <Protocol/Shell.h>
 
 extern UINT8 EFI_FILE_STORE_PATH_PARTITION_NAME[50];
 
@@ -389,6 +390,9 @@ extern UINT64 FreeNumberOfPages;
 extern UINT64 SystemAllPagesAllocated;
 extern DEVICE_PARAMETER device[10];
 extern EFI_HANDLE  TimerOne;
+extern EFI_HANDLE  SystemHandle;
+extern EFI_SHELL_PROTOCOL    *EfiShellProtocol;
+
 
 typedef enum
 {

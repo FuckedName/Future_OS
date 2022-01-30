@@ -47,7 +47,6 @@
 #include <Global/Global.h>
 #include <Partitions/L2_PARTITION.h>
 #include <Processes/L2_PROCESS_Multi.h>
-#include <Applications/L2_APPLICATIONS.h>
 
 
 //https://blog.csdn.net/goodwillyang/article/details/45559925
@@ -92,6 +91,8 @@ EFI_STATUS EFIAPI Main (
     INFO_SELF(L"Main: 0x%X Status: 0x%X sASCII: 0x%X p1: 0x%X pBuffer: 0x%X \r\n", Main, &Status, sASCII, p1, pBuffer);  
 
 	L2_SCREEN_Init();
+
+	SystemHandle = ImageHandle;
 	
     L2_COMMON_MemoryAllocate();
 
@@ -116,12 +117,29 @@ EFI_STATUS EFIAPI Main (
     L2_GRAPHICS_SystemSettingInit();
 
 	L3_APPLICATION_WindowsInitial();
-	
-    L2_ApplicationRun(ImageHandle);
+
+    EFI_EVENT Event;
+    VOID           *Context;
     
-    L2_TIMER_IntervalInit();    
-        
+
+    // ASSERT_EFI_ERROR(-1);
+    //初始化协议
+    Status = gBS->LocateProtocol (&gEfiShellProtocolGuid,
+                                NULL,
+                                (VOID **)&EfiShellProtocol);
+	    
+    if (EFI_ERROR (Status)) 
+    {
+        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: L2_ApplicationRun Status: %d\n", __LINE__, Status);
+        return EFI_SUCCESS; 
+    }
+    
+    //L2_ApplicationRun(Event, Context);
+    
+    L2_TIMER_IntervalInit();  
+    
     return EFI_SUCCESS;
-}
+}  
+        
 
 

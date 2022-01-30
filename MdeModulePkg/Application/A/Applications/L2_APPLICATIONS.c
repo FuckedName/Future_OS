@@ -32,6 +32,10 @@
 
 #include <Global/Global.h>
 
+EFI_SHELL_PROTOCOL    *EfiShellProtocol = NULL;
+
+EFI_HANDLE   SystemHandle = NULL;
+
 
 /****************************************************************************
 *
@@ -44,38 +48,31 @@
 *  返回值： 成功：XXXX，失败：XXXXX
 *
 *****************************************************************************/
-VOID L2_ApplicationRun(EFI_HANDLE        ImageHandle)
+VOID L2_ApplicationRun(EFI_EVENT Event,  VOID           *Context)
 {
-    // ASSERT_EFI_ERROR(-1);
-    EFI_SHELL_PROTOCOL    *EfiShellProtocol;
     EFI_STATUS            Status;
-    //初始化协议
-    Status = gBS->LocateProtocol (&gEfiShellProtocolGuid,
-                                NULL,
-                                (VOID **)&EfiShellProtocol);
+    
+    //return EFI_SUCCESS;
 
     //Print(L"%d Status: %d\r\n", __LINE__, Status);
-    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: L2_ApplicationRun Status: %d\n", __LINE__, Status);
+    //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: L2_ApplicationRun Status: %d\n", __LINE__, Status);
 
-    if (EFI_ERROR (Status)) 
-    {
-        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: L2_ApplicationRun Status: %d\n", __LINE__, Status);
-        return EFI_SUCCESS; 
-    }
 
-    EfiShellProtocol->Execute (&ImageHandle,
+    EfiShellProtocol->Execute (&SystemHandle,
                              L"fs0:",
                              NULL,
                              &Status);
                              
-    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: L2_ApplicationRun Status: %d\n", __LINE__, Status);
-
-    EfiShellProtocol->Execute (&ImageHandle,
+    //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: L2_ApplicationRun Status: %d\n", __LINE__, Status);
+    
+    EfiShellProtocol->Execute (&SystemHandle,
                              L"H.efi",
                              NULL,
                              &Status);
-    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: L2_ApplicationRun Status: %d\n", __LINE__, Status);
+    //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: L2_ApplicationRun Status: %d ID: %d input: %c\n", __LINE__, Status, pApplicationCallData->ID, pApplicationCallData->pApplicationCallInput[0]);
     //5. Run Buffer2 after apply cpu time slice;
+    return EFI_SUCCESS;
+    //return EFI_SUCCESS;
 }
 
 // Use to load *.efi test

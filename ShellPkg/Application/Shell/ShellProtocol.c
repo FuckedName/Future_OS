@@ -1448,6 +1448,7 @@ InternalShellExecuteDevicePath(
                             NULL,
                             0,
                             &NewHandle);
+  Print(L"%d %a %a %d \r\n", __LINE__, __FILE__, __FUNCTION__, Status);
 
   if (EFI_ERROR(Status)) {
     if (NewHandle != NULL) {
@@ -1464,7 +1465,7 @@ InternalShellExecuteDevicePath(
     NULL,
     EFI_OPEN_PROTOCOL_GET_PROTOCOL);
 
-  Print(L"%d InternalShellExecuteDevicePath\r\n", __LINE__);
+  Print(L"%d InternalShellExecuteDevicePath Status:%d \r\n", __LINE__, Status);
 
   if (!EFI_ERROR(Status)) {
     //
@@ -1551,6 +1552,7 @@ InternalShellExecuteDevicePath(
                           0,
                           NULL
                           );
+      Print(L"%d %a %a %d \r\n", __LINE__, __FILE__, __FUNCTION__, StartStatus);
       if (StartImageStatus != NULL) {
         *StartImageStatus = StartStatus;
       }

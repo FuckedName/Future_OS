@@ -37,6 +37,8 @@
 #include <Devices/Timer/L2_DEVICE_Timer.h>
 #include <Devices/Network/L2_DEVICE_Network.h>
 
+#include <Applications/L2_APPLICATIONS.h>
+
 #include "L2_INTERFACES.h"
 
 
@@ -210,55 +212,13 @@ EFI_STATUS L2_COMMON_MultiProcessInit ()
 
     // initial application memory address.
     //pApplication = (UINT8 *)APPLICATION_DYNAMIC_MEMORY_ADDRESS_START;
-
-    // test ok.
-    pFunction = testfunction;
-
-    
-    /*pApplication[0] = 0xf3;
-    pApplication[1] = 0x0f;
-    pApplication[2] = 0x1e;
-    pApplication[3] = 0xfa;
-    
-    pApplication[4] = 0x55;
-    
-    pApplication[5] = 0x48;
-    pApplication[6] = 0x89;
-    pApplication[7] = 0xe5;
-
-    pApplication[8] = 0x48;
-    pApplication[9] = 0xc7;
-    pApplication[0xa] = 0x45;
-    pApplication[0xb] = 0xf8;
-    pApplication[0xc] = 0x00;
-    pApplication[0xd] = 0xf0;
-    pApplication[0xe] = 0xff;
-    
-    pApplication[0xf] = 0x1f;
-    
-    pApplication[0x10] = 0x48;
-    pApplication[0x11] = 0x8b;
-    pApplication[0x12] = 0x45;
-    pApplication[0x13] = 0xf8;
-    
-    pApplication[0x14] = 0x48;
-    pApplication[0x15] = 0xc7;
-    pApplication[0x16] = 0x00;    
-    pApplication[0x17] = 0x01;
-    pApplication[0x18] = 0x00;
-    pApplication[0x19] = 0x00;
-    pApplication[0x1a] = 0x00;
-    
-    pApplication[0x1b] = 0x90;
-    pApplication[0x1c] = 0x5d;
-    pApplication[0x1d] = 0xc3;*/
     
     //操作系统运行应用程序对应的事件处理
 
     //Not ok.
     //pFunction = code;
     // run application step 1
-    EFI_EVENT_NOTIFY       TaskProcessesGroupApplicationCall[] = {testfunction};
+    EFI_EVENT_NOTIFY       TaskProcessesGroupApplicationCall[] = {L2_ApplicationRun};
     
     // run application step 2
     EFI_EVENT_NOTIFY       TaskProcessesGroupApplicationCall2[] = {L2_INTERFACES_ApplicationCall};
@@ -299,7 +259,7 @@ EFI_STATUS L2_COMMON_MultiProcessInit ()
     for (i = 0; i < sizeof(TaskProcessesGroupApplicationCall) / sizeof(EFI_EVENT_NOTIFY); i++)
     {
         gBS->CreateEventEx(EVT_NOTIFY_SIGNAL,
-                          TPL_NOTIFY,
+                          TPL_CALLBACK,
                           TaskProcessesGroupApplicationCall[i],
                           NULL,
                           &gMultiProcessGroup4Guid,
