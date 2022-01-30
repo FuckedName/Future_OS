@@ -392,6 +392,7 @@ extern DEVICE_PARAMETER device[10];
 extern EFI_HANDLE  TimerOne;
 extern EFI_HANDLE  SystemHandle;
 extern EFI_SHELL_PROTOCOL    *EfiShellProtocol;
+extern BOOLEAN ApplicationRunFinished;
 
 
 typedef enum

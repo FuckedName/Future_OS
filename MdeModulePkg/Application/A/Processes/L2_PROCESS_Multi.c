@@ -112,7 +112,7 @@ VOID EFIAPI L2_TIMER_Slice(
         gBS->SignalEvent(MultiTaskTriggerGroup4Event);
     }
 
-    if (TimerSliceCount == 150)
+    if (APPLICATION_CALL_ID_INIT != pApplicationCallData->ID && ApplicationRunFinished)
     {
         gBS->SignalEvent (MultiTaskTriggerGroup5Event);
         pApplicationCallData->ID = APPLICATION_CALL_ID_INIT;
@@ -210,17 +210,10 @@ EFI_STATUS L2_COMMON_MultiProcessInit ()
     //TCP通信处理相关事件
     EFI_EVENT_NOTIFY       TaskProcessesGroupTCPHandle[] = {L2_TCP4_HeartBeatNotify, L2_TCP4_ReceiveNotify, L2_TCP4_SendNotify};
 
-    // initial application memory address.
-    //pApplication = (UINT8 *)APPLICATION_DYNAMIC_MEMORY_ADDRESS_START;
-    
-    //操作系统运行应用程序对应的事件处理
-
-    //Not ok.
-    //pFunction = code;
-    // run application step 1
+    //step 1: run application 
     EFI_EVENT_NOTIFY       TaskProcessesGroupApplicationCall[] = {L2_ApplicationRun};
     
-    // run application step 2
+    //step 2: System respond the system call 
     EFI_EVENT_NOTIFY       TaskProcessesGroupApplicationCall2[] = {L2_INTERFACES_ApplicationCall};
     
     for (i = 0; i < sizeof(TaskProcessesGroupSystem) / sizeof(EFI_EVENT_NOTIFY); i++)
