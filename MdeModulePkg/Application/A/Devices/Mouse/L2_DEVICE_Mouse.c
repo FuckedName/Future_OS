@@ -32,6 +32,57 @@
 
 #include <Graphics/L2_GRAPHICS.h>
 
+typedef struct
+{
+    CHAR8 ucX_RelativeMove;
+    CHAR8 ucY_RelativeMove;
+    BOOLEAN LeftButton;
+    BOOLEAN RightButton;
+    BOOLEAN MiddleButton;
+}MOUSE_STATE;
+
+VOID L2_MOUSE_StateAnaysis(EFI_SIMPLE_POINTER_STATE State)
+{
+    MOUSE_STATE stMouseState;
+        
+    //X
+    if (State.RelativeMovementX < 0)
+    {
+        int temp = State.RelativeMovementX >> 16;
+        x_move = (0xFFFF - temp) & 0xff;  
+        x_move = - x_move;
+    }
+    else if(State.RelativeMovementX > 0)
+    {
+        x_move = (State.RelativeMovementX >> 16) & 0xff;
+    }
+
+    //Y
+    if (State.RelativeMovementY < 0)
+    {       
+        int temp = State.RelativeMovementY >> 16;
+        y_move = (0xFFFF - temp) & 0xff;  
+        y_move = - y_move;
+    }
+    else if(State.RelativeMovementY > 0)
+    {
+        y_move = (State.RelativeMovementY >> 16) & 0xff;
+    }
+    
+    //左
+    if (State.LeftButton == TRUE)
+    {
+    }
+
+    //右
+    if (State.RightButton == TRUE)
+    {
+    }
+    
+    stMouseState.ucX_RelativeMove = x_move;
+    stMouseState.ucX_RelativeMove = y_move;
+
+}
 
 
 
@@ -65,34 +116,14 @@ VOID EFIAPI L2_MOUSE_Event (IN EFI_EVENT Event, IN VOID *Context)
     {
         return ;
     }
+    
+    //如果鼠标没有按键和鼠标移动，则直接返回。
     if (0 == State.RelativeMovementX && 0 == State.RelativeMovementY && 0 == State.LeftButton && 0 == State.RightButton)
     {
         return;
     }
-    
-    //X
-    if (State.RelativeMovementX < 0)
-    {
-        int temp = State.RelativeMovementX >> 16;
-        x_move = (0xFFFF - temp) & 0xff;  
-        x_move = - x_move;
-    }
-    else if(State.RelativeMovementX > 0)
-    {
-        x_move = (State.RelativeMovementX >> 16) & 0xff;
-    }
 
-    //Y
-    if (State.RelativeMovementY < 0)
-    {       
-        int temp = State.RelativeMovementY >> 16;
-        y_move = (0xFFFF - temp) & 0xff;  
-        y_move = - y_move;
-    }
-    else if(State.RelativeMovementY > 0)
-    {
-        y_move = (State.RelativeMovementY >> 16) & 0xff;
-    }
+    L2_MOUSE_StateAnaysis(State);
 
     ////DEBUG ((EFI_D_INFO, "X: %X, Y: %X ", x_move, y_move));
     L2_DEBUG_Print1(0, ScreenHeight - 30 -  8 * 16, "%d: X: %04d, Y: %04d move X: %d move Y: %d", __LINE__, iMouseX, iMouseY, x_move, y_move );
@@ -108,8 +139,8 @@ VOID EFIAPI L2_MOUSE_Event (IN EFI_EVENT Event, IN VOID *Context)
 	iMouseY = (iMouseY < 0) ? 0 : iMouseY;
 	iMouseY = (iMouseY > ScreenHeight - 16) ? ScreenHeight - 16 : iMouseY;
 	
-    //Button
-    if (State.LeftButton == MOUSE_LEFT_CLICKED)
+    //左
+    if (State.LeftButton == TRUE)
     {
         //DEBUG ((EFI_D_INFO, "Left button clicked\n"));
         
@@ -122,7 +153,8 @@ VOID EFIAPI L2_MOUSE_Event (IN EFI_EVENT Event, IN VOID *Context)
         //DrawAsciiCharUseBuffer(GraphicsOutput, 20 + process2_i * 8 + 16, 60, 'E', Color);  
     }
     
-    if (State.RightButton == 0x01)
+    //右
+    if (State.RightButton == TRUE)
     {
         //DEBUG ((EFI_D_INFO, "Right button clicked\n"));
         //DrawAsciiCharUseBuffer(GraphicsOutput, 20 + process2_i * 8 + 16, 60, 'R', Color);

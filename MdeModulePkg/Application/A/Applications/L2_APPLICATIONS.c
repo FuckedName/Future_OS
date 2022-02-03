@@ -34,7 +34,10 @@
 
 EFI_SHELL_PROTOCOL    *EfiShellProtocol = NULL;
 
-EFI_HANDLE   SystemHandle = NULL;
+//系统的指针
+EFI_HANDLE SystemHandle = NULL;
+
+//应用程序执行完成标识，需要应用程序执行完成才能执行内核的系统调用。
 BOOLEAN ApplicationRunFinished = FALSE;
 
 

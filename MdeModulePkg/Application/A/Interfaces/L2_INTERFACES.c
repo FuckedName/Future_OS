@@ -124,19 +124,12 @@ APPLICATION_CALL_TABLE InterfaceCallTable[] =
 *****************************************************************************/
 VOID L2_INTERFACES_ApplicationCall (EFI_EVENT Event,  VOID           *Context)
 {
-    //return;
-    UINT8 *p = testfunction;
-    //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: L2_ApplicationShutdown pApplicationCallData->ID: %d\n", __LINE__, pApplicationCallData->ID);
-
-    //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: %02X %02X %02X %02X %02X \n", __LINE__, p[0], p[1], p[2], p[3], p[4]);
-
-
     UINT16 x, y;
     UINT8 S = "Test";
     x = DISPLAY_DESK_DATE_TIME_X - 200;
     y = DISPLAY_DESK_DATE_TIME_Y - 300;    
     
-    L2_DEBUG_Print1(x, y, "%d  %02X %02X %02X %02X %02X \n", __LINE__, p[0], p[1], p[2], p[3], p[4]);
+    L2_DEBUG_Print1(x, y, "%d  L2_INTERFACES_ApplicationCall.\n", __LINE__);
     
     //进入系统调用
     if (APPLICATION_CALL_ID_INIT != pApplicationCallData->ID)

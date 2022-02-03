@@ -42,15 +42,17 @@
 #include "L2_INTERFACES.h"
 
 
-EFI_EVENT MultiTaskTriggerGroup1Event;
-EFI_EVENT MultiTaskTriggerGroup2Event;
-EFI_EVENT MultiTaskTriggerGroup3Event;
-EFI_EVENT MultiTaskTriggerGroup4Event;
-EFI_EVENT MultiTaskTriggerGroup5Event;
+EFI_EVENT MultiTaskTriggerGroupEventSystem;
+EFI_EVENT MultiTaskTriggerGroupEventDateTimePrint;
+EFI_EVENT MultiTaskTriggerGroupEventTCPHandle;
+EFI_EVENT MultiTaskTriggerGroupEventApplicationCall;
+EFI_EVENT MultiTaskTriggerGroupEventSystemResponse;
 UINT8 *pApplication = NULL;
 
 VOID (*pFunction)();
 
+
+//时间片记数，用于区分不同调度频率的任务。
 UINT32 TimerSliceCount = 0;
 
 
@@ -97,24 +99,24 @@ VOID EFIAPI L2_TIMER_Slice(
 	//第一个事件分组是鼠标、键盘，所以需要频率更高的运行
     if (TimerSliceCount % 10 == 0)
     {
-        gBS->SignalEvent (MultiTaskTriggerGroup1Event);
-        gBS->SignalEvent (MultiTaskTriggerGroup3Event);        
+        gBS->SignalEvent (MultiTaskTriggerGroupEventSystem);
+        gBS->SignalEvent (MultiTaskTriggerGroupEventTCPHandle);        
     }
 
 	//第二个事件分组是屏幕右下角显示日期、时间、星期几，所以频率可以低些以节约CPU资源
     if (TimerSliceCount % 20 == 0)
-       gBS->SignalEvent (MultiTaskTriggerGroup2Event);
+       gBS->SignalEvent (MultiTaskTriggerGroupEventDateTimePrint);
 
     //系统调用如果不为零，表示应用层有系统调用，则触发对应的事件组。
     //if (0 != *APPLICATION_CALL_FLAG_ADDRESS)
     if (TimerSliceCount == 100)
     {
-        gBS->SignalEvent(MultiTaskTriggerGroup4Event);
+        gBS->SignalEvent(MultiTaskTriggerGroupEventApplicationCall);
     }
 
     if (APPLICATION_CALL_ID_INIT != pApplicationCallData->ID && ApplicationRunFinished)
     {
-        gBS->SignalEvent (MultiTaskTriggerGroup5Event);
+        gBS->SignalEvent (MultiTaskTriggerGroupEventSystemResponse);
         pApplicationCallData->ID = APPLICATION_CALL_ID_INIT;
     }
     
@@ -140,38 +142,6 @@ VOID testfunction2()
 	return;
 }
 
-
-VOID testfunction()
-{    
-    UINT16 x, y;
-    UINT8 S = "Test";
-    x = DISPLAY_DESK_DATE_TIME_X - 200;
-    y = DISPLAY_DESK_DATE_TIME_Y - 216;
-    
-    UINT8 code[] = {0xf3,0x0f,0x1e,0xfa,0x48,0x8b,0x05,0x00,0x00,0x00,0x00,0xc7,0x00,0x02,0x00,0x00,0x00,0x48,0x8b,0x05,0x00,0x00,0x00,0x00,0xc6,0x40,0x04,0x54,0x48,0x8b,0x05,0x00,0x00,0x00,0x00,0xc6,0x40,0x05,0x54,0x48,0x8b,0x05,0x00,0x00,0x00,0x00,0xc6,0x40,0x06,0x54,0x48,0x8b,0x05,0x00,0x00,0x00,0x00,0xc6,0x40,0x07,0x54,0x48,0x8b,0x05,0x00,0x00,0x00,0x00,0xc6,0x40,0x08,0x00,0xc3};
-    UINT8 *p = testfunction2;
-    
-    //L2_DEBUG_Print1(x, y, "%d testfunction: %02X testfunction2: %02X code: %02X",  __LINE__, testfunction, testfunction2, code);
-    //L1_MEMORY_Copy(p, code, 0x49);
-    //testfunction2();
-}
-
-/*
-
-VOID testfunction()
-{
-    pApplicationCallData->ID = APPLICATION_CALL_ID_PRINT_STRING;
-    pApplicationCallData->pApplicationCallInput[0] = 'T';
-    pApplicationCallData->pApplicationCallInput[1] = 'T';
-    pApplicationCallData->pApplicationCallInput[2] = 'T';
-    pApplicationCallData->pApplicationCallInput[3] = 'T';
-    pApplicationCallData->pApplicationCallInput[4] = '\0';
-    
-	return;
-}
-*/
-
-
 /****************************************************************************
 *
 *  描述:   多进程组，每个进程组里有多个进程，不过跟真正操作系统的进程有些差别。
@@ -190,16 +160,16 @@ EFI_STATUS L2_COMMON_MultiProcessInit ()
     UINT16 i;
 
     // task group for mouse keyboard
-    EFI_GUID gMultiProcessGroup1Guid  = { 0x0579257E, 0x1843, 0x45FB, { 0x83, 0x9D, 0x6B, 0x79, 0x09, 0x38, 0x29, 0xA9 } };
+    EFI_GUID gMultiProcessGroupGuidSystem  = { 0x0579257E, 0x1843, 0x45FB, { 0x83, 0x9D, 0x6B, 0x79, 0x09, 0x38, 0x29, 0xA9 } };
     
     // task group for display date time
-    EFI_GUID gMultiProcessGroup2Guid  = { 0x0579257E, 0x1843, 0x45FB, { 0x83, 0x9D, 0x6B, 0x79, 0x09, 0x38, 0x29, 0xAA } };
+    EFI_GUID gMultiProcessGroupGuidDateTimePrint  = { 0x0579257E, 0x1843, 0x45FB, { 0x83, 0x9D, 0x6B, 0x79, 0x09, 0x38, 0x29, 0xAA } };
     
-    EFI_GUID gMultiProcessGroup3Guid  = { 0x0579257E, 0x1843, 0x45FB, { 0x83, 0x9D, 0x6B, 0x79, 0x09, 0x38, 0x29, 0xAB } };
+    EFI_GUID gMultiProcessGroupGuidTCPHandle  = { 0x0579257E, 0x1843, 0x45FB, { 0x83, 0x9D, 0x6B, 0x79, 0x09, 0x38, 0x29, 0xAB } };
     
-    EFI_GUID gMultiProcessGroup4Guid  = { 0x0579257E, 0x1843, 0x45FB, { 0x83, 0x9D, 0x6B, 0x79, 0x09, 0x38, 0x29, 0xAC } };
+    EFI_GUID gMultiProcessGroupGuidApplicationCall  = { 0x0579257E, 0x1843, 0x45FB, { 0x83, 0x9D, 0x6B, 0x79, 0x09, 0x38, 0x29, 0xAC } };
     
-    EFI_GUID gMultiProcessGroup5Guid  = { 0x0579257E, 0x1843, 0x45FB, { 0x83, 0x9D, 0x6B, 0x79, 0x09, 0x38, 0x29, 0xAD } };
+    EFI_GUID gMultiProcessGroupGuidSystemResponse  = { 0x0579257E, 0x1843, 0x45FB, { 0x83, 0x9D, 0x6B, 0x79, 0x09, 0x38, 0x29, 0xAD } };
 
     //系统事件：键盘处理，鼠标处理，
     EFI_EVENT_NOTIFY       TaskProcessesGroupSystem[] = {L2_KEYBOARD_Event, L2_MOUSE_Event};
@@ -223,8 +193,8 @@ EFI_STATUS L2_COMMON_MultiProcessInit ()
                           TPL_NOTIFY,
                           TaskProcessesGroupSystem[i],
                           NULL,
-                          &gMultiProcessGroup1Guid,
-                          &MultiTaskTriggerGroup1Event);
+                          &gMultiProcessGroupGuidSystem,
+                          &MultiTaskTriggerGroupEventSystem);
     }    
 
     for (i = 0; i < sizeof(TaskProcessesGroupDateTimePrint) / sizeof(EFI_EVENT_NOTIFY); i++)
@@ -234,8 +204,8 @@ EFI_STATUS L2_COMMON_MultiProcessInit ()
                           TPL_NOTIFY,
                           TaskProcessesGroupDateTimePrint[i],
                           NULL,
-                          &gMultiProcessGroup2Guid,
-                          &MultiTaskTriggerGroup2Event);
+                          &gMultiProcessGroupGuidDateTimePrint,
+                          &MultiTaskTriggerGroupEventDateTimePrint);
     }    
 
     for (i = 0; i < sizeof(TaskProcessesGroupTCPHandle) / sizeof(EFI_EVENT_NOTIFY); i++)
@@ -245,8 +215,8 @@ EFI_STATUS L2_COMMON_MultiProcessInit ()
                           TPL_NOTIFY,
                           TaskProcessesGroupTCPHandle[i],
                           NULL,
-                          &gMultiProcessGroup3Guid,
-                          &MultiTaskTriggerGroup3Event);
+                          &gMultiProcessGroupGuidTCPHandle,
+                          &MultiTaskTriggerGroupEventTCPHandle);
     }    
 
     for (i = 0; i < sizeof(TaskProcessesGroupApplicationCall) / sizeof(EFI_EVENT_NOTIFY); i++)
@@ -255,8 +225,8 @@ EFI_STATUS L2_COMMON_MultiProcessInit ()
                           TPL_CALLBACK,
                           TaskProcessesGroupApplicationCall[i],
                           NULL,
-                          &gMultiProcessGroup4Guid,
-                          &MultiTaskTriggerGroup4Event);
+                          &gMultiProcessGroupGuidApplicationCall,
+                          &MultiTaskTriggerGroupEventApplicationCall);
     }    
  
     for (i = 0; i < sizeof(TaskProcessesGroupApplicationCall2) / sizeof(EFI_EVENT_NOTIFY); i++)
@@ -265,8 +235,8 @@ EFI_STATUS L2_COMMON_MultiProcessInit ()
                           TPL_NOTIFY,
                           TaskProcessesGroupApplicationCall2[i],
                           NULL,
-                          &gMultiProcessGroup5Guid,
-                          &MultiTaskTriggerGroup5Event);
+                          &gMultiProcessGroupGuidSystemResponse,
+                          &MultiTaskTriggerGroupEventSystemResponse);
     }    
 
     return EFI_SUCCESS;
