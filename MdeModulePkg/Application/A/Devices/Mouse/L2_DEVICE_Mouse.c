@@ -162,8 +162,6 @@ VOID EFIAPI L2_MOUSE_Event (IN EFI_EVENT Event, IN VOID *Context)
         L2_GRAPHICS_RightClickMenu(iMouseX, iMouseY);
         
         MouseClickFlag = 2;
-
-        
     }
     //L2_DEBUG_Print1(DISPLAY_X, DISPLAY_Y, "%d: HandleMouseEvent\n", __LINE__);
     ////DEBUG ((EFI_D_INFO, "\n"));
@@ -221,6 +219,12 @@ EFI_STATUS L2_MOUSE_Init()
             return EFI_SUCCESS;
         }
     }   
+    
+    MouseMoveoverObject.StartX = 0;
+    MouseMoveoverObject.EndX   = 0;
+    MouseMoveoverObject.StartY = 0;
+    MouseMoveoverObject.EndY   = 0;
+    MouseMoveoverObject.GraphicsLayerID   = 0;
     
     return EFI_SUCCESS;
 

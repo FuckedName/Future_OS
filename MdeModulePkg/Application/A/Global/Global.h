@@ -392,6 +392,17 @@ extern DEVICE_PARAMETER device[10];
 extern EFI_HANDLE  TimerOne;
 extern EFI_HANDLE  SystemHandle;
 extern EFI_SHELL_PROTOCOL    *EfiShellProtocol;
+
+typedef struct
+{
+    UINT16 StartX;
+    UINT16 StartY;
+    UINT16 EndX;
+    UINT16 EndY;
+    UINT16 GraphicsLayerID;
+}MOUSE_MOVEOVER_OBJECT;
+
+extern MOUSE_MOVEOVER_OBJECT MouseMoveoverObject;
 extern BOOLEAN ApplicationRunFinished;
 
 

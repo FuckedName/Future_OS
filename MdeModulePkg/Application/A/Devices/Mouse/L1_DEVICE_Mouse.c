@@ -37,7 +37,7 @@ INT16 iMouseY = 0;
 UINT16 MouseClickWindowWidth = 300;
 UINT16 MouseClickWindowHeight = 400;
 
-
+MOUSE_MOVEOVER_OBJECT MouseMoveoverObject;
 
 
 /****************************************************************************

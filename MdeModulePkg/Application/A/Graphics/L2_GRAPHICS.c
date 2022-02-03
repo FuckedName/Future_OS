@@ -45,6 +45,8 @@
 #include <Partitions/NTFS/L2_PARTITION_NTFS.h>
 #include <Partitions/L2_PARTITION.h>
 
+#include <Devices/Mouse/L1_DEVICE_Mouse.h>
+
 UINTN ScreenWidth, ScreenHeight;
 
 UINT16 LogStatusErrorCount = 0;
@@ -1643,6 +1645,10 @@ EFI_STATUS L2_GRAPHICS_SayGoodBye()
 *****************************************************************************/
 BOOLEAN L1_GRAPHICS_InsideRectangle(UINT16 StartX, UINT16 EndX, UINT16 StartY, UINT16 EndY)
 {
+    MouseMoveoverObject.StartX = StartX;
+    MouseMoveoverObject.EndX   = EndX;
+    MouseMoveoverObject.StartY = StartY;
+    MouseMoveoverObject.EndY   = EndY;
 	return (iMouseX >= StartX && iMouseX <= EndX && iMouseY >= StartY && iMouseY <= EndY);
 }
 
@@ -1666,10 +1672,40 @@ MOUSE_CLICK_EVENT L2_GRAPHICS_DeskLayerClickEventGet()
 	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: L2_GRAPHICS_DeskLayerClickEventGet\n", __LINE__);
 
 	if (L1_GRAPHICS_InsideRectangle(0, 16 + 16 * 2, ScreenHeight - 21, ScreenHeight))
-	{
+	{	    
 		L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: START_MENU_CLICKED_EVENT\n", __LINE__);
         return START_MENU_CLICKED_EVENT;
 	}
+
+	
+    UINT16 ItemHeight = SYSTEM_ICON_HEIGHT / 4;
+    UINT16 ItemWidth = SYSTEM_ICON_WIDTH / 4;
+    UINT16 x1 = 20;
+    UINT16 y1 = 20;
+
+	if (L1_GRAPHICS_InsideRectangle(x1, x1 + ItemWidth, y1, y1 + ItemHeight))
+	{	    
+		L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: START_MENU_CLICKED_EVENT\n", __LINE__);
+        return START_MENU_CLICKED_EVENT;
+	}
+
+	y1 += ItemHeight + 2 * 16;
+
+	if (L1_GRAPHICS_InsideRectangle(x1, x1 + ItemWidth, y1, y1 + ItemHeight))
+	{	    
+		L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: START_MENU_CLICKED_EVENT\n", __LINE__);
+        return START_MENU_CLICKED_EVENT;
+	}
+
+	y1 += ItemHeight + 2 * 16;
+
+	if (L1_GRAPHICS_InsideRectangle(x1, x1 + ItemWidth, y1, y1 + ItemHeight))
+	{	    
+		L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: START_MENU_CLICKED_EVENT\n", __LINE__);
+        return START_MENU_CLICKED_EVENT;
+	}
+
+	y1 += ItemHeight + 2 * 16;
 
 	return MAX_CLICKED_EVENT;
 }
@@ -1698,40 +1734,40 @@ MOUSE_CLICK_EVENT L2_GRAPHICS_StartMenuLayerClickEventGet()
     UINT16 StartMenuPositionY = WindowLayers.item[GRAPHICS_LAYER_START_MENU].StartY;
 
     // Display my computer window
-    if (iMouseX >= 3 + StartMenuPositionX && iMouseX <= 3 + 4 * 16  + StartMenuPositionX  
-         && iMouseY >= 3 + StartMenuPositionY + 16 * START_MENU_BUTTON_MY_COMPUTER && iMouseY <= 3 + StartMenuPositionY + 16 * (START_MENU_BUTTON_MY_COMPUTER + 1))
+    if (L1_GRAPHICS_InsideRectangle(3 + StartMenuPositionX, 3 + 4 * 16  + StartMenuPositionX, 
+                                   3 + StartMenuPositionY + 16 * START_MENU_BUTTON_MY_COMPUTER, 3 + StartMenuPositionY + 16 * (START_MENU_BUTTON_MY_COMPUTER + 1)))
     {
         L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: MY_COMPUTER_CLICKED_EVENT\n", __LINE__);
         return MY_COMPUTER_CLICKED_EVENT;
     }
-
+    
     // Display Setting window
-    if (iMouseX >= 3 + StartMenuPositionX && iMouseX <= 3 + 4 * 16  + StartMenuPositionX  
-         && iMouseY >= 3 + StartMenuPositionY + 16 * START_MENU_BUTTON_SYSTEM_SETTING && iMouseY <= 3 + StartMenuPositionY + 16 * (START_MENU_BUTTON_SYSTEM_SETTING + 1))
+    if (L1_GRAPHICS_InsideRectangle(3 + StartMenuPositionX, 3 + 4 * 16  + StartMenuPositionX, 
+                                   3 + StartMenuPositionY + 16 * START_MENU_BUTTON_SYSTEM_SETTING, 3 + StartMenuPositionY + 16 * (START_MENU_BUTTON_SYSTEM_SETTING + 1)))
     {
         L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: SETTING_CLICKED_EVENT\n", __LINE__);
         return SETTING_CLICKED_EVENT;
     }
 
     // Display Memory Information window
-    if (iMouseX >= 3 + StartMenuPositionX && iMouseX <= 3 + 4 * 16  + StartMenuPositionX  
-         && iMouseY >= 3 + StartMenuPositionY + 16 * START_MENU_BUTTON_MEMORY_INFORMATION && iMouseY <= 3 + StartMenuPositionY + 16 * (START_MENU_BUTTON_MEMORY_INFORMATION + 1))
+    if (L1_GRAPHICS_InsideRectangle(3 + StartMenuPositionX, 3 + 4 * 16  + StartMenuPositionX, 
+                                    3 + StartMenuPositionY + 16 * START_MENU_BUTTON_MEMORY_INFORMATION, 3 + StartMenuPositionY + 16 * (START_MENU_BUTTON_MEMORY_INFORMATION + 1)))
     {
         L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: MEMORY_INFORMATION_CLICKED_EVENT\n", __LINE__);
         return MEMORY_INFORMATION_CLICKED_EVENT;
     }
     
     // System quit button
-    if (iMouseX >= 3 + StartMenuPositionX && iMouseX <= 3 + 4 * 16  + StartMenuPositionX  
-         && iMouseY >= 3 + StartMenuPositionY + 16 * START_MENU_BUTTON_SYSTEM_LOG && iMouseY <= 3 + StartMenuPositionY + 16 * (START_MENU_BUTTON_SYSTEM_LOG + 1))
+    if (L1_GRAPHICS_InsideRectangle(3 + StartMenuPositionX, 3 + 4 * 16  + StartMenuPositionX, 
+                                    3 + StartMenuPositionY + 16 * START_MENU_BUTTON_SYSTEM_LOG, 3 + StartMenuPositionY + 16 * (START_MENU_BUTTON_SYSTEM_LOG + 1)))
     {
         L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: SYSTEM_LOG_CLICKED_EVENT\n", __LINE__);
         return SYSTEM_LOG_CLICKED_EVENT;
     }
 
     // System quit button
-    if (iMouseX >= 3 + StartMenuPositionX && iMouseX <= 3 + 4 * 16  + StartMenuPositionX  
-         && iMouseY >= 3 + StartMenuPositionY + 16 * START_MENU_BUTTON_SYSTEM_QUIT && iMouseY <= 3 + StartMenuPositionY + 16 * (START_MENU_BUTTON_SYSTEM_QUIT + 1))
+    if (L1_GRAPHICS_InsideRectangle(3 + StartMenuPositionX, 3 + 4 * 16  + StartMenuPositionX, 
+                                    3 + StartMenuPositionY + 16 * START_MENU_BUTTON_SYSTEM_QUIT, 3 + StartMenuPositionY + 16 * (START_MENU_BUTTON_SYSTEM_QUIT + 1)))
     {
         L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: SYSTEM_QUIT_CLICKED_EVENT\n", __LINE__);
         return SYSTEM_QUIT_CLICKED_EVENT;
@@ -1762,24 +1798,24 @@ MOUSE_CLICK_EVENT L2_GRAPHICS_SystemSettingLayerClickEventGet()
     UINT16 SystemSettingWindowPositionY = WindowLayers.item[GRAPHICS_LAYER_SYSTEM_SETTING_WINDOW].StartY;
 
     //Wall paper setting
-    if (iMouseX >= 3 + SystemSettingWindowPositionX && iMouseX <= 3 + 4 * 16  + SystemSettingWindowPositionX  
-         && iMouseY >= 3 + SystemSettingWindowPositionY && iMouseY <= 3 + SystemSettingWindowPositionY + 16)
+    if (L1_GRAPHICS_InsideRectangle(3 + SystemSettingWindowPositionX, 3 + 4 * 16  + SystemSettingWindowPositionX, 
+                                   3 + SystemSettingWindowPositionY, 3 + SystemSettingWindowPositionY + 16))
     {
         L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: WALLPAPER_SETTING_CLICKED_EVENT\n", __LINE__);
         return WALLPAPER_SETTING_CLICKED_EVENT;
     }
     
     //Wall paper Reset
-    if (iMouseX >= 3 + SystemSettingWindowPositionX && iMouseX <= 3 + 4 * 16  + SystemSettingWindowPositionX  
-         && iMouseY >= 3 + SystemSettingWindowPositionY + 16 && iMouseY <= 3 + SystemSettingWindowPositionY + 16 * 2)
+    if (L1_GRAPHICS_InsideRectangle(3 + SystemSettingWindowPositionX, 3 + 4 * 16  + SystemSettingWindowPositionX, 
+                                   3 + SystemSettingWindowPositionY + 16, 3 + SystemSettingWindowPositionY + 16 * 2))
     {
         L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: WALLPAPER_RESET_CLICKED_EVENT\n", __LINE__);
         return WALLPAPER_RESET_CLICKED_EVENT;
     }
 
     // Hide Memory Information window
-    if (iMouseX >= SystemSettingWindowPositionX + SystemSettingWindowWidth - 20 && iMouseX <=  SystemSettingWindowPositionX + SystemSettingWindowWidth - 4 
-            && iMouseY >= SystemSettingWindowPositionY+ 0 && iMouseY <= SystemSettingWindowPositionY + 16)
+    if (L1_GRAPHICS_InsideRectangle(SystemSettingWindowPositionX + SystemSettingWindowWidth - 20, SystemSettingWindowPositionX + SystemSettingWindowWidth - 4, 
+                                   SystemSettingWindowPositionY+ 0, SystemSettingWindowPositionY + 16))
     {
         L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: SYSTEM_SETTING_CLOSE_CLICKED_EVENT\n", __LINE__);
         return SYSTEM_SETTING_CLOSE_CLICKED_EVENT;
@@ -1826,8 +1862,8 @@ MOUSE_CLICK_EVENT L2_GRAPHICS_MyComputerLayerClickEventGet()
 		UINT16 StartX = MyComputerPositionX + 50;
 		UINT16 StartY = MyComputerPositionY + i * 18 + 16 * 2;
 		
-		if (iMouseX >= StartX && iMouseX <=  StartX + 16 * 4 
-            && iMouseY >= StartY + 0 && iMouseY <= StartY + 16)
+		if (L1_GRAPHICS_InsideRectangle(iMouseX >= StartX, StartX + 16 * 4, 
+                                   StartY + 0, StartY + 16))
 		{
 			PartitionItemID = i;
 			L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: MY_COMPUTER_PARTITION_ITEM_CLICKED_EVENT PartitionItemID: %d\n", __LINE__, PartitionItemID);
@@ -1845,8 +1881,8 @@ MOUSE_CLICK_EVENT L2_GRAPHICS_MyComputerLayerClickEventGet()
 		UINT16 StartX = MyComputerPositionX + 130;
 		UINT16 StartY = MyComputerPositionY + i  * (HeightNew + 16 * 2) + 200;
 		
-		if (iMouseX >= StartX && iMouseX <=  StartX + WidthNew 
-            && iMouseY >= StartY && iMouseY <= StartY + HeightNew)
+		if (L1_GRAPHICS_InsideRectangle(iMouseX >= StartX, StartX + WidthNew, 
+                                   StartY + 0, StartY + HeightNew))
 		{
 			FolderItemID = i;
 			L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: MY_COMPUTER_PARTITION_ITEM_CLICKED_EVENT FolderItemID: %d\n", __LINE__, FolderItemID);
@@ -2175,33 +2211,27 @@ UINT16 L2_MOUSE_ClickEventHandle()
     
     L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: Name: %X %X\n", __LINE__, EFI_FILE_STORE_PATH_PARTITION_NAME[0], EFI_FILE_STORE_PATH_PARTITION_NAME[1]);
     
-    UINT16 i = 1; 
-    //L2_FILE_PartitionNameGet(i);
-    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: Name: %d %d\n", __LINE__, device[i].PartitionName[0], device[i].PartitionName[1]);
-    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: BlockSize: %d StartSector: %llu FileSystemType: %d\n",  __LINE__, BlockSize, device[i].StartSectorNumber, device[i].FileSystemType);
-    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: Reserved: %llu PerFat: %llu NumFATS: %d Start: %llu Cluster: %d",  __LINE__,
-                                                                                                                                   device[i].stMBRSwitched.ReservedSelector, 
-                                                                                                                                   device[i].stMBRSwitched.SectorsPerFat, 
-                                                                                                                                   device[i].stMBRSwitched.NumFATS,
-                                                                                                                                   device[i].stMBRSwitched.BootPathStartCluster,
-                                                                                                                                   device[i].stMBRSwitched.SectorOfCluster);
-
+    UINT16 i = 1;                    
     EFI_STATUS Status;
     UINT8 Buffer1[DISK_BUFFER_SIZE] = {0};
-    
+
+    //For test
+    /*
     L1_STORE_READ(1, 0, 1, Buffer1 );  
     for (int j = 0; j < 512; j++)
     {
         L2_DEBUG_Print1(0 + (j % 16) * 8 * 3, 6 * 56 + 16 * (j / 16), "%02X ", Buffer1[j] & 0xff);
     }
-    
+    */
 
 	// Get click event
 	MOUSE_CLICK_EVENT event = GraphicsLayerEventHandle[LayerID].pClickEventGet();
+	
     MouseClickFlag = MOUSE_NO_CLICKED;
 
 	// Handle click event
 	GraphicsLayerEventHandle[LayerID].pClickEventHandle(event);
+
 
 	return;	
 }
@@ -2455,16 +2485,16 @@ EFI_STATUS L2_GRAPHICS_DeskInit()
     
     y1 += HeightNew;
     // wo de dian nao
-    L2_GRAPHICS_ChineseCharDraw(pDeskBuffer, x1, y1, (46 - 1) * 94 + 50 - 1, Color, ScreenWidth);
+    L2_GRAPHICS_ChineseCharDraw(pDeskBuffer, x1, y1, (47 - 1) * 94 + 21 - 1, Color, ScreenWidth);
     x1 += 16;
     
-    L2_GRAPHICS_ChineseCharDraw(pDeskBuffer, x1, y1, (21 - 1) * 94 + 36 - 1, Color, ScreenWidth);
+    L2_GRAPHICS_ChineseCharDraw(pDeskBuffer, x1, y1, (45 - 1) * 94 + 19 - 1, Color, ScreenWidth);
     x1 += 16;
     
-    L2_GRAPHICS_ChineseCharDraw(pDeskBuffer, x1, y1, (21 - 1) * 94 + 71 - 1, Color, ScreenWidth);
+    L2_GRAPHICS_ChineseCharDraw(pDeskBuffer, x1, y1, (41 - 1) * 94 + 72 - 1, Color, ScreenWidth);
     x1 += 16;
     
-    L2_GRAPHICS_ChineseCharDraw(pDeskBuffer, x1, y1, (36 - 1) * 94 + 52 - 1, Color, ScreenWidth);
+    L2_GRAPHICS_ChineseCharDraw(pDeskBuffer, x1, y1, (54 - 1) * 94 + 35 - 1, Color, ScreenWidth);
 
     y1 += 16;
     y1 += 16;
@@ -2505,20 +2535,15 @@ EFI_STATUS L2_GRAPHICS_DeskInit()
     
     y1 += HeightNew;
     // wo de dian nao
-    L2_GRAPHICS_ChineseCharDraw(pDeskBuffer, x1, y1, (46 - 1) * 94 + 50 - 1, Color, ScreenWidth);
+    L2_GRAPHICS_ChineseCharDraw(pDeskBuffer, x1, y1, (27 - 1) * 94 + 56 - 1, Color, ScreenWidth);
     x1 += 16;
     
-    L2_GRAPHICS_ChineseCharDraw(pDeskBuffer, x1, y1, (21 - 1) * 94 + 36 - 1, Color, ScreenWidth);
+    L2_GRAPHICS_ChineseCharDraw(pDeskBuffer, x1, y1, (42 - 1) * 94 + 53 - 1, Color, ScreenWidth);
     x1 += 16;
     
-    L2_GRAPHICS_ChineseCharDraw(pDeskBuffer, x1, y1, (21 - 1) * 94 + 71 - 1, Color, ScreenWidth);
+    L2_GRAPHICS_ChineseCharDraw(pDeskBuffer, x1, y1, (53 - 1) * 94 + 30 - 1, Color, ScreenWidth);
     x1 += 16;
     
-    L2_GRAPHICS_ChineseCharDraw(pDeskBuffer, x1, y1, (36 - 1) * 94 + 52 - 1, Color, ScreenWidth);
-
-    y1 += 16;
-    y1 += 16;
-
     
     // line
     Color.Red   = 0xC6;
@@ -3341,6 +3366,7 @@ VOID L2_GRAPHICS_RightClickMenu(UINT16 iMouseX, UINT16 iMouseY)
 
 
 
+MOUSE_MOVEOVER_OBJECT MouseMoveoverObjectOld;
 
 
 
@@ -3355,24 +3381,62 @@ VOID L2_GRAPHICS_RightClickMenu(UINT16 iMouseX, UINT16 iMouseY)
 *  返回值： 成功：XXXX，失败：XXXXX
 *
 *****************************************************************************/
-VOID L2_MOUSE_MoveOver()
-{    
-	//L3_PARTITION_RootPathAccess();
+VOID L2_MOUSE_MoveOver()                                        
+{        
+	//获取鼠标光标所在的图层，窗口、图层在初始化的时候把第4个字节用于存放图层ID
+	UINT16 LayerID = pDeskDisplayBuffer[(iMouseY * ScreenWidth + iMouseX) * 4 + 3];
 	
     if (MouseClickFlag == 1)
     {
-        UINT16 layer = pDeskDisplayBuffer[(iMouseY * ScreenWidth + iMouseX) * 4 + 3];
-        if (0 != layer)
+        if (0 != LayerID)
         {
-            WindowLayers.item[layer].StartX += x_move * 3;
-            WindowLayers.item[layer].StartY += y_move * 3;
-            L1_GRAPHICS_UpdateWindowLayer(layer);
+            WindowLayers.item[LayerID].StartX += x_move * 3;
+            WindowLayers.item[LayerID].StartY += y_move * 3;
+            L1_GRAPHICS_UpdateWindowLayer(LayerID);
         }
     }
     
     x_move = 0;
     y_move = 0;
+    
+	MouseMoveoverObject.GraphicsLayerID = LayerID;
+	
+	// Get click event
+	MOUSE_CLICK_EVENT event = GraphicsLayerEventHandle[LayerID].pClickEventGet();
+    EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
+    Color.Red = 0x1f;
+    Color.Blue = 0x1f;
+    Color.Green = 0x1f;
 
+    if (MouseMoveoverObjectOld.StartX != MouseMoveoverObject.StartX 
+       || MouseMoveoverObjectOld.StartY != MouseMoveoverObject.StartY
+       || MouseMoveoverObjectOld.EndX != MouseMoveoverObject.EndX
+       || MouseMoveoverObjectOld.EndY != MouseMoveoverObject.EndY
+       || MouseMoveoverObjectOld.GraphicsLayerID != MouseMoveoverObject.GraphicsLayerID)
+    {
+        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: StartX: %d StartY: %d EndX: %d EndY: %d GraphicsLayerID: %d\n", __LINE__,                                
+                                  MouseMoveoverObject.StartX,
+                                  MouseMoveoverObject.StartY, 
+                                  MouseMoveoverObject.EndX, 
+                                  MouseMoveoverObject.EndY,
+                                  MouseMoveoverObject.GraphicsLayerID);
+
+        MouseMoveoverObjectOld.StartX = MouseMoveoverObject.StartX;
+        MouseMoveoverObjectOld.StartY = MouseMoveoverObject.StartY;
+        MouseMoveoverObjectOld.EndX   = MouseMoveoverObject.EndX;
+        MouseMoveoverObjectOld.EndY   = MouseMoveoverObject.EndY;
+        MouseMoveoverObjectOld.GraphicsLayerID = MouseMoveoverObject.GraphicsLayerID;
+    }
+    /*
+    L2_GRAPHICS_RectangleDraw(pDeskBuffer, 
+                              MouseMoveoverObject.StartX,
+                              MouseMoveoverObject.StartY, 
+                              MouseMoveoverObject.EndX, 
+                              MouseMoveoverObject.EndY, 
+                              1,  
+                              Color, 
+                              ScreenWidth);
+    */
 }
 
 
@@ -3616,6 +3680,7 @@ VOID L2_MOUSE_Move()
     // display graphics layer id mouse over, for mouse click event.
     //L2_DEBUG_Print1(DISPLAY_X, DISPLAY_Y, "%d: Graphics Layer id: %d ", __LINE__, pDeskDisplayBuffer[(iMouseY * ScreenWidth + iMouseX) * 4 + 3]);
     L2_DEBUG_Print1(0, ScreenHeight - 30 -  7 * 16, "%d: iMouseX: %d iMouseY: %d Graphics Layer id: %d GraphicsLayerIDCount: %u", __LINE__, iMouseX, iMouseY, pDeskDisplayBuffer[(iMouseY * ScreenWidth + iMouseX) * 4 + 3], GraphicsLayerIDCount++);
+    
     L2_MOUSE_MoveOver();
     
     L2_MOUSE_LeftClick();
