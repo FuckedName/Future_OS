@@ -503,9 +503,10 @@ VOID L2_MOUSE_MyComputerPartitionItemClicked()
     L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d L2_MOUSE_MyComputerPartitionItemClicked\n", __LINE__);
 	EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
 	
-    Color.Red = 0xff;
-    Color.Green= 0x00;
-    Color.Blue= 0x00;
+    Color.Red   = 0xff;
+    Color.Green = 0x00;
+    Color.Blue  = 0x00;
+    Color.Reserved = GRAPHICS_LAYER_MY_COMPUTER_WINDOW;
 	
     L2_GRAPHICS_RectangleDraw(pMouseSelectedBuffer, 0,  0, 31, 15, 1,  Color, 32);
 	L2_GRAPHICS_Copy(pDeskDisplayBuffer, pMouseSelectedBuffer, ScreenWidth, ScreenHeight, 32, 16, WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].StartX + 50, WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].StartY  + PartitionItemID * (16 + 2) + 16 * 2);   
@@ -662,7 +663,7 @@ EFI_STATUS L2_MOUSE_MyComputerFolderItemClicked()
 
 		
 		//return;
-		for (UINT16 i = 0; i < 10; i++)
+		for (UINT16 i = 0; i < 20; i++)
 		{
 			UINT8 type = NTFSFileSwitched.NTFSFileAttributeHeaderSwitched[i].Type;
 			
@@ -1267,6 +1268,7 @@ VOID EFIAPI L2_DEBUG_Print1 (UINT16 x, UINT16 y,  IN  CONST CHAR8  *Format, ...)
     Color.Blue = 0x00;
     Color.Red = 0x00;
     Color.Green = 0x00;
+    Color.Reserved = 0;
 
     VA_LIST         VaList;
     VA_START (VaList, Format);
@@ -1733,6 +1735,11 @@ MOUSE_CLICK_EVENT L2_GRAPHICS_StartMenuLayerClickEventGet()
     UINT16 StartMenuPositionX = WindowLayers.item[GRAPHICS_LAYER_START_MENU].StartX;
     UINT16 StartMenuPositionY = WindowLayers.item[GRAPHICS_LAYER_START_MENU].StartY;
 
+    if (FALSE == WindowLayers.item[GRAPHICS_LAYER_START_MENU].DisplayFlag)
+    {
+        return START_MENU_INIT_CLICKED_EVENT;
+    }
+
     // Display my computer window
     if (L1_GRAPHICS_InsideRectangle(3 + StartMenuPositionX, 3 + 4 * 16  + StartMenuPositionX, 
                                    3 + StartMenuPositionY + 16 * START_MENU_BUTTON_MY_COMPUTER, 3 + StartMenuPositionY + 16 * (START_MENU_BUTTON_MY_COMPUTER + 1)))
@@ -1847,6 +1854,11 @@ MOUSE_CLICK_EVENT L2_GRAPHICS_MyComputerLayerClickEventGet()
 		
     UINT16 MyComputerPositionX = WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].StartX;
     UINT16 MyComputerPositionY = WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].StartY;
+    
+    if (FALSE == WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].DisplayFlag)
+    {
+        return START_MENU_INIT_CLICKED_EVENT;
+    }
 
     // Hide My computer window
     if (iMouseX >= MyComputerPositionX + MyComputerWidth - 20 && iMouseX <=  MyComputerPositionX + MyComputerWidth - 4 
@@ -3404,9 +3416,10 @@ VOID L2_MOUSE_MoveOver()
 	// Get click event
 	MOUSE_CLICK_EVENT event = GraphicsLayerEventHandle[LayerID].pClickEventGet();
     EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
-    Color.Red = 0x1f;
-    Color.Blue = 0x1f;
-    Color.Green = 0x1f;
+    Color.Red = 0xff;
+    Color.Blue = 0;
+    Color.Green = 0;
+    Color.Reserved = 0;
 
     if (MouseMoveoverObjectOld.StartX != MouseMoveoverObject.StartX 
        || MouseMoveoverObjectOld.StartY != MouseMoveoverObject.StartY
@@ -3426,17 +3439,18 @@ VOID L2_MOUSE_MoveOver()
         MouseMoveoverObjectOld.EndX   = MouseMoveoverObject.EndX;
         MouseMoveoverObjectOld.EndY   = MouseMoveoverObject.EndY;
         MouseMoveoverObjectOld.GraphicsLayerID = MouseMoveoverObject.GraphicsLayerID;
+        
+        
+        L2_GRAPHICS_RectangleDraw(pDeskBuffer, 
+                                  MouseMoveoverObject.StartX,
+                                  MouseMoveoverObject.StartY, 
+                                  MouseMoveoverObject.EndX, 
+                                  MouseMoveoverObject.EndY, 
+                                  1,  
+                                  Color, 
+                                  ScreenWidth);
+        
     }
-    /*
-    L2_GRAPHICS_RectangleDraw(pDeskBuffer, 
-                              MouseMoveoverObject.StartX,
-                              MouseMoveoverObject.StartY, 
-                              MouseMoveoverObject.EndX, 
-                              MouseMoveoverObject.EndY, 
-                              1,  
-                              Color, 
-                              ScreenWidth);
-    */
 }
 
 
