@@ -31,7 +31,7 @@
 typedef struct
 {
     UINT16 Name[40]; // graphics layer
-    UINT8  DisplayFlag; // 0: do not display, 1: display
+    UINT8  DisplayFlag; // FALSE: do not display, TRUE: display
     UINT8 *pBuffer;
     UINT16 StartX;
     UINT16 StartY;

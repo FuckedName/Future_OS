@@ -2263,13 +2263,20 @@ UINT16 L2_MOUSE_ClickEventHandle()
 *  返回值： 成功：XXXX，失败：XXXXX
 *
 *****************************************************************************/
-VOID L2_MOUSE_LeftClick()
+VOID L2_MOUSE_LeftClick(UINT16 LayerID)
 {
     //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: iMouseX: %d iMouseY: %d \n",  __LINE__, iMouseX, iMouseY);
-    EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
-    Color.Red = 0xff;
-    Color.Green= 0xff;
-    Color.Blue= 0x00;
+    if (MouseClickFlag == 1)
+    {
+        if (0 != LayerID)
+        {
+            WindowLayers.item[LayerID].StartX += x_move * 3;
+            WindowLayers.item[LayerID].StartY += y_move * 3;
+            L1_GRAPHICS_UpdateWindowLayer(LayerID);
+        }
+    }
+    x_move = 0;
+    y_move = 0;
     
     if ( MouseClickFlag != MOUSE_LEFT_CLICKED)
     {
@@ -3393,33 +3400,10 @@ MOUSE_MOVEOVER_OBJECT MouseMoveoverObjectOld;
 *  返回值： 成功：XXXX，失败：XXXXX
 *
 *****************************************************************************/
-VOID L2_MOUSE_MoveOver()                                        
-{        
-	//获取鼠标光标所在的图层，窗口、图层在初始化的时候把第4个字节用于存放图层ID
-	UINT16 LayerID = pDeskDisplayBuffer[(iMouseY * ScreenWidth + iMouseX) * 4 + 3];
-	
-    if (MouseClickFlag == 1)
-    {
-        if (0 != LayerID)
-        {
-            WindowLayers.item[LayerID].StartX += x_move * 3;
-            WindowLayers.item[LayerID].StartY += y_move * 3;
-            L1_GRAPHICS_UpdateWindowLayer(LayerID);
-        }
-    }
-    
-    x_move = 0;
-    y_move = 0;
-    
-	MouseMoveoverObject.GraphicsLayerID = LayerID;
-	
+VOID L2_MOUSE_MoveOver(UINT16 LayerID)                                        
+{            
 	// Get click event
 	MOUSE_CLICK_EVENT event = GraphicsLayerEventHandle[LayerID].pClickEventGet();
-    EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
-    Color.Red = 0xff;
-    Color.Blue = 0;
-    Color.Green = 0;
-    Color.Reserved = 0;
 
     if (MouseMoveoverObjectOld.StartX != MouseMoveoverObject.StartX 
        || MouseMoveoverObjectOld.StartY != MouseMoveoverObject.StartY
@@ -3433,6 +3417,8 @@ VOID L2_MOUSE_MoveOver()
                                   MouseMoveoverObject.EndX, 
                                   MouseMoveoverObject.EndY,
                                   MouseMoveoverObject.GraphicsLayerID);
+        
+        MouseMoveoverObject.GraphicsLayerID = LayerID;
 
         MouseMoveoverObjectOld.StartX = MouseMoveoverObject.StartX;
         MouseMoveoverObjectOld.StartY = MouseMoveoverObject.StartY;
@@ -3440,7 +3426,12 @@ VOID L2_MOUSE_MoveOver()
         MouseMoveoverObjectOld.EndY   = MouseMoveoverObject.EndY;
         MouseMoveoverObjectOld.GraphicsLayerID = MouseMoveoverObject.GraphicsLayerID;
         
-        
+        EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
+        Color.Red = 0xff;
+        Color.Blue = 0;
+        Color.Green = 0;
+        Color.Reserved = 0;
+        /*
         L2_GRAPHICS_RectangleDraw(pDeskBuffer, 
                                   MouseMoveoverObject.StartX,
                                   MouseMoveoverObject.StartY, 
@@ -3449,7 +3440,7 @@ VOID L2_MOUSE_MoveOver()
                                   1,  
                                   Color, 
                                   ScreenWidth);
-        
+        */
     }
 }
 
@@ -3695,12 +3686,13 @@ VOID L2_MOUSE_Move()
     //L2_DEBUG_Print1(DISPLAY_X, DISPLAY_Y, "%d: Graphics Layer id: %d ", __LINE__, pDeskDisplayBuffer[(iMouseY * ScreenWidth + iMouseX) * 4 + 3]);
     L2_DEBUG_Print1(0, ScreenHeight - 30 -  7 * 16, "%d: iMouseX: %d iMouseY: %d Graphics Layer id: %d GraphicsLayerIDCount: %u", __LINE__, iMouseX, iMouseY, pDeskDisplayBuffer[(iMouseY * ScreenWidth + iMouseX) * 4 + 3], GraphicsLayerIDCount++);
     
-    L2_MOUSE_MoveOver();
+	//获取鼠标光标所在的图层，窗口、图层在初始化的时候把第4个字节用于存放图层ID
+	UINT16 LayerID = pDeskDisplayBuffer[(iMouseY * ScreenWidth + iMouseX) * 4 + 3];
+	
+    L2_MOUSE_MoveOver(LayerID);
     
-    L2_MOUSE_LeftClick();
+    L2_MOUSE_LeftClick(LayerID);
 }
-
-
 
 
 /****************************************************************************

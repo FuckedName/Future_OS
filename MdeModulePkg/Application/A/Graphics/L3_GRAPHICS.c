@@ -201,7 +201,7 @@ VOID L3_APPLICATION_MyComputerWindow(UINT16 StartX, UINT16 StartY)
 
     for (UINT16 i = 0 ; i < PartitionCount; i++)
     {
-        x = 50;
+        x = 100;
         y = i * 18 + 16 * 2;        
 
         if (device[i].DeviceType == 2)
@@ -306,11 +306,12 @@ VOID L3_APPLICATION_MyComputerWindow(UINT16 StartX, UINT16 StartY)
     y += 16;
     y += 16;
     
-    x = 50;
+    x = 100;
     //3658
     //内
     //2070
     //存
+    /*
     L2_GRAPHICS_ChineseCharDraw(pBuffer, x, y,          (36 - 1 ) * 94 + 58 - 1, Color, MyComputerWidth);  
     x += 16;
     
@@ -326,7 +327,7 @@ VOID L3_APPLICATION_MyComputerWindow(UINT16 StartX, UINT16 StartY)
     char sizePostfix2[3] = "GB";
     L2_DEBUG_Print3(x, y, WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW], "%a%a", L1_STRING_FloatToString(MemorySize, 3, buf), sizePostfix2);
     x += 5 * 8;
-    
+    */
 }
 
 
