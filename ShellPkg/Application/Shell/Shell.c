@@ -925,7 +925,7 @@ ProcessCommandLine(
   ShellInfoObject.ShellInitSettings.BitUnion.Bits.Delay        = FALSE;
   ShellInfoObject.ShellInitSettings.BitUnion.Bits.Exit         = FALSE;
   ShellInfoObject.ShellInitSettings.BitUnion.Bits.NoNest       = FALSE;
-  ShellInfoObject.ShellInitSettings.Delay = 5;
+  ShellInfoObject.ShellInitSettings.Delay = 1;
 
   //
   // Start LoopVar at 0 to parse only optional arguments at Argv[0]
