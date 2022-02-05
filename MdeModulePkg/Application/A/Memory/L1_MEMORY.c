@@ -275,6 +275,7 @@ EFI_STATUS L2_COMMON_MemoryAllocate()
     MouseColor.Blue  = 0x00;
     MouseColor.Red   = 0xff;
     MouseColor.Green = 0x00;
+    MouseColor.Reserved = 0x00;
 
     for (int i = 0; i < StartMenuHeight; i++)
         for (int j = 0; j < StartMenuWidth; j++)

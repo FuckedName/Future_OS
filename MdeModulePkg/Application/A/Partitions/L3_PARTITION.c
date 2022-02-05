@@ -598,6 +598,7 @@ EFI_STATUS L3_PARTITION_RootPathAccess()
     Color.Red = 0xff;
     Color.Green= 0x00;
     Color.Blue= 0x00;
+    Color.Reserved = 0x00;
 
 	UINT16 i = 0;
 	

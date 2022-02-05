@@ -803,6 +803,7 @@ VOID L2_MOUSE_MyComputerClicked()
     Color.Red = 0xff;
     Color.Green= 0x00;
     Color.Blue= 0x00;
+    Color.Reserved = GRAPHICS_LAYER_MY_COMPUTER_WINDOW;
 
     WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].DisplayFlag = TRUE;
 	WindowLayers.item[GRAPHICS_LAYER_START_MENU].DisplayFlag = FALSE;
@@ -959,6 +960,7 @@ VOID L2_MOUSE_WallpaperSettingClicked()
     Color.Red   = 0xC6;
     Color.Green = 0xC6;
     Color.Blue  = 0xC6;
+    Color.Reserved  = GRAPHICS_LAYER_MY_COMPUTER_WINDOW;
     L1_MEMORY_RectangleFill(pDeskBuffer, 0,     y - 28, x -  1, y - 28, 1, Color);
 
     Color.Red   = 0xFF;
@@ -1211,9 +1213,9 @@ VOID EFIAPI L2_DEBUG_Print3 (UINT16 x, UINT16 y, WINDOW_LAYER_ITEM layer, IN  CO
     UINT32 i = 0;
     
         
-    Color.Blue = 0x00;
-    Color.Red = 0x00;
-    Color.Green = 0x00;
+    Color.Blue = 0xFF;
+    Color.Red = 0xFF;
+    Color.Green = 0xFF;
     Color.Reserved = layer.LayerID;
 
     for (UINT16 i = 0; i < 0x100; i++)
@@ -1265,9 +1267,9 @@ VOID EFIAPI L2_DEBUG_Print1 (UINT16 x, UINT16 y,  IN  CONST CHAR8  *Format, ...)
         AsciiBuffer[i] = 0;
         
 	
-    Color.Blue = 0x00;
-    Color.Red = 0x00;
-    Color.Green = 0x00;
+    Color.Blue = 0xFF;
+    Color.Red = 0xFF;
+    Color.Green = 0xFF;
     Color.Reserved = 0;
 
     VA_LIST         VaList;
@@ -1349,7 +1351,7 @@ EFI_STATUS L2_GRAPHICS_ScreenInit()
     L2_GRAPHICS_DeskInit();
 
     // 初始化鼠标显示缓存
-    L2_GRAPHICS_ChineseCharDraw(pMouseBuffer, 0, 0, 11 * 94 + 42, MouseColor, 16);
+    L2_GRAPHICS_ChineseCharDraw(pMouseBuffer, 0, 0, (12 - 1) * 94 + 84 - 1, MouseColor, 16);
     //L2_DEBUG_Print1(DISPLAY_X, DISPLAY_Y, "%d: GraphicsLayerCompute\n", __LINE__);
 
 	//把上面初始化好的缓冲显示出来
@@ -1397,6 +1399,9 @@ EFI_STATUS L2_GRAPHICS_StartMenuInit()
     x += 16;
     
     L2_GRAPHICS_ChineseCharDraw(pStartMenuBuffer, x , y,     (36 - 1) * 94 + 52 - 1, Color, StartMenuWidth);   
+    x += 16;
+    
+    L2_GRAPHICS_ChineseCharDraw2(pStartMenuBuffer, x , y,     12, 84, Color, StartMenuWidth);   
 
     //系统设置
     x = 3;
@@ -1529,6 +1534,7 @@ EFI_STATUS L2_GRAPHICS_SystemSettingInit()
     Color.Red   = 0xff;
     Color.Green = 0x00;
     Color.Blue  = 0x00;
+    Color.Reserved  = GRAPHICS_LAYER_SYSTEM_SETTING_WINDOW;
 
     //背景设置
     //背 1719    景   3016    设   4172    置   5435
@@ -1600,6 +1606,7 @@ EFI_STATUS L2_GRAPHICS_SayGoodBye()
     Color.Red   = 0xff;
     Color.Green = 0xff;
     Color.Blue  = 0xff;
+    Color.Reserved  = GRAPHICS_LAYER_DESK;
     
     L2_GRAPHICS_ChineseCharDraw(pDeskBuffer,  x, y, (52 - 1) * 94 + 57 - 1, Color, ScreenWidth);
     x += 16;
@@ -1991,6 +1998,7 @@ VOID L3_GRAPHICS_StartMenuClicked()
     Color.Red   = 0xff;
     Color.Green = 0x00;
     Color.Blue   = 0x00;
+    Color.Reserved  = GRAPHICS_LAYER_START_MENU;
     //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: iMouseX: %d iMouseY: %d \n",  __LINE__, iMouseX, iMouseY);
     L2_GRAPHICS_RectangleDraw(pMouseSelectedBuffer, 0,  0, 31, 15, 1,  Color, 32);
     //MenuButtonClickResponse();
@@ -2315,6 +2323,8 @@ EFI_STATUS L2_GRAPHICS_ButtonDraw()
     Color.Red   = 0xFF;
     Color.Green = 0xFF;
     Color.Blue  = 0xFF;
+    Color.Reserved  = GRAPHICS_LAYER_DESK;
+    
     L1_MEMORY_RectangleFill(pDeskBuffer, 3,  y - 24, 59, y - 24, 1, Color); //line top (3,  y - 24) (59, y - 24)
     L1_MEMORY_RectangleFill(pDeskBuffer, 2,  y - 24, 59, y - 4,  1, Color); //area center(2,  y - 24) (59, y - 4)
 
@@ -2357,6 +2367,7 @@ EFI_STATUS L2_GRAPHICS_ButtonDraw2(UINT16 StartX, UINT16 StartY, UINT16 Width, U
     Color.Red   = 0xFF;
     Color.Green = 0xFF;
     Color.Blue  = 0xFF;
+    Color.Reserved  = GRAPHICS_LAYER_DESK;
     L1_MEMORY_RectangleFill(pDeskBuffer, StartX,  StartY, StartX + Width, StartY, 1, Color); //line top 
     L1_MEMORY_RectangleFill(pDeskBuffer, StartX,  StartY, StartX, StartY + Height,  1, Color); //line left
 
@@ -2857,7 +2868,7 @@ VOID L2_GRAPHICS_LayerCompute(UINT16 iMouseX, UINT16 iMouseY, UINT8 MouseClickFl
 	}
 
 	//然后绘制鼠标光标
-    L2_GRAPHICS_ChineseCharDraw(pMouseBuffer, 0, 0, 11 * 94 + 42, MouseColor, 16);
+    L2_GRAPHICS_ChineseCharDraw(pMouseBuffer, 0, 0, 12 * 94 + 84, MouseColor, 16);
 
 	//把鼠标光标显示到桌面
     L2_GRAPHICS_CopyNoReserved(pDeskDisplayBuffer, pMouseBuffer, ScreenWidth, ScreenHeight, 16, 16, iMouseX, iMouseY);
@@ -3213,7 +3224,7 @@ EFI_STATUS L2_GRAPHICS_AsciiCharDraw(UINT8 *pBufferDest,
 
     for(i = 0; i < 16 * 8 * 4; i++)
     {
-        pBuffer[i] = 0xff;
+        pBuffer[i] = 0x0;
     }
     
     for(i = 0; i < 16; i++)
@@ -3288,7 +3299,7 @@ EFI_STATUS L2_GRAPHICS_AsciiCharDraw2(WINDOW_LAYER_ITEM layer,
 
     for(i = 0; i < 16 * 8 * 4; i++)
     {
-        pBuffer[i] = 0xff;
+        pBuffer[i] = 0;
     }
     
     for(i = 0; i < 16; i++)
@@ -3363,6 +3374,7 @@ VOID L2_GRAPHICS_RightClickMenu(UINT16 iMouseX, UINT16 iMouseY)
 		pMouseClickBuffer[i * 4] = 160;
 		pMouseClickBuffer[i * 4 + 1] = 160;
 		pMouseClickBuffer[i * 4 + 2] = 160;
+		pMouseClickBuffer[i * 4 + 3] = 0;
 	}
 
 	Color.Blue = 0xFF;
@@ -3430,7 +3442,7 @@ VOID L2_MOUSE_MoveOver(UINT16 LayerID)
         Color.Red = 0xff;
         Color.Blue = 0;
         Color.Green = 0;
-        Color.Reserved = 0;
+        Color.Reserved  = GRAPHICS_LAYER_DESK;
         /*
         L2_GRAPHICS_RectangleDraw(pDeskBuffer, 
                                   MouseMoveoverObject.StartX,
@@ -3463,7 +3475,7 @@ void L1_MEMORY_CopyColor1(UINT8 *pBuffer, EFI_GRAPHICS_OUTPUT_BLT_PIXEL color, U
     pBuffer[y0 * AreaWidth * 4 + x0 * 4]     = color.Blue;
     pBuffer[y0 * AreaWidth * 4 + x0 * 4 + 1] = color.Green;
     pBuffer[y0 * AreaWidth * 4 + x0 * 4 + 2] = color.Red;
-    pBuffer[y0 * AreaWidth * 4 + x0 * 4 + 3] = color.Reserved;
+    pBuffer[y0 * AreaWidth * 4 + x0 * 4 + 3] = 0;
 
 }
 
@@ -3508,7 +3520,7 @@ void L1_MEMORY_CopyColor3(UINT8 *pBuffer, EFI_GRAPHICS_OUTPUT_BLT_PIXEL color, U
     pBuffer[y0 * AreaWidth * 4 + x0 * 4]     = color.Blue;
     pBuffer[y0 * AreaWidth * 4 + x0 * 4 + 1] = color.Green;
     pBuffer[y0 * AreaWidth * 4 + x0 * 4 + 2] = color.Red;
-    pBuffer[y0 * AreaWidth * 4 + x0 * 4 + 3] = color.Reserved;
+    pBuffer[y0 * AreaWidth * 4 + x0 * 4 + 3] = 0;
 }
 
 // Draw 8 X 16 point
@@ -3567,7 +3579,6 @@ EFI_STATUS L2_GRAPHICS_ChineseHalfDraw2(UINT8 *pBuffer,UINT8 d,
 
 
 
-
 /****************************************************************************
 *
 *  描述:   中文字符绘制函数，绘制结果是16*16像素大小
@@ -3590,6 +3601,55 @@ EFI_STATUS L2_GRAPHICS_ChineseCharDraw(UINT8 *pBuffer,
     //L2_DEBUG_Print1(10, 10, "%X %X %X %X", x0, y0, offset, AreaWidth);
     ////DEBUG ((EFI_D_INFO, "%X %X %X %X", x0, y0, offset, AreaWidth));
 
+    if (NULL == pBuffer)
+    {
+        //DEBUG ((EFI_D_INFO, "NULL == pBuffer"));
+        return EFI_SUCCESS;
+    }
+
+    if (offset < 1)
+    {
+        //DEBUG ((EFI_D_INFO, "offset < 1 \n"));
+        return EFI_SUCCESS;
+    }
+    
+    for(i = 0; i < 32; i += 2)
+    {
+        L2_GRAPHICS_ChineseHalfDraw2(pBuffer, sChineseChar[offset * 32 + i ],     x0,     y0 + i / 2, 1, Color, AreaWidth);              
+        L2_GRAPHICS_ChineseHalfDraw2(pBuffer, sChineseChar[offset * 32 + i + 1],  x0 + 8, y0 + i / 2, 1, Color, AreaWidth);      
+    }
+    
+    ////DEBUG ((EFI_D_INFO, "\n"));
+    
+    return EFI_SUCCESS;
+}
+
+
+
+/****************************************************************************
+*
+*  描述:   中文字符绘制函数，绘制结果是16*16像素大小
+*
+*  参数pBuffer： 		把中文字符写到的目标缓存
+*  参数x0： 			把中文字符写到的X目标
+*  参数y0： 			把中文字符写到的Y目标
+*  参数offset： 		汉字库编码位移
+*  参数Color： 		字体颜色
+*  参数AreaWidth： 	目标缓存宽度，比如：在桌面上绘制传桌面的宽度，在我的电脑绘制传我的电脑宽度等等
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
+EFI_STATUS L2_GRAPHICS_ChineseCharDraw2(UINT8 *pBuffer,
+        IN UINTN x0, UINTN y0, UINT32 AreaCode, UINT32 BitCode,
+        IN EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color , UINT16 AreaWidth)
+{
+    INT8 i;
+    //L2_DEBUG_Print1(10, 10, "%X %X %X %X", x0, y0, offset, AreaWidth);
+    ////DEBUG ((EFI_D_INFO, "%X %X %X %X", x0, y0, offset, AreaWidth));
+    
+    UINT32 offset = (AreaCode - 1) * 94 + BitCode - 1;
+    
     if (NULL == pBuffer)
     {
         //DEBUG ((EFI_D_INFO, "NULL == pBuffer"));
@@ -3737,6 +3797,7 @@ VOID EFIAPI L2_TIMER_Print (
     Color.Blue = 0x00;
     Color.Red = 0xFF;
     Color.Green = 0x00;
+    Color.Reserved  = GRAPHICS_LAYER_DESK;
 
     x = DISPLAY_DESK_DATE_TIME_X;
     y = DISPLAY_DESK_DATE_TIME_Y;

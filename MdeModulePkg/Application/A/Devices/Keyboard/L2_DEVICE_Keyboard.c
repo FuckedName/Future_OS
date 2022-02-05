@@ -107,11 +107,6 @@ L2_KEYBOARD_Event (
     EFI_STATUS Status;
 
     EFI_KEY_TOGGLE_STATE toggleState;
-    EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
-
-    Color.Blue = 0xFF;
-    Color.Red = 0xFF;
-    Color.Green = 0xFF;
 
     EFI_SIMPLE_TEXT_INPUT_EX_PROTOCOL *SimpleEx;
     EFI_KEY_DATA                      KeyData;
