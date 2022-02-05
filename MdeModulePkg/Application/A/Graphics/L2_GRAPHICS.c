@@ -3443,8 +3443,8 @@ VOID L2_MOUSE_MoveOver(UINT16 LayerID)
         Color.Blue = 0;
         Color.Green = 0;
         Color.Reserved  = GRAPHICS_LAYER_DESK;
-        /*
-        L2_GRAPHICS_RectangleDraw(pDeskBuffer, 
+        
+        L2_GRAPHICS_RectangleDraw(WindowLayers.item[MouseMoveoverObject.GraphicsLayerID].pBuffer, 
                                   MouseMoveoverObject.StartX,
                                   MouseMoveoverObject.StartY, 
                                   MouseMoveoverObject.EndX, 
@@ -3452,7 +3452,7 @@ VOID L2_MOUSE_MoveOver(UINT16 LayerID)
                                   1,  
                                   Color, 
                                   ScreenWidth);
-        */
+        
     }
 }
 
