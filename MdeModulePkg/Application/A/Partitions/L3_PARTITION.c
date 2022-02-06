@@ -136,6 +136,53 @@ void L1_FILE_NameGet(UINT8 ItemID, UINT8 *FileName)
 	FileName[12] = 0;
  }
 
+/****************************************************************************
+*
+*  描述:   xxxxx
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
+void L1_FILE_NameMerge(UINT8 ItemID, UINT8 *FileName)
+ {    
+    UINT8 count = 0;
+    while (pItems[ItemID].FileName[count] != 0)
+    {
+    	if (count >= 8 || pItems[ItemID].FileName[count] == 0x20)
+		{
+			break;
+    	}
+        FileName[count] = pItems[ItemID].FileName[count];
+        count++;
+    }
+	
+    if (pItems[ItemID].ExtensionName[0] != 0)
+    {
+        FileName[count] = '.';
+        count++;
+    }
+
+	UINT8 count2 = 0;
+    while (pItems[ItemID].ExtensionName[count2] != 0)
+    {
+    	if (count2 >= 3 || pItems[ItemID].ExtensionName[count2] == 0x20)
+		{
+			break;
+    	}
+    
+        FileName[count] = pItems[ItemID].ExtensionName[count2];
+        count++;
+        count2++;
+    }
+
+    count = (count >= 11) ? 11 : count;
+	
+	FileName[count] = 0;
+ }
 
 
 //delete blanks of file name and file extension name

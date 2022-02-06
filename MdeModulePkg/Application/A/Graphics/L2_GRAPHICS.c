@@ -621,13 +621,36 @@ EFI_STATUS L2_MOUSE_MyComputerFolderItemClicked()
         //如果是efi文件，认为是可执行文件
         if (pItems[index].ExtensionName[0] == 'E' && pItems[index].ExtensionName[1] == 'F' && pItems[index].ExtensionName[2] == 'I' )
         {
+            pItems[index].ExtensionName[0] = 'e';
+            pItems[index].ExtensionName[1] = 'f';
+            pItems[index].ExtensionName[2] = 'i';
+            
             UINT8 FileName[13] = {0};
-            L1_FILE_NameGet(index, FileName);
-            L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: FileName: %a\n", __LINE__, FileName);
-                    
+            L1_FILE_NameMerge(index, FileName);
+            L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: FileName: %u %u %u %u %u %u %u %u %u %u %u %u %u\n", __LINE__, 
+                                                                                                                                FileName[0],
+                                                                                                                                FileName[1],
+                                                                                                                                FileName[2],
+                                                                                                                                FileName[3],
+                                                                                                                                FileName[4],
+                                                                                                                                FileName[5],
+                                                                                                                                FileName[6],
+                                                                                                                                FileName[7],
+                                                                                                                                FileName[8],
+                                                                                                                                FileName[9],
+                                                                                                                                FileName[10],
+                                                                                                                                FileName[11],
+                                                                                                                                FileName[12]);
+            CHAR16 wcFileName[13] = {0};
+
+            for (UINT8 i = 0; '\0' != FileName[i]; i++)
+            {
+                wcFileName[i] = FileName[i];
+            }
+            
+                
             EFI_EVENT       Event;
-            VOID           *Context;
-            L2_ApplicationRun(Event, Context);
+            L2_ApplicationRun(Event, wcFileName);
         }
 
 		// Read data from partition(disk or USB etc..)					

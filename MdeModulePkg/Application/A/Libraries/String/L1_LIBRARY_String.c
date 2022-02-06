@@ -49,7 +49,19 @@ unsigned long long L1_STRING_Length(char *String)
     return Length;
 }
 
+L1_STRING_AsciiStringToWchar(CHAR8          *pSource, unsigned short *pDest)
+{
+    if (pSource == NULL || pDest == NULL)
+    {
+        return NULL;
+    }
 
+    unsigned long long  i;
+    for (i = 0; *pSource != '\0'; pSource++, i++)
+    {
+        pDest[i] = pSource[i];
+    }
+}
 
 
 /****************************************************************************

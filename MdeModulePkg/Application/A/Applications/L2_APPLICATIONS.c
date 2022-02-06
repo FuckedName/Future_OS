@@ -52,7 +52,7 @@ BOOLEAN ApplicationRunFinished;
 *  返回值： 成功：XXXX，失败：XXXXX
 *
 *****************************************************************************/
-VOID L2_ApplicationRun(EFI_EVENT Event,  VOID           *Context)
+VOID L2_ApplicationRun(EFI_EVENT Event,  CHAR16       *FileName)
 {
     EFI_STATUS            Status;
     ApplicationRunFinished = FALSE;
@@ -63,7 +63,7 @@ VOID L2_ApplicationRun(EFI_EVENT Event,  VOID           *Context)
                              &Status);
                              
     EfiShellProtocol->Execute (&SystemHandle,
-                             L"H.efi",
+                             FileName,
                              NULL,
                              &Status);
 

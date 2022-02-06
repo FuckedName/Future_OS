@@ -32,7 +32,7 @@
 #include <Global/Global.h>
 
 
-VOID L2_ApplicationRun(EFI_EVENT Event,  VOID           *Context);
+VOID L2_ApplicationRun(EFI_EVENT Event,     CHAR16  *FileName);
 
 VOID L2_APPLICATIONS_SetHandle(EFI_HANDLE          ImageHandle);
 
