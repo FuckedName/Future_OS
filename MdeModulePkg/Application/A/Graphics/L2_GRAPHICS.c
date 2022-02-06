@@ -618,6 +618,18 @@ EFI_STATUS L2_MOUSE_MyComputerFolderItemClicked()
 						StartCluster,
 						StartSectorNumber);
 
+        //如果是efi文件，认为是可执行文件
+        if (pItems[index].ExtensionName[0] == 'E' && pItems[index].ExtensionName[1] == 'F' && pItems[index].ExtensionName[2] == 'I' )
+        {
+            UINT8 FileName[13] = {0};
+            L1_FILE_NameGet(index, FileName);
+            L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: FileName: %a\n", __LINE__, FileName);
+                    
+            EFI_EVENT       Event;
+            VOID           *Context;
+            L2_ApplicationRun(Event, Context);
+        }
+
 		// Read data from partition(disk or USB etc..)					
 	    Status = L1_STORE_READ(PartitionItemID, StartSectorNumber, 1, Buffer); 
 	    if (EFI_ERROR(Status))
@@ -628,11 +640,13 @@ EFI_STATUS L2_MOUSE_MyComputerFolderItemClicked()
 
 		switch(pItems[index].Attribute[0])
 		{
+		    //如果是目录，则显示子目录
 			case 0x10:  L1_MEMORY_Memset(&pItems, 0, sizeof(pItems));
 					    L1_MEMORY_Copy(&pItems, Buffer, DISK_BUFFER_SIZE);
 						L2_STORE_FolderItemsPrint();
 						break;
-			
+
+			//如果是文件，则显示文件内容
 			case 0x20: L2_PARTITION_FileContentPrint(Buffer); break;
 
 			default: break;
@@ -1680,7 +1694,7 @@ BOOLEAN L1_GRAPHICS_InsideRectangle(UINT16 StartX, UINT16 EndX, UINT16 StartY, U
 *****************************************************************************/
 DESKTOP_ITEM_CLICKED_EVENT L2_GRAPHICS_DeskLayerClickEventGet()
 {
-	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: L2_GRAPHICS_DeskLayerClickEventGet\n", __LINE__);
+	//L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: L2_GRAPHICS_DeskLayerClickEventGet\n", __LINE__);
 
 	if (L1_GRAPHICS_InsideRectangle(0, 16 + 16 * 2, ScreenHeight - 21, ScreenHeight))
 	{	    
@@ -1739,7 +1753,7 @@ DESKTOP_ITEM_CLICKED_EVENT L2_GRAPHICS_DeskLayerClickEventGet()
 *****************************************************************************/
 START_MENU_ITEM_CLICKED_EVENT L2_GRAPHICS_StartMenuLayerClickEventGet()
 {
-	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: L2_GRAPHICS_StartMenuLayerClickEventGet\n", __LINE__);
+	//L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: L2_GRAPHICS_StartMenuLayerClickEventGet\n", __LINE__);
 
     UINT16 StartMenuPositionX = WindowLayers.item[GRAPHICS_LAYER_START_MENU].StartX;
     UINT16 StartMenuPositionY = WindowLayers.item[GRAPHICS_LAYER_START_MENU].StartY;
@@ -1855,7 +1869,7 @@ START_MENU_SYSTEM_SETTING_SUBITEM_CLICKED_EVENT L2_GRAPHICS_SystemSettingLayerCl
 *****************************************************************************/
 MY_COMPUTER_WINDOW_CLICKED_EVENT L2_GRAPHICS_MyComputerLayerClickEventGet()
 {
-	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: L2_GRAPHICS_MyComputerLayerClickEventGet\n", __LINE__);
+	//L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: L2_GRAPHICS_MyComputerLayerClickEventGet\n", __LINE__);
 		
     UINT16 MyComputerPositionX = WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].StartX;
     UINT16 MyComputerPositionY = WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].StartY;
@@ -1879,7 +1893,7 @@ MY_COMPUTER_WINDOW_CLICKED_EVENT L2_GRAPHICS_MyComputerLayerClickEventGet()
 		UINT16 StartX = MyComputerPositionX + 50;
 		UINT16 StartY = MyComputerPositionY + i * 18 + 16 * 2;
 		
-		if (L1_GRAPHICS_InsideRectangle(iMouseX >= StartX, StartX + 16 * 4, 
+		if (L1_GRAPHICS_InsideRectangle(StartX, StartX + 16 * 4, 
                                    StartY + 0, StartY + 16))
 		{
 			PartitionItemID = i;
@@ -1898,7 +1912,7 @@ MY_COMPUTER_WINDOW_CLICKED_EVENT L2_GRAPHICS_MyComputerLayerClickEventGet()
 		UINT16 StartX = MyComputerPositionX + 130;
 		UINT16 StartY = MyComputerPositionY + i  * (HeightNew + 16 * 2) + 200;
 		
-		if (L1_GRAPHICS_InsideRectangle(iMouseX >= StartX, StartX + WidthNew, 
+		if (L1_GRAPHICS_InsideRectangle(StartX, StartX + WidthNew, 
                                    StartY + 0, StartY + HeightNew))
 		{
 			FolderItemID = i;
@@ -1927,7 +1941,7 @@ MY_COMPUTER_WINDOW_CLICKED_EVENT L2_GRAPHICS_MyComputerLayerClickEventGet()
 *****************************************************************************/
 SYSTEM_LOG_WINDOW_CLICKED_EVENT L2_GRAPHICS_SystemLogLayerClickEventGet()
 {	
-	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: L2_GRAPHICS_SystemLogLayerClickEventGet\n", __LINE__);
+	//L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: L2_GRAPHICS_SystemLogLayerClickEventGet\n", __LINE__);
     UINT16 SystemLogWindowPositionX = WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW].StartX;
     UINT16 SystemLogWindowPositionY = WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW].StartY;
 
@@ -3123,22 +3137,6 @@ void L2_GRAPHICS_CopyBufferFromWindowsToDesk()
             L2_GRAPHICS_Copy(pDeskDisplayBuffer, WindowLayers.item[j].pBuffer, ScreenWidth, ScreenHeight, WindowLayers.item[j].WindowWidth, WindowLayers.item[j].WindowHeight, WindowLayers.item[j].StartX, WindowLayers.item[j].StartY);
         }
     }
-    /*
-    if (DisplaySystemLogWindowFlag)
-        L2_GRAPHICS_Copy(pDeskDisplayBuffer, pSystemLogWindowBuffer, ScreenWidth, ScreenHeight, SystemLogWindowWidth, SystemLogWindowHeight, SystemLogWindowPositionX, SystemLogWindowPositionY);
-    
-    if (DisplayMemoryInformationWindowFlag)
-        L2_GRAPHICS_Copy(pDeskDisplayBuffer, pMemoryInformationBuffer, ScreenWidth, ScreenHeight, MemoryInformationWindowWidth, MemoryInformationWindowHeight, MemoryInformationWindowPositionX, MemoryInformationWindowPositionY);
-
-    if (DisplaySystemSettingWindowFlag)
-        L2_GRAPHICS_Copy(pDeskDisplayBuffer, pSystemSettingWindowBuffer, ScreenWidth, ScreenHeight, SystemSettingWindowWidth, SystemSettingWindowHeight, SystemSettingWindowPositionX, SystemSettingWindowPositionY);
-
-    if (DisplayStartMenuFlag)
-        L2_GRAPHICS_Copy(pDeskDisplayBuffer, pStartMenuBuffer, ScreenWidth, ScreenHeight, StartMenuWidth, StartMenuHeight, StartMenuPositionX, StartMenuPositionY);
-
-    if (DisplayMyComputerFlag)
-        L2_GRAPHICS_Copy(pDeskDisplayBuffer, pMyComputerBuffer, ScreenWidth, ScreenHeight, MyComputerWidth, MyComputerHeight, MyComputerPositionX, MyComputerPositionY);
-    */
 }
 							  
 

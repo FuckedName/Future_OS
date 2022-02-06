@@ -181,7 +181,8 @@ EFI_STATUS L2_COMMON_MultiProcessInit ()
     EFI_EVENT_NOTIFY       TaskProcessesGroupTCPHandle[] = {L2_TCP4_HeartBeatNotify, L2_TCP4_ReceiveNotify, L2_TCP4_SendNotify};
 
     //step 1: run application 
-    EFI_EVENT_NOTIFY       TaskProcessesGroupApplicationCall[] = {L2_ApplicationRun};
+    //EFI_EVENT_NOTIFY       TaskProcessesGroupApplicationCall[] = {L2_ApplicationRun};
+    EFI_EVENT_NOTIFY       TaskProcessesGroupApplicationCall[] = {};
     
     //step 2: System respond the system call 
     EFI_EVENT_NOTIFY       TaskProcessesGroupApplicationCall2[] = {L2_INTERFACES_ApplicationCall};

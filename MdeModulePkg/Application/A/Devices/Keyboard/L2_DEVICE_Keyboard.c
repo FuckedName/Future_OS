@@ -203,6 +203,8 @@ L2_KEYBOARD_Event (
      //DrawAsciiCharUseBuffer(pDeskBuffer, DISPLAY_KEYBOARD_X, DISPLAY_KEYBOARD_Y, uniChar, Color);
 
 	//更新图层信息，这里可以稍优化下，如果没有按键事件，则可以不更新图层，以节省CPU资源
+	//由于屏幕的时间在不停的走，时间片信息也在不断的变化，所以并不能完全优化
+	//如果能做到上面的信息更新只刷新对应的区域，则是可以的
     L2_GRAPHICS_LayerCompute(iMouseX, iMouseY, 0);
 }
 
