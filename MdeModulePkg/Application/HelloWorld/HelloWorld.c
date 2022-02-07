@@ -30,7 +30,7 @@ typedef struct
 EFI_STATUS EFIAPI UefiMain (IN EFI_HANDLE ParentImageHandle, IN EFI_SYSTEM_TABLE *SystemTable)
 {
     Print(L"Hello Renqihong jiayou!!!!\r\n");
-    
+
     APPLICATION_CALL_DATA *pApplicationCallData = (APPLICATION_CALL_DATA *)(0x40000000 - 0x1000);
     
     pApplicationCallData->ID = APPLICATION_CALL_ID_PRINT_STRING;
@@ -42,8 +42,9 @@ EFI_STATUS EFIAPI UefiMain (IN EFI_HANDLE ParentImageHandle, IN EFI_SYSTEM_TABLE
     pApplicationCallData->pApplicationCallInput[4] = 'A';
     pApplicationCallData->pApplicationCallInput[5] = 'P';
     pApplicationCallData->pApplicationCallInput[6] = 'I';
-    pApplicationCallData->pApplicationCallInput[7] = '\0';    
+    pApplicationCallData->pApplicationCallInput[7] = '3';
+    pApplicationCallData->pApplicationCallInput[8] = '\0';    
       
-      return EFI_SUCCESS;
+    return EFI_SUCCESS;
 
 }

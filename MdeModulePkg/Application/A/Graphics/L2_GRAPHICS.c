@@ -1930,7 +1930,7 @@ MY_COMPUTER_WINDOW_CLICKED_EVENT L2_GRAPHICS_MyComputerLayerClickEventGet()
 
 	//Only 6 item, need to fix after test.
 	//分区的文件或文件夹被点击事件
-    for (UINT16 i = 0 ; i < 8; i++)
+    for (UINT16 i = 0 ; i < 11; i++)
     {
 		UINT16 StartX = MyComputerPositionX + 130;
 		UINT16 StartY = MyComputerPositionY + i  * (HeightNew + 16 * 2) + 200;
@@ -2897,23 +2897,47 @@ VOID L2_GRAPHICS_LayerCompute(UINT16 iMouseX, UINT16 iMouseY, UINT8 MouseClickFl
     Color.Blue = 0;
     Color.Green = 0;
     Color.Reserved  = GRAPHICS_LAYER_DESK;
+
+    UINT16 DrawGraphicsLayerID = MouseMoveoverObject.GraphicsLayerID;
+    UINT16 DrawWindowWidth = WindowLayers.item[DrawGraphicsLayerID].WindowWidth;
+    UINT8 *pDrawBuffer = WindowLayers.item[DrawGraphicsLayerID].pBuffer;
+    UINT16 DrawStartX = MouseMoveoverObject.StartX;
+    UINT16 DrawWindowStartX = WindowLayers.item[DrawGraphicsLayerID].StartX;
+    UINT16 DrawEndX = MouseMoveoverObject.EndX;
+    UINT16 DrawStartY = MouseMoveoverObject.StartY;
+    UINT16 DrawWindowStartY = WindowLayers.item[DrawGraphicsLayerID].StartY;
+    UINT16 DrawEndY = MouseMoveoverObject.EndY;
+    
     
     L2_DEBUG_Print1(0, ScreenHeight - 30 - 9 * 16, "%d: MouseMoveoverObject: LayerID: %u StartX: %u EndX: %u StartY: %u EndY: %u\n", __LINE__, 
-                              MouseMoveoverObject.GraphicsLayerID,
-                              MouseMoveoverObject.StartX,
-                              MouseMoveoverObject.EndX, 
-                              MouseMoveoverObject.StartY, 
-                              MouseMoveoverObject.EndY);
-    
-    L2_GRAPHICS_RectangleDraw(WindowLayers.item[MouseMoveoverObject.GraphicsLayerID].pBuffer, 
-                              MouseMoveoverObject.StartX,
-                              MouseMoveoverObject.StartY, 
-                              MouseMoveoverObject.EndX, 
-                              MouseMoveoverObject.EndY, 
-                              1,  
-                              Color, 
-                              ScreenWidth);
+                              DrawGraphicsLayerID,
+                              DrawStartX,
+                              DrawEndX, 
+                              DrawStartY, 
+                              DrawEndY);
 
+    if (0 == MouseMoveoverObject.GraphicsLayerID)
+    {
+        L2_GRAPHICS_RectangleDraw(pDrawBuffer, 
+                                  DrawStartX,
+                                  DrawStartY, 
+                                  DrawEndX, 
+                                  DrawEndY, 
+                                  1,  
+                                  Color, 
+                                  ScreenWidth);
+    }
+    else
+    {        
+        L2_GRAPHICS_RectangleDraw(pDrawBuffer, 
+                                  DrawStartX - DrawWindowStartX,
+                                  DrawStartY - DrawWindowStartY, 
+                                  DrawEndX - DrawWindowStartX, 
+                                  DrawEndY - DrawWindowStartY,  
+                                  1,  
+                                  Color, 
+                                  DrawWindowWidth);
+    }
 	//为了让鼠标光标透明，需要把图层对应的像素点拷贝到鼠标显示内存缓冲
     for (UINT8 i = 0; i < 16; i++)
     {
