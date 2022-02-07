@@ -72,6 +72,16 @@ EFI_STATUS L3_WINDOW_Create(UINT8 *pBuffer, UINT8 *pParent, UINT16 Width, UINT16
     L2_GRAPHICS_ChineseCharDraw(pBuffer, Width - 2 * 16 - 3, 6, (01 - 1) * 94 + 85 - 1, Color, Width);
     L2_GRAPHICS_ChineseCharDraw(pBuffer, Width - 1 * 16 - 3, 6, (14 - 1) * 94 + 21 - 1, Color, Width);
 
+    
+    // 窗口最顶部标题栏
+    for (i = 0; i < 23; i++)
+    {
+        for (j = 0; j < Width; j++)
+        {
+            pBuffer[(i * Width + j) * 4 + 3] = LayerID;
+        }
+    }
+
     // The Left of Window
     for (i = 23; i < Height; i++)
     {
@@ -388,34 +398,12 @@ VOID L3_APPLICATION_MemoryInformationWindow(UINT16 StartX, UINT16 StartY)
     
     TitleX += 16;
     L2_GRAPHICS_ChineseCharDraw(pBuffer, TitleX, TitleY, (47 - 1) * 94 + 24 - 1, Color, Width);
-
+    
+    /*
     L2_GRAPHICS_ChineseCharDraw(pBuffer, MyComputerWidth - 3 * 16 - 3, 6, (12 - 1) * 94 + 58 - 1, Color, Width);
     L2_GRAPHICS_ChineseCharDraw(pBuffer, MyComputerWidth - 2 * 16 - 3, 6, (01 - 1) * 94 + 85 - 1, Color, Width);
     L2_GRAPHICS_ChineseCharDraw(pBuffer, MyComputerWidth - 1 * 16 - 3, 6, (14 - 1) * 94 + 21 - 1, Color, Width);
-
-    // The Left of Window
-    for (i = 23; i < Height; i++)
-    {
-        for (j = 0; j < Width / 3; j++)
-        {
-            pBuffer[(i * Width + j) * 4] = 214;
-            pBuffer[(i * Width + j) * 4 + 1] = 211;
-            pBuffer[(i * Width + j) * 4 + 2] = 204;
-            pBuffer[(i * Width + j) * 4 + 3] = GRAPHICS_LAYER_MEMORY_INFORMATION_WINDOW;
-        }
-    }
-
-    // The right of Window
-    for (i = 23; i < Height; i++)
-    {
-        for (j = Width / 3 - 1; j < Width; j++)
-        {
-            pBuffer[(i * Width + j) * 4] = 214;
-            pBuffer[(i * Width + j) * 4 + 1] = 211;
-            pBuffer[(i * Width + j) * 4 + 2] = 104;
-            pBuffer[(i * Width + j) * 4 + 3] = GRAPHICS_LAYER_MEMORY_INFORMATION_WINDOW;
-        }
-    }
+    */
     
     int x = 0, y = 0;
     
@@ -500,7 +488,8 @@ VOID L3_APPLICATION_SystemLogWindow(UINT16 StartX, UINT16 StartY)
     //系	4721	统	4519	日	4053	志	5430
     UINT16 TitleX = 3;
     UINT16 TitleY = 6;
-    // wo de dian nao
+    
+    // 系统日志
     L2_GRAPHICS_ChineseCharDraw(pBuffer, TitleX, TitleY, (47 - 1) * 94 + 21 - 1, Color, Width); 
 
     TitleX += 16;
@@ -515,33 +504,7 @@ VOID L3_APPLICATION_SystemLogWindow(UINT16 StartX, UINT16 StartY)
     L2_GRAPHICS_ChineseCharDraw(pBuffer, Width - 3 * 16 - 3, 6, (12 - 1) * 94 + 58 - 1, Color, Width);
     L2_GRAPHICS_ChineseCharDraw(pBuffer, Width - 2 * 16 - 3, 6, (01 - 1) * 94 + 85 - 1, Color, Width);
     L2_GRAPHICS_ChineseCharDraw(pBuffer, Width - 1 * 16 - 3, 6, (14 - 1) * 94 + 21 - 1, Color, Width);
-
-    // The Left of Window
-    for (i = 23; i < Height; i++)
-    {
-        for (j = 0; j < Width / 3; j++)
-        {
-            pBuffer[(i * Width + j) * 4] = 214;
-            pBuffer[(i * Width + j) * 4 + 1] = 211;
-            pBuffer[(i * Width + j) * 4 + 2] = 204;
-            pBuffer[(i * Width + j) * 4 + 3] = GRAPHICS_LAYER_SYSTEM_LOG_WINDOW;
-        }
-    }
-
-    // The right of Window
-    for (i = 23; i < Height; i++)
-    {
-        for (j = Width / 3 - 1; j < Width; j++)
-        {
-            pBuffer[(i * Width + j) * 4] = 214;
-            pBuffer[(i * Width + j) * 4 + 1] = 211;
-            pBuffer[(i * Width + j) * 4 + 2] = 104;
-            pBuffer[(i * Width + j) * 4 + 3] = GRAPHICS_LAYER_SYSTEM_LOG_WINDOW;
-        }
-    }
-    
-    
-    
+            
     return EFI_SUCCESS;
 }
 

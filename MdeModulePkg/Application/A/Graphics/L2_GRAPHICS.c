@@ -2159,9 +2159,14 @@ VOID L3_GRAPHICS_SystemSettingClickEventHandle(START_MENU_SYSTEM_SETTING_SUBITEM
 	switch(event)
 	{
 		case START_MENU_SYSTEM_SETTING_SUBITEM_CLOSE_SUBITEM_CLICKED_EVENT:
-			; break;
-
-		//这边其实需要注意下，需要跟事件获取的状态保持一致，其实少了三个事件，我的电脑、系统设置、回收站。
+			L2_MOUSE_SystemSettingCloseClicked(); break;
+			
+        case START_MENU_SYSTEM_SETTING_SUBITEM_WALLPAPER_SETTING_CLICKED_EVENT:
+            L2_MOUSE_WallpaperSettingClicked(); break;
+            
+        case START_MENU_SYSTEM_SETTING_SUBITEM_WALLPAPER_RESET_CLICKED_EVENT:
+            L2_MOUSE_WallpaperResetClicked(); break;
+            
 		default: break;
 	}
 
@@ -2225,19 +2230,40 @@ VOID L3_GRAPHICS_MyComupterClickEventHandle(MY_COMPUTER_WINDOW_CLICKED_EVENT eve
 *  返回值： 成功：XXXX，失败：XXXXX
 *
 *****************************************************************************/
-VOID L2_MOUSE_MemoryInformationCloseClicked()
+VOID L2_MOUSE_SystemSettingCloseClicked()
 {
-    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d L2_MOUSE_SystemLogCloseClicked\n", __LINE__);
-    //DisplayMyComputerFlag = 0;
-    //WindowLayers.item[3].DisplayFlag = 0;
-    if (TRUE == WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW].DisplayFlag)
+    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d L2_MOUSE_SystemSettingCloseClicked\n", __LINE__);
+
+    if (TRUE == WindowLayers.item[GRAPHICS_LAYER_SYSTEM_SETTING_WINDOW].DisplayFlag)
     {
         WindowLayers.ActiveWindowCount--;        
-        WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW].DisplayFlag = FALSE;
+        WindowLayers.item[GRAPHICS_LAYER_SYSTEM_SETTING_WINDOW].DisplayFlag = FALSE;
     }
 }
 
 
+
+/****************************************************************************
+*
+*  描述:   我的电脑窗口点击事件中关闭窗口事件响应，注：未进行内存释放，有优化的空间
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
+VOID L2_MOUSE_MemoryInformationCloseClicked()
+{
+    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d L2_MOUSE_SystemLogCloseClicked\n", __LINE__);
+
+    if (TRUE == WindowLayers.item[GRAPHICS_LAYER_MEMORY_INFORMATION_WINDOW].DisplayFlag)
+    {
+        WindowLayers.ActiveWindowCount--;        
+        WindowLayers.item[GRAPHICS_LAYER_MEMORY_INFORMATION_WINDOW].DisplayFlag = FALSE;
+    }
+}
 
 
 
@@ -2411,13 +2437,7 @@ VOID L2_MOUSE_LeftClick(UINT16 LayerID)
     {
         WindowLayers.item[LayerID].StartX += x_move * 3;
         WindowLayers.item[LayerID].StartY += y_move * 3;
-
-        WindowLayers.item[LayerID].StartX = (WindowLayers.item[LayerID].StartX <= 3) ? 3 : WindowLayers.item[LayerID].StartX;
-        WindowLayers.item[LayerID].StartX = (WindowLayers.item[LayerID].StartX >= ScreenWidth - WindowLayers.item[LayerID].StartX) ? ScreenWidth - WindowLayers.item[LayerID].StartX : WindowLayers.item[LayerID].StartX;
-
-        WindowLayers.item[LayerID].StartY = (WindowLayers.item[LayerID].StartY <= 3) ? 3 : WindowLayers.item[LayerID].StartY;
-        WindowLayers.item[LayerID].StartY = (WindowLayers.item[LayerID].StartY >= ScreenHeight - WindowLayers.item[LayerID].StartY) ? ScreenHeight - WindowLayers.item[LayerID].StartY : WindowLayers.item[LayerID].StartY;
-        
+       
         L1_GRAPHICS_UpdateWindowLayer(LayerID);
     }
     
