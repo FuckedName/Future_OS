@@ -37,6 +37,7 @@ INT16 iMouseY = 0;
 UINT16 MouseClickWindowWidth = 300;
 UINT16 MouseClickWindowHeight = 400;
 
+//用于记录鼠标移动时光标所指的菜单、图标、文件夹、文件等等
 MOUSE_MOVEOVER_OBJECT MouseMoveoverObject;
 
 
