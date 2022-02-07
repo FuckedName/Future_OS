@@ -85,6 +85,9 @@ UINT16 SystemSettingWindowHeight = 16 * 10;
 
 UINT16 MemoryInformationWindowHeight = 16 * 60;
 UINT16 MemoryInformationWindowWidth = 16 * 40;
+UINT16 LayerID = 0;
+
+EFI_GRAPHICS_OUTPUT_BLT_PIXEL MouseMoveoverObjectDrawColor;
 
 
 EFI_GRAPHICS_OUTPUT_BLT_PIXEL MouseColor;
@@ -1202,7 +1205,7 @@ void L2_GRAPHICS_ParameterInit()
 
     WindowLayers.LayerCount++;
 	
-    WindowLayers.item[GRAPHICS_LAYER_DESK].DisplayFlag = FALSE;
+    WindowLayers.item[GRAPHICS_LAYER_DESK].DisplayFlag = TRUE;
     L1_MEMORY_Copy((UINT8 *)WindowLayers.item[GRAPHICS_LAYER_DESK].Name, "Desk layer", sizeof("Desk layer"));
     WindowLayers.item[GRAPHICS_LAYER_DESK].pBuffer = pDeskBuffer;
     WindowLayers.item[GRAPHICS_LAYER_DESK].StartX = 0;
@@ -1693,10 +1696,15 @@ EFI_STATUS L2_GRAPHICS_SayGoodBye()
 *****************************************************************************/
 BOOLEAN L1_GRAPHICS_InsideRectangle(UINT16 StartX, UINT16 EndX, UINT16 StartY, UINT16 EndY)
 {
-    MouseMoveoverObject.StartX = StartX;
-    MouseMoveoverObject.EndX   = EndX;
-    MouseMoveoverObject.StartY = StartY;
-    MouseMoveoverObject.EndY   = EndY;
+    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: StartX: %d, EndX: %d, StartY: %d, EndY: %d\n", __LINE__, StartX, EndX, StartY, EndY);
+
+    if (TRUE == WindowLayers.item[LayerID].DisplayFlag)
+    {
+        MouseMoveoverObject.StartX = StartX;
+        MouseMoveoverObject.EndX   = EndX;
+        MouseMoveoverObject.StartY = StartY;
+        MouseMoveoverObject.EndY   = EndY;
+    }
 	return (iMouseX >= StartX && iMouseX <= EndX && iMouseY >= StartY && iMouseY <= EndY);
 }
 
@@ -1721,7 +1729,7 @@ DESKTOP_ITEM_CLICKED_EVENT L2_GRAPHICS_DeskLayerClickEventGet()
 
 	if (L1_GRAPHICS_InsideRectangle(0, 16 + 16 * 2, ScreenHeight - 21, ScreenHeight))
 	{	    
-		L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: DESKTOP_ITEM_START_MENU_CLICKED_EVENT\n", __LINE__);
+		L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d:1 DESKTOP_ITEM_START_MENU_CLICKED_EVENT\n", __LINE__);
         return DESKTOP_ITEM_START_MENU_CLICKED_EVENT;
 	}
 
@@ -1731,9 +1739,11 @@ DESKTOP_ITEM_CLICKED_EVENT L2_GRAPHICS_DeskLayerClickEventGet()
     UINT16 x1 = 20;
     UINT16 y1 = 20;
 
+    
+    //下面这几个判断，其实可以写成for循环这种，不用写多次
 	if (L1_GRAPHICS_InsideRectangle(x1, x1 + ItemWidth, y1, y1 + ItemHeight))
 	{	    
-		L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: DESKTOP_ITEM_MY_COMPUTER_CLICKED_EVENT\n", __LINE__);
+		L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d:2 DESKTOP_ITEM_MY_COMPUTER_CLICKED_EVENT\n", __LINE__);
         return DESKTOP_ITEM_MY_COMPUTER_CLICKED_EVENT;
 	}
 
@@ -1741,7 +1751,7 @@ DESKTOP_ITEM_CLICKED_EVENT L2_GRAPHICS_DeskLayerClickEventGet()
 
 	if (L1_GRAPHICS_InsideRectangle(x1, x1 + ItemWidth, y1, y1 + ItemHeight))
 	{	    
-		L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: DESKTOP_ITEM_SYSTEM_SETTING_CLICKED_EVENT\n", __LINE__);
+		L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d:3 DESKTOP_ITEM_SYSTEM_SETTING_CLICKED_EVENT\n", __LINE__);
         return DESKTOP_ITEM_SYSTEM_SETTING_CLICKED_EVENT;
 	}
 
@@ -1749,7 +1759,7 @@ DESKTOP_ITEM_CLICKED_EVENT L2_GRAPHICS_DeskLayerClickEventGet()
 
 	if (L1_GRAPHICS_InsideRectangle(x1, x1 + ItemWidth, y1, y1 + ItemHeight))
 	{	    
-		L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: DESKTOP_ITEM_RECYCLE_BIN_CLICKED_EVENT\n", __LINE__);
+		L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d:4 DESKTOP_ITEM_RECYCLE_BIN_CLICKED_EVENT\n", __LINE__);
         return DESKTOP_ITEM_RECYCLE_BIN_CLICKED_EVENT;
 	}
 
@@ -1791,7 +1801,7 @@ START_MENU_ITEM_CLICKED_EVENT L2_GRAPHICS_StartMenuLayerClickEventGet()
     if (L1_GRAPHICS_InsideRectangle(3 + StartMenuPositionX, 3 + 4 * 16  + StartMenuPositionX, 
                                    3 + StartMenuPositionY + 16 * START_MENU_BUTTON_MY_COMPUTER, 3 + StartMenuPositionY + 16 * (START_MENU_BUTTON_MY_COMPUTER + 1)))
     {
-        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: MY_COMPUTER_CLICKED_EVENT\n", __LINE__);
+        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d:5 MY_COMPUTER_CLICKED_EVENT\n", __LINE__);
         return START_MENU_ITEM_MY_COMPUTER_CLICKED_EVENT;
     }
     
@@ -1799,7 +1809,7 @@ START_MENU_ITEM_CLICKED_EVENT L2_GRAPHICS_StartMenuLayerClickEventGet()
     if (L1_GRAPHICS_InsideRectangle(3 + StartMenuPositionX, 3 + 4 * 16  + StartMenuPositionX, 
                                    3 + StartMenuPositionY + 16 * START_MENU_BUTTON_SYSTEM_SETTING, 3 + StartMenuPositionY + 16 * (START_MENU_BUTTON_SYSTEM_SETTING + 1)))
     {
-        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: SETTING_CLICKED_EVENT\n", __LINE__);
+        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d:6 SETTING_CLICKED_EVENT\n", __LINE__);
         return START_MENU_ITEM_SYSTEM_SETTING_CLICKED_EVENT;
     }
 
@@ -1807,7 +1817,7 @@ START_MENU_ITEM_CLICKED_EVENT L2_GRAPHICS_StartMenuLayerClickEventGet()
     if (L1_GRAPHICS_InsideRectangle(3 + StartMenuPositionX, 3 + 4 * 16  + StartMenuPositionX, 
                                     3 + StartMenuPositionY + 16 * START_MENU_BUTTON_MEMORY_INFORMATION, 3 + StartMenuPositionY + 16 * (START_MENU_BUTTON_MEMORY_INFORMATION + 1)))
     {
-        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: MEMORY_INFORMATION_CLICKED_EVENT\n", __LINE__);
+        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d:7 MEMORY_INFORMATION_CLICKED_EVENT\n", __LINE__);
         return START_MENU_ITEM_MEMORY_INFORMATION_CLICKED_EVENT;
     }
     
@@ -1815,7 +1825,7 @@ START_MENU_ITEM_CLICKED_EVENT L2_GRAPHICS_StartMenuLayerClickEventGet()
     if (L1_GRAPHICS_InsideRectangle(3 + StartMenuPositionX, 3 + 4 * 16  + StartMenuPositionX, 
                                     3 + StartMenuPositionY + 16 * START_MENU_BUTTON_SYSTEM_LOG, 3 + StartMenuPositionY + 16 * (START_MENU_BUTTON_SYSTEM_LOG + 1)))
     {
-        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: SYSTEM_LOG_CLICKED_EVENT\n", __LINE__);
+        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d:8 SYSTEM_LOG_CLICKED_EVENT\n", __LINE__);
         return START_MENU_ITEM_SYSTEM_LOG_CLICKED_EVENT;
     }
 
@@ -1823,7 +1833,7 @@ START_MENU_ITEM_CLICKED_EVENT L2_GRAPHICS_StartMenuLayerClickEventGet()
     if (L1_GRAPHICS_InsideRectangle(3 + StartMenuPositionX, 3 + 4 * 16  + StartMenuPositionX, 
                                     3 + StartMenuPositionY + 16 * START_MENU_BUTTON_SYSTEM_QUIT, 3 + StartMenuPositionY + 16 * (START_MENU_BUTTON_SYSTEM_QUIT + 1)))
     {
-        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: SYSTEM_QUIT_CLICKED_EVENT\n", __LINE__);
+        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d:9 SYSTEM_QUIT_CLICKED_EVENT\n", __LINE__);
         return START_MENU_ITEM_SHUTDOWN_CLICKED_EVENT;
     }
 
@@ -1855,7 +1865,7 @@ START_MENU_SYSTEM_SETTING_SUBITEM_CLICKED_EVENT L2_GRAPHICS_SystemSettingLayerCl
     if (L1_GRAPHICS_InsideRectangle(3 + SystemSettingWindowPositionX, 3 + 4 * 16  + SystemSettingWindowPositionX, 
                                    3 + SystemSettingWindowPositionY, 3 + SystemSettingWindowPositionY + 16))
     {
-        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: WALLPAPER_SETTING_CLICKED_EVENT\n", __LINE__);
+        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d:10 WALLPAPER_SETTING_CLICKED_EVENT\n", __LINE__);
         return START_MENU_SYSTEM_SETTING_SUBITEM_WALLPAPER_SETTING_CLICKED_EVENT;
     }
     
@@ -1863,7 +1873,7 @@ START_MENU_SYSTEM_SETTING_SUBITEM_CLICKED_EVENT L2_GRAPHICS_SystemSettingLayerCl
     if (L1_GRAPHICS_InsideRectangle(3 + SystemSettingWindowPositionX, 3 + 4 * 16  + SystemSettingWindowPositionX, 
                                    3 + SystemSettingWindowPositionY + 16, 3 + SystemSettingWindowPositionY + 16 * 2))
     {
-        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: WALLPAPER_RESET_CLICKED_EVENT\n", __LINE__);
+        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d:11 WALLPAPER_RESET_CLICKED_EVENT\n", __LINE__);
         return START_MENU_SYSTEM_SETTING_SUBITEM_WALLPAPER_RESET_CLICKED_EVENT;
     }
 
@@ -1871,7 +1881,7 @@ START_MENU_SYSTEM_SETTING_SUBITEM_CLICKED_EVENT L2_GRAPHICS_SystemSettingLayerCl
     if (L1_GRAPHICS_InsideRectangle(SystemSettingWindowPositionX + SystemSettingWindowWidth - 20, SystemSettingWindowPositionX + SystemSettingWindowWidth - 4, 
                                    SystemSettingWindowPositionY+ 0, SystemSettingWindowPositionY + 16))
     {
-        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: SYSTEM_SETTING_CLOSE_CLICKED_EVENT\n", __LINE__);
+        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d:12 SYSTEM_SETTING_CLOSE_CLICKED_EVENT\n", __LINE__);
         return START_MENU_SYSTEM_SETTING_SUBITEM_CLOSE_SUBITEM_CLICKED_EVENT;
     }	
 
@@ -1901,10 +1911,9 @@ MY_COMPUTER_WINDOW_CLICKED_EVENT L2_GRAPHICS_MyComputerLayerClickEventGet()
     {
         return START_MENU_ITEM_INIT_EVENT;
     }
-
-    // Hide My computer window
-    if (iMouseX >= MyComputerPositionX + MyComputerWidth - 20 && iMouseX <=  MyComputerPositionX + MyComputerWidth - 4 
-            && iMouseY >= MyComputerPositionY + 0 && iMouseY <= MyComputerPositionY + 16)
+    
+    if (L1_GRAPHICS_InsideRectangle(MyComputerPositionX + MyComputerWidth - 20, MyComputerPositionX + MyComputerWidth - 4, 
+                                       MyComputerPositionY + 0, MyComputerPositionY + 16))  
     {
         L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: MY_COMPUTER_CLOSE_CLICKED_EVENT\n", __LINE__);
         return MY_COMPUTER_WINDOW_CLOSE_WINDOW_CLICKED_EVENT;
@@ -1913,14 +1922,14 @@ MY_COMPUTER_WINDOW_CLICKED_EVENT L2_GRAPHICS_MyComputerLayerClickEventGet()
 	//分区被点击事件
     for (UINT16 i = 0 ; i < PartitionCount; i++)
     {
-		UINT16 StartX = MyComputerPositionX + 50;
+		UINT16 StartX = MyComputerPositionX + 100;
 		UINT16 StartY = MyComputerPositionY + i * 18 + 16 * 2;
 		
 		if (L1_GRAPHICS_InsideRectangle(StartX, StartX + 16 * 4, 
                                    StartY + 0, StartY + 16))
 		{
 			PartitionItemID = i;
-			L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: MY_COMPUTER_PARTITION_ITEM_CLICKED_EVENT PartitionItemID: %d\n", __LINE__, PartitionItemID);
+			L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d:14 MY_COMPUTER_PARTITION_ITEM_CLICKED_EVENT PartitionItemID: %d\n", __LINE__, PartitionItemID);
 			return MY_COMPUTER_WINDOW_PARTITION_ITEM_CLICKED_EVENT;
 		}
 	}
@@ -1939,7 +1948,7 @@ MY_COMPUTER_WINDOW_CLICKED_EVENT L2_GRAPHICS_MyComputerLayerClickEventGet()
                                    StartY + 0, StartY + HeightNew))
 		{
 			FolderItemID = i;
-			L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: MY_COMPUTER_PARTITION_ITEM_CLICKED_EVENT FolderItemID: %d\n", __LINE__, FolderItemID);
+			L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d:15 MY_COMPUTER_PARTITION_ITEM_CLICKED_EVENT FolderItemID: %d\n", __LINE__, FolderItemID);
 			return MY_COMPUTER_WINDOW_FOLDER_ITEM_CLICKED_EVENT;
 		}
 	}
@@ -1969,8 +1978,8 @@ SYSTEM_LOG_WINDOW_CLICKED_EVENT L2_GRAPHICS_SystemLogLayerClickEventGet()
     UINT16 SystemLogWindowPositionY = WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW].StartY;
 
     // Hide System Log window
-    if (iMouseX >= SystemLogWindowPositionX + SystemLogWindowWidth - 20 && iMouseX <=  SystemLogWindowPositionX + SystemLogWindowWidth - 4 
-            && iMouseY >= SystemLogWindowPositionY+ 0 && iMouseY <= SystemLogWindowPositionY + 16)
+    if (L1_GRAPHICS_InsideRectangle(SystemLogWindowPositionX + SystemLogWindowWidth - 20, SystemLogWindowPositionX + SystemLogWindowWidth - 4, 
+                                       SystemLogWindowPositionY+ 0, SystemLogWindowPositionY + 16))
     {
         L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: SYSTEM_LOG_CLOSE_CLICKED_EVENT\n", __LINE__);
         return SYSTEM_LOG_WINDOW_CLOSE_WINDOW_CLICKED_EVENT;
@@ -2000,16 +2009,15 @@ MEMORY_INFORMATION_WINDOW_CLICKED_EVENT L2_GRAPHICS_MemoryInformationLayerClickE
 
     UINT16 MemoryInformationWindowPositionX = WindowLayers.item[GRAPHICS_LAYER_MEMORY_INFORMATION_WINDOW].StartX;
     UINT16 MemoryInformationWindowPositionY = WindowLayers.item[GRAPHICS_LAYER_MEMORY_INFORMATION_WINDOW].StartY;
-    
-    // Hide Memory Information window
-    if (iMouseX >= MemoryInformationWindowPositionX + MemoryInformationWindowWidth - 20 && iMouseX <=  MemoryInformationWindowPositionX + MemoryInformationWindowWidth - 4 
-            && iMouseY >= MemoryInformationWindowPositionY+ 0 && iMouseY <= MemoryInformationWindowPositionY + 16)
+
+    if (L1_GRAPHICS_InsideRectangle(MemoryInformationWindowPositionX + MemoryInformationWindowWidth - 20, MemoryInformationWindowPositionX + MemoryInformationWindowWidth - 4, 
+                                   MemoryInformationWindowPositionY+ 0, MemoryInformationWindowPositionY + 16))
     {
         L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: MEMORY_INFORMATION_CLOSE_CLICKED_EVENT\n", __LINE__);
-        return SYSTEM_LOG_WINDOW_CLOSE_WINDOW_CLICKED_EVENT;
+        return MEMORY_INFORMATION_WINDOW_CLOSE_WINDOW_CLICKED_EVENT;
     }
 			
-	return SYSTEM_LOG_WINDOW_MAX_CLICKED_EVENT;
+	return MEMORY_INFORMATION_WINDOW_MAX_CLICKED_EVENT;
 }
 
 
@@ -2148,6 +2156,15 @@ VOID L3_GRAPHICS_StartMenuClickEventHandle(START_MENU_ITEM_CLICKED_EVENT event)
 VOID L3_GRAPHICS_SystemSettingClickEventHandle(START_MENU_SYSTEM_SETTING_SUBITEM_CLICKED_EVENT event)
 {
 
+	switch(event)
+	{
+		case START_MENU_SYSTEM_SETTING_SUBITEM_CLOSE_SUBITEM_CLICKED_EVENT:
+			; break;
+
+		//这边其实需要注意下，需要跟事件获取的状态保持一致，其实少了三个事件，我的电脑、系统设置、回收站。
+		default: break;
+	}
+
 }
 
 
@@ -2166,7 +2183,15 @@ VOID L3_GRAPHICS_SystemSettingClickEventHandle(START_MENU_SYSTEM_SETTING_SUBITEM
 *
 *****************************************************************************/
 VOID L3_GRAPHICS_MyComupterClickEventHandle(MY_COMPUTER_WINDOW_CLICKED_EVENT event)
-{
+{    
+	switch(event)
+	{
+		case MY_COMPUTER_WINDOW_CLOSE_WINDOW_CLICKED_EVENT:
+			L2_MOUSE_MyComputerCloseClicked(); break;
+
+		//这边其实需要注意下，需要跟事件获取的状态保持一致，其实少了三个事件，我的电脑、系统设置、回收站。
+		default: break;
+	}
 	
     for (int i = 0; i <  sizeof(MyComputerStateTransformTable)/sizeof(MyComputerStateTransformTable[0]); i++ )
     {
@@ -2189,6 +2214,55 @@ VOID L3_GRAPHICS_MyComupterClickEventHandle(MY_COMPUTER_WINDOW_CLICKED_EVENT eve
 
 
 
+/****************************************************************************
+*
+*  描述:   我的电脑窗口点击事件中关闭窗口事件响应，注：未进行内存释放，有优化的空间
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
+VOID L2_MOUSE_MemoryInformationCloseClicked()
+{
+    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d L2_MOUSE_SystemLogCloseClicked\n", __LINE__);
+    //DisplayMyComputerFlag = 0;
+    //WindowLayers.item[3].DisplayFlag = 0;
+    if (TRUE == WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW].DisplayFlag)
+    {
+        WindowLayers.ActiveWindowCount--;        
+        WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW].DisplayFlag = FALSE;
+    }
+}
+
+
+
+
+
+/****************************************************************************
+*
+*  描述:   我的电脑窗口点击事件中关闭窗口事件响应，注：未进行内存释放，有优化的空间
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
+VOID L2_MOUSE_SystemLogCloseClicked()
+{
+    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d L2_MOUSE_SystemLogCloseClicked\n", __LINE__);
+    //DisplayMyComputerFlag = 0;
+    //WindowLayers.item[3].DisplayFlag = 0;
+    if (TRUE == WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW].DisplayFlag)
+    {
+        WindowLayers.ActiveWindowCount--;        
+        WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW].DisplayFlag = FALSE;
+    }
+}
 
 
 /****************************************************************************
@@ -2204,6 +2278,15 @@ VOID L3_GRAPHICS_MyComupterClickEventHandle(MY_COMPUTER_WINDOW_CLICKED_EVENT eve
 *****************************************************************************/
 VOID L3_GRAPHICS_SystemLogClickEventHandle(SYSTEM_LOG_WINDOW_CLICKED_EVENT event)
 {
+
+	switch(event)
+	{
+		case SYSTEM_LOG_WINDOW_CLOSE_WINDOW_CLICKED_EVENT:
+			L2_MOUSE_SystemLogCloseClicked(); break;
+
+		//这边其实需要注意下，需要跟事件获取的状态保持一致，其实少了三个事件，我的电脑、系统设置、回收站。
+		default: break;
+	}
 
 }
 
@@ -2223,7 +2306,14 @@ VOID L3_GRAPHICS_SystemLogClickEventHandle(SYSTEM_LOG_WINDOW_CLICKED_EVENT event
 *
 *****************************************************************************/
 VOID L3_GRAPHICS_MemoryInformationClickEventHandle(MEMORY_INFORMATION_WINDOW_CLICKED_EVENT event)
-{
+{    
+	switch(event)
+	{
+		case MEMORY_INFORMATION_WINDOW_CLOSE_WINDOW_CLICKED_EVENT:
+			L2_MOUSE_MemoryInformationCloseClicked(); break;
+
+		default: break;
+	}
 
 }
 
@@ -2269,7 +2359,7 @@ GRAPHICS_LAYER_EVENT_GET GraphicsLayerEventHandle[] =
 UINT16 L2_MOUSE_ClickEventHandle()
 {   
 	//获取鼠标光标所在的图层，窗口、图层在初始化的时候把第4个字节用于存放图层ID
-	UINT16 LayerID = pDeskDisplayBuffer[(iMouseY * ScreenWidth + iMouseX) * 4 + 3];
+	LayerID = pDeskDisplayBuffer[(iMouseY * ScreenWidth + iMouseX) * 4 + 3];
 
 	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: iMouseX: %d iMouseY: %d ClickFlag: %d, LayerID: %d\n", __LINE__, iMouseX, iMouseY, MouseClickFlag, LayerID);
     
@@ -2321,6 +2411,13 @@ VOID L2_MOUSE_LeftClick(UINT16 LayerID)
     {
         WindowLayers.item[LayerID].StartX += x_move * 3;
         WindowLayers.item[LayerID].StartY += y_move * 3;
+
+        WindowLayers.item[LayerID].StartX = (WindowLayers.item[LayerID].StartX <= 3) ? 3 : WindowLayers.item[LayerID].StartX;
+        WindowLayers.item[LayerID].StartX = (WindowLayers.item[LayerID].StartX >= ScreenWidth - WindowLayers.item[LayerID].StartX) ? ScreenWidth - WindowLayers.item[LayerID].StartX : WindowLayers.item[LayerID].StartX;
+
+        WindowLayers.item[LayerID].StartY = (WindowLayers.item[LayerID].StartY <= 3) ? 3 : WindowLayers.item[LayerID].StartY;
+        WindowLayers.item[LayerID].StartY = (WindowLayers.item[LayerID].StartY >= ScreenHeight - WindowLayers.item[LayerID].StartY) ? ScreenHeight - WindowLayers.item[LayerID].StartY : WindowLayers.item[LayerID].StartY;
+        
         L1_GRAPHICS_UpdateWindowLayer(LayerID);
     }
     
@@ -2891,12 +2988,6 @@ VOID L2_GRAPHICS_LayerCompute(UINT16 iMouseX, UINT16 iMouseY, UINT8 MouseClickFl
 
 	//这行代码为啥添加，不太记得了
     L2_MOUSE_Move();
-    
-    EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
-    Color.Red = 0xff;
-    Color.Blue = 0;
-    Color.Green = 0;
-    Color.Reserved  = GRAPHICS_LAYER_DESK;
 
     UINT16 DrawGraphicsLayerID = MouseMoveoverObject.GraphicsLayerID;
     UINT16 DrawWindowWidth = WindowLayers.item[DrawGraphicsLayerID].WindowWidth;
@@ -2924,7 +3015,7 @@ VOID L2_GRAPHICS_LayerCompute(UINT16 iMouseX, UINT16 iMouseY, UINT8 MouseClickFl
                                   DrawEndX, 
                                   DrawEndY, 
                                   1,  
-                                  Color, 
+                                  MouseMoveoverObjectDrawColor, 
                                   ScreenWidth);
     }
     else
@@ -2935,7 +3026,7 @@ VOID L2_GRAPHICS_LayerCompute(UINT16 iMouseX, UINT16 iMouseY, UINT8 MouseClickFl
                                   DrawEndX - DrawWindowStartX, 
                                   DrawEndY - DrawWindowStartY,  
                                   1,  
-                                  Color, 
+                                  MouseMoveoverObjectDrawColor, 
                                   DrawWindowWidth);
     }
 	//为了让鼠标光标透明，需要把图层对应的像素点拷贝到鼠标显示内存缓冲
@@ -3485,10 +3576,13 @@ VOID L2_MOUSE_MoveOver(UINT16 LayerID)
 
     if (MouseMoveoverObjectOld.StartX != MouseMoveoverObject.StartX 
        || MouseMoveoverObjectOld.StartY != MouseMoveoverObject.StartY
-       || MouseMoveoverObjectOld.EndX != MouseMoveoverObject.EndX
-       || MouseMoveoverObjectOld.EndY != MouseMoveoverObject.EndY
        || MouseMoveoverObjectOld.GraphicsLayerID != MouseMoveoverObject.GraphicsLayerID)
-    {
+    {    
+        MouseMoveoverObjectDrawColor.Red = 0xff;
+        MouseMoveoverObjectDrawColor.Blue = 0;
+        MouseMoveoverObjectDrawColor.Green = 0;
+        MouseMoveoverObjectDrawColor.Reserved  = GRAPHICS_LAYER_DESK;
+        
         L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: StartX: %d StartY: %d EndX: %d EndY: %d GraphicsLayerID: %d\n", __LINE__,                                
                                   MouseMoveoverObject.StartX,
                                   MouseMoveoverObject.StartY, 
@@ -3505,6 +3599,13 @@ VOID L2_MOUSE_MoveOver(UINT16 LayerID)
         MouseMoveoverObjectOld.GraphicsLayerID = MouseMoveoverObject.GraphicsLayerID;
                
         
+    }
+    else
+    {   
+        MouseMoveoverObjectDrawColor.Red = 0;
+        MouseMoveoverObjectDrawColor.Blue = 0xff;
+        MouseMoveoverObjectDrawColor.Green = 0;
+        MouseMoveoverObjectDrawColor.Reserved  = GRAPHICS_LAYER_DESK;
     }
 }
 
