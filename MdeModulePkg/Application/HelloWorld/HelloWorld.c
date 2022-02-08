@@ -21,9 +21,16 @@ typedef enum
 typedef struct
 {
     APPLICATION_CALL_ID ID;
+    EFI_STATUS          RanStatus;
     UINT8 pApplicationCallInput[20];
-    UINT8 (*pCallbackFunction)();
+    UINT8 (*pCallbackFunction)(EFI_STATUS ret);
 }APPLICATION_CALL_DATA;
+
+EFI_STATUS Callback(EFI_STATUS ret)
+{
+     Print(L"Call Print string successfully.!!!!\r\n");
+     return EFI_SUCCESS;
+}
 
 // code refer from StartEfiApplication
 //
@@ -44,7 +51,11 @@ EFI_STATUS EFIAPI UefiMain (IN EFI_HANDLE ParentImageHandle, IN EFI_SYSTEM_TABLE
     pApplicationCallData->pApplicationCallInput[6] = 'I';
     pApplicationCallData->pApplicationCallInput[7] = '3';
     pApplicationCallData->pApplicationCallInput[8] = '\0';    
+
+    pApplicationCallData->pCallbackFunction = Callback;
       
+    Print(L"Hello Renqihong jiayou!!!!: %d\r\n", pApplicationCallData->RanStatus);
+    
     return EFI_SUCCESS;
 
 }

@@ -417,8 +417,9 @@ typedef enum
 typedef struct
 {
     APPLICATION_CALL_ID ID;
+    EFI_STATUS          RanStatus;
     UINT8 pApplicationCallInput[20];
-    UINT8 (*pCallbackFunction)();
+    UINT8 (*pCallbackFunction)(EFI_STATUS ret);
 }APPLICATION_CALL_DATA;
 
 // Application call

@@ -632,28 +632,13 @@ EFI_STATUS L2_MOUSE_MyComputerFolderItemClicked()
             
             UINT8 FileName[13] = {0};
             L1_FILE_NameMerge(index, FileName);
-            L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: FileName: %u %u %u %u %u %u %u %u %u %u %u %u %u\n", __LINE__, 
-                                                                                                                                FileName[0],
-                                                                                                                                FileName[1],
-                                                                                                                                FileName[2],
-                                                                                                                                FileName[3],
-                                                                                                                                FileName[4],
-                                                                                                                                FileName[5],
-                                                                                                                                FileName[6],
-                                                                                                                                FileName[7],
-                                                                                                                                FileName[8],
-                                                                                                                                FileName[9],
-                                                                                                                                FileName[10],
-                                                                                                                                FileName[11],
-                                                                                                                                FileName[12]);
             CHAR16 wcFileName[13] = {0};
 
             for (UINT8 i = 0; '\0' != FileName[i]; i++)
             {
                 wcFileName[i] = FileName[i];
             }
-            
-                
+                            
             EFI_EVENT       Event;
             L2_ApplicationRun(Event, wcFileName);
         }
@@ -2999,20 +2984,6 @@ VOID L2_GRAPHICS_LayerCompute(UINT16 iMouseX, UINT16 iMouseY, UINT8 MouseClickFl
 
     L2_GRAPHICS_CopyBufferFromWindowsToDesk();
         
-    if (MouseClickFlag == 1 && pDeskDisplayBuffer[(iMouseY * ScreenWidth + iMouseX) * 4 + 3] == GRAPHICS_LAYER_MY_COMPUTER_WINDOW)
-    {
-        WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].StartX += x_move * 3;
-        WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].StartY += y_move * 3;
-        
-    //  L2_GRAPHICS_Copy(pDeskDisplayBuffer, pMyComputerBuffer, ScreenWidth, ScreenHeight, MyComputerWidth, MyComputerHeight, MyComputerPositionX, MyComputerPositionX);
-    }
-    x_move = 0;
-    y_move = 0;
-    // display graphics layer id mouse over, for mouse click event.
-    //L2_DEBUG_Print1(DISPLAY_X, DISPLAY_Y, "%d: Graphics Layer id: %d ", __LINE__, pDeskDisplayBuffer[(iMouseY * ScreenWidth + iMouseX) * 4 + 3]);
-    
-    int i, j;
-
 	//这行代码为啥添加，不太记得了
     L2_MOUSE_Move();
 
@@ -3033,7 +3004,9 @@ VOID L2_GRAPHICS_LayerCompute(UINT16 iMouseX, UINT16 iMouseY, UINT8 MouseClickFl
                               DrawEndX, 
                               DrawStartY, 
                               DrawEndY);
-
+                              
+    //如果鼠标没有点击，则追踪鼠标所指的目标
+    //因为桌面图层是没有相对桌面图层起始X，Y方向坐标
     if (0 == MouseMoveoverObject.GraphicsLayerID)
     {
         L2_GRAPHICS_RectangleDraw(pDrawBuffer, 
@@ -3056,6 +3029,7 @@ VOID L2_GRAPHICS_LayerCompute(UINT16 iMouseX, UINT16 iMouseY, UINT8 MouseClickFl
                                   MouseMoveoverObjectDrawColor, 
                                   DrawWindowWidth);
     }
+    
 	//为了让鼠标光标透明，需要把图层对应的像素点拷贝到鼠标显示内存缓冲
     for (UINT8 i = 0; i < 16; i++)
     {

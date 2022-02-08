@@ -127,21 +127,6 @@ VOID EFIAPI L2_TIMER_Slice(
     return;
 }
 
-//操作系统给应用程序分配的内存，以2147483648=2G大小内存处开始，当前只有一个应用程序
-
-VOID testfunction2()
-{    
-    pApplicationCallData->ID = APPLICATION_CALL_ID_PRINT_STRING;
-    pApplicationCallData->pApplicationCallInput[0] = 'S';
-    pApplicationCallData->pApplicationCallInput[1] = 'S';
-    pApplicationCallData->pApplicationCallInput[2] = 'S';
-    pApplicationCallData->pApplicationCallInput[3] = 'S';
-    pApplicationCallData->pApplicationCallInput[4] = 'S';
-    pApplicationCallData->pApplicationCallInput[5] = 'S';
-    pApplicationCallData->pApplicationCallInput[6] = '\0';    
-	return;
-}
-
 /****************************************************************************
 *
 *  描述:   多进程组，每个进程组里有多个进程，不过跟真正操作系统的进程有些差别。

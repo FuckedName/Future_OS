@@ -123,7 +123,7 @@ L2_KEYBOARD_Event (
                                         );    
     if(EFI_ERROR (Status))
         return ;
-    //L2_DEBUG_Print1(DISPLAY_X, DISPLAY_Y, "%d:HandleKeyboardEvent \n", __LINE__);
+        
     for (HandleIndex = 0; HandleIndex < HandleCount; HandleIndex++) 
     {
         Status = gBS->HandleProtocol (Handles[HandleIndex], &gEfiSimpleTextInputExProtocolGuid, (VOID **) &SimpleEx);

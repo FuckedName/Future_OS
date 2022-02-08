@@ -76,7 +76,7 @@ MOUSE_CLICK_EVENT L2_GRAPHICS_DeskLayerClickEventGet()
 	return MAX_CLICKED_EVENT;
 }*/
 
-VOID L2_INTERFACES_PrintString()
+EFI_STATUS L2_INTERFACES_PrintString()
 {    
 
     UINT16 x, y;
@@ -135,7 +135,10 @@ VOID L2_INTERFACES_ApplicationCall (EFI_EVENT Event,  VOID           *Context)
     if (APPLICATION_CALL_ID_INIT != pApplicationCallData->ID)
     {
         //执行系统调用
-        InterfaceCallTable[pApplicationCallData->ID].pApplicationCallFunction();
+        EFI_STATUS RanStatus = InterfaceCallTable[pApplicationCallData->ID].pApplicationCallFunction();
+
+        //如果回调函数执行成功，则给应用程序一个反馈。这里测试，发现回调函数不能执行成功
+        pApplicationCallData->RanStatus = RanStatus;
 
         //把系统调用类型设置为初始化，不然会进入死循环
         pApplicationCallData->ID = APPLICATION_CALL_ID_INIT;

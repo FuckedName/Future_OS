@@ -306,10 +306,11 @@ VOID L3_APPLICATION_MyComputerWindow(UINT16 StartX, UINT16 StartY)
             type[4] = '\0';
         }
 		//L2_FILE_PartitionNameGet(i);
-		
-		L2_DEBUG_Print3(0, y, WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW], "%a", device[i].PartitionName);
 
-        L2_DEBUG_Print3(x, y, WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW], "%a", type);
+		//原来这里是X坐标0，显示效果比较靠窗口左边，现在改为10
+		L2_DEBUG_Print3(10, y, WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW], "%a", device[i].PartitionName);
+
+        L2_DEBUG_Print3(x + 10, y, WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW], "%a", type);
         
     }
     
