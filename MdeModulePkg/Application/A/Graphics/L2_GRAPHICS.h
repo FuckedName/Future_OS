@@ -208,6 +208,7 @@ EFI_STATUS L2_GRAPHICS_ChineseHalfDraw(UINT8 *pBuffer,UINT8 d,
         IN EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color, UINT8 fontWidth);
 
 VOID L2_GRAPHICS_LayerCompute(UINT16 iMouseX, UINT16 iMouseY, UINT8 MouseClickFlag);
+VOID L2_GRAPHICS_RightClickMenuInit(UINT16 iMouseX, UINT16 iMouseY, UINT16 LayerID);
 
 VOID L2_STORE_FolderItemsPrint();
 
@@ -234,8 +235,6 @@ EFI_STATUS L2_GRAPHICS_ChineseCharDraw2(UINT8 *pBuffer,
 EFI_STATUS L2_GRAPHICS_AsciiCharDraw2(WINDOW_LAYER_ITEM layer,
         IN UINTN x0, UINTN y0, UINT8 c,
         IN EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color);
-
-VOID L2_GRAPHICS_RightClickMenu(UINT16 iMouseX, UINT16 iMouseY);
 
 UINT16 L2_MOUSE_MoveOver(UINT16 LayerID);
 

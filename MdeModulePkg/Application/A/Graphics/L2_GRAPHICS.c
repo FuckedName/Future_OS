@@ -1215,7 +1215,7 @@ void L2_GRAPHICS_ParameterInit()
 
     WindowLayers.ActiveWindowCount = 0;
 
-    MouseClickFlag = MOUSE_NO_CLICKED;
+    MouseClickFlag = MOUSE_EVENT_TYPE_NO_CLICKED;
 
 	// Active window list, please note: desk layer always display at firstly.
 	// So WindowLayers.LayerCount value always one more than WindowLayers.ActiveWindowCount
@@ -2394,6 +2394,31 @@ GRAPHICS_LAYER_EVENT_GET GraphicsLayerEventHandle[] =
     {GRAPHICS_LAYER_MEMORY_INFORMATION_WINDOW,       L2_GRAPHICS_MemoryInformationLayerClickEventGet, 	L3_GRAPHICS_MemoryInformationClickEventHandle},
 };
 
+/****************************************************************************
+*
+*  描述:   鼠标左键点击事件处理
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
+VOID L2_MOUSE_RightClick(UINT16 LayerID, UINT16 event)
+{
+    if ( MouseClickFlag != MOUSE_EVENT_TYPE_RIGHT_CLICKED)
+    {
+        return;
+    }
+    
+
+    if (MouseClickFlag == MOUSE_EVENT_TYPE_RIGHT_CLICKED)
+        L2_GRAPHICS_CopyNoReserved(pDeskDisplayBuffer, pMouseClickBuffer, ScreenWidth, ScreenHeight, MouseClickWindowWidth, MouseClickWindowHeight, iMouseX, iMouseY);
+        
+    //L2_GRAPHICS_RightClickMenuInit(iMouseX, iMouseY, LayerID);
+    
+}
 
 
 /****************************************************************************
@@ -2412,7 +2437,7 @@ VOID L2_MOUSE_LeftClick(UINT16 LayerID, UINT16 event)
     //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: iMouseX: %d iMouseY: %d \n",  __LINE__, iMouseX, iMouseY);
     //鼠标拖动窗口移动
     
-    if ( MouseClickFlag != MOUSE_LEFT_CLICKED)
+    if ( MouseClickFlag != MOUSE_EVENT_TYPE_LEFT_CLICKED)
     {
         return;
     }
@@ -2434,7 +2459,7 @@ VOID L2_MOUSE_LeftClick(UINT16 LayerID, UINT16 event)
 
 	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: iMouseX: %d iMouseY: %d ClickFlag: %d, LayerID: %d\n", __LINE__, iMouseX, iMouseY, MouseClickFlag, LayerID);
       	
-    MouseClickFlag = MOUSE_NO_CLICKED;
+    MouseClickFlag = MOUSE_EVENT_TYPE_NO_CLICKED;
 
 	// Handle click event
 	GraphicsLayerEventHandle[LayerID].pClickEventHandle(event);
@@ -3520,26 +3545,29 @@ EFI_STATUS L2_GRAPHICS_AsciiCharDraw2(WINDOW_LAYER_ITEM layer,
 *  返回值： 成功：XXXX，失败：XXXXX
 *
 *****************************************************************************/
-VOID L2_GRAPHICS_RightClickMenu(UINT16 iMouseX, UINT16 iMouseY)
+VOID L2_GRAPHICS_RightClickMenuInit(UINT16 iMouseX, UINT16 iMouseY, UINT16 LayerID)
 {
 	INT16 i;	
 	UINT16 width = 100;
 	UINT16 height = 300;
 	EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
-		 
-	for (i = 0; i < width * height; i++)
-	{
-		pMouseClickBuffer[i * 4] = 160;
-		pMouseClickBuffer[i * 4 + 1] = 160;
-		pMouseClickBuffer[i * 4 + 2] = 160;
-		pMouseClickBuffer[i * 4 + 3] = 0;
-	}
 
 	Color.Blue = 0xFF;
 	Color.Red  = 0xFF;
 	Color.Green= 0xFF;
+		 
+	for (i = 0; i < MouseClickWindowWidth * MouseClickWindowHeight; i++)
+	{
+		pMouseClickBuffer[i * 4] = 160;
+		pMouseClickBuffer[i * 4 + 1] = 160;
+		pMouseClickBuffer[i * 4 + 2] = 160;
+		pMouseClickBuffer[i * 4 + 3] = LayerID;
+	}
+	Color.Reserved = LayerID;
+	Color.Blue = 0;
 	
-	//DrawChineseCharUseBuffer(pBuffer, 10, 10, sChinese[0], 5, Color, width);
+    //L2_GRAPHICS_ChineseCharDraw(pMouseClickBuffer, 0 , 0,     (47 - 1 ) * 94 + 21 - 1, Color, MouseClickWindowWidth);  
+    
 	/*
 	GraphicsOutput->Blt(GraphicsOutput, 
 						(EFI_GRAPHICS_OUTPUT_BLT_PIXEL *) pMouseClickBuffer,
@@ -3547,7 +3575,7 @@ VOID L2_GRAPHICS_RightClickMenu(UINT16 iMouseX, UINT16 iMouseY)
 						0, 0, 
 						iMouseX, iMouseY, 
 						width, height, 0);	
-   */
+    */
 	//FreePool(pBuffer);
 	return ;
 
@@ -3865,14 +3893,25 @@ VOID L2_MOUSE_Move()
     
     // display graphics layer id mouse over, for mouse click event.
     //L2_DEBUG_Print1(DISPLAY_X, DISPLAY_Y, "%d: Graphics Layer id: %d ", __LINE__, pDeskDisplayBuffer[(iMouseY * ScreenWidth + iMouseX) * 4 + 3]);
-    L2_DEBUG_Print1(0, ScreenHeight - 30 -  7 * 16, "%d: iMouseX: %d iMouseY: %d Graphics Layer id: %d GraphicsLayerIDCount: %u", __LINE__, iMouseX, iMouseY, pDeskDisplayBuffer[(iMouseY * ScreenWidth + iMouseX) * 4 + 3], GraphicsLayerIDCount++);
+    L2_DEBUG_Print1(0, ScreenHeight - 30 -  7 * 16, "%d: iMouseX: %d iMouseY: %d MouseClickFlag: %d Graphics Layer id: %d GraphicsLayerIDCount: %u", __LINE__, iMouseX, iMouseY, MouseClickFlag, pDeskDisplayBuffer[(iMouseY * ScreenWidth + iMouseX) * 4 + 3], GraphicsLayerIDCount++);
     
 	//获取鼠标光标所在的图层，窗口、图层在初始化的时候把第4个字节用于存放图层ID
 	LayerID = pDeskDisplayBuffer[(iMouseY * ScreenWidth + iMouseX) * 4 + 3];
-	
+
     UINT16 event = L2_MOUSE_MoveOver(LayerID);
+
+	switch (MouseClickFlag)
+	{
+	    case MOUSE_EVENT_TYPE_LEFT_CLICKED: 
+	        L2_MOUSE_LeftClick(LayerID, event); break;
+	    
+	    case MOUSE_EVENT_TYPE_RIGHT_CLICKED: 
+	        L2_MOUSE_RightClick(LayerID, event); break;
+	        
+	    default: break;
+	}
     
-    L2_MOUSE_LeftClick(LayerID, event);
+    
 }
 
 

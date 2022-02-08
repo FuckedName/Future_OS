@@ -425,9 +425,13 @@ typedef struct
 // Application call
 extern APPLICATION_CALL_DATA *pApplicationCallData;
 
-#define MOUSE_NO_CLICKED 0
-#define MOUSE_LEFT_CLICKED 1
-#define MOUSE_RIGHT_CLICKED 2
+typedef enum
+{
+    MOUSE_EVENT_TYPE_NO_CLICKED = 0,
+    MOUSE_EVENT_TYPE_LEFT_CLICKED,
+    MOUSE_EVENT_TYPE_RIGHT_CLICKED,
+    MOUSE_EVENT_TYPE_MAX
+}MOUSE_EVENT_TYPE;
 
 
 typedef struct

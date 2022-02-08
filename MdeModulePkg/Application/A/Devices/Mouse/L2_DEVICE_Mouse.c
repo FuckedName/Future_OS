@@ -82,6 +82,21 @@ VOID L2_MOUSE_StateAnaysis(EFI_SIMPLE_POINTER_STATE State)
     stMouseState.ucX_RelativeMove = x_move;
     stMouseState.ucX_RelativeMove = y_move;
 
+    //鼠标左键点击
+    if (State.LeftButton == TRUE)
+    {
+        //如果原来是未点击状态，则改为点击状态，否则改为未点击状态
+        MouseClickFlag = (MouseClickFlag == MOUSE_EVENT_TYPE_NO_CLICKED) ? MOUSE_EVENT_TYPE_LEFT_CLICKED : MOUSE_EVENT_TYPE_NO_CLICKED;        
+    }
+    
+    //鼠标右键点击
+    if (State.RightButton == TRUE)
+    {        
+        //如果原来是未点击状态，则改为点击状态，否则改为未点击状态
+        MouseClickFlag = (MouseClickFlag == MOUSE_EVENT_TYPE_NO_CLICKED) ? MOUSE_EVENT_TYPE_RIGHT_CLICKED : MOUSE_EVENT_TYPE_NO_CLICKED;
+    }
+    
+
 }
 
 
@@ -139,32 +154,6 @@ VOID EFIAPI L2_MOUSE_Event (IN EFI_EVENT Event, IN VOID *Context)
 	iMouseY = (iMouseY < 0) ? 0 : iMouseY;
 	iMouseY = (iMouseY > ScreenHeight - 16) ? ScreenHeight - 16 : iMouseY;
 	
-    //左
-    if (State.LeftButton == TRUE)
-    {
-        //DEBUG ((EFI_D_INFO, "Left button clicked\n"));
-        
-        L2_GRAPHICS_RightClickMenu(iMouseX, iMouseY);
-
-        //WirelessMAC();
-        
-        MouseClickFlag = (MouseClickFlag == MOUSE_NO_CLICKED) ? MOUSE_LEFT_CLICKED : MOUSE_NO_CLICKED;
-        
-        //DrawAsciiCharUseBuffer(GraphicsOutput, 20 + process2_i * 8 + 16, 60, 'E', Color);  
-    }
-    
-    //右
-    if (State.RightButton == TRUE)
-    {
-        //DEBUG ((EFI_D_INFO, "Right button clicked\n"));
-        //DrawAsciiCharUseBuffer(GraphicsOutput, 20 + process2_i * 8 + 16, 60, 'R', Color);
-
-        L2_GRAPHICS_RightClickMenu(iMouseX, iMouseY);
-        
-        MouseClickFlag = 2;
-    }
-    //L2_DEBUG_Print1(DISPLAY_X, DISPLAY_Y, "%d: HandleMouseEvent\n", __LINE__);
-    ////DEBUG ((EFI_D_INFO, "\n"));
     L2_MOUSE_Move();
     
     gBS->WaitForEvent( 1, &gMouse->WaitForInput, &Index );
@@ -191,7 +180,7 @@ EFI_STATUS L2_MOUSE_Init()
     EFI_STATUS                         Status;
     EFI_HANDLE                         *PointerHandleBuffer = NULL;
     UINTN                              i = 0;
-	MouseClickFlag 					   = MOUSE_NO_CLICKED;
+	MouseClickFlag 					   = MOUSE_EVENT_TYPE_NO_CLICKED;
     UINTN                              HandleCount = 0;
     
     //get the handles which supports

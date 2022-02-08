@@ -27,7 +27,7 @@
 
 EFI_SIMPLE_POINTER_PROTOCOL  *gMouse;
 UINT16 mouse_count = 0;
-UINT8 MouseClickFlag = MOUSE_NO_CLICKED;
+UINT8 MouseClickFlag = MOUSE_EVENT_TYPE_NO_CLICKED;
 
 CHAR8 x_move = 0;
 CHAR8 y_move = 0;
