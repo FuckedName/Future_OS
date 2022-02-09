@@ -314,8 +314,22 @@ VOID L3_GRAPHICS_ItemPrint(UINT8 *pDestBuffer, UINT8 *pSourceBuffer, UINT16 pDes
 }
 
 
-
-
+/****************************************************************************
+*
+*  描述:   图片的内存拷贝，感觉跟L3_GRAPHICS_ItemPrint有些是重复的。
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
+VOID L2_GRAPHICS_MouseMoveoverObjectSetZero()
+{    
+    bMouseMoveoverObject = FALSE;
+   
+}
 
 
 /****************************************************************************
@@ -1231,6 +1245,8 @@ void L2_GRAPHICS_ParameterInit()
     MouseMoveoverObjectDrawColor.Red = 0;
     MouseMoveoverObjectDrawColor.Green = 0;
     MouseMoveoverObjectDrawColor.Reserved = 0;
+
+    //L2_MOUSE_GraphicsEventInit();
 }
 
 
@@ -1710,6 +1726,8 @@ BOOLEAN L1_GRAPHICS_InsideRectangle(UINT16 StartX, UINT16 EndX, UINT16 StartY, U
         MouseMoveoverObject.StartY = StartY;
         MouseMoveoverObject.EndY   = EndY;
         MouseMoveoverObject.GraphicsLayerID = LayerID;
+        
+        bMouseMoveoverObject = TRUE;
     }
 
     //因为每一个图层的每一个事件区域是唯一的，所以只需要判断三个都不相等就可以
@@ -1791,6 +1809,8 @@ DESKTOP_ITEM_CLICKED_EVENT L2_GRAPHICS_DeskLayerClickEventGet()
 	}
 
 	y1 += ItemHeight + 2 * 16;
+    L2_GRAPHICS_MouseMoveoverObjectSetZero();
+
 
 	return DESKTOP_ITEM_MAX_CLICKED_EVENT;
 }
@@ -1864,6 +1884,8 @@ START_MENU_ITEM_CLICKED_EVENT L2_GRAPHICS_StartMenuLayerClickEventGet()
         return START_MENU_ITEM_SHUTDOWN_CLICKED_EVENT;
     }
 
+    L2_GRAPHICS_MouseMoveoverObjectSetZero();
+
 	return START_MENU_ITEM_MAX_CLICKED_EVENT;
 }
 
@@ -1911,6 +1933,8 @@ START_MENU_SYSTEM_SETTING_SUBITEM_CLICKED_EVENT L2_GRAPHICS_SystemSettingLayerCl
         L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d:12 SYSTEM_SETTING_CLOSE_CLICKED_EVENT\n", __LINE__);
         return START_MENU_SYSTEM_SETTING_SUBITEM_CLOSE_SUBITEM_CLICKED_EVENT;
     }	
+
+    L2_GRAPHICS_MouseMoveoverObjectSetZero();
 
 	return START_MENU_SYSTEM_SETTING_SUBITEM_MAX_CLICKED_EVENT;
 
@@ -1980,6 +2004,8 @@ MY_COMPUTER_WINDOW_CLICKED_EVENT L2_GRAPHICS_MyComputerLayerClickEventGet()
 		}
 	}
 
+    L2_GRAPHICS_MouseMoveoverObjectSetZero();
+
 	return MY_COMPUTER_WINDOW_MAX_CLICKED_EVENT;
 }
 
@@ -2011,6 +2037,8 @@ SYSTEM_LOG_WINDOW_CLICKED_EVENT L2_GRAPHICS_SystemLogLayerClickEventGet()
         L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: SYSTEM_LOG_CLOSE_CLICKED_EVENT\n", __LINE__);
         return SYSTEM_LOG_WINDOW_CLOSE_WINDOW_CLICKED_EVENT;
     }    
+
+    L2_GRAPHICS_MouseMoveoverObjectSetZero();
 
 	return SYSTEM_LOG_WINDOW_MAX_CLICKED_EVENT;			
 }
@@ -2044,6 +2072,7 @@ MEMORY_INFORMATION_WINDOW_CLICKED_EVENT L2_GRAPHICS_MemoryInformationLayerClickE
         return MEMORY_INFORMATION_WINDOW_CLOSE_WINDOW_CLICKED_EVENT;
     }
 			
+    L2_GRAPHICS_MouseMoveoverObjectSetZero();
 	return MEMORY_INFORMATION_WINDOW_MAX_CLICKED_EVENT;
 }
 
@@ -3029,6 +3058,17 @@ VOID L2_GRAPHICS_LayerCompute(UINT16 iMouseX, UINT16 iMouseY, UINT8 MouseClickFl
                               DrawEndX, 
                               DrawStartY, 
                               DrawEndY);
+
+    if (bMouseMoveoverObject == FALSE)
+    {
+        MouseMoveoverObjectDrawColor.Blue = 0xff;
+        MouseMoveoverObjectDrawColor.Red = 0;
+    }
+    else
+    {
+        MouseMoveoverObjectDrawColor.Blue = 0;
+        MouseMoveoverObjectDrawColor.Red = 0xff;        
+    }    
                               
     //如果鼠标没有点击，则追踪鼠标所指的目标
     //因为桌面图层是没有相对桌面图层起始X，Y方向坐标
@@ -3556,13 +3596,6 @@ VOID L2_GRAPHICS_RightClickMenuInit(UINT16 iMouseX, UINT16 iMouseY, UINT16 Layer
 	Color.Red  = 0xFF;
 	Color.Green= 0xFF;
 		 
-	for (i = 0; i < MouseClickWindowWidth * MouseClickWindowHeight; i++)
-	{
-		pMouseClickBuffer[i * 4] = 160;
-		pMouseClickBuffer[i * 4 + 1] = 160;
-		pMouseClickBuffer[i * 4 + 2] = 160;
-		pMouseClickBuffer[i * 4 + 3] = LayerID;
-	}
 	Color.Reserved = LayerID;
 	Color.Blue = 0;
 	

@@ -404,6 +404,7 @@ typedef struct
 
 extern MOUSE_MOVEOVER_OBJECT MouseMoveoverObject;
 extern BOOLEAN ApplicationRunFinished;
+extern BOOLEAN bMouseMoveoverObject;
 
 
 typedef enum

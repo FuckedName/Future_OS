@@ -162,6 +162,43 @@ VOID EFIAPI L2_MOUSE_Event (IN EFI_EVENT Event, IN VOID *Context)
 
 
 
+/****************************************************************************
+*
+*  描述:   鼠标图形事件相关变量初始化
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
+EFI_STATUS L2_MOUSE_GraphicsEventInit()
+{    
+    MouseMoveoverObject.StartX = 0;
+    MouseMoveoverObject.EndX   = 0;
+    MouseMoveoverObject.StartY = 0;
+    MouseMoveoverObject.EndY   = 0;
+    MouseMoveoverObject.GraphicsLayerID = 0;
+    bMouseMoveoverObject = FALSE;
+
+    UINT8 *pBuffer = pMouseClickBuffer;
+    UINT16 Width = MouseClickWindowWidth;
+
+	EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
+
+	Color.Blue = 0xFF;
+	Color.Red  = 0xFF;
+	Color.Green= 0xFF;
+	Color.Reserved= 0;
+
+    L2_GRAPHICS_ChineseCharDraw2(pBuffer, Width - 3 * 16 - 3 , 6, 12, 58, Color, Width);   
+    L2_GRAPHICS_ChineseCharDraw2(pBuffer, Width - 2 * 16 - 3 , 6, 01, 85, Color, Width);   
+    L2_GRAPHICS_ChineseCharDraw2(pBuffer, Width - 1 * 16 - 3 , 6, 14, 21, Color, Width);   
+
+}
+
+
 
 
 /****************************************************************************
@@ -182,7 +219,7 @@ EFI_STATUS L2_MOUSE_Init()
     UINTN                              i = 0;
 	MouseClickFlag 					   = MOUSE_EVENT_TYPE_NO_CLICKED;
     UINTN                              HandleCount = 0;
-    
+        
     //get the handles which supports
     Status = gBS->LocateHandleBuffer(
                                     ByProtocol,
@@ -208,15 +245,7 @@ EFI_STATUS L2_MOUSE_Init()
             return EFI_SUCCESS;
         }
     }   
-    
-    MouseMoveoverObject.StartX = 0;
-    MouseMoveoverObject.EndX   = 0;
-    MouseMoveoverObject.StartY = 0;
-    MouseMoveoverObject.EndY   = 0;
-    MouseMoveoverObject.GraphicsLayerID   = 0;
-    
+        
     return EFI_SUCCESS;
-
 }
-
 
