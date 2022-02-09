@@ -1790,35 +1790,22 @@ DESKTOP_ITEM_CLICKED_EVENT L2_GRAPHICS_DeskLayerClickEventGet()
     UINT16 x1 = 20;
     UINT16 y1 = 20;
 
+    UINT16 ystep = ItemHeight + 2 * 16;
+
+    //这边需要注意，第一个i不为0或者1
+    for (UINT16 i = DESKTOP_ITEM_MY_COMPUTER_CLICKED_EVENT; i < DESKTOP_ITEM_MAX_CLICKED_EVENT; i++)
+    {
+    	if (L1_GRAPHICS_InsideRectangle(x1, x1 + ItemWidth, y1 + (i - 2) * ystep, y1 + (i - 2) * ystep + ItemHeight))
+    	{	    
+    		L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d:2 DESKTOP_ITEM_MY_COMPUTER_CLICKED_EVENT\n", __LINE__);
+            return i;
+    	}    	
+    }
     
-    //下面这几个判断，其实可以写成for循环这种，不用写多次
-	if (L1_GRAPHICS_InsideRectangle(x1, x1 + ItemWidth, y1, y1 + ItemHeight))
-	{	    
-		L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d:2 DESKTOP_ITEM_MY_COMPUTER_CLICKED_EVENT\n", __LINE__);
-        return DESKTOP_ITEM_MY_COMPUTER_CLICKED_EVENT;
-	}
-
-	y1 += ItemHeight + 2 * 16;
-
-	if (L1_GRAPHICS_InsideRectangle(x1, x1 + ItemWidth, y1, y1 + ItemHeight))
-	{	    
-		L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d:3 DESKTOP_ITEM_SYSTEM_SETTING_CLICKED_EVENT\n", __LINE__);
-        return DESKTOP_ITEM_SYSTEM_SETTING_CLICKED_EVENT;
-	}
-
-	y1 += ItemHeight + 2 * 16;
-
-	if (L1_GRAPHICS_InsideRectangle(x1, x1 + ItemWidth, y1, y1 + ItemHeight))
-	{	    
-		L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d:4 DESKTOP_ITEM_RECYCLE_BIN_CLICKED_EVENT\n", __LINE__);
-        return DESKTOP_ITEM_RECYCLE_BIN_CLICKED_EVENT;
-	}
-
 	y1 += ItemHeight + 2 * 16;
     L2_GRAPHICS_MouseMoveoverObjectSetZero();
 
-
-	return DESKTOP_ITEM_MAX_CLICKED_EVENT;
+	return DESKTOP_ITEM_MAX_CLICKED_EVENT;    
 }
 
 
@@ -2158,6 +2145,9 @@ VOID L3_GRAPHICS_DeskClickEventHandle(DESKTOP_ITEM_CLICKED_EVENT event)
 
         case DESKTOP_ITEM_RECYCLE_BIN_CLICKED_EVENT:
             L2_MOUSE_MyComputerClicked(); break;
+
+        case DESKTOP_ITEM_SHUTDOWN_CLICKED_EVENT:
+            L2_System_Shutdown(); break;
 
 		//这边其实需要注意下，需要跟事件获取的状态保持一致，其实少了三个事件，我的电脑、系统设置、回收站。
 		default: break;
