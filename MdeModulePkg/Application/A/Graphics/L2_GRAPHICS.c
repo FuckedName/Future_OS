@@ -2693,6 +2693,15 @@ EFI_STATUS L2_GRAPHICS_DeskInit()
     UINT16 WidthNew = SYSTEM_ICON_WIDTH / 4;
     //UINT8 *pSource = pSystemIconBuffer[0][0x36];
 
+    UINT16 icon_chinese_name[SYSTEM_ICON_MAX][8] = 
+    {
+        {46,50,21,36,21,71,36,52}, //我的电脑
+        {47,21,45,19,41,72,54,35}, //系统设置
+        {27,56,42,53,53,30,0,0},//回收站
+        {46,36,28,94,28,48,0,0},//文	件夹
+        {46,36,28,94,0,0,0,0},//文件
+        {25,56,27,90,0,0,0,0},//关机
+    };
     
     Color.Blue  = 0xff;
     Color.Red   = 0xff;
@@ -2716,110 +2725,22 @@ EFI_STATUS L2_GRAPHICS_DeskInit()
 
         
         y1 += HeightNew;
-        // wo de dian nao
-        L2_GRAPHICS_ChineseCharDraw(pDeskBuffer, x1, y1, (46 - 1) * 94 + 50 - 1, Color, ScreenWidth);
-        x1 += 16;
-        
-        L2_GRAPHICS_ChineseCharDraw(pDeskBuffer, x1, y1, (21 - 1) * 94 + 36 - 1, Color, ScreenWidth);
-        x1 += 16;
-        
-        L2_GRAPHICS_ChineseCharDraw(pDeskBuffer, x1, y1, (21 - 1) * 94 + 71 - 1, Color, ScreenWidth);
-        x1 += 16;
-        
-        L2_GRAPHICS_ChineseCharDraw(pDeskBuffer, x1, y1, (36 - 1) * 94 + 52 - 1, Color, ScreenWidth);
+
+        for (UINT16 i = 0; i < 4; i++)
+        {
+            UINT16 AreaCode = icon_chinese_name[j][2 * i];
+            UINT16 BitCode = icon_chinese_name[j][2 * i + 1];
+            
+            if (0 != AreaCode && 0 != BitCode)
+                L2_GRAPHICS_ChineseCharDraw(pDeskBuffer, x1, y1, (AreaCode - 1) * 94 + BitCode - 1, Color, ScreenWidth);
+                
+            x1 += 16;
+        }        
 
         y1 += 16;
         y1 += 16;
     }
 
-
-
-
-    /*    
-    //下边代码其实可以优化下，用一个大的for循环
-    //Skip bmp header.
-    for (UINT32 i = 0; i < 384000; i++)
-        pSystemIconTempBuffer2[i] = pSystemIconBuffer[SYSTEM_ICON_MYCOMPUTER][0x36 + i];
-
-	//默认提供的BMP图标太大，所以在显示之前把图片缩小了下
-    L1_GRAPHICS_ZoomImage(pSystemIconMyComputerBuffer, WidthNew, HeightNew, pSystemIconTempBuffer2, SYSTEM_ICON_WIDTH, SYSTEM_ICON_HEIGHT);
-    
-    int x1, y1;
-    x1 = 20;
-    y1 = 20;
-	//在桌面显示我的电脑图标
-    L3_GRAPHICS_ItemPrint(pDeskBuffer, pSystemIconMyComputerBuffer, ScreenWidth, ScreenHeight, WidthNew, HeightNew, x1, y1, "", 1, GRAPHICS_LAYER_DESK);
-
-    
-    y1 += HeightNew;
-    Color.Blue  = 0xff;
-    Color.Red   = 0xff;
-    Color.Green = 0xff;
-    // wo de dian nao
-    L2_GRAPHICS_ChineseCharDraw(pDeskBuffer, x1, y1, (46 - 1) * 94 + 50 - 1, Color, ScreenWidth);
-    x1 += 16;
-    
-    L2_GRAPHICS_ChineseCharDraw(pDeskBuffer, x1, y1, (21 - 1) * 94 + 36 - 1, Color, ScreenWidth);
-    x1 += 16;
-    
-    L2_GRAPHICS_ChineseCharDraw(pDeskBuffer, x1, y1, (21 - 1) * 94 + 71 - 1, Color, ScreenWidth);
-    x1 += 16;
-    
-    L2_GRAPHICS_ChineseCharDraw(pDeskBuffer, x1, y1, (36 - 1) * 94 + 52 - 1, Color, ScreenWidth);
-
-    y1 += 16;
-    y1 += 16;
-
-    //Skip bmp header.
-    for (UINT32 i = 0; i < 384000; i++)
-        pSystemIconTempBuffer2[i] = pSystemIconBuffer[SYSTEM_ICON_SETTING][0x36 + i];
-
-    L1_GRAPHICS_ZoomImage(pSystemIconMySettingBuffer, WidthNew, HeightNew, pSystemIconTempBuffer2, SYSTEM_ICON_WIDTH, SYSTEM_ICON_HEIGHT);
-    
-    x1 = 20;
-	//在桌面显示系统设置图标
-    L3_GRAPHICS_ItemPrint(pDeskBuffer, pSystemIconMySettingBuffer, ScreenWidth, ScreenHeight, WidthNew, HeightNew, x1, y1, "", 1, GRAPHICS_LAYER_DESK);
-
-    
-    y1 += HeightNew;
-    // wo de dian nao
-    L2_GRAPHICS_ChineseCharDraw(pDeskBuffer, x1, y1, (47 - 1) * 94 + 21 - 1, Color, ScreenWidth);
-    x1 += 16;
-    
-    L2_GRAPHICS_ChineseCharDraw(pDeskBuffer, x1, y1, (45 - 1) * 94 + 19 - 1, Color, ScreenWidth);
-    x1 += 16;
-    
-    L2_GRAPHICS_ChineseCharDraw(pDeskBuffer, x1, y1, (41 - 1) * 94 + 72 - 1, Color, ScreenWidth);
-    x1 += 16;
-    
-    L2_GRAPHICS_ChineseCharDraw(pDeskBuffer, x1, y1, (54 - 1) * 94 + 35 - 1, Color, ScreenWidth);
-
-    y1 += 16;
-    y1 += 16;
-
-    //Skip bmp header.
-    for (UINT32 i = 0; i < 384000; i++)
-        pSystemIconTempBuffer2[i] = pSystemIconBuffer[SYSTEM_ICON_RECYCLE][0x36 + i];
-
-    L1_GRAPHICS_ZoomImage(pSystemIconRecycleBuffer, WidthNew, HeightNew, pSystemIconTempBuffer2, SYSTEM_ICON_WIDTH, SYSTEM_ICON_HEIGHT);
-        
-    x1 = 20;
-	//在桌面显示回收站图标
-    L3_GRAPHICS_ItemPrint(pDeskBuffer, pSystemIconRecycleBuffer, ScreenWidth, ScreenHeight, WidthNew, HeightNew, x1, y1, "", 1, GRAPHICS_LAYER_DESK);
-
-    
-    y1 += HeightNew;
-    // wo de dian nao
-    L2_GRAPHICS_ChineseCharDraw(pDeskBuffer, x1, y1, (27 - 1) * 94 + 56 - 1, Color, ScreenWidth);
-    x1 += 16;
-    
-    L2_GRAPHICS_ChineseCharDraw(pDeskBuffer, x1, y1, (42 - 1) * 94 + 53 - 1, Color, ScreenWidth);
-    x1 += 16;
-    
-    L2_GRAPHICS_ChineseCharDraw(pDeskBuffer, x1, y1, (53 - 1) * 94 + 30 - 1, Color, ScreenWidth);
-    x1 += 16;
-    
-    */
     // line
     Color.Red   = 0xC6;
     Color.Green = 0xC6;
