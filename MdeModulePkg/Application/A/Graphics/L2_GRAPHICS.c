@@ -1110,7 +1110,7 @@ STATE_TRANSFORM StartMenuStateTransformTable[] =
 
 void L2_GRAPHICS_Init()
 {
-
+    
 }
 
 
@@ -1246,7 +1246,7 @@ void L2_GRAPHICS_ParameterInit()
     MouseMoveoverObjectDrawColor.Green = 0;
     MouseMoveoverObjectDrawColor.Reserved = 0;
 
-    //L2_MOUSE_GraphicsEventInit();
+    L2_MOUSE_GraphicsEventInit();
 }
 
 
@@ -2441,9 +2441,41 @@ VOID L2_MOUSE_RightClick(UINT16 LayerID, UINT16 event)
         return;
     }
     
+	EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
 
-    if (MouseClickFlag == MOUSE_EVENT_TYPE_RIGHT_CLICKED)
-        L2_GRAPHICS_CopyNoReserved(pDeskDisplayBuffer, pMouseClickBuffer, ScreenWidth, ScreenHeight, MouseClickWindowWidth, MouseClickWindowHeight, iMouseX, iMouseY);
+	Color.Blue = 0xff;
+	Color.Red  = 0xff;
+	Color.Green= 0xff;
+	Color.Reserved= 0;
+
+	//汉字	区位码	汉字	区位码
+    //打 	2082	开	3110
+	UINT16 x = 3;
+    UINT16 y = 3;
+
+    L2_GRAPHICS_ChineseCharDraw2(pMouseClickBuffer, x , y,     20, 82, Color, MouseClickWindowWidth);
+    x += 16;
+    
+    L2_GRAPHICS_ChineseCharDraw2(pMouseClickBuffer, x , y,     31, 10, Color, MouseClickWindowWidth);
+    x += 16;
+    
+    L2_GRAPHICS_ChineseCharDraw2(pMouseClickBuffer, x , y,     12, 84, Color, MouseClickWindowWidth);   
+
+    //汉字	区位码	汉字	区位码
+    //运	 5243	行	4848
+    //第二行
+    x = 3;
+    y += 16; 
+    L2_GRAPHICS_ChineseCharDraw2(pMouseClickBuffer, x , y,     52, 43, Color, MouseClickWindowWidth);
+    x += 16;
+    
+    L2_GRAPHICS_ChineseCharDraw2(pMouseClickBuffer, x , y,     48, 48, Color, MouseClickWindowWidth);
+    x += 16;
+    
+    L2_GRAPHICS_ChineseCharDraw2(pMouseClickBuffer, x , y,     12, 84, Color, MouseClickWindowWidth);  
+    
+    
+    L2_GRAPHICS_CopyNoReserved(pDeskDisplayBuffer, pMouseClickBuffer, ScreenWidth, ScreenHeight, MouseClickWindowWidth, MouseClickWindowHeight, iMouseX, iMouseY);
         
     //L2_GRAPHICS_RightClickMenuInit(iMouseX, iMouseY, LayerID);
     
@@ -3102,7 +3134,8 @@ VOID L2_GRAPHICS_LayerCompute(UINT16 iMouseX, UINT16 iMouseY, UINT8 MouseClickFl
 	}
 
 	//然后绘制鼠标光标
-    L2_GRAPHICS_ChineseCharDraw(pMouseBuffer, 0, 0, 12 * 94 + 84, MouseColor, 16);
+    L2_GRAPHICS_ChineseCharDraw2(pMouseBuffer, 0 , 0,     12, 84, MouseColor, 16);  
+    //L2_GRAPHICS_ChineseCharDraw(pMouseBuffer, 0, 0, 12 * 94 + 84, MouseColor, 16);
 
 	//把鼠标光标显示到桌面
     L2_GRAPHICS_CopyNoReserved(pDeskDisplayBuffer, pMouseBuffer, ScreenWidth, ScreenHeight, 16, 16, iMouseX, iMouseY);
@@ -3806,6 +3839,7 @@ EFI_STATUS L2_GRAPHICS_ChineseCharDraw(UINT8 *pBuffer,
 /****************************************************************************
 *
 *  描述:   中文字符绘制函数，绘制结果是16*16像素大小
+*        这里估计可以优化下，把内存先准备好，直接拷贝，这样CPU使用会少些，不需要每次打印中文的时候再比较一次
 *
 *  参数pBuffer： 		把中文字符写到的目标缓存
 *  参数x0： 			把中文字符写到的X目标
@@ -3844,9 +3878,7 @@ EFI_STATUS L2_GRAPHICS_ChineseCharDraw2(UINT8 *pBuffer,
         L2_GRAPHICS_ChineseHalfDraw2(pBuffer, sChineseChar[offset * 32 + i ],     x0,     y0 + i / 2, 1, Color, AreaWidth);              
         L2_GRAPHICS_ChineseHalfDraw2(pBuffer, sChineseChar[offset * 32 + i + 1],  x0 + 8, y0 + i / 2, 1, Color, AreaWidth);      
     }
-    
-    ////DEBUG ((EFI_D_INFO, "\n"));
-    
+        
     return EFI_SUCCESS;
 }
 

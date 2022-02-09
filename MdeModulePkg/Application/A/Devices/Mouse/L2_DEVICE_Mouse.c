@@ -182,19 +182,53 @@ EFI_STATUS L2_MOUSE_GraphicsEventInit()
     MouseMoveoverObject.GraphicsLayerID = 0;
     bMouseMoveoverObject = FALSE;
 
+    if (NULL == pMouseClickBuffer)
+    {
+        return -1;
+    }
+
     UINT8 *pBuffer = pMouseClickBuffer;
     UINT16 Width = MouseClickWindowWidth;
 
+
+	for (UINT16 i = MouseClickWindowHeight / 2; i < MouseClickWindowHeight; i++)
+	{
+	    for (UINT16 j = 0; j < MouseClickWindowWidth; j++)
+	    {
+	        // WHITE
+	        pBuffer[(i * Width + j) * 4 + 0] = 0xff;
+	        pBuffer[(i * Width + j) * 4 + 1] = 0xff;
+	        pBuffer[(i * Width + j) * 4 + 2] = 0xff;
+	        pBuffer[(i * Width + j) * 4 + 3] = 0; 
+	    }
+	}
+	
+    UINT16 x = 0;
+    UINT16 y = 0;
+    
 	EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
 
-	Color.Blue = 0xFF;
-	Color.Red  = 0xFF;
-	Color.Green= 0xFF;
+	Color.Blue = 0;
+	Color.Red  = 0;
+	Color.Green= 0xff;
 	Color.Reserved= 0;
+	
+    L2_GRAPHICS_ChineseCharDraw2(pMouseClickBuffer, x , y,     12, 84, Color, MouseClickWindowWidth);    
+    x += 16;
 
-    L2_GRAPHICS_ChineseCharDraw2(pBuffer, Width - 3 * 16 - 3 , 6, 12, 58, Color, Width);   
-    L2_GRAPHICS_ChineseCharDraw2(pBuffer, Width - 2 * 16 - 3 , 6, 01, 85, Color, Width);   
-    L2_GRAPHICS_ChineseCharDraw2(pBuffer, Width - 1 * 16 - 3 , 6, 14, 21, Color, Width);   
+    //背景设置
+    //背 1719    景   3016    设   4172    置   5435
+    L2_GRAPHICS_ChineseCharDraw(pMouseClickBuffer, x , y,   (17 - 1) * 94 + 19 - 1, Color, MouseClickWindowWidth);   
+    x += 16;
+    
+    L2_GRAPHICS_ChineseCharDraw(pMouseClickBuffer, x , y,   (30 - 1) * 94 + 16 - 1, Color, MouseClickWindowWidth);
+    x += 16;
+        
+    L2_GRAPHICS_ChineseCharDraw(pMouseClickBuffer, x , y,   (41 - 1) * 94 + 72 - 1, Color, MouseClickWindowWidth); 
+    x += 16;
+    
+    L2_GRAPHICS_ChineseCharDraw(pMouseClickBuffer, x , y,   (54 - 1) * 94 + 35 - 1, Color, MouseClickWindowWidth);
+    x += 16;
 
 }
 
