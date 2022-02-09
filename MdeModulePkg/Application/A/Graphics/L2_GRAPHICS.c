@@ -1395,6 +1395,12 @@ EFI_STATUS L2_GRAPHICS_ScreenInit()
         L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: ReadFileSelf error\n", __LINE__);
     }
     
+    Status = L3_APPLICATION_ReadFile("SHUTDOWNBMP", 11, pSystemIconBuffer[SYSTEM_ICON_SHUTDOWN]);
+    if (EFI_ERROR(Status))
+    {
+        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: ReadFileSelf error\n", __LINE__);
+    }
+    
     Status = L3_APPLICATION_ReadFile("HZK16", 5, sChineseChar);
     if (EFI_ERROR(Status))
     {
@@ -2687,6 +2693,50 @@ EFI_STATUS L2_GRAPHICS_DeskInit()
     UINT16 WidthNew = SYSTEM_ICON_WIDTH / 4;
     //UINT8 *pSource = pSystemIconBuffer[0][0x36];
 
+    
+    Color.Blue  = 0xff;
+    Color.Red   = 0xff;
+    Color.Green = 0xff;
+    
+    UINT16 x1, y1;
+    y1 = 20;
+    
+    for (UINT32 j = 0; j < SYSTEM_ICON_MAX; j++)
+    {
+        x1 = 20;
+        
+        for (UINT32 i = 0; i < 384000; i++)
+            pSystemIconTempBuffer2[i] = pSystemIconBuffer[j][0x36 + i];
+        
+    	//默认提供的BMP图标太大，所以在显示之前把图片缩小了下
+        L1_GRAPHICS_ZoomImage(pSystemIconMyComputerBuffer, WidthNew, HeightNew, pSystemIconTempBuffer2, SYSTEM_ICON_WIDTH, SYSTEM_ICON_HEIGHT);
+
+	    //在桌面显示我的电脑图标
+        L3_GRAPHICS_ItemPrint(pDeskBuffer, pSystemIconMyComputerBuffer, ScreenWidth, ScreenHeight, WidthNew, HeightNew, x1, y1, "", 1, GRAPHICS_LAYER_DESK);
+
+        
+        y1 += HeightNew;
+        // wo de dian nao
+        L2_GRAPHICS_ChineseCharDraw(pDeskBuffer, x1, y1, (46 - 1) * 94 + 50 - 1, Color, ScreenWidth);
+        x1 += 16;
+        
+        L2_GRAPHICS_ChineseCharDraw(pDeskBuffer, x1, y1, (21 - 1) * 94 + 36 - 1, Color, ScreenWidth);
+        x1 += 16;
+        
+        L2_GRAPHICS_ChineseCharDraw(pDeskBuffer, x1, y1, (21 - 1) * 94 + 71 - 1, Color, ScreenWidth);
+        x1 += 16;
+        
+        L2_GRAPHICS_ChineseCharDraw(pDeskBuffer, x1, y1, (36 - 1) * 94 + 52 - 1, Color, ScreenWidth);
+
+        y1 += 16;
+        y1 += 16;
+    }
+
+
+
+
+    /*    
+    //下边代码其实可以优化下，用一个大的for循环
     //Skip bmp header.
     for (UINT32 i = 0; i < 384000; i++)
         pSystemIconTempBuffer2[i] = pSystemIconBuffer[SYSTEM_ICON_MYCOMPUTER][0x36 + i];
@@ -2720,19 +2770,6 @@ EFI_STATUS L2_GRAPHICS_DeskInit()
     y1 += 16;
     y1 += 16;
 
-    /*
-    for (int j = 0; j < HeightNew; j++)
-    {
-        for (int k = 0; k < WidthNew; k++)
-        {
-            pDeskBuffer[((20 + j) * ScreenWidth + 20 + k) * 4 ]     = pSystemIconMyComputerBuffer[((HeightNew - j) * WidthNew + k) * 3 ];
-            pDeskBuffer[((20 + j) * ScreenWidth + 20 + k) * 4 + 1 ] = pSystemIconMyComputerBuffer[((HeightNew - j) * WidthNew + k) * 3 + 1 ];
-            pDeskBuffer[((20 + j) * ScreenWidth + 20 + k) * 4 + 2 ] = pSystemIconMyComputerBuffer[((HeightNew - j) * WidthNew + k) * 3 + 2 ];
-        }
-    }
-    */
-
-
     //Skip bmp header.
     for (UINT32 i = 0; i < 384000; i++)
         pSystemIconTempBuffer2[i] = pSystemIconBuffer[SYSTEM_ICON_SETTING][0x36 + i];
@@ -2760,34 +2797,11 @@ EFI_STATUS L2_GRAPHICS_DeskInit()
     y1 += 16;
     y1 += 16;
 
-    
-    /*
-    for (int j = 0; j < HeightNew; j++)
-    {
-        for (int k = 0; k < WidthNew; k++)
-        {
-            pDeskBuffer[((120 + j) * ScreenWidth + 20 + k) * 4 ]     = pSystemIconMySettingBuffer[((HeightNew - j) * WidthNew + k) * 3 ];
-            pDeskBuffer[((120 + j) * ScreenWidth + 20 + k) * 4 + 1 ] = pSystemIconMySettingBuffer[((HeightNew - j) * WidthNew + k) * 3 + 1 ];
-            pDeskBuffer[((120 + j) * ScreenWidth + 20 + k) * 4 + 2 ] = pSystemIconMySettingBuffer[((HeightNew - j) * WidthNew + k) * 3 + 2 ];
-        }
-    }*/
-
     //Skip bmp header.
     for (UINT32 i = 0; i < 384000; i++)
         pSystemIconTempBuffer2[i] = pSystemIconBuffer[SYSTEM_ICON_RECYCLE][0x36 + i];
 
     L1_GRAPHICS_ZoomImage(pSystemIconRecycleBuffer, WidthNew, HeightNew, pSystemIconTempBuffer2, SYSTEM_ICON_WIDTH, SYSTEM_ICON_HEIGHT);
-    /*
-    for (int j = 0; j < HeightNew; j++)
-    {
-        for (int k = 0; k < WidthNew; k++)
-        {
-            pDeskBuffer[((220 + j) * ScreenWidth + 20 + k) * 4 ]     = pSystemIconRecycleBuffer[((HeightNew - j) * WidthNew + k) * 3 ];
-            pDeskBuffer[((220 + j) * ScreenWidth + 20 + k) * 4 + 1 ] = pSystemIconRecycleBuffer[((HeightNew - j) * WidthNew + k) * 3 + 1 ];
-            pDeskBuffer[((220 + j) * ScreenWidth + 20 + k) * 4 + 2 ] = pSystemIconRecycleBuffer[((HeightNew - j) * WidthNew + k) * 3 + 2 ];
-        }
-    }
-    */
         
     x1 = 20;
 	//在桌面显示回收站图标
@@ -2805,7 +2819,7 @@ EFI_STATUS L2_GRAPHICS_DeskInit()
     L2_GRAPHICS_ChineseCharDraw(pDeskBuffer, x1, y1, (53 - 1) * 94 + 30 - 1, Color, ScreenWidth);
     x1 += 16;
     
-    
+    */
     // line
     Color.Red   = 0xC6;
     Color.Green = 0xC6;
@@ -3844,7 +3858,8 @@ EFI_STATUS L2_GRAPHICS_ChineseCharDraw(UINT8 *pBuffer,
 *  参数pBuffer： 		把中文字符写到的目标缓存
 *  参数x0： 			把中文字符写到的X目标
 *  参数y0： 			把中文字符写到的Y目标
-*  参数offset： 		汉字库编码位移
+*  参数AreaCode： 		汉字库区码
+*  参数BitCode： 		汉字库位码
 *  参数Color： 		字体颜色
 *  参数AreaWidth： 	目标缓存宽度，比如：在桌面上绘制传桌面的宽度，在我的电脑绘制传我的电脑宽度等等
 *
