@@ -3072,28 +3072,23 @@ VOID L2_GRAPHICS_LayerCompute(UINT16 iMouseX, UINT16 iMouseY, UINT8 MouseClickFl
                               
     //如果鼠标没有点击，则追踪鼠标所指的目标
     //因为桌面图层是没有相对桌面图层起始X，Y方向坐标
-    if (0 == MouseMoveoverObject.GraphicsLayerID)
-    {
-        L2_GRAPHICS_RectangleDraw(pDrawBuffer, 
-                                  DrawStartX,
-                                  DrawStartY, 
-                                  DrawEndX, 
-                                  DrawEndY, 
-                                  1,  
-                                  MouseMoveoverObjectDrawColor, 
-                                  ScreenWidth);
-    }
-    else
+    if (0 != MouseMoveoverObject.GraphicsLayerID)
     {        
-        L2_GRAPHICS_RectangleDraw(pDrawBuffer, 
-                                  DrawStartX - DrawWindowStartX,
-                                  DrawStartY - DrawWindowStartY, 
-                                  DrawEndX - DrawWindowStartX, 
-                                  DrawEndY - DrawWindowStartY,  
-                                  1,  
-                                  MouseMoveoverObjectDrawColor, 
-                                  DrawWindowWidth);
+        DrawStartX -= DrawWindowStartX;
+        DrawStartY -= DrawWindowStartY;
+        DrawEndX -= DrawWindowStartX;
+        DrawEndY -= DrawWindowStartY;  
     }
+    
+    L2_GRAPHICS_RectangleDraw(pDrawBuffer, 
+                              DrawStartX,
+                              DrawStartY, 
+                              DrawEndX, 
+                              DrawEndY, 
+                              1,  
+                              MouseMoveoverObjectDrawColor, 
+                              DrawWindowWidth);
+
     
 	//为了让鼠标光标透明，需要把图层对应的像素点拷贝到鼠标显示内存缓冲
     for (UINT8 i = 0; i < 16; i++)
