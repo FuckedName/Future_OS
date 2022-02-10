@@ -118,23 +118,9 @@ EFI_STATUS EFIAPI Main (
 
 	L3_APPLICATION_WindowsInitial();
 
-    EFI_EVENT Event;
-    VOID           *Context;
+    L2_MOUSE_GraphicsEventInit();
     
-
-    // ASSERT_EFI_ERROR(-1);
-    //初始化协议
-    Status = gBS->LocateProtocol (&gEfiShellProtocolGuid,
-                                NULL,
-                                (VOID **)&EfiShellProtocol);
-	    
-    if (EFI_ERROR (Status)) 
-    {
-        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: L2_ApplicationRun Status: %d\n", __LINE__, Status);
-        return EFI_SUCCESS; 
-    }
-    
-    //L2_ApplicationRun(Event, Context);
+    L2_ApplicationInit();
     
     L2_TIMER_IntervalInit();  
     

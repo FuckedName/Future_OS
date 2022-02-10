@@ -40,6 +40,32 @@ EFI_HANDLE SystemHandle = NULL;
 //应用程序执行完成标识，需要应用程序执行完成才能执行内核的系统调用。
 BOOLEAN ApplicationRunFinished;
 
+/****************************************************************************
+*
+*  描述:   操作系统运行应用程序
+*
+*  ApplicationCallID：     应用调用接口编号
+*  pParameters：           参数列表
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
+VOID L2_ApplicationInit()
+{    
+    EFI_STATUS            Status;
+    //初始化协议
+    Status = gBS->LocateProtocol (&gEfiShellProtocolGuid,
+                                NULL,
+                                (VOID **)&EfiShellProtocol);
+	    
+    if (EFI_ERROR (Status)) 
+    {
+        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: L2_ApplicationRun Status: %d\n", __LINE__, Status);
+        return EFI_SUCCESS; 
+    }
+}
+
 
 /****************************************************************************
 *

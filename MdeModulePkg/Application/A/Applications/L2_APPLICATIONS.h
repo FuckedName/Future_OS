@@ -31,6 +31,7 @@
 
 #include <Global/Global.h>
 
+VOID L2_ApplicationInit();
 
 VOID L2_ApplicationRun(EFI_EVENT Event,     CHAR16  *FileName);
 

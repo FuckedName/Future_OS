@@ -203,33 +203,38 @@ EFI_STATUS L2_MOUSE_GraphicsEventInit()
 	    }
 	}
 	
-    UINT16 x = 0;
-    UINT16 y = 0;
-    
 	EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
 
-	Color.Blue = 0;
-	Color.Red  = 0;
+	Color.Blue = 0xff;
+	Color.Red  = 0xff;
 	Color.Green= 0xff;
 	Color.Reserved= 0;
-	
-    L2_GRAPHICS_ChineseCharDraw2(pMouseClickBuffer, x , y,     12, 84, Color, MouseClickWindowWidth);    
-    x += 16;
 
-    //背景设置
-    //背 1719    景   3016    设   4172    置   5435
-    L2_GRAPHICS_ChineseCharDraw(pMouseClickBuffer, x , y,   (17 - 1) * 94 + 19 - 1, Color, MouseClickWindowWidth);   
+	//汉字	区位码	汉字	区位码
+    //打 	2082	开	3110
+	UINT16 x = 3;
+    UINT16 y = 3;
+
+    L2_GRAPHICS_ChineseCharDraw2(pMouseClickBuffer, x , y,     20, 82, Color, MouseClickWindowWidth);
     x += 16;
     
-    L2_GRAPHICS_ChineseCharDraw(pMouseClickBuffer, x , y,   (30 - 1) * 94 + 16 - 1, Color, MouseClickWindowWidth);
-    x += 16;
-        
-    L2_GRAPHICS_ChineseCharDraw(pMouseClickBuffer, x , y,   (41 - 1) * 94 + 72 - 1, Color, MouseClickWindowWidth); 
+    L2_GRAPHICS_ChineseCharDraw2(pMouseClickBuffer, x , y,     31, 10, Color, MouseClickWindowWidth);
     x += 16;
     
-    L2_GRAPHICS_ChineseCharDraw(pMouseClickBuffer, x , y,   (54 - 1) * 94 + 35 - 1, Color, MouseClickWindowWidth);
-    x += 16;
+    L2_GRAPHICS_ChineseCharDraw2(pMouseClickBuffer, x , y,     12, 84, Color, MouseClickWindowWidth);   
 
+    //汉字	区位码	汉字	区位码
+    //运	 5243	行	4848
+    //第二行
+    x = 3;
+    y += 16; 
+    L2_GRAPHICS_ChineseCharDraw2(pMouseClickBuffer, x , y,     52, 43, Color, MouseClickWindowWidth);
+    x += 16;
+    
+    L2_GRAPHICS_ChineseCharDraw2(pMouseClickBuffer, x , y,     48, 48, Color, MouseClickWindowWidth);
+    x += 16;
+    
+    L2_GRAPHICS_ChineseCharDraw2(pMouseClickBuffer, x , y,     12, 84, Color, MouseClickWindowWidth);  
 }
 
 

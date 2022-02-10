@@ -1246,7 +1246,6 @@ void L2_GRAPHICS_ParameterInit()
     MouseMoveoverObjectDrawColor.Green = 0;
     MouseMoveoverObjectDrawColor.Reserved = 0;
 
-    L2_MOUSE_GraphicsEventInit();
 }
 
 
@@ -2437,38 +2436,6 @@ VOID L2_MOUSE_RightClick(UINT16 LayerID, UINT16 event)
         return;
     }
     
-	EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
-
-	Color.Blue = 0xff;
-	Color.Red  = 0xff;
-	Color.Green= 0xff;
-	Color.Reserved= 0;
-
-	//汉字	区位码	汉字	区位码
-    //打 	2082	开	3110
-	UINT16 x = 3;
-    UINT16 y = 3;
-
-    L2_GRAPHICS_ChineseCharDraw2(pMouseClickBuffer, x , y,     20, 82, Color, MouseClickWindowWidth);
-    x += 16;
-    
-    L2_GRAPHICS_ChineseCharDraw2(pMouseClickBuffer, x , y,     31, 10, Color, MouseClickWindowWidth);
-    x += 16;
-    
-    L2_GRAPHICS_ChineseCharDraw2(pMouseClickBuffer, x , y,     12, 84, Color, MouseClickWindowWidth);   
-
-    //汉字	区位码	汉字	区位码
-    //运	 5243	行	4848
-    //第二行
-    x = 3;
-    y += 16; 
-    L2_GRAPHICS_ChineseCharDraw2(pMouseClickBuffer, x , y,     52, 43, Color, MouseClickWindowWidth);
-    x += 16;
-    
-    L2_GRAPHICS_ChineseCharDraw2(pMouseClickBuffer, x , y,     48, 48, Color, MouseClickWindowWidth);
-    x += 16;
-    
-    L2_GRAPHICS_ChineseCharDraw2(pMouseClickBuffer, x , y,     12, 84, Color, MouseClickWindowWidth);  
     
     
     L2_GRAPHICS_CopyNoReserved(pDeskDisplayBuffer, pMouseClickBuffer, ScreenWidth, ScreenHeight, MouseClickWindowWidth, MouseClickWindowHeight, iMouseX, iMouseY);
