@@ -190,21 +190,59 @@ EFI_STATUS L2_MOUSE_GraphicsEventInit()
     UINT8 *pBuffer = pMouseClickBuffer;
     UINT16 Width = MouseClickWindowWidth;
 
+    EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
 
-	for (UINT16 i = MouseClickWindowHeight / 2; i < MouseClickWindowHeight; i++)
+    //其实这边有点不严谨，因为鼠标右击可能有多种弹出菜单，比如，有选中的目标，没有选中的目标
+    UINT16 MouseRightButtonClickMenuChineseName[MOUSE_RIGHT_BUTTON_CLICK_MENU_MAX][8] = 
+    {
+        {20,82,31,10,12, 84,0,0}, //“打开”文件
+        {41,30,19,93,12, 84,0,0}, //“删除”文件
+        {48,34,52,86,12, 84,0,0}, //“新增”文件
+        {48,62,24,36,12, 84,0,0}, //“修改”文件
+    };
+    
+    Color.Blue  = 0x00;
+    Color.Red   = 0x00;
+    Color.Green = 0x00;
+    Color.Reserved = GRAPHICS_LAYER_MOUSE_RIGHT_CLICK_WINDOW;
+    
+    UINT16 x1, y1;
+    y1 = 20;
+    
+    //背景颜色初始化
+	for (UINT16 i = 0; i < MouseClickWindowHeight; i++)
 	{
 	    for (UINT16 j = 0; j < MouseClickWindowWidth; j++)
 	    {
 	        // WHITE
-	        pBuffer[(i * Width + j) * 4 + 0] = 0xff;
-	        pBuffer[(i * Width + j) * 4 + 1] = 0xff;
-	        pBuffer[(i * Width + j) * 4 + 2] = 0xff;
-	        pBuffer[(i * Width + j) * 4 + 3] = 0; 
+	        pBuffer[(i * Width + j) * 4 + 0] = 0xee;
+	        pBuffer[(i * Width + j) * 4 + 1] = 0xee;
+	        pBuffer[(i * Width + j) * 4 + 2] = 0xee;
+	        pBuffer[(i * Width + j) * 4 + 3] = GRAPHICS_LAYER_MOUSE_RIGHT_CLICK_WINDOW; 
 	    }
 	}
 	
-	EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
 
+    for (UINT32 j = 0; j < SYSTEM_ICON_MAX; j++)
+    {
+        x1 = 20;
+        
+
+        for (UINT16 i = 0; i < 4; i++)
+        {
+            UINT16 AreaCode = MouseRightButtonClickMenuChineseName[j][2 * i];
+            UINT16 BitCode = MouseRightButtonClickMenuChineseName[j][2 * i + 1];
+            
+            if (0 != AreaCode && 0 != BitCode)
+                L2_GRAPHICS_ChineseCharDraw(pMouseClickBuffer, x1, y1, (AreaCode - 1) * 94 + BitCode - 1, Color, MouseClickWindowWidth);
+                
+            x1 += 16;
+        }        
+        y1 += 16;
+    }        
+
+    return;
+    
 	Color.Blue = 0xff;
 	Color.Red  = 0xff;
 	Color.Green= 0xff;

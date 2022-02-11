@@ -92,6 +92,9 @@ EFI_GRAPHICS_OUTPUT_BLT_PIXEL MouseMoveoverObjectDrawColor;
 
 EFI_GRAPHICS_OUTPUT_BLT_PIXEL MouseColor;
 
+INT16 iMouseRightClickX = 0;
+INT16 iMouseRightClickY = 0;
+
 UINT8 *pSystemLogBuffer = NULL; // Save log data
 
 //Need to allocate buffer in this module.
@@ -1810,6 +1813,36 @@ DESKTOP_ITEM_CLICKED_EVENT L2_GRAPHICS_DeskLayerClickEventGet()
 
 
 
+/****************************************************************************
+*
+*  描述:   桌面图层点击事件，当前只有左下角的开始菜单点击事件
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
+DESKTOP_ITEM_CLICKED_EVENT L2_GRAPHICS_RightMenuClickEventGet()
+{	
+    UINT16 x = 0;
+    UINT16 y = 0;
+
+    for (UINT16 i = 0; i < MOUSE_RIGHT_MENU_MAX_CLICKED_EVENT; i++)
+    {
+    	if (L1_GRAPHICS_InsideRectangle(x, x + 4 * 16, y + i * 16, y + (i + 1) * 16))
+    	{	    
+    		L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d:2 L2_GRAPHICS_RightMenuClickEventGet\n", __LINE__);
+            return i;
+    	}    	
+    }
+    
+    L2_GRAPHICS_MouseMoveoverObjectSetZero();
+
+	return MOUSE_RIGHT_MENU_MAX_CLICKED_EVENT;    
+}
+
 
 
 /****************************************************************************
@@ -2368,6 +2401,37 @@ VOID L3_GRAPHICS_SystemLogClickEventHandle(SYSTEM_LOG_WINDOW_CLICKED_EVENT event
 }
 
 
+/****************************************************************************
+*
+*  描述:   xxxxx
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
+VOID L3_GRAPHICS_MouseRightButtonClickEventHandle(MOUSE_RIGHT_MENU_CLICKED_EVENT event)
+{    
+	switch(event)
+	{
+		case MOUSE_RIGHT_MENU_OPEN_CLICKED_EVENT:
+			L2_MOUSE_MemoryInformationCloseClicked(); break;
+
+		case MOUSE_RIGHT_MENU_DELETE_CLICKED_EVENT:
+			L2_MOUSE_MemoryInformationCloseClicked(); break;
+
+		case MOUSE_RIGHT_MENU_ADD_CLICKED_EVENT:
+			L2_MOUSE_MemoryInformationCloseClicked(); break;
+
+		case MOUSE_RIGHT_MENU_MODIFY_CLICKED_EVENT:
+			L2_MOUSE_MemoryInformationCloseClicked(); break;
+
+		default: break;
+	}
+
+}
 
 
 
@@ -2416,6 +2480,7 @@ GRAPHICS_LAYER_EVENT_GET GraphicsLayerEventHandle[] =
     {GRAPHICS_LAYER_MY_COMPUTER_WINDOW,            	 L2_GRAPHICS_MyComputerLayerClickEventGet, 			L3_GRAPHICS_MyComupterClickEventHandle},
     {GRAPHICS_LAYER_SYSTEM_LOG_WINDOW,            	 L2_GRAPHICS_SystemLogLayerClickEventGet, 			L3_GRAPHICS_SystemLogClickEventHandle},
     {GRAPHICS_LAYER_MEMORY_INFORMATION_WINDOW,       L2_GRAPHICS_MemoryInformationLayerClickEventGet, 	L3_GRAPHICS_MemoryInformationClickEventHandle},
+    {GRAPHICS_LAYER_MOUSE_RIGHT_CLICK_WINDOW,        L2_GRAPHICS_RightMenuClickEventGet, 	            L3_GRAPHICS_MouseRightButtonClickEventHandle},
 };
 
 /****************************************************************************
@@ -2436,12 +2501,13 @@ VOID L2_MOUSE_RightClick(UINT16 LayerID, UINT16 event)
         return;
     }
     
-    
+    //iMouseRightClickX = iMouseX;
+    //iMouseRightClickY = iMouseY;
+
+    //MouseClickFlag = MOUSE_EVENT_TYPE_NO_CLICKED;
     
     L2_GRAPHICS_CopyNoReserved(pDeskDisplayBuffer, pMouseClickBuffer, ScreenWidth, ScreenHeight, MouseClickWindowWidth, MouseClickWindowHeight, iMouseX, iMouseY);
         
-    //L2_GRAPHICS_RightClickMenuInit(iMouseX, iMouseY, LayerID);
-    
 }
 
 
@@ -3012,7 +3078,16 @@ VOID L2_GRAPHICS_LayerCompute(UINT16 iMouseX, UINT16 iMouseY, UINT8 MouseClickFl
                               1,  
                               MouseMoveoverObjectDrawColor, 
                               DrawWindowWidth);
-
+/*
+    L2_GRAPHICS_RectangleDraw(pDrawBuffer, 
+                              DrawStartX + 1,
+                              DrawStartY + 1, 
+                              DrawEndX - 1, 
+                              DrawEndY - 1, 
+                              1,  
+                              MouseMoveoverObjectDrawColor, 
+                              DrawWindowWidth);
+*/
     
 	//为了让鼠标光标透明，需要把图层对应的像素点拷贝到鼠标显示内存缓冲
     for (UINT8 i = 0; i < 16; i++)

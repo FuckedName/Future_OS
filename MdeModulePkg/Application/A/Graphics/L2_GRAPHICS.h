@@ -70,6 +70,18 @@ typedef enum
     DESKTOP_ITEM_MAX_CLICKED_EVENT             //默认最大值
 }DESKTOP_ITEM_CLICKED_EVENT;
 
+
+//鼠标右击菜单点击事件
+typedef enum 
+{
+    MOUSE_RIGHT_MENU_OPEN_CLICKED_EVENT = 0, 
+    MOUSE_RIGHT_MENU_DELETE_CLICKED_EVENT,  
+    MOUSE_RIGHT_MENU_ADD_CLICKED_EVENT,     
+    MOUSE_RIGHT_MENU_MODIFY_CLICKED_EVENT,  
+    MOUSE_RIGHT_MENU_MAX_CLICKED_EVENT     
+}MOUSE_RIGHT_MENU_CLICKED_EVENT;
+
+
 //开始菜单事件（注意：如果有子菜单，需要新建一个枚举，各个子菜单定义时相互独立，减少耦合）
 typedef enum 
 { 

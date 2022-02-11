@@ -807,8 +807,10 @@ PARTITION_ITEM_ACCESS_STATE PartitionItemAccessNextState = INIT_ACCESS_STATE;
 PARTITION_ITEM_ACCESS_EVENT PartitionItemAccessEvent = ROOT_PATH_ACCESS_EVENT;
 
 
-
-
+//我的电脑窗口，对文件处理的状态机，开始可以只对FAT32文件系统格式操作，后续可以增加对NTFS文件系统对应操作，因为FAT32相对简单一些
+//入参：目录、文件（或：未选中文件，因为可以在某个目录创建文件，这个场景不需要选择某文件）
+//事件：新增、打开、删除、修改
+//操作处理函数
 
 /****************************************************************************
 *
