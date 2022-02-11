@@ -426,6 +426,10 @@ void L2_GRAPHICS_RectangleDraw(UINT8 *pBuffer,
         IN UINTN BorderWidth,
         IN EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color, UINT16 AreaWidth)
 {    
+    //这个入参判断很重要，不然传入的参数可能很大，然后会直接死机。 - -
+    if (x0 > ScreenWidth || y0 > ScreenHeight || x1 > ScreenWidth || y1 > ScreenHeight)
+        return;
+        
     if (NULL == pBuffer)
     {
         //DEBUG ((EFI_D_INFO, "NULL == pBuffer"));
@@ -532,7 +536,7 @@ VOID L2_MOUSE_MyComputerPartitionItemClicked()
     Color.Blue  = 0x00;
     Color.Reserved = GRAPHICS_LAYER_MY_COMPUTER_WINDOW;
 	
-    L2_GRAPHICS_RectangleDraw(pMouseSelectedBuffer, 0,  0, 31, 15, 1,  Color, 32);
+    //L2_GRAPHICS_RectangleDraw(pMouseSelectedBuffer, 0,  0, 31, 15, 1,  Color, 32);
 	L2_GRAPHICS_Copy(pDeskDisplayBuffer, pMouseSelectedBuffer, ScreenWidth, ScreenHeight, 32, 16, WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].StartX + 50, WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].StartY  + PartitionItemID * (16 + 2) + 16 * 2);   
     L2_STORE_PartitionItemsPrint(PartitionItemID);
 }
@@ -2124,7 +2128,7 @@ VOID L3_GRAPHICS_StartMenuClicked()
     Color.Blue   = 0x00;
     Color.Reserved  = GRAPHICS_LAYER_START_MENU;
     //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: iMouseX: %d iMouseY: %d \n",  __LINE__, iMouseX, iMouseY);
-    L2_GRAPHICS_RectangleDraw(pMouseSelectedBuffer, 0,  0, 31, 15, 1,  Color, 32);
+    //L2_GRAPHICS_RectangleDraw(pMouseSelectedBuffer, 0,  0, 31, 15, 1,  Color, 32);
     //MenuButtonClickResponse();
     Color.Red   = 0xFF;
     Color.Green = 0xFF;
@@ -3057,7 +3061,7 @@ VOID L2_GRAPHICS_LayerCompute(UINT16 iMouseX, UINT16 iMouseY, UINT8 MouseClickFl
     else
     {
         MouseMoveoverObjectDrawColor.Blue = 0;
-        MouseMoveoverObjectDrawColor.Red = 0xff;        
+        MouseMoveoverObjectDrawColor.Red = 0xff;
     }    
                               
     //如果鼠标没有点击，则追踪鼠标所指的目标
@@ -3078,7 +3082,7 @@ VOID L2_GRAPHICS_LayerCompute(UINT16 iMouseX, UINT16 iMouseY, UINT8 MouseClickFl
                               1,  
                               MouseMoveoverObjectDrawColor, 
                               DrawWindowWidth);
-/*
+
     L2_GRAPHICS_RectangleDraw(pDrawBuffer, 
                               DrawStartX + 1,
                               DrawStartY + 1, 
@@ -3087,7 +3091,7 @@ VOID L2_GRAPHICS_LayerCompute(UINT16 iMouseX, UINT16 iMouseY, UINT8 MouseClickFl
                               1,  
                               MouseMoveoverObjectDrawColor, 
                               DrawWindowWidth);
-*/
+
     
 	//为了让鼠标光标透明，需要把图层对应的像素点拷贝到鼠标显示内存缓冲
     for (UINT8 i = 0; i < 16; i++)
