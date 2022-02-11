@@ -313,7 +313,7 @@ extern UINT8 *pSystemIconBuffer[SYSTEM_ICON_MAX];
 extern UINT8 *pSystemIconFolderBuffer;
 extern UINT8 *pSystemIconTextBuffer;
 extern UINT8 *pSystemIconTempBuffer2;
-extern UINT8 *pMouseClickBuffer;
+extern UINT8 *pMouseRightButtonClickWindowBuffer;
 extern UINT8 *pMemoryInformationBuffer;
 extern UINT8 *pDateTimeBuffer;
 extern UINT8 *pMouseBuffer;
@@ -399,8 +399,8 @@ extern UINT16 LogStatusErrorCount;
 
 extern UINTN ScreenWidth, ScreenHeight;
 
-extern UINT16 MouseClickWindowWidth;
-extern UINT16 MouseClickWindowHeight;
+extern UINT16 MouseRightButtonClickWindowWidth;
+extern UINT16 MouseRightButtonClickWindowHeight;
 extern UINT8 *pMapper;
 
 // memory: 1G->3G

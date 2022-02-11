@@ -182,15 +182,13 @@ EFI_STATUS L2_MOUSE_GraphicsEventInit()
     MouseMoveoverObject.GraphicsLayerID = 0;
     bMouseMoveoverObject = FALSE;
 
-    if (NULL == pMouseClickBuffer)
+    if (NULL == pMouseRightButtonClickWindowBuffer)
     {
         return -1;
     }
 
-    UINT8 *pBuffer = pMouseClickBuffer;
-    UINT16 Width = MouseClickWindowWidth;
+    UINT16 Width = MouseRightButtonClickWindowWidth;
 
-    EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
 
     //其实这边有点不严谨，因为鼠标右击可能有多种弹出菜单，比如，有选中的目标，没有选中的目标
     UINT16 MouseRightButtonClickMenuChineseName[MOUSE_RIGHT_BUTTON_CLICK_MENU_MAX][8] = 
@@ -201,6 +199,7 @@ EFI_STATUS L2_MOUSE_GraphicsEventInit()
         {48,62,24,36,12, 84,0,0}, //“修改”文件
     };
     
+    EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
     Color.Blue  = 0x00;
     Color.Red   = 0x00;
     Color.Green = 0x00;
@@ -209,10 +208,12 @@ EFI_STATUS L2_MOUSE_GraphicsEventInit()
     UINT16 x1, y1;
     y1 = 20;
     
+    UINT8 *pBuffer = pMouseRightButtonClickWindowBuffer;
+    
     //背景颜色初始化
-	for (UINT16 i = 0; i < MouseClickWindowHeight; i++)
+	for (UINT16 i = 0; i < MouseRightButtonClickWindowHeight; i++)
 	{
-	    for (UINT16 j = 0; j < MouseClickWindowWidth; j++)
+	    for (UINT16 j = 0; j < MouseRightButtonClickWindowWidth; j++)
 	    {
 	        // WHITE
 	        pBuffer[(i * Width + j) * 4 + 0] = 0xee;
@@ -234,45 +235,14 @@ EFI_STATUS L2_MOUSE_GraphicsEventInit()
             UINT16 BitCode = MouseRightButtonClickMenuChineseName[j][2 * i + 1];
             
             if (0 != AreaCode && 0 != BitCode)
-                L2_GRAPHICS_ChineseCharDraw(pMouseClickBuffer, x1, y1, (AreaCode - 1) * 94 + BitCode - 1, Color, MouseClickWindowWidth);
+                L2_GRAPHICS_ChineseCharDraw(pMouseRightButtonClickWindowBuffer, x1, y1, (AreaCode - 1) * 94 + BitCode - 1, Color, MouseRightButtonClickWindowWidth);
                 
             x1 += 16;
         }        
         y1 += 16;
     }        
 
-    return;
-    
-	Color.Blue = 0xff;
-	Color.Red  = 0xff;
-	Color.Green= 0xff;
-	Color.Reserved= 0;
-
-	//汉字	区位码	汉字	区位码
-    //打 	2082	开	3110
-	UINT16 x = 3;
-    UINT16 y = 3;
-
-    L2_GRAPHICS_ChineseCharDraw2(pMouseClickBuffer, x , y,     20, 82, Color, MouseClickWindowWidth);
-    x += 16;
-    
-    L2_GRAPHICS_ChineseCharDraw2(pMouseClickBuffer, x , y,     31, 10, Color, MouseClickWindowWidth);
-    x += 16;
-    
-    L2_GRAPHICS_ChineseCharDraw2(pMouseClickBuffer, x , y,     12, 84, Color, MouseClickWindowWidth);   
-
-    //汉字	区位码	汉字	区位码
-    //运	 5243	行	4848
-    //第二行
-    x = 3;
-    y += 16; 
-    L2_GRAPHICS_ChineseCharDraw2(pMouseClickBuffer, x , y,     52, 43, Color, MouseClickWindowWidth);
-    x += 16;
-    
-    L2_GRAPHICS_ChineseCharDraw2(pMouseClickBuffer, x , y,     48, 48, Color, MouseClickWindowWidth);
-    x += 16;
-    
-    L2_GRAPHICS_ChineseCharDraw2(pMouseClickBuffer, x , y,     12, 84, Color, MouseClickWindowWidth);  
+    return;    
 }
 
 

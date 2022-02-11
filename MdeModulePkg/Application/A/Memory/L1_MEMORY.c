@@ -214,8 +214,8 @@ EFI_STATUS L2_COMMON_MemoryAllocate()
     pSystemIconTextBuffer   = L2_MEMORY_Allocate("System pSystemIconText Buffer", MEMORY_TYPE_GRAPHICS, 384054);
     pSystemIconTempBuffer2  = L2_MEMORY_Allocate("System Icon temp2 Buffer", MEMORY_TYPE_GRAPHICS, 384054);
         
-    pMouseClickBuffer = (UINT8 *)L2_MEMORY_Allocate("Mouse Click Buffer", MEMORY_TYPE_GRAPHICS, MouseClickWindowWidth * MouseClickWindowHeight * 4); 
-    if (pMouseClickBuffer == NULL)
+    pMouseRightButtonClickWindowBuffer = (UINT8 *)L2_MEMORY_Allocate("Mouse Click Buffer", MEMORY_TYPE_GRAPHICS, MouseRightButtonClickWindowWidth * MouseRightButtonClickWindowHeight * 4); 
+    if (pMouseRightButtonClickWindowBuffer == NULL)
     {
         return -1;
     }   

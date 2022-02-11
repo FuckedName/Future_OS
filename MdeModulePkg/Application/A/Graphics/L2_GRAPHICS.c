@@ -60,7 +60,7 @@ UINT8 *pDeskWallpaperBuffer = NULL;
 UINT8 *pDeskWallpaperZoomedBuffer = NULL;
 UINT8 *pMemoryInformationBuffer = NULL; // MyComputer layer: 2
 UINT8 *pMouseBuffer = NULL; //Mouse layer: 4
-UINT8 *pMouseClickBuffer = NULL; // for mouse click 
+UINT8 *pMouseRightButtonClickWindowBuffer = NULL; // for mouse click 
 UINT8 *pMouseSelectedBuffer = NULL;  // after mouse selected
 UINT8 *pMyComputerBuffer = NULL; // MyComputer layer: 2
 UINT8 *pReadFileDestBuffer = NULL;
@@ -2500,18 +2500,11 @@ GRAPHICS_LAYER_EVENT_GET GraphicsLayerEventHandle[] =
 *****************************************************************************/
 VOID L2_MOUSE_RightClick(UINT16 LayerID, UINT16 event)
 {
-    if ( MouseClickFlag != MOUSE_EVENT_TYPE_RIGHT_CLICKED)
-    {
-        return;
-    }
-    
-    //iMouseRightClickX = iMouseX;
-    //iMouseRightClickY = iMouseY;
+    iMouseRightClickX = iMouseX;
+    iMouseRightClickY = iMouseY;
 
-    //MouseClickFlag = MOUSE_EVENT_TYPE_NO_CLICKED;
+    MouseClickFlag = MOUSE_EVENT_TYPE_NO_CLICKED;
     
-    L2_GRAPHICS_CopyNoReserved(pDeskDisplayBuffer, pMouseClickBuffer, ScreenWidth, ScreenHeight, MouseClickWindowWidth, MouseClickWindowHeight, iMouseX, iMouseY);
-        
 }
 
 
@@ -3034,6 +3027,11 @@ VOID L2_GRAPHICS_LayerCompute(UINT16 iMouseX, UINT16 iMouseY, UINT8 MouseClickFl
         
 	//这行代码为啥添加，不太记得了
     L2_MOUSE_Move();
+
+    //鼠标右击菜单
+    if (iMouseRightClickX != 0 || iMouseRightClickY != 0)
+        L2_GRAPHICS_CopyNoReserved(pDeskDisplayBuffer, pMouseRightButtonClickWindowBuffer, ScreenWidth, ScreenHeight, MouseRightButtonClickWindowWidth, MouseRightButtonClickWindowHeight, iMouseRightClickX, iMouseRightClickY);
+            
 
     UINT16 DrawGraphicsLayerID = MouseMoveoverObject.GraphicsLayerID;
     UINT16 DrawWindowWidth = WindowLayers.item[DrawGraphicsLayerID].WindowWidth;
@@ -3921,14 +3919,11 @@ UINT16 GraphicsLayerIDCount = 0;
 *****************************************************************************/
 VOID L2_MOUSE_Move()
 {   
-    //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: GraphicsLayerMouseMove\n",  __LINE__);
-    
     // display graphics layer id mouse over, for mouse click event.
-    //L2_DEBUG_Print1(DISPLAY_X, DISPLAY_Y, "%d: Graphics Layer id: %d ", __LINE__, pDeskDisplayBuffer[(iMouseY * ScreenWidth + iMouseX) * 4 + 3]);
-    L2_DEBUG_Print1(0, ScreenHeight - 30 -  7 * 16, "%d: iMouseX: %d iMouseY: %d MouseClickFlag: %d Graphics Layer id: %d GraphicsLayerIDCount: %u", __LINE__, iMouseX, iMouseY, MouseClickFlag, pDeskDisplayBuffer[(iMouseY * ScreenWidth + iMouseX) * 4 + 3], GraphicsLayerIDCount++);
-    
-	//获取鼠标光标所在的图层，窗口、图层在初始化的时候把第4个字节用于存放图层ID
+    //获取鼠标光标所在的图层，窗口、图层在初始化的时候把第4个字节用于存放图层ID
 	LayerID = pDeskDisplayBuffer[(iMouseY * ScreenWidth + iMouseX) * 4 + 3];
+    L2_DEBUG_Print1(0, ScreenHeight - 30 -  7 * 16, "%d: iMouseX: %d iMouseY: %d MouseClickFlag: %d Graphics Layer id: %d GraphicsLayerIDCount: %u", __LINE__, iMouseX, iMouseY, MouseClickFlag, LayerID, GraphicsLayerIDCount++);
+    
 
     UINT16 event = L2_MOUSE_MoveOver(LayerID);
 
