@@ -1828,16 +1828,16 @@ DESKTOP_ITEM_CLICKED_EVENT L2_GRAPHICS_DeskLayerClickEventGet()
 *  返回值： 成功：XXXX，失败：XXXXX
 *
 *****************************************************************************/
-DESKTOP_ITEM_CLICKED_EVENT L2_GRAPHICS_RightMenuClickEventGet()
+DESKTOP_ITEM_CLICKED_EVENT L2_GRAPHICS_MouseRightButtonClickEventGet()
 {	
-    UINT16 x = 0;
-    UINT16 y = 0;
+    UINT16 x = 10 + iMouseRightClickX;
+    UINT16 y = 10 + iMouseRightClickY;
 
     for (UINT16 i = 0; i < MOUSE_RIGHT_MENU_MAX_CLICKED_EVENT; i++)
     {
     	if (L1_GRAPHICS_InsideRectangle(x, x + 4 * 16, y + i * 16, y + (i + 1) * 16))
     	{	    
-    		L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d:2 L2_GRAPHICS_RightMenuClickEventGet\n", __LINE__);
+    		L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d:2 L2_GRAPHICS_MouseRightButtonClickEventGet\n", __LINE__);
             return i;
     	}    	
     }
@@ -2002,7 +2002,8 @@ MY_COMPUTER_WINDOW_CLICKED_EVENT L2_GRAPHICS_MyComputerLayerClickEventGet()
 	//分区被点击事件
     for (UINT16 i = 0 ; i < PartitionCount; i++)
     {
-		UINT16 StartX = MyComputerPositionX + 100;
+        //需要跟L3_APPLICATION_MyComputerWindow定义保持一致
+		UINT16 StartX = MyComputerPositionX + 10;
 		UINT16 StartY = MyComputerPositionY + i * 18 + 16 * 2;
 		
 		if (L1_GRAPHICS_InsideRectangle(StartX, StartX + 16 * 4, 
@@ -2282,7 +2283,6 @@ VOID L3_GRAPHICS_MyComupterClickEventHandle(MY_COMPUTER_WINDOW_CLICKED_EVENT eve
 		case MY_COMPUTER_WINDOW_CLOSE_WINDOW_CLICKED_EVENT:
 			L2_MOUSE_MyComputerCloseClicked(); break;
 
-		//这边其实需要注意下，需要跟事件获取的状态保持一致，其实少了三个事件，我的电脑、系统设置、回收站。
 		default: break;
 	}
 	
@@ -2421,16 +2421,16 @@ VOID L3_GRAPHICS_MouseRightButtonClickEventHandle(MOUSE_RIGHT_MENU_CLICKED_EVENT
 	switch(event)
 	{
 		case MOUSE_RIGHT_MENU_OPEN_CLICKED_EVENT:
-			L2_MOUSE_MemoryInformationCloseClicked(); break;
+			L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d MOUSE_RIGHT_MENU_OPEN_CLICKED_EVENT\n", __LINE__); break;
 
 		case MOUSE_RIGHT_MENU_DELETE_CLICKED_EVENT:
-			L2_MOUSE_MemoryInformationCloseClicked(); break;
+			L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d MOUSE_RIGHT_MENU_DELETE_CLICKED_EVENT\n", __LINE__); break;
 
 		case MOUSE_RIGHT_MENU_ADD_CLICKED_EVENT:
-			L2_MOUSE_MemoryInformationCloseClicked(); break;
+			L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d MOUSE_RIGHT_MENU_ADD_CLICKED_EVENT\n", __LINE__); break;
 
 		case MOUSE_RIGHT_MENU_MODIFY_CLICKED_EVENT:
-			L2_MOUSE_MemoryInformationCloseClicked(); break;
+			L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d MOUSE_RIGHT_MENU_MODIFY_CLICKED_EVENT\n", __LINE__); break;
 
 		default: break;
 	}
@@ -2484,7 +2484,7 @@ GRAPHICS_LAYER_EVENT_GET GraphicsLayerEventHandle[] =
     {GRAPHICS_LAYER_MY_COMPUTER_WINDOW,            	 L2_GRAPHICS_MyComputerLayerClickEventGet, 			L3_GRAPHICS_MyComupterClickEventHandle},
     {GRAPHICS_LAYER_SYSTEM_LOG_WINDOW,            	 L2_GRAPHICS_SystemLogLayerClickEventGet, 			L3_GRAPHICS_SystemLogClickEventHandle},
     {GRAPHICS_LAYER_MEMORY_INFORMATION_WINDOW,       L2_GRAPHICS_MemoryInformationLayerClickEventGet, 	L3_GRAPHICS_MemoryInformationClickEventHandle},
-    {GRAPHICS_LAYER_MOUSE_RIGHT_CLICK_WINDOW,        L2_GRAPHICS_RightMenuClickEventGet, 	            L3_GRAPHICS_MouseRightButtonClickEventHandle},
+    {GRAPHICS_LAYER_MOUSE_RIGHT_CLICK_WINDOW,        L2_GRAPHICS_MouseRightButtonClickEventGet, 	    L3_GRAPHICS_MouseRightButtonClickEventHandle},
 };
 
 /****************************************************************************
@@ -3021,18 +3021,18 @@ VOID L2_GRAPHICS_LayerCompute(UINT16 iMouseX, UINT16 iMouseY, UINT8 MouseClickFl
 		L2_SCREEN_Draw(pDeskDisplayBuffer, 0, 0, 0, 0, ScreenWidth, ScreenHeight);	
                     
         return;
-    }
+    }//
 
     L2_GRAPHICS_CopyBufferFromWindowsToDesk();
         
-	//这行代码为啥添加，不太记得了
-    L2_MOUSE_Move();
-
     //鼠标右击菜单
     if (iMouseRightClickX != 0 || iMouseRightClickY != 0)
     {        
         L2_GRAPHICS_Copy(pDeskDisplayBuffer, pMouseRightButtonClickWindowBuffer, ScreenWidth, ScreenHeight, MouseRightButtonClickWindowWidth, MouseRightButtonClickWindowHeight, iMouseRightClickX, iMouseRightClickY);
     }    
+
+	//这行代码为啥添加，不太记得了
+    L2_MOUSE_Move();
 
     UINT16 DrawGraphicsLayerID = MouseMoveoverObject.GraphicsLayerID;
     UINT16 DrawWindowWidth = WindowLayers.item[DrawGraphicsLayerID].WindowWidth;
@@ -3655,7 +3655,10 @@ void L1_MEMORY_CopyColor1(UINT8 *pBuffer, EFI_GRAPHICS_OUTPUT_BLT_PIXEL color, U
     pBuffer[y0 * AreaWidth * 4 + x0 * 4]     = color.Blue;
     pBuffer[y0 * AreaWidth * 4 + x0 * 4 + 1] = color.Green;
     pBuffer[y0 * AreaWidth * 4 + x0 * 4 + 2] = color.Red;
-    pBuffer[y0 * AreaWidth * 4 + x0 * 4 + 3] = 0;
+
+    //因为有时候会有未初始化内存部分过来，这样直接会死机
+    if (color.Reserved < GRAPHICS_LAYER_MOUSE)
+        pBuffer[y0 * AreaWidth * 4 + x0 * 4 + 3] = color.Reserved;
 
 }
 
@@ -3922,7 +3925,9 @@ VOID L2_MOUSE_Move()
 {   
     // display graphics layer id mouse over, for mouse click event.
     //获取鼠标光标所在的图层，窗口、图层在初始化的时候把第4个字节用于存放图层ID
+    
 	LayerID = pDeskDisplayBuffer[(iMouseY * ScreenWidth + iMouseX) * 4 + 3];
+	
     L2_DEBUG_Print1(0, ScreenHeight - 30 -  7 * 16, "%d: iMouseX: %d iMouseY: %d MouseClickFlag: %d Graphics Layer id: %d GraphicsLayerIDCount: %u", __LINE__, iMouseX, iMouseY, MouseClickFlag, LayerID, GraphicsLayerIDCount++);
     
 
