@@ -3030,8 +3030,9 @@ VOID L2_GRAPHICS_LayerCompute(UINT16 iMouseX, UINT16 iMouseY, UINT8 MouseClickFl
 
     //鼠标右击菜单
     if (iMouseRightClickX != 0 || iMouseRightClickY != 0)
-        L2_GRAPHICS_CopyNoReserved(pDeskDisplayBuffer, pMouseRightButtonClickWindowBuffer, ScreenWidth, ScreenHeight, MouseRightButtonClickWindowWidth, MouseRightButtonClickWindowHeight, iMouseRightClickX, iMouseRightClickY);
-            
+    {        
+        L2_GRAPHICS_Copy(pDeskDisplayBuffer, pMouseRightButtonClickWindowBuffer, ScreenWidth, ScreenHeight, MouseRightButtonClickWindowWidth, MouseRightButtonClickWindowHeight, iMouseRightClickX, iMouseRightClickY);
+    }    
 
     UINT16 DrawGraphicsLayerID = MouseMoveoverObject.GraphicsLayerID;
     UINT16 DrawWindowWidth = WindowLayers.item[DrawGraphicsLayerID].WindowWidth;

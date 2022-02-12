@@ -204,29 +204,25 @@ EFI_STATUS L2_MOUSE_GraphicsEventInit()
     Color.Red   = 0x00;
     Color.Green = 0x00;
     Color.Reserved = GRAPHICS_LAYER_MOUSE_RIGHT_CLICK_WINDOW;
-    
-    UINT16 x1, y1;
-    y1 = 20;
-    
-    UINT8 *pBuffer = pMouseRightButtonClickWindowBuffer;
-    
+        
     //背景颜色初始化
 	for (UINT16 i = 0; i < MouseRightButtonClickWindowHeight; i++)
 	{
 	    for (UINT16 j = 0; j < MouseRightButtonClickWindowWidth; j++)
 	    {
-	        // WHITE
-	        pBuffer[(i * Width + j) * 4 + 0] = 0xee;
-	        pBuffer[(i * Width + j) * 4 + 1] = 0xee;
-	        pBuffer[(i * Width + j) * 4 + 2] = 0xee;
-	        pBuffer[(i * Width + j) * 4 + 3] = GRAPHICS_LAYER_MOUSE_RIGHT_CLICK_WINDOW; 
+	        pMouseRightButtonClickWindowBuffer[(i * Width + j) * 4 + 0] = 0xee;
+	        pMouseRightButtonClickWindowBuffer[(i * Width + j) * 4 + 1] = 0xee;
+	        pMouseRightButtonClickWindowBuffer[(i * Width + j) * 4 + 2] = 0xee;
+	        pMouseRightButtonClickWindowBuffer[(i * Width + j) * 4 + 3] = GRAPHICS_LAYER_MOUSE_RIGHT_CLICK_WINDOW; 
 	    }
 	}
 	
+    UINT16 x1, y1;
+    y1 = 10;
 
     for (UINT32 j = 0; j < SYSTEM_ICON_MAX; j++)
     {
-        x1 = 20;
+        x1 = 10;
         
 
         for (UINT16 i = 0; i < 4; i++)
