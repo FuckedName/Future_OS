@@ -178,9 +178,9 @@ VOID EFIAPI L2_KEYBOARD_Event (
 
             UINT8 *pAddress = (UINT8 *)Sumary;
             
-            for (int j = 0; j < 250; j++)
+            for (int j = 0; j < 256; j++)
             {
-                L2_DEBUG_Print1(DISK_READ_BUFFER_X + ScreenWidth / 2+ (j % 16) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 16), "%02X ", pAddress[j] & 0xff);
+                L2_DEBUG_Print1(DISK_READ_BUFFER_X + ScreenWidth * 3 / 4 + (j % 16) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 16), "%02X ", pAddress[j] & 0xff);
             }
 
             //初始化键盘输入字符数组
@@ -194,15 +194,18 @@ VOID EFIAPI L2_KEYBOARD_Event (
         //Clear log window content
         else if ('a' == uniChar || 'A' == uniChar)
         {
-        	for (UINT32 i = 0; i < SystemLogWindowHeight; i++)
+        	for (UINT32 i = 23; i < SystemLogWindowHeight - 3; i++)
 	        {
-	        	for (UINT32 j = 0; j < SystemLogWindowWidth; j++)
+	        	for (UINT32 j = 3; j < SystemLogWindowWidth - 3; j++)
 	        	{
 	        		pSystemLogWindowBuffer[4 * (i * SystemLogWindowWidth + j)] = 0;
 	        		pSystemLogWindowBuffer[4 * (i * SystemLogWindowWidth + j) + 1] = 0;
 	        		pSystemLogWindowBuffer[4 * (i * SystemLogWindowWidth + j) + 2] = 0;
 	        	}
-        	}		
+        	}	
+
+            //初始化后，从第1行开始显示
+        	LogStatusErrorCount = 0;
 
         	//显示输入的按键
             L2_DEBUG_Print1(DISPLAY_KEYBOARD_X, DISPLAY_KEYBOARD_Y, "%a keyboard_input_count: %04d ", pKeyboardInputBuffer, keyboard_input_count);
