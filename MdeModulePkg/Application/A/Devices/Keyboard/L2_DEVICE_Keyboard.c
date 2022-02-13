@@ -49,6 +49,8 @@ UINT16 keyboard_count = 0;
 
 #define KEYBOARD_BUFFER_LENGTH (30) 
 char pKeyboardInputBuffer[KEYBOARD_BUFFER_LENGTH] = {0};
+EFI_HANDLE                        *Handles;
+UINTN                             HandleCount;
 
 
 
@@ -79,9 +81,24 @@ VOID L2_KEYBOARD_KeyPressed()
     //DEBUG ((EFI_D_INFO, "%d HandleEnterPressed\n", __LINE__));
 }
 
-VOID
-EFIAPI
 
+VOID EFIAPI L2_KEYBOARD_Init (
+  IN EFI_EVENT Event,
+  IN VOID      *Context
+  )
+{
+    EFI_STATUS Status;
+        
+    Status = gBS->LocateHandleBuffer ( ByProtocol,
+                                        &gEfiSimpleTextInputExProtocolGuid,
+                                        NULL,
+                                        &HandleCount,
+                                        &Handles
+                                        );    
+    if(EFI_ERROR (Status))
+        return ;
+
+}
 
 
 /****************************************************************************
@@ -95,34 +112,23 @@ EFIAPI
 *  返回值： 成功：XXXX，失败：XXXXX
 *
 *****************************************************************************/
-L2_KEYBOARD_Event (
+VOID EFIAPI L2_KEYBOARD_Event (
   IN EFI_EVENT Event,
   IN VOID      *Context
   )
 {
-    keyboard_count++;
-    UINT16 scanCode = 0;
-    UINT16 uniChar = 0;
-    UINT32 shiftState;
     EFI_STATUS Status;
-
+    UINTN                             HandleIndex;
+    UINTN                             Index;
     EFI_KEY_TOGGLE_STATE toggleState;
 
     EFI_SIMPLE_TEXT_INPUT_EX_PROTOCOL *SimpleEx;
     EFI_KEY_DATA                      KeyData;
-    EFI_HANDLE                        *Handles;
-    UINTN                             HandleCount;
-    UINTN                             HandleIndex;
-    UINTN                             Index;
-        
-    Status = gBS->LocateHandleBuffer ( ByProtocol,
-                                        &gEfiSimpleTextInputExProtocolGuid,
-                                        NULL,
-                                        &HandleCount,
-                                        &Handles
-                                        );    
-    if(EFI_ERROR (Status))
-        return ;
+    UINT16 scanCode = 0;
+    UINT16 uniChar = 0;
+    UINT32 shiftState;
+    
+    keyboard_count++;
         
     for (HandleIndex = 0; HandleIndex < HandleCount; HandleIndex++) 
     {
@@ -148,39 +154,49 @@ L2_KEYBOARD_Event (
         uniChar     = KeyData.Key.UnicodeChar;
         shiftState  = KeyData.KeyState.KeyShiftState;
         toggleState  = KeyData.KeyState.KeyToggleState;
+        L2_DEBUG_Print1(0, ScreenHeight - 30 - 2 * 16, "%d: L2_KEYBOARD_Event input uniChar: %d", __LINE__, uniChar);
         L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: keyboard input uniChar: %d", __LINE__, uniChar);
        
         pKeyboardInputBuffer[keyboard_input_count++] = uniChar;
 
-        display_sector_number = uniChar - '0';
-
-        if (display_sector_number > 10)
-        {
-            display_sector_number = 10;
-        }
-
-        if (display_sector_number < 0)
-        {
-            display_sector_number = 0;
-        }
-
-        //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: uniChar: %d display_sector_number: %d \n", __LINE__, uniChar, display_sector_number);
-
+        //想开发一个内存查看功能，比如：从内存XXX地址，查看后续100个长度内存信息
         // Enter pressed
         if (0x0D == uniChar)
         {
-            keyboard_input_count = 0;
-			L1_MEMORY_SetValue(pKeyboardInputBuffer, '\0', KEYBOARD_BUFFER_LENGTH);
-            //memset();
-            //L2_DEBUG_Print1(DISPLAY_KEYBOARD_X, DISPLAY_KEYBOARD_Y, "%a keyboard_input_count: %04d enter pressed", pKeyboardInputBuffer, keyboard_input_count);
+            UINT64 Sumary = 0;
+            
+            for (UINT16 i = 0; '\0' != pKeyboardInputBuffer[i]; i++)
+            {
+                if(pKeyboardInputBuffer[i] >= '0' && pKeyboardInputBuffer[i] <= '9')
+                {
+                    Sumary = Sumary * 10 + (pKeyboardInputBuffer[i] - '0');
+                }
+            }
+            
+            L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: Sumary: %d \n", __LINE__, Sumary);
+            
 
+            UINT8 *pAddress = (UINT8 *)Sumary;
+            
+            for (int j = 0; j < 250; j++)
+            {
+                L2_DEBUG_Print1(DISK_READ_BUFFER_X + ScreenWidth / 2+ (j % 16) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 16), "%02X ", pAddress[j] & 0xff);
+            }
+
+            //初始化键盘输入字符数组
+            keyboard_input_count = 0;
+            
+            for (UINT16 i = 0; i < KEYBOARD_BUFFER_LENGTH; i++)
+                pKeyboardInputBuffer[i] = '\0';
+                            
             L2_KEYBOARD_KeyPressed();
         }
-        else if ('a' == uniChar)
+        //Clear log window content
+        else if ('a' == uniChar || 'A' == uniChar)
         {
-        	for (UINT8 i = 0; i < SystemLogWindowHeight; i++)
+        	for (UINT32 i = 0; i < SystemLogWindowHeight; i++)
 	        {
-	        	for (UINT8 j = 0; j < SystemLogWindowWidth; j++)
+	        	for (UINT32 j = 0; j < SystemLogWindowWidth; j++)
 	        	{
 	        		pSystemLogWindowBuffer[4 * (i * SystemLogWindowWidth + j)] = 0;
 	        		pSystemLogWindowBuffer[4 * (i * SystemLogWindowWidth + j) + 1] = 0;
@@ -188,7 +204,6 @@ L2_KEYBOARD_Event (
 	        	}
         	}		
 
-			//L1_LIBRARY_QueueInit(&Queue, 0);
         	//显示输入的按键
             L2_DEBUG_Print1(DISPLAY_KEYBOARD_X, DISPLAY_KEYBOARD_Y, "%a keyboard_input_count: %04d ", pKeyboardInputBuffer, keyboard_input_count);
         }

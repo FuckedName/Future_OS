@@ -102,6 +102,8 @@ EFI_STATUS EFIAPI Main (
 
     L2_MOUSE_Init();
     
+    L2_KEYBOARD_Init();
+    
     L2_TCP4_Init();
 
     L2_INTERFACES_Initial();

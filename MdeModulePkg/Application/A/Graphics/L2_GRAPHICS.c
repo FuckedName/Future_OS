@@ -102,10 +102,6 @@ UINT8 *pSystemLogBuffer = NULL; // Save log data
 #define SYSTEM_LOG_DATA_LINE 40
 
 
-// Line 22
-#define DISK_READ_BUFFER_X (0) 
-#define DISK_READ_BUFFER_Y (6 * 56)
-
 
 UINT16 date_time_count_increase_flag = 0;
 UINT16 date_time_count = 0;

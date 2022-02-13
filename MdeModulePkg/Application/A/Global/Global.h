@@ -76,6 +76,11 @@ typedef enum
 }MOUSE_RIGHT_BUTTON_CLICK_MENU;
 
 
+// Line 22
+#define DISK_READ_BUFFER_X (0) 
+#define DISK_READ_BUFFER_Y (6 * 56)
+
+
 //save path and block information.
 typedef struct
 {
