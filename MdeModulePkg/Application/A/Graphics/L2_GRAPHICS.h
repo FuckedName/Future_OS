@@ -183,17 +183,6 @@ typedef struct
 }GRAPHICS_LAYER_EVENT_GET;
 
 
-typedef struct
-{
-    UINT16                    CurrentState;
-    UINT16            		  event;
-    UINT16                    NextState;
-    VOID                      (*pFunc)(); 
-}STATE_TRANSFORM;
-
-
-
-
 void L2_GRAPHICS_ParameterInit();
 
 VOID EFIAPI L2_DEBUG_Print1 (UINT16 x, UINT16 y,  IN  CONST CHAR8  *Format, ...);
@@ -249,8 +238,6 @@ EFI_STATUS L2_GRAPHICS_ChineseCharDraw2(UINT8 *pBuffer,
 EFI_STATUS L2_GRAPHICS_AsciiCharDraw2(WINDOW_LAYER_ITEM layer,
         IN UINTN x0, UINTN y0, UINT8 c,
         IN EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color);
-
-UINT16 L2_MOUSE_MoveOver(UINT16 LayerID);
 
 VOID L2_MOUSE_Move();
 

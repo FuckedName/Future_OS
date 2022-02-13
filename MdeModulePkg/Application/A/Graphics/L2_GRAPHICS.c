@@ -2215,7 +2215,7 @@ VOID L3_GRAPHICS_StartMenuClickEventHandle(START_MENU_ITEM_CLICKED_EVENT event)
             StartMenuNextState = StartMenuStateTransformTable[i].NextState;
 
             // need to check the return value after function runs..... 
-            StartMenuStateTransformTable[i].pFunc();
+            StartMenuStateTransformTable[i].pAction();
             L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: MouseClickEvent: %d StartMenuNextState: %d\n", __LINE__, event, StartMenuNextState);
             break;
         }   
@@ -2292,7 +2292,7 @@ VOID L3_GRAPHICS_MyComupterClickEventHandle(MY_COMPUTER_WINDOW_CLICKED_EVENT eve
             MyComputerNextState = MyComputerStateTransformTable[i].NextState;
 
             // need to check the return value after function runs..... 
-            MyComputerStateTransformTable[i].pFunc();
+            MyComputerStateTransformTable[i].pAction();
             L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: MouseClickEvent: %d StartMenuNextState: %d\n", __LINE__, event, StartMenuNextState);
             break;
         }   
@@ -2984,52 +2984,31 @@ VOID L2_GRAPHICS_CopyNoReserved(UINT8 *pDest, UINT8 *pSource,
     }
 }
 
-
-
-
-/****************************************************************************
-*
-*  描述:   把所有图层叠加起来显示
-*
-*  参数1： xxxxx
-*  参数2： xxxxx
-*  参数n： xxxxx
-*
-*  返回值： 成功：XXXX，失败：XXXXX
-*
-*****************************************************************************/
-VOID L2_GRAPHICS_LayerCompute(UINT16 iMouseX, UINT16 iMouseY, UINT8 MouseClickFlag)
+VOID L2_GRAPHICS_DrawMouseToDesk()
 {
-    /*L2_DEBUG_Print1(DISPLAY_X, DISPLAY_Y, "%d: pDeskDisplayBuffer: %X pDeskBuffer: %X ScreenWidth: %d ScreenHeight: %d pMouseBuffer: %X\n", __LINE__, 
-                                                                pDeskDisplayBuffer,
-                                                                pDeskBuffer,
-                                                                ScreenWidth,
-                                                                ScreenHeight,
-                                                                pMouseBuffer);
-    */
-    //desk 
-    L2_GRAPHICS_Copy(pDeskDisplayBuffer, pDeskBuffer, ScreenWidth, ScreenHeight, ScreenWidth, ScreenHeight, 0, 0);
-    //L2_DEBUG_Print1(DISPLAY_X, DISPLAY_Y, "%d: GraphicsLayerCompute\n", __LINE__);
-
-    if (TRUE == SystemQuitFlag)
+    //为了让鼠标光标透明，需要把图层对应的像素点拷贝到鼠标显示内存缓冲
+    for (UINT8 i = 0; i < 16; i++)
     {
-    
-		L2_SCREEN_Draw(pDeskDisplayBuffer, 0, 0, 0, 0, ScreenWidth, ScreenHeight);	
-                    
-        return;
-    }//
+        for (UINT8 j = 0; j < 16; j++)
+        {
+			pMouseBuffer[(i * 16 + j) * 4]     = pDeskDisplayBuffer[((iMouseY + i) * ScreenWidth + iMouseX + j) * 4 + 0];
+			pMouseBuffer[(i * 16 + j) * 4 + 1] = pDeskDisplayBuffer[((iMouseY + i) * ScreenWidth + iMouseX + j) * 4 + 1];
+			pMouseBuffer[(i * 16 + j) * 4 + 2] = pDeskDisplayBuffer[((iMouseY + i) * ScreenWidth + iMouseX + j) * 4 + 2];
+        }
+	}
 
-    L2_GRAPHICS_CopyBufferFromWindowsToDesk();
-        
-    //鼠标右击菜单
-    if (iMouseRightClickX != 0 || iMouseRightClickY != 0)
-    {        
-        L2_GRAPHICS_Copy(pDeskDisplayBuffer, pMouseRightButtonClickWindowBuffer, ScreenWidth, ScreenHeight, MouseRightButtonClickWindowWidth, MouseRightButtonClickWindowHeight, iMouseRightClickX, iMouseRightClickY);
-    }    
+	//然后绘制鼠标光标
+    L2_GRAPHICS_ChineseCharDraw2(pMouseBuffer, 0 , 0,     12, 84, MouseColor, 16);  
+    //L2_GRAPHICS_ChineseCharDraw(pMouseBuffer, 0, 0, 12 * 94 + 84, MouseColor, 16);
 
-	//这行代码为啥添加，不太记得了
-    L2_MOUSE_Move();
+	//把鼠标光标显示到桌面
+    L2_GRAPHICS_CopyNoReserved(pDeskDisplayBuffer, pMouseBuffer, ScreenWidth, ScreenHeight, 16, 16, iMouseX, iMouseY);
+    //L2_DEBUG_Print1(DISPLAY_X, DISPLAY_Y, "%d: GraphicsLayerCompute\n", __LINE__);
+}
 
+
+VOID L2_GRAPHICS_TrackMouseMoveoverObject()
+{
     UINT16 DrawGraphicsLayerID = MouseMoveoverObject.GraphicsLayerID;
     UINT16 DrawWindowWidth = WindowLayers.item[DrawGraphicsLayerID].WindowWidth;
     UINT8 *pDrawBuffer = WindowLayers.item[DrawGraphicsLayerID].pBuffer;
@@ -3087,25 +3066,56 @@ VOID L2_GRAPHICS_LayerCompute(UINT16 iMouseX, UINT16 iMouseY, UINT8 MouseClickFl
                               MouseMoveoverObjectDrawColor, 
                               DrawWindowWidth);
 
-    
-	//为了让鼠标光标透明，需要把图层对应的像素点拷贝到鼠标显示内存缓冲
-    for (UINT8 i = 0; i < 16; i++)
-    {
-        for (UINT8 j = 0; j < 16; j++)
-        {
-			pMouseBuffer[(i * 16 + j) * 4]     = pDeskDisplayBuffer[((iMouseY + i) * ScreenWidth + iMouseX + j) * 4 + 0];
-			pMouseBuffer[(i * 16 + j) * 4 + 1] = pDeskDisplayBuffer[((iMouseY + i) * ScreenWidth + iMouseX + j) * 4 + 1];
-			pMouseBuffer[(i * 16 + j) * 4 + 2] = pDeskDisplayBuffer[((iMouseY + i) * ScreenWidth + iMouseX + j) * 4 + 2];
-        }
-	}
+}
 
-	//然后绘制鼠标光标
-    L2_GRAPHICS_ChineseCharDraw2(pMouseBuffer, 0 , 0,     12, 84, MouseColor, 16);  
-    //L2_GRAPHICS_ChineseCharDraw(pMouseBuffer, 0, 0, 12 * 94 + 84, MouseColor, 16);
 
-	//把鼠标光标显示到桌面
-    L2_GRAPHICS_CopyNoReserved(pDeskDisplayBuffer, pMouseBuffer, ScreenWidth, ScreenHeight, 16, 16, iMouseX, iMouseY);
+
+/****************************************************************************
+*
+*  描述:   把所有图层叠加起来显示
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
+VOID L2_GRAPHICS_LayerCompute(UINT16 iMouseX, UINT16 iMouseY, UINT8 MouseClickFlag)
+{
+    /*L2_DEBUG_Print1(DISPLAY_X, DISPLAY_Y, "%d: pDeskDisplayBuffer: %X pDeskBuffer: %X ScreenWidth: %d ScreenHeight: %d pMouseBuffer: %X\n", __LINE__, 
+                                                                pDeskDisplayBuffer,
+                                                                pDeskBuffer,
+                                                                ScreenWidth,
+                                                                ScreenHeight,
+                                                                pMouseBuffer);
+    */
+    //desk 
+    L2_GRAPHICS_Copy(pDeskDisplayBuffer, pDeskBuffer, ScreenWidth, ScreenHeight, ScreenWidth, ScreenHeight, 0, 0);
     //L2_DEBUG_Print1(DISPLAY_X, DISPLAY_Y, "%d: GraphicsLayerCompute\n", __LINE__);
+
+    if (TRUE == SystemQuitFlag)
+    {
+    
+		L2_SCREEN_Draw(pDeskDisplayBuffer, 0, 0, 0, 0, ScreenWidth, ScreenHeight);	
+                    
+        return;
+    }//
+
+    L2_GRAPHICS_CopyBufferFromWindowsToDesk();
+        
+    //鼠标右击菜单，注意，需要在鼠标获取事件前拷贝，因为鼠标右击事件也需要被获取
+    if (iMouseRightClickX != 0 || iMouseRightClickY != 0)
+    {        
+        L2_GRAPHICS_Copy(pDeskDisplayBuffer, pMouseRightButtonClickWindowBuffer, ScreenWidth, ScreenHeight, MouseRightButtonClickWindowWidth, MouseRightButtonClickWindowHeight, iMouseRightClickX, iMouseRightClickY);
+    }    
+
+	//获取当前鼠标所在的图层，根据鼠标当前的点击事件进行操作
+    L2_MOUSE_Move();
+
+    L2_GRAPHICS_TrackMouseMoveoverObject();
+    
+	L2_GRAPHICS_DrawMouseToDesk();
 
 	//把准备好的桌面缓冲区显示到屏幕
 	L2_SCREEN_Draw(pDeskDisplayBuffer, 0, 0, 0, 0, ScreenWidth, ScreenHeight);	
@@ -3610,31 +3620,6 @@ VOID L2_GRAPHICS_RightClickMenuInit(UINT16 iMouseX, UINT16 iMouseY, UINT16 Layer
 
 
 
-
-
-/****************************************************************************
-*
-*  描述:   如果鼠标处于左击，并且鼠标在移动，并且鼠标所在的图层不在桌面层，那么移动鼠标所在的图层，类似窗口移动。
-*
-*  参数1： xxxxx
-*  参数2： xxxxx
-*  参数n： xxxxx
-*
-*  返回值： 成功：XXXX，失败：XXXXX
-*
-*****************************************************************************/
-UINT16 L2_MOUSE_MoveOver(UINT16 LayerID)                                        
-{            
-	// Get click event
-	UINT16 event = GraphicsLayerEventHandle[LayerID].pClickEventGet();
-
-
-    return event;
-}
-
-
-
-
 /****************************************************************************
 *
 *  描述:   内存拷贝，颜色在本质上来讲，也就是内存
@@ -3919,15 +3904,12 @@ UINT16 GraphicsLayerIDCount = 0;
 *****************************************************************************/
 VOID L2_MOUSE_Move()
 {   
-    // display graphics layer id mouse over, for mouse click event.
-    //获取鼠标光标所在的图层，窗口、图层在初始化的时候把第4个字节用于存放图层ID
-    
+    //获取鼠标光标所在的图层，窗口、图层在初始化的时候把第4个字节用于存放图层ID    
 	LayerID = pDeskDisplayBuffer[(iMouseY * ScreenWidth + iMouseX) * 4 + 3];
 	
     L2_DEBUG_Print1(0, ScreenHeight - 30 -  7 * 16, "%d: iMouseX: %d iMouseY: %d MouseClickFlag: %d Graphics Layer id: %d GraphicsLayerIDCount: %u", __LINE__, iMouseX, iMouseY, MouseClickFlag, LayerID, GraphicsLayerIDCount++);
     
-
-    UINT16 event = L2_MOUSE_MoveOver(LayerID);
+	UINT16 event = GraphicsLayerEventHandle[LayerID].pClickEventGet();
 
 	switch (MouseClickFlag)
 	{

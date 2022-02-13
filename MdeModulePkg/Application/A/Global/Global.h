@@ -374,11 +374,11 @@ typedef enum
 
 typedef struct
 {
-    STATE          CurrentState;
-    EVENT          event;
-    STATE          NextState;
-    EFI_STATUS    (*pFunc)(); 
-}STATE_TRANS;
+    UINT16          CurrentState;
+    UINT16          event;
+    UINT16          NextState;
+    EFI_STATUS    (*pAction)(); 
+}STATE_TRANSFORM;
 
 
 	                      

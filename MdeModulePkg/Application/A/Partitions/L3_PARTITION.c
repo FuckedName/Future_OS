@@ -500,7 +500,7 @@ EFI_STATUS L2_STORE_ReadFileFSM()
 
 
 //可优化，同一个分区，第一次读入后，不需要再初始化一遍
-STATE_TRANS StatusTransitionTable[] =
+STATE_TRANSFORM StatusTransitionTable[] =
 {
     { INIT_STATE,                READ_PATITION_EVENT,   GET_PARTITION_INFO_STATE, L2_STORE_PartitionAnalysisFSM},
     { GET_PARTITION_INFO_STATE,  READ_ROOT_PATH_EVENT,  GET_ROOT_PATH_INFO_STATE, L2_STORE_RootPathAnalysisFSM},
@@ -543,7 +543,7 @@ int L2_STORE_FileRead(EVENT event)
     if ( event == StatusTransitionTable[NextState].event)
     {
         L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: Status:%X \n", __LINE__, Status);
-        StatusTransitionTable[NextState].pFunc();
+        StatusTransitionTable[NextState].pAction();
         NextState = StatusTransitionTable[NextState].NextState;
     }
     else  
