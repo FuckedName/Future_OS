@@ -2537,9 +2537,6 @@ VOID L2_MOUSE_LeftClick(UINT16 LayerID, UINT16 event)
     x_move = 0;
     y_move = 0;
 
-	//获取鼠标光标所在的图层，窗口、图层在初始化的时候把第4个字节用于存放图层ID
-	LayerID = pDeskDisplayBuffer[(iMouseY * ScreenWidth + iMouseX) * 4 + 3];
-
 	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: iMouseX: %d iMouseY: %d ClickFlag: %d, LayerID: %d\n", __LINE__, iMouseX, iMouseY, MouseClickFlag, LayerID);
       	
     MouseClickFlag = MOUSE_EVENT_TYPE_NO_CLICKED;
@@ -3113,6 +3110,7 @@ VOID L2_GRAPHICS_LayerCompute(UINT16 iMouseX, UINT16 iMouseY, UINT8 MouseClickFl
 	//获取当前鼠标所在的图层，根据鼠标当前的点击事件进行操作
     L2_MOUSE_Move();
 
+    //追踪鼠标事件需要在绘制鼠标图标前完成，因为绘制图标会修改显示的图层
     L2_GRAPHICS_TrackMouseMoveoverObject();
     
 	L2_GRAPHICS_DrawMouseToDesk();
@@ -3908,8 +3906,14 @@ VOID L2_MOUSE_Move()
 	LayerID = pDeskDisplayBuffer[(iMouseY * ScreenWidth + iMouseX) * 4 + 3];
 	
     L2_DEBUG_Print1(0, ScreenHeight - 30 -  7 * 16, "%d: iMouseX: %d iMouseY: %d MouseClickFlag: %d Graphics Layer id: %d GraphicsLayerIDCount: %u", __LINE__, iMouseX, iMouseY, MouseClickFlag, LayerID, GraphicsLayerIDCount++);
-    
+
+        
+    //获取不同图层的不同矩形区域点击对应的事件
 	UINT16 event = GraphicsLayerEventHandle[LayerID].pClickEventGet();
+
+    //如果没有点击事件，则不获取点击事件。
+    if (MOUSE_EVENT_TYPE_NO_CLICKED == MouseClickFlag)
+        return;
 
 	switch (MouseClickFlag)
 	{

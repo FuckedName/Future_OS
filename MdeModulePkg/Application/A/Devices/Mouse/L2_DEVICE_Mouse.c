@@ -68,17 +68,7 @@ VOID L2_MOUSE_StateAnaysis(EFI_SIMPLE_POINTER_STATE State)
     {
         y_move = (State.RelativeMovementY >> 16) & 0xff;
     }
-    
-    //左
-    if (State.LeftButton == TRUE)
-    {
-    }
-
-    //右
-    if (State.RightButton == TRUE)
-    {
-    }
-    
+        
     stMouseState.ucX_RelativeMove = x_move;
     stMouseState.ucX_RelativeMove = y_move;
 
