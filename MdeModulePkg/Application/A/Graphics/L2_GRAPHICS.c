@@ -2514,6 +2514,8 @@ VOID L2_MOUSE_RightClick(UINT16 LayerID, UINT16 event)
     WindowLayers.item[GRAPHICS_LAYER_MOUSE_RIGHT_CLICK_WINDOW].StartX = iMouseX;
     WindowLayers.item[GRAPHICS_LAYER_MOUSE_RIGHT_CLICK_WINDOW].StartY = iMouseY;
 
+    WindowLayers.item[GRAPHICS_LAYER_MOUSE_RIGHT_CLICK_WINDOW].DisplayFlag = TRUE;
+
     MouseClickFlag = MOUSE_EVENT_TYPE_NO_CLICKED;
     
 }
