@@ -603,7 +603,7 @@ EFI_STATUS L2_FILE_NTFS_90AttributeAnalysis()
 *****************************************************************************/
 EFI_STATUS L2_MOUSE_MyComputerFolderItemClicked()
 {
-    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d L2_MOUSE_MyComputerFolderItemClicked\n", __LINE__);
+    //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d L2_MOUSE_MyComputerFolderItemClicked\n", __LINE__);
 	//FolderItemID;
 	//L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d DeviceID: %d\n", __LINE__, DeviceID);
     //printf( "RootPathAnalysis\n" );
@@ -627,7 +627,7 @@ EFI_STATUS L2_MOUSE_MyComputerFolderItemClicked()
 
 		UINT16 High2B = L1_NETWORK_2BytesToUINT16(pItems[index].StartClusterHigh2B);
 		UINT16 Low2B  = L1_NETWORK_2BytesToUINT16(pItems[index].StartClusterLow2B);
-		UINT32 StartCluster = (UINT32)High2B << 64 | (UINT32)Low2B;
+		UINT32 StartCluster = (UINT32)High2B << 16 | (UINT32)Low2B;
 
 		// Start cluster id is 2, exclude 0,1
 		//这样写死8192，会有BUG
@@ -1225,6 +1225,17 @@ void L2_GRAPHICS_ParameterInit()
     WindowLayers.item[GRAPHICS_LAYER_DESK].WindowWidth = ScreenWidth;
     WindowLayers.item[GRAPHICS_LAYER_DESK].WindowHeight= ScreenHeight;
     WindowLayers.item[GRAPHICS_LAYER_DESK].LayerID = GRAPHICS_LAYER_DESK;
+
+    WindowLayers.LayerCount++;
+    
+    WindowLayers.item[GRAPHICS_LAYER_MOUSE_RIGHT_CLICK_WINDOW].DisplayFlag = FALSE;
+    L1_MEMORY_Copy((UINT8 *)WindowLayers.item[GRAPHICS_LAYER_MOUSE_RIGHT_CLICK_WINDOW].Name, "Mouse right click window layer", sizeof("Mouse right click window layer"));
+    WindowLayers.item[GRAPHICS_LAYER_MOUSE_RIGHT_CLICK_WINDOW].pBuffer = pMouseRightButtonClickWindowBuffer;
+    WindowLayers.item[GRAPHICS_LAYER_MOUSE_RIGHT_CLICK_WINDOW].StartX = 0;
+    WindowLayers.item[GRAPHICS_LAYER_MOUSE_RIGHT_CLICK_WINDOW].StartY = 0;
+    WindowLayers.item[GRAPHICS_LAYER_MOUSE_RIGHT_CLICK_WINDOW].WindowWidth = MouseRightButtonClickWindowWidth;
+    WindowLayers.item[GRAPHICS_LAYER_MOUSE_RIGHT_CLICK_WINDOW].WindowHeight= MouseRightButtonClickWindowHeight;
+    WindowLayers.item[GRAPHICS_LAYER_MOUSE_RIGHT_CLICK_WINDOW].LayerID = GRAPHICS_LAYER_MOUSE_RIGHT_CLICK_WINDOW;
 
     WindowLayers.LayerCount++;
 
@@ -1826,8 +1837,8 @@ DESKTOP_ITEM_CLICKED_EVENT L2_GRAPHICS_DeskLayerClickEventGet()
 *****************************************************************************/
 DESKTOP_ITEM_CLICKED_EVENT L2_GRAPHICS_MouseRightButtonClickEventGet()
 {	
-    UINT16 x = 10 + iMouseRightClickX;
-    UINT16 y = 10 + iMouseRightClickY;
+    UINT16 x = 10 + WindowLayers.item[GRAPHICS_LAYER_MOUSE_RIGHT_CLICK_WINDOW].StartX;
+    UINT16 y = 10 + WindowLayers.item[GRAPHICS_LAYER_MOUSE_RIGHT_CLICK_WINDOW].StartY;
 
     for (UINT16 i = 0; i < MOUSE_RIGHT_MENU_MAX_CLICKED_EVENT; i++)
     {
@@ -2417,15 +2428,19 @@ VOID L3_GRAPHICS_MouseRightButtonClickEventHandle(MOUSE_RIGHT_MENU_CLICKED_EVENT
 	switch(event)
 	{
 		case MOUSE_RIGHT_MENU_OPEN_CLICKED_EVENT:
+		    L2_FILE_FAT32_FileOpen();
 			L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d MOUSE_RIGHT_MENU_OPEN_CLICKED_EVENT\n", __LINE__); break;
 
 		case MOUSE_RIGHT_MENU_DELETE_CLICKED_EVENT:
+		    L2_FILE_FAT32_FileDelete();
 			L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d MOUSE_RIGHT_MENU_DELETE_CLICKED_EVENT\n", __LINE__); break;
 
 		case MOUSE_RIGHT_MENU_ADD_CLICKED_EVENT:
+		    L2_FILE_FAT32_FileAdd();
 			L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d MOUSE_RIGHT_MENU_ADD_CLICKED_EVENT\n", __LINE__); break;
 
 		case MOUSE_RIGHT_MENU_MODIFY_CLICKED_EVENT:
+		    L2_FILE_FAT32_FileModify();
 			L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d MOUSE_RIGHT_MENU_MODIFY_CLICKED_EVENT\n", __LINE__); break;
 
 		default: break;
@@ -2496,8 +2511,8 @@ GRAPHICS_LAYER_EVENT_GET GraphicsLayerEventHandle[] =
 *****************************************************************************/
 VOID L2_MOUSE_RightClick(UINT16 LayerID, UINT16 event)
 {
-    iMouseRightClickX = iMouseX;
-    iMouseRightClickY = iMouseY;
+    WindowLayers.item[GRAPHICS_LAYER_MOUSE_RIGHT_CLICK_WINDOW].StartX = iMouseX;
+    WindowLayers.item[GRAPHICS_LAYER_MOUSE_RIGHT_CLICK_WINDOW].StartY = iMouseY;
 
     MouseClickFlag = MOUSE_EVENT_TYPE_NO_CLICKED;
     
@@ -3102,9 +3117,9 @@ VOID L2_GRAPHICS_LayerCompute(UINT16 iMouseX, UINT16 iMouseY, UINT8 MouseClickFl
     L2_GRAPHICS_CopyBufferFromWindowsToDesk();
         
     //鼠标右击菜单，注意，需要在鼠标获取事件前拷贝，因为鼠标右击事件也需要被获取
-    if (iMouseRightClickX != 0 || iMouseRightClickY != 0)
+    if (WindowLayers.item[GRAPHICS_LAYER_MOUSE_RIGHT_CLICK_WINDOW].StartX != 0 || WindowLayers.item[GRAPHICS_LAYER_MOUSE_RIGHT_CLICK_WINDOW].StartY != 0)
     {        
-        L2_GRAPHICS_Copy(pDeskDisplayBuffer, pMouseRightButtonClickWindowBuffer, ScreenWidth, ScreenHeight, MouseRightButtonClickWindowWidth, MouseRightButtonClickWindowHeight, iMouseRightClickX, iMouseRightClickY);
+        L2_GRAPHICS_Copy(pDeskDisplayBuffer, pMouseRightButtonClickWindowBuffer, ScreenWidth, ScreenHeight, MouseRightButtonClickWindowWidth, MouseRightButtonClickWindowHeight, WindowLayers.item[GRAPHICS_LAYER_MOUSE_RIGHT_CLICK_WINDOW].StartX, WindowLayers.item[GRAPHICS_LAYER_MOUSE_RIGHT_CLICK_WINDOW].StartY);
     }    
 
 	//获取当前鼠标所在的图层，根据鼠标当前的点击事件进行操作

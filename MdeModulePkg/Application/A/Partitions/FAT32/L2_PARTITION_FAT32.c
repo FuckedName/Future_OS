@@ -144,3 +144,227 @@ EFI_STATUS L2_FILE_FAT32_DataSectorHandle(UINT16 DeviceID)
     return EFI_SUCCESS;
 }
 
+/****************************************************************************
+*
+*  描述:   xxxxx
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
+EFI_STATUS L2_FILE_FAT32_FileModify(UINT16 DeviceID)
+{
+    EFI_STATUS Status ;
+    UINT8 Buffer[DISK_BUFFER_SIZE];
+    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d L2_FILE_FAT32_FileModify PartitionItemID: %d FolderItemID: %d \n", __LINE__, PartitionItemID, FolderItemID);
+        
+    if (0xffff == PartitionItemID || 0xffff == FolderItemID)
+    {
+        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d 0xffff == PartitionItemID\n", __LINE__);
+        return -1;
+    }
+
+    //需要找获取有效的项索引
+    UINT16 index = FolderItemValidIndexArray[FolderItemID];
+    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d index: %d\n", __LINE__, index);
+        
+    //FAT32文件系统格式
+    if (device[PartitionItemID].FileSystemType == FILE_SYSTEM_FAT32)
+    {
+
+        UINT16 High2B = L1_NETWORK_2BytesToUINT16(pItems[index].StartClusterHigh2B);
+        UINT16 Low2B  = L1_NETWORK_2BytesToUINT16(pItems[index].StartClusterLow2B);
+        UINT32 StartCluster = (UINT32)High2B << 16 | (UINT32)Low2B;
+
+        // Start cluster id is 2, exclude 0,1
+        //这样写死8192，会有BUG
+        UINT32 StartSectorNumber = 8192 + (StartCluster - 2) * 8;
+        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], 
+                        "%d High2B: %X Low2B: %X StartCluster: %X StartSectorNumber: %X\n", 
+                        __LINE__, 
+                        High2B,
+                        Low2B,
+                        StartCluster,
+                        StartSectorNumber);
+
+        // Read data from partition(disk or USB etc..)                  
+        Status = L1_STORE_READ(PartitionItemID, StartSectorNumber, 1, Buffer); 
+        if (EFI_ERROR(Status))
+        {
+            L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d Status: %X\n", __LINE__, Status);
+            return Status;
+        }
+
+        switch(pItems[index].Attribute[0])
+        {
+            //如果是目录，则显示子目录
+            case 0x10:  L1_MEMORY_Memset(&pItems, 0, sizeof(pItems));
+                        L1_MEMORY_Copy(&pItems, Buffer, DISK_BUFFER_SIZE);
+                        L2_STORE_FolderItemsPrint();
+                        break;
+
+            //如果是文件，则显示文件内容
+            case 0x20: L2_PARTITION_FileContentPrint(Buffer); break;
+
+            default: break;
+        }
+        
+    }
+
+
+}
+
+/****************************************************************************
+*
+*  描述:   xxxxx
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
+EFI_STATUS L2_FILE_FAT32_FileAdd(UINT16 DeviceID)
+{}
+
+
+/****************************************************************************
+*
+*  描述:   xxxxx
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
+EFI_STATUS L2_FILE_FAT32_FileOpen(UINT16 DeviceID)
+{}
+
+
+/****************************************************************************
+*
+*  描述:   xxxxx
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
+EFI_STATUS L2_FILE_FAT32_FileDelete(UINT16 DeviceID)
+{
+    //暂时先不实现
+    return;
+    UINT8 Buffer1[512];
+    EFI_STATUS Status;
+    Status = L1_STORE_READ(DeviceID, 0, 1, Buffer1 );  
+    if (EFI_ERROR(Status))
+    {
+        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d Status: %X\n", __LINE__, Status);
+        return Status;
+    }
+
+    // FAT32 file system
+    if (Buffer1[0x52] == 'F' && Buffer1[0x53] == 'A' && Buffer1[0x54] == 'T' && Buffer1[0x55] == '3' && Buffer1[0x56] == '2')   
+    {                   
+        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: FAT32\n",  __LINE__);
+        // analysis data area of patition
+        L1_FILE_FAT32_DataSectorAnalysis(Buffer1, &(device[DeviceID].stMBRSwitched)); 
+
+        // data sector number start include: reserved selector, fat sectors(usually is 2: fat1 and fat2), and file system boot path start cluster(usually is 2, data block start number is 2)
+        device[DeviceID].StartSectorNumber = device[DeviceID].stMBRSwitched.ReservedSelector + device[DeviceID].stMBRSwitched.SectorsPerFat * device[DeviceID].stMBRSwitched.NumFATS;
+		sector_count = device[DeviceID].StartSectorNumber + (device[DeviceID].stMBRSwitched.BootPathStartCluster - 2) * 8;
+		device[DeviceID].FileSystemType = FILE_SYSTEM_FAT32;
+        BlockSize = device[DeviceID].stMBRSwitched.SectorOfCluster * 512; 
+        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: sector_count:%ld BlockSize: %d StartSectorNumber: %llu FileSystemType: %d\n",  __LINE__, sector_count, BlockSize, device[DeviceID].StartSectorNumber, device[DeviceID].FileSystemType);
+        return FILE_SYSTEM_FAT32;
+    }
+    
+    //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d L2_MOUSE_MyComputerFolderItemClicked\n", __LINE__);
+    //FolderItemID;
+    //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d DeviceID: %d\n", __LINE__, DeviceID);
+    //printf( "RootPathAnalysis\n" );
+    UINT8 Buffer[DISK_BUFFER_SIZE];
+    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d PartitionItemID: %d FolderItemID: %d \n", __LINE__, PartitionItemID, FolderItemID);
+        
+    if (0xffff == PartitionItemID || 0xffff == FolderItemID)
+    {
+        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d 0xffff == PartitionItemID\n", __LINE__);
+        return -1;
+    }
+
+    //需要找获取有效的项索引
+    UINT16 index = FolderItemValidIndexArray[FolderItemID];
+    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d index: %d\n", __LINE__, index);
+        
+    //FAT32文件系统格式
+    if (device[PartitionItemID].FileSystemType == FILE_SYSTEM_FAT32)
+    {       
+
+        UINT16 High2B = L1_NETWORK_2BytesToUINT16(pItems[index].StartClusterHigh2B);
+        UINT16 Low2B  = L1_NETWORK_2BytesToUINT16(pItems[index].StartClusterLow2B);
+        UINT32 StartCluster = (UINT32)High2B << 16 | (UINT32)Low2B;
+
+        // Start cluster id is 2, exclude 0,1
+        //这样写死8192，会有BUG
+        UINT32 StartSectorNumber = 8192 + (StartCluster - 2) * 8;
+        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], 
+                        "%d High2B: %X Low2B: %X StartCluster: %X StartSectorNumber: %X\n", 
+                        __LINE__, 
+                        High2B,
+                        Low2B,
+                        StartCluster,
+                        StartSectorNumber);
+
+        //如果是efi文件，认为是可执行文件
+        if (pItems[index].ExtensionName[0] == 'E' && pItems[index].ExtensionName[1] == 'F' && pItems[index].ExtensionName[2] == 'I' )
+        {
+            pItems[index].ExtensionName[0] = 'e';
+            pItems[index].ExtensionName[1] = 'f';
+            pItems[index].ExtensionName[2] = 'i';
+            
+            UINT8 FileName[13] = {0};
+            L1_FILE_NameMerge(index, FileName);
+            CHAR16 wcFileName[13] = {0};
+
+            for (UINT8 i = 0; '\0' != FileName[i]; i++)
+            {
+                wcFileName[i] = FileName[i];
+            }
+                            
+            EFI_EVENT       Event;
+            L2_ApplicationRun(Event, wcFileName);
+        }
+
+        // Read data from partition(disk or USB etc..)                  
+        Status = L1_STORE_READ(PartitionItemID, StartSectorNumber, 1, Buffer); 
+        if (EFI_ERROR(Status))
+        {
+            L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d Status: %X\n", __LINE__, Status);
+            return Status;
+        }
+
+        switch(pItems[index].Attribute[0])
+        {
+            //如果是目录，则显示子目录
+            case 0x10:  L1_MEMORY_Memset(&pItems, 0, sizeof(pItems));
+                        L1_MEMORY_Copy(&pItems, Buffer, DISK_BUFFER_SIZE);
+                        L2_STORE_FolderItemsPrint();
+                        break;
+
+            //如果是文件，则显示文件内容
+            case 0x20: L2_PARTITION_FileContentPrint(Buffer); break;
+
+            default: break;
+        }
+        
+    }
+
+}
