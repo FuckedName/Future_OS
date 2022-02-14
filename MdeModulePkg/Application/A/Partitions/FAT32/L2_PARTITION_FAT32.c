@@ -190,6 +190,21 @@ EFI_STATUS L2_FILE_FAT32_FileModify(UINT16 DeviceID)
                         StartCluster,
                         StartSectorNumber);
 
+        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], 
+                        "%d ItemName:%c%c%c%c%c%c%c%c, extension Name: %c%c%c\n", 
+                        __LINE__, 
+                        pItems[index].FileName[0],
+                        pItems[index].FileName[1],
+                        pItems[index].FileName[2],
+                        pItems[index].FileName[3],
+                        pItems[index].FileName[4],
+                        pItems[index].FileName[5],
+                        pItems[index].FileName[6],
+                        pItems[index].FileName[7],
+                        pItems[index].ExtensionName[0],
+                        pItems[index].ExtensionName[1],
+                        pItems[index].ExtensionName[2]);
+
         // Read data from partition(disk or USB etc..)                  
         Status = L1_STORE_READ(PartitionItemID, StartSectorNumber, 1, Buffer); 
         if (EFI_ERROR(Status))

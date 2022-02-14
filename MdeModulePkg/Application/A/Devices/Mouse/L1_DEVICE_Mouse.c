@@ -40,8 +40,10 @@ UINT16 MouseRightButtonClickWindowWidth = 140;
 UINT16 MouseRightButtonClickWindowHeight = 300;
 
 //用于记录鼠标移动时光标所指的菜单、图标、文件夹、文件等等
+//并保存可点击菜单、图标的位置信息
 MOUSE_MOVEOVER_OBJECT MouseMoveoverObject;
 
+//鼠标是否在一个可点击按钮上边标志
 BOOLEAN bMouseMoveoverObject;
 
 /****************************************************************************

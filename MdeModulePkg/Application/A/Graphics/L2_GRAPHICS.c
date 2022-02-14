@@ -1731,6 +1731,7 @@ EFI_STATUS L2_GRAPHICS_SayGoodBye()
 *****************************************************************************/
 BOOLEAN L1_GRAPHICS_InsideRectangle(UINT16 StartX, UINT16 EndX, UINT16 StartY, UINT16 EndY)
 {
+    //光标是否在指定区域
     BOOLEAN bInArea = iMouseX >= StartX && iMouseX <= EndX && iMouseY >= StartY && iMouseY <= EndY;
 
     if (!bInArea)
@@ -2547,7 +2548,14 @@ VOID L2_MOUSE_LeftClick(UINT16 LayerID, UINT16 event)
     {
         WindowLayers.item[LayerID].StartX += x_move * 3;
         WindowLayers.item[LayerID].StartY += y_move * 3;
-       
+
+        if (WindowLayers.item[LayerID].StartX >= ScreenWidth )
+            WindowLayers.item[LayerID].StartX = ScreenWidth / 2;
+
+        //如果超过屏幕，则把窗口挪回来
+        if (WindowLayers.item[LayerID].StartY >= ScreenHeight )
+            WindowLayers.item[LayerID].StartY =  2;
+            
         L1_GRAPHICS_UpdateWindowLayer(LayerID);
     }
     
