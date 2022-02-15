@@ -533,7 +533,7 @@ VOID L2_MOUSE_MyComputerPartitionItemClicked()
     Color.Reserved = GRAPHICS_LAYER_MY_COMPUTER_WINDOW;
 	
     //L2_GRAPHICS_RectangleDraw(pMouseSelectedBuffer, 0,  0, 31, 15, 1,  Color, 32);
-	L2_GRAPHICS_Copy(pDeskDisplayBuffer, pMouseSelectedBuffer, ScreenWidth, ScreenHeight, 32, 16, WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].StartX + 50, WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].StartY  + PartitionItemID * (16 + 2) + 16 * 2);   
+	//L2_GRAPHICS_Copy(pDeskDisplayBuffer, pMouseSelectedBuffer, ScreenWidth, ScreenHeight, 32, 16, WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].StartX + 50, WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].StartY  + PartitionItemID * (16 + 2) + 16 * 2);   
     L2_STORE_PartitionItemsPrint(PartitionItemID);
 }
 
@@ -779,6 +779,9 @@ EFI_STATUS L2_MOUSE_MyComputerFolderItemClicked()
 /****************************************************************************
 *
 *  描述:   我的电脑窗口状态转换的状态机，包含窗口关闭、分区点击、文件夹点击、文件点击事件。
+   这个状态机当前来看，是有点问题的，因为在点击分区事件后，也可以继续点击分区事件
+   在任何状态下都应该可以点击窗口关闭事件，当然在开始测试的时候是满足要求的，越往后期开发，这里的状态项就会
+   显得比较少
 *
 *  参数1： xxxxx
 *  参数2： xxxxx
@@ -789,8 +792,9 @@ EFI_STATUS L2_MOUSE_MyComputerFolderItemClicked()
 *****************************************************************************/
 STATE_TRANSFORM MyComputerStateTransformTable[] =
 {
-    {MY_COMPUTER_INIT_STATE,                MY_COMPUTER_WINDOW_CLOSE_WINDOW_CLICKED_EVENT,     MY_COMPUTER_INIT_STATE,         L2_MOUSE_MyComputerCloseClicked},
+    {MY_COMPUTER_INIT_STATE,                MY_COMPUTER_WINDOW_CLOSE_WINDOW_CLICKED_EVENT,     MY_COMPUTER_INIT_STATE,               L2_MOUSE_MyComputerCloseClicked},
     {MY_COMPUTER_INIT_STATE,     	        MY_COMPUTER_WINDOW_PARTITION_ITEM_CLICKED_EVENT,   MY_COMPUTER_PARTITION_CLICKED_STATE,  L2_MOUSE_MyComputerPartitionItemClicked},
+    {MY_COMPUTER_PARTITION_CLICKED_STATE,   MY_COMPUTER_WINDOW_PARTITION_ITEM_CLICKED_EVENT,   MY_COMPUTER_FOLDER_CLICKED_STATE,     L2_MOUSE_MyComputerPartitionItemClicked},
     {MY_COMPUTER_PARTITION_CLICKED_STATE,   MY_COMPUTER_WINDOW_FOLDER_ITEM_CLICKED_EVENT,      MY_COMPUTER_FOLDER_CLICKED_STATE,     L2_MOUSE_MyComputerFolderItemClicked},
     {MY_COMPUTER_FOLDER_CLICKED_STATE, 	    MY_COMPUTER_WINDOW_FOLDER_ITEM_CLICKED_EVENT,      MY_COMPUTER_FOLDER_CLICKED_STATE,     L2_MOUSE_MyComputerFolderItemClicked},
 };
@@ -3386,15 +3390,20 @@ void L2_GRAPHICS_CopyBufferFromWindowsToDesk()
 *****************************************************************************/
 VOID L2_STORE_PartitionItemsPrint(UINT16 PartitionItemID)
 {
-    //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: \n",  __LINE__);
+    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: L2_STORE_PartitionItemsPrint, PartitionItemID: %d\n",  __LINE__, PartitionItemID);
     
     // this code may be have some problems, because my USB file system is FAT32, my Disk file system is NTFS.
     // others use this code must be careful...
     //UINT8 FileSystemType = L2_FILE_PartitionTypeAnalysis(PartitionItemID);
 
+    L2_FILE_PartitionTypeAnalysis(PartitionItemID);
+
     if (device[PartitionItemID].FileSystemType == FILE_SYSTEM_FAT32)
     {
-        L2_FILE_FAT32_DataSectorHandle(PartitionItemID);
+        EFI_STATUS Status = L2_FILE_FAT32_DataSectorHandle(PartitionItemID);
+        if (0 != Status)
+            return;
+            
         L2_STORE_FolderItemsPrint();
     }
     else if (device[PartitionItemID].FileSystemType == FILE_SYSTEM_NTFS)

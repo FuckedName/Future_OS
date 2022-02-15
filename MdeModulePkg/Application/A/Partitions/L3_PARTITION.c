@@ -823,7 +823,7 @@ PARTITION_ITEM_ACCESS_EVENT PartitionItemAccessEvent = ROOT_PATH_ACCESS_EVENT;
 *  返回值： 成功：XXXX，失败：XXXXX
 *
 *****************************************************************************/
-VOID L3_PARTITION_Access()
+VOID L3_PARTITION_Access() //暂时未使用
 {
 	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: L3_PARTITION_Access\n", __LINE__);
 	

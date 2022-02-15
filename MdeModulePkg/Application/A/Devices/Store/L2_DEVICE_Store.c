@@ -283,7 +283,7 @@ void L2_STORE_TextDevicePathAnalysis(CHAR16 *p, DEVICE_PARAMETER *device, UINTN 
     //puts(temp);
     //DEBUG ((EFI_D_INFO, "line:%d device->StartSectorNumber: %a \n", __LINE__, temp));
     //printf("line:%d start: %d\n", __LINE__, strtol(temp));
-    device->StartSectorNumber = L1_MATH_StringToLongLong(temp, NULL, 10);
+    //device->StartSectorNumber = L1_MATH_StringToLongLong(temp, NULL, 10);
     //putchar('\n');
     
     j = 0;
@@ -380,8 +380,11 @@ EFI_STATUS L2_STORE_PartitionsParameterGet()
         }
 
         CHAR16 *TextDevicePath = DevPathToText->ConvertDevicePathToText(DiskDevicePath, TRUE, TRUE);
+        
         L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: Status:%X Partition: %s\n", __LINE__, Status, TextDevicePath);
 
+        Print(L"%s\n", TextDevicePath);
+        
         L2_STORE_TextDevicePathAnalysis(TextDevicePath, &device[i], i);
 
         if (FILE_SYSTEM_MAX == L2_FILE_PartitionTypeAnalysis(i))

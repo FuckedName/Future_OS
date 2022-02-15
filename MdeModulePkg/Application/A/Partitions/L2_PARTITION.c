@@ -75,7 +75,7 @@ COMMON_STORAGE_ITEM pCommonStorageItems[32];
 *****************************************************************************/
 EFI_STATUS L2_FILE_PartitionTypeAnalysis(UINT16 DeviceID)
 {    
-    //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d DeviceID: %d\n", __LINE__, DeviceID);
+    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d DeviceID: %d\n", __LINE__, DeviceID);
     EFI_STATUS Status;
     UINT8 Buffer1[DISK_BUFFER_SIZE] = {0};
 
@@ -101,6 +101,9 @@ EFI_STATUS L2_FILE_PartitionTypeAnalysis(UINT16 DeviceID)
 		device[DeviceID].FileSystemType = FILE_SYSTEM_FAT32;
         BlockSize = device[DeviceID].stMBRSwitched.SectorOfCluster * 512; 
         L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: sector_count:%ld BlockSize: %d StartSectorNumber: %llu FileSystemType: %d\n",  __LINE__, sector_count, BlockSize, device[DeviceID].StartSectorNumber, device[DeviceID].FileSystemType);
+
+
+        
         return FILE_SYSTEM_FAT32;
     }
     // NTFS

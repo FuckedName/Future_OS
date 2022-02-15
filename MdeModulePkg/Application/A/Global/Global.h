@@ -273,8 +273,8 @@ typedef struct
     UINT16 DeviceType; // 0 Disk, 1: USB, 2: Sata;
     UINT16 PartitionType; // 0 MBR, 1 GPT;
     UINT16 PartitionID; // a physics device consist of Several parts like c: d: e:
-    UINT32 StartSectorNumber; //Very important
-    UINT32 SectorCount; //0xC93060
+    UINT64 StartSectorNumber; //Very important
+    UINT64 SectorCount; //0xC93060
     UINT8 PartitionName[50];
 
     //Partition parameter

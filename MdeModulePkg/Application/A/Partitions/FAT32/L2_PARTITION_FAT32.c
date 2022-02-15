@@ -121,7 +121,7 @@ EFI_STATUS L1_FILE_FAT32_DataSectorAnalysis(UINT8 *p, MasterBootRecordSwitched *
 *****************************************************************************/
 EFI_STATUS L2_FILE_FAT32_DataSectorHandle(UINT16 DeviceID)
 {
-    //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d DeviceID: %d\n", __LINE__, DeviceID);
+    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d L2_FILE_FAT32_DataSectorHandle DeviceID: %d sector_count: %u\n", __LINE__, DeviceID, sector_count);
     //printf( "RootPathAnalysis\n" );
     EFI_STATUS Status ;
     UINT8 Buffer1[DISK_BUFFER_SIZE];
@@ -135,6 +135,9 @@ EFI_STATUS L2_FILE_FAT32_DataSectorHandle(UINT16 DeviceID)
     
     //When get root path data sector start number, we can get content of root path.
     //L1_FILE_FAT32_DataSectorAnalysis(Buffer1, &device[DeviceID].stMBRSwitched);    
+    
+    L1_MEMORY_Memset(&pItems, 0, sizeof(pItems));
+    L1_MEMORY_Copy(&pItems, Buffer1, DISK_BUFFER_SIZE);
 
     // data area start from 1824, HZK16 file start from     FileBlockStart  block, so need to convert into sector by multi 8, block start number is 2   
     // next state is to read FAT table
