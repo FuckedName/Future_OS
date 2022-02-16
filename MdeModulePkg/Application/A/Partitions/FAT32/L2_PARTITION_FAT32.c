@@ -183,7 +183,8 @@ EFI_STATUS L2_FILE_FAT32_FileModify(UINT16 DeviceID)
         UINT32 StartCluster = (UINT32)High2B << 16 | (UINT32)Low2B;
 
         // Start cluster id is 2, exclude 0,1
-        //这样写死8192，会有BUG
+        //这样写死8192或者1592，会有BUG
+        //正常应该用这个：device[DeviceID].StartSectorNumber
         UINT32 StartSectorNumber = 15920 + (StartCluster - 2) * 8;
         L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], 
                         "%d High2B: %X Low2B: %X StartCluster: %X StartSectorNumber: %X\n", 
@@ -225,8 +226,14 @@ EFI_STATUS L2_FILE_FAT32_FileModify(UINT16 DeviceID)
                         break;
 
             //如果是文件，则显示文件内容
-            case 0x20: L2_PARTITION_FileContentPrint(Buffer); break;
+            case 0x20: L2_PARTITION_FileContentPrint(Buffer); 
 
+                        for (UINT16 i = 0; i < 5; i++)
+                            Buffer[i] += 1;
+
+                        L1_STORE_Write(PartitionItemID, StartSectorNumber, 1, Buffer);
+                        break;
+    
             default: break;
         }
         
