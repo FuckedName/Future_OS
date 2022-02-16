@@ -184,7 +184,7 @@ EFI_STATUS L2_FILE_FAT32_FileModify(UINT16 DeviceID)
 
         // Start cluster id is 2, exclude 0,1
         //这样写死8192，会有BUG
-        UINT32 StartSectorNumber = 8192 + (StartCluster - 2) * 8;
+        UINT32 StartSectorNumber = 15920 + (StartCluster - 2) * 8;
         L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], 
                         "%d High2B: %X Low2B: %X StartCluster: %X StartSectorNumber: %X\n", 
                         __LINE__, 
