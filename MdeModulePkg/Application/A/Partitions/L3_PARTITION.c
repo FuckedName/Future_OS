@@ -32,7 +32,7 @@
 int READ_FILE_FSM_Event = READ_PATITION_EVENT;
 UINTN PartitionCount = 0;
 
-STATE   NextState = INIT_STATE;
+READ_FILE_STATE   NextState = READ_FILE_INIT_STATE;
 
 UINT64 FileReadCount = 0;
 
@@ -44,6 +44,7 @@ UINT8 ReadFileNameLength = 0;
 
 UINT8 ReadFileName[20];
 
+//记录下次读取第多少号扇区
 UINT64 sector_count = 0;
 UINT32 ReadFilePartitionID = 0;
 
@@ -79,7 +80,7 @@ EFI_STATUS L2_STORE_PartitionAnalysisFSM()
         //L1_FILE_FAT32_DataSectorAnalysis(Buffer1, &MBRSwitched); 
         
         // data sector number start include: reserved selector, fat sectors(usually is 2: fat1 and fat2), and file system boot path start cluster(usually is 2, data block start number is 2)
-        sector_count = device[i].stMBRSwitched.ReservedSelector + device[i].stMBRSwitched.SectorsPerFat * device[i].stMBRSwitched.NumFATS + (device[i].stMBRSwitched.BootPathStartCluster - 2) * 8;
+        sector_count = device[i].stMBRSwitched.ReservedSelector + device[i].stMBRSwitched.SectorsPerFat * device[i].stMBRSwitched.FATCount + (device[i].stMBRSwitched.BootPathStartCluster - 2) * 8;
         BlockSize = device[i].stMBRSwitched.SectorOfCluster * 512;
         L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: sector_count:%ld BlockSize: %d\n",  __LINE__, sector_count, BlockSize);
      }           
@@ -261,8 +262,7 @@ EFI_STATUS L1_FILE_RootPathAnalysis(UINT8 *p)
             L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: FileName2: %a\n", __LINE__, FileName2);
             L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: ReadFileName: %a\n", __LINE__, ReadFileName);
 
-            //for (int j = 0; j < 5; j++)
-            //  L2_DEBUG_Print1(j * 3 * 8, 16 * 40 + valid_count * 16, "%02X ", pItems[i].FileName[j]);
+            //这里写的不太好，应该只需要两个参数就行了，不应该有Length这个参数
             if (L1_STRING_Compare(FileName2, ReadFileName, ReadFileNameLength) == EFI_SUCCESS)
             {
                 L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d FileName:%2c%2c%2c%2c%2c%2c%2c%2c ExtensionName:%2c%2c%2c StartCluster:%02X%02X%02X%02X FileLength: %02X%02X%02X%02X Attribute: %02X    ",  __LINE__,
@@ -347,7 +347,7 @@ EFI_STATUS L2_STORE_GetFatTableFSM()
     if (NULL != FAT32_Table)
     {
         // start sector of file
-        sector_count = device[i].stMBRSwitched.ReservedSelector + device[i].stMBRSwitched.SectorsPerFat * device[i].stMBRSwitched.NumFATS + device[i].stMBRSwitched.BootPathStartCluster - 2 + (FileBlockStart - 2) * 8;
+        sector_count = device[i].stMBRSwitched.ReservedSelector + device[i].stMBRSwitched.SectorsPerFat * device[i].stMBRSwitched.FATCount + device[i].stMBRSwitched.BootPathStartCluster - 2 + (FileBlockStart - 2) * 8;
         
         // for FAT32_Table get next block number
         PreviousBlockNumber = FileBlockStart;
@@ -378,7 +378,7 @@ EFI_STATUS L2_STORE_GetFatTableFSM()
      }           
     
     // start sector of file
-    sector_count = device[i].stMBRSwitched.ReservedSelector + device[i].stMBRSwitched.SectorsPerFat * device[i].stMBRSwitched.NumFATS + device[i].stMBRSwitched.BootPathStartCluster - 2 + (FileBlockStart - 2) * 8;
+    sector_count = device[i].stMBRSwitched.ReservedSelector + device[i].stMBRSwitched.SectorsPerFat * device[i].stMBRSwitched.FATCount + device[i].stMBRSwitched.BootPathStartCluster - 2 + (FileBlockStart - 2) * 8;
     
     // for FAT32_Table get next block number
     PreviousBlockNumber = FileBlockStart;
@@ -449,7 +449,8 @@ EFI_STATUS L2_STORE_ReadFileFSM()
     // Read file content from FAT32(USB), minimum unit is block
 
     UINT8 AddOneFlag = (FileLength % (512 * 8)) == 0 ? 0 : 1;
-    
+
+    //把整个文件从外存读取到内存
     for (UINT16 k = 0; k < FileLength / (512 * 8) + AddOneFlag; k++)
     {
         Status = L1_STORE_READ(i, sector_count, 8, BufferBlock); 
@@ -486,7 +487,7 @@ EFI_STATUS L2_STORE_ReadFileFSM()
           
           FileReadCount++;
           UINT32 NextBlockNumber = L2_FILE_GetNextBlockNumber();
-          sector_count = device[i].stMBRSwitched.ReservedSelector + device[i].stMBRSwitched.SectorsPerFat * device[i].stMBRSwitched.NumFATS + device[i].stMBRSwitched.BootPathStartCluster - 2 + (NextBlockNumber - 2) * 8;
+          sector_count = device[i].stMBRSwitched.ReservedSelector + device[i].stMBRSwitched.SectorsPerFat * device[i].stMBRSwitched.FATCount + device[i].stMBRSwitched.BootPathStartCluster - 2 + (NextBlockNumber - 2) * 8;
           PreviousBlockNumber = NextBlockNumber;
           //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: NextBlockNumber: %llu\n",  __LINE__, NextBlockNumber);
      }
@@ -500,13 +501,13 @@ EFI_STATUS L2_STORE_ReadFileFSM()
 
 
 //可优化，同一个分区，第一次读入后，不需要再初始化一遍
-STATE_TRANSFORM StatusTransitionTable[] =
+STATE_TRANSFORM FileReadTransitionTable[] =
 {
-    { INIT_STATE,                READ_PATITION_EVENT,   GET_PARTITION_INFO_STATE, L2_STORE_PartitionAnalysisFSM},
-    { GET_PARTITION_INFO_STATE,  READ_ROOT_PATH_EVENT,  GET_ROOT_PATH_INFO_STATE, L2_STORE_RootPathAnalysisFSM},
-    { GET_ROOT_PATH_INFO_STATE,  READ_FAT_TABLE_EVENT,  GET_FAT_TABLE_STATE,      L2_STORE_GetFatTableFSM},
-    { GET_FAT_TABLE_STATE,       READ_FILE_EVENT,       READ_FILE_STATE,          L2_STORE_ReadFileFSM},
-    { READ_FILE_STATE,           READ_FILE_EVENT,       READ_FILE_STATE,          L2_STORE_ReadFileFSM },
+    { READ_FILE_INIT_STATE,                READ_PATITION_EVENT,   READ_FILE_GET_PARTITION_INFO_STATE, L2_STORE_PartitionAnalysisFSM},
+    { READ_FILE_GET_PARTITION_INFO_STATE,  READ_ROOT_PATH_EVENT,  READ_FILE_GET_ROOT_PATH_INFO_STATE, L2_STORE_RootPathAnalysisFSM},
+    { READ_FILE_GET_ROOT_PATH_INFO_STATE,  READ_FAT_TABLE_EVENT,  READ_FILE_GET_FAT_TABLE_STATE,      L2_STORE_GetFatTableFSM},
+    { READ_FILE_GET_FAT_TABLE_STATE,       READ_FILE_EVENT,       READ_FILE_GET_DATA_STATE,               L2_STORE_ReadFileFSM},
+    { READ_FILE_GET_DATA_STATE,            READ_FILE_EVENT,       READ_FILE_GET_DATA_STATE,               L2_STORE_ReadFileFSM },
 };
 
 
@@ -527,7 +528,8 @@ STATE_TRANSFORM StatusTransitionTable[] =
 int L2_STORE_FileRead(EVENT event)
 {
     EFI_STATUS Status;
-    
+
+    //如果读取的扇区数量，超过文件长度除以每个扇区所占用的字节，则停止读取
     if (FileReadCount > FileLength / (512 * 8))
     {
         L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: Status:%X \n", __LINE__, Status);
@@ -537,19 +539,19 @@ int L2_STORE_FileRead(EVENT event)
                               __LINE__, 
                             event, 
                             NextState,
-                            StatusTransitionTable[NextState].event,
-                            StatusTransitionTable[NextState].NextState);
+                            FileReadTransitionTable[NextState].event,
+                            FileReadTransitionTable[NextState].NextState);
     
-    if ( event == StatusTransitionTable[NextState].event)
+    if ( event == FileReadTransitionTable[NextState].event)
     {
         L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: Status:%X \n", __LINE__, Status);
-        StatusTransitionTable[NextState].pAction();
-        NextState = StatusTransitionTable[NextState].NextState;
+        FileReadTransitionTable[NextState].pAction();
+        NextState = FileReadTransitionTable[NextState].NextState;
     }
     else  
     {
         L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: Status:%X \n", __LINE__, Status);
-        NextState = INIT_STATE;
+        NextState = READ_FILE_INIT_STATE;
     }
 
     L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: Status:%X \n", __LINE__, Status);
@@ -588,7 +590,7 @@ EFI_STATUS L3_APPLICATION_ReadFile(UINT8 *FileName, UINT8 NameLength, UINT8 *pBu
     sector_count = 0;
     PreviousBlockNumber = 0;
     FileBlockStart = 0;
-    NextState = INIT_STATE;
+    NextState = READ_FILE_INIT_STATE;
     READ_FILE_FSM_Event = 0;
 
     //当前读取系统文件，都是在"OS"这个分区
@@ -609,8 +611,11 @@ EFI_STATUS L3_APPLICATION_ReadFile(UINT8 *FileName, UINT8 NameLength, UINT8 *pBu
     {
         L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: i: %d \n", __LINE__, i);
         //DEBUG ((EFI_D_INFO, "%d HandleEnterPressed FSM_Event: %d\n", __LINE__, READ_FILE_FSM_Event));
+
+        //这里就是按照读取文件的状态机，一个一个事件的触发
         L2_STORE_FileRead(READ_FILE_FSM_Event++);
 
+        //前几个事件只需要触发一次，但是文件读取的时候，需要触发很多次
         if (READ_FILE_EVENT <= READ_FILE_FSM_Event)
             READ_FILE_FSM_Event = READ_FILE_EVENT;
     }

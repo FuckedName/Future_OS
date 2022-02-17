@@ -43,10 +43,13 @@
 //#include <NTFS/L2_PARTITION_NTFS.h>
 
 UINT32 BlockSize = 0;
-DEVICE_PARAMETER device[10] = {0};
+
+//定义整个系统分区数，类似C，D，E，U盘等等，注意，一块硬盘或U盘可以分成多个分区
+DEVICE_PARAMETER device[50] = {0};
 UINT64 FileBlockStart = 0;
 DollarBootSwitched NTFSBootSwitched;
 
+//定义当前操作系统读取系统文件所在的分区名称，系统文件包含：背景图片，图标，HZK16文件等等这些
 UINT8 EFI_FILE_STORE_PATH_PARTITION_NAME[50] = "OS";
 
 UINT8 Buffer1[DISK_BUFFER_SIZE];
@@ -55,8 +58,9 @@ UINT8 Buffer1[DISK_BUFFER_SIZE];
 
 
 //通用文件系统文件或者目录
-//因为当前系统支持NTFS和FAT32，实际上后边可能会支持其他类型的文件系统，不同文件系统，读取出来的文件都会有文件名、大小、类型等等，所以抽象出来一个公共的数据结构。
-COMMON_STORAGE_ITEM pCommonStorageItems[32];
+//因为当前系统支持NTFS和FAT32，实际上后边可能会支持其他类型的文件系统，不同文件系统，
+//读取出来的文件都会有文件名、大小、类型等等，所以抽象出来一个公共的数据结构。
+COMMON_STORAGE_ITEM pCommonStorageItems[100];
 
 
 // all partitions analysis
@@ -98,7 +102,7 @@ EFI_STATUS L2_FILE_PartitionTypeAnalysis(UINT16 DeviceID)
         L1_FILE_FAT32_DataSectorAnalysis(Buffer1, &(device[DeviceID].stMBRSwitched)); 
 
         // data sector number start include: reserved selector, fat sectors(usually is 2: fat1 and fat2), and file system boot path start cluster(usually is 2, data block start number is 2)
-        device[DeviceID].StartSectorNumber = device[DeviceID].stMBRSwitched.ReservedSelector + device[DeviceID].stMBRSwitched.SectorsPerFat * device[DeviceID].stMBRSwitched.NumFATS;
+        device[DeviceID].StartSectorNumber = device[DeviceID].stMBRSwitched.ReservedSelector + device[DeviceID].stMBRSwitched.SectorsPerFat * device[DeviceID].stMBRSwitched.FATCount;
 		sector_count = device[DeviceID].StartSectorNumber + (device[DeviceID].stMBRSwitched.BootPathStartCluster - 2) * 8;
 		device[DeviceID].FileSystemType = FILE_SYSTEM_FAT32;
         BlockSize = device[DeviceID].stMBRSwitched.SectorOfCluster * 512; 

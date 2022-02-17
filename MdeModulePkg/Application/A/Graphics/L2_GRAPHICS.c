@@ -1429,7 +1429,8 @@ EFI_STATUS L2_GRAPHICS_ScreenInit()
     
     L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: FAT32\n",  __LINE__);
 
-    Status = L3_APPLICATION_ReadFile("ZHUFENGBMP", 10, pDeskWallpaperBuffer);
+    UINT8 pBuffer[] = "ZHUFENGBMP";    
+    Status = L3_APPLICATION_ReadFile(pBuffer, L1_STRING_Length(pBuffer), pDeskWallpaperBuffer);
     if (EFI_ERROR(Status))
     {
         L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: ReadFileSelf error\n", __LINE__);

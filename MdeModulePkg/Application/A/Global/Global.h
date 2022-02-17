@@ -210,7 +210,7 @@ extern float MemorySize;
 #define DISPLAY_DESK_DATE_TIME_Y (ScreenHeight - 21)
 
 extern DollarBootSwitched NTFSBootSwitched;
-extern COMMON_STORAGE_ITEM pCommonStorageItems[32];
+extern COMMON_STORAGE_ITEM pCommonStorageItems[100];
 
 
 #define SYSTEM_ICON_WIDTH 400
@@ -222,7 +222,7 @@ typedef struct
     UINT16 ReservedSelector;
     UINT32 SectorsPerFat;   
     UINT32 BootPathStartCluster;
-    UINT8 NumFATS;
+    UINT8 FATCount;
     UINT8 SectorOfCluster;
     UINT8 *FAT32_Table;
 }MasterBootRecordSwitched;    
@@ -234,7 +234,7 @@ typedef struct
     UINT8 BitsOfSector[2] ; // 0x0b 2 每个扇区的字节数。取值只能是以下几种：512，1024，2048或是4096。设为512会取得最好的兼容性
     UINT8 SectorOfCluster[1] ; // 0x0d 1 每簇扇区数。 其值必须中2的整数次方，同时还要保证每簇的字节数不能超过32K
     UINT8 ReservedSelector[2] ; // 0x0e 2 保留扇区数（包括启动扇区）此域不能为0，FAT12/FAT16必须为1，FAT32的典型值取为32
-    UINT8 NumFATS[1] ; // 0x10 1 文件分配表数目。 NumFATS，任何FAT格式都建议为2
+    UINT8 FATCount[1] ; // 0x10 1 文件分配表数目。 NumFATS，任何FAT格式都建议为2
     UINT8 RootPathRecords[2] ; // 0x11 2 最大根目录条目个数, 0 for fat32, 512 for fat16
     UINT8 AllSectors[2] ; // 0x13 2 总扇区数（如果是0，就使用偏移0x20处的4字节值）0 for fat32
     UINT8 Description[1] ; // 0x15 1 介质描述 0xF8 单面、每面80磁道、每磁道9扇区
@@ -356,12 +356,12 @@ extern UINT16 FolderItemID;
  // init -> partition analysised -> root path analysised -> read fat table -> start read file -> reading a file -> read finished
  typedef enum 
  {
-	 INIT_STATE = 0,
-	 GET_PARTITION_INFO_STATE,
-	 GET_ROOT_PATH_INFO_STATE,
-	 GET_FAT_TABLE_STATE,
-	 READ_FILE_STATE,
- }STATE;
+	 READ_FILE_INIT_STATE = 0,
+	 READ_FILE_GET_PARTITION_INFO_STATE,
+	 READ_FILE_GET_ROOT_PATH_INFO_STATE,
+	 READ_FILE_GET_FAT_TABLE_STATE,
+	 READ_FILE_GET_DATA_STATE,
+ }READ_FILE_STATE;
 
 
 typedef enum 
@@ -393,12 +393,9 @@ typedef struct
 
 
 	                      
-extern UINT8 ReadFileName[20];                                
-extern UINT8 *pReadFileDestBuffer;                          
-extern UINT8 ReadFileNameLength;                           
-extern UINT64 PreviousBlockNumber;                          
-extern UINT64 FileBlockStart;                               
-extern STATE   NextState;                                    
+extern UINT8 ReadFileName[20];                              
+extern UINT8 ReadFileNameLength;                             
+extern READ_FILE_STATE   NextState;                                    
 extern int READ_FILE_FSM_Event;     
 
 extern UINT16 StatusErrorCount; 
@@ -425,7 +422,7 @@ extern UINT8 *pMapper;
 
 extern UINT64 FreeNumberOfPages;
 extern UINT64 SystemAllPagesAllocated;
-extern DEVICE_PARAMETER device[10];
+extern DEVICE_PARAMETER device[50];
 extern EFI_HANDLE  TimerOne;
 extern EFI_HANDLE  SystemHandle;
 extern EFI_SHELL_PROTOCOL    *EfiShellProtocol;
