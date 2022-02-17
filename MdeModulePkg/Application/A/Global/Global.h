@@ -111,7 +111,17 @@ typedef struct
     UINT8 LatestModiedDate[2];
     UINT8 StartClusterLow2B[2]; //*
     UINT8 FileLength[4];
+
+    //用于指向当前文件或者目录对应的扇区缓存，因为有时候一个缓存指向很多目录或文件项
+    //这样，如果需要删除文件项时，需要把这个文件所在的目录项都要读取出来，再写入磁盘
+    //不知道能不能优化下，当前记录项为1025，表示是第3个扇区等等（因为读取和写入，需要以扇区为单位）
+    //UINT8 *pSectorBuffer;
 }FAT32_ROOTPATH_SHORT_FILE_ITEM;
+
+
+#define DISK_BUFFER_SIZE (512)
+
+extern UINT8 Buffer1[DISK_BUFFER_SIZE];
 
 
 typedef struct 
@@ -202,7 +212,6 @@ extern float MemorySize;
 extern DollarBootSwitched NTFSBootSwitched;
 extern COMMON_STORAGE_ITEM pCommonStorageItems[32];
 
-#define DISK_BUFFER_SIZE (512)
 
 #define SYSTEM_ICON_WIDTH 400
 #define SYSTEM_ICON_HEIGHT 320
@@ -276,6 +285,8 @@ typedef struct
     UINT64 StartSectorNumber; //Very important
     UINT64 SectorCount; //0xC93060
     UINT8 PartitionName[50];
+
+    UINT64 FAT_TableStartSectorNumber;
 
     //Partition parameter
     MasterBootRecordSwitched stMBRSwitched; //FAT32

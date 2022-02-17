@@ -49,6 +49,7 @@ DollarBootSwitched NTFSBootSwitched;
 
 UINT8 EFI_FILE_STORE_PATH_PARTITION_NAME[50] = "OS";
 
+UINT8 Buffer1[DISK_BUFFER_SIZE];
 
 
 
@@ -77,9 +78,10 @@ EFI_STATUS L2_FILE_PartitionTypeAnalysis(UINT16 DeviceID)
 {    
     L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d DeviceID: %d\n", __LINE__, DeviceID);
     EFI_STATUS Status;
-    UINT8 Buffer1[DISK_BUFFER_SIZE] = {0};
 
     sector_count = 0;
+
+    L1_MEMORY_SetValue(Buffer1, 0, DISK_BUFFER_SIZE);
 
     Status = L1_STORE_READ(DeviceID, 0, 1, Buffer1 );  
     if (EFI_ERROR(Status))

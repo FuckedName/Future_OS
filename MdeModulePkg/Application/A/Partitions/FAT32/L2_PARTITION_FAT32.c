@@ -124,7 +124,8 @@ EFI_STATUS L2_FILE_FAT32_DataSectorHandle(UINT16 DeviceID)
     L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d L2_FILE_FAT32_DataSectorHandle DeviceID: %d sector_count: %u\n", __LINE__, DeviceID, sector_count);
     //printf( "RootPathAnalysis\n" );
     EFI_STATUS Status ;
-    UINT8 Buffer1[DISK_BUFFER_SIZE];
+    
+    L1_MEMORY_SetValue(Buffer1, 0, DISK_BUFFER_SIZE);
     
     Status = L1_STORE_READ(DeviceID, sector_count, 1, Buffer1); 
     if (EFI_ERROR(Status))
@@ -133,15 +134,12 @@ EFI_STATUS L2_FILE_FAT32_DataSectorHandle(UINT16 DeviceID)
         return Status;
     }
     
-    //When get root path data sector start number, we can get content of root path.
-    //L1_FILE_FAT32_DataSectorAnalysis(Buffer1, &device[DeviceID].stMBRSwitched);    
-    
     L1_MEMORY_Memset(&pItems, 0, sizeof(pItems));
     L1_MEMORY_Copy(&pItems, Buffer1, DISK_BUFFER_SIZE);
 
     // data area start from 1824, HZK16 file start from     FileBlockStart  block, so need to convert into sector by multi 8, block start number is 2   
     // next state is to read FAT table
-    sector_count = device[DeviceID].stMBRSwitched.ReservedSelector;
+    //sector_count = device[DeviceID].stMBRSwitched.ReservedSelector;
     L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: sector_count:%ld FileLength: %d MBRSwitched.ReservedSelector:%ld\n",  __LINE__, sector_count, FileLength, device[DeviceID].stMBRSwitched.ReservedSelector);
 
     return EFI_SUCCESS;
@@ -228,9 +226,11 @@ EFI_STATUS L2_FILE_FAT32_FileModify(UINT16 DeviceID)
             //如果是文件，则显示文件内容
             case 0x20: L2_PARTITION_FileContentPrint(Buffer); 
 
+                        //我们将从U盘读取的缓冲区，前5位，每位在原来的基础上+1
                         for (UINT16 i = 0; i < 5; i++)
                             Buffer[i] += 1;
-
+                            
+                        //然后写入U盘，这样可以看到U盘目录下文件的变化，不过这里边有点问题，我们修改文件正常还需要记录修改文件的日期，时间信息
                         L1_STORE_Write(PartitionItemID, StartSectorNumber, 1, Buffer);
                         break;
     
@@ -286,38 +286,10 @@ EFI_STATUS L2_FILE_FAT32_FileOpen(UINT16 DeviceID)
 EFI_STATUS L2_FILE_FAT32_FileDelete(UINT16 DeviceID)
 {
     //暂时先不实现
-    return;
-    UINT8 Buffer1[512];
     EFI_STATUS Status;
-    Status = L1_STORE_READ(DeviceID, 0, 1, Buffer1 );  
-    if (EFI_ERROR(Status))
-    {
-        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d Status: %X\n", __LINE__, Status);
-        return Status;
-    }
-
-    // FAT32 file system
-    if (Buffer1[0x52] == 'F' && Buffer1[0x53] == 'A' && Buffer1[0x54] == 'T' && Buffer1[0x55] == '3' && Buffer1[0x56] == '2')   
-    {                   
-        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: FAT32\n",  __LINE__);
-        // analysis data area of patition
-        L1_FILE_FAT32_DataSectorAnalysis(Buffer1, &(device[DeviceID].stMBRSwitched)); 
-
-        // data sector number start include: reserved selector, fat sectors(usually is 2: fat1 and fat2), and file system boot path start cluster(usually is 2, data block start number is 2)
-        device[DeviceID].StartSectorNumber = device[DeviceID].stMBRSwitched.ReservedSelector + device[DeviceID].stMBRSwitched.SectorsPerFat * device[DeviceID].stMBRSwitched.NumFATS;
-		sector_count = device[DeviceID].StartSectorNumber + (device[DeviceID].stMBRSwitched.BootPathStartCluster - 2) * 8;
-		device[DeviceID].FileSystemType = FILE_SYSTEM_FAT32;
-        BlockSize = device[DeviceID].stMBRSwitched.SectorOfCluster * 512; 
-        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: sector_count:%ld BlockSize: %d StartSectorNumber: %llu FileSystemType: %d\n",  __LINE__, sector_count, BlockSize, device[DeviceID].StartSectorNumber, device[DeviceID].FileSystemType);
-        return FILE_SYSTEM_FAT32;
-    }
     
-    //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d L2_MOUSE_MyComputerFolderItemClicked\n", __LINE__);
-    //FolderItemID;
-    //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d DeviceID: %d\n", __LINE__, DeviceID);
-    //printf( "RootPathAnalysis\n" );
     UINT8 Buffer[DISK_BUFFER_SIZE];
-    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d PartitionItemID: %d FolderItemID: %d \n", __LINE__, PartitionItemID, FolderItemID);
+    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d L2_FILE_FAT32_FileDelete PartitionItemID: %d FolderItemID: %d \n", __LINE__, PartitionItemID, FolderItemID);
         
     if (0xffff == PartitionItemID || 0xffff == FolderItemID)
     {
@@ -339,7 +311,7 @@ EFI_STATUS L2_FILE_FAT32_FileDelete(UINT16 DeviceID)
 
         // Start cluster id is 2, exclude 0,1
         //这样写死8192，会有BUG
-        UINT32 StartSectorNumber = 8192 + (StartCluster - 2) * 8;
+        UINT32 StartSectorNumber = 15920 + (StartCluster - 2) * 8;
         L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], 
                         "%d High2B: %X Low2B: %X StartCluster: %X StartSectorNumber: %X\n", 
                         __LINE__, 
@@ -347,34 +319,6 @@ EFI_STATUS L2_FILE_FAT32_FileDelete(UINT16 DeviceID)
                         Low2B,
                         StartCluster,
                         StartSectorNumber);
-
-        //如果是efi文件，认为是可执行文件
-        if (pItems[index].ExtensionName[0] == 'E' && pItems[index].ExtensionName[1] == 'F' && pItems[index].ExtensionName[2] == 'I' )
-        {
-            pItems[index].ExtensionName[0] = 'e';
-            pItems[index].ExtensionName[1] = 'f';
-            pItems[index].ExtensionName[2] = 'i';
-            
-            UINT8 FileName[13] = {0};
-            L1_FILE_NameMerge(index, FileName);
-            CHAR16 wcFileName[13] = {0};
-
-            for (UINT8 i = 0; '\0' != FileName[i]; i++)
-            {
-                wcFileName[i] = FileName[i];
-            }
-                            
-            EFI_EVENT       Event;
-            L2_ApplicationRun(Event, wcFileName);
-        }
-
-        // Read data from partition(disk or USB etc..)                  
-        Status = L1_STORE_READ(PartitionItemID, StartSectorNumber, 1, Buffer); 
-        if (EFI_ERROR(Status))
-        {
-            L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d Status: %X\n", __LINE__, Status);
-            return Status;
-        }
 
         switch(pItems[index].Attribute[0])
         {
@@ -384,8 +328,31 @@ EFI_STATUS L2_FILE_FAT32_FileDelete(UINT16 DeviceID)
                         L2_STORE_FolderItemsPrint();
                         break;
 
-            //如果是文件，则显示文件内容
-            case 0x20: L2_PARTITION_FileContentPrint(Buffer); break;
+            //如果是文件，则XXX
+            case 0x20: 
+                        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], 
+                        "%d File: \n", __LINE__);
+                       //打印从U盘读取的内容
+                       L1_STORE_READ(2, 16384, 1, Buffer);
+                       //L2_PARTITION_FileContentPrint(Buffer);
+
+                       Buffer[0x20 * 4 + 0] = 0xE5;
+                       //Buffer[0x20 * 4 + 0] = 'E';
+                       //Buffer[0x20 * 4 + 1] = '5';
+                       L1_STORE_Write(2, 16384, 1, Buffer);
+                        break;
+
+                       sector_count = device[DeviceID].stMBRSwitched.ReservedSelector;
+                       L1_STORE_READ(DeviceID, sector_count, 1, Buffer);
+                       
+                       for (UINT8 i = 0; i < 4; i++)
+                       {
+                            Buffer[StartCluster * 4 + i] = 0;
+                       }
+                       
+                       L1_STORE_Write(DeviceID, sector_count, 1, Buffer);
+                       ;
+                    break;
 
             default: break;
         }

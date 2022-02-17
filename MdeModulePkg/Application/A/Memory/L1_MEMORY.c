@@ -35,6 +35,7 @@ UINT64 FreeNumberOfPages = ALL_PAGE_COUNT;
 UINT64 SystemAllPagesAllocated = 0;
 UINT8 *pMapper = (UINT8 *)(PHYSICAL_ADDRESS_START);
 
+//每个FAT32格式需要一个FAT TABLE
 UINT8 *FAT32_Table = NULL;
 
 UINT8 *pDateTimeBuffer = NULL; //Mouse layer: 3

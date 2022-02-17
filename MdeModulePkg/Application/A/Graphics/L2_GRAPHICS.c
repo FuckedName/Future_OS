@@ -114,7 +114,7 @@ UINT16 FolderItemID = 0xffff; // invalid
 
 INT8 SystemQuitFlag = FALSE;
 
-// because part items of  pItems is not valid;
+// 当前认为是目录或文件才记录为有效文件索引;
 UINT16 FolderItemValidIndexArray[10] = {0};
 
 DESKTOP_ITEM_CLICKED_EVENT    DesktopItemClickEvent = DESKTOP_ITEM_INIT_CLICKED_EVENT;
@@ -524,17 +524,69 @@ VOID L2_MOUSE_MyComputerCloseClicked()
 *****************************************************************************/
 VOID L2_MOUSE_MyComputerPartitionItemClicked()
 {
-    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d L2_MOUSE_MyComputerPartitionItemClicked\n", __LINE__);
-	EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
-	
-    Color.Red   = 0xff;
-    Color.Green = 0x00;
-    Color.Blue  = 0x00;
-    Color.Reserved = GRAPHICS_LAYER_MY_COMPUTER_WINDOW;
-	
-    //L2_GRAPHICS_RectangleDraw(pMouseSelectedBuffer, 0,  0, 31, 15, 1,  Color, 32);
-	//L2_GRAPHICS_Copy(pDeskDisplayBuffer, pMouseSelectedBuffer, ScreenWidth, ScreenHeight, 32, 16, WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].StartX + 50, WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].StartY  + PartitionItemID * (16 + 2) + 16 * 2);   
-    L2_STORE_PartitionItemsPrint(PartitionItemID);
+    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: L2_MOUSE_MyComputerPartitionItemClicked, PartitionItemID: %d\n",  __LINE__, PartitionItemID);
+    
+    // this code may be have some problems, because my USB file system is FAT32, my Disk file system is NTFS.
+    // others use this code must be careful...
+    //UINT8 FileSystemType = L2_FILE_PartitionTypeAnalysis(PartitionItemID);
+
+    L2_FILE_PartitionTypeAnalysis(PartitionItemID);
+
+    if (device[PartitionItemID].FileSystemType == FILE_SYSTEM_FAT32)
+    {
+        //读取根目录项目
+        EFI_STATUS Status = L2_FILE_FAT32_DataSectorHandle(PartitionItemID);
+        if (0 != Status)
+            return;
+            
+        L2_STORE_FolderItemsPrint();
+    }
+    else if (device[PartitionItemID].FileSystemType == FILE_SYSTEM_NTFS)
+    {
+    	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%a %d: %d\n",  __FUNCTION__,  __LINE__, device[PartitionItemID].StartSectorNumber + MFT_ITEM_DOLLAR_ROOT * 2);
+		
+        // get MFT $ROOT item. 
+        L2_FILE_NTFS_MFT_Item_Read(PartitionItemID, device[PartitionItemID].StartSectorNumber + MFT_ITEM_DOLLAR_ROOT * 2);
+
+        // get data runs
+        //L2_FILE_NTFS_MFTDollarRootFileAnalysis(BufferMFT);      
+
+		L1_MEMORY_Memset(&NTFSFileSwitched, 0, sizeof(NTFSFileSwitched)); 
+		
+		//当前测试，只显示一个设备，显示多个设备测试会比较麻烦
+		//if (3 == DeviceID)
+		//L2_PARTITION_FileContentPrint(BufferMFT);
+
+		L2_FILE_NTFS_FileItemBufferAnalysis(BufferMFT, &NTFSFileSwitched);
+
+		for (UINT16 i = 0; i < 10; i++)
+		{
+			//找到A0属性
+			if (NTFSFileSwitched.NTFSFileAttributeHeaderSwitched[i].Type == MFT_ATTRIBUTE_DOLLAR_INDEX_ALLOCATION)
+			{
+				// Analysis data runs
+				L2_FILE_NTFS_DollarRootA0DatarunAnalysis(NTFSFileSwitched.NTFSFileAttributeHeaderSwitched[i].Data);
+				
+				L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: %02X %02X %02X %02X %02X  %02X\n",  __LINE__, NTFSFileSwitched.NTFSFileAttributeHeaderSwitched[i].Data[0],
+								NTFSFileSwitched.NTFSFileAttributeHeaderSwitched[i].Data[1],
+								NTFSFileSwitched.NTFSFileAttributeHeaderSwitched[i].Data[2],
+								NTFSFileSwitched.NTFSFileAttributeHeaderSwitched[i].Data[3],
+								NTFSFileSwitched.NTFSFileAttributeHeaderSwitched[i].Data[4],
+								NTFSFileSwitched.NTFSFileAttributeHeaderSwitched[i].Data[5]);
+				break;
+			}
+		}
+		
+        // use data run get root path item index
+        L2_FILE_NTFS_RootPathItemsRead(PartitionItemID);
+		
+
+		L2_STORE_FolderItemsPrint2();
+    }
+    else if (device[PartitionItemID].FileSystemType == FILE_SYSTEM_MAX)
+    {
+        return;
+    }
 }
 
 
@@ -1744,7 +1796,7 @@ BOOLEAN L1_GRAPHICS_InsideRectangle(UINT16 StartX, UINT16 EndX, UINT16 StartY, U
     //如果图层为显示状态，并且鼠标在事件触发区域，则更新值
     if (TRUE == WindowLayers.item[LayerID].DisplayFlag && bInArea)
     {        
-        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: StartX: %d, EndX: %d, StartY: %d, EndY: %d\n", __LINE__, StartX, EndX, StartY, EndY);
+        //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: StartX: %d, EndX: %d, StartY: %d, EndY: %d\n", __LINE__, StartX, EndX, StartY, EndY);
         MouseMoveoverObject.StartX = StartX;
         MouseMoveoverObject.EndX   = EndX;
         MouseMoveoverObject.StartY = StartY;
@@ -3192,6 +3244,7 @@ VOID L2_STORE_FolderItemsPrint()
 	
     for (UINT16 i = 0; i < 32; i++)
     {       
+        //如果第一位为0表示这项有问题
         if (pItems[i].FileName[0] == 0)
             break;
             
@@ -3210,17 +3263,7 @@ VOID L2_STORE_FolderItemsPrint()
         {
             //显示文件夹小图标
             L3_GRAPHICS_ItemPrint(pMyComputerBuffer, pSystemIconFolderBuffer, MyComputerWidth, MyComputerHeight, WidthNew, HeightNew, x, y, "111", 2, GRAPHICS_LAYER_MY_COMPUTER_WINDOW);
-            /*
-            for (int j = 0; j < HeightNew; j++)
-            {
-                for (int k = 0; k < WidthNew; k++)
-                {
-                    pMyComputerBuffer[((valid_count * (HeightNew + 16 * 2) + 200 + j) * MyComputerWidth + 130 + k) * 4 ]     = pSystemIconFolderBuffer[((HeightNew - j) * WidthNew + k) * 3 ];
-                    pMyComputerBuffer[((valid_count * (HeightNew + 16 * 2) + 200 + j) * MyComputerWidth + 130 + k) * 4 + 1 ] = pSystemIconFolderBuffer[((HeightNew - j) * WidthNew + k) * 3 + 1 ];
-                    pMyComputerBuffer[((valid_count * (HeightNew + 16 * 2) + 200 + j) * MyComputerWidth + 130 + k) * 4 + 2 ] = pSystemIconFolderBuffer[((HeightNew - j) * WidthNew + k) * 3 + 2 ];
-                }
-            }
-            */
+            
             L2_DEBUG_Print3(x, y + HeightNew, WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW], "%a %d Bytes",
                                             name,
                                             L1_NETWORK_4BytesToUINT32(pItems[i].FileLength));
@@ -3228,17 +3271,7 @@ VOID L2_STORE_FolderItemsPrint()
             valid_count++;
         }
         else if (pItems[i].Attribute[0] == 0x20) //File
-        {
-            
-            /*for (int j = 0; j < HeightNew; j++)
-            {
-                for (int k = 0; k < WidthNew; k++)
-                {
-                    pMyComputerBuffer[((valid_count * (HeightNew + 16 * 2) + 200 + j) * MyComputerWidth + 130 + k) * 4 ]     = pSystemIconTextBuffer[((HeightNew - j) * WidthNew + k) * 3 ];
-                    pMyComputerBuffer[((valid_count * (HeightNew + 16 * 2) + 200 + j) * MyComputerWidth + 130 + k) * 4 + 1 ] = pSystemIconTextBuffer[((HeightNew - j) * WidthNew + k) * 3 + 1 ];
-                    pMyComputerBuffer[((valid_count * (HeightNew + 16 * 2) + 200 + j) * MyComputerWidth + 130 + k) * 4 + 2 ] = pSystemIconTextBuffer[((HeightNew - j) * WidthNew + k) * 3 + 2 ];
-                }
-            }*/
+        {            
             L2_DEBUG_Print3(x, y + HeightNew, WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW], "%a %d Bytes",
                                             name,
                                             L1_NETWORK_4BytesToUINT32(pItems[i].FileLength));
@@ -3390,68 +3423,6 @@ void L2_GRAPHICS_CopyBufferFromWindowsToDesk()
 *****************************************************************************/
 VOID L2_STORE_PartitionItemsPrint(UINT16 PartitionItemID)
 {
-    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: L2_STORE_PartitionItemsPrint, PartitionItemID: %d\n",  __LINE__, PartitionItemID);
-    
-    // this code may be have some problems, because my USB file system is FAT32, my Disk file system is NTFS.
-    // others use this code must be careful...
-    //UINT8 FileSystemType = L2_FILE_PartitionTypeAnalysis(PartitionItemID);
-
-    L2_FILE_PartitionTypeAnalysis(PartitionItemID);
-
-    if (device[PartitionItemID].FileSystemType == FILE_SYSTEM_FAT32)
-    {
-        EFI_STATUS Status = L2_FILE_FAT32_DataSectorHandle(PartitionItemID);
-        if (0 != Status)
-            return;
-            
-        L2_STORE_FolderItemsPrint();
-    }
-    else if (device[PartitionItemID].FileSystemType == FILE_SYSTEM_NTFS)
-    {
-    	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%a %d: %d\n",  __FUNCTION__,  __LINE__, device[PartitionItemID].StartSectorNumber + MFT_ITEM_DOLLAR_ROOT * 2);
-		
-        // get MFT $ROOT item. 
-        L2_FILE_NTFS_MFT_Item_Read(PartitionItemID, device[PartitionItemID].StartSectorNumber + MFT_ITEM_DOLLAR_ROOT * 2);
-
-        // get data runs
-        //L2_FILE_NTFS_MFTDollarRootFileAnalysis(BufferMFT);      
-
-		L1_MEMORY_Memset(&NTFSFileSwitched, 0, sizeof(NTFSFileSwitched)); 
-		
-		//当前测试，只显示一个设备，显示多个设备测试会比较麻烦
-		//if (3 == DeviceID)
-		//L2_PARTITION_FileContentPrint(BufferMFT);
-
-		L2_FILE_NTFS_FileItemBufferAnalysis(BufferMFT, &NTFSFileSwitched);
-
-		for (UINT16 i = 0; i < 10; i++)
-		{
-			//找到A0属性
-			if (NTFSFileSwitched.NTFSFileAttributeHeaderSwitched[i].Type == MFT_ATTRIBUTE_DOLLAR_INDEX_ALLOCATION)
-			{
-				// Analysis data runs
-				L2_FILE_NTFS_DollarRootA0DatarunAnalysis(NTFSFileSwitched.NTFSFileAttributeHeaderSwitched[i].Data);
-				
-				L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: %02X %02X %02X %02X %02X  %02X\n",  __LINE__, NTFSFileSwitched.NTFSFileAttributeHeaderSwitched[i].Data[0],
-								NTFSFileSwitched.NTFSFileAttributeHeaderSwitched[i].Data[1],
-								NTFSFileSwitched.NTFSFileAttributeHeaderSwitched[i].Data[2],
-								NTFSFileSwitched.NTFSFileAttributeHeaderSwitched[i].Data[3],
-								NTFSFileSwitched.NTFSFileAttributeHeaderSwitched[i].Data[4],
-								NTFSFileSwitched.NTFSFileAttributeHeaderSwitched[i].Data[5]);
-				break;
-			}
-		}
-		
-        // use data run get root path item index
-        L2_FILE_NTFS_RootPathItemsRead(PartitionItemID);
-		
-
-		L2_STORE_FolderItemsPrint2();
-    }
-    else if (device[PartitionItemID].FileSystemType == FILE_SYSTEM_MAX)
-    {
-        return;
-    }
 }
 
 
