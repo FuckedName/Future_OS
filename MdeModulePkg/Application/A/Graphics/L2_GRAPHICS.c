@@ -112,6 +112,7 @@ UINT8 BufferMFT[DISK_BUFFER_SIZE * 2];
 UINT16 PartitionItemID = 0xffff; // invalid
 UINT16 FolderItemID = 0xffff; // invalid
 
+//系统关机
 INT8 SystemQuitFlag = FALSE;
 
 // 当前认为是目录或文件才记录为有效文件索引;
@@ -2245,7 +2246,7 @@ VOID L3_GRAPHICS_DeskClickEventHandle(DESKTOP_ITEM_CLICKED_EVENT event)
             L2_MOUSE_SystemSettingClicked(); break;
 
         case DESKTOP_ITEM_RECYCLE_BIN_CLICKED_EVENT:
-            L2_MOUSE_MyComputerClicked(); break;
+            L2_MOUSE_SystemLogClicked(); break;
 
         case DESKTOP_ITEM_SHUTDOWN_CLICKED_EVENT:
             L2_System_Shutdown(); break;
@@ -3161,25 +3162,19 @@ VOID L2_GRAPHICS_TrackMouseMoveoverObject()
 *****************************************************************************/
 VOID L2_GRAPHICS_LayerCompute(UINT16 iMouseX, UINT16 iMouseY, UINT8 MouseClickFlag)
 {
-    /*L2_DEBUG_Print1(DISPLAY_X, DISPLAY_Y, "%d: pDeskDisplayBuffer: %X pDeskBuffer: %X ScreenWidth: %d ScreenHeight: %d pMouseBuffer: %X\n", __LINE__, 
-                                                                pDeskDisplayBuffer,
-                                                                pDeskBuffer,
-                                                                ScreenWidth,
-                                                                ScreenHeight,
-                                                                pMouseBuffer);
-    */
     //desk 
     L2_GRAPHICS_Copy(pDeskDisplayBuffer, pDeskBuffer, ScreenWidth, ScreenHeight, ScreenWidth, ScreenHeight, 0, 0);
-    //L2_DEBUG_Print1(DISPLAY_X, DISPLAY_Y, "%d: GraphicsLayerCompute\n", __LINE__);
 
+    //关机
     if (TRUE == SystemQuitFlag)
-    {
-    
+    {    
+        //关机的时候，会有一个小的动画写入到pDeskBuffer
 		L2_SCREEN_Draw(pDeskDisplayBuffer, 0, 0, 0, 0, ScreenWidth, ScreenHeight);	
                     
         return;
-    }//
+    }
 
+    //窗口图层拷贝
     L2_GRAPHICS_CopyBufferFromWindowsToDesk();
         
     //鼠标右击菜单，注意，需要在鼠标获取事件前拷贝，因为鼠标右击事件也需要被获取

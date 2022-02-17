@@ -48,7 +48,10 @@ UINT16 keyboard_count = 0;
 #define DISPLAY_KEYBOARD_Y (ScreenHeight - 16 * 3  - 30)
 
 #define KEYBOARD_BUFFER_LENGTH (30) 
+
+//用于记录已经键盘输入字符
 char pKeyboardInputBuffer[KEYBOARD_BUFFER_LENGTH] = {0};
+
 EFI_HANDLE                        *Handles;
 UINTN                             HandleCount;
 
@@ -101,6 +104,80 @@ VOID EFIAPI L2_KEYBOARD_Init (
 }
 
 
+
+/****************************************************************************
+*
+*  描述:   处理键盘输入的命令行
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
+VOID L2_KEYBOARD_CommandHandle (UINT16 uniChar)
+{
+    // Enter pressed，显示以输入地址开始的一段内存地址
+    if (0x0D == uniChar)
+    {
+        UINT64 Sumary = 0;
+        
+        for (UINT16 i = 0; '\0' != pKeyboardInputBuffer[i]; i++)
+        {
+            if(pKeyboardInputBuffer[i] >= '0' && pKeyboardInputBuffer[i] <= '9')
+            {
+                Sumary = Sumary * 10 + (pKeyboardInputBuffer[i] - '0');
+            }
+        }
+        
+        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: Sumary: %d \n", __LINE__, Sumary);
+        
+
+        UINT8 *pAddress = (UINT8 *)Sumary;
+        
+        for (int j = 0; j < 256; j++)
+        {
+            L2_DEBUG_Print1(DISK_READ_BUFFER_X + ScreenWidth * 3 / 4 + (j % 16) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 16), "%02X ", pAddress[j] & 0xff);
+        }
+
+        //初始化键盘输入字符数组
+        keyboard_input_count = 0;
+        
+        for (UINT16 i = 0; i < KEYBOARD_BUFFER_LENGTH; i++)
+            pKeyboardInputBuffer[i] = '\0';
+                        
+        L2_KEYBOARD_KeyPressed();
+    }
+    //When click 'a' or 'A' then Clear log window content
+    else if ('a' == uniChar || 'A' == uniChar)
+    {
+        for (UINT32 i = 23; i < SystemLogWindowHeight - 3; i++)
+        {
+            for (UINT32 j = 3; j < SystemLogWindowWidth - 3; j++)
+            {
+                pSystemLogWindowBuffer[4 * (i * SystemLogWindowWidth + j)] = 0;
+                pSystemLogWindowBuffer[4 * (i * SystemLogWindowWidth + j) + 1] = 0;
+                pSystemLogWindowBuffer[4 * (i * SystemLogWindowWidth + j) + 2] = 0;
+            }
+        }   
+
+        //初始化后，从第1行开始显示
+        LogStatusErrorCount = 0;
+
+        //显示输入的按键
+        L2_DEBUG_Print1(DISPLAY_KEYBOARD_X, DISPLAY_KEYBOARD_Y, "%a keyboard_input_count: %04d ", pKeyboardInputBuffer, keyboard_input_count);
+    }
+    else
+    {
+        //显示输入的按键
+        L2_DEBUG_Print1(DISPLAY_KEYBOARD_X, DISPLAY_KEYBOARD_Y, "%a keyboard_input_count: %04d ", pKeyboardInputBuffer, keyboard_input_count);
+    }
+
+}
+
+
+
 /****************************************************************************
 *
 *  描述:   键盘按键事件响应总入口函数
@@ -150,72 +227,13 @@ VOID EFIAPI L2_KEYBOARD_Event (
             continue;
         }
         
-        scanCode    = KeyData.Key.ScanCode;
         uniChar     = KeyData.Key.UnicodeChar;
-        shiftState  = KeyData.KeyState.KeyShiftState;
-        toggleState  = KeyData.KeyState.KeyToggleState;
         L2_DEBUG_Print1(0, ScreenHeight - 30 - 2 * 16, "%d: L2_KEYBOARD_Event input uniChar: %d", __LINE__, uniChar);
-        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: keyboard input uniChar: %d", __LINE__, uniChar);
-       
+
+        //
         pKeyboardInputBuffer[keyboard_input_count++] = uniChar;
-
-        //想开发一个内存查看功能，比如：从内存XXX地址，查看后续100个长度内存信息
-        // Enter pressed
-        if (0x0D == uniChar)
-        {
-            UINT64 Sumary = 0;
-            
-            for (UINT16 i = 0; '\0' != pKeyboardInputBuffer[i]; i++)
-            {
-                if(pKeyboardInputBuffer[i] >= '0' && pKeyboardInputBuffer[i] <= '9')
-                {
-                    Sumary = Sumary * 10 + (pKeyboardInputBuffer[i] - '0');
-                }
-            }
-            
-            L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: Sumary: %d \n", __LINE__, Sumary);
-            
-
-            UINT8 *pAddress = (UINT8 *)Sumary;
-            
-            for (int j = 0; j < 256; j++)
-            {
-                L2_DEBUG_Print1(DISK_READ_BUFFER_X + ScreenWidth * 3 / 4 + (j % 16) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 16), "%02X ", pAddress[j] & 0xff);
-            }
-
-            //初始化键盘输入字符数组
-            keyboard_input_count = 0;
-            
-            for (UINT16 i = 0; i < KEYBOARD_BUFFER_LENGTH; i++)
-                pKeyboardInputBuffer[i] = '\0';
-                            
-            L2_KEYBOARD_KeyPressed();
-        }
-        //Clear log window content
-        else if ('a' == uniChar || 'A' == uniChar)
-        {
-        	for (UINT32 i = 23; i < SystemLogWindowHeight - 3; i++)
-	        {
-	        	for (UINT32 j = 3; j < SystemLogWindowWidth - 3; j++)
-	        	{
-	        		pSystemLogWindowBuffer[4 * (i * SystemLogWindowWidth + j)] = 0;
-	        		pSystemLogWindowBuffer[4 * (i * SystemLogWindowWidth + j) + 1] = 0;
-	        		pSystemLogWindowBuffer[4 * (i * SystemLogWindowWidth + j) + 2] = 0;
-	        	}
-        	}	
-
-            //初始化后，从第1行开始显示
-        	LogStatusErrorCount = 0;
-
-        	//显示输入的按键
-            L2_DEBUG_Print1(DISPLAY_KEYBOARD_X, DISPLAY_KEYBOARD_Y, "%a keyboard_input_count: %04d ", pKeyboardInputBuffer, keyboard_input_count);
-        }
-        else
-        {
-        	//显示输入的按键
-            L2_DEBUG_Print1(DISPLAY_KEYBOARD_X, DISPLAY_KEYBOARD_Y, "%a keyboard_input_count: %04d ", pKeyboardInputBuffer, keyboard_input_count);
-        }
-       
+                
+        L2_KEYBOARD_CommandHandle(uniChar);
     }  
     
      //DrawAsciiCharUseBuffer(pDeskBuffer, DISPLAY_KEYBOARD_X, DISPLAY_KEYBOARD_Y, uniChar, Color);
