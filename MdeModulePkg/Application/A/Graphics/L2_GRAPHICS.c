@@ -2484,6 +2484,8 @@ VOID L3_GRAPHICS_SystemLogClickEventHandle(SYSTEM_LOG_WINDOW_CLICKED_EVENT event
 *****************************************************************************/
 VOID L3_GRAPHICS_MouseRightButtonClickEventHandle(MOUSE_RIGHT_MENU_CLICKED_EVENT event)
 {    
+    UINT8 *pPathName;
+    UINT8 *pBuffer;
 	switch(event)
 	{
 		case MOUSE_RIGHT_MENU_OPEN_CLICKED_EVENT:
@@ -2495,6 +2497,7 @@ VOID L3_GRAPHICS_MouseRightButtonClickEventHandle(MOUSE_RIGHT_MENU_CLICKED_EVENT
 			L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d MOUSE_RIGHT_MENU_DELETE_CLICKED_EVENT\n", __LINE__); break;
 
 		case MOUSE_RIGHT_MENU_ADD_CLICKED_EVENT:
+		    L3_APPLICATION_ReadFileWithPath(pPathName, pBuffer);
 		    L2_FILE_FAT32_FileAdd();
 			L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d MOUSE_RIGHT_MENU_ADD_CLICKED_EVENT\n", __LINE__); break;
 

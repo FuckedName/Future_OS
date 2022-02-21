@@ -49,6 +49,45 @@ unsigned long long L1_STRING_Length(char *String)
     return Length;
 }
 
+
+
+/****************************************************************************
+*
+*  描述:  把一个字符串倒序
+*
+*  参数1： 示例："/OS/resource/zhufeng.bmp"，其中/OS是指系统目录
+*  参数2： pBuffer
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
+UINT16 L1_STRING_Reverse(UINT8 *s)
+{
+    UINT16 len = AsciiStrLen(s);
+    UINT16 i;
+    UINT16 t;
+    for (i = 0; i < len / 2; i++)
+    {
+        t = s[i];
+        s[i] = s[len - 1 - i];
+        s[len - 1 - i] = t;
+    }
+}
+
+
+
+/****************************************************************************
+*
+*  描述:  把单字节字符串，转换成双字节字符串
+*
+*  参数1： 示例："/OS/resource/zhufeng.bmp"，其中/OS是指系统目录
+*  参数2： pBuffer
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
 L1_STRING_AsciiStringToWchar(CHAR8          *pSource, unsigned short *pDest)
 {
     if (pSource == NULL || pDest == NULL)

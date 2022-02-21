@@ -30,6 +30,8 @@
 #include <Global/Global.h>
 
 int READ_FILE_FSM_Event = READ_PATITION_EVENT;
+
+//整个系统硬盘、U盘等等外存的分区总数，注：一个硬盘或一个U盘可以分成多个分区
 UINTN PartitionCount = 0;
 
 READ_FILE_STATE   NextState = READ_FILE_INIT_STATE;
@@ -48,6 +50,11 @@ UINT8 ReadFileName[20];
 UINT64 sector_count = 0;
 UINT32 ReadFilePartitionID = 0;
 
+//记录文件所在目录最大目录深度
+#define FILE_PATH_COUNT 10
+
+//记录文件所在目录最大目录长度
+#define FILE_PATH_LENGTH 20
 
 // all partitions analysis
 
@@ -621,6 +628,186 @@ EFI_STATUS L3_APPLICATION_ReadFile(UINT8 *FileName, UINT8 NameLength, UINT8 *pBu
     }
 
     
+}
+
+
+
+/****************************************************************************
+*
+*  描述:    解析文件所在的路径列表，以/分割，把根目录写到FilePaths[0]，下一级目录写到FilePaths[1]，依次类推
+*         示例："/OS/resource/zhufeng.bmp"，把OS写到FilePaths[0]，resource写到FilePaths[1]
+*
+*  参数1： 示例："/OS/resource/zhufeng.bmp"，其中/OS是指系统目录
+*  参数2： pBuffer
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
+UINT16 L3_APPLICATION_GetFilePaths(UINT8 *pPath, UINT8 FilePaths[FILE_PATH_COUNT][FILE_PATH_LENGTH])
+{
+    UINT16 i = 0;
+    UINT16 j = 0;
+    UINT16 PathCount = 0;
+
+    if ('/' != pPath[0])
+    {
+        return -1;
+    }
+
+    for (i = 1; i < AsciiStrLen(pPath); i++)
+    {
+        if('/' == pPath[i])
+        {
+            FilePaths[PathCount][j] = '\0';
+            L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d Found path: %a\n", __LINE__, FilePaths[PathCount]);
+    
+            //printf("Found path: %s\n", FilePaths[PathCount]);
+            j = 0;
+            PathCount++;
+        }
+        else
+        {
+            FilePaths[PathCount][j++] = pPath[i];
+        }
+    }
+}
+
+
+
+/****************************************************************************
+*
+*  描述:    解析文件名，是从最后一个字符解析
+*
+*  参数1： 示例："/OS/resource/zhufeng.bmp"，其中/OS是指系统目录
+*  参数2： pBuffer
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
+UINT16 L3_APPLICATION_GetFileName(UINT8 *pPath, UINT8 *FileName)
+{
+    UINT16 Length = AsciiStrLen(pPath);
+    UINT16 j = 0;
+    
+    for (UINT16 i = Length - 1; i >= 0; i--)
+    {
+        if ('/' == pPath[i])
+        {
+            //putUINT8('\n');
+            L1_STRING_Reverse(FileName);
+            L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d File name: %a\n", __LINE__, FileName);
+            L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d filename start location: %d\n", __LINE__, i);
+
+            break;
+        }
+        FileName[j++] = pPath[i];
+    }
+
+}
+
+
+/****************************************************************************
+*
+*  描述:    把带有路径和文件名的信息解析出来
+*
+*  参数1： 示例："/OS/resource/zhufeng.bmp"，其中/OS是指系统目录
+*  参数2： pBuffer
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
+UINT16 L3_APPLICATION_AnaysisPath(const UINT8 *pPath)
+{
+    if (pPath[0] != '/')
+    {
+        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d Path error!\n", __LINE__);
+        return;
+    }
+
+    UINT16 Length = AsciiStrLen(pPath);
+    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d string length: %d\n", __LINE__, Length);
+        
+    UINT8 FileName[50] = {0};
+    UINT16 FileNameLength = 0;
+    L3_APPLICATION_GetFileName(pPath, FileName);
+
+    UINT8 FilePaths[FILE_PATH_COUNT][FILE_PATH_LENGTH] = {0};
+    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d File name length: %d\n", __LINE__, FileNameLength);
+   
+    L3_APPLICATION_GetFilePaths(pPath, FilePaths);
+
+    UINT16 i = 0;
+    UINT16 j = 0;
+    UINT16 FileInPartitionID = 0xffff;
+    
+    //找到对应的分区
+    for (i = 0; i < PartitionCount; i++)
+    {
+        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: FileInPartitionID: %a \n", __LINE__, device[i].PartitionName);
+            
+        //分区都在FilePaths第一个字符串
+        for (j = 0; (device[i].PartitionName[j] != 0) || (FilePaths[0][j] != 0); j++)
+        {
+            if (device[i].PartitionName[j] != FilePaths[0][j])
+            {
+                break;
+            }
+        }
+        
+        if (device[i].PartitionName[j] == '\0' && FilePaths[0][j] == '\0')
+        {
+            FileInPartitionID = i;
+            L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: FileInPartitionID: %d \n", __LINE__, FileInPartitionID);
+            break;
+        }
+    }
+
+    return;
+
+    for (int i = 0; i < 5; i++)
+    {
+        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: i: %d \n", __LINE__, i);
+        //DEBUG ((EFI_D_INFO, "%d HandleEnterPressed FSM_Event: %d\n", __LINE__, READ_FILE_FSM_Event));
+
+        //这里就是按照读取文件的状态机，一个一个事件的触发
+        L2_STORE_FileRead(READ_FILE_FSM_Event++);
+
+        //前几个事件只需要触发一次，但是文件读取的时候，需要触发很多次
+        if (READ_FILE_EVENT <= READ_FILE_FSM_Event)
+            READ_FILE_FSM_Event = READ_FILE_EVENT;
+    }
+}
+
+/*
+UINT16 main()
+{
+        //UINT8 p[] = "/OS/resource/zhufeng.bmp";
+        UINT8 p[] = "/home/x/test.bmp";
+        AnaysisPath(p);
+
+}
+*/        
+
+
+/****************************************************************************
+*
+*  描述:    通过文件所在的完整路径，读取文件
+*
+*  参数1： 示例："/OS/resource/zhufeng.bmp"，其中/OS是指系统目录
+*  参数2： pBuffer
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
+EFI_STATUS L3_APPLICATION_ReadFileWithPath(UINT8 *pPathName, UINT8 *pBuffer)
+{
+    UINT8 p[] = "/OS/resource/zhufeng.bmp";
+    L3_APPLICATION_AnaysisPath(p);
+
 }
 
 
