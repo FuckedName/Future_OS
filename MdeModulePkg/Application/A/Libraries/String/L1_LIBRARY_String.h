@@ -39,3 +39,5 @@ char *L1_STRING_FloatToString(float val, int precision, char *buf);
 
 unsigned long long L1_STRING_Length(char *String);
 
+BOOLEAN L1_STRING_IsValidNameChar (CHAR8      NameChar);
+

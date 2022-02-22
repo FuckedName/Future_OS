@@ -27,6 +27,7 @@
 
 #include <Graphics/L2_GRAPHICS.h>
 #include <Devices/Store/L2_DEVICE_Store.h>
+#include <Libraries/String/L1_LIBRARY_String.h>
 #include <Global/Global.h>
 
 int READ_FILE_FSM_Event = READ_PATITION_EVENT;
@@ -749,15 +750,15 @@ UINT16 L3_APPLICATION_AnaysisPath(const UINT8 *pPath)
         L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: FileInPartitionID: %a \n", __LINE__, device[i].PartitionName);
             
         //分区都在FilePaths第一个字符串
-        for (j = 0; (device[i].PartitionName[j] != 0) || (FilePaths[0][j] != 0); j++)
+        for (j = 0; L1_STRING_IsValidNameChar(device[i].PartitionName[j]) && L1_STRING_IsValidNameChar(FilePaths[0][j]); j++)
         {
-            if (device[i].PartitionName[j] != FilePaths[0][j])
+            if (device[i].PartitionName[j] != FilePaths[0][j])            
             {
                 break;
             }
         }
         
-        if (device[i].PartitionName[j] == '\0' && FilePaths[0][j] == '\0')
+        if (device[i].PartitionName[j] == 0x20 && FilePaths[0][j] == 0)
         {
             FileInPartitionID = i;
             L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: FileInPartitionID: %d \n", __LINE__, FileInPartitionID);

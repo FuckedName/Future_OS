@@ -103,6 +103,32 @@ L1_STRING_AsciiStringToWchar(CHAR8          *pSource, unsigned short *pDest)
 }
 
 
+/**
+  Return if the name char is valid.
+
+  @param[in] NameChar    The name char to be checked.
+
+  @retval TRUE   The name char is valid.
+  @retval FALSE  The name char is invalid.
+**/
+BOOLEAN L1_STRING_IsValidNameChar (CHAR8      NameChar)
+{
+  if (NameChar >= 'a' && NameChar <= 'z') {
+    return TRUE;
+  }
+  if (NameChar >= 'A' && NameChar <= 'Z') {
+    return TRUE;
+  }
+  if (NameChar >= '0' && NameChar <= '9') {
+    return TRUE;
+  }
+  if (NameChar == '_') {
+    return TRUE;
+  }
+  return FALSE;
+}
+
+
 /****************************************************************************
 *
 *  描述:   字符串比较
