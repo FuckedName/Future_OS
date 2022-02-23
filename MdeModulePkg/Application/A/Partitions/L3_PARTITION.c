@@ -30,7 +30,7 @@
 #include <Libraries/String/L1_LIBRARY_String.h>
 #include <Global/Global.h>
 
-int READ_FILE_FSM_Event = READ_PATITION_EVENT;
+int READ_FILE_FSM_Event = READ_PATITION_INFO_EVENT;
 
 //整个系统硬盘、U盘等等外存的分区总数，注：一个硬盘或一个U盘可以分成多个分区
 UINTN PartitionCount = 0;
@@ -57,7 +57,21 @@ UINT32 ReadFilePartitionID = 0;
 //记录文件所在目录最大目录长度
 #define FILE_PATH_LENGTH 20
 
+//记录文件名长度
+#define FILE_NAME_LENGTH 50
+
 // all partitions analysis
+
+
+typedef struct
+{
+	//文件路径和文件名信息
+	//因为单独从文件名来看，不能确认是否是路径还是文件名
+	UINT8 FilePaths[FILE_PATH_COUNT][FILE_PATH_LENGTH]; 
+	UINT8 pDestBuffer; //文件读取后存放的缓冲区
+	UINT16 CurrentPath; //当前操作的路径
+
+}FILE_READ_DATA;
 
 
 
@@ -509,9 +523,10 @@ EFI_STATUS L2_STORE_ReadFileFSM()
 
 
 //可优化，同一个分区，第一次读入后，不需要再初始化一遍
+//这里需要注意，FAT表格是变化的，因为如果涉及文件写入，删除，新建文件，这些场景FAT表会变化
 STATE_TRANSFORM FileReadTransitionTable[] =
 {
-    { READ_FILE_INIT_STATE,                READ_PATITION_EVENT,   READ_FILE_GET_PARTITION_INFO_STATE, L2_STORE_PartitionAnalysisFSM},
+    { READ_FILE_INIT_STATE,                READ_PATITION_INFO_EVENT,   READ_FILE_GET_PARTITION_INFO_STATE, L2_STORE_PartitionAnalysisFSM},
     { READ_FILE_GET_PARTITION_INFO_STATE,  READ_ROOT_PATH_EVENT,  READ_FILE_GET_ROOT_PATH_INFO_STATE, L2_STORE_RootPathAnalysisFSM},
     { READ_FILE_GET_ROOT_PATH_INFO_STATE,  READ_FAT_TABLE_EVENT,  READ_FILE_GET_FAT_TABLE_STATE,      L2_STORE_GetFatTableFSM},
     { READ_FILE_GET_FAT_TABLE_STATE,       READ_FILE_EVENT,       READ_FILE_GET_DATA_STATE,               L2_STORE_ReadFileFSM},
@@ -521,10 +536,26 @@ STATE_TRANSFORM FileReadTransitionTable[] =
 
 
 
+//准备把文件读取功能重构：
+//1、原来的ACTION函数没有入参，准备新写一个带入参，减少全局变量，便于后期维护；
+//2、原来文件读取不支持带文件路径，新的版本准备带文件路径；
+//3、为了更好的对图形化界面文件新增、修改、删除、查询的操作；
+//4、更好的支持独立目录、文件单独读取
+STATE_TRANSFORM_NEW FileReadNewTransitionTable[] =
+{
+    { READ_FILE_INIT_STATE,                READ_PATITION_INFO_EVENT,   READ_FILE_GET_PARTITION_INFO_STATE, L2_STORE_PartitionAnalysisFSM},
+    { READ_FILE_GET_PARTITION_INFO_STATE,  READ_ROOT_PATH_EVENT,  READ_FILE_GET_ROOT_PATH_INFO_STATE, L2_STORE_RootPathAnalysisFSM},
+    { READ_FILE_GET_ROOT_PATH_INFO_STATE,  READ_FAT_TABLE_EVENT,  READ_FILE_GET_FAT_TABLE_STATE,      L2_STORE_GetFatTableFSM},
+    { READ_FILE_GET_FAT_TABLE_STATE,       READ_FILE_EVENT,       READ_FILE_GET_DATA_STATE,               L2_STORE_ReadFileFSM},
+    { READ_FILE_GET_DATA_STATE,            READ_FILE_EVENT,       READ_FILE_GET_DATA_STATE,               L2_STORE_ReadFileFSM },
+};
+
+
 
 /****************************************************************************
 *
-*  描述:   xxxxx
+*  描述:   仔细看了下状态机代码，发现代码有问题，CurrentState这个变量没有使用，不过原来只需要状态依次从小到大触发就可以
+*        所以这块代码是有缺陷的
 *
 *  参数1： xxxxx
 *  参数2： xxxxx
@@ -645,33 +676,39 @@ EFI_STATUS L3_APPLICATION_ReadFile(UINT8 *FileName, UINT8 NameLength, UINT8 *pBu
 *  返回值： 成功：XXXX，失败：XXXXX
 *
 *****************************************************************************/
-UINT16 L3_APPLICATION_GetFilePaths(UINT8 *pPath, UINT8 FilePaths[FILE_PATH_COUNT][FILE_PATH_LENGTH])
+UINT16 L3_APPLICATION_GetFilePaths(UINT8 *pPath, FILE_READ_DATA *FileReadData, UINT16 *PathsCount)
 {
     UINT16 i = 0;
     UINT16 j = 0;
     UINT16 PathCount = 0;
 
+	//如果不是以/开头的路径，我们认为不合法
     if ('/' != pPath[0])
     {
+    	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d File name does not start with '/'. \n", __LINE__);
+   
         return -1;
     }
 
-    for (i = 1; i < AsciiStrLen(pPath); i++)
+    for (i = 1; i <= AsciiStrLen(pPath); i++)
     {
-        if('/' == pPath[i])
+    	//从第2个字符开始往后找，如果找到/，则表示已经找到一个路径
+        if('/' == pPath[i] || '\0' == pPath[i])
         {
-            FilePaths[PathCount][j] = '\0';
-            L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d Found path: %a\n", __LINE__, FilePaths[PathCount]);
+            FileReadData->FilePaths[PathCount][j] = '\0';
+            L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d Found path: %a\n", __LINE__, FileReadData->FilePaths[PathCount]);
     
-            //printf("Found path: %s\n", FilePaths[PathCount]);
             j = 0;
             PathCount++;
         }
         else
         {
-            FilePaths[PathCount][j++] = pPath[i];
+            FileReadData->FilePaths[PathCount][j++] = pPath[i];
         }
     }
+
+	//用于记录一共找到路径个数
+	*PathsCount = PathCount;
 }
 
 
@@ -694,10 +731,12 @@ UINT16 L3_APPLICATION_GetFileName(UINT8 *pPath, UINT8 *FileName)
     
     for (UINT16 i = Length - 1; i >= 0; i--)
     {
+    	//从最后一位，往前找，如果找到/表示都是文件名，文件名不合法的场景暂时没有判断，比如是否有：字符等等
         if ('/' == pPath[i])
         {
-            //putUINT8('\n');
+            //因为取文件名是从最后一位往前放文件名，所以需要倒序下
             L1_STRING_Reverse(FileName);
+			
             L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d File name: %a\n", __LINE__, FileName);
             L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d filename start location: %d\n", __LINE__, i);
 
@@ -721,7 +760,9 @@ UINT16 L3_APPLICATION_GetFileName(UINT8 *pPath, UINT8 *FileName)
 *
 *****************************************************************************/
 UINT16 L3_APPLICATION_AnaysisPath(const UINT8 *pPath)
-{
+{	
+	FILE_READ_DATA FileReadData = {0};
+	
     if (pPath[0] != '/')
     {
         L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d Path error!\n", __LINE__);
@@ -731,18 +772,20 @@ UINT16 L3_APPLICATION_AnaysisPath(const UINT8 *pPath)
     UINT16 Length = AsciiStrLen(pPath);
     L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d string length: %d\n", __LINE__, Length);
         
-    UINT8 FileName[50] = {0};
-    UINT16 FileNameLength = 0;
-    L3_APPLICATION_GetFileName(pPath, FileName);
+    //UINT8 FilePaths[FILE_PATH_COUNT][FILE_PATH_LENGTH] = {0};
+    //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d File name length: %d\n", __LINE__, FileNameLength);
 
-    UINT8 FilePaths[FILE_PATH_COUNT][FILE_PATH_LENGTH] = {0};
-    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d File name length: %d\n", __LINE__, FileNameLength);
-   
-    L3_APPLICATION_GetFilePaths(pPath, FilePaths);
+	UINT16 PathCount = 0;
 
+	//分析文件路径，把路径和文件名按照/拆分，方便后续操作
+    L3_APPLICATION_GetFilePaths(pPath, &FileReadData, &PathCount);
+	
     UINT16 i = 0;
     UINT16 j = 0;
     UINT16 FileInPartitionID = 0xffff;
+
+	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: FileReadData.FilePaths[0]: %a \n", __LINE__, FileReadData.FilePaths[0]);
+            
     
     //找到对应的分区
     for (i = 0; i < PartitionCount; i++)
@@ -750,15 +793,16 @@ UINT16 L3_APPLICATION_AnaysisPath(const UINT8 *pPath)
         L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: FileInPartitionID: %a \n", __LINE__, device[i].PartitionName);
             
         //分区都在FilePaths第一个字符串
-        for (j = 0; L1_STRING_IsValidNameChar(device[i].PartitionName[j]) && L1_STRING_IsValidNameChar(FilePaths[0][j]); j++)
+        for (j = 0; L1_STRING_IsValidNameChar(device[i].PartitionName[j]) && L1_STRING_IsValidNameChar(FileReadData.FilePaths[0][j]); j++)
         {
-            if (device[i].PartitionName[j] != FilePaths[0][j])            
+            if (device[i].PartitionName[j] != FileReadData.FilePaths[0][j])            
             {
                 break;
             }
         }
-        
-        if (device[i].PartitionName[j] == 0x20 && FilePaths[0][j] == 0)
+
+        //这里需要注意，分区名称如果为空，值是0x20
+        if (device[i].PartitionName[j] == 0x20 && FileReadData.FilePaths[0][j] == 0)
         {
             FileInPartitionID = i;
             L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: FileInPartitionID: %d \n", __LINE__, FileInPartitionID);
@@ -807,7 +851,9 @@ UINT16 main()
 EFI_STATUS L3_APPLICATION_ReadFileWithPath(UINT8 *pPathName, UINT8 *pBuffer)
 {
     UINT8 p[] = "/OS/resource/zhufeng.bmp";
-    L3_APPLICATION_AnaysisPath(p);
+
+
+	L3_APPLICATION_AnaysisPath(p);
 
 }
 

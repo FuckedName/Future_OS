@@ -113,18 +113,26 @@ L1_STRING_AsciiStringToWchar(CHAR8          *pSource, unsigned short *pDest)
 **/
 BOOLEAN L1_STRING_IsValidNameChar (CHAR8      NameChar)
 {
-  if (NameChar >= 'a' && NameChar <= 'z') {
+  if (NameChar >= 'a' && NameChar <= 'z') 
+  {
     return TRUE;
   }
-  if (NameChar >= 'A' && NameChar <= 'Z') {
+  
+  if (NameChar >= 'A' && NameChar <= 'Z') 
+  {
     return TRUE;
   }
-  if (NameChar >= '0' && NameChar <= '9') {
+  
+  if (NameChar >= '0' && NameChar <= '9') 
+  {
     return TRUE;
   }
-  if (NameChar == '_') {
+  
+  if (NameChar == '_') 
+  {
     return TRUE;
   }
+  
   return FALSE;
 }
 

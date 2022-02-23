@@ -358,11 +358,11 @@ extern UINT16 FolderItemID;
  // init -> partition analysised -> root path analysised -> read fat table -> start read file -> reading a file -> read finished
  typedef enum 
  {
-	 READ_FILE_INIT_STATE = 0,
-	 READ_FILE_GET_PARTITION_INFO_STATE,
-	 READ_FILE_GET_ROOT_PATH_INFO_STATE,
-	 READ_FILE_GET_FAT_TABLE_STATE,
-	 READ_FILE_GET_DATA_STATE,
+	 READ_FILE_INIT_STATE = 0, //初始状态
+	 READ_FILE_GET_PARTITION_INFO_STATE, //获取分区信息
+	 READ_FILE_GET_ROOT_PATH_INFO_STATE, //获取根目录信息
+	 READ_FILE_GET_FAT_TABLE_STATE,  //获取FAT表数据信息
+	 READ_FILE_GET_DATA_STATE, //获取数据信息
  }READ_FILE_STATE;
 
 
@@ -379,7 +379,7 @@ typedef enum
           
 typedef enum 
 {
-    READ_PATITION_EVENT = 0,
+    READ_PATITION_INFO_EVENT = 0,
     READ_ROOT_PATH_EVENT,
     READ_FAT_TABLE_EVENT,
     READ_FILE_EVENT,
@@ -393,6 +393,14 @@ typedef struct
     EFI_STATUS    (*pAction)(); 
 }STATE_TRANSFORM;
 
+
+typedef struct
+{
+    UINT16          CurrentState;
+    UINT16          event;
+    UINT16          NextState;
+    EFI_STATUS    (*pAction)(VOID *pData); 
+}STATE_TRANSFORM_NEW;
 
 	                      
 extern UINT8 ReadFileName[20];                              
