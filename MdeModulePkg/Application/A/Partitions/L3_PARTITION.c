@@ -231,27 +231,29 @@ void L1_FILE_NameGetUseItem(FAT32_ROOTPATH_SHORT_FILE_ITEM pItem, UINT8 *FileNam
  		return;
  	}
  
-    UINT8 count = 0;
-    while (pItem.FileName[count] != 0x20)
+    UINT16 i = 0;
+    while (TRUE)
     {
-    	if (count >= 8)
+    	if (i >= 8 || pItem.FileName[i] == 0x20)
 		{
 			break;
     	}
-        FileName[count] = pItem.FileName[count];
-        count++;
+        FileName[i] = pItem.FileName[i];
+        i++;
     }
 
+	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: i: %d\n", __LINE__, i);
+				
 	//表示没有后缀名
 	if (pItem.ExtensionName[0] == 0x20)
 	{
-		FileName[count] = '\0';
+		FileName[i] = '\0';
 		return;
 	}
 
 	//有后缀名，则需要加点号
-    FileName[count] = '.';
-    count++;
+    FileName[i] = '.';
+    i++;
 
 	UINT8 count2 = 0;
     while (pItem.ExtensionName[count2] != 0x20)
@@ -261,14 +263,14 @@ void L1_FILE_NameGetUseItem(FAT32_ROOTPATH_SHORT_FILE_ITEM pItem, UINT8 *FileNam
 			break;
     	}
     
-        FileName[count] = pItem.ExtensionName[count2];
-        count++;
+        FileName[i] = pItem.ExtensionName[count2];
+        i++;
         count2++;
     }
 
-    count = (count >= 12) ? 12 : count;
+    i = (i >= 12) ? 12 : i;
 	
-	FileName[count] = '\0';
+	FileName[i] = '\0';
  }
 
 
@@ -941,6 +943,8 @@ UINT16 L3_APPLICATION_AnaysisPath(const UINT8 *pPath)
 			L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: Read from device error: Status:%X \n", __LINE__, Status);
 			return Status;
 		}
+		
+		L2_PARTITION_BufferPrint(Buffer, 512);	
 
 		L1_MEMORY_Copy(&pItemsInPath, Buffer, DISK_BUFFER_SIZE * 2);
 		
