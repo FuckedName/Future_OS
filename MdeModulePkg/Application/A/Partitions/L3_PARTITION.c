@@ -747,6 +747,18 @@ UINT16 L3_APPLICATION_GetFileName(UINT8 *pPath, UINT8 *FileName)
 
 }
 
+EFI_STATUS L2_STORE_PartitionMBRAnalysis(UINT8 *Buffer, MasterBootRecordSwitched *pstMBRSwitched)
+{ 
+	// analysis data area of patition
+	L1_FILE_FAT32_DataSectorAnalysis(Buffer, pstMBRSwitched); 
+	
+	// data sector number start include: reserved selector, fat sectors(usually is 2: fat1 and fat2), and file system boot path start cluster(usually is 2, data block start number is 2)
+	UINT64 DataAreaStartSector = pstMBRSwitched->ReservedSelector + pstMBRSwitched->SectorsPerFat * pstMBRSwitched->FATCount + (pstMBRSwitched->BootPathStartCluster - 2) * 8;
+	//BlockSize = pstMBRSwitched->SectorOfCluster * 512;
+	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: DataAreaStartSector:%ld BlockSize: %d\n",  __LINE__, DataAreaStartSector, BlockSize);
+
+}
+
 
 /****************************************************************************
 *
@@ -810,7 +822,31 @@ UINT16 L3_APPLICATION_AnaysisPath(const UINT8 *pPath)
         }
     }
 
+	UINT8 Buffer[DISK_BUFFER_SIZE];
+	
+	//读取第一个扇区
+	EFI_STATUS Status = L1_STORE_READ(i, 0, 1, Buffer); 
+    if (EFI_SUCCESS != Status)
+    {
+		L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: Read from device error: Status:%X \n", __LINE__, Status);
+    	return Status;
+    }
+	MasterBootRecordSwitched stMBRSwitched;
+	L2_STORE_PartitionMBRAnalysis(Buffer, &stMBRSwitched);
+	
     return;
+	//获取分区参数信息
+	L2_STORE_FileRead(READ_PATITION_INFO_EVENT);
+	
+	//获取分区FAT表数据信息
+	L2_STORE_FileRead(READ_FAT_TABLE_EVENT);
+
+	//获取根目录数据项信息
+	L2_STORE_FileRead(READ_ROOT_PATH_EVENT);
+
+
+
+
 
     for (int i = 0; i < 5; i++)
     {

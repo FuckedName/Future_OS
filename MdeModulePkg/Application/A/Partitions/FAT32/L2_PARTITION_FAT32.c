@@ -32,7 +32,7 @@
 
 /****************************************************************************
 *
-*  描述:   xxxxx
+*  描述:   需要进行大小端转换，这里边应该可以封装成接口
 *
 *  参数1： xxxxx
 *  参数2： xxxxx
@@ -43,17 +43,18 @@
 *****************************************************************************/
 VOID L2_FILE_Transfer(MasterBootRecord *pSource, MasterBootRecordSwitched *pDest)
 {
-    pDest->ReservedSelector = (UINT16)pSource->ReservedSelector[0] | (UINT16)pSource->ReservedSelector[1] << 8;
-    pDest->SectorsPerFat    = (UINT32)pSource->SectorsPerFat[0] | (UINT32)(pSource->SectorsPerFat[1]) << 8 | (UINT32)(pSource->SectorsPerFat[2]) << 16 | (UINT32)(pSource->SectorsPerFat[3]) << 24;
-    pDest->BootPathStartCluster = (UINT32)pSource->BootPathStartCluster[0] | (UINT32)pSource->BootPathStartCluster[1] << 8 | (UINT32)pSource->BootPathStartCluster[2] << 16 | (UINT32)pSource->BootPathStartCluster[3] << 24;
+    pDest->ReservedSelector = L1_NETWORK_2BytesToUINT16(pSource->ReservedSelector);
+    pDest->SectorsPerFat    = L1_NETWORK_4BytesToUINT32(pSource->SectorsPerFat);
+    pDest->BootPathStartCluster = L1_NETWORK_4BytesToUINT32(pSource->BootPathStartCluster);
     pDest->FATCount      = pSource->FATCount[0];
     pDest->SectorOfCluster = pSource->SectorOfCluster[0];
 
     //Todo: the other parameters can compute like above too
     //Current only get parameters we need to use
     
-    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "ReservedSelector:%d SectorsPerFat:%d BootPathStartCluster: %d NumFATS:%d SectorOfCluster:%d", 
-                                                pDest->ReservedSelector,
+    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d ReservedSelector:%d SectorsPerFat:%d BootPathStartCluster: %d NumFATS:%d SectorOfCluster:%d", 
+												__LINE__,		
+												pDest->ReservedSelector,
                                                 pDest->SectorsPerFat,
                                                 pDest->BootPathStartCluster,
                                                 pDest->FATCount,
@@ -89,18 +90,17 @@ EFI_STATUS L1_FILE_FAT32_DataSectorAnalysis(UINT8 *p, MasterBootRecordSwitched *
 	
     // 大端字节序：低位字节在高地址，高位字节低地址上。这是人类读写数值的方法。
     // 小端字节序：与上面相反。低位字节在低地址，高位字节在高地址。
-    /*
+    
     L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d ReservedSelector:%02X%02X SectorsPerFat:%02X%02X%02X%02X BootPathStartCluster:%02X%02X%02X%02X NumFATS: %X", 
                                         __LINE__,
                                         pMBR->ReservedSelector[0], pMBR->ReservedSelector[1], 
                                         pMBR->SectorsPerFat[0], pMBR->SectorsPerFat[1], pMBR->SectorsPerFat[2], pMBR->SectorsPerFat[3],
                                         pMBR->BootPathStartCluster[0], pMBR->BootPathStartCluster[1], pMBR->BootPathStartCluster[2], pMBR->BootPathStartCluster[3],
-                                        pMBR->NumFATS[0]);
-    */
+                                        pMBR->FATCount[0]);
+    
     
     L2_FILE_Transfer(pMBR, pMBRSwitched);
 
-    //FreePool(pMBR);
 }
 
 
