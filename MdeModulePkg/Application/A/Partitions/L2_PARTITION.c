@@ -44,8 +44,11 @@
 
 UINT32 BlockSize = 0;
 
+//假设存储设备一共有50个分区
+#define PARTITION_COUNT 50
+
 //定义整个系统分区数，类似C，D，E，U盘等等，注意，一块硬盘或U盘可以分成多个分区
-DEVICE_PARAMETER device[50] = {0};
+DEVICE_PARAMETER device[PARTITION_COUNT] = {0};
 UINT64 FileBlockStart = 0;
 DollarBootSwitched NTFSBootSwitched;
 
@@ -341,6 +344,27 @@ EFI_STATUS L2_FILE_PartitionNameGet(UINT16 DeviceID)
 
 
 
+/****************************************************************************
+*
+*  描述:   xxxxx
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
+EFI_STATUS L2_STORE_PartitionParameterInitial()
+{
+	for (UINT16 i = 0; i < PARTITION_COUNT; i++)
+	{
+		device[i].FAT_TableBuffer = NULL;
+	}
+
+}
+
+
 
 /****************************************************************************
 *
@@ -354,6 +378,6 @@ EFI_STATUS L2_FILE_PartitionNameGet(UINT16 DeviceID)
 *
 *****************************************************************************/
 EFI_STATUS L2_STORE_PartitionAnalysis()
-{
+{	
 	L2_STORE_PartitionsParameterGet();
 }

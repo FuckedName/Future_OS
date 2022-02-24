@@ -290,6 +290,8 @@ typedef struct
 
     UINT64 FAT_TableStartSectorNumber;
 
+	UINT8 *FAT_TableBuffer;
+
     //Partition parameter
     MasterBootRecordSwitched stMBRSwitched; //FAT32
 
