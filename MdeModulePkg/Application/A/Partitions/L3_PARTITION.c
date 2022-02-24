@@ -1011,14 +1011,14 @@ UINT16 L3_APPLICATION_AnaysisPath(const UINT8 *pPath)
 						UINT8 AddOneFlag = (FileLength % (512 * 8) == 0) ? 0 : 1; 
 						
 						//这样读取文件会有问题，如果文件是连续存放，则没有问题，如果是非连续存放，则不行
-						EFI_STATUS Status = L1_STORE_READ(FileInPartitionID, NextReadSectorNumber, 2, Buffer); 
+						EFI_STATUS Status = L1_STORE_READ(FileInPartitionID, NextReadSectorNumber, FileLength / 512, pDeskWallpaperBuffer); 
 						if (EFI_SUCCESS != Status)
 						{
 							L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: Read from device error: Status:%X \n", __LINE__, Status);
 							return Status;
 						}
 						
-						L2_PARTITION_BufferPrint(Buffer, 512);	
+						//L2_PARTITION_BufferPrint(Buffer, 512);	
 					}
 				}
 		    }	

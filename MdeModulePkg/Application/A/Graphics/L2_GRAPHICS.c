@@ -1431,7 +1431,7 @@ EFI_STATUS L2_GRAPHICS_ScreenInit()
 
 	UINT8 p[] = "/OS/resource/zhufeng.bmp";
 
-	//L3_APPLICATION_AnaysisPath(p);
+	L3_APPLICATION_AnaysisPath(p);
 	/*
     UINT8 pBuffer[] = "ZHUFENGBMP";    
     Status = L3_APPLICATION_ReadFile(pBuffer, L1_STRING_Length(pBuffer), pDeskWallpaperBuffer);
