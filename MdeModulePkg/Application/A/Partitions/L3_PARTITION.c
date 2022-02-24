@@ -241,13 +241,15 @@ void L1_FILE_NameGetUseItem(FAT32_ROOTPATH_SHORT_FILE_ITEM pItem, UINT8 *FileNam
         FileName[count] = pItem.FileName[count];
         count++;
     }
-	
+
+	//表示没有后缀名
 	if (pItem.ExtensionName[0] == 0x20)
 	{
 		FileName[count] = '\0';
 		return;
 	}
-	   
+
+	//有后缀名，则需要加点号
     FileName[count] = '.';
     count++;
 
@@ -264,7 +266,7 @@ void L1_FILE_NameGetUseItem(FAT32_ROOTPATH_SHORT_FILE_ITEM pItem, UINT8 *FileNam
         count2++;
     }
 
-    count = (count >= 11) ? 11 : count;
+    count = (count >= 12) ? 12 : count;
 	
 	FileName[count] = '\0';
  }
@@ -962,7 +964,9 @@ UINT16 L3_APPLICATION_AnaysisPath(const UINT8 *pPath)
 			{
 
 				UINT16 k;
-				UINT8 FileName[12] = {0};
+				//8位文件名+.+3位后缀名=12位，加'\0'共13位
+				//当前暂不处理长文件名，长目录名
+				UINT8 FileName[14] = {0};
 				L1_FILE_NameGetUseItem(pItemsInPath[j], FileName);
 				L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d Name:%c%c%c%c%c%c%c%c Extension:%c%c%c Start:%02X%02X%02X%02X Length: %02X%02X%02X%02X A: %02X	%a ", __LINE__,
 												pItemsInPath[j].FileName[0], pItemsInPath[j].FileName[1], pItemsInPath[j].FileName[2], pItemsInPath[j].FileName[3], pItemsInPath[j].FileName[4], pItemsInPath[j].FileName[5], pItemsInPath[j].FileName[6], pItemsInPath[j].FileName[7],
