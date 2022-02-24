@@ -285,7 +285,7 @@ typedef struct
     UINT16 PartitionID; // a physics device consist of Several parts like c: d: e:
     UINT64 StartSectorNumber; //Very important
     UINT64 SectorCount; //0xC93060
-    UINT8   PartitionName[PARTITION_NAME_LENGTH];
+    UINT8  PartitionName[PARTITION_NAME_LENGTH];
 
     UINT64 FAT_TableStartSectorNumber;
 

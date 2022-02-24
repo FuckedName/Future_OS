@@ -69,7 +69,9 @@ typedef struct
 	//因为单独从文件名来看，不能确认是否是路径还是文件名
 	UINT8 FilePaths[FILE_PATH_COUNT][FILE_PATH_LENGTH]; 
 	UINT8 pDestBuffer; //文件读取后存放的缓冲区
-	UINT16 CurrentPath; //当前操作的路径
+	UINT16 CurrentPath; //当前操作的路径编号
+	UINT16 PathCount;
+    UINT16 CurrentPartitionID; //当前操作分区编号 
 
 }FILE_READ_DATA;
 
@@ -211,6 +213,62 @@ void L1_FILE_NameMerge(UINT8 ItemID, UINT8 *FileName)
 //delete blanks of file name and file extension name
 
 
+/****************************************************************************
+*
+*  描述:   xxxxx
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
+void L1_FILE_NameGetUseItem(FAT32_ROOTPATH_SHORT_FILE_ITEM pItem, UINT8 *FileName)
+ {
+ 	if (NULL == FileName)
+ 	{
+ 		return;
+ 	}
+ 
+    UINT8 count = 0;
+    while (pItem.FileName[count] != 0x20)
+    {
+    	if (count >= 8)
+		{
+			break;
+    	}
+        FileName[count] = pItem.FileName[count];
+        count++;
+    }
+	
+	if (pItem.ExtensionName[0] == 0x20)
+	{
+		FileName[count] = '\0';
+		return;
+	}
+	   
+    FileName[count] = '.';
+    count++;
+
+	UINT8 count2 = 0;
+    while (pItem.ExtensionName[count2] != 0x20)
+    {
+    	if (count2 >= 3)
+		{
+			break;
+    	}
+    
+        FileName[count] = pItem.ExtensionName[count2];
+        count++;
+        count2++;
+    }
+
+    count = (count >= 11) ? 11 : count;
+	
+	FileName[count] = '\0';
+ }
+
 
 /****************************************************************************
 *
@@ -349,6 +407,7 @@ EFI_STATUS L2_STORE_RootPathAnalysisFSM()
 /****************************************************************************
 *
 *  描述: 从分区读取FAT表内容，这里需要注意，如果FAT表信息有变化，则需要重新读取
+         FAT个一般有两个，我们只读一个，所以我们在文件操作新建，修改的时候，若涉及FAT表写入的时候，也需要注意写入这个FAT
 *
 *  参数1： xxxxx
 *  参数2： xxxxx
@@ -368,7 +427,7 @@ EFI_STATUS L2_STORE_FatTableGet(DEVICE_PARAMETER *pDevice)
 		L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: NULL == FAT32_Table\n", __LINE__);                             
 	}             
 
-	EFI_STATUS Status = L1_STORE_READ(i, pDevice->stMBRSwitched.ReservedSelector,  pDevice->stMBRSwitched.SectorsPerFat, pDevice->FAT_TableBuffer); 
+	EFI_STATUS Status = L1_STORE_READ(ReadFilePartitionID, pDevice->stMBRSwitched.ReservedSelector,  pDevice->stMBRSwitched.SectorsPerFat, pDevice->FAT_TableBuffer); 
 	
 	L2_PARTITION_BufferPrint(pDevice->FAT_TableBuffer, 512);	
 }
@@ -703,7 +762,7 @@ EFI_STATUS L3_APPLICATION_ReadFile(UINT8 *FileName, UINT8 NameLength, UINT8 *pBu
 *  返回值： 成功：XXXX，失败：XXXXX
 *
 *****************************************************************************/
-UINT16 L3_APPLICATION_GetFilePaths(UINT8 *pPath, FILE_READ_DATA *FileReadData, UINT16 *PathsCount)
+UINT16 L3_APPLICATION_GetFilePaths(UINT8 *pPath, FILE_READ_DATA *FileReadData)
 {
     UINT16 i = 0;
     UINT16 j = 0;
@@ -730,12 +789,12 @@ UINT16 L3_APPLICATION_GetFilePaths(UINT8 *pPath, FILE_READ_DATA *FileReadData, U
         }
         else
         {
-            FileReadData->FilePaths[PathCount][j++] = pPath[i];
+            FileReadData->FilePaths[PathCount][j++] = L1_STRING_UpperCaseString(pPath[i]);
         }
     }
 
 	//用于记录一共找到路径个数
-	*PathsCount = PathCount;
+	FileReadData->PathCount = PathCount;
 }
 
 
@@ -814,10 +873,8 @@ UINT16 L3_APPLICATION_AnaysisPath(const UINT8 *pPath)
     //UINT8 FilePaths[FILE_PATH_COUNT][FILE_PATH_LENGTH] = {0};
     //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d File name length: %d\n", __LINE__, FileNameLength);
 
-	UINT16 PathCount = 0;
-
 	//分析文件路径，把路径和文件名按照/拆分，方便后续操作
-    L3_APPLICATION_GetFilePaths(pPath, &FileReadData, &PathCount);
+    L3_APPLICATION_GetFilePaths(pPath, &FileReadData);
 	
     UINT16 i = 0;
     UINT16 j = 0;
@@ -844,15 +901,16 @@ UINT16 L3_APPLICATION_AnaysisPath(const UINT8 *pPath)
         if (device[i].PartitionName[j] == 0x20 && FileReadData.FilePaths[0][j] == 0)
         {
             FileInPartitionID = i;
+			FileReadData.CurrentPartitionID = i;
             L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: FileInPartitionID: %d \n", __LINE__, FileInPartitionID);
             break;
         }
     }
 
-	UINT8 Buffer[DISK_BUFFER_SIZE];
+	UINT8 Buffer[DISK_BUFFER_SIZE * 2];
 	
 	//读取第一个扇区，分析分区参数，比如：FAT表大小，FAT表个数，保留扇区数
-	EFI_STATUS Status = L1_STORE_READ(i, 0, 1, Buffer); 
+	EFI_STATUS Status = L1_STORE_READ(FileInPartitionID, 0, 1, Buffer); 
     if (EFI_SUCCESS != Status)
     {
 		L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: Read from device error: Status:%X \n", __LINE__, Status);
@@ -864,18 +922,83 @@ UINT16 L3_APPLICATION_AnaysisPath(const UINT8 *pPath)
 
 	//读取FAT表
 	L2_STORE_FatTableGet(&device[FileInPartitionID]);
+
+	UINT64 NextReadSectorNumber = device[FileInPartitionID].stMBRSwitched.ReservedSelector + device[FileInPartitionID].stMBRSwitched.SectorsPerFat * device[FileInPartitionID].stMBRSwitched.FATCount + (device[FileInPartitionID].stMBRSwitched.BootPathStartCluster - 2) * 8;;
+
+	//用于存放从目录下读取文件或目录数据，用于解析
+	FAT32_ROOTPATH_SHORT_FILE_ITEM pItemsInPath[32];
+
+	//解析各个路径参数
+	//这里需要注意，第一个路径是分区名字，所以根目录下的路径需要从第二个名字开始找，索引号是1
+	for (UINT16 i = 1; i < FileReadData.PathCount; i++)
+	{
+		//当前只读一个扇区，这样这里是有缺陷的，如果路径里的项目超过16个，则不能正常读取
+		EFI_STATUS Status = L1_STORE_READ(FileInPartitionID, NextReadSectorNumber, 2, Buffer); 
+		if (EFI_SUCCESS != Status)
+		{
+			L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: Read from device error: Status:%X \n", __LINE__, Status);
+			return Status;
+		}
+
+		L1_MEMORY_Copy(&pItemsInPath, Buffer, DISK_BUFFER_SIZE * 2);
+		
+		UINT64 FileBlockStartNumber = 0;
+		UINT64 FileLength = 0;
+		
+		L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: \n", __LINE__);
 	
-}
+		//解析目录下的项目，因为每项32个字节长度，我们读取的512字节，所以512/32=16
+		for (int j = 0; j < DISK_BUFFER_SIZE * 2 / 32; j++)
+		{
+			//外层循环一共是32项，但实际目录下可能没有存放32个项，比如少于32项
+			if (pItemsInPath[j].FileName[0] == 0)
+			{
+				L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: pItemsInPath[j].FileName[0] == 0\n", __LINE__);
+	
+				break;
+			}
+		
+			if (pItemsInPath[j].FileName[0] != 0xE5 && (pItemsInPath[j].Attribute[0] == 0x20 || pItemsInPath[j].Attribute[0] == 0x10))
+			{
 
-/*
-UINT16 main()
-{
-        //UINT8 p[] = "/OS/resource/zhufeng.bmp";
-        UINT8 p[] = "/home/x/test.bmp";
-        AnaysisPath(p);
+				UINT16 k;
+				UINT8 FileName[12] = {0};
+				L1_FILE_NameGetUseItem(pItemsInPath[j], FileName);
+				L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d Name:%c%c%c%c%c%c%c%c Extension:%c%c%c Start:%02X%02X%02X%02X Length: %02X%02X%02X%02X A: %02X	%a ", __LINE__,
+												pItemsInPath[j].FileName[0], pItemsInPath[j].FileName[1], pItemsInPath[j].FileName[2], pItemsInPath[j].FileName[3], pItemsInPath[j].FileName[4], pItemsInPath[j].FileName[5], pItemsInPath[j].FileName[6], pItemsInPath[j].FileName[7],
+												pItemsInPath[j].ExtensionName[0], pItemsInPath[j].ExtensionName[1],pItemsInPath[j].ExtensionName[2],
+												pItemsInPath[j].StartClusterHigh2B[0], pItemsInPath[j].StartClusterHigh2B[1],
+												pItemsInPath[j].StartClusterLow2B[0], pItemsInPath[j].StartClusterLow2B[1],
+												pItemsInPath[j].FileLength[0], pItemsInPath[j].FileLength[1], pItemsInPath[j].FileLength[2], pItemsInPath[j].FileLength[3],
+												pItemsInPath[j].Attribute[0],
+												FileName);
+				
+				for (k = 0; L1_STRING_IsValidNameChar(FileName[k]) && L1_STRING_IsValidNameChar(FileReadData.FilePaths[i][k]); k++)
+		        {
+		            if (FileName[k] != FileReadData.FilePaths[i][k])            
+		            {
+		                break;
+		            }
+		        }
 
+		        //这里需要注意，分区名称如果为空，值是0x20
+		        if (FileName[k] == 0 && FileReadData.FilePaths[i][k] == 0)
+		        {					
+					//获取下一次访问的扇区编号
+					UINT64 BlockNumber = (UINT64)pItemsInPath[j].StartClusterLow2B[0] | (UINT64)pItemsInPath[j].StartClusterLow2B[1] << 8 | (UINT64)pItemsInPath[j].StartClusterHigh2B[0] << 16 | (UINT64)pItemsInPath[j].StartClusterHigh2B[1] << 24;
+					
+					NextReadSectorNumber = device[FileInPartitionID].stMBRSwitched.ReservedSelector + device[FileInPartitionID].stMBRSwitched.SectorsPerFat * device[FileInPartitionID].stMBRSwitched.FATCount + device[FileInPartitionID].stMBRSwitched.BootPathStartCluster - 2 + (BlockNumber - 2) * 8;			
+					
+					FileLength = (UINT64)pItemsInPath[j].FileLength[0] | (UINT64)pItemsInPath[j].FileLength[1] << 8 | (UINT64)pItemsInPath[j].FileLength[2] << 16 | (UINT64)pItemsInPath[j].FileLength[3] << 24;
+				
+		            L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: File In Items: %d NextReadSectorNumber: %d FileLength: %d\n", __LINE__, j, NextReadSectorNumber, FileLength);
+				}
+		    }	
+		}	
+	
+
+	}
 }
-*/        
 
 
 /****************************************************************************
@@ -951,26 +1074,6 @@ EFI_STATUS L3_APPLICATION_FileModifyWithPath(UINT8 *pPathName, UINT8 *pBuffer)
 }
 
 
-
-/****************************************************************************
-*
-*  描述:    通过文件所在的完整路径，读取文件
-*
-*  参数1： 示例："/OS/resource/zhufeng.bmp"，其中/OS是指系统目录
-*  参数2： pBuffer
-*  参数n： xxxxx
-*
-*  返回值： 成功：XXXX，失败：XXXXX
-*
-*****************************************************************************/
-EFI_STATUS L3_APPLICATION_ReadFileWithPath(UINT8 *pPathName, UINT8 *pBuffer)
-{
-    UINT8 p[] = "/OS/resource/zhufeng.bmp";
-
-
-	L3_APPLICATION_AnaysisPath(p);
-
-}
 
 
 UINT8 PreviousItem = -1;

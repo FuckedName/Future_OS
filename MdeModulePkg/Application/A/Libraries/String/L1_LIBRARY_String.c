@@ -103,6 +103,28 @@ L1_STRING_AsciiStringToWchar(CHAR8          *pSource, unsigned short *pDest)
 }
 
 
+/****************************************************************************
+*
+*  描述:  把小写字符改为大写
+*
+*  参数1： 
+*  参数2： 
+*  参数n： 
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
+char L1_STRING_UpperCaseString(char c)
+{
+	if ('a' <= c && c <= 'z') 
+	{
+		return (c - 'a' + 'A');
+	}
+
+	return c;
+}
+
+
 /**
   Return if the name char is valid.
 
