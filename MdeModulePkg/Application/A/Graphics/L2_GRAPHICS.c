@@ -1429,13 +1429,17 @@ EFI_STATUS L2_GRAPHICS_ScreenInit()
     
     L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: FAT32\n",  __LINE__);
 
+	UINT8 p[] = "/OS/resource/zhufeng.bmp";
+
+	//L3_APPLICATION_AnaysisPath(p);
+	/*
     UINT8 pBuffer[] = "ZHUFENGBMP";    
     Status = L3_APPLICATION_ReadFile(pBuffer, L1_STRING_Length(pBuffer), pDeskWallpaperBuffer);
     if (EFI_ERROR(Status))
     {
         L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: ReadFileSelf error\n", __LINE__);
     }
-    
+    */
     Status = L3_APPLICATION_ReadFile("COMPUTERBMP", 11, pSystemIconBuffer[SYSTEM_ICON_MYCOMPUTER]);
     if (EFI_ERROR(Status))
     {
@@ -2623,7 +2627,7 @@ VOID L2_MOUSE_LeftClick(UINT16 LayerID, UINT16 event)
     x_move = 0;
     y_move = 0;
 
-	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: iMouseX: %d iMouseY: %d ClickFlag: %d, LayerID: %d\n", __LINE__, iMouseX, iMouseY, MouseClickFlag, LayerID);
+	//L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: iMouseX: %d iMouseY: %d ClickFlag: %d, LayerID: %d\n", __LINE__, iMouseX, iMouseY, MouseClickFlag, LayerID);
       	
     MouseClickFlag = MOUSE_EVENT_TYPE_NO_CLICKED;
 

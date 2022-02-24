@@ -155,6 +155,10 @@ BOOLEAN L1_STRING_IsValidNameChar (CHAR8      NameChar)
     return TRUE;
   }
   
+  if (NameChar == '.') 
+  {
+    return TRUE;
+  }
   return FALSE;
 }
 

@@ -102,7 +102,7 @@ typedef struct
     // 00001000(Volume name)
     // 00010000(Sub path)
     // 00100000(FILING: guidang)
-    UINT8 Attribute[1];  // if 0x0FH then Long path structor
+    UINT8 Attribute[1];  // if 0x0FH then Long path structor, 0x20文件，0x10文件夹
     UINT8 Reserved[1];
     UINT8 CreateTimeLow[1];
     UINT8 CreateTimeHigh[2];
