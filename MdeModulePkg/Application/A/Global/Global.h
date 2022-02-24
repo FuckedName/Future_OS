@@ -226,7 +226,6 @@ typedef struct
     UINT32 BootPathStartCluster;
     UINT8 FATCount;
     UINT8 SectorOfCluster;
-    UINT8 *FAT32_Table;
 }MasterBootRecordSwitched;    
 
 typedef struct

@@ -345,7 +345,33 @@ EFI_STATUS L2_STORE_RootPathAnalysisFSM()
 }
 
 
-// 
+
+/****************************************************************************
+*
+*  描述: 从分区读取FAT表内容，这里需要注意，如果FAT表信息有变化，则需要重新读取
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
+EFI_STATUS L2_STORE_FatTableGet(DEVICE_PARAMETER *pDevice)
+{
+	// 512 = 16 * 32 = 4 item * 32
+    UINT16 i = ReadFilePartitionID;
+	
+	if (NULL == pDevice->FAT_TableBuffer)
+	{
+		pDevice->FAT_TableBuffer = L2_MEMORY_Allocate("FAT Table Buffer", MEMORY_TYPE_APPLICATION, DISK_BUFFER_SIZE * pDevice->stMBRSwitched.SectorsPerFat);
+		L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: NULL == FAT32_Table\n", __LINE__);                             
+	}             
+
+	EFI_STATUS Status = L1_STORE_READ(i, pDevice->stMBRSwitched.ReservedSelector,  pDevice->stMBRSwitched.SectorsPerFat, pDevice->FAT_TableBuffer); 
+	
+	L2_PARTITION_BufferPrint(pDevice->FAT_TableBuffer, 512);	
+}
 
 
 
@@ -442,7 +468,7 @@ UINT32 L2_FILE_GetNextBlockNumber()
         return 0x0fffffff;
     }
     
-    return L1_NETWORK_4BytesToUINT32(device[i].FAT_TableBuffer[PreviousBlockNumber  * 4]);  
+    return device[i].FAT_TableBuffer[PreviousBlockNumber  * 4] | (UINT32)device[i].FAT_TableBuffer[PreviousBlockNumber * 4 + 1] << 8 | (UINT32)device[i].FAT_TableBuffer[PreviousBlockNumber * 4 + 2] << 16 | (UINT32)device[i].FAT_TableBuffer[PreviousBlockNumber * 4 + 3] << 24;  
 }
 
 
@@ -748,13 +774,13 @@ UINT16 L3_APPLICATION_GetFileName(UINT8 *pPath, UINT8 *FileName)
 
 }
 
-EFI_STATUS L2_STORE_PartitionMBRAnalysis(UINT8 *Buffer, MasterBootRecordSwitched *pstMBRSwitched)
+EFI_STATUS L2_STORE_PartitionMBRAnalysis(UINT8 *Buffer, DEVICE_PARAMETER *pDevice)
 { 
 	// analysis data area of patition
-	L1_FILE_FAT32_DataSectorAnalysis(Buffer, pstMBRSwitched); 
+	L1_FILE_FAT32_DataSectorAnalysis(Buffer, &pDevice->stMBRSwitched); 
 	
 	// data sector number start include: reserved selector, fat sectors(usually is 2: fat1 and fat2), and file system boot path start cluster(usually is 2, data block start number is 2)
-	UINT64 DataAreaStartSector = pstMBRSwitched->ReservedSelector + pstMBRSwitched->SectorsPerFat * pstMBRSwitched->FATCount + (pstMBRSwitched->BootPathStartCluster - 2) * 8;
+	UINT64 DataAreaStartSector = pDevice->stMBRSwitched.ReservedSelector + pDevice->stMBRSwitched.SectorsPerFat * pDevice->stMBRSwitched.FATCount + (pDevice->stMBRSwitched.BootPathStartCluster - 2) * 8;
 	//BlockSize = pstMBRSwitched->SectorOfCluster * 512;
 	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: DataAreaStartSector:%ld BlockSize: %d\n",  __LINE__, DataAreaStartSector, BlockSize);
 
@@ -825,42 +851,20 @@ UINT16 L3_APPLICATION_AnaysisPath(const UINT8 *pPath)
 
 	UINT8 Buffer[DISK_BUFFER_SIZE];
 	
-	//读取第一个扇区
+	//读取第一个扇区，分析分区参数，比如：FAT表大小，FAT表个数，保留扇区数
 	EFI_STATUS Status = L1_STORE_READ(i, 0, 1, Buffer); 
     if (EFI_SUCCESS != Status)
     {
 		L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: Read from device error: Status:%X \n", __LINE__, Status);
     	return Status;
     }
-	MasterBootRecordSwitched stMBRSwitched;
-	L2_STORE_PartitionMBRAnalysis(Buffer, &stMBRSwitched);
 	
-    return;
-	//获取分区参数信息
-	L2_STORE_FileRead(READ_PATITION_INFO_EVENT);
+	L2_STORE_PartitionMBRAnalysis(Buffer, &device[FileInPartitionID]);
+
+
+	//读取FAT表
+	L2_STORE_FatTableGet(&device[FileInPartitionID]);
 	
-	//获取分区FAT表数据信息
-	L2_STORE_FileRead(READ_FAT_TABLE_EVENT);
-
-	//获取根目录数据项信息
-	L2_STORE_FileRead(READ_ROOT_PATH_EVENT);
-
-
-
-
-
-    for (int i = 0; i < 5; i++)
-    {
-        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: i: %d \n", __LINE__, i);
-        //DEBUG ((EFI_D_INFO, "%d HandleEnterPressed FSM_Event: %d\n", __LINE__, READ_FILE_FSM_Event));
-
-        //这里就是按照读取文件的状态机，一个一个事件的触发
-        //L2_STORE_FileRead(READ_FILE_FSM_Event++);
-
-        //前几个事件只需要触发一次，但是文件读取的时候，需要触发很多次
-        if (READ_FILE_EVENT <= READ_FILE_FSM_Event)
-            READ_FILE_FSM_Event = READ_FILE_EVENT;
-    }
 }
 
 /*
@@ -872,6 +876,80 @@ UINT16 main()
 
 }
 */        
+
+
+/****************************************************************************
+*
+*  描述:    通过文件所在的完整路径，读取文件
+*
+*  参数1： 示例："/OS/resource/zhufeng.bmp"，其中/OS是指系统目录
+*  参数2： pBuffer
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
+EFI_STATUS L3_APPLICATION_FileReadWithPath(UINT8 *pPathName, UINT8 *pBuffer)
+{
+    UINT8 p[] = "/OS/resource/zhufeng.bmp";
+
+
+	L3_APPLICATION_AnaysisPath(p);
+
+}
+
+
+/****************************************************************************
+*
+*  描述:    通过文件所在的完整路径，删除文件
+*
+*  参数1： 示例："/OS/resource/zhufeng.bmp"，其中/OS是指系统目录
+*  参数2： pBuffer
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
+EFI_STATUS L3_APPLICATION_FileDeleteWithPath(UINT8 *pPathName)
+{
+    UINT8 p[] = "/OS/resource/zhufeng.bmp";
+}
+
+
+/****************************************************************************
+*
+*  描述:    通过文件所在的完整路径，删除文件
+*
+*  参数1： 示例："/OS/resource/zhufeng.bmp"，其中/OS是指系统目录
+*  参数2： pBuffer
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
+EFI_STATUS L3_APPLICATION_FileAddWithPath(UINT8 *pPathName, UINT8 *pBuffer)
+{
+    UINT8 p[] = "/OS/resource/zhufeng.bmp";
+
+}
+
+
+/****************************************************************************
+*
+*  描述:    通过文件所在的完整路径，修改文件
+*
+*  参数1： 示例："/OS/resource/zhufeng.bmp"，其中/OS是指系统目录
+*  参数2： pBuffer
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
+EFI_STATUS L3_APPLICATION_FileModifyWithPath(UINT8 *pPathName, UINT8 *pBuffer)
+{
+    UINT8 p[] = "/OS/resource/zhufeng.bmp";
+}
+
 
 
 /****************************************************************************
