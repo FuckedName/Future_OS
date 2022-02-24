@@ -366,7 +366,7 @@ EFI_STATUS L2_STORE_GetFatTableFSM()
     EFI_STATUS Status ;
     UINT16 i = ReadFilePartitionID;
     
-    if (NULL != FAT32_Table)
+    if (NULL != device[i].FAT_TableBuffer)
     {
         // start sector of file
         sector_count = device[i].stMBRSwitched.ReservedSelector + device[i].stMBRSwitched.SectorsPerFat * device[i].stMBRSwitched.FATCount + device[i].stMBRSwitched.BootPathStartCluster - 2 + (FileBlockStart - 2) * 8;
@@ -383,13 +383,13 @@ EFI_STATUS L2_STORE_GetFatTableFSM()
     
      // 512 = 16 * 32 = 4 item * 32
     //FAT32_Table = (UINT8 *)AllocateZeroPool(DISK_BUFFER_SIZE * device[i].stMBRSwitched.SectorsPerFat);
-    FAT32_Table = L2_MEMORY_Allocate("Desk Wall paper Buffer", MEMORY_TYPE_APPLICATION, DISK_BUFFER_SIZE * device[i].stMBRSwitched.SectorsPerFat);
-     if (NULL == FAT32_Table)
+    device[i].FAT_TableBuffer = L2_MEMORY_Allocate("Desk Wall paper Buffer", MEMORY_TYPE_APPLICATION, DISK_BUFFER_SIZE * device[i].stMBRSwitched.SectorsPerFat);
+     if (NULL == device[i].FAT_TableBuffer)
      {
          L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: NULL == FAT32_Table\n", __LINE__);                             
      }             
      
-    Status = L1_STORE_READ(i, sector_count,  device[i].stMBRSwitched.SectorsPerFat, FAT32_Table); 
+    Status = L1_STORE_READ(i, sector_count,  device[i].stMBRSwitched.SectorsPerFat, device[i].FAT_TableBuffer); 
     if ( EFI_SUCCESS == Status )
     {
           //CopyMem(FAT32_Table, Buffer1, DISK_BUFFER_SIZE * MBRSwitched.SectorsPerFat);
@@ -431,17 +431,18 @@ UINT32 L2_FILE_GetNextBlockNumber()
     {
         return 0x0fffffff;
     }
+    UINT16 i = ReadFilePartitionID;
     
-    if (FAT32_Table[PreviousBlockNumber * 4] == 0xff 
-        && FAT32_Table[PreviousBlockNumber * 4 + 1] == 0xff 
-        && FAT32_Table[PreviousBlockNumber * 4 + 2] == 0xff 
-        && FAT32_Table[PreviousBlockNumber * 4 + 3] == 0x0f)
+    if (device[i].FAT_TableBuffer[PreviousBlockNumber * 4] == 0xff 
+        && device[i].FAT_TableBuffer[PreviousBlockNumber * 4 + 1] == 0xff 
+        && device[i].FAT_TableBuffer[PreviousBlockNumber * 4 + 2] == 0xff 
+        && device[i].FAT_TableBuffer[PreviousBlockNumber * 4 + 3] == 0x0f)
     {
         L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: PreviousBlockNumber: %d, PreviousBlockNumber: %llX\n",  __LINE__, PreviousBlockNumber, 0x0fffffff);
         return 0x0fffffff;
     }
     
-    return FAT32_Table[PreviousBlockNumber  * 4] | (UINT32)FAT32_Table[PreviousBlockNumber * 4 + 1] << 8 | (UINT32)FAT32_Table[PreviousBlockNumber * 4 + 2] << 16 | (UINT32)FAT32_Table[PreviousBlockNumber * 4 + 3] << 24;  
+    return device[i].FAT_TableBuffer[PreviousBlockNumber  * 4] | (UINT32)device[i].FAT_TableBuffer[PreviousBlockNumber * 4 + 1] << 8 | (UINT32)device[i].FAT_TableBuffer[PreviousBlockNumber * 4 + 2] << 16 | (UINT32)device[i].FAT_TableBuffer[PreviousBlockNumber * 4 + 3] << 24;  
 }
 
 
