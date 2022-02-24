@@ -304,7 +304,6 @@ typedef struct
 
 extern UINT64 sector_count;
 
-extern UINT8 *FAT32_Table;
 extern UINT64 FileReadCount;
 
 extern EFI_SIMPLE_POINTER_PROTOCOL        *gMouse;

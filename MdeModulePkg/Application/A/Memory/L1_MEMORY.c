@@ -35,9 +35,6 @@ UINT64 FreeNumberOfPages = ALL_PAGE_COUNT;
 UINT64 SystemAllPagesAllocated = 0;
 UINT8 *pMapper = (UINT8 *)(PHYSICAL_ADDRESS_START);
 
-//每个FAT32格式需要一个FAT TABLE
-UINT8 *FAT32_Table = NULL;
-
 UINT8 *pDateTimeBuffer = NULL; //Mouse layer: 3
 
 // size: the one unit size is Bytes 
@@ -308,7 +305,6 @@ EFI_STATUS L2_COMMON_MemoryAllocate()
     iMouseY = ScreenHeight / 2;
 
     FileReadCount = 0;
-    FAT32_Table = NULL;
     
     INFO_SELF(L"\r\n");
 

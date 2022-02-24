@@ -383,7 +383,7 @@ EFI_STATUS L2_STORE_GetFatTableFSM()
     
      // 512 = 16 * 32 = 4 item * 32
     //FAT32_Table = (UINT8 *)AllocateZeroPool(DISK_BUFFER_SIZE * device[i].stMBRSwitched.SectorsPerFat);
-    device[i].FAT_TableBuffer = L2_MEMORY_Allocate("Desk Wall paper Buffer", MEMORY_TYPE_APPLICATION, DISK_BUFFER_SIZE * device[i].stMBRSwitched.SectorsPerFat);
+    device[i].FAT_TableBuffer = L2_MEMORY_Allocate("FAT Table Buffer", MEMORY_TYPE_APPLICATION, DISK_BUFFER_SIZE * device[i].stMBRSwitched.SectorsPerFat);
      if (NULL == device[i].FAT_TableBuffer)
      {
          L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: NULL == FAT32_Table\n", __LINE__);                             
@@ -442,7 +442,7 @@ UINT32 L2_FILE_GetNextBlockNumber()
         return 0x0fffffff;
     }
     
-    return device[i].FAT_TableBuffer[PreviousBlockNumber  * 4] | (UINT32)device[i].FAT_TableBuffer[PreviousBlockNumber * 4 + 1] << 8 | (UINT32)device[i].FAT_TableBuffer[PreviousBlockNumber * 4 + 2] << 16 | (UINT32)device[i].FAT_TableBuffer[PreviousBlockNumber * 4 + 3] << 24;  
+    return L1_NETWORK_4BytesToUINT32(device[i].FAT_TableBuffer[PreviousBlockNumber  * 4]);  
 }
 
 
@@ -855,7 +855,7 @@ UINT16 L3_APPLICATION_AnaysisPath(const UINT8 *pPath)
         //DEBUG ((EFI_D_INFO, "%d HandleEnterPressed FSM_Event: %d\n", __LINE__, READ_FILE_FSM_Event));
 
         //这里就是按照读取文件的状态机，一个一个事件的触发
-        L2_STORE_FileRead(READ_FILE_FSM_Event++);
+        //L2_STORE_FileRead(READ_FILE_FSM_Event++);
 
         //前几个事件只需要触发一次，但是文件读取的时候，需要触发很多次
         if (READ_FILE_EVENT <= READ_FILE_FSM_Event)
