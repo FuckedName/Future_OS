@@ -1429,64 +1429,17 @@ EFI_STATUS L2_GRAPHICS_ScreenInit()
     
     L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: FAT32\n",  __LINE__);
 
-	UINT8 p[] = "/OS/resource/zhufeng.bmp";
-
-	L3_APPLICATION_AnaysisPath(p);
-	/*
-    UINT8 pBuffer[] = "ZHUFENGBMP";    
-    Status = L3_APPLICATION_ReadFile(pBuffer, L1_STRING_Length(pBuffer), pDeskWallpaperBuffer);
-    if (EFI_ERROR(Status))
-    {
-        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: ReadFileSelf error\n", __LINE__);
-    }
-    */
-    Status = L3_APPLICATION_ReadFile("COMPUTERBMP", 11, pSystemIconBuffer[SYSTEM_ICON_MYCOMPUTER]);
-    if (EFI_ERROR(Status))
-    {
-        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: ReadFileSelf error\n", __LINE__);
-    }
+	L3_APPLICATION_FileReadWithPath("/OS/resource/zhufeng.bmp", pDeskWallpaperBuffer);
+	L3_APPLICATION_FileReadWithPath("/OS/resource/computer.bmp", pSystemIconBuffer[SYSTEM_ICON_MYCOMPUTER]);
+	L3_APPLICATION_FileReadWithPath("/OS/resource/setting.bmp", pSystemIconBuffer[SYSTEM_ICON_SETTING]);
+	L3_APPLICATION_FileReadWithPath("/OS/resource/recycle.bmp", pSystemIconBuffer[SYSTEM_ICON_RECYCLE]);
+	L3_APPLICATION_FileReadWithPath("/OS/resource/folder.bmp", pSystemIconBuffer[SYSTEM_ICON_FOLDER]);
+	L3_APPLICATION_FileReadWithPath("/OS/resource/text.bmp", pSystemIconBuffer[SYSTEM_ICON_TEXT]);
+	L3_APPLICATION_FileReadWithPath("/OS/resource/shutdown.bmp", pSystemIconBuffer[SYSTEM_ICON_SHUTDOWN]);        
     
-    Status = L3_APPLICATION_ReadFile("SETTINGBMP", 10, pSystemIconBuffer[SYSTEM_ICON_SETTING]);
-    if (EFI_ERROR(Status))
-    {
-        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: ReadFileSelf error\n", __LINE__);
-    }
-
-    Status = L3_APPLICATION_ReadFile("RECYCLEBMP", 10, pSystemIconBuffer[SYSTEM_ICON_RECYCLE]);
-    if (EFI_ERROR(Status))
-    {
-        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: ReadFileSelf error\n", __LINE__);
-    }
-
-    Status = L3_APPLICATION_ReadFile("FOLDERBMP", 9, pSystemIconBuffer[SYSTEM_ICON_FOLDER]);
-    if (EFI_ERROR(Status))
-    {
-        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: ReadFileSelf error\n", __LINE__);
-    }
-
-    Status = L3_APPLICATION_ReadFile("TEXTBMP", 7, pSystemIconBuffer[SYSTEM_ICON_TEXT]);
-    if (EFI_ERROR(Status))
-    {
-        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: ReadFileSelf error\n", __LINE__);
-    }
+	L3_APPLICATION_FileReadWithPath("/OS/HZK16", sChineseChar);
+	L3_APPLICATION_FileReadWithPath("/OS/HZK12", sChineseChar12);
     
-    Status = L3_APPLICATION_ReadFile("SHUTDOWNBMP", 11, pSystemIconBuffer[SYSTEM_ICON_SHUTDOWN]);
-    if (EFI_ERROR(Status))
-    {
-        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: ReadFileSelf error\n", __LINE__);
-    }
-    
-    Status = L3_APPLICATION_ReadFile("HZK16", 5, sChineseChar);
-    if (EFI_ERROR(Status))
-    {
-        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: ReadFileSelf error\n", __LINE__);
-    }
-    
-    Status = L3_APPLICATION_ReadFile("HZK12", 5, sChineseChar12);
-    if (EFI_ERROR(Status))
-    {
-        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: L3_APPLICATION_ReadFile error\n", __LINE__);
-    }
     L2_GRAPHICS_DeskInit();
 
     // 初始化鼠标显示缓存
@@ -2501,7 +2454,7 @@ VOID L3_GRAPHICS_MouseRightButtonClickEventHandle(MOUSE_RIGHT_MENU_CLICKED_EVENT
 			L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d MOUSE_RIGHT_MENU_DELETE_CLICKED_EVENT\n", __LINE__); break;
 
 		case MOUSE_RIGHT_MENU_ADD_CLICKED_EVENT:
-		    L3_APPLICATION_FileReadWithPath(pPathName, pBuffer);
+		    //L3_APPLICATION_FileReadWithPath(pPathName, pBuffer);
 		    L2_FILE_FAT32_FileAdd();
 			L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d MOUSE_RIGHT_MENU_ADD_CLICKED_EVENT\n", __LINE__); break;
 

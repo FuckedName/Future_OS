@@ -68,7 +68,7 @@ typedef struct
 	//文件路径和文件名信息
 	//因为单独从文件名来看，不能确认是否是路径还是文件名
 	UINT8 FilePaths[FILE_PATH_COUNT][FILE_PATH_LENGTH]; 
-	UINT8 pDestBuffer; //文件读取后存放的缓冲区
+	UINT8 *pDestBuffer; //文件读取后存放的缓冲区
 	UINT16 CurrentPath; //当前操作的路径编号
 	UINT16 PathCount;
     UINT16 CurrentPartitionID; //当前操作分区编号 
@@ -850,7 +850,7 @@ EFI_STATUS L2_STORE_PartitionMBRAnalysis(UINT8 *Buffer, DEVICE_PARAMETER *pDevic
 
 /****************************************************************************
 *
-*  描述:    把带有路径和文件名的信息解析出来
+*  描述:    通过文件所在的完整路径，读取文件
 *
 *  参数1： 示例："/OS/resource/zhufeng.bmp"，其中/OS是指系统目录
 *  参数2： pBuffer
@@ -859,11 +859,10 @@ EFI_STATUS L2_STORE_PartitionMBRAnalysis(UINT8 *Buffer, DEVICE_PARAMETER *pDevic
 *  返回值： 成功：XXXX，失败：XXXXX
 *
 *****************************************************************************/
-UINT16 L3_APPLICATION_AnaysisPath(const UINT8 *pPath)
-{	
-	FILE_READ_DATA FileReadData = {0};
-
-	FileReadData.pDestBuffer = pDeskWallpaperBuffer;
+EFI_STATUS L3_APPLICATION_FileReadWithPath(UINT8 *pPath, UINT8 *pDestBuffer)
+{
+	FILE_READ_DATA FileReadData;
+	FileReadData.pDestBuffer = pDestBuffer;
 	
     if (pPath[0] != '/')
     {
@@ -1011,7 +1010,7 @@ UINT16 L3_APPLICATION_AnaysisPath(const UINT8 *pPath)
 						UINT8 AddOneFlag = (FileLength % (512 * 8) == 0) ? 0 : 1; 
 						
 						//这样读取文件会有问题，如果文件是连续存放，则没有问题，如果是非连续存放，则不行
-						EFI_STATUS Status = L1_STORE_READ(FileInPartitionID, NextReadSectorNumber, FileLength / 512, pDeskWallpaperBuffer); 
+						EFI_STATUS Status = L1_STORE_READ(FileInPartitionID, NextReadSectorNumber, FileLength / 512, FileReadData.pDestBuffer); 
 						if (EFI_SUCCESS != Status)
 						{
 							L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: Read from device error: Status:%X \n", __LINE__, Status);
@@ -1024,28 +1023,6 @@ UINT16 L3_APPLICATION_AnaysisPath(const UINT8 *pPath)
 		    }	
 		}
 	}
-
-	
-}
-
-
-/****************************************************************************
-*
-*  描述:    通过文件所在的完整路径，读取文件
-*
-*  参数1： 示例："/OS/resource/zhufeng.bmp"，其中/OS是指系统目录
-*  参数2： pBuffer
-*  参数n： xxxxx
-*
-*  返回值： 成功：XXXX，失败：XXXXX
-*
-*****************************************************************************/
-EFI_STATUS L3_APPLICATION_FileReadWithPath(UINT8 *pPathName, UINT8 *pBuffer)
-{
-    UINT8 p[] = "/OS/resource/zhufeng.bmp";
-
-
-	L3_APPLICATION_AnaysisPath(p);
 
 }
 
