@@ -737,7 +737,7 @@ UINT16  L2_FILE_NTFS_FileItemAttributeAnalysis(UINT8 *p, UINT16 AttributeOffset,
 					pCommonStorageItems[i].Type = COMMON_STORAGE_ITEM_MAX;
 				}
 
-				L2_PARTITION_BufferPrint(pItem, AttributeSize);
+				//L2_PARTITION_BufferPrint(pItem, AttributeSize);
 				
 				if (pAttributeHeaderSwitched->ResidentFlag == 0) //常驻
 				{
@@ -1064,7 +1064,7 @@ UINT16  L2_FILE_NTFS_FileItemAttributeAnalysis2(UINT8 *p, UINT16 AttributeOffset
 					pCommonStorageItems[i].Type = COMMON_STORAGE_ITEM_MAX;
 				}
 
-				L2_PARTITION_BufferPrint(pItem, AttributeSize);
+				//L2_PARTITION_BufferPrint(pItem, AttributeSize);
 				
 				if (pAttributeHeaderSwitched->ResidentFlag == 0) //常驻
 				{

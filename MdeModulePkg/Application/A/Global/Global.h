@@ -124,6 +124,7 @@ typedef struct
 #define DISK_BUFFER_SIZE (512)
 
 extern UINT8 Buffer1[DISK_BUFFER_SIZE];
+extern BOOLEAN TestFlag;
 
 
 typedef struct 

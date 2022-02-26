@@ -62,6 +62,8 @@ UINT32 ReadFilePartitionID = 0;
 
 // all partitions analysis
 
+BOOLEAN TestFlag = FALSE;
+
 
 typedef struct
 {
@@ -418,20 +420,16 @@ EFI_STATUS L2_STORE_RootPathAnalysisFSM()
 *  返回值： 成功：XXXX，失败：XXXXX
 *
 *****************************************************************************/
-EFI_STATUS L2_STORE_FatTableGet(DEVICE_PARAMETER *pDevice)
-{
-	// 512 = 16 * 32 = 4 item * 32
-    UINT16 i = ReadFilePartitionID;
-	
+EFI_STATUS L2_STORE_FatTableGet(DEVICE_PARAMETER *pDevice, FILE_READ_DATA FileReadData)
+{	
 	if (NULL == pDevice->FAT_TableBuffer)
 	{
 		pDevice->FAT_TableBuffer = L2_MEMORY_Allocate("FAT Table Buffer", MEMORY_TYPE_APPLICATION, DISK_BUFFER_SIZE * pDevice->stMBRSwitched.SectorsPerFat);
-		L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: NULL == FAT32_Table\n", __LINE__);                             
-	}             
-
-	EFI_STATUS Status = L1_STORE_READ(ReadFilePartitionID, pDevice->stMBRSwitched.ReservedSelector,  pDevice->stMBRSwitched.SectorsPerFat, pDevice->FAT_TableBuffer); 
+		EFI_STATUS Status = L1_STORE_READ(FileReadData.CurrentPartitionID, pDevice->stMBRSwitched.ReservedSelector,  pDevice->stMBRSwitched.SectorsPerFat, pDevice->FAT_TableBuffer);	
+	} 
 	
-	L2_PARTITION_BufferPrint(pDevice->FAT_TableBuffer, 512);	
+	//L2_PARTITION_BufferPrint(pDevice->FAT_TableBuffer, 512);	
+	//L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: pDevice->FAT_TableBuffer: %x Status: %d\n", __LINE__, pDevice->FAT_TableBuffer, Status); 
 }
 
 
@@ -850,6 +848,40 @@ EFI_STATUS L2_STORE_PartitionMBRAnalysis(UINT8 *Buffer, DEVICE_PARAMETER *pDevic
 
 /****************************************************************************
 *
+*  描述:   xxxxx
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
+UINT32 L2_FILE_GetNextBlockNumber2(UINT16 PartitionID, UINT64 PreviousBlockNumber)
+{
+    //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: PartitionID: %d PreviousBlockNumber: %d\n",  __LINE__, PartitionID, PreviousBlockNumber);
+
+    if (PreviousBlockNumber == 0)
+    {
+        return 0x0fffffff;
+    }
+    UINT16 i = PartitionID;
+    
+    if (device[i].FAT_TableBuffer[PreviousBlockNumber * 4] == 0xff 
+        && device[i].FAT_TableBuffer[PreviousBlockNumber * 4 + 1] == 0xff 
+        && device[i].FAT_TableBuffer[PreviousBlockNumber * 4 + 2] == 0xff 
+        && device[i].FAT_TableBuffer[PreviousBlockNumber * 4 + 3] == 0x0f)
+    {
+        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: PreviousBlockNumber: %d, PreviousBlockNumber: %llX\n",  __LINE__, PreviousBlockNumber, 0x0fffffff);
+        return 0x0fffffff;
+    }
+    
+    return device[i].FAT_TableBuffer[PreviousBlockNumber  * 4] | (UINT32)device[i].FAT_TableBuffer[PreviousBlockNumber * 4 + 1] << 8 | (UINT32)device[i].FAT_TableBuffer[PreviousBlockNumber * 4 + 2] << 16 | (UINT32)device[i].FAT_TableBuffer[PreviousBlockNumber * 4 + 3] << 24;  
+}
+
+
+/****************************************************************************
+*
 *  描述:    通过文件所在的完整路径，读取文件
 *
 *  参数1： 示例："/OS/resource/zhufeng.bmp"，其中/OS是指系统目录
@@ -924,7 +956,7 @@ EFI_STATUS L3_APPLICATION_FileReadWithPath(UINT8 *pPath, UINT8 *pDestBuffer)
 
 
 	//读取FAT表
-	L2_STORE_FatTableGet(&device[FileInPartitionID]);
+	L2_STORE_FatTableGet(&device[FileInPartitionID], FileReadData);
 
 	UINT64 NextReadSectorNumber = device[FileInPartitionID].stMBRSwitched.ReservedSelector + device[FileInPartitionID].stMBRSwitched.SectorsPerFat * device[FileInPartitionID].stMBRSwitched.FATCount + (device[FileInPartitionID].stMBRSwitched.BootPathStartCluster - 2) * 8;;
 
@@ -947,7 +979,7 @@ EFI_STATUS L3_APPLICATION_FileReadWithPath(UINT8 *pPath, UINT8 *pDestBuffer)
 			return Status;
 		}
 		
-		L2_PARTITION_BufferPrint(Buffer, 512);	
+		//L2_PARTITION_BufferPrint(Buffer, 512);	
 
 		L1_MEMORY_Copy(&pItemsInPath, Buffer, DISK_BUFFER_SIZE * 2);
 		
@@ -1006,17 +1038,43 @@ EFI_STATUS L3_APPLICATION_FileReadWithPath(UINT8 *pPath, UINT8 *pDestBuffer)
 
 					if (pItemsInPath[j].Attribute[0] == 0x20)
 					{
-						UINT16 SectorCount = FileLength / (512 * 8);
+						UINT64 SectorCount = FileLength / (512 * 8);
 						UINT8 AddOneFlag = (FileLength % (512 * 8) == 0) ? 0 : 1; 
-						
-						//这样读取文件会有问题，如果文件是连续存放，则没有问题，如果是非连续存放，则不行
-						EFI_STATUS Status = L1_STORE_READ(FileInPartitionID, NextReadSectorNumber, FileLength / 512, FileReadData.pDestBuffer); 
-						if (EFI_SUCCESS != Status)
+						UINT8 BufferBlock[DISK_BUFFER_SIZE * 8];
+
+
+						if (!TestFlag)
 						{
-							L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: Read from device error: Status:%X \n", __LINE__, Status);
-							return Status;
-						}
+							for (UINT64 ReadTimes = 0; ReadTimes < FileLength / (512 * 8); ReadTimes++)
+							{
+								//这样读取文件会有问题，如果文件是连续存放，则没有问题，如果是非连续存放，则不行
+								EFI_STATUS Status = L1_STORE_READ(FileInPartitionID, NextReadSectorNumber, 8, BufferBlock); 
+								if (EFI_SUCCESS != Status)
+								{
+									L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: Read from device error: Status:%X \n", __LINE__, Status);
+									return Status;
+								}
+								
+								L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: NextReadSectorNumber: %llu BlockNumber: %llu\n", __LINE__, NextReadSectorNumber, BlockNumber);
+																	
+
+								for (UINT16 BufferCopy = 0; BufferCopy < 512 * 8; BufferCopy++)
+									FileReadData.pDestBuffer[ReadTimes * 512 * 8 + BufferCopy] = BufferBlock[BufferCopy];
+
+								BlockNumber = L2_FILE_GetNextBlockNumber2(FileInPartitionID, BlockNumber);
+								NextReadSectorNumber = device[FileInPartitionID].stMBRSwitched.ReservedSelector + device[FileInPartitionID].stMBRSwitched.SectorsPerFat * device[FileInPartitionID].stMBRSwitched.FATCount + device[FileInPartitionID].stMBRSwitched.BootPathStartCluster - 2 + (BlockNumber - 2) * 8;			
 						
+							}
+						}
+						else
+						{
+							EFI_STATUS Status = L1_STORE_READ(FileInPartitionID, NextReadSectorNumber, FileLength / DISK_BUFFER_SIZE , FileReadData.pDestBuffer); 
+							if (EFI_SUCCESS != Status)
+							{
+								L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: Read from device error: Status:%X \n", __LINE__, Status);
+								return Status;
+							}
+						}
 						//L2_PARTITION_BufferPrint(Buffer, 512);	
 					}
 				}
