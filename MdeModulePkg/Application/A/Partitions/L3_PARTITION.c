@@ -1043,39 +1043,27 @@ EFI_STATUS L3_APPLICATION_FileReadWithPath(UINT8 *pPath, UINT8 *pDestBuffer)
 						UINT8 BufferBlock[DISK_BUFFER_SIZE * 8];
 
 
-						if (!TestFlag)
+						for (UINT64 ReadTimes = 0; ReadTimes < FileLength / (512 * 8); ReadTimes++)
 						{
-							for (UINT64 ReadTimes = 0; ReadTimes < FileLength / (512 * 8); ReadTimes++)
-							{
-								//这样读取文件会有问题，如果文件是连续存放，则没有问题，如果是非连续存放，则不行
-								EFI_STATUS Status = L1_STORE_READ(FileInPartitionID, NextReadSectorNumber, 8, BufferBlock); 
-								if (EFI_SUCCESS != Status)
-								{
-									L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: Read from device error: Status:%X \n", __LINE__, Status);
-									return Status;
-								}
-								
-								L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: NextReadSectorNumber: %llu BlockNumber: %llu\n", __LINE__, NextReadSectorNumber, BlockNumber);
-																	
-
-								for (UINT16 BufferCopy = 0; BufferCopy < 512 * 8; BufferCopy++)
-									FileReadData.pDestBuffer[ReadTimes * 512 * 8 + BufferCopy] = BufferBlock[BufferCopy];
-
-								BlockNumber = L2_FILE_GetNextBlockNumber2(FileInPartitionID, BlockNumber);
-								NextReadSectorNumber = device[FileInPartitionID].stMBRSwitched.ReservedSelector + device[FileInPartitionID].stMBRSwitched.SectorsPerFat * device[FileInPartitionID].stMBRSwitched.FATCount + device[FileInPartitionID].stMBRSwitched.BootPathStartCluster - 2 + (BlockNumber - 2) * 8;			
-						
-							}
-						}
-						else
-						{
-							EFI_STATUS Status = L1_STORE_READ(FileInPartitionID, NextReadSectorNumber, FileLength / DISK_BUFFER_SIZE , FileReadData.pDestBuffer); 
+							//这样读取文件会有问题，如果文件是连续存放，则没有问题，如果是非连续存放，则不行
+							EFI_STATUS Status = L1_STORE_READ(FileInPartitionID, NextReadSectorNumber, 8, BufferBlock); 
 							if (EFI_SUCCESS != Status)
 							{
 								L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: Read from device error: Status:%X \n", __LINE__, Status);
 								return Status;
 							}
+							
+							L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: NextReadSectorNumber: %llu BlockNumber: %llu\n", __LINE__, NextReadSectorNumber, BlockNumber);
+																
+
+							for (UINT16 BufferCopy = 0; BufferCopy < 512 * 8; BufferCopy++)
+								FileReadData.pDestBuffer[ReadTimes * 512 * 8 + BufferCopy] = BufferBlock[BufferCopy];
+
+							BlockNumber = L2_FILE_GetNextBlockNumber2(FileInPartitionID, BlockNumber);
+							NextReadSectorNumber = device[FileInPartitionID].stMBRSwitched.ReservedSelector + device[FileInPartitionID].stMBRSwitched.SectorsPerFat * device[FileInPartitionID].stMBRSwitched.FATCount + device[FileInPartitionID].stMBRSwitched.BootPathStartCluster - 2 + (BlockNumber - 2) * 8;			
+					
 						}
-						//L2_PARTITION_BufferPrint(Buffer, 512);	
+							
 					}
 				}
 		    }	
