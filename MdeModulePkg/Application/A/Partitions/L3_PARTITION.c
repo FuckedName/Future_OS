@@ -891,6 +891,38 @@ UINT32 L2_FILE_GetNextBlockNumber2(UINT16 PartitionID, UINT64 PreviousBlockNumbe
 *  返回值： 成功：XXXX，失败：XXXXX
 *
 *****************************************************************************/
+UINT16 L3_APPLICATION_GetPartitionByPath(DEVICE_PARAMETER *pDevice, FILE_READ_DATA *pFileReadData)
+{
+	UINT16 j = 0;
+	
+	//找到对应的分区
+    for (UINT16 i = 0; i < PartitionCount; i++)
+    {
+        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: FileInPartitionID: %a \n", __LINE__, pDevice[i].PartitionName);
+            
+        //分区都在FilePaths第一个字符串
+        for (j = 0; L1_STRING_IsValidNameChar(pDevice[i].PartitionName[j]) && L1_STRING_IsValidNameChar(pFileReadData->FilePaths[0][j]); j++)
+        {
+            if (pDevice[i].PartitionName[j] != pFileReadData->FilePaths[0][j])            
+            {
+                break;
+            }
+        }
+
+        //这里需要注意，分区名称如果为空，值是0x20
+        if (pDevice[i].PartitionName[j] == 0x20 && pFileReadData->FilePaths[0][j] == 0)
+        {
+			pFileReadData->CurrentPartitionID = i;
+            L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: FileInPartitionID: %d \n", __LINE__, pFileReadData->CurrentPartitionID);
+            return i;
+        }
+    }
+
+	return 0xffff;
+}
+
+
+
 EFI_STATUS L3_APPLICATION_FileReadWithPath(UINT8 *pPath, UINT8 *pDestBuffer)
 {
 	FILE_READ_DATA FileReadData;
@@ -916,32 +948,10 @@ EFI_STATUS L3_APPLICATION_FileReadWithPath(UINT8 *pPath, UINT8 *pDestBuffer)
     UINT16 FileInPartitionID = 0xffff;
 
 	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: FileReadData.FilePaths[0]: %a \n", __LINE__, FileReadData.FilePaths[0]);
-            
-    
-    //找到对应的分区
-    for (i = 0; i < PartitionCount; i++)
-    {
-        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: FileInPartitionID: %a \n", __LINE__, device[i].PartitionName);
-            
-        //分区都在FilePaths第一个字符串
-        for (j = 0; L1_STRING_IsValidNameChar(device[i].PartitionName[j]) && L1_STRING_IsValidNameChar(FileReadData.FilePaths[0][j]); j++)
-        {
-            if (device[i].PartitionName[j] != FileReadData.FilePaths[0][j])            
-            {
-                break;
-            }
-        }
 
-        //这里需要注意，分区名称如果为空，值是0x20
-        if (device[i].PartitionName[j] == 0x20 && FileReadData.FilePaths[0][j] == 0)
-        {
-            FileInPartitionID = i;
-			FileReadData.CurrentPartitionID = i;
-            L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: FileInPartitionID: %d \n", __LINE__, FileInPartitionID);
-            break;
-        }
-    }
-
+	//找到分区对应的设备索引，后续对文件进行读写的时候需要。
+	FileInPartitionID = L3_APPLICATION_GetPartitionByPath(&device, &FileReadData);
+        
 	UINT8 Buffer[DISK_BUFFER_SIZE * 2];
 	
 	//读取第一个扇区，分析分区参数，比如：FAT表大小，FAT表个数，保留扇区数
