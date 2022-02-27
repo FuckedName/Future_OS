@@ -431,9 +431,13 @@ extern UINT8 *pMapper;
 #define ALL_PAGE_COUNT 0x80000
 #define PHYSICAL_ADDRESS_START 0x20000000
 
+
+//假设存储设备一共有50个分区
+#define PARTITION_COUNT 50
+
 extern UINT64 FreeNumberOfPages;
 extern UINT64 SystemAllPagesAllocated;
-extern DEVICE_PARAMETER device[50];
+extern DEVICE_PARAMETER device[PARTITION_COUNT];
 extern EFI_HANDLE  TimerOne;
 extern EFI_HANDLE  SystemHandle;
 extern EFI_SHELL_PROTOCOL    *EfiShellProtocol;

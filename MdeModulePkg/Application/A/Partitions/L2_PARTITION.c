@@ -28,9 +28,10 @@
 
 #include <Protocol/DevicePath.h>
 #include <Protocol/DevicePathToText.h>
-#include <L2_PARTITION.h>
 #include <Partitions/NTFS/L2_PARTITION_NTFS.h>
 #include <Partitions/FAT32/L2_PARTITION_FAT32.h>
+
+#include "L2_PARTITION.h"
 
 #include <Library/UefiBootServicesTableLib.h>
 #include <Protocol/DevicePathToText.h>
@@ -44,8 +45,6 @@
 
 UINT32 BlockSize = 0;
 
-//假设存储设备一共有50个分区
-#define PARTITION_COUNT 50
 
 //定义整个系统分区数，类似C，D，E，U盘等等，注意，一块硬盘或U盘可以分成多个分区
 DEVICE_PARAMETER device[PARTITION_COUNT] = {0};
