@@ -71,7 +71,7 @@ typedef struct
 	//因为单独从文件名来看，不能确认是否是路径还是文件名
 	UINT8 FilePaths[FILE_PATH_COUNT][FILE_PATH_LENGTH]; 
 	UINT8 *pDestBuffer; //文件读取后存放的缓冲区
-	UINT16 CurrentPath; //当前操作的路径编号
+	UINT16 CurrentPathID; //当前操作的路径编号
 	UINT16 PathCount;
     UINT16 CurrentPartitionID; //当前操作分区编号 
 
@@ -921,14 +921,14 @@ UINT16 L3_APPLICATION_GetPartitionByPath(DEVICE_PARAMETER *pDevice, FILE_READ_DA
 	return 0xffff;
 }
 
-//用于存放从目录下读取文件或目录数据，用于解析
-FAT32_ROOTPATH_SHORT_FILE_ITEM pItemsInPath[32];
 
-EFI_STATUS L3_APPLICATION_ItemFindByName(FILE_READ_DATA *pFileReadData, UINT16 i, UINT64 *pNextReadSectorNumber)
+
+EFI_STATUS L3_APPLICATION_ItemFindByName(FAT32_ROOTPATH_SHORT_FILE_ITEM *pItemsInPath , FILE_READ_DATA *pFileReadData,UINT64 *pNextReadSectorNumber)
 {
 	UINT64 FileBlockStartNumber = 0;
 	UINT64 FileLength = 0;
     UINT16 FileInPartitionID = pFileReadData->CurrentPartitionID;
+	UINT16 CurrentPathID  = pFileReadData->CurrentPathID;
 	UINT64 NextReadSectorNumber = 0;
 	
 	//解析目录下的项目，因为每项32个字节长度，我们读取的512字节，所以512/32=16
@@ -961,16 +961,16 @@ EFI_STATUS L3_APPLICATION_ItemFindByName(FILE_READ_DATA *pFileReadData, UINT16 i
 											pItemsInPath[j].Attribute[0],
 											FileName);
 			
-			for (k = 0; L1_STRING_IsValidNameChar(FileName[k]) && L1_STRING_IsValidNameChar(pFileReadData->FilePaths[i][k]); k++)
+			for (k = 0; L1_STRING_IsValidNameChar(FileName[k]) && L1_STRING_IsValidNameChar(pFileReadData->FilePaths[CurrentPathID][k]); k++)
 			{
-				if (FileName[k] != pFileReadData->FilePaths[i][k])			
+				if (FileName[k] != pFileReadData->FilePaths[CurrentPathID][k])			
 				{
 					break;
 				}
 			}
 
 			//这里需要注意，分区名称如果为空，值是0x20
-			if (FileName[k] == 0 && pFileReadData->FilePaths[i][k] == 0)
+			if (FileName[k] == 0 && pFileReadData->FilePaths[CurrentPathID][k] == 0)
 			{					
 				//获取下一次访问的扇区编号
 				UINT64 BlockNumber = (UINT64)pItemsInPath[j].StartClusterLow2B[0] | (UINT64)pItemsInPath[j].StartClusterLow2B[1] << 8 | (UINT64)pItemsInPath[j].StartClusterHigh2B[0] << 16 | (UINT64)pItemsInPath[j].StartClusterHigh2B[1] << 24;
@@ -1064,7 +1064,9 @@ EFI_STATUS L3_APPLICATION_FileReadWithPath(UINT8 *pPath, UINT8 *pDestBuffer)
 	UINT64 NextReadSectorNumber = device[FileInPartitionID].stMBRSwitched.ReservedSelector + device[FileInPartitionID].stMBRSwitched.SectorsPerFat * device[FileInPartitionID].stMBRSwitched.FATCount + (device[FileInPartitionID].stMBRSwitched.BootPathStartCluster - 2) * 8;;
 
 	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: NextReadSectorNumber: %d \n", __LINE__, NextReadSectorNumber);
-            
+
+	//用于存放从目录下读取文件或目录数据，用于解析
+    FAT32_ROOTPATH_SHORT_FILE_ITEM pItemsInPath[32];
 
 	//解析各个路径参数
 	//这里需要注意，第一个路径是分区名字，所以根目录下的路径需要从第二个名字开始找，索引号是1
@@ -1083,8 +1085,9 @@ EFI_STATUS L3_APPLICATION_FileReadWithPath(UINT8 *pPath, UINT8 *pDestBuffer)
 		//L2_PARTITION_BufferPrint(Buffer, 512);	
 
 		L1_MEMORY_Copy(&pItemsInPath, Buffer, DISK_BUFFER_SIZE * 2);
+		FileReadData.CurrentPathID = i;
 		
-		L3_APPLICATION_ItemFindByName(&FileReadData, i, &NextReadSectorNumber);
+		L3_APPLICATION_ItemFindByName(&pItemsInPath, &FileReadData, &NextReadSectorNumber);
 	}
 
 }
