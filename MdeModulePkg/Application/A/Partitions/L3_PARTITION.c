@@ -923,7 +923,51 @@ UINT16 L3_APPLICATION_GetPartitionByPath(DEVICE_PARAMETER *pDevice, FILE_READ_DA
 
 
 
-EFI_STATUS L3_APPLICATION_ItemFindByName(FAT32_ROOTPATH_SHORT_FILE_ITEM *pItemsInPath , FILE_READ_DATA *pFileReadData,UINT64 *pNextReadSectorNumber)
+UINT16 L3_APPLICATION_FileDataGetByItemID(FAT32_ROOTPATH_SHORT_FILE_ITEM *pItemsInPath , FILE_READ_DATA *pFileReadData, UINT64 *pNextReadSectorNumber, UINT16 j)
+{
+    UINT16 FileInPartitionID = pFileReadData->CurrentPartitionID;
+	
+	//获取下一次访问的扇区编号
+	UINT64 BlockNumber = (UINT64)pItemsInPath[j].StartClusterLow2B[0] | (UINT64)pItemsInPath[j].StartClusterLow2B[1] << 8 | (UINT64)pItemsInPath[j].StartClusterHigh2B[0] << 16 | (UINT64)pItemsInPath[j].StartClusterHigh2B[1] << 24;
+	
+	*pNextReadSectorNumber = device[FileInPartitionID].stMBRSwitched.ReservedSelector + device[FileInPartitionID].stMBRSwitched.SectorsPerFat * device[FileInPartitionID].stMBRSwitched.FATCount + device[FileInPartitionID].stMBRSwitched.BootPathStartCluster - 2 + (BlockNumber - 2) * 8;			
+	
+	FileLength = (UINT64)pItemsInPath[j].FileLength[0] | (UINT64)pItemsInPath[j].FileLength[1] << 8 | (UINT64)pItemsInPath[j].FileLength[2] << 16 | (UINT64)pItemsInPath[j].FileLength[3] << 24;
+
+	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: File In Items: %d NextReadSectorNumber: %d FileLength: %d\n", __LINE__, j, *pNextReadSectorNumber, FileLength);
+
+	//文件
+	if (pItemsInPath[j].Attribute[0] == 0x20)
+	{
+		UINT64 SectorCount = FileLength / (512 * 8);
+		UINT8 AddOneFlag = (FileLength % (512 * 8) == 0) ? 0 : 1; 
+		UINT8 BufferBlock[DISK_BUFFER_SIZE * 8];
+
+
+		for (UINT64 ReadTimes = 0; ReadTimes < FileLength / (512 * 8); ReadTimes++)
+		{
+			//这样读取文件会有问题，如果文件是连续存放，则没有问题，如果是非连续存放，则不行
+			EFI_STATUS Status = L1_STORE_READ(FileInPartitionID, *pNextReadSectorNumber, 8, BufferBlock); 
+			if (EFI_SUCCESS != Status)
+			{
+				L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: Read from device error: Status:%X \n", __LINE__, Status);
+				return Status;
+			}
+			
+			//L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: NextReadSectorNumber: %llu BlockNumber: %llu\n", __LINE__, *pNextReadSectorNumber, BlockNumber);
+												
+
+			for (UINT16 BufferCopy = 0; BufferCopy < 512 * 8; BufferCopy++)
+				pFileReadData->pDestBuffer[ReadTimes * 512 * 8 + BufferCopy] = BufferBlock[BufferCopy];
+
+			BlockNumber = L2_FILE_GetNextBlockNumber2(FileInPartitionID, BlockNumber);
+			*pNextReadSectorNumber = device[FileInPartitionID].stMBRSwitched.ReservedSelector + device[FileInPartitionID].stMBRSwitched.SectorsPerFat * device[FileInPartitionID].stMBRSwitched.FATCount + device[FileInPartitionID].stMBRSwitched.BootPathStartCluster - 2 + (BlockNumber - 2) * 8;
+		}			
+	}
+}
+
+
+UINT16 L3_APPLICATION_ItemFindByName(FAT32_ROOTPATH_SHORT_FILE_ITEM *pItemsInPath , FILE_READ_DATA *pFileReadData)
 {
 	UINT64 FileBlockStartNumber = 0;
 	UINT64 FileLength = 0;
@@ -932,7 +976,7 @@ EFI_STATUS L3_APPLICATION_ItemFindByName(FAT32_ROOTPATH_SHORT_FILE_ITEM *pItemsI
 	UINT64 NextReadSectorNumber = 0;
 	
 	//解析目录下的项目，因为每项32个字节长度，我们读取的512字节，所以512/32=16
-	for (int j = 0; j < DISK_BUFFER_SIZE * 2 / 32; j++)
+	for (UINT16 j = 0; j < DISK_BUFFER_SIZE * 2 / 32; j++)
 	{
 		//外层循环一共是32项，但实际目录下可能没有存放32个项，比如少于32项
 		if (pItemsInPath[j].FileName[0] == 0 )
@@ -972,44 +1016,7 @@ EFI_STATUS L3_APPLICATION_ItemFindByName(FAT32_ROOTPATH_SHORT_FILE_ITEM *pItemsI
 			//这里需要注意，分区名称如果为空，值是0x20
 			if (FileName[k] == 0 && pFileReadData->FilePaths[CurrentPathID][k] == 0)
 			{					
-				//获取下一次访问的扇区编号
-				UINT64 BlockNumber = (UINT64)pItemsInPath[j].StartClusterLow2B[0] | (UINT64)pItemsInPath[j].StartClusterLow2B[1] << 8 | (UINT64)pItemsInPath[j].StartClusterHigh2B[0] << 16 | (UINT64)pItemsInPath[j].StartClusterHigh2B[1] << 24;
-				
-				*pNextReadSectorNumber = device[FileInPartitionID].stMBRSwitched.ReservedSelector + device[FileInPartitionID].stMBRSwitched.SectorsPerFat * device[FileInPartitionID].stMBRSwitched.FATCount + device[FileInPartitionID].stMBRSwitched.BootPathStartCluster - 2 + (BlockNumber - 2) * 8;			
-				
-				FileLength = (UINT64)pItemsInPath[j].FileLength[0] | (UINT64)pItemsInPath[j].FileLength[1] << 8 | (UINT64)pItemsInPath[j].FileLength[2] << 16 | (UINT64)pItemsInPath[j].FileLength[3] << 24;
-			
-				L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: File In Items: %d NextReadSectorNumber: %d FileLength: %d\n", __LINE__, j, NextReadSectorNumber, FileLength);
-
-				if (pItemsInPath[j].Attribute[0] == 0x20)
-				{
-					UINT64 SectorCount = FileLength / (512 * 8);
-					UINT8 AddOneFlag = (FileLength % (512 * 8) == 0) ? 0 : 1; 
-					UINT8 BufferBlock[DISK_BUFFER_SIZE * 8];
-
-
-					for (UINT64 ReadTimes = 0; ReadTimes < FileLength / (512 * 8); ReadTimes++)
-					{
-						//这样读取文件会有问题，如果文件是连续存放，则没有问题，如果是非连续存放，则不行
-						EFI_STATUS Status = L1_STORE_READ(FileInPartitionID, *pNextReadSectorNumber, 8, BufferBlock); 
-						if (EFI_SUCCESS != Status)
-						{
-							L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: Read from device error: Status:%X \n", __LINE__, Status);
-							return Status;
-						}
-						
-						L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: NextReadSectorNumber: %llu BlockNumber: %llu\n", __LINE__, NextReadSectorNumber, BlockNumber);
-															
-
-						for (UINT16 BufferCopy = 0; BufferCopy < 512 * 8; BufferCopy++)
-							pFileReadData->pDestBuffer[ReadTimes * 512 * 8 + BufferCopy] = BufferBlock[BufferCopy];
-
-						BlockNumber = L2_FILE_GetNextBlockNumber2(FileInPartitionID, BlockNumber);
-						*pNextReadSectorNumber = device[FileInPartitionID].stMBRSwitched.ReservedSelector + device[FileInPartitionID].stMBRSwitched.SectorsPerFat * device[FileInPartitionID].stMBRSwitched.FATCount + device[FileInPartitionID].stMBRSwitched.BootPathStartCluster - 2 + (BlockNumber - 2) * 8;			
-				
-					}
-						
-				}
+				return j;
 			}
 		}	
 	}
@@ -1037,7 +1044,6 @@ EFI_STATUS L3_APPLICATION_FileReadWithPath(UINT8 *pPath, UINT8 *pDestBuffer)
     L3_APPLICATION_GetFilePaths(pPath, &FileReadData);
 	
     UINT16 i = 0;
-    UINT16 j = 0;
     UINT16 FileInPartitionID = 0xffff;
 
 	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: FileReadData.FilePaths[0]: %a \n", __LINE__, FileReadData.FilePaths[0]);
@@ -1087,7 +1093,9 @@ EFI_STATUS L3_APPLICATION_FileReadWithPath(UINT8 *pPath, UINT8 *pDestBuffer)
 		L1_MEMORY_Copy(&pItemsInPath, Buffer, DISK_BUFFER_SIZE * 2);
 		FileReadData.CurrentPathID = i;
 		
-		L3_APPLICATION_ItemFindByName(&pItemsInPath, &FileReadData, &NextReadSectorNumber);
+		UINT16 j = L3_APPLICATION_ItemFindByName(&pItemsInPath, &FileReadData);
+
+		L3_APPLICATION_FileDataGetByItemID(&pItemsInPath, &FileReadData, &NextReadSectorNumber, j);
 	}
 
 }

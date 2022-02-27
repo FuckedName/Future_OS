@@ -64,7 +64,7 @@ EFI_STATUS L1_STORE_READ(UINT8 deviceID, UINT64 StartSectorNumber, UINT16 ReadSi
         return -1;
     }
 
-    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: deviceID: %d StartSectorNumber: %llu ReadSize: %d\n", __LINE__, deviceID, StartSectorNumber, ReadSize);
+    //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: deviceID: %d StartSectorNumber: %llu ReadSize: %d\n", __LINE__, deviceID, StartSectorNumber, ReadSize);
     EFI_STATUS Status;
     UINTN NumHandles;
     EFI_BLOCK_IO_PROTOCOL *BlockIo;
