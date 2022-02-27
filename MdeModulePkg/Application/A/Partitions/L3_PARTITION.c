@@ -891,7 +891,7 @@ UINT32 L2_FILE_GetNextBlockNumber2(UINT16 PartitionID, UINT64 PreviousBlockNumbe
 *  返回值： 成功：XXXX，失败：XXXXX
 *
 *****************************************************************************/
-UINT16 L3_APPLICATION_GetPartitionByPath(DEVICE_PARAMETER *pDevice, FILE_READ_DATA *pFileReadData)
+UINT16 L3_APPLICATION_PartitionQueryByPath(DEVICE_PARAMETER *pDevice, FILE_READ_DATA *pFileReadData)
 {
 	UINT16 j = 0;
 	
@@ -1027,6 +1027,9 @@ EFI_STATUS L3_APPLICATION_FileReadWithPath(UINT8 *pPath, UINT8 *pDestBuffer)
 {
 	FILE_READ_DATA FileReadData;
 	FileReadData.pDestBuffer = pDestBuffer;
+    UINT16 FileInPartitionID = 0xffff;
+	UINT8 Buffer[DISK_BUFFER_SIZE * 2];
+	UINT64 NextReadSectorNumber = 0;
 	
     if (pPath[0] != '/')
     {
@@ -1037,22 +1040,14 @@ EFI_STATUS L3_APPLICATION_FileReadWithPath(UINT8 *pPath, UINT8 *pDestBuffer)
     UINT16 Length = AsciiStrLen(pPath);
     L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d string length: %d\n", __LINE__, Length);
         
-    //UINT8 FilePaths[FILE_PATH_COUNT][FILE_PATH_LENGTH] = {0};
-    //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d File name length: %d\n", __LINE__, FileNameLength);
-
 	//分析文件路径，把路径和文件名按照/拆分，方便后续操作
     L3_APPLICATION_GetFilePaths(pPath, &FileReadData);
 	
-    UINT16 i = 0;
-    UINT16 FileInPartitionID = 0xffff;
-
 	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: FileReadData.FilePaths[0]: %a \n", __LINE__, FileReadData.FilePaths[0]);
 
 	//找到分区对应的设备索引，后续对文件进行读写的时候需要。
-	FileInPartitionID = L3_APPLICATION_GetPartitionByPath(&device, &FileReadData);
-        
-	UINT8 Buffer[DISK_BUFFER_SIZE * 2];
-	
+	FileInPartitionID = L3_APPLICATION_PartitionQueryByPath(&device, &FileReadData);
+        	
 	//读取第一个扇区，分析分区参数，比如：FAT表大小，FAT表个数，保留扇区数
 	EFI_STATUS Status = L1_STORE_READ(FileInPartitionID, 0, 1, Buffer); 
     if (EFI_SUCCESS != Status)
@@ -1063,11 +1058,10 @@ EFI_STATUS L3_APPLICATION_FileReadWithPath(UINT8 *pPath, UINT8 *pDestBuffer)
 	
 	L2_STORE_PartitionMBRAnalysis(Buffer, &device[FileInPartitionID]);
 
-
 	//读取FAT表
 	L2_STORE_FatTableGet(&device[FileInPartitionID], FileReadData);
 
-	UINT64 NextReadSectorNumber = device[FileInPartitionID].stMBRSwitched.ReservedSelector + device[FileInPartitionID].stMBRSwitched.SectorsPerFat * device[FileInPartitionID].stMBRSwitched.FATCount + (device[FileInPartitionID].stMBRSwitched.BootPathStartCluster - 2) * 8;;
+	NextReadSectorNumber = device[FileInPartitionID].stMBRSwitched.ReservedSelector + device[FileInPartitionID].stMBRSwitched.SectorsPerFat * device[FileInPartitionID].stMBRSwitched.FATCount + (device[FileInPartitionID].stMBRSwitched.BootPathStartCluster - 2) * 8;;
 
 	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: NextReadSectorNumber: %d \n", __LINE__, NextReadSectorNumber);
 
@@ -1088,8 +1082,6 @@ EFI_STATUS L3_APPLICATION_FileReadWithPath(UINT8 *pPath, UINT8 *pDestBuffer)
 			return Status;
 		}
 		
-		//L2_PARTITION_BufferPrint(Buffer, 512);	
-
 		L1_MEMORY_Copy(&pItemsInPath, Buffer, DISK_BUFFER_SIZE * 2);
 		FileReadData.CurrentPathID = i;
 		

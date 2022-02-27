@@ -2455,7 +2455,8 @@ VOID L3_GRAPHICS_MouseRightButtonClickEventHandle(MOUSE_RIGHT_MENU_CLICKED_EVENT
 
 		case MOUSE_RIGHT_MENU_ADD_CLICKED_EVENT:
 		    TestFlag = TRUE;
-			L3_APPLICATION_FileReadWithPath("/OS/resource/shutdown.bmp", pSystemIconBuffer[SYSTEM_ICON_SHUTDOWN]);    
+			UINT8 Buffer[512] = {0};
+			L3_APPLICATION_FileReadWithPath("/TEST/2.TEXT", Buffer);    
 		    L2_FILE_FAT32_FileAdd();
 			L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d MOUSE_RIGHT_MENU_ADD_CLICKED_EVENT\n", __LINE__); break;
 
