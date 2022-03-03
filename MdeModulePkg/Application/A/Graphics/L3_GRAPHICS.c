@@ -60,6 +60,16 @@ EFI_STATUS L3_WINDOW_Create(UINT8 *pBuffer, UINT8 *pParent, UINT16 Width, UINT16
         //DEBUG ((EFI_D_INFO, "NULL == pBuffer"));
         return EFI_SUCCESS;
     }   
+
+	for (i = 0; i < Height; i++)
+	{
+		for (j = 0; j < Width; j++)
+		{
+			pBuffer[(i * Width + j) * 4 + 0] = 0;
+			pBuffer[(i * Width + j) * 4 + 1] = 0;
+			pBuffer[(i * Width + j) * 4 + 2] = 0;
+		}
+	}
     
     EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
     
@@ -138,6 +148,9 @@ VOID L3_APPLICATION_MyComputerWindow(UINT16 StartX, UINT16 StartY)
     Color.Reserved = GRAPHICS_LAYER_MY_COMPUTER_WINDOW;
     
     L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: MyComputerWidth: %d \n", __LINE__, MyComputerWidth);
+
+	
+	
     L3_WINDOW_Create(pMyComputerBuffer, pParent, MyComputerWidth, MyComputerHeight, GRAPHICS_LAYER_MY_COMPUTER_WINDOW, pWindowTitle);
 
     UINT8 *pBuffer = pMyComputerBuffer;

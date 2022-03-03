@@ -283,8 +283,11 @@ typedef struct
 	UINT8 Path[20];
 	UINT16 PartitionID;
 	UINT16 ItemID;
+	UINT16 MyComputerNextState;
+	MY_COMPUTER_WINDOW_CLICKED_EVENT CurrentEvent; //当前触发我的电脑事件
 }MY_COMPUTER_CURRENT_STATE;
 
+//用于保存我的电脑窗口的一些事件信息
 MY_COMPUTER_CURRENT_STATE MyComputerCurrentState;
 
 
@@ -509,6 +512,14 @@ VOID L2_MOUSE_MyComputerCloseClicked()
     L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d L2_MOUSE_MyComputerCloseClicked\n", __LINE__);
     //DisplayMyComputerFlag = 0;
     //WindowLayers.item[3].DisplayFlag = 0;
+
+	MyComputerNextState = MY_COMPUTER_INIT_STATE;
+	PartitionItemID = 0xffff; // invalid
+	FolderItemID = 0xffff; // invalid
+	L1_MEMORY_Memset(&pItems, 0, sizeof(pItems));
+
+	L3_APPLICATION_MyComputerWindow(0, 50);
+	
     if (TRUE == WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].DisplayFlag)
     {
         WindowLayers.ActiveWindowCount--;        
@@ -2324,6 +2335,8 @@ VOID L3_GRAPHICS_SystemSettingClickEventHandle(START_MENU_SYSTEM_SETTING_SUBITEM
 *****************************************************************************/
 VOID L3_GRAPHICS_MyComupterClickEventHandle(MY_COMPUTER_WINDOW_CLICKED_EVENT event)
 {    
+	MyComputerCurrentState;
+	
 	switch(event)
 	{
 		case MY_COMPUTER_WINDOW_CLOSE_WINDOW_CLICKED_EVENT:
