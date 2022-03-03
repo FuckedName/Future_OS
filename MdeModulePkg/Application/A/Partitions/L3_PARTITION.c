@@ -74,6 +74,8 @@ typedef struct
 	UINT16 CurrentPathID; //当前操作的路径编号
 	UINT16 PathCount;
     UINT16 CurrentPartitionID; //当前操作分区编号 
+	UINT8 *pItemBuffer; //存放文件所在目录，目录对应的磁盘缓冲区
+	UINT8 *pItemID; //存放文件所在目录的编号
 
 }FILE_READ_DATA;
 
@@ -420,12 +422,40 @@ EFI_STATUS L2_STORE_RootPathAnalysisFSM()
 *  返回值： 成功：XXXX，失败：XXXXX
 *
 *****************************************************************************/
-EFI_STATUS L2_STORE_FatTableGet(DEVICE_PARAMETER *pDevice, FILE_READ_DATA FileReadData)
+EFI_STATUS L2_STORE_FatTableRead(DEVICE_PARAMETER *pDevice, FILE_READ_DATA FileReadData)
 {	
 	if (NULL == pDevice->FAT_TableBuffer)
 	{
 		pDevice->FAT_TableBuffer = L2_MEMORY_Allocate("FAT Table Buffer", MEMORY_TYPE_APPLICATION, DISK_BUFFER_SIZE * pDevice->stMBRSwitched.SectorsPerFat);
 		EFI_STATUS Status = L1_STORE_READ(FileReadData.CurrentPartitionID, pDevice->stMBRSwitched.ReservedSelector,  pDevice->stMBRSwitched.SectorsPerFat, pDevice->FAT_TableBuffer);	
+	} 
+	
+	//L2_PARTITION_BufferPrint(pDevice->FAT_TableBuffer, 512);	
+	//L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: pDevice->FAT_TableBuffer: %x Status: %d\n", __LINE__, pDevice->FAT_TableBuffer, Status); 
+}
+
+
+
+/****************************************************************************
+*
+*  描述:     把FAT表指定BLOCK数值设置为0
+*
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
+EFI_STATUS L2_STORE_FatTableSetZero(DEVICE_PARAMETER *pDevice, FILE_READ_DATA FileReadData, UINT64 BlockNumber)
+{	
+	if (NULL == pDevice->FAT_TableBuffer)
+	{
+		for (UINT16 i = 0; i < 4; i++)
+			pDevice->FAT_TableBuffer[4 * BlockNumber + i] = 0;
+		//pDevice->FAT_TableBuffer = L2_MEMORY_Allocate("FAT Table Buffer", MEMORY_TYPE_APPLICATION, DISK_BUFFER_SIZE * pDevice->stMBRSwitched.SectorsPerFat);
+		EFI_STATUS Status = L1_STORE_Write(FileReadData.CurrentPartitionID, pDevice->stMBRSwitched.ReservedSelector,  pDevice->stMBRSwitched.SectorsPerFat, pDevice->FAT_TableBuffer);	
 	} 
 	
 	//L2_PARTITION_BufferPrint(pDevice->FAT_TableBuffer, 512);	
@@ -1004,7 +1034,8 @@ UINT16 L3_APPLICATION_ItemFindByName(FAT32_ROOTPATH_SHORT_FILE_ITEM *pItemsInPat
 											pItemsInPath[j].FileLength[0], pItemsInPath[j].FileLength[1], pItemsInPath[j].FileLength[2], pItemsInPath[j].FileLength[3],
 											pItemsInPath[j].Attribute[0],
 											FileName);
-			
+
+			//查找CurrentPathID对应的路径
 			for (k = 0; L1_STRING_IsValidNameChar(FileName[k]) && L1_STRING_IsValidNameChar(pFileReadData->FilePaths[CurrentPathID][k]); k++)
 			{
 				if (FileName[k] != pFileReadData->FilePaths[CurrentPathID][k])			
@@ -1016,12 +1047,17 @@ UINT16 L3_APPLICATION_ItemFindByName(FAT32_ROOTPATH_SHORT_FILE_ITEM *pItemsInPat
 			//这里需要注意，分区名称如果为空，值是0x20
 			if (FileName[k] == 0 && pFileReadData->FilePaths[CurrentPathID][k] == 0)
 			{					
+				pFileReadData->pItemBuffer = pItemsInPath;
+				pFileReadData->pItemID = j;
 				return j;
 			}
 		}	
 	}
 
 }
+
+
+
 
 EFI_STATUS L3_APPLICATION_FileReadWithPath(UINT8 *pPath, UINT8 *pDestBuffer)
 {
@@ -1059,7 +1095,7 @@ EFI_STATUS L3_APPLICATION_FileReadWithPath(UINT8 *pPath, UINT8 *pDestBuffer)
 	L2_STORE_PartitionMBRAnalysis(Buffer, &device[FileInPartitionID]);
 
 	//读取FAT表
-	L2_STORE_FatTableGet(&device[FileInPartitionID], FileReadData);
+	L2_STORE_FatTableRead(&device[FileInPartitionID], FileReadData);
 
 	NextReadSectorNumber = device[FileInPartitionID].stMBRSwitched.ReservedSelector + device[FileInPartitionID].stMBRSwitched.SectorsPerFat * device[FileInPartitionID].stMBRSwitched.FATCount + (device[FileInPartitionID].stMBRSwitched.BootPathStartCluster - 2) * 8;;
 
@@ -1085,9 +1121,9 @@ EFI_STATUS L3_APPLICATION_FileReadWithPath(UINT8 *pPath, UINT8 *pDestBuffer)
 		L1_MEMORY_Copy(&pItemsInPath, Buffer, DISK_BUFFER_SIZE * 2);
 		FileReadData.CurrentPathID = i;
 		
-		UINT16 j = L3_APPLICATION_ItemFindByName(&pItemsInPath, &FileReadData);
+		UINT16 index = L3_APPLICATION_ItemFindByName(&pItemsInPath, &FileReadData);
 
-		L3_APPLICATION_FileDataGetByItemID(&pItemsInPath, &FileReadData, &NextReadSectorNumber, j);
+		L3_APPLICATION_FileDataGetByItemID(&pItemsInPath, &FileReadData, &NextReadSectorNumber, index);
 	}
 
 }
@@ -1104,9 +1140,93 @@ EFI_STATUS L3_APPLICATION_FileReadWithPath(UINT8 *pPath, UINT8 *pDestBuffer)
 *  返回值： 成功：XXXX，失败：XXXXX
 *
 *****************************************************************************/
-EFI_STATUS L3_APPLICATION_FileDeleteWithPath(UINT8 *pPathName)
+EFI_STATUS L3_APPLICATION_FileDeleteWithPath(UINT8 *pPath, UINT8 *pDestBuffer)
 {
-    UINT8 p[] = "/OS/resource/zhufeng.bmp";
+	FILE_READ_DATA FileReadData;
+	FileReadData.pDestBuffer = pDestBuffer;
+    UINT16 FileInPartitionID = 0xffff;
+	UINT8 Buffer[DISK_BUFFER_SIZE * 2];
+	UINT64 NextReadSectorNumber = 0;
+	
+    if (pPath[0] != '/')
+    {
+        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d Path error!\n", __LINE__);
+        return;
+    }
+
+    UINT16 Length = AsciiStrLen(pPath);
+    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d string length: %d\n", __LINE__, Length);
+        
+	//分析文件路径，把路径和文件名按照/拆分，方便后续操作
+    L3_APPLICATION_GetFilePaths(pPath, &FileReadData);
+	
+	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: FileReadData.FilePaths[0]: %a \n", __LINE__, FileReadData.FilePaths[0]);
+
+	//找到分区对应的设备索引，后续对文件进行读写的时候需要。
+	FileInPartitionID = L3_APPLICATION_PartitionQueryByPath(&device, &FileReadData);
+        	
+	//读取第一个扇区，分析分区参数，比如：FAT表大小，FAT表个数，保留扇区数
+	EFI_STATUS Status = L1_STORE_READ(FileInPartitionID, 0, 1, Buffer); 
+    if (EFI_SUCCESS != Status)
+    {
+		L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: Read from device error: Status:%X \n", __LINE__, Status);
+    	return Status;
+    }
+	
+	L2_STORE_PartitionMBRAnalysis(Buffer, &device[FileInPartitionID]);
+
+	//读取FAT表
+	L2_STORE_FatTableRead(&device[FileInPartitionID], FileReadData);
+
+	NextReadSectorNumber = device[FileInPartitionID].stMBRSwitched.ReservedSelector + device[FileInPartitionID].stMBRSwitched.SectorsPerFat * device[FileInPartitionID].stMBRSwitched.FATCount + (device[FileInPartitionID].stMBRSwitched.BootPathStartCluster - 2) * 8;;
+
+	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: NextReadSectorNumber: %d \n", __LINE__, NextReadSectorNumber);
+
+	//用于存放从目录下读取文件或目录数据，用于解析
+    FAT32_ROOTPATH_SHORT_FILE_ITEM pItemsInPath[32];
+
+	//解析各个路径参数
+	//这里需要注意，第一个路径是分区名字，所以根目录下的路径需要从第二个名字开始找，索引号是1
+	for (UINT16 i = 1; i < FileReadData.PathCount; i++)
+	{
+		L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: FilePaths: %a \n", __LINE__, FileReadData.FilePaths[i]);
+            
+		//当前只读一个扇区，这样这里是有缺陷的，如果路径里的项目超过16个，则不能正常读取
+		EFI_STATUS Status = L1_STORE_READ(FileInPartitionID, NextReadSectorNumber, 2, Buffer); 
+		if (EFI_SUCCESS != Status)
+		{
+			L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: Read from device error: Status:%X \n", __LINE__, Status);
+			return Status;
+		}
+		
+		L1_MEMORY_Copy(&pItemsInPath, Buffer, DISK_BUFFER_SIZE * 2);
+		FileReadData.CurrentPathID = i;
+		
+		UINT16 index = L3_APPLICATION_ItemFindByName(&pItemsInPath, &FileReadData);
+		
+		//1、把目录项名称的第一个字节修改为0xE5
+		pItemsInPath[index].FileName[0] = 0xE5;
+		L1_MEMORY_Copy(Buffer, &pItemsInPath, DISK_BUFFER_SIZE * 2);
+		
+		Status = L1_STORE_Write(FileInPartitionID, 0, 1, Buffer); 
+
+		L3_APPLICATION_FileDataGetByItemID(&pItemsInPath, &FileReadData, &NextReadSectorNumber, index);
+		
+		//获取文件所在的块号
+		UINT64 BlockNumber = (UINT64)pItemsInPath[index].StartClusterLow2B[0] | (UINT64)pItemsInPath[index].StartClusterLow2B[1] << 8 | (UINT64)pItemsInPath[index].StartClusterHigh2B[0] << 16 | (UINT64)pItemsInPath[index].StartClusterHigh2B[1] << 24;
+
+
+		for (UINT64 ReadTimes = 0; ReadTimes < FileLength / (512 * 8); ReadTimes++)
+		{				
+			BlockNumber = L2_FILE_GetNextBlockNumber2(FileInPartitionID, BlockNumber);
+			L2_STORE_FatTableSetZero(&device[FileInPartitionID], FileReadData,  BlockNumber);
+		}
+		
+	}
+
+	//删除文件需要的操作：
+	//2、把FAT Table对应的索引清空
+	//3、
 }
 
 
@@ -1121,9 +1241,72 @@ EFI_STATUS L3_APPLICATION_FileDeleteWithPath(UINT8 *pPathName)
 *  返回值： 成功：XXXX，失败：XXXXX
 *
 *****************************************************************************/
-EFI_STATUS L3_APPLICATION_FileAddWithPath(UINT8 *pPathName, UINT8 *pBuffer)
+EFI_STATUS L3_APPLICATION_FileAddWithPath(UINT8 *pPath, UINT8 *pDestBuffer)
 {
-    UINT8 p[] = "/OS/resource/zhufeng.bmp";
+    FILE_READ_DATA FileReadData;
+	FileReadData.pDestBuffer = pDestBuffer;
+    UINT16 FileInPartitionID = 0xffff;
+	UINT8 Buffer[DISK_BUFFER_SIZE * 2];
+	UINT64 NextReadSectorNumber = 0;
+	
+    if (pPath[0] != '/')
+    {
+        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d Path error!\n", __LINE__);
+        return;
+    }
+
+    UINT16 Length = AsciiStrLen(pPath);
+    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d string length: %d\n", __LINE__, Length);
+        
+	//分析文件路径，把路径和文件名按照/拆分，方便后续操作
+    L3_APPLICATION_GetFilePaths(pPath, &FileReadData);
+	
+	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: FileReadData.FilePaths[0]: %a \n", __LINE__, FileReadData.FilePaths[0]);
+
+	//找到分区对应的设备索引，后续对文件进行读写的时候需要。
+	FileInPartitionID = L3_APPLICATION_PartitionQueryByPath(&device, &FileReadData);
+        	
+	//读取第一个扇区，分析分区参数，比如：FAT表大小，FAT表个数，保留扇区数
+	EFI_STATUS Status = L1_STORE_READ(FileInPartitionID, 0, 1, Buffer); 
+    if (EFI_SUCCESS != Status)
+    {
+		L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: Read from device error: Status:%X \n", __LINE__, Status);
+    	return Status;
+    }
+	
+	L2_STORE_PartitionMBRAnalysis(Buffer, &device[FileInPartitionID]);
+
+	//读取FAT表
+	L2_STORE_FatTableRead(&device[FileInPartitionID], FileReadData);
+
+	NextReadSectorNumber = device[FileInPartitionID].stMBRSwitched.ReservedSelector + device[FileInPartitionID].stMBRSwitched.SectorsPerFat * device[FileInPartitionID].stMBRSwitched.FATCount + (device[FileInPartitionID].stMBRSwitched.BootPathStartCluster - 2) * 8;;
+
+	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: NextReadSectorNumber: %d \n", __LINE__, NextReadSectorNumber);
+
+	//用于存放从目录下读取文件或目录数据，用于解析
+    FAT32_ROOTPATH_SHORT_FILE_ITEM pItemsInPath[32];
+
+	//解析各个路径参数
+	//这里需要注意，第一个路径是分区名字，所以根目录下的路径需要从第二个名字开始找，索引号是1
+	for (UINT16 i = 1; i < FileReadData.PathCount; i++)
+	{
+		L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: FilePaths: %a \n", __LINE__, FileReadData.FilePaths[i]);
+            
+		//当前只读一个扇区，这样这里是有缺陷的，如果路径里的项目超过16个，则不能正常读取
+		EFI_STATUS Status = L1_STORE_READ(FileInPartitionID, NextReadSectorNumber, 2, Buffer); 
+		if (EFI_SUCCESS != Status)
+		{
+			L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: Read from device error: Status:%X \n", __LINE__, Status);
+			return Status;
+		}
+		
+		L1_MEMORY_Copy(&pItemsInPath, Buffer, DISK_BUFFER_SIZE * 2);
+		FileReadData.CurrentPathID = i;
+		
+		UINT16 index = L3_APPLICATION_ItemFindByName(&pItemsInPath, &FileReadData);
+
+		L3_APPLICATION_FileDataGetByItemID(&pItemsInPath, &FileReadData, &NextReadSectorNumber, index);
+	}
 
 }
 
@@ -1139,9 +1322,72 @@ EFI_STATUS L3_APPLICATION_FileAddWithPath(UINT8 *pPathName, UINT8 *pBuffer)
 *  返回值： 成功：XXXX，失败：XXXXX
 *
 *****************************************************************************/
-EFI_STATUS L3_APPLICATION_FileModifyWithPath(UINT8 *pPathName, UINT8 *pBuffer)
+EFI_STATUS L3_APPLICATION_FileModifyWithPath(UINT8 *pPath, UINT8 *pDestBuffer)
 {
-    UINT8 p[] = "/OS/resource/zhufeng.bmp";
+    FILE_READ_DATA FileReadData;
+	FileReadData.pDestBuffer = pDestBuffer;
+    UINT16 FileInPartitionID = 0xffff;
+	UINT8 Buffer[DISK_BUFFER_SIZE * 2];
+	UINT64 NextReadSectorNumber = 0;
+	
+    if (pPath[0] != '/')
+    {
+        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d Path error!\n", __LINE__);
+        return;
+    }
+
+    UINT16 Length = AsciiStrLen(pPath);
+    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d string length: %d\n", __LINE__, Length);
+        
+	//分析文件路径，把路径和文件名按照/拆分，方便后续操作
+    L3_APPLICATION_GetFilePaths(pPath, &FileReadData);
+	
+	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: FileReadData.FilePaths[0]: %a \n", __LINE__, FileReadData.FilePaths[0]);
+
+	//找到分区对应的设备索引，后续对文件进行读写的时候需要。
+	FileInPartitionID = L3_APPLICATION_PartitionQueryByPath(&device, &FileReadData);
+        	
+	//读取第一个扇区，分析分区参数，比如：FAT表大小，FAT表个数，保留扇区数
+	EFI_STATUS Status = L1_STORE_READ(FileInPartitionID, 0, 1, Buffer); 
+    if (EFI_SUCCESS != Status)
+    {
+		L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: Read from device error: Status:%X \n", __LINE__, Status);
+    	return Status;
+    }
+	
+	L2_STORE_PartitionMBRAnalysis(Buffer, &device[FileInPartitionID]);
+
+	//读取FAT表
+	L2_STORE_FatTableRead(&device[FileInPartitionID], FileReadData);
+
+	NextReadSectorNumber = device[FileInPartitionID].stMBRSwitched.ReservedSelector + device[FileInPartitionID].stMBRSwitched.SectorsPerFat * device[FileInPartitionID].stMBRSwitched.FATCount + (device[FileInPartitionID].stMBRSwitched.BootPathStartCluster - 2) * 8;;
+
+	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: NextReadSectorNumber: %d \n", __LINE__, NextReadSectorNumber);
+
+	//用于存放从目录下读取文件或目录数据，用于解析
+    FAT32_ROOTPATH_SHORT_FILE_ITEM pItemsInPath[32];
+
+	//解析各个路径参数
+	//这里需要注意，第一个路径是分区名字，所以根目录下的路径需要从第二个名字开始找，索引号是1
+	for (UINT16 i = 1; i < FileReadData.PathCount; i++)
+	{
+		L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: FilePaths: %a \n", __LINE__, FileReadData.FilePaths[i]);
+            
+		//当前只读一个扇区，这样这里是有缺陷的，如果路径里的项目超过16个，则不能正常读取
+		EFI_STATUS Status = L1_STORE_READ(FileInPartitionID, NextReadSectorNumber, 2, Buffer); 
+		if (EFI_SUCCESS != Status)
+		{
+			L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: Read from device error: Status:%X \n", __LINE__, Status);
+			return Status;
+		}
+		
+		L1_MEMORY_Copy(&pItemsInPath, Buffer, DISK_BUFFER_SIZE * 2);
+		FileReadData.CurrentPathID = i;
+		
+		UINT16 index = L3_APPLICATION_ItemFindByName(&pItemsInPath, &FileReadData);
+
+		L3_APPLICATION_FileDataGetByItemID(&pItemsInPath, &FileReadData, &NextReadSectorNumber, index);
+	}
 }
 
 

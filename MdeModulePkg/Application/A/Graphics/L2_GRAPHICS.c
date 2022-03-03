@@ -278,7 +278,14 @@ const UINT8 sASCII[][16] =
     {0x00,0x00,0xCC,0x00,0x00,0x78,0x0C,0x7C,0xCC,0xCC,0xCC,0x76,0x00,0x00,0x00,0x00},       
 };
 
+typedef struct 
+{
+	UINT8 Path[20];
+	UINT16 PartitionID;
+	UINT16 ItemID;
+}MY_COMPUTER_CURRENT_STATE;
 
+MY_COMPUTER_CURRENT_STATE MyComputerCurrentState;
 
 
 /****************************************************************************
@@ -525,11 +532,27 @@ VOID L2_MOUSE_MyComputerCloseClicked()
 *****************************************************************************/
 VOID L2_MOUSE_MyComputerPartitionItemClicked()
 {
+	UINT16 i = 0;
     L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: L2_MOUSE_MyComputerPartitionItemClicked, PartitionItemID: %d\n",  __LINE__, PartitionItemID);
     
     // this code may be have some problems, because my USB file system is FAT32, my Disk file system is NTFS.
     // others use this code must be careful...
     //UINT8 FileSystemType = L2_FILE_PartitionTypeAnalysis(PartitionItemID);
+
+	MyComputerCurrentState.Path[0] = '/' ;
+
+	while(L1_STRING_IsValidNameChar(device[PartitionItemID].PartitionName[i]))
+	{
+		MyComputerCurrentState.Path[i + 1] = device[PartitionItemID].PartitionName[i];
+		i++;
+	}
+
+	MyComputerCurrentState.Path[i + 1] = '\0';
+	
+    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: PartitionName: %a\n",  __LINE__, device[PartitionItemID].PartitionName);
+    
+    L2_DEBUG_Print3(16 * 23, 32, WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW], "%a",
+                                    MyComputerCurrentState.Path);		
 
     L2_FILE_PartitionTypeAnalysis(PartitionItemID);
 
