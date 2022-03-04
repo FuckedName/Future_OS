@@ -101,7 +101,7 @@ UINT8 *pSystemLogBuffer = NULL; // Save log data
 #define SYSTEM_LOG_DATA_WIDTH 200
 #define SYSTEM_LOG_DATA_LINE 40
 
-
+#define MY_COMPUTER_PARTITION_CLICKED_FLAG -1
 
 UINT16 date_time_count_increase_flag = 0;
 UINT16 date_time_count = 0;
@@ -136,6 +136,9 @@ NTFS_FILE_SWITCHED NTFSFileSwitched = {0};
 //Line 0
 #define DISPLAY_DESK_HEIGHT_WEIGHT_X (date_time_count % 30) 
 #define DISPLAY_DESK_HEIGHT_WEIGHT_Y (ScreenHeight - 16 * 3)
+
+#define FAT32_FILE_SYSTEM_ATTRIBUTE_DIRECTORY   0x10
+#define FAT32_FILE_SYSTEM_ATTRIBUTE_FILE  		0x20
 
 
 MOUSE_MOVEOVER_OBJECT MouseMoveoverObjectOld;
@@ -285,6 +288,7 @@ typedef struct
 	UINT16 ItemID;
 	UINT16 MyComputerNextState;
 	UINT64 SectorStartOld;  //用于记录上一次访问文件或者目录对应的扇区号或者块号
+	UINT64 LastVisitedItemAttribute;  //用于记录上一次访问文件或者目录对应的扇区号或者块号
 	MY_COMPUTER_WINDOW_CLICKED_EVENT CurrentEvent; //当前触发‘我的电脑’窗口事件
 }MY_COMPUTER_CURRENT_STATE;
 
@@ -295,7 +299,7 @@ MY_COMPUTER_CURRENT_STATE MyComputerCurrentState;
 
 /****************************************************************************
 *
-*  描述:     把新访问的目录或者文件信息添加到我的电脑当前访问路径
+*  描述:     这个接口只用于分区被点击时目录展示，所以这个接口只能是分区被点击才能使用
 *
 *  参数1： xxxxx
 *  参数2： xxxxx
@@ -316,6 +320,8 @@ EFI_STATUS L2_GRAPHICS_PathPushByName(MY_COMPUTER_CURRENT_STATE *pMyComputerCurr
 	}
 
 	pMyComputerCurrentState->Path[i + 1] = '\0';
+
+	pMyComputerCurrentState->SectorStartOld = MY_COMPUTER_PARTITION_CLICKED_FLAG;
 	
     L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: PartitionName: %a\n",  __LINE__, pName);
     
@@ -337,6 +343,8 @@ EFI_STATUS L2_GRAPHICS_PathPush(MY_COMPUTER_CURRENT_STATE *pMyComputerCurrentSta
 {
 	UINT16 PathLength = 0;	
 	UINT16 i = 0;
+
+	//8个文件名长度，3个后缀名长度，1个点号共12个，加一个'\0'
 	UINT8  FileName[14] = {0};
 
 	if (ItemIndex > 32)
@@ -344,9 +352,26 @@ EFI_STATUS L2_GRAPHICS_PathPush(MY_COMPUTER_CURRENT_STATE *pMyComputerCurrentSta
 		L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d ItemIndex > 32: %d\n", __LINE__, ItemIndex);
 		return;
 	}
-	
+
+	//获取当前的路径长度，需要在长度路径长度上添加新路径长度
 	PathLength = L1_STRING_Length(pMyComputerCurrentState->Path);
+
 	L1_FILE_NameGetUseItem(pItems[ItemIndex], FileName);
+	
+	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d pMyComputerCurrentState->LastVisitedItemAttribute: %d\n", __LINE__, pMyComputerCurrentState->LastVisitedItemAttribute);
+		
+	//如果前面访问的项是文件，则需要从文件前面的/开始写新的项名称
+	if (pMyComputerCurrentState->LastVisitedItemAttribute == FAT32_FILE_SYSTEM_ATTRIBUTE_FILE) 
+	{
+		for (i = PathLength - 1; i > 0; i--)
+		{
+			if (pMyComputerCurrentState->Path[i] == '/')
+			{
+				PathLength = i;
+				break;
+			}
+		}
+	}
 
 	//因为需要新增加目录，所以需要先增加/
 	pMyComputerCurrentState->Path[PathLength] = '/';
@@ -360,6 +385,8 @@ EFI_STATUS L2_GRAPHICS_PathPush(MY_COMPUTER_CURRENT_STATE *pMyComputerCurrentSta
 	}
 	
 	pMyComputerCurrentState->Path[PathLength + i]  = '\0';
+
+	pMyComputerCurrentState->LastVisitedItemAttribute = pItems[ItemIndex].Attribute[0];
 
 }
 
@@ -625,6 +652,8 @@ VOID L2_MOUSE_MyComputerPartitionItemClicked()
 
 	L2_GRAPHICS_PathPushByName(&MyComputerCurrentState, device[PartitionItemID].PartitionName);
 
+	MyComputerCurrentState.LastVisitedItemAttribute = FAT32_FILE_SYSTEM_ATTRIBUTE_DIRECTORY;
+
     L2_DEBUG_Print3(16 * 23, 32, WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW], "%a",
                                     MyComputerCurrentState.Path);		
 
@@ -771,6 +800,8 @@ EFI_STATUS L2_MOUSE_MyComputerFolderItemClicked()
 	UINT16 index = FolderItemValidIndexArray[FolderItemID];
 	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d index: %d\n", __LINE__, index);
 
+	MyComputerCurrentState.LastVisitedItemAttribute = pItems[index].Attribute[0];
+
 	L2_GRAPHICS_PathPush(&MyComputerCurrentState, index);
 
     L2_DEBUG_Print3(16 * 23, 32, WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW], "%a",
@@ -825,13 +856,13 @@ EFI_STATUS L2_MOUSE_MyComputerFolderItemClicked()
 		switch(pItems[index].Attribute[0])
 		{
 		    //如果是目录，则显示子目录
-			case 0x10:  L1_MEMORY_Memset(&pItems, 0, sizeof(pItems));
+			case FAT32_FILE_SYSTEM_ATTRIBUTE_DIRECTORY:  L1_MEMORY_Memset(&pItems, 0, sizeof(pItems));
 					    L1_MEMORY_Copy(&pItems, Buffer, DISK_BUFFER_SIZE);
 						L2_STORE_FolderItemsPrint();
 						break;
 
 			//如果是文件，则显示文件内容
-			case 0x20: L2_PARTITION_FileContentPrint(Buffer); break;
+			case FAT32_FILE_SYSTEM_ATTRIBUTE_FILE: L2_PARTITION_FileContentPrint(Buffer); break;
 
 			default: break;
 		}
