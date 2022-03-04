@@ -284,11 +284,84 @@ typedef struct
 	UINT16 PartitionID;
 	UINT16 ItemID;
 	UINT16 MyComputerNextState;
-	MY_COMPUTER_WINDOW_CLICKED_EVENT CurrentEvent; //当前触发我的电脑事件
+	UINT64 SectorStartOld;  //用于记录上一次访问文件或者目录对应的扇区号或者块号
+	MY_COMPUTER_WINDOW_CLICKED_EVENT CurrentEvent; //当前触发‘我的电脑’窗口事件
 }MY_COMPUTER_CURRENT_STATE;
 
 //用于保存我的电脑窗口的一些事件信息
 MY_COMPUTER_CURRENT_STATE MyComputerCurrentState;
+
+
+
+/****************************************************************************
+*
+*  描述:     把新访问的目录或者文件信息添加到我的电脑当前访问路径
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
+EFI_STATUS L2_GRAPHICS_PathPushByName(MY_COMPUTER_CURRENT_STATE *pMyComputerCurrentState, UINT8 *pName)
+{
+	UINT16 i = 0;
+	pMyComputerCurrentState->Path[0] = '/' ;
+
+	while(L1_STRING_IsValidNameChar(pName[i]))
+	{
+		pMyComputerCurrentState->Path[i + 1] = pName[i];
+		i++;
+	}
+
+	pMyComputerCurrentState->Path[i + 1] = '\0';
+	
+    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: PartitionName: %a\n",  __LINE__, pName);
+    
+}
+
+
+/****************************************************************************
+*
+*  描述:     把新访问的目录或者文件信息添加到我的电脑当前访问路径
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
+EFI_STATUS L2_GRAPHICS_PathPush(MY_COMPUTER_CURRENT_STATE *pMyComputerCurrentState, UINT16 ItemIndex)
+{
+	UINT16 PathLength = 0;	
+	UINT16 i = 0;
+	UINT8  FileName[14] = {0};
+
+	if (ItemIndex > 32)
+	{		
+		L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d ItemIndex > 32: %d\n", __LINE__, ItemIndex);
+		return;
+	}
+	
+	PathLength = L1_STRING_Length(pMyComputerCurrentState->Path);
+	L1_FILE_NameGetUseItem(pItems[ItemIndex], FileName);
+
+	//因为需要新增加目录，所以需要先增加/
+	pMyComputerCurrentState->Path[PathLength] = '/';
+			
+	//因为上边已经添加了/，所以我们需要从1开始写入新的路径字符串
+	i = 1;	
+	while(L1_STRING_IsValidNameChar(FileName[i - 1]))
+	{
+		pMyComputerCurrentState->Path[PathLength + i] = FileName[i - 1];
+		i++;
+	}
+	
+	pMyComputerCurrentState->Path[PathLength + i]  = '\0';
+
+}
 
 
 /****************************************************************************
@@ -550,18 +623,8 @@ VOID L2_MOUSE_MyComputerPartitionItemClicked()
     // others use this code must be careful...
     //UINT8 FileSystemType = L2_FILE_PartitionTypeAnalysis(PartitionItemID);
 
-	MyComputerCurrentState.Path[0] = '/' ;
+	L2_GRAPHICS_PathPushByName(&MyComputerCurrentState, device[PartitionItemID].PartitionName);
 
-	while(L1_STRING_IsValidNameChar(device[PartitionItemID].PartitionName[i]))
-	{
-		MyComputerCurrentState.Path[i + 1] = device[PartitionItemID].PartitionName[i];
-		i++;
-	}
-
-	MyComputerCurrentState.Path[i + 1] = '\0';
-	
-    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: PartitionName: %a\n",  __LINE__, device[PartitionItemID].PartitionName);
-    
     L2_DEBUG_Print3(16 * 23, 32, WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW], "%a",
                                     MyComputerCurrentState.Path);		
 
@@ -708,29 +771,14 @@ EFI_STATUS L2_MOUSE_MyComputerFolderItemClicked()
 	UINT16 index = FolderItemValidIndexArray[FolderItemID];
 	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d index: %d\n", __LINE__, index);
 
-	UINT16 PathLength = L1_STRING_Length(MyComputerCurrentState.Path);
-
-	//因为需要新增加目录，所以需要先增加/
-	MyComputerCurrentState.Path[PathLength] = '/';
-
-	//因为上边已经添加了/，所以我们需要从1开始写入新的路径字符串
-	UINT16 i = 1;	
-	while(L1_STRING_IsValidNameChar(pItems[index].FileName[i - 1]))
-	{
-		MyComputerCurrentState.Path[PathLength + i] = pItems[index].FileName[i - 1];
-		i++;
-	}
-	
-	MyComputerCurrentState.Path[PathLength + i]  = '\0';
+	L2_GRAPHICS_PathPush(&MyComputerCurrentState, index);
 
     L2_DEBUG_Print3(16 * 23, 32, WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW], "%a",
                                     MyComputerCurrentState.Path);	
 
-
 	//FAT32文件系统格式
 	if (device[PartitionItemID].FileSystemType == FILE_SYSTEM_FAT32)
     {    	
-
 		UINT16 High2B = L1_NETWORK_2BytesToUINT16(pItems[index].StartClusterHigh2B);
 		UINT16 Low2B  = L1_NETWORK_2BytesToUINT16(pItems[index].StartClusterLow2B);
 		UINT32 StartCluster = (UINT32)High2B << 16 | (UINT32)Low2B;
