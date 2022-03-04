@@ -707,7 +707,26 @@ EFI_STATUS L2_MOUSE_MyComputerFolderItemClicked()
 	//需要找获取有效的项索引
 	UINT16 index = FolderItemValidIndexArray[FolderItemID];
 	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d index: %d\n", __LINE__, index);
-		
+
+	UINT16 PathLength = L1_STRING_Length(MyComputerCurrentState.Path);
+
+	//因为需要新增加目录，所以需要先增加/
+	MyComputerCurrentState.Path[PathLength] = '/';
+
+	//因为上边已经添加了/，所以我们需要从1开始写入新的路径字符串
+	UINT16 i = 1;	
+	while(L1_STRING_IsValidNameChar(pItems[index].FileName[i - 1]))
+	{
+		MyComputerCurrentState.Path[PathLength + i] = pItems[index].FileName[i - 1];
+		i++;
+	}
+	
+	MyComputerCurrentState.Path[PathLength + i]  = '\0';
+
+    L2_DEBUG_Print3(16 * 23, 32, WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW], "%a",
+                                    MyComputerCurrentState.Path);	
+
+
 	//FAT32文件系统格式
 	if (device[PartitionItemID].FileSystemType == FILE_SYSTEM_FAT32)
     {    	
