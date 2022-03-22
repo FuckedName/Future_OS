@@ -120,8 +120,58 @@ EFI_STATUS L3_WINDOW_Create(UINT8 *pBuffer, UINT8 *pParent, UINT16 Width, UINT16
 }
 
 
+VOID L3_APPLICATION_TitleBarCreate(UINT16 StartX, UINT16 StartY, UINT16 Model)
+{
+
+}
 
 
+VOID L3_APPLICATION_MenuBarCreate(UINT16 StartX, UINT16 StartY, UINT16 Model)
+{
+
+}
+
+
+VOID L3_APPLICATION_ToolBarCreate(UINT16 StartX, UINT16 StartY, UINT16 Model)
+{
+
+}
+
+VOID L3_APPLICATION_WorkSpaceCreate(UINT16 StartX, UINT16 StartY, UINT16 Model)
+{
+
+}
+
+VOID L3_APPLICATION_StateBarCreate(UINT16 StartX, UINT16 StartY, UINT16 Model)
+{
+
+}
+
+/****************************************************************************
+*
+*  描述:   创建我的电脑窗口
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
+VOID L3_APPLICATION_MyComputerWindowCreate(UINT16 StartX, UINT16 StartY, UINT16 Model)
+{
+	//标题栏 TitleBar
+	
+	//菜单栏
+
+	//工具栏
+
+	//工作区
+
+	//状态栏
+
+	//窗口边框
+}
 
 
 /****************************************************************************

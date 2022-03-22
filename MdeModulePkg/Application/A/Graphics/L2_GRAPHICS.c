@@ -847,7 +847,7 @@ EFI_STATUS L2_MOUSE_MyComputerFolderItemClicked()
         }
 
 		// Read data from partition(disk or USB etc..)					
-	    Status = L1_STORE_READ(PartitionItemID, StartSectorNumber, 1, Buffer); 
+	    Status = L2_STORE_Read(PartitionItemID, StartSectorNumber, 1, Buffer); 
 	    if (EFI_ERROR(Status))
 	    {
 	        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d Status: %X\n", __LINE__, Status);
@@ -876,7 +876,7 @@ EFI_STATUS L2_MOUSE_MyComputerFolderItemClicked()
 		L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: StartSector: %llu Sector: %llu",  __LINE__, StartSectorNumber, pCommonStorageItems[index].FileContentRelativeSector);
 
 		// Read data from partition(disk or USB etc..)					
-	    Status = L1_STORE_READ(PartitionItemID, StartSectorNumber, 2, BufferMFT); 
+	    Status = L2_STORE_Read(PartitionItemID, StartSectorNumber, 2, BufferMFT); 
 	    if (EFI_ERROR(Status))
 	    {
 	        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d Status: %X\n", __LINE__, Status);
@@ -926,7 +926,7 @@ EFI_STATUS L2_MOUSE_MyComputerFolderItemClicked()
 				{
 				    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d Status: %X\n", __LINE__, Status);
 					// Read data from partition(disk or USB etc..)					
-				    Status = L1_STORE_READ(PartitionItemID, 8 * pA0Indexes[0].Offset, 2, BufferMFT); 
+				    Status = L2_STORE_Read(PartitionItemID, 8 * pA0Indexes[0].Offset, 2, BufferMFT); 
 				    if (EFI_ERROR(Status))
 				    {
 				        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d Status: %X\n", __LINE__, Status);

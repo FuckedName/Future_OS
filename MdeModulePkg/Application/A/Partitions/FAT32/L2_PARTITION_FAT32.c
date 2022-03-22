@@ -131,7 +131,7 @@ EFI_STATUS L2_FILE_FAT32_DataSectorHandle(UINT16 DeviceID)
     
     L1_MEMORY_SetValue(Buffer1, 0, DISK_BUFFER_SIZE);
     
-    Status = L1_STORE_READ(DeviceID, sector_count, 1, Buffer1); 
+    Status = L2_STORE_Read(DeviceID, sector_count, 1, Buffer1); 
     if (EFI_ERROR(Status))
     {
         L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d Status: %X\n", __LINE__, Status);
@@ -212,7 +212,7 @@ EFI_STATUS L2_FILE_FAT32_FileModify(UINT16 DeviceID)
                         pItems[index].ExtensionName[2]);
 
         // Read data from partition(disk or USB etc..)                  
-        Status = L1_STORE_READ(PartitionItemID, StartSectorNumber, 1, Buffer); 
+        Status = L2_STORE_Read(PartitionItemID, StartSectorNumber, 1, Buffer); 
         if (EFI_ERROR(Status))
         {
             L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d Status: %X\n", __LINE__, Status);
@@ -235,7 +235,7 @@ EFI_STATUS L2_FILE_FAT32_FileModify(UINT16 DeviceID)
                             Buffer[i] += 1;
                             
                         //然后写入U盘，这样可以看到U盘目录下文件的变化，不过这里边有点问题，我们修改文件正常还需要记录修改文件的日期，时间信息
-                        L1_STORE_Write(PartitionItemID, StartSectorNumber, 1, Buffer);
+                        L2_STORE_Write(PartitionItemID, StartSectorNumber, 1, Buffer);
                         break;
     
             default: break;
@@ -337,24 +337,24 @@ EFI_STATUS L2_FILE_FAT32_FileDelete(UINT16 DeviceID)
                         L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], 
                         "%d File: \n", __LINE__);
                        //打印从U盘读取的内容
-                       L1_STORE_READ(2, 16384, 1, Buffer);
+                       L2_STORE_Read(2, 16384, 1, Buffer);
                        //L2_PARTITION_FileContentPrint(Buffer);
 
                        Buffer[0x20 * 4 + 0] = 0xE5;
                        //Buffer[0x20 * 4 + 0] = 'E';
                        //Buffer[0x20 * 4 + 1] = '5';
-                       L1_STORE_Write(2, 16384, 1, Buffer);
+                       L2_STORE_Write(2, 16384, 1, Buffer);
                         break;
 
                        sector_count = device[DeviceID].stMBRSwitched.ReservedSelector;
-                       L1_STORE_READ(DeviceID, sector_count, 1, Buffer);
+                       L2_STORE_Read(DeviceID, sector_count, 1, Buffer);
                        
                        for (UINT8 i = 0; i < 4; i++)
                        {
                             Buffer[StartCluster * 4 + i] = 0;
                        }
                        
-                       L1_STORE_Write(DeviceID, sector_count, 1, Buffer);
+                       L2_STORE_Write(DeviceID, sector_count, 1, Buffer);
                        ;
                     break;
 

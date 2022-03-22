@@ -56,7 +56,7 @@
 *  返回值： 成功：XXXX，失败：XXXXX
 *
 *****************************************************************************/
-EFI_STATUS L1_STORE_READ(UINT8 deviceID, UINT64 StartSectorNumber, UINT16 ReadSize, UINT8 *pBuffer)
+EFI_STATUS L2_STORE_Read(UINT8 deviceID, UINT64 StartSectorNumber, UINT16 ReadSize, UINT8 *pBuffer)
 {
     if (StartSectorNumber > device[deviceID].SectorCount)
     {
@@ -124,7 +124,7 @@ EFI_STATUS L1_STORE_READ(UINT8 deviceID, UINT64 StartSectorNumber, UINT16 ReadSi
 *  返回值： 成功：XXXX，失败：XXXXX
 *
 *****************************************************************************/
-EFI_STATUS L1_STORE_Write(UINT8 deviceID, UINT64 StartSectorNumber, UINT16 WriteSize, UINT8 *pBuffer)
+EFI_STATUS L2_STORE_Write(UINT8 deviceID, UINT64 StartSectorNumber, UINT16 WriteSize, UINT8 *pBuffer)
 {
     if (StartSectorNumber > device[deviceID].SectorCount)
     {

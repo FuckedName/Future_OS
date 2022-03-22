@@ -70,7 +70,7 @@ EFI_STATUS L2_FILE_NTFS_MFT_Item_Read(UINT16 DeviceID, UINT64 SectorStartNumber)
 
     //sector_count is MFT start sector, 5 * 2 means $ROOT sector...
     //Every MFT Item use 2 sector .
-    Status = L1_STORE_READ(DeviceID, SectorStartNumber, 2, BufferMFT); 
+    Status = L2_STORE_Read(DeviceID, SectorStartNumber, 2, BufferMFT); 
     if (EFI_ERROR(Status))
     {
         L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d Status: %X\n", __LINE__, Status);
@@ -213,7 +213,7 @@ EFI_STATUS L2_FILE_NTFS_RootPathItemsRead(UINT8 PartitionID)
     
     // cluster need to multi with 8 then it is sector.
     // 读取根目录项的INDEX ITEM 磁盘缓存
-    Status = L1_STORE_READ(PartitionID, (A0Indexes[k].Offset + lastOffset) * 8 , A0Indexes[k].OccupyCluster * 8, BufferBlock);
+    Status = L2_STORE_Read(PartitionID, (A0Indexes[k].Offset + lastOffset) * 8 , A0Indexes[k].OccupyCluster * 8, BufferBlock);
     if (EFI_ERROR(Status))
     {
         L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d Status: %X\n", __LINE__, Status);

@@ -99,7 +99,7 @@ EFI_STATUS L2_STORE_PartitionAnalysisFSM()
     UINT8 Buffer1[DISK_BUFFER_SIZE];
     UINT16 i = ReadFilePartitionID;
     
-    Status = L1_STORE_READ(i, sector_count, 1, Buffer1); 
+    Status = L2_STORE_Read(i, sector_count, 1, Buffer1); 
     if (EFI_SUCCESS == Status)
     {
         L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: Status:%X \n", __LINE__, Status);
@@ -391,7 +391,7 @@ EFI_STATUS L2_STORE_RootPathAnalysisFSM()
     UINT8 Buffer1[DISK_BUFFER_SIZE];
     UINT16 i = ReadFilePartitionID;
     
-    Status = L1_STORE_READ(i, sector_count, 1, Buffer1); 
+    Status = L2_STORE_Read(i, sector_count, 1, Buffer1); 
     if ( EFI_SUCCESS == Status )
     {
          //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: Status:%X\n", __LINE__, Status);
@@ -427,7 +427,7 @@ EFI_STATUS L2_STORE_FatTableRead(DEVICE_PARAMETER *pDevice, FILE_READ_DATA FileR
 	if (NULL == pDevice->FAT_TableBuffer)
 	{
 		pDevice->FAT_TableBuffer = L2_MEMORY_Allocate("FAT Table Buffer", MEMORY_TYPE_APPLICATION, DISK_BUFFER_SIZE * pDevice->stMBRSwitched.SectorsPerFat);
-		EFI_STATUS Status = L1_STORE_READ(FileReadData.CurrentPartitionID, pDevice->stMBRSwitched.ReservedSelector,  pDevice->stMBRSwitched.SectorsPerFat, pDevice->FAT_TableBuffer);	
+		EFI_STATUS Status = L2_STORE_Read(FileReadData.CurrentPartitionID, pDevice->stMBRSwitched.ReservedSelector,  pDevice->stMBRSwitched.SectorsPerFat, pDevice->FAT_TableBuffer);	
 	} 
 	
 	//L2_PARTITION_BufferPrint(pDevice->FAT_TableBuffer, 512);	
@@ -455,7 +455,7 @@ EFI_STATUS L2_STORE_FatTableSetZero(DEVICE_PARAMETER *pDevice, FILE_READ_DATA Fi
 		for (UINT16 i = 0; i < 4; i++)
 			pDevice->FAT_TableBuffer[4 * BlockNumber + i] = 0;
 		//pDevice->FAT_TableBuffer = L2_MEMORY_Allocate("FAT Table Buffer", MEMORY_TYPE_APPLICATION, DISK_BUFFER_SIZE * pDevice->stMBRSwitched.SectorsPerFat);
-		EFI_STATUS Status = L1_STORE_Write(FileReadData.CurrentPartitionID, pDevice->stMBRSwitched.ReservedSelector,  pDevice->stMBRSwitched.SectorsPerFat, pDevice->FAT_TableBuffer);	
+		EFI_STATUS Status = L2_STORE_Write(FileReadData.CurrentPartitionID, pDevice->stMBRSwitched.ReservedSelector,  pDevice->stMBRSwitched.SectorsPerFat, pDevice->FAT_TableBuffer);	
 	} 
 	
 	//L2_PARTITION_BufferPrint(pDevice->FAT_TableBuffer, 512);	
@@ -504,7 +504,7 @@ EFI_STATUS L2_STORE_GetFatTableFSM()
          L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: NULL == FAT32_Table\n", __LINE__);                             
      }             
      
-    Status = L1_STORE_READ(i, sector_count,  device[i].stMBRSwitched.SectorsPerFat, device[i].FAT_TableBuffer); 
+    Status = L2_STORE_Read(i, sector_count,  device[i].stMBRSwitched.SectorsPerFat, device[i].FAT_TableBuffer); 
     if ( EFI_SUCCESS == Status )
     {
           //CopyMem(FAT32_Table, Buffer1, DISK_BUFFER_SIZE * MBRSwitched.SectorsPerFat);
@@ -591,7 +591,7 @@ EFI_STATUS L2_STORE_ReadFileFSM()
     //把整个文件从外存读取到内存
     for (UINT16 k = 0; k < FileLength / (512 * 8) + AddOneFlag; k++)
     {
-        Status = L1_STORE_READ(i, sector_count, 8, BufferBlock); 
+        Status = L2_STORE_Read(i, sector_count, 8, BufferBlock); 
         if (EFI_ERROR(Status))
         {
             L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d Status: %X\n", __LINE__, Status);
@@ -602,7 +602,7 @@ EFI_STATUS L2_STORE_ReadFileFSM()
         BufferBlock[0] = 0xff;
         BufferBlock[1] = 0xff;
 
-        Status = L1_STORE_Write(i, sector_count, 8, BufferBlock); 
+        Status = L2_STORE_Write(i, sector_count, 8, BufferBlock); 
         if (EFI_ERROR(Status))
         {
             L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d Status: %X\n", __LINE__, Status);
@@ -977,7 +977,7 @@ UINT16 L3_APPLICATION_FileDataGetByItemID(FAT32_ROOTPATH_SHORT_FILE_ITEM *pItems
 		for (UINT64 ReadTimes = 0; ReadTimes < FileLength / (512 * 8); ReadTimes++)
 		{
 			//这样读取文件会有问题，如果文件是连续存放，则没有问题，如果是非连续存放，则不行
-			EFI_STATUS Status = L1_STORE_READ(FileInPartitionID, *pNextReadSectorNumber, 8, BufferBlock); 
+			EFI_STATUS Status = L2_STORE_Read(FileInPartitionID, *pNextReadSectorNumber, 8, BufferBlock); 
 			if (EFI_SUCCESS != Status)
 			{
 				L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: Read from device error: Status:%X \n", __LINE__, Status);
@@ -1085,7 +1085,7 @@ EFI_STATUS L3_APPLICATION_FileReadWithPath(UINT8 *pPath, UINT8 *pDestBuffer)
 	FileInPartitionID = L3_APPLICATION_PartitionQueryByPath(&device, &FileReadData);
         	
 	//读取第一个扇区，分析分区参数，比如：FAT表大小，FAT表个数，保留扇区数
-	EFI_STATUS Status = L1_STORE_READ(FileInPartitionID, 0, 1, Buffer); 
+	EFI_STATUS Status = L2_STORE_Read(FileInPartitionID, 0, 1, Buffer); 
     if (EFI_SUCCESS != Status)
     {
 		L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: Read from device error: Status:%X \n", __LINE__, Status);
@@ -1111,7 +1111,7 @@ EFI_STATUS L3_APPLICATION_FileReadWithPath(UINT8 *pPath, UINT8 *pDestBuffer)
 		L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: FilePaths: %a \n", __LINE__, FileReadData.FilePaths[i]);
             
 		//当前只读一个扇区，这样这里是有缺陷的，如果路径里的项目超过16个，则不能正常读取
-		EFI_STATUS Status = L1_STORE_READ(FileInPartitionID, NextReadSectorNumber, 2, Buffer); 
+		EFI_STATUS Status = L2_STORE_Read(FileInPartitionID, NextReadSectorNumber, 2, Buffer); 
 		if (EFI_SUCCESS != Status)
 		{
 			L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: Read from device error: Status:%X \n", __LINE__, Status);
@@ -1166,7 +1166,7 @@ EFI_STATUS L3_APPLICATION_FileDeleteWithPath(UINT8 *pPath, UINT8 *pDestBuffer)
 	FileInPartitionID = L3_APPLICATION_PartitionQueryByPath(&device, &FileReadData);
         	
 	//读取第一个扇区，分析分区参数，比如：FAT表大小，FAT表个数，保留扇区数
-	EFI_STATUS Status = L1_STORE_READ(FileInPartitionID, 0, 1, Buffer); 
+	EFI_STATUS Status = L2_STORE_Read(FileInPartitionID, 0, 1, Buffer); 
     if (EFI_SUCCESS != Status)
     {
 		L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: Read from device error: Status:%X \n", __LINE__, Status);
@@ -1192,7 +1192,7 @@ EFI_STATUS L3_APPLICATION_FileDeleteWithPath(UINT8 *pPath, UINT8 *pDestBuffer)
 		L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: FilePaths: %a \n", __LINE__, FileReadData.FilePaths[i]);
             
 		//当前只读一个扇区，这样这里是有缺陷的，如果路径里的项目超过16个，则不能正常读取
-		EFI_STATUS Status = L1_STORE_READ(FileInPartitionID, NextReadSectorNumber, 2, Buffer); 
+		EFI_STATUS Status = L2_STORE_Read(FileInPartitionID, NextReadSectorNumber, 2, Buffer); 
 		if (EFI_SUCCESS != Status)
 		{
 			L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: Read from device error: Status:%X \n", __LINE__, Status);
@@ -1208,7 +1208,7 @@ EFI_STATUS L3_APPLICATION_FileDeleteWithPath(UINT8 *pPath, UINT8 *pDestBuffer)
 		pItemsInPath[index].FileName[0] = 0xE5;
 		L1_MEMORY_Copy(Buffer, &pItemsInPath, DISK_BUFFER_SIZE * 2);
 		
-		Status = L1_STORE_Write(FileInPartitionID, 0, 1, Buffer); 
+		Status = L2_STORE_Write(FileInPartitionID, 0, 1, Buffer); 
 
 		L3_APPLICATION_FileDataGetByItemID(&pItemsInPath, &FileReadData, &NextReadSectorNumber, index);
 		
@@ -1267,7 +1267,7 @@ EFI_STATUS L3_APPLICATION_FileAddWithPath(UINT8 *pPath, UINT8 *pDestBuffer)
 	FileInPartitionID = L3_APPLICATION_PartitionQueryByPath(&device, &FileReadData);
         	
 	//读取第一个扇区，分析分区参数，比如：FAT表大小，FAT表个数，保留扇区数
-	EFI_STATUS Status = L1_STORE_READ(FileInPartitionID, 0, 1, Buffer); 
+	EFI_STATUS Status = L2_STORE_Read(FileInPartitionID, 0, 1, Buffer); 
     if (EFI_SUCCESS != Status)
     {
 		L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: Read from device error: Status:%X \n", __LINE__, Status);
@@ -1293,7 +1293,7 @@ EFI_STATUS L3_APPLICATION_FileAddWithPath(UINT8 *pPath, UINT8 *pDestBuffer)
 		L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: FilePaths: %a \n", __LINE__, FileReadData.FilePaths[i]);
             
 		//当前只读一个扇区，这样这里是有缺陷的，如果路径里的项目超过16个，则不能正常读取
-		EFI_STATUS Status = L1_STORE_READ(FileInPartitionID, NextReadSectorNumber, 2, Buffer); 
+		EFI_STATUS Status = L2_STORE_Read(FileInPartitionID, NextReadSectorNumber, 2, Buffer); 
 		if (EFI_SUCCESS != Status)
 		{
 			L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: Read from device error: Status:%X \n", __LINE__, Status);
@@ -1348,7 +1348,7 @@ EFI_STATUS L3_APPLICATION_FileModifyWithPath(UINT8 *pPath, UINT8 *pDestBuffer)
 	FileInPartitionID = L3_APPLICATION_PartitionQueryByPath(&device, &FileReadData);
         	
 	//读取第一个扇区，分析分区参数，比如：FAT表大小，FAT表个数，保留扇区数
-	EFI_STATUS Status = L1_STORE_READ(FileInPartitionID, 0, 1, Buffer); 
+	EFI_STATUS Status = L2_STORE_Read(FileInPartitionID, 0, 1, Buffer); 
     if (EFI_SUCCESS != Status)
     {
 		L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: Read from device error: Status:%X \n", __LINE__, Status);
@@ -1374,7 +1374,7 @@ EFI_STATUS L3_APPLICATION_FileModifyWithPath(UINT8 *pPath, UINT8 *pDestBuffer)
 		L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: FilePaths: %a \n", __LINE__, FileReadData.FilePaths[i]);
             
 		//当前只读一个扇区，这样这里是有缺陷的，如果路径里的项目超过16个，则不能正常读取
-		EFI_STATUS Status = L1_STORE_READ(FileInPartitionID, NextReadSectorNumber, 2, Buffer); 
+		EFI_STATUS Status = L2_STORE_Read(FileInPartitionID, NextReadSectorNumber, 2, Buffer); 
 		if (EFI_SUCCESS != Status)
 		{
 			L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: Read from device error: Status:%X \n", __LINE__, Status);
@@ -1443,7 +1443,7 @@ EFI_STATUS L3_PARTITION_RootPathAccess()
         }
     }
 	/*
-	Status = L1_STORE_READ(i, sector_count, 1, Buffer1); 
+	Status = L2_STORE_Read(i, sector_count, 1, Buffer1); 
 	if ( EFI_SUCCESS == Status )
 	{
 		//L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: Status:%X\n", __LINE__, Status);
@@ -1481,7 +1481,7 @@ EFI_STATUS L3_PARTITION_FileAccess(UINT16 DeviceID)
 	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: L3_PARTITION_FileAccess\n", __LINE__);
 	UINT8 Buffer1[512];
 	
-	EFI_STATUS Status = L1_STORE_READ(DeviceID, sector_count, 1, Buffer1 );  
+	EFI_STATUS Status = L2_STORE_Read(DeviceID, sector_count, 1, Buffer1 );  
     if (EFI_ERROR(Status))
     {
         L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d Status: %X\n", __LINE__, Status);

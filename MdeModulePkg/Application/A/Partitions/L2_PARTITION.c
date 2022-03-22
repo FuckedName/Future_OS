@@ -89,7 +89,7 @@ EFI_STATUS L2_FILE_PartitionTypeAnalysis(UINT16 DeviceID)
 
     L1_MEMORY_SetValue(Buffer1, 0, DISK_BUFFER_SIZE);
 
-    Status = L1_STORE_READ(DeviceID, 0, 1, Buffer1 );  
+    Status = L2_STORE_Read(DeviceID, 0, 1, Buffer1 );  
     if (EFI_ERROR(Status))
     {
         L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d Status: %X\n", __LINE__, Status);
@@ -330,7 +330,7 @@ EFI_STATUS L2_FILE_PartitionNameGet(UINT16 DeviceID)
 	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d DeviceID: %d FileSystemType: %d, StartSectorNumber: %llu\n", __LINE__, DeviceID,FileSystemType, StartSectorNumber);
 
 	//一个元数据是读取两个扇区
-	Status = L1_STORE_READ(DeviceID, StartSectorNumber, 2, Buffer);  
+	Status = L2_STORE_Read(DeviceID, StartSectorNumber, 2, Buffer);  
 	if (EFI_ERROR(Status))
 	{
 		L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d Status: %X\n", __LINE__, Status);
