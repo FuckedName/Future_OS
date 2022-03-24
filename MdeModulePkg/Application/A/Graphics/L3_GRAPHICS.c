@@ -35,7 +35,18 @@
 UINT16 MyComputerWidth = 16 * 40;
 UINT16 MyComputerHeight = 16 * 80;
 
+typedef struct
+{
+	UINT8* pWindowBuffer;
+	UINT16 StartX;
+	UINT16 StartY;
+	UINT16 MaxWidth;
+	UINT16 MaxHeight;
+	UINT16 CurrentWidth;
+	UINT16 CurrentHeight;
+}MY_COMPUTER_WINDOW;
 
+MY_COMPUTER_WINDOW MyComputerWindow;
 
 
 /****************************************************************************
@@ -122,29 +133,38 @@ EFI_STATUS L3_WINDOW_Create(UINT8 *pBuffer, UINT8 *pParent, UINT16 Width, UINT16
 
 VOID L3_APPLICATION_TitleBarCreate(UINT16 StartX, UINT16 StartY, UINT16 Model)
 {
-
+	//蓝色背景，标题“我的电脑”，颜色白色，右边是最小化，最大化，关闭窗口
 }
 
 
 VOID L3_APPLICATION_MenuBarCreate(UINT16 StartX, UINT16 StartY, UINT16 Model)
 {
+	//灰色背景，文件、编辑、查看、转到、收藏、帮助
+	
 
 }
 
 
 VOID L3_APPLICATION_ToolBarCreate(UINT16 StartX, UINT16 StartY, UINT16 Model)
 {
-
+	//后退、进进、向上、剪切、复制、粘贴、撤消、删除属性、查看
 }
+
+
+VOID L3_APPLICATION_AddressBarCreate(UINT16 StartX, UINT16 StartY, UINT16 Model)
+{
+	//地址：空白区域，可点击编辑
+}
+
 
 VOID L3_APPLICATION_WorkSpaceCreate(UINT16 StartX, UINT16 StartY, UINT16 Model)
 {
-
+	//工作空间，白色背景，里边放读取的文件夹、文件项
 }
 
 VOID L3_APPLICATION_StateBarCreate(UINT16 StartX, UINT16 StartY, UINT16 Model)
 {
-
+	//项目数量、选中项目数量、选中项目大小
 }
 
 /****************************************************************************
@@ -160,17 +180,35 @@ VOID L3_APPLICATION_StateBarCreate(UINT16 StartX, UINT16 StartY, UINT16 Model)
 *****************************************************************************/
 VOID L3_APPLICATION_MyComputerWindowCreate(UINT16 StartX, UINT16 StartY, UINT16 Model)
 {
+	//灰色部分背景色：188，188，188
+	//白色部分背景色：188，188，188
+	//WindowLayers.item[];
+	MyComputerWindow.pWindowBuffer   = L2_MEMORY_Allocate("My Computer Window Buffer", MEMORY_TYPE_GRAPHICS, ScreenWidth * ScreenHeight * 4);
+	MyComputerWindow.MaxHeight       = ScreenHeight;
+	MyComputerWindow.MaxWidth        = ScreenWidth;
+ 	MyComputerWindow.CurrentHeight   = ScreenHeight;
+ 	MyComputerWindow.CurrentWidth    = ScreenWidth;
+	MyComputerWindow.StartX          = 0;
+	MyComputerWindow.StartY          = 0;
+	
+	
 	//标题栏 TitleBar
+	//L3_APPLICATION_TitleBarCreate();
 	
 	//菜单栏
+	//L3_APPLICATION_MenuBarCreate();
 
 	//工具栏
-
+	//L3_APPLICATION_ToolBarCreate();
+	
 	//工作区
+	//L3_APPLICATION_WorkSpaceCreate();	
 
 	//状态栏
+	//L3_APPLICATION_StateBarCreate();
 
 	//窗口边框
+	
 }
 
 
@@ -404,6 +442,47 @@ VOID L3_APPLICATION_MyComputerWindow(UINT16 StartX, UINT16 StartY)
     */
 }
 
+/****************************************************************************
+*
+*  描述:   创建我的电脑窗口
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
+VOID L3_APPLICATION_MyComputerWindowNew(UINT16 StartX, UINT16 StartY)
+{
+    UINT8 *pParent;
+    UINT16 Type;
+    CHAR8 *pWindowTitle;
+    EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
+    
+    Color.Blue  = 0xff;
+    Color.Red   = 0xff;
+    Color.Green = 0xff;
+    Color.Reserved = GRAPHICS_LAYER_MY_COMPUTER_NEW_WINDOW;
+    
+    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: MyComputerWidth: %d \n", __LINE__, MyComputerWidth);
+	
+    UINT16 Width = ScreenWidth;
+    UINT16 Height = ScreenHeight;
+
+    
+	for (UINT16 i = 0; i < Height; i++)
+	{
+		for (UINT16 j = 0; j < Width; j++)
+		{
+			pMyComputerNewBuffer[(i * Width + j) * 4 + 0] = 0;
+			pMyComputerNewBuffer[(i * Width + j) * 4 + 1] = 230;
+			pMyComputerNewBuffer[(i * Width + j) * 4 + 2] = 220;
+		}
+	}
+
+    
+}
 
 
 
@@ -589,10 +668,13 @@ VOID L3_APPLICATION_SystemLogWindow(UINT16 StartX, UINT16 StartY)
 *****************************************************************************/
 VOID L3_APPLICATION_WindowsInitial()
 {    
+    L3_APPLICATION_MyComputerWindowNew(50, 50);
+	
     L3_APPLICATION_MyComputerWindow(0, 50);
         
     L3_APPLICATION_SystemLogWindow(300, 10);
     
     L3_APPLICATION_MemoryInformationWindow(600, 100);
+	
 }
 

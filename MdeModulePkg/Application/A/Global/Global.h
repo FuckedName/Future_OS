@@ -290,7 +290,7 @@ typedef struct
 
     UINT64 FAT_TableStartSectorNumber;
 
-	UINT8 *FAT_TableBuffer;
+	UINT8 *pFAT_TableBuffer;
 
     //Partition parameter
     MasterBootRecordSwitched stMBRSwitched; //FAT32
@@ -339,6 +339,7 @@ extern UINT8 *pMouseBuffer;
 extern UINT8 *pMouseSelectedBuffer;
 extern UINT8 *pStartMenuBuffer ;
 extern UINT8 *pMyComputerBuffer;
+extern UINT8 *pMyComputerNewBuffer;
 extern UINT8 *pSystemIconMyComputerBuffer;
 extern UINT8 *pSystemIconMySettingBuffer;
 extern UINT8 *pSystemIconRecycleBuffer;

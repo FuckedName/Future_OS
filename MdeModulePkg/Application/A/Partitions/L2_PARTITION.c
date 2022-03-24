@@ -358,7 +358,7 @@ EFI_STATUS L2_STORE_PartitionParameterInitial()
 {
 	for (UINT16 i = 0; i < PARTITION_COUNT; i++)
 	{
-		device[i].FAT_TableBuffer = NULL;
+		device[i].pFAT_TableBuffer = NULL;
 	}
 
 }

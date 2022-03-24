@@ -63,6 +63,8 @@ UINT8 *pMouseBuffer = NULL; //Mouse layer: 4
 UINT8 *pMouseRightButtonClickWindowBuffer = NULL; // for mouse click 
 UINT8 *pMouseSelectedBuffer = NULL;  // after mouse selected
 UINT8 *pMyComputerBuffer = NULL; // MyComputer layer: 2
+UINT8 *pMyComputerNewBuffer = NULL; // MyComputer layer: 2
+
 UINT8 *pReadFileDestBuffer = NULL;
 
 UINT8 *pStartMenuBuffer = NULL;
@@ -86,6 +88,10 @@ UINT16 SystemSettingWindowHeight = 16 * 10;
 UINT16 MemoryInformationWindowHeight = 16 * 60;
 UINT16 MemoryInformationWindowWidth = 16 * 40;
 UINT16 LayerID = 0;
+
+WINDOW_LAYERS WindowLayers = {0};
+
+
 
 EFI_GRAPHICS_OUTPUT_BLT_PIXEL MouseMoveoverObjectDrawColor;
 
@@ -459,7 +465,7 @@ VOID L2_GRAPHICS_Copy(UINT8 *pDest, UINT8 *pSource,
                            UINT16 SourceWidth, UINT16 SourceHeight, 
                            UINT16 StartX, UINT16 StartY)
 {
-    int i, j;
+    UINT16 i, j;
     for(i = 0; i < SourceHeight; i++)
     {
         for (j = 0; j < SourceWidth; j++)
@@ -1429,21 +1435,31 @@ void L2_GRAPHICS_ParameterInit()
 
     WindowLayers.LayerCount++;
 
-    L1_MEMORY_SetValue(WindowLayers.LayerSequences, 0, 10 * 2);
+    WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_NEW_WINDOW].DisplayFlag = TRUE;
+    L1_MEMORY_Copy((UINT8 *)WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_NEW_WINDOW].Name, "My Computer New window layer", sizeof("My Computer New window layer"));
+    WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_NEW_WINDOW].pBuffer = pMyComputerNewBuffer;
+    WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_NEW_WINDOW].StartX = 0;
+    WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_NEW_WINDOW].StartY = 0;
+    WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_NEW_WINDOW].WindowWidth = ScreenWidth;
+    WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_NEW_WINDOW].WindowHeight= ScreenHeight;
+    WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_NEW_WINDOW].LayerID = GRAPHICS_LAYER_MY_COMPUTER_NEW_WINDOW;
 
-    WindowLayers.ActiveWindowCount = 0;
+    WindowLayers.LayerCount++;
+
+    L1_MEMORY_SetValue(WindowLayers.LayerSequences, 0, LAYER_QUANTITY * 2);
 
     MouseClickFlag = MOUSE_EVENT_TYPE_NO_CLICKED;
 
 	// Active window list, please note: desk layer always display at firstly.
 	// So WindowLayers.LayerCount value always one more than WindowLayers.ActiveWindowCount
     WindowLayers.LayerSequences[0] = GRAPHICS_LAYER_START_MENU;
-    WindowLayers.LayerSequences[1] = GRAPHICS_LAYER_MEMORY_INFORMATION_WINDOW;
+    WindowLayers.LayerSequences[1] = GRAPHICS_LAYER_MY_COMPUTER_NEW_WINDOW;
     WindowLayers.LayerSequences[2] = GRAPHICS_LAYER_MY_COMPUTER_WINDOW;
-    WindowLayers.LayerSequences[3] = GRAPHICS_LAYER_SYSTEM_LOG_WINDOW;
-    WindowLayers.LayerSequences[4] = GRAPHICS_LAYER_SYSTEM_SETTING_WINDOW;
+    WindowLayers.LayerSequences[3] = GRAPHICS_LAYER_MEMORY_INFORMATION_WINDOW;
+    WindowLayers.LayerSequences[4] = GRAPHICS_LAYER_SYSTEM_LOG_WINDOW;
+    WindowLayers.LayerSequences[5] = GRAPHICS_LAYER_SYSTEM_SETTING_WINDOW;
+	
     WindowLayers.ActiveWindowCount = WindowLayers.LayerCount - 1;
-
 
     MouseMoveoverObjectDrawColor.Blue = 0;
     MouseMoveoverObjectDrawColor.Red = 0;
@@ -3278,6 +3294,9 @@ VOID L2_GRAPHICS_LayerCompute(UINT16 iMouseX, UINT16 iMouseY, UINT8 MouseClickFl
 
     //窗口图层拷贝
     L2_GRAPHICS_CopyBufferFromWindowsToDesk();
+	
+	L2_GRAPHICS_Copy(pDeskDisplayBuffer, WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_NEW_WINDOW].pBuffer, ScreenWidth, ScreenHeight, ScreenWidth / 2, ScreenHeight / 2, 0, 0);
+    
         
     //鼠标右击菜单，注意，需要在鼠标获取事件前拷贝，因为鼠标右击事件也需要被获取
     if (WindowLayers.item[GRAPHICS_LAYER_MOUSE_RIGHT_CLICK_WINDOW].StartX != 0 || WindowLayers.item[GRAPHICS_LAYER_MOUSE_RIGHT_CLICK_WINDOW].StartY != 0)
@@ -3499,6 +3518,16 @@ void L2_GRAPHICS_CopyBufferFromWindowsToDesk()
         UINT16 j = WindowLayers.LayerSequences[i];
         if (TRUE == WindowLayers.item[j].DisplayFlag)
         {
+			L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], 
+							"%d LayerID: %d pBuffer: %X StartX: %d StartY: %d WindowWidth: %d WindowHeight: %d j: %d\n", 
+							__LINE__, 
+							WindowLayers.item[j].LayerID,
+							WindowLayers.item[j].pBuffer,
+							WindowLayers.item[j].StartX,
+							WindowLayers.item[j].StartY,
+							WindowLayers.item[j].WindowWidth,
+							WindowLayers.item[j].WindowHeight,
+							j);
             L2_GRAPHICS_Copy(pDeskDisplayBuffer, WindowLayers.item[j].pBuffer, ScreenWidth, ScreenHeight, WindowLayers.item[j].WindowWidth, WindowLayers.item[j].WindowHeight, WindowLayers.item[j].StartX, WindowLayers.item[j].StartY);
         }
     }

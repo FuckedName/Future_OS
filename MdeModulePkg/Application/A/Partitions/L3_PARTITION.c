@@ -424,14 +424,14 @@ EFI_STATUS L2_STORE_RootPathAnalysisFSM()
 *****************************************************************************/
 EFI_STATUS L2_STORE_FatTableRead(DEVICE_PARAMETER *pDevice, FILE_READ_DATA FileReadData)
 {	
-	if (NULL == pDevice->FAT_TableBuffer)
+	if (NULL == pDevice->pFAT_TableBuffer)
 	{
-		pDevice->FAT_TableBuffer = L2_MEMORY_Allocate("FAT Table Buffer", MEMORY_TYPE_APPLICATION, DISK_BUFFER_SIZE * pDevice->stMBRSwitched.SectorsPerFat);
-		EFI_STATUS Status = L2_STORE_Read(FileReadData.CurrentPartitionID, pDevice->stMBRSwitched.ReservedSelector,  pDevice->stMBRSwitched.SectorsPerFat, pDevice->FAT_TableBuffer);	
+		pDevice->pFAT_TableBuffer = L2_MEMORY_Allocate("FAT Table Buffer", MEMORY_TYPE_APPLICATION, DISK_BUFFER_SIZE * pDevice->stMBRSwitched.SectorsPerFat);
+		EFI_STATUS Status = L2_STORE_Read(FileReadData.CurrentPartitionID, pDevice->stMBRSwitched.ReservedSelector,  pDevice->stMBRSwitched.SectorsPerFat, pDevice->pFAT_TableBuffer);	
 	} 
 	
-	//L2_PARTITION_BufferPrint(pDevice->FAT_TableBuffer, 512);	
-	//L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: pDevice->FAT_TableBuffer: %x Status: %d\n", __LINE__, pDevice->FAT_TableBuffer, Status); 
+	//L2_PARTITION_BufferPrint(pDevice->pFAT_TableBuffer, 512);	
+	//L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: pDevice->pFAT_TableBuffer: %x Status: %d\n", __LINE__, pDevice->pFAT_TableBuffer, Status); 
 }
 
 
@@ -450,16 +450,16 @@ EFI_STATUS L2_STORE_FatTableRead(DEVICE_PARAMETER *pDevice, FILE_READ_DATA FileR
 *****************************************************************************/
 EFI_STATUS L2_STORE_FatTableSetZero(DEVICE_PARAMETER *pDevice, FILE_READ_DATA FileReadData, UINT64 BlockNumber)
 {	
-	if (NULL == pDevice->FAT_TableBuffer)
+	if (NULL == pDevice->pFAT_TableBuffer)
 	{
 		for (UINT16 i = 0; i < 4; i++)
-			pDevice->FAT_TableBuffer[4 * BlockNumber + i] = 0;
-		//pDevice->FAT_TableBuffer = L2_MEMORY_Allocate("FAT Table Buffer", MEMORY_TYPE_APPLICATION, DISK_BUFFER_SIZE * pDevice->stMBRSwitched.SectorsPerFat);
-		EFI_STATUS Status = L2_STORE_Write(FileReadData.CurrentPartitionID, pDevice->stMBRSwitched.ReservedSelector,  pDevice->stMBRSwitched.SectorsPerFat, pDevice->FAT_TableBuffer);	
+			pDevice->pFAT_TableBuffer[4 * BlockNumber + i] = 0;
+		//pDevice->pFAT_TableBuffer = L2_MEMORY_Allocate("FAT Table Buffer", MEMORY_TYPE_APPLICATION, DISK_BUFFER_SIZE * pDevice->stMBRSwitched.SectorsPerFat);
+		EFI_STATUS Status = L2_STORE_Write(FileReadData.CurrentPartitionID, pDevice->stMBRSwitched.ReservedSelector,  pDevice->stMBRSwitched.SectorsPerFat, pDevice->pFAT_TableBuffer);	
 	} 
 	
-	//L2_PARTITION_BufferPrint(pDevice->FAT_TableBuffer, 512);	
-	//L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: pDevice->FAT_TableBuffer: %x Status: %d\n", __LINE__, pDevice->FAT_TableBuffer, Status); 
+	//L2_PARTITION_BufferPrint(pDevice->pFAT_TableBuffer, 512);	
+	//L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: pDevice->pFAT_TableBuffer: %x Status: %d\n", __LINE__, pDevice->pFAT_TableBuffer, Status); 
 }
 
 
@@ -481,7 +481,7 @@ EFI_STATUS L2_STORE_GetFatTableFSM()
     EFI_STATUS Status ;
     UINT16 i = ReadFilePartitionID;
     
-    if (NULL != device[i].FAT_TableBuffer)
+    if (NULL != device[i].pFAT_TableBuffer)
     {
         // start sector of file
         sector_count = device[i].stMBRSwitched.ReservedSelector + device[i].stMBRSwitched.SectorsPerFat * device[i].stMBRSwitched.FATCount + device[i].stMBRSwitched.BootPathStartCluster - 2 + (FileBlockStart - 2) * 8;
@@ -498,13 +498,13 @@ EFI_STATUS L2_STORE_GetFatTableFSM()
     
      // 512 = 16 * 32 = 4 item * 32
     //FAT32_Table = (UINT8 *)AllocateZeroPool(DISK_BUFFER_SIZE * device[i].stMBRSwitched.SectorsPerFat);
-    device[i].FAT_TableBuffer = L2_MEMORY_Allocate("FAT Table Buffer", MEMORY_TYPE_APPLICATION, DISK_BUFFER_SIZE * device[i].stMBRSwitched.SectorsPerFat);
-     if (NULL == device[i].FAT_TableBuffer)
+    device[i].pFAT_TableBuffer = L2_MEMORY_Allocate("FAT Table Buffer", MEMORY_TYPE_APPLICATION, DISK_BUFFER_SIZE * device[i].stMBRSwitched.SectorsPerFat);
+     if (NULL == device[i].pFAT_TableBuffer)
      {
          L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: NULL == FAT32_Table\n", __LINE__);                             
      }             
      
-    Status = L2_STORE_Read(i, sector_count,  device[i].stMBRSwitched.SectorsPerFat, device[i].FAT_TableBuffer); 
+    Status = L2_STORE_Read(i, sector_count,  device[i].stMBRSwitched.SectorsPerFat, device[i].pFAT_TableBuffer); 
     if ( EFI_SUCCESS == Status )
     {
           //CopyMem(FAT32_Table, Buffer1, DISK_BUFFER_SIZE * MBRSwitched.SectorsPerFat);
@@ -548,16 +548,16 @@ UINT32 L2_FILE_GetNextBlockNumber()
     }
     UINT16 i = ReadFilePartitionID;
     
-    if (device[i].FAT_TableBuffer[PreviousBlockNumber * 4] == 0xff 
-        && device[i].FAT_TableBuffer[PreviousBlockNumber * 4 + 1] == 0xff 
-        && device[i].FAT_TableBuffer[PreviousBlockNumber * 4 + 2] == 0xff 
-        && device[i].FAT_TableBuffer[PreviousBlockNumber * 4 + 3] == 0x0f)
+    if (device[i].pFAT_TableBuffer[PreviousBlockNumber * 4] == 0xff 
+        && device[i].pFAT_TableBuffer[PreviousBlockNumber * 4 + 1] == 0xff 
+        && device[i].pFAT_TableBuffer[PreviousBlockNumber * 4 + 2] == 0xff 
+        && device[i].pFAT_TableBuffer[PreviousBlockNumber * 4 + 3] == 0x0f)
     {
         L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: PreviousBlockNumber: %d, PreviousBlockNumber: %llX\n",  __LINE__, PreviousBlockNumber, 0x0fffffff);
         return 0x0fffffff;
     }
     
-    return device[i].FAT_TableBuffer[PreviousBlockNumber  * 4] | (UINT32)device[i].FAT_TableBuffer[PreviousBlockNumber * 4 + 1] << 8 | (UINT32)device[i].FAT_TableBuffer[PreviousBlockNumber * 4 + 2] << 16 | (UINT32)device[i].FAT_TableBuffer[PreviousBlockNumber * 4 + 3] << 24;  
+    return device[i].pFAT_TableBuffer[PreviousBlockNumber  * 4] | (UINT32)device[i].pFAT_TableBuffer[PreviousBlockNumber * 4 + 1] << 8 | (UINT32)device[i].pFAT_TableBuffer[PreviousBlockNumber * 4 + 2] << 16 | (UINT32)device[i].pFAT_TableBuffer[PreviousBlockNumber * 4 + 3] << 24;  
 }
 
 
@@ -897,16 +897,16 @@ UINT32 L2_FILE_GetNextBlockNumber2(UINT16 PartitionID, UINT64 PreviousBlockNumbe
     }
     UINT16 i = PartitionID;
     
-    if (device[i].FAT_TableBuffer[PreviousBlockNumber * 4] == 0xff 
-        && device[i].FAT_TableBuffer[PreviousBlockNumber * 4 + 1] == 0xff 
-        && device[i].FAT_TableBuffer[PreviousBlockNumber * 4 + 2] == 0xff 
-        && device[i].FAT_TableBuffer[PreviousBlockNumber * 4 + 3] == 0x0f)
+    if (device[i].pFAT_TableBuffer[PreviousBlockNumber * 4] == 0xff 
+        && device[i].pFAT_TableBuffer[PreviousBlockNumber * 4 + 1] == 0xff 
+        && device[i].pFAT_TableBuffer[PreviousBlockNumber * 4 + 2] == 0xff 
+        && device[i].pFAT_TableBuffer[PreviousBlockNumber * 4 + 3] == 0x0f)
     {
         L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: PreviousBlockNumber: %d, PreviousBlockNumber: %llX\n",  __LINE__, PreviousBlockNumber, 0x0fffffff);
         return 0x0fffffff;
     }
     
-    return device[i].FAT_TableBuffer[PreviousBlockNumber  * 4] | (UINT32)device[i].FAT_TableBuffer[PreviousBlockNumber * 4 + 1] << 8 | (UINT32)device[i].FAT_TableBuffer[PreviousBlockNumber * 4 + 2] << 16 | (UINT32)device[i].FAT_TableBuffer[PreviousBlockNumber * 4 + 3] << 24;  
+    return device[i].pFAT_TableBuffer[PreviousBlockNumber  * 4] | (UINT32)device[i].pFAT_TableBuffer[PreviousBlockNumber * 4 + 1] << 8 | (UINT32)device[i].pFAT_TableBuffer[PreviousBlockNumber * 4 + 2] << 16 | (UINT32)device[i].pFAT_TableBuffer[PreviousBlockNumber * 4 + 3] << 24;  
 }
 
 
