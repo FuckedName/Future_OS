@@ -63,7 +63,6 @@ UINT8 *pMouseBuffer = NULL; //Mouse layer: 4
 UINT8 *pMouseRightButtonClickWindowBuffer = NULL; // for mouse click 
 UINT8 *pMouseSelectedBuffer = NULL;  // after mouse selected
 UINT8 *pMyComputerBuffer = NULL; // MyComputer layer: 2
-UINT8 *pMyComputerNewBuffer = NULL; // MyComputer layer: 2
 
 UINT8 *pReadFileDestBuffer = NULL;
 
@@ -1435,17 +1434,6 @@ void L2_GRAPHICS_ParameterInit()
 
     WindowLayers.LayerCount++;
 
-    WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_NEW_WINDOW].DisplayFlag = TRUE;
-    L1_MEMORY_Copy((UINT8 *)WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_NEW_WINDOW].Name, "My Computer New window layer", sizeof("My Computer New window layer"));
-    WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_NEW_WINDOW].pBuffer = pMyComputerNewBuffer;
-    WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_NEW_WINDOW].StartX = 0;
-    WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_NEW_WINDOW].StartY = 0;
-    WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_NEW_WINDOW].WindowWidth = ScreenWidth;
-    WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_NEW_WINDOW].WindowHeight= ScreenHeight;
-    WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_NEW_WINDOW].LayerID = GRAPHICS_LAYER_MY_COMPUTER_NEW_WINDOW;
-
-    WindowLayers.LayerCount++;
-
     L1_MEMORY_SetValue(WindowLayers.LayerSequences, 0, LAYER_QUANTITY * 2);
 
     MouseClickFlag = MOUSE_EVENT_TYPE_NO_CLICKED;
@@ -1453,11 +1441,10 @@ void L2_GRAPHICS_ParameterInit()
 	// Active window list, please note: desk layer always display at firstly.
 	// So WindowLayers.LayerCount value always one more than WindowLayers.ActiveWindowCount
     WindowLayers.LayerSequences[0] = GRAPHICS_LAYER_START_MENU;
-    WindowLayers.LayerSequences[1] = GRAPHICS_LAYER_MY_COMPUTER_NEW_WINDOW;
-    WindowLayers.LayerSequences[2] = GRAPHICS_LAYER_MY_COMPUTER_WINDOW;
-    WindowLayers.LayerSequences[3] = GRAPHICS_LAYER_MEMORY_INFORMATION_WINDOW;
-    WindowLayers.LayerSequences[4] = GRAPHICS_LAYER_SYSTEM_LOG_WINDOW;
-    WindowLayers.LayerSequences[5] = GRAPHICS_LAYER_SYSTEM_SETTING_WINDOW;
+    WindowLayers.LayerSequences[1] = GRAPHICS_LAYER_MY_COMPUTER_WINDOW;
+    WindowLayers.LayerSequences[2] = GRAPHICS_LAYER_MEMORY_INFORMATION_WINDOW;
+    WindowLayers.LayerSequences[3] = GRAPHICS_LAYER_SYSTEM_LOG_WINDOW;
+    WindowLayers.LayerSequences[4] = GRAPHICS_LAYER_SYSTEM_SETTING_WINDOW;
 	
     WindowLayers.ActiveWindowCount = WindowLayers.LayerCount - 1;
 
@@ -3294,10 +3281,7 @@ VOID L2_GRAPHICS_LayerCompute(UINT16 iMouseX, UINT16 iMouseY, UINT8 MouseClickFl
 
     //窗口图层拷贝
     L2_GRAPHICS_CopyBufferFromWindowsToDesk();
-	
-	L2_GRAPHICS_Copy(pDeskDisplayBuffer, WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_NEW_WINDOW].pBuffer, ScreenWidth, ScreenHeight, ScreenWidth / 2, ScreenHeight / 2, 0, 0);
-    
-        
+	        
     //鼠标右击菜单，注意，需要在鼠标获取事件前拷贝，因为鼠标右击事件也需要被获取
     if (WindowLayers.item[GRAPHICS_LAYER_MOUSE_RIGHT_CLICK_WINDOW].StartX != 0 || WindowLayers.item[GRAPHICS_LAYER_MOUSE_RIGHT_CLICK_WINDOW].StartY != 0)
     {        

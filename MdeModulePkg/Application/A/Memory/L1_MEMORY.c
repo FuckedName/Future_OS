@@ -259,13 +259,6 @@ EFI_STATUS L2_COMMON_MemoryAllocate()
         return -1;
     }     
 
-	pMyComputerNewBuffer = (UINT8 *)L2_MEMORY_Allocate("My Computer.New Buffer", MEMORY_TYPE_GRAPHICS, ScreenWidth * ScreenHeight * 4); 
-    if (pMyComputerNewBuffer == NULL)
-    {
-        //DEBUG ((EFI_D_INFO, "MyComputer , AllocateZeroPool failed... "));
-        return -1;
-    }     
-
     pSystemIconMyComputerBuffer = L2_MEMORY_Allocate("System pSystemIconMyComputerBuffer", MEMORY_TYPE_GRAPHICS, 384054);
     pSystemIconMySettingBuffer  = L2_MEMORY_Allocate("System pSystemIconMySettingBuffer", MEMORY_TYPE_GRAPHICS, 384054);
     pSystemIconRecycleBuffer    = L2_MEMORY_Allocate("System pSystemIconRecycleBuffer", MEMORY_TYPE_GRAPHICS, 384054);

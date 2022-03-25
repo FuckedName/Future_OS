@@ -19,6 +19,8 @@
   	Libraries/String/L1_LIBRARY_String.c
   	Libraries/Memory/L1_LIBRARY_Memory.h
   	Libraries/Memory/L1_LIBRARY_Memory.c
+  	Libraries/Languages/L1_LIBRARY_Language.h
+  	Libraries/Languages/L1_LIBRARY_Language.c
   	Libraries/DataStructure/L1_LIBRARY_DataStructure.h
   	Libraries/DataStructure/L1_LIBRARY_DataStructure.c
   	Graphics/L1_GRAPHICS.c
