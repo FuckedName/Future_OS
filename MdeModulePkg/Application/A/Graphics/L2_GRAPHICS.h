@@ -228,8 +228,8 @@ EFI_STATUS L2_GRAPHICS_AsciiCharDraw(UINT8 *pBufferDest,
         IN EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color);
         
 EFI_STATUS L2_GRAPHICS_ChineseCharDraw12(UINT8 *pBuffer,
-        IN UINTN x0, UINTN y0, UINT32 offset,
-        IN EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color , UINT16 AreaWidth);
+        UINTN x0, UINTN y0, UINT16 AreaCode,	UINT16 BitCode,
+        EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color , UINT16 AreaWidth);
         
 EFI_STATUS L2_GRAPHICS_ChineseCharDraw2(UINT8 *pBuffer,
         IN UINTN x0, UINTN y0, UINT32 AreaCode, UINT32 BitCode,

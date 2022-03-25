@@ -305,6 +305,8 @@ typedef struct
 extern UINT64 sector_count;
 
 extern UINT64 FileReadCount;
+extern EFI_GRAPHICS_OUTPUT_BLT_PIXEL WhiteColor;
+extern EFI_GRAPHICS_OUTPUT_BLT_PIXEL BlackColor;
 
 extern EFI_SIMPLE_POINTER_PROTOCOL        *gMouse;
 extern UINT16 mouse_count;

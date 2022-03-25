@@ -57,8 +57,6 @@ typedef struct
 
 MY_COMPUTER_WINDOW MyComputerWindow;
 
-EFI_GRAPHICS_OUTPUT_BLT_PIXEL WhiteColor;
-EFI_GRAPHICS_OUTPUT_BLT_PIXEL BlackColor;
 
 /****************************************************************************
 *
@@ -93,13 +91,6 @@ EFI_STATUS L3_WINDOW_Initial(WINDOW_LAYER_ITEM *pWindowLayerItem, WINDOW_CURRENT
     GrayColor.Blue  = 229;
     GrayColor.Red   = 229;
     GrayColor.Green = 202;
-	WhiteColor.Blue  = 255;
-	WhiteColor.Red	 = 255;
-	WhiteColor.Green  = 255;
-		
-	BlackColor.Blue  = 0;
-	BlackColor.Red	 = 0;
-	BlackColor.Green  = 0;
 
 	//初始化窗口边框    
 	//上边第一像素行
@@ -297,25 +288,26 @@ VOID L3_APPLICATION_TitleBarCreate(WINDOW_LAYER_ITEM *pWindowLayerItem, UINT16 *
         BitCode  = TitleName[2 * i + 1];
         
         if (0 != AreaCode && 0 != BitCode)
-            L2_GRAPHICS_ChineseCharDraw12(pWindowLayerItem->pBuffer, StartX, StartY, (AreaCode - 1) * 94 + BitCode - 1, Color, MyComputerWidth);
+            L2_GRAPHICS_ChineseCharDraw12(pWindowLayerItem->pBuffer, StartX, StartY, AreaCode, BitCode, Color, MyComputerWidth);
             
         StartX += FontSize + 1; //因为字体宽度是12，所以加13，多一点像素
     }
-
 	
 	//灰色背景，文件、编辑、查看、转到、收藏、帮助
-	int word[] = {L'文'};
-	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: word:%X \n", __LINE__, word[0]);
-        
-	UINT16 Code = L1_LIBRARY_QueryAreaCodeBitCodeByChineseChar(word[0]);
-		
-	AreaCode = (Code & 0xff00) >> 8;
-	BitCode  = Code & 0xff;
+	int word[] = {L'文', L'件', L'编', L'辑', L'查', L'看', L'转', L'到', L'收', L'藏', L'帮', L'助'};
+	    
+	UINT16 Code[12] = {0};
+	L1_LIBRARY_QueryAreaCodeBitCodeByChineseChar(word, Code);//这里一定要有个数组取数据的操作
+	for (UINT16 i = 0; i < sizeof(word)/sizeof(int) - 1; i++)
+	{
+		AreaCode = (Code[i] & 0xff00) >> 8;
+		BitCode  = Code[i] & 0xff;
 	
-	if (0 <= AreaCode && AreaCode <= 94 && 0 <= BitCode && 94 >= BitCode)
-		L2_GRAPHICS_ChineseCharDraw12(pWindowLayerItem->pBuffer, StartX, StartY, (AreaCode - 1) * 94 + BitCode - 1, Color, MyComputerWidth);
-           
-
+		if (0 <= AreaCode && AreaCode <= 94 && 0 <= BitCode && 94 >= BitCode)
+			L2_GRAPHICS_ChineseCharDraw12(pWindowLayerItem->pBuffer, StartX, StartY, AreaCode, BitCode, Color, MyComputerWidth);
+		StartX += FontSize + 1;	
+	}
+	
 	Position->StartY += TitleBarHeight;
 }
 
@@ -324,18 +316,18 @@ VOID L3_APPLICATION_MenuBarCreate(WINDOW_LAYER_ITEM *pWindowLayerItem, UINT16 *T
 {
 	//灰色背景，文件、编辑、查看、转到、收藏、帮助
 	int word[] = {L'文'};
-	UINT16 Code = L1_LIBRARY_QueryAreaCodeBitCodeByChineseChar(word);
+	UINT16 Code[12] = {0};
+	L1_LIBRARY_QueryAreaCodeBitCodeByChineseChar(word, Code);
 	
     UINT16 AreaCode;
 	UINT16 BitCode;
 	
-	AreaCode = (Code & 0xff00) >> 8;
-	BitCode  = Code & 0xff;
+	AreaCode = (Code[0] & 0xff00) >> 8;
+	BitCode  = Code[0] & 0xff;
 	
 	if (0 != AreaCode && 0 != BitCode)
-		L2_GRAPHICS_ChineseCharDraw12(pWindowLayerItem->pBuffer, Position->StartX, Position->StartY, (AreaCode - 1) * 94 + BitCode - 1, BlackColor, MyComputerWidth);
+		L2_GRAPHICS_ChineseCharDraw12(pWindowLayerItem->pBuffer, Position->StartX, Position->StartY, AreaCode, BitCode, BlackColor, MyComputerWidth);
 		
-
 }
 
 

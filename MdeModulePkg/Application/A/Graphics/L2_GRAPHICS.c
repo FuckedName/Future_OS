@@ -90,6 +90,9 @@ UINT16 LayerID = 0;
 
 WINDOW_LAYERS WindowLayers = {0};
 
+EFI_GRAPHICS_OUTPUT_BLT_PIXEL WhiteColor;
+EFI_GRAPHICS_OUTPUT_BLT_PIXEL BlackColor;
+
 
 
 EFI_GRAPHICS_OUTPUT_BLT_PIXEL MouseMoveoverObjectDrawColor;
@@ -1453,6 +1456,14 @@ void L2_GRAPHICS_ParameterInit()
     MouseMoveoverObjectDrawColor.Green = 0;
     MouseMoveoverObjectDrawColor.Reserved = 0;
 
+	WhiteColor.Blue  = 255;
+	WhiteColor.Red	 = 255;
+	WhiteColor.Green  = 255;
+		
+	BlackColor.Blue  = 0;
+	BlackColor.Red	 = 0;
+	BlackColor.Green  = 0;
+
 }
 
 
@@ -1696,39 +1707,39 @@ EFI_STATUS L2_GRAPHICS_StartMenuInit()
 
     x = 3;
     y += 16;
-    L2_GRAPHICS_ChineseCharDraw12(pStartMenuBuffer, x , y,     (47 - 1 ) * 94 + 21 - 1, Color, StartMenuWidth);    
+    L2_GRAPHICS_ChineseCharDraw12(pStartMenuBuffer, x , y,     47, 21, Color, StartMenuWidth);    
     x += 16;
     
-    L2_GRAPHICS_ChineseCharDraw12(pStartMenuBuffer, x , y,     (45 - 1) * 94 + 19 - 1, Color, StartMenuWidth);
+    L2_GRAPHICS_ChineseCharDraw12(pStartMenuBuffer, x , y,     45, 19, Color, StartMenuWidth);
     x += 16;
     
-    L2_GRAPHICS_ChineseCharDraw12(pStartMenuBuffer, x , y,     (45 - 1) * 94 + 43 - 1, Color, StartMenuWidth);
+    L2_GRAPHICS_ChineseCharDraw12(pStartMenuBuffer, x , y,     45, 43, Color, StartMenuWidth);
     x += 16;
     
-    L2_GRAPHICS_ChineseCharDraw12(pStartMenuBuffer, x , y,     (19 - 1) * 94 + 86 - 1, Color, StartMenuWidth);   
+    L2_GRAPHICS_ChineseCharDraw12(pStartMenuBuffer, x , y,     19, 86, Color, StartMenuWidth);   
 
     x = 3;
     y += 16;
-    L2_GRAPHICS_ChineseCharDraw12(pStartMenuBuffer, x , y,     (47 - 1 ) * 94 + 21 - 1, Color, StartMenuWidth);    
+    L2_GRAPHICS_ChineseCharDraw12(pStartMenuBuffer, x , y,     47, 21, Color, StartMenuWidth);    
     x += 16;
     
-    L2_GRAPHICS_ChineseCharDraw12(pStartMenuBuffer, x , y,     (45 - 1) * 94 + 19 - 1, Color, StartMenuWidth);
+    L2_GRAPHICS_ChineseCharDraw12(pStartMenuBuffer, x , y,     45, 19, Color, StartMenuWidth);
     x += 16;
     
-    L2_GRAPHICS_ChineseCharDraw12(pStartMenuBuffer, x , y,     (45 - 1) * 94 + 43 - 1, Color, StartMenuWidth);
+    L2_GRAPHICS_ChineseCharDraw12(pStartMenuBuffer, x , y,     45, 43, Color, StartMenuWidth);
     x += 16;
     
-    L2_GRAPHICS_ChineseCharDraw12(pStartMenuBuffer, x , y,     (19 - 1) * 94 + 86 - 1, Color, StartMenuWidth);   
+    L2_GRAPHICS_ChineseCharDraw12(pStartMenuBuffer, x , y,     19, 86, Color, StartMenuWidth);   
     
     x = 3;
     y += 16;
-    L2_GRAPHICS_ChineseCharDraw12(pStartMenuBuffer, x , y,     (47 - 1 ) * 94 + 21 - 1, Color, StartMenuWidth);    
+    L2_GRAPHICS_ChineseCharDraw12(pStartMenuBuffer, x , y,     47, 21, Color, StartMenuWidth);    
     x += 16;
     
-    L2_GRAPHICS_ChineseCharDraw12(pStartMenuBuffer, x , y,     (45 - 1) * 94 + 19 - 1, Color, StartMenuWidth);
+    L2_GRAPHICS_ChineseCharDraw12(pStartMenuBuffer, x , y,     45, 19, Color, StartMenuWidth);
     x += 16;
     
-    L2_GRAPHICS_ChineseCharDraw12(pStartMenuBuffer, x , y,     (45 - 1) * 94 + 43 - 1, Color, StartMenuWidth);
+    L2_GRAPHICS_ChineseCharDraw12(pStartMenuBuffer, x , y,     45, 43, Color, StartMenuWidth);
     x += 16;
 
     UINT8 word[3] = "啊";
@@ -3966,12 +3977,14 @@ EFI_STATUS L2_GRAPHICS_ChineseCharDraw2(UINT8 *pBuffer,
 *
 *****************************************************************************/
 EFI_STATUS L2_GRAPHICS_ChineseCharDraw12(UINT8 *pBuffer,
-        IN UINTN x0, UINTN y0, UINT32 offset,
-        IN EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color , UINT16 AreaWidth)
+        UINTN x0, UINTN y0, UINT16 AreaCode,	UINT16 BitCode,
+        EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color , UINT16 AreaWidth)
 {
     INT8 i;
     //L2_DEBUG_Print1(10, 10, "%X %X %X %X", x0, y0, offset, AreaWidth);
     ////DEBUG ((EFI_D_INFO, "%X %X %X %X", x0, y0, offset, AreaWidth));
+
+	UINT32 offset = (AreaCode - 1) * 94 + BitCode - 1;
 
     if (NULL == pBuffer)
     {
