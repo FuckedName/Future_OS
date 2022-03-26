@@ -281,6 +281,8 @@ VOID L3_APPLICATION_TitleBarCreate(WINDOW_LAYER_ITEM *pWindowLayerItem, UINT16 *
 	}
 	
 	StartY = StartY + (TitleBarHeight - FontSize) / 2;
+
+	StartX += 6;
 	
     for (UINT16 i = 0; i < 4; i++)
     {
@@ -309,31 +311,98 @@ VOID L3_APPLICATION_TitleBarCreate(WINDOW_LAYER_ITEM *pWindowLayerItem, UINT16 *
 		StartX += FontSize + 1;	
 	}
 	*/
-	Position->StartY += TitleBarHeight;
+	
+	Position->StartY += TitleBarHeight + 4;
+	Position->StartX += 4;
+	
 }
 
 
 VOID L3_APPLICATION_MenuBarCreate(WINDOW_LAYER_ITEM *pWindowLayerItem, UINT16 *TitleName, WINDOW_CURRENT_POSITION *Position)
 {
+    EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
+	UINT16 MenuBarHeight;
+	UINT16 FontSize;
+
+	MenuBarHeight = 30;
+	FontSize = 12;
+	Color.Red   = 192;
+	Color.Green = 192;
+	Color.Blue  = 192;
+	Color.Reserved = GRAPHICS_LAYER_MY_COMPUTER_WINDOW;
+	
+	L2_GRAPHICS_ButtonDraw2(pWindowLayerItem, Position->StartX, Position->StartY, pWindowLayerItem->WindowWidth - 6, Position->StartY + FontSize * 2);
+	
+	//L1_MEMORY_RectangleFill(pWindowLayerItem->pBuffer, Position->StartX, Position->StartY, pWindowLayerItem->WindowWidth - 6, Position->StartY + FontSize * 2, pWindowLayerItem->WindowWidth, Color); // line top
+	
 	//灰色背景，文件、编辑、查看、转到、收藏、帮助
 	int word[] = {L'文'};
 	GBK_Code Code = {0};
 	L1_LIBRARY_QueryAreaCodeBitCodeByChineseChar(word, &Code);
 
-	L2_GRAPHICS_ChineseCharDraw12(pWindowLayerItem->pBuffer, Position->StartX, Position->StartY, Code.AreaCode, Code.BitCode, WhiteColor, MyComputerWidth);
-		
+	L2_GRAPHICS_ChineseCharDraw12(pWindowLayerItem->pBuffer, Position->StartX + 4, Position->StartY, Code.AreaCode, Code.BitCode, WhiteColor, MyComputerWidth);
+
+	Position->StartY += MenuBarHeight + 4;
 }
 
 
-VOID L3_APPLICATION_ToolBarCreate(UINT16 StartX, UINT16 StartY, UINT16 Model)
+VOID L3_APPLICATION_ToolBarCreate(WINDOW_LAYER_ITEM *pWindowLayerItem, UINT16 *TitleName, WINDOW_CURRENT_POSITION *Position)
 {
 	//后退、进进、向上、剪切、复制、粘贴、撤消、删除属性、查看
+
+	EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
+	UINT16 MenuBarHeight;
+	UINT16 FontSize;
+
+	MenuBarHeight = 30;
+	FontSize = 12;
+	Color.Red   = 192;
+	Color.Green = 192;
+	Color.Blue  = 192;
+	Color.Reserved = GRAPHICS_LAYER_MY_COMPUTER_WINDOW;
+	
+	L2_GRAPHICS_ButtonDraw2(pWindowLayerItem, Position->StartX, Position->StartY, pWindowLayerItem->WindowWidth - 6, Position->StartY + FontSize * 2);
+	
+	//L1_MEMORY_RectangleFill(pWindowLayerItem->pBuffer, Position->StartX, Position->StartY, pWindowLayerItem->WindowWidth - 6, Position->StartY + FontSize * 2, pWindowLayerItem->WindowWidth, Color); // line top
+	
+	//灰色背景，文件、编辑、查看、转到、收藏、帮助
+	int word[] = {L'文'};
+	GBK_Code Code = {0};
+	L1_LIBRARY_QueryAreaCodeBitCodeByChineseChar(word, &Code);
+
+	L2_GRAPHICS_ChineseCharDraw12(pWindowLayerItem->pBuffer, Position->StartX + 4, Position->StartY, Code.AreaCode, Code.BitCode, WhiteColor, MyComputerWidth);
+
+	Position->StartY += MenuBarHeight + 4;
 }
 
 
-VOID L3_APPLICATION_AddressBarCreate(UINT16 StartX, UINT16 StartY, UINT16 Model)
+VOID L3_APPLICATION_AddressBarCreate(WINDOW_LAYER_ITEM *pWindowLayerItem, UINT16 *TitleName, WINDOW_CURRENT_POSITION *Position)
 {
 	//地址：空白区域，可点击编辑
+	
+	EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
+	UINT16 AddressBarHeight;
+	UINT16 FontSize;
+
+	AddressBarHeight = 20;
+	FontSize = 12;
+	Color.Red   = WhiteColor.Red;
+	Color.Green = WhiteColor.Green;
+	Color.Blue  = WhiteColor.Blue;
+	Color.Reserved = GRAPHICS_LAYER_MY_COMPUTER_WINDOW;
+	
+	L2_GRAPHICS_ButtonDraw2(pWindowLayerItem, Position->StartX + 5 * FontSize, Position->StartY, pWindowLayerItem->WindowWidth - 6, Position->StartY + FontSize * 2);
+	
+	//L1_MEMORY_RectangleFill(pWindowLayerItem->pBuffer, Position->StartX + 5 * FontSize, Position->StartY, pWindowLayerItem->WindowWidth - 6, Position->StartY + FontSize, pWindowLayerItem->WindowWidth, Color); // line top
+	
+	//灰色背景，文件、编辑、查看、转到、收藏、帮助
+	int word[] = {L'文'};
+	GBK_Code Code = {0};
+	L1_LIBRARY_QueryAreaCodeBitCodeByChineseChar(word, &Code);
+
+	L2_GRAPHICS_ChineseCharDraw12(pWindowLayerItem->pBuffer, Position->StartX + 4, Position->StartY, Code.AreaCode, Code.BitCode, WhiteColor, MyComputerWidth);
+
+	Position->StartY += AddressBarHeight + 4;
 }
 
 
@@ -392,7 +461,12 @@ VOID L3_APPLICATION_MyComputerWindow(UINT16 StartX, UINT16 StartY)
 	L3_APPLICATION_MenuBarCreate(&WindowLayers.item[LayerID], TitleChineseName, &WindowCurrentPosition);
 
 	//工具栏
-	//L3_APPLICATION_ToolBarCreate();
+	L3_APPLICATION_ToolBarCreate(&WindowLayers.item[LayerID], TitleChineseName, &WindowCurrentPosition);
+
+
+	L3_APPLICATION_AddressBarCreate(&WindowLayers.item[LayerID], TitleChineseName, &WindowCurrentPosition);
+
+
 	
 	//工作区
 	//L3_APPLICATION_WorkSpaceCreate();	
@@ -457,7 +531,7 @@ VOID L3_APPLICATION_MyComputerWindow(UINT16 StartX, UINT16 StartY)
 
     for (UINT16 i = 0 ; i < PartitionCount; i++)
     {
-        x = 100;
+        x = 500;
         y = i * 18 + 16 * 2;        
 
         if (device[i].DeviceType == 2)
