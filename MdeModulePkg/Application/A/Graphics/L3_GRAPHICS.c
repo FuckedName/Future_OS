@@ -294,7 +294,8 @@ VOID L3_APPLICATION_TitleBarCreate(WINDOW_LAYER_ITEM *pWindowLayerItem, UINT16 *
     }
 	
 	//灰色背景，文件、编辑、查看、转到、收藏、帮助
-	int word[] = {L'文', L'件', L'编', L'辑', L'查', L'看', L'转', L'到', L'收', L'藏', L'帮', L'助'};
+	//int word[] = {L'文', L'件', L'编', L'辑', L'查', L'看', L'转', L'到', L'收', L'藏', L'帮', L'助'};
+	/*int word[20] = L"文件";
 	    
 	UINT16 Code[12] = {0};
 	L1_LIBRARY_QueryAreaCodeBitCodeByChineseChar(word, Code);//这里一定要有个数组取数据的操作
@@ -307,7 +308,7 @@ VOID L3_APPLICATION_TitleBarCreate(WINDOW_LAYER_ITEM *pWindowLayerItem, UINT16 *
 			L2_GRAPHICS_ChineseCharDraw12(pWindowLayerItem->pBuffer, StartX, StartY, AreaCode, BitCode, Color, MyComputerWidth);
 		StartX += FontSize + 1;	
 	}
-	
+	*/
 	Position->StartY += TitleBarHeight;
 }
 
@@ -316,17 +317,10 @@ VOID L3_APPLICATION_MenuBarCreate(WINDOW_LAYER_ITEM *pWindowLayerItem, UINT16 *T
 {
 	//灰色背景，文件、编辑、查看、转到、收藏、帮助
 	int word[] = {L'文'};
-	UINT16 Code[12] = {0};
-	L1_LIBRARY_QueryAreaCodeBitCodeByChineseChar(word, Code);
-	
-    UINT16 AreaCode;
-	UINT16 BitCode;
-	
-	AreaCode = (Code[0] & 0xff00) >> 8;
-	BitCode  = Code[0] & 0xff;
-	
-	if (0 != AreaCode && 0 != BitCode)
-		L2_GRAPHICS_ChineseCharDraw12(pWindowLayerItem->pBuffer, Position->StartX, Position->StartY, AreaCode, BitCode, BlackColor, MyComputerWidth);
+	GBK_Code Code = {0};
+	L1_LIBRARY_QueryAreaCodeBitCodeByChineseChar(word, &Code);
+
+	L2_GRAPHICS_ChineseCharDraw12(pWindowLayerItem->pBuffer, Position->StartX, Position->StartY, Code.AreaCode, Code.BitCode, WhiteColor, MyComputerWidth);
 		
 }
 

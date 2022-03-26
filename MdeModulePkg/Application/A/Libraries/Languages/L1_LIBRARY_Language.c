@@ -1,6 +1,7 @@
 #include "L1_LIBRARY_Language.h"
 
 
+
 UINT16 UNICODE_GBK_MAP[][2] = 
 {    
     //unicode16, GBK
@@ -20954,24 +20955,27 @@ UINT16 L1_LIBRARY_Query_GBK_By_UNICODE16(UINT16 input)
 	return 0xffff;
 }
 
-UINT16 L1_LIBRARY_QueryAreaCodeBitCodeByChineseChar(INT16 *ChineseChar, UINT16 *pCode)
+UINT16 L1_LIBRARY_QueryAreaCodeBitCodeByChineseChar(INT16 *ChineseChar, GBK_Code *pCode)
 {
-	for (UINT16 i = 0; i < sizeof(ChineseChar)/sizeof(int) - 1; i++)
+	
+	UINT16 GBK_code = L1_LIBRARY_Query_GBK_By_UNICODE16(ChineseChar[0]);
+	if (0xffff == GBK_code)
 	{
-		UINT16 GBK_code = L1_LIBRARY_Query_GBK_By_UNICODE16(ChineseChar[i]);
-		if (0xffff == GBK_code)
-		{
-			return GBK_code;
-		}
-		
-		//汉字’王’的区位码是4585， 区号45， 位号85. 首先对区号和位号加上32， 
-		//因为0－31编码保留作它用。 现在得到77和117， 写作二进制为01001101和01110101， 
-		//然后，为了与ascii码区分，将这两个字节的最高位置1， 得到11001101和11110101， 
-		//即为0xcd和0xf5, 因此0xcdf5即为’王’的GB码。
-		GBK_code &= 0x7f7f;
-		GBK_code -= 0x2020;
-
-		pCode[i] = GBK_code;
+		return GBK_code;
 	}
-	return EFI_SUCCESS;	
+	
+	//汉字’王’的区位码是4585， 区号45， 位号85. 首先对区号和位号加上32， 
+	//因为0－31编码保留作它用。 现在得到77和117， 写作二进制为01001101和01110101， 
+	//然后，为了与ascii码区分，将这两个字节的最高位置1， 得到11001101和11110101， 
+	//即为0xcd和0xf5, 因此0xcdf5即为’王’的GB码。
+	GBK_code &= 0x7f7f;
+	GBK_code -= 0x2020;
+	
+	pCode->AreaCode = (GBK_code & 0xff00) >> 8;
+	pCode->BitCode  = GBK_code & 0xff;
+
+	if (0 <= pCode->AreaCode && pCode->AreaCode <= 94 && 0 <= pCode->BitCode && 94 >= pCode->BitCode)
+		return EFI_SUCCESS; 
+
+	return RETURN_INVALID_PARAMETER; 
 }	
