@@ -32,6 +32,7 @@
 #include <Graphics/L2_GRAPHICS.h>
 			
 #include <Libraries/DataStructure/L1_LIBRARY_DataStructure.h>
+#include <Graphics/Window/L2_GRAPHICS_Window.h>
 
 #include <Graphics/L1_GRAPHICS.h>
 #include <Protocol/Shell.h>

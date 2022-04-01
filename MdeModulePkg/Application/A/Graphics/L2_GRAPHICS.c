@@ -73,8 +73,6 @@ UINT8 *pSystemIconMySettingBuffer = NULL; //after zoom in or zoom out
 UINT8 *pSystemIconRecycleBuffer = NULL; //after zoom in or zoom out
 UINT8 *pSystemIconTempBuffer2 = NULL;
 UINT8 *pSystemIconTextBuffer = NULL; //after zoom in or zoom out
-UINT8 *pSystemLogWindowBuffer = NULL; // MyComputer layer: 2
-UINT8 *pSystemSettingWindowBuffer = NULL;
 
 UINT16 StartMenuWidth = 16 * 10;
 UINT16 StartMenuHeight = 16 * 20;
@@ -88,7 +86,6 @@ UINT16 MemoryInformationWindowHeight = 16 * 60;
 UINT16 MemoryInformationWindowWidth = 16 * 40;
 UINT16 LayerID = 0;
 
-WINDOW_LAYERS WindowLayers = {0};
 
 EFI_GRAPHICS_OUTPUT_BLT_PIXEL WhiteColor;
 EFI_GRAPHICS_OUTPUT_BLT_PIXEL BlackColor;
@@ -575,15 +572,20 @@ void L2_GRAPHICS_RectangleDraw(UINT8 *pBuffer,
 *
 *****************************************************************************/
 void L1_MEMORY_RectangleFill(UINT8 *pBuffer,
-        IN UINTN x0, UINTN y0, UINTN x1, UINTN y1, 
-        IN UINTN DestWidth,
-        IN EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color)
+        UINTN x0, UINTN y0, UINTN x1, UINTN y1, 
+        UINTN DestWidth,
+        EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color)
 {    
     if (NULL == pBuffer)
     {
         //DEBUG ((EFI_D_INFO, "NULL == pBuffer"));
         return ;
     }
+
+	if (x0 >= x1 || y0 >= y1)
+	{
+		return;
+	}
     
 
     UINT32 i = 0;
@@ -1440,6 +1442,7 @@ void L2_GRAPHICS_ParameterInit()
     WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].WindowWidth = MyComputerWidth;
     WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].WindowHeight = MyComputerHeight;
     WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].LayerID = GRAPHICS_LAYER_MY_COMPUTER_WINDOW;
+    WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].Step = 2;
     
     WindowLayers.LayerCount++;
 
@@ -2831,47 +2834,6 @@ EFI_STATUS L2_GRAPHICS_ButtonDraw()
 
 
 //                                                 16 * 4,        16 * 7,       16 * 4,        16 * 2
-
-
-
-/****************************************************************************
-*
-*  描述:   绘制按钮
-*
-*  参数1： xxxxx
-*  参数2： xxxxx
-*  参数n： xxxxx
-*
-*  返回值： 成功：XXXX，失败：XXXXX
-*
-*****************************************************************************/
-EFI_STATUS L2_GRAPHICS_ButtonDraw2(WINDOW_LAYER_ITEM *pWindowLayerItem, UINT16 StartX, UINT16 StartY, UINT16 Width, UINT16 Height)
-{
-    EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
-    
-    // Button
-    // white
-    Color.Red   = 0xFF;
-    Color.Green = 0xFF;
-    Color.Blue  = 0xFF;
-    Color.Reserved  = GRAPHICS_LAYER_DESK;
-    L1_MEMORY_RectangleFill(pWindowLayerItem->pBuffer, StartX,  StartY, StartX + Width, StartY, pWindowLayerItem->WindowWidth, Color); //line top 
-    L1_MEMORY_RectangleFill(pWindowLayerItem->pBuffer, StartX,  StartY, StartX, StartY + Height,  pWindowLayerItem->WindowWidth, Color); //line left
-
-    Color.Red   = 214;
-    Color.Green = 211;
-    Color.Blue  = 206;
-    L1_MEMORY_RectangleFill(pWindowLayerItem->pBuffer, StartX + 1, StartY + 1, StartX + Width, StartY + Height, pWindowLayerItem->WindowWidth, Color); // Area
-    
-    // Black
-    Color.Red   = 0x00;
-    Color.Green = 0x00;
-    Color.Blue  = 0x00;
-    L1_MEMORY_RectangleFill(pWindowLayerItem->pBuffer, StartX,  StartY + Height + 1, StartX + Width, StartY + Height + 2, pWindowLayerItem->WindowWidth, Color); // line button
-    L1_MEMORY_RectangleFill(pWindowLayerItem->pBuffer, StartX + Width + 1, StartY + 1 , StartX + Width + 2, StartY + Height + 1, pWindowLayerItem->WindowWidth, Color); // line right
-}
-
-
 
 
 /****************************************************************************

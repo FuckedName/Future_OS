@@ -29,6 +29,8 @@
   	Graphics/L2_GRAPHICS.h
   	Graphics/L3_GRAPHICS.c
   	Graphics/L3_GRAPHICS.h
+  	Graphics/Window/L2_GRAPHICS_Window.c
+  	Graphics/Window/L2_GRAPHICS_Window.h
   	Devices/Mouse/L1_DEVICE_Mouse.h
   	Devices/Mouse/L1_DEVICE_Mouse.c
   	Devices/Mouse/L2_DEVICE_Mouse.h

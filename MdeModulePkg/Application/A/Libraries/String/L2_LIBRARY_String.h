@@ -29,6 +29,7 @@
 
 #include <L1_LIBRARY_String.h>
 #include <Graphics/L1_GRAPHICS.h>
+#include <Graphics/Window/L2_GRAPHICS_Window.h>
 
 
 VOID L2_STRING_Maker (UINT16 x, UINT16 y,

@@ -27,8 +27,9 @@
 
 #include <Protocol/GraphicsOutput.h>
 #include <Library/BaseLib.h>
-
 #include <Global/Global.h>
+
+#include <Graphics/Window/L2_GRAPHICS_Window.h>
 
 #include <L1_GRAPHICS.h>
 
@@ -258,5 +259,4 @@ void L1_MEMORY_CopyColor2(UINT8 *pBuffer, EFI_GRAPHICS_OUTPUT_BLT_PIXEL color, U
 
 void L1_MEMORY_CopyColor3(UINT8 *pBuffer, EFI_GRAPHICS_OUTPUT_BLT_PIXEL color, UINT16 x0, UINT16 y0, UINT8 AreaWidth);
 
-EFI_STATUS L2_GRAPHICS_ButtonDraw2(WINDOW_LAYER_ITEM *pWindowLayerItem, UINT16 StartX, UINT16 StartY, UINT16 Width, UINT16 Height);
 

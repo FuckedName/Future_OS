@@ -41,6 +41,9 @@
 #include <Devices/Timer/L2_DEVICE_Timer.h>
 #include <Devices/Store/L2_DEVICE_Store.h>
 #include <Devices/Screen/L2_DEVICE_Screen.h>
+#include <Graphics/Window/L2_GRAPHICS_Window.h>
+
+
 
 #include <Memory/L2_MEMORY.h>
 #include <Memory/L1_MEMORY.h>

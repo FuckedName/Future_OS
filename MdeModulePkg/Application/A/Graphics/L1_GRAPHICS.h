@@ -28,28 +28,6 @@
 #include <Library/BaseLib.h>
 
 
-typedef struct
-{
-    UINT16 Name[40]; // graphics layer
-    UINT8  DisplayFlag; // FALSE: do not display, TRUE: display
-    UINT8 *pBuffer;
-    UINT16 StartX;
-    UINT16 StartY;
-    UINT16 WindowWidth;
-    UINT16 WindowHeight;
-    UINT16 LayerID;
-}WINDOW_LAYER_ITEM;
-
-#define LAYER_QUANTITY 20 
-
-typedef struct
-{
-    WINDOW_LAYER_ITEM item[LAYER_QUANTITY];
-    UINT16 LayerCount;
-    UINT16 ActiveWindowCount;
-    UINT16 LayerSequences[LAYER_QUANTITY];
-}WINDOW_LAYERS;
-
 typedef enum
 {
     GRAPHICS_LAYER_DESK = 0,
