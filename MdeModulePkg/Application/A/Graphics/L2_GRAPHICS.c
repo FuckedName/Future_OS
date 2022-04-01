@@ -604,6 +604,48 @@ void L1_MEMORY_RectangleFill(UINT8 *pBuffer,
 }
 
 
+/****************************************************************************
+*
+*  描述:   矩形填充，x1,y1是基于x0,y0的增量
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
+void L1_MEMORY_RectangleFillInrease(UINT8 *pBuffer,
+        UINTN x0, UINTN y0, UINTN x1, UINTN y1, 
+        UINTN DestWidth,
+        EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color)
+{    
+    if (NULL == pBuffer)
+    {
+        //DEBUG ((EFI_D_INFO, "NULL == pBuffer"));
+        return ;
+    }
+
+	if ( x1 == 0 || 0 == y1)
+	{
+		return;
+	}
+    
+
+    UINT32 i = 0;
+    UINT32 j = 0;
+    for (j = y0; j <= y0 + y1; j++) 
+    {
+        for (i = x0; i <= x0 + x1; i++) 
+        {
+            pBuffer[(j * DestWidth + i) * 4]     =  Color.Blue; //Blue   
+            pBuffer[(j * DestWidth + i) * 4 + 1] =  Color.Green; //Green 
+            pBuffer[(j * DestWidth + i) * 4 + 2] =  Color.Red; //Red  
+            pBuffer[(j * DestWidth + i) * 4 + 3] =  Color.Reserved; //Red  
+        }
+    }
+
+}
 
 
 /****************************************************************************

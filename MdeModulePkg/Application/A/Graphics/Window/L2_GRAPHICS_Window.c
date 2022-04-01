@@ -84,7 +84,7 @@ WINDOW_LAYERS WindowLayers = {0};
 *****************************************************************************/
 EFI_STATUS L3_WINDOW_Initial(WINDOW_LAYER_ITEM *pWindowLayerItem, WINDOW_CURRENT_POSITION *Position)
 {	
-	UINT16 step = 4;
+	UINT16 step = 2;
 	//最外第一层像素
 	//g.setColor(new Color(191,191,191));
     EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
@@ -98,59 +98,40 @@ EFI_STATUS L3_WINDOW_Initial(WINDOW_LAYER_ITEM *pWindowLayerItem, WINDOW_CURRENT
 			pBuffer[(height * pWindowLayerItem->WindowWidth + width) * 4 + 0] = 100;
 			pBuffer[(height * pWindowLayerItem->WindowWidth + width) * 4 + 1] = 100;
 			pBuffer[(height * pWindowLayerItem->WindowWidth + width) * 4 + 2] = 100;
-			pBuffer[(height * pWindowLayerItem->WindowWidth + width) * 4 + 3] = Position->LayerID;
+			pBuffer[(height * pWindowLayerItem->WindowWidth + width) * 4 + 3] = pWindowLayerItem->LayerID;
 		}
 	}
 	
-	Color.Red = 255;
-	Color.Green = 0;
-	Color.Blue = 0;
-	Color.Reserved = Position->LayerID;
-	L1_MEMORY_RectangleFill(pBuffer, 0, 0, step, 30, MyComputerWidth, Color); //left
-	L1_MEMORY_RectangleFill(pBuffer, 0, 0, 30, step, MyComputerWidth, Color); //top
+	Color.Red = 191;
+	Color.Green = 191;
+	Color.Blue = 191;
+	Color.Reserved = pWindowLayerItem->LayerID;
+	L1_MEMORY_RectangleFillInrease(pBuffer, 0, 0, step, pWindowLayerItem->WindowHeight - 1, MyComputerWidth, Color); //left
+	L1_MEMORY_RectangleFillInrease(pBuffer, 0, 0, pWindowLayerItem->WindowWidth - 1, step, MyComputerWidth, Color); //top
 	
 	//Black
-	Color.Red = 0;
-	Color.Green = 255;
-	Color.Blue = 0;
-	L1_MEMORY_RectangleFill(pBuffer, pWindowLayerItem->WindowWidth - step, 0, pWindowLayerItem->WindowWidth - 1, pWindowLayerItem->WindowHeight - 1, MyComputerWidth, Color); //down
-	L1_MEMORY_RectangleFill(pBuffer, 0, pWindowLayerItem->WindowHeight - step, pWindowLayerItem->WindowWidth - 1,  pWindowLayerItem->WindowHeight - 1, MyComputerWidth, Color); //right
-	
-
-	return;
-
-
-
-
-	Position->StartX += step;
-	Position->pBuffer += step;
-	Position->StartY += step;
-	Position->pBuffer += step  * pWindowLayerItem->WindowWidth;
-	Position->WindowWidth -=  2 * step;
-	Position->WindowHeight -= 2 * step;
-	
+	Color.Red = BlackColor.Red;
+	Color.Green = BlackColor.Green;
+	Color.Blue = BlackColor.Blue;
+	L1_MEMORY_RectangleFillInrease(pBuffer, pWindowLayerItem->WindowWidth - step - 1, 0, step, pWindowLayerItem->WindowHeight - 1, MyComputerWidth, Color); //down
+	L1_MEMORY_RectangleFillInrease(pBuffer, 0, pWindowLayerItem->WindowHeight - step - 1, pWindowLayerItem->WindowWidth - 1,  step, MyComputerWidth, Color); //right
+		
 	//最外第二层像素
 	//white
-	Color.Red = 255;
-	Color.Green = 255;
-	Color.Blue = 255;
-	L1_MEMORY_RectangleFill(Position->pBuffer, Position->StartX, Position->StartY, step, Position->WindowHeight, Position->WindowWidth, Color);
-	L1_MEMORY_RectangleFill(Position->pBuffer, Position->StartX, Position->StartY, Position->WindowWidth,  step, Position->WindowWidth, Color);
+	Color.Red = WhiteColor.Red;
+	Color.Green = WhiteColor.Green;
+	Color.Blue = WhiteColor.Blue;
+	L1_MEMORY_RectangleFillInrease(pWindowLayerItem->pBuffer, step, step, step, pWindowLayerItem->WindowHeight - 1 - 2 * step, pWindowLayerItem->WindowWidth, Color); //left
+	L1_MEMORY_RectangleFillInrease(pWindowLayerItem->pBuffer, step, step, pWindowLayerItem->WindowWidth - 1 - 2 * step,  step, pWindowLayerItem->WindowWidth, Color); //Top
 	
 	//g.setColor(new Color(128,128,128));
 	Color.Red = 128;
 	Color.Green = 128;
 	Color.Blue = 128;
-	L1_MEMORY_RectangleFill(Position->pBuffer, Position->StartX, Position->WindowHeight + Position->StartY - step, Position->WindowWidth, step, Position->WindowWidth, Color);
-	L1_MEMORY_RectangleFill(Position->pBuffer, Position->WindowWidth + Position->StartX - step, Position->StartY, step, Position->WindowHeight, Position->WindowWidth, Color);
-	
-	Position->StartX += step;
-	Position->pBuffer += step;
-	Position->StartY += step;
-	Position->pBuffer += step  * pWindowLayerItem->WindowWidth;
-	Position->WindowWidth -=  2 * step;
-	Position->WindowHeight -= 2 * step;
-	
+	L1_MEMORY_RectangleFillInrease(pWindowLayerItem->pBuffer, step, pWindowLayerItem->WindowHeight - 2 * step - 1, pWindowLayerItem->WindowWidth - 2 * step - 1, step, pWindowLayerItem->WindowWidth, Color); //Down
+	L1_MEMORY_RectangleFillInrease(pWindowLayerItem->pBuffer, pWindowLayerItem->WindowWidth - 2 * step - 1, step, step, pWindowLayerItem->WindowHeight - 2 * step - 1, pWindowLayerItem->WindowWidth, Color); //Right
+		
+	return;
 	//最外第三层像素
 	//step = windowParameter.DefaultStep * 2;
 	//g.setColor(new Color(191,191,191));
@@ -160,16 +141,17 @@ EFI_STATUS L3_WINDOW_Initial(WINDOW_LAYER_ITEM *pWindowLayerItem, WINDOW_CURRENT
 	
 	for (int i = 0; i < step; i++)
 	{
-		L1_MEMORY_RectangleFill(Position->StartX, Position->StartY, Position->WindowWidth, Position->WindowHeight, Position->WindowWidth, Color);
+		L1_MEMORY_RectangleFill(pWindowLayerItem->StartX, pWindowLayerItem->StartY, pWindowLayerItem->WindowWidth, pWindowLayerItem->WindowHeight, pWindowLayerItem->WindowWidth, Color);
 		
-		Position->StartX += 1;
-		Position->pBuffer += 1;
-		Position->StartY += 1;
-		Position->pBuffer += 1  * pWindowLayerItem->WindowWidth;
+		pWindowLayerItem->StartX += 1;
+		pWindowLayerItem->pBuffer += 1;
+		pWindowLayerItem->StartY += 1;
+		pWindowLayerItem->pBuffer += 1	* pWindowLayerItem->WindowWidth;
 
-		Position->WindowWidth -= 2;
-		Position->WindowHeight -= 2;
+		pWindowLayerItem->WindowWidth -= 2;
+		pWindowLayerItem->WindowHeight -= 2;
 	}
+
 	//pWindowLayerItem->StartX += 1;
 
 	return  EFI_SUCCESS;
