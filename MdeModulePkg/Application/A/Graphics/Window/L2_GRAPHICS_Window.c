@@ -84,7 +84,7 @@ WINDOW_LAYERS WindowLayers = {0};
 *****************************************************************************/
 EFI_STATUS L3_WINDOW_Initial(WINDOW_LAYER_ITEM *pWindowLayerItem, WINDOW_CURRENT_POSITION *Position)
 {	
-	UINT16 step = 2;
+	UINT16 step = pWindowLayerItem->Step;
 	//�����һ������
 	//g.setColor(new Color(191,191,191));
     EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
@@ -102,9 +102,9 @@ EFI_STATUS L3_WINDOW_Initial(WINDOW_LAYER_ITEM *pWindowLayerItem, WINDOW_CURRENT
 		}
 	}
 	
-	Color.Red = 191;
-	Color.Green = 191;
-	Color.Blue = 191;
+	Color.Red = 226;
+	Color.Green = 230;
+	Color.Blue = 204;
 	Color.Reserved = pWindowLayerItem->LayerID;
 	L1_MEMORY_RectangleFillInrease(pBuffer, 0, 0, step, pWindowLayerItem->WindowHeight - 1, MyComputerWidth, Color); //left
 	L1_MEMORY_RectangleFillInrease(pBuffer, 0, 0, pWindowLayerItem->WindowWidth - 1, step, MyComputerWidth, Color); //top
@@ -113,8 +113,8 @@ EFI_STATUS L3_WINDOW_Initial(WINDOW_LAYER_ITEM *pWindowLayerItem, WINDOW_CURRENT
 	Color.Red = BlackColor.Red;
 	Color.Green = BlackColor.Green;
 	Color.Blue = BlackColor.Blue;
-	L1_MEMORY_RectangleFillInrease(pBuffer, pWindowLayerItem->WindowWidth - step - 1, 0, step, pWindowLayerItem->WindowHeight - 1, MyComputerWidth, Color); //down
-	L1_MEMORY_RectangleFillInrease(pBuffer, 0, pWindowLayerItem->WindowHeight - step - 1, pWindowLayerItem->WindowWidth - 1,  step, MyComputerWidth, Color); //right
+	L1_MEMORY_RectangleFillInrease(pBuffer, pWindowLayerItem->WindowWidth - step - 1, 0, step, pWindowLayerItem->WindowHeight - 1, MyComputerWidth, Color); //right
+	L1_MEMORY_RectangleFillInrease(pBuffer, 0, pWindowLayerItem->WindowHeight - step - 1, pWindowLayerItem->WindowWidth - 1,  step, MyComputerWidth, Color); //down
 		
 	//����ڶ�������
 	//white
@@ -131,28 +131,17 @@ EFI_STATUS L3_WINDOW_Initial(WINDOW_LAYER_ITEM *pWindowLayerItem, WINDOW_CURRENT
 	L1_MEMORY_RectangleFillInrease(pWindowLayerItem->pBuffer, step, pWindowLayerItem->WindowHeight - 2 * step - 1, pWindowLayerItem->WindowWidth - 2 * step - 1, step, pWindowLayerItem->WindowWidth, Color); //Down
 	L1_MEMORY_RectangleFillInrease(pWindowLayerItem->pBuffer, pWindowLayerItem->WindowWidth - 2 * step - 1, step, step, pWindowLayerItem->WindowHeight - 2 * step - 1, pWindowLayerItem->WindowWidth, Color); //Right
 		
-	return;
 	//�������������
 	//step = windowParameter.DefaultStep * 2;
 	//g.setColor(new Color(191,191,191));
-	Color.Red = 191;
-	Color.Green = 191;
-	Color.Blue = 191;
-	
-	for (int i = 0; i < step; i++)
+	Color.Red = 186;
+	Color.Green = 188;
+	Color.Blue = 189;
+
+	for (UINT16 i = 0; i < step * 2; i++)
 	{
-		L1_MEMORY_RectangleFill(pWindowLayerItem->StartX, pWindowLayerItem->StartY, pWindowLayerItem->WindowWidth, pWindowLayerItem->WindowHeight, pWindowLayerItem->WindowWidth, Color);
-		
-		pWindowLayerItem->StartX += 1;
-		pWindowLayerItem->pBuffer += 1;
-		pWindowLayerItem->StartY += 1;
-		pWindowLayerItem->pBuffer += 1	* pWindowLayerItem->WindowWidth;
-
-		pWindowLayerItem->WindowWidth -= 2;
-		pWindowLayerItem->WindowHeight -= 2;
-	}
-
-	//pWindowLayerItem->StartX += 1;
+		L2_GRAPHICS_RectangleDraw(pWindowLayerItem->pBuffer, 2 * step + i, 2 * step + i, pWindowLayerItem->WindowWidth - 2 * step - 1 - i, pWindowLayerItem->WindowHeight - 2 * step - 1 - i, 0, Color, pWindowLayerItem->WindowWidth);
+	}	
 
 	return  EFI_SUCCESS;
 }
@@ -242,6 +231,7 @@ EFI_STATUS L3_WINDOW_Create(UINT8 *pBuffer, UINT8 *pParent, UINT16 Width, UINT16
     return EFI_SUCCESS;
 }
 
+#define XNAME(n) word##n
 
 VOID L3_APPLICATION_TitleBarCreate(WINDOW_LAYER_ITEM *pWindowLayerItem, UINT16 *TitleName, WINDOW_CURRENT_POSITION *Position)
 {
@@ -257,6 +247,7 @@ VOID L3_APPLICATION_TitleBarCreate(WINDOW_LAYER_ITEM *pWindowLayerItem, UINT16 *
 	UINT16 FontSize = 12;
     UINT16 AreaCode;
 	UINT16 BitCode;
+	UINT16 Step;
     
     Color.Blue  = WhiteColor.Blue;
     Color.Red   = WhiteColor.Blue;
@@ -268,16 +259,14 @@ VOID L3_APPLICATION_TitleBarCreate(WINDOW_LAYER_ITEM *pWindowLayerItem, UINT16 *
 	Width   = pWindowLayerItem->WindowWidth;
 	Height = pWindowLayerItem->WindowHeight;
 	LayerID = pWindowLayerItem->LayerID;
+	Step = pWindowLayerItem->Step;
 	
-	StartX = Position->StartX;
-	StartY = Position->StartY;
-
 	//Blue: RGB:9，70，168
 
 	//这里减4是因为窗口最外边4个像素被边框占用
-	for (UINT16 i = StartY; i <  StartY + TitleBarHeight; i++)
+	for (UINT16 i = StartY + 4 * Step; i <  StartY + TitleBarHeight; i++)
 	{
-		for (UINT16 j = StartX + 4; j < StartX + Width - 4; j++)
+		for (UINT16 j = StartX + 4 * Step; j < StartX + Width - 4 * Step; j++)
 		{
 			pWindowLayerItem->pBuffer[(i * Width + j) * 4 + 0] = 168;
 			pWindowLayerItem->pBuffer[(i * Width + j) * 4 + 1] = 70;
@@ -285,38 +274,32 @@ VOID L3_APPLICATION_TitleBarCreate(WINDOW_LAYER_ITEM *pWindowLayerItem, UINT16 *
 		}
 	}
 	
-	StartY = StartY + (TitleBarHeight - FontSize) / 2;
+	StartY = StartY + (TitleBarHeight - FontSize - 4 * Step) / 2;
 
-	StartX += 6;
+	StartX += 6 * Step;
+
+	//灰色背景，文件、编辑、查看、转到、收藏、帮助
+	
+	int word[] = {L'我'};
+	GBK_Code Code = {0};
+	L1_LIBRARY_QueryAreaCodeBitCodeByChineseChar(word, &Code);
+
+	//L1_LIBRARY_QueryAreaCodeBitCodeByChineseChar(word, &Code);
+
+	//L2_GRAPHICS_ChineseCharDraw12(pWindowLayerItem->pBuffer, Position->StartX + 4, Position->StartY, Code.AreaCode, Code.BitCode, WhiteColor, MyComputerWidth);
 	
     for (UINT16 i = 0; i < 4; i++)
-    {
-        AreaCode = TitleName[2 * i];
-        BitCode  = TitleName[2 * i + 1];
+    {		
+		//L1_LIBRARY_QueryAreaCodeBitCodeByChineseChar(XNAME(0), &Code);
+        //AreaCode = TitleName[2 * i];
+        //BitCode  = TitleName[2 * i + 1];
         
-        if (0 != AreaCode && 0 != BitCode)
-            L2_GRAPHICS_ChineseCharDraw12(pWindowLayerItem->pBuffer, StartX, StartY, AreaCode, BitCode, Color, MyComputerWidth);
+        //if (0 != AreaCode && 0 != BitCode)
+            L2_GRAPHICS_ChineseCharDraw12(pWindowLayerItem->pBuffer, StartX, StartY, Code.AreaCode, Code.BitCode, Color, MyComputerWidth);
             
         StartX += FontSize + 1; //因为字体宽度是12，所以加13，多一点像素
     }
-	
-	//灰色背景，文件、编辑、查看、转到、收藏、帮助
-	//int word[] = {L'文', L'件', L'编', L'辑', L'查', L'看', L'转', L'到', L'收', L'藏', L'帮', L'助'};
-	/*int word[20] = L"文件";
-	    
-	UINT16 Code[12] = {0};
-	L1_LIBRARY_QueryAreaCodeBitCodeByChineseChar(word, Code);//这里一定要有个数组取数据的操作
-	for (UINT16 i = 0; i < sizeof(word)/sizeof(int) - 1; i++)
-	{
-		AreaCode = (Code[i] & 0xff00) >> 8;
-		BitCode  = Code[i] & 0xff;
-	
-		if (0 <= AreaCode && AreaCode <= 94 && 0 <= BitCode && 94 >= BitCode)
-			L2_GRAPHICS_ChineseCharDraw12(pWindowLayerItem->pBuffer, StartX, StartY, AreaCode, BitCode, Color, MyComputerWidth);
-		StartX += FontSize + 1;	
-	}
-	*/
-	
+		
 	Position->StartY += TitleBarHeight + 4;
 	Position->StartX += 4;
 	
@@ -465,12 +448,12 @@ VOID L3_APPLICATION_MyComputerWindow(UINT16 StartX, UINT16 StartY)
     
     L3_WINDOW_Initial(&WindowLayers.item[LayerID], &WindowCurrentPosition);
 
-	return;
 	UINT16 TitleChineseName[] = {46,50,21,36,21,71,36,52}; //我的电脑
-    
+    	
 	//标题栏 TitleBar, 20 高度，宽度比窗口小些
 	L3_APPLICATION_TitleBarCreate(&WindowLayers.item[LayerID], TitleChineseName, &WindowCurrentPosition);
 	
+	return;
 	//菜单栏, //灰色背景，文件、编辑、查看、转到、收藏、帮助
 	//UINT16 MenusChineseName[] = "文件";
 	L3_APPLICATION_MenuBarCreate(&WindowLayers.item[LayerID], TitleChineseName, &WindowCurrentPosition);
