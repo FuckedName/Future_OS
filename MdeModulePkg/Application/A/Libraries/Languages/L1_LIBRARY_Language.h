@@ -10,7 +10,7 @@ typedef struct
 }GBK_Code;
 
 
-UINT16 L1_LIBRARY_QueryAreaCodeBitCodeByChineseChar(INT16 *ChineseChar, GBK_Code *pCode);
+UINT16 L1_LIBRARY_QueryAreaCodeBitCodeByChineseChar(INT16 ChineseChar, GBK_Code *pCode);
 
 #endif
 

@@ -69,12 +69,16 @@ MY_COMPUTER_WINDOW MyComputerWindow;
 
 WINDOW_LAYERS WindowLayers = {0};
 
-EFI_STATUS L3_WINDOW_ChineseCharDraw(UINT8 *pBuffer, INT16 *ChineseChar, UINTN StartX, UINTN StartY, EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color , UINT16 AreaWidth)
+EFI_STATUS L3_WINDOW_ChineseCharDraw(UINT8 *pBuffer, INT16 *ChineseChar, UINT16 FontWidth, UINTN *StartX, UINTN StartY, EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color , UINT16 AreaWidth)
 {		
 	//int word3[] = {L'脑'};
 	GBK_Code Code = {0};
-	L1_LIBRARY_QueryAreaCodeBitCodeByChineseChar(ChineseChar, &Code); 	
-	L2_GRAPHICS_ChineseCharDraw12(pBuffer, StartX, StartY, Code.AreaCode, Code.BitCode, Color, AreaWidth);
+	for (int i = 0; i < sizeof(ChineseChar) / sizeof(INT16); i++)
+	{
+		L1_LIBRARY_QueryAreaCodeBitCodeByChineseChar(ChineseChar[2 * i], &Code); 	
+		L2_GRAPHICS_ChineseCharDraw12(pBuffer, *StartX, StartY, Code.AreaCode, Code.BitCode, Color, AreaWidth);
+		*StartX += FontWidth + 1;
+	}
 }
 
 /****************************************************************************
@@ -289,23 +293,14 @@ VOID L3_APPLICATION_TitleBarCreate(WINDOW_LAYER_ITEM *pWindowLayerItem, UINT16 *
 
 	//灰色背景，文件、编辑、查看、转到、收藏、帮助
 	//这里不能写成{L'我',L'我',L'我',L'我'}，因为EDK2代码里边编译选项不让一次性定义多个，如果定义，需要修改编译选项，修改编译选项后，原来EDK2代码会编译不通过，有点蛋疼，
-	int word1[] = {L'我'};
-	L3_WINDOW_ChineseCharDraw(pWindowLayerItem->pBuffer, word1, StartX, StartY, Color, MyComputerWidth);
+	int word1[5] = {0};
 		
-	StartX += FontSize + 1; 
-	
-	int word2[] = {L'的'};
-	L3_WINDOW_ChineseCharDraw(pWindowLayerItem->pBuffer, word2, StartX, StartY, Color, MyComputerWidth);
+	word1[0] = L'我';
+	word1[1] = L'的';
+	word1[2] = L'电';
+	word1[3] = L'脑';
+	L3_WINDOW_ChineseCharDraw(pWindowLayerItem->pBuffer, word1, FontSize, &StartX, StartY, Color, MyComputerWidth);
 		
-	StartX += FontSize + 1; 
-
-	int word3[] = {L'电'};
-	L3_WINDOW_ChineseCharDraw(pWindowLayerItem->pBuffer, word3, StartX, StartY, Color, MyComputerWidth);
-		
-	StartX += FontSize + 1; 
-	
-	int word4[] = {L'脑'};
-	L3_WINDOW_ChineseCharDraw(pWindowLayerItem->pBuffer, word4, StartX, StartY, Color, MyComputerWidth);
 				
 	Position->StartY += TitleBarHeight + 4;
 	Position->StartX += 4;
@@ -333,7 +328,7 @@ VOID L3_APPLICATION_MenuBarCreate(WINDOW_LAYER_ITEM *pWindowLayerItem, UINT16 *T
 	//灰色背景，文件、编辑、查看、转到、收藏、帮助
 	int word[] = {L'文'};
 	GBK_Code Code = {0};
-	L1_LIBRARY_QueryAreaCodeBitCodeByChineseChar(word, &Code);
+	L1_LIBRARY_QueryAreaCodeBitCodeByChineseChar(word[0], &Code);
 
 	L2_GRAPHICS_ChineseCharDraw12(pWindowLayerItem->pBuffer, Position->StartX + 4, Position->StartY, Code.AreaCode, Code.BitCode, WhiteColor, MyComputerWidth);
 
@@ -393,7 +388,7 @@ VOID L3_APPLICATION_AddressBarCreate(WINDOW_LAYER_ITEM *pWindowLayerItem, UINT16
 	//灰色背景，文件、编辑、查看、转到、收藏、帮助
 	int word[] = {L'文'};
 	GBK_Code Code = {0};
-	L1_LIBRARY_QueryAreaCodeBitCodeByChineseChar(word, &Code);
+	L1_LIBRARY_QueryAreaCodeBitCodeByChineseChar(word[0], &Code);
 
 	L2_GRAPHICS_ChineseCharDraw12(pWindowLayerItem->pBuffer, Position->StartX + 4, Position->StartY, Code.AreaCode, Code.BitCode, WhiteColor, MyComputerWidth);
 

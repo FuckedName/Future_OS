@@ -20955,10 +20955,10 @@ UINT16 L1_LIBRARY_Query_GBK_By_UNICODE16(UINT16 input)
 	return 0xffff;
 }
 
-UINT16 L1_LIBRARY_QueryAreaCodeBitCodeByChineseChar(INT16 *ChineseChar, GBK_Code *pCode)
+UINT16 L1_LIBRARY_QueryAreaCodeBitCodeByChineseChar(INT16 ChineseChar, GBK_Code *pCode)
 {
 	
-	UINT16 GBK_code = L1_LIBRARY_Query_GBK_By_UNICODE16(ChineseChar[0]);
+	UINT16 GBK_code = L1_LIBRARY_Query_GBK_By_UNICODE16(ChineseChar);
 	if (0xffff == GBK_code)
 	{
 		return GBK_code;
