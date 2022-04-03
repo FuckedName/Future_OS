@@ -69,12 +69,35 @@ MY_COMPUTER_WINDOW MyComputerWindow;
 
 WINDOW_LAYERS WindowLayers = {0};
 
-EFI_STATUS L3_WINDOW_ChineseCharDraw(UINT8 *pBuffer, INT16 *ChineseChar, UINT16 FontWidth, UINTN *StartX, UINTN StartY, EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color , UINT16 AreaWidth)
+/****************************************************************************
+*
+*  描述: 将汉字字符串显示到指定内存Buffer
+*
+*  参数 pBuffer： 需要写入的目标内存块
+*  参数 ChineseChar： 汉字字符串
+	声明汉字字符串的时候可以采用如下方式声明
+	int ChineseChars[5] = {0};
+		
+	ChineseChars[0] = L'我';
+	ChineseChars[1] = L'的';
+	ChineseChars[2] = L'电';
+	ChineseChars[3] = L'脑';
+	
+*  参数 FontWidth： 字体宽度，当前我们字体大小是12 *12像素
+*       StartX：写入的起始X轴坐标
+*       StartY：写入的起始Y轴坐标
+		Color:写入的颜色
+		AreaWidth：目标图层内存块，图层宽度
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
+EFI_STATUS L3_WINDOW_ChineseCharsDraw(UINT8 *pBuffer, INT16 *ChineseChar, UINT16 FontWidth, UINTN *StartX, UINTN StartY, EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color , UINT16 AreaWidth)
 {		
 	//int word3[] = {L'脑'};
 	GBK_Code Code = {0};
 	for (int i = 0; i < sizeof(ChineseChar) / sizeof(INT16); i++)
 	{
+		//这里的2 * i是因为汉字的占用两个字节，需要取第一个字节
 		L1_LIBRARY_QueryAreaCodeBitCodeByChineseChar(ChineseChar[2 * i], &Code); 	
 		L2_GRAPHICS_ChineseCharDraw12(pBuffer, *StartX, StartY, Code.AreaCode, Code.BitCode, Color, AreaWidth);
 		*StartX += FontWidth + 1;
@@ -293,13 +316,13 @@ VOID L3_APPLICATION_TitleBarCreate(WINDOW_LAYER_ITEM *pWindowLayerItem, UINT16 *
 
 	//灰色背景，文件、编辑、查看、转到、收藏、帮助
 	//这里不能写成{L'我',L'我',L'我',L'我'}，因为EDK2代码里边编译选项不让一次性定义多个，如果定义，需要修改编译选项，修改编译选项后，原来EDK2代码会编译不通过，有点蛋疼，
-	int word1[5] = {0};
+	int ChineseChars[5] = {0};
 		
-	word1[0] = L'我';
-	word1[1] = L'的';
-	word1[2] = L'电';
-	word1[3] = L'脑';
-	L3_WINDOW_ChineseCharDraw(pWindowLayerItem->pBuffer, word1, FontSize, &StartX, StartY, Color, MyComputerWidth);
+	ChineseChars[0] = L'我';
+	ChineseChars[1] = L'的';
+	ChineseChars[2] = L'电';
+	ChineseChars[3] = L'脑';
+	L3_WINDOW_ChineseCharsDraw(pWindowLayerItem->pBuffer, ChineseChars, FontSize, &StartX, StartY, Color, MyComputerWidth);
 		
 				
 	Position->StartY += TitleBarHeight + 4;
