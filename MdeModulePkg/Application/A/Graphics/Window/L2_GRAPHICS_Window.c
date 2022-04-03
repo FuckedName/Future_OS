@@ -69,6 +69,14 @@ MY_COMPUTER_WINDOW MyComputerWindow;
 
 WINDOW_LAYERS WindowLayers = {0};
 
+EFI_STATUS L3_WINDOW_ChineseCharDraw(UINT8 *pBuffer, INT16 *ChineseChar, UINTN StartX, UINTN StartY, EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color , UINT16 AreaWidth)
+{		
+	//int word3[] = {L'脑'};
+	GBK_Code Code = {0};
+	L1_LIBRARY_QueryAreaCodeBitCodeByChineseChar(ChineseChar, &Code); 	
+	L2_GRAPHICS_ChineseCharDraw12(pBuffer, StartX, StartY, Code.AreaCode, Code.BitCode, Color, AreaWidth);
+}
+
 /****************************************************************************
 *
 *  描述: 初始化窗口
@@ -274,32 +282,31 @@ VOID L3_APPLICATION_TitleBarCreate(WINDOW_LAYER_ITEM *pWindowLayerItem, UINT16 *
 		}
 	}
 	
-	StartY = StartY + (TitleBarHeight - FontSize - 4 * Step) / 2;
+	//Step * 4是窗口边框所占像素
+	StartY = StartY + (TitleBarHeight - FontSize - 4 * Step) / 2 + Step * 4; 
 
 	StartX += 6 * Step;
 
 	//灰色背景，文件、编辑、查看、转到、收藏、帮助
-	
-	int word[] = {L'我'};
-	GBK_Code Code = {0};
-	L1_LIBRARY_QueryAreaCodeBitCodeByChineseChar(word, &Code);
-
-	//L1_LIBRARY_QueryAreaCodeBitCodeByChineseChar(word, &Code);
-
-	//L2_GRAPHICS_ChineseCharDraw12(pWindowLayerItem->pBuffer, Position->StartX + 4, Position->StartY, Code.AreaCode, Code.BitCode, WhiteColor, MyComputerWidth);
-	
-    for (UINT16 i = 0; i < 4; i++)
-    {		
-		//L1_LIBRARY_QueryAreaCodeBitCodeByChineseChar(XNAME(0), &Code);
-        //AreaCode = TitleName[2 * i];
-        //BitCode  = TitleName[2 * i + 1];
-        
-        //if (0 != AreaCode && 0 != BitCode)
-            L2_GRAPHICS_ChineseCharDraw12(pWindowLayerItem->pBuffer, StartX, StartY, Code.AreaCode, Code.BitCode, Color, MyComputerWidth);
-            
-        StartX += FontSize + 1; //因为字体宽度是12，所以加13，多一点像素
-    }
+	//这里不能写成{L'我',L'我',L'我',L'我'}，因为EDK2代码里边编译选项不让一次性定义多个，如果定义，需要修改编译选项，修改编译选项后，原来EDK2代码会编译不通过，有点蛋疼，
+	int word1[] = {L'我'};
+	L3_WINDOW_ChineseCharDraw(pWindowLayerItem->pBuffer, word1, StartX, StartY, Color, MyComputerWidth);
 		
+	StartX += FontSize + 1; 
+	
+	int word2[] = {L'的'};
+	L3_WINDOW_ChineseCharDraw(pWindowLayerItem->pBuffer, word2, StartX, StartY, Color, MyComputerWidth);
+		
+	StartX += FontSize + 1; 
+
+	int word3[] = {L'电'};
+	L3_WINDOW_ChineseCharDraw(pWindowLayerItem->pBuffer, word3, StartX, StartY, Color, MyComputerWidth);
+		
+	StartX += FontSize + 1; 
+	
+	int word4[] = {L'脑'};
+	L3_WINDOW_ChineseCharDraw(pWindowLayerItem->pBuffer, word4, StartX, StartY, Color, MyComputerWidth);
+				
 	Position->StartY += TitleBarHeight + 4;
 	Position->StartX += 4;
 	
