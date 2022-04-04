@@ -41,6 +41,7 @@ typedef struct
     UINT16 WindowHeight;
     UINT16 LayerID;
 	UINT16 Step;
+	UINT16 TitleBarHeight;
 }WINDOW_LAYER_ITEM;
 
 typedef struct

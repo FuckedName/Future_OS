@@ -54,13 +54,13 @@ typedef struct
 //窗口当前已经初始化的位置信息，方便下一个模块初始化
 typedef struct
 {
-	UINT16 StartX;
-	UINT16 StartY;
-	UINT16 WindowWidth;
-	UINT16 WindowHeight;
+	UINT16 CurrentWidth;
+	UINT16 CurrentHeight;
 	UINT8 *pBuffer;
 	UINT16 LayerID;
 	UINT16 Step;
+	UINT16 CurrentX; //Current Bar StartX, a window may be have many Bars.
+	UINT16 CurrentY; //Current Bar StartY, a window may be have many Bars.
 }WINDOW_CURRENT_POSITION;
 
 
@@ -178,6 +178,13 @@ EFI_STATUS L3_WINDOW_Initial(WINDOW_LAYER_ITEM *pWindowLayerItem, WINDOW_CURRENT
 		L2_GRAPHICS_RectangleDraw(pWindowLayerItem->pBuffer, 2 * step + i, 2 * step + i, pWindowLayerItem->WindowWidth - 2 * step - 1 - i, pWindowLayerItem->WindowHeight - 2 * step - 1 - i, 0, Color, pWindowLayerItem->WindowWidth);
 	}	
 
+	//��߿�ռ�õ�����
+	Position->CurrentX += 4 * step;
+	Position->CurrentY += 4 * step;
+
+	Position->CurrentHeight -= 2 * 4 * step;
+	Position->CurrentWidth -= 4 * step;
+
 	return  EFI_SUCCESS;
 }
 
@@ -266,72 +273,70 @@ EFI_STATUS L3_WINDOW_Create(UINT8 *pBuffer, UINT8 *pParent, UINT16 Width, UINT16
     return EFI_SUCCESS;
 }
 
-#define XNAME(n) word##n
-
 VOID L3_APPLICATION_TitleBarCreate(WINDOW_LAYER_ITEM *pWindowLayerItem, UINT16 *TitleName, WINDOW_CURRENT_POSITION *Position)
 {
 	//蓝色背景，标题“我的电脑”，颜色白色，右边是最小化，最大化，关闭窗口    
     EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
 	
-    UINT16 StartX;
-	UINT16 StartY;
-	UINT16 Width;
+    UINT16 CurrentX;
+	UINT16 CurrentY;
+    UINT16 CurrentWidth;
+	UINT16 CurrentHeight;
+	UINT16 WindowWidth; //���ڱ�����С�����ƴ���ʱ�����޸Ĵ�С
 	UINT16 Height;
 	UINT16 LayerID;
-	UINT16 TitleBarHeight = 30;
+	UINT16 TitleBarHeight;
 	UINT16 FontSize = 12;
     UINT16 AreaCode;
 	UINT16 BitCode;
 	UINT16 Step;
+
+	TitleBarHeight = pWindowLayerItem->TitleBarHeight;
     
     Color.Blue  = WhiteColor.Blue;
     Color.Red   = WhiteColor.Blue;
     Color.Green = WhiteColor.Blue;
-    Color.Reserved = GRAPHICS_LAYER_MY_COMPUTER_WINDOW;
+    Color.Reserved = pWindowLayerItem->LayerID;
 		
-    StartY = pWindowLayerItem->StartY;
-    StartX = pWindowLayerItem->StartX;
-	Width   = pWindowLayerItem->WindowWidth;
+    CurrentX = Position->CurrentX;
+    CurrentY = Position->CurrentY;
+	CurrentWidth = Position->CurrentWidth;
+	CurrentHeight = Position->CurrentHeight;
+	WindowWidth = pWindowLayerItem->WindowWidth;
 	Height = pWindowLayerItem->WindowHeight;
 	LayerID = pWindowLayerItem->LayerID;
 	Step = pWindowLayerItem->Step;
 	
 	//Blue: RGB:9，70，168
 
-	//这里减4是因为窗口最外边4个像素被边框占用
-	for (UINT16 i = StartY + 4 * Step; i <  StartY + TitleBarHeight; i++)
+	//这里减4是因为窗口最外边4 * Step个像素被边框占用
+	for (UINT16 i = CurrentY; i <  CurrentY + TitleBarHeight; i++)
 	{
-		for (UINT16 j = StartX + 4 * Step; j < StartX + Width - 4 * Step; j++)
+		for (UINT16 j = CurrentX; j < CurrentWidth; j++)
 		{
-			pWindowLayerItem->pBuffer[(i * Width + j) * 4 + 0] = 168;
-			pWindowLayerItem->pBuffer[(i * Width + j) * 4 + 1] = 70;
-			pWindowLayerItem->pBuffer[(i * Width + j) * 4 + 2] = 9;
+			pWindowLayerItem->pBuffer[(i * WindowWidth + j) * 4 + 0] = 168;
+			pWindowLayerItem->pBuffer[(i * WindowWidth + j) * 4 + 1] = 70;
+			pWindowLayerItem->pBuffer[(i * WindowWidth + j) * 4 + 2] = 9;
 		}
 	}
 	
 	//Step * 4是窗口边框所占像素
-	StartY = StartY + (TitleBarHeight - FontSize - 4 * Step) / 2 + Step * 4; 
+	CurrentY += (TitleBarHeight - FontSize - 4 * Step) / 2 + Step * 4; 
 
-	StartX += 6 * Step;
+	Position->CurrentX += 4;
 
 	//灰色背景，文件、编辑、查看、转到、收藏、帮助
 	//这里不能写成{L'我',L'我',L'我',L'我'}，因为EDK2代码里边编译选项不让一次性定义多个，如果定义，需要修改编译选项，修改编译选项后，原来EDK2代码会编译不通过，有点蛋疼，
-	int ChineseChars[5] = {0};
-		
-	ChineseChars[0] = L'我';
-	ChineseChars[1] = L'的';
-	ChineseChars[2] = L'电';
-	ChineseChars[3] = L'脑';
-	L3_WINDOW_ChineseCharsDraw(pWindowLayerItem->pBuffer, ChineseChars, FontSize, &StartX, StartY, Color, MyComputerWidth);
-		
-				
-	Position->StartY += TitleBarHeight + 4;
-	Position->StartX += 4;
+	int ChineseChars[5] = {L'我', L'的', L'电', L'脑'};
+	L3_WINDOW_ChineseCharsDraw(pWindowLayerItem->pBuffer, ChineseChars, FontSize, &CurrentX, CurrentY, Color, pWindowLayerItem->WindowWidth);
+							
+	//������ռ�õĸ߶�
+	Position->CurrentY += WindowLayers.item[LayerID].TitleBarHeight + 2 * Step;
 	
 }
 
 
-VOID L3_APPLICATION_MenuBarCreate(WINDOW_LAYER_ITEM *pWindowLayerItem, UINT16 *TitleName, WINDOW_CURRENT_POSITION *Position)
+VOID L3_APPLICATION_WindowBarCreate(WINDOW_LAYER_ITEM *pWindowLayerItem, UINT16 *TitleName, WINDOW_CURRENT_POSITION *Position)
 {
     EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
 	UINT16 MenuBarHeight;
@@ -344,18 +349,33 @@ VOID L3_APPLICATION_MenuBarCreate(WINDOW_LAYER_ITEM *pWindowLayerItem, UINT16 *T
 	Color.Blue  = 192;
 	Color.Reserved = GRAPHICS_LAYER_MY_COMPUTER_WINDOW;
 	
-	L2_GRAPHICS_ButtonDraw2(pWindowLayerItem, Position->StartX, Position->StartY, pWindowLayerItem->WindowWidth - 6, Position->StartY + FontSize * 2);
-	
-	//L1_MEMORY_RectangleFill(pWindowLayerItem->pBuffer, Position->StartX, Position->StartY, pWindowLayerItem->WindowWidth - 6, Position->StartY + FontSize * 2, pWindowLayerItem->WindowWidth, Color); // line top
-	
-	//灰色背景，文件、编辑、查看、转到、收藏、帮助
-	int word[] = {L'文'};
-	GBK_Code Code = {0};
-	L1_LIBRARY_QueryAreaCodeBitCodeByChineseChar(word[0], &Code);
+	UINT16 CurrentX = Position->CurrentX;
+	UINT16 CurrentY = Position->CurrentY;
+	UINT16 CurrentWidth = Position->CurrentWidth;
+	UINT16 CurrentHeight = Position->CurrentHeight;
+	UINT16 Step = Position->Step;
+	UINT16 WindowWidth = pWindowLayerItem->WindowWidth;
 
-	L2_GRAPHICS_ChineseCharDraw12(pWindowLayerItem->pBuffer, Position->StartX + 4, Position->StartY, Code.AreaCode, Code.BitCode, WhiteColor, MyComputerWidth);
+	
+	//�����4����Ϊ���������4 * Step�����ر��߿�ռ��
+	for (UINT16 i = CurrentY; i <  CurrentY + MenuBarHeight; i++)
+	{
+		for (UINT16 j = CurrentX; j < CurrentWidth; j++)
+		{
+			pWindowLayerItem->pBuffer[(i * WindowWidth + j) * 4 + 0] = 231;
+			pWindowLayerItem->pBuffer[(i * WindowWidth + j) * 4 + 1] = 234;
+			pWindowLayerItem->pBuffer[(i * WindowWidth + j) * 4 + 2] = 237;
+		}
+	}
+	
+	Color.Red = WhiteColor.Red;
+	Color.Green =  WhiteColor.Green;
+	Color.Blue =  WhiteColor.Blue;
+	Color.Reserved = pWindowLayerItem->LayerID;
+	L1_MEMORY_RectangleFillInrease(pWindowLayerItem->pBuffer, 0, 0, Step, pWindowLayerItem->WindowHeight - 1, WindowWidth, Color); //left
 
-	Position->StartY += MenuBarHeight + 4;
+	Position->CurrentY += pWindowLayerItem->TitleBarHeight;
+	
 }
 
 
@@ -374,7 +394,7 @@ VOID L3_APPLICATION_ToolBarCreate(WINDOW_LAYER_ITEM *pWindowLayerItem, UINT16 *T
 	Color.Blue  = 192;
 	Color.Reserved = GRAPHICS_LAYER_MY_COMPUTER_WINDOW;
 	
-	L2_GRAPHICS_ButtonDraw2(pWindowLayerItem, Position->StartX, Position->StartY, pWindowLayerItem->WindowWidth - 6, Position->StartY + FontSize * 2);
+	L2_GRAPHICS_ButtonDraw2(pWindowLayerItem, Position->CurrentX, Position->CurrentY, pWindowLayerItem->WindowWidth - 6, Position->CurrentY + FontSize * 2);
 	
 	//L1_MEMORY_RectangleFill(pWindowLayerItem->pBuffer, Position->StartX, Position->StartY, pWindowLayerItem->WindowWidth - 6, Position->StartY + FontSize * 2, pWindowLayerItem->WindowWidth, Color); // line top
 	
@@ -383,9 +403,9 @@ VOID L3_APPLICATION_ToolBarCreate(WINDOW_LAYER_ITEM *pWindowLayerItem, UINT16 *T
 	GBK_Code Code = {0};
 	L1_LIBRARY_QueryAreaCodeBitCodeByChineseChar(word, &Code);
 
-	L2_GRAPHICS_ChineseCharDraw12(pWindowLayerItem->pBuffer, Position->StartX + 4, Position->StartY, Code.AreaCode, Code.BitCode, WhiteColor, MyComputerWidth);
+	L2_GRAPHICS_ChineseCharDraw12(pWindowLayerItem->pBuffer, Position->CurrentX + 4, Position->CurrentY, Code.AreaCode, Code.BitCode, WhiteColor, MyComputerWidth);
 
-	Position->StartY += MenuBarHeight + 4;
+	Position->CurrentY += MenuBarHeight + 4;
 }
 
 
@@ -404,7 +424,7 @@ VOID L3_APPLICATION_AddressBarCreate(WINDOW_LAYER_ITEM *pWindowLayerItem, UINT16
 	Color.Blue  = WhiteColor.Blue;
 	Color.Reserved = GRAPHICS_LAYER_MY_COMPUTER_WINDOW;
 	
-	L2_GRAPHICS_ButtonDraw2(pWindowLayerItem, Position->StartX + 5 * FontSize, Position->StartY, pWindowLayerItem->WindowWidth - 6, Position->StartY + FontSize * 2);
+	//L2_GRAPHICS_ButtonDraw2(pWindowLayerItem, Position->StartX + 5 * FontSize, Position->StartY, pWindowLayerItem->WindowWidth - 6, Position->StartY + FontSize * 2);
 	
 	//L1_MEMORY_RectangleFill(pWindowLayerItem->pBuffer, Position->StartX + 5 * FontSize, Position->StartY, pWindowLayerItem->WindowWidth - 6, Position->StartY + FontSize, pWindowLayerItem->WindowWidth, Color); // line top
 	
@@ -413,9 +433,9 @@ VOID L3_APPLICATION_AddressBarCreate(WINDOW_LAYER_ITEM *pWindowLayerItem, UINT16
 	GBK_Code Code = {0};
 	L1_LIBRARY_QueryAreaCodeBitCodeByChineseChar(word[0], &Code);
 
-	L2_GRAPHICS_ChineseCharDraw12(pWindowLayerItem->pBuffer, Position->StartX + 4, Position->StartY, Code.AreaCode, Code.BitCode, WhiteColor, MyComputerWidth);
+	//L2_GRAPHICS_ChineseCharDraw12(pWindowLayerItem->pBuffer, Position->StartX + 4, Position->StartY, Code.AreaCode, Code.BitCode, WhiteColor, MyComputerWidth);
 
-	Position->StartY += AddressBarHeight + 4;
+	//Position->StartY += AddressBarHeight + 4;
 }
 
 
@@ -461,27 +481,55 @@ VOID L3_APPLICATION_MyComputerWindow(UINT16 StartX, UINT16 StartY)
     y = 6;
 
 	UINT16 LayerID = GRAPHICS_LAYER_MY_COMPUTER_WINDOW;
-
-	WindowCurrentPosition.StartX = WindowLayers.item[LayerID].StartX;
-	WindowCurrentPosition.StartY = WindowLayers.item[LayerID].StartX;
-	WindowCurrentPosition.WindowHeight = WindowLayers.item[LayerID].WindowHeight;
-	WindowCurrentPosition.WindowWidth = WindowLayers.item[LayerID].WindowWidth;
-	WindowCurrentPosition.LayerID = WindowLayers.item[LayerID].LayerID;
-	WindowCurrentPosition.Step = WindowLayers.item[LayerID].Step;
-	WindowCurrentPosition.pBuffer = WindowLayers.item[LayerID].pBuffer;
-
-    
-    L3_WINDOW_Initial(&WindowLayers.item[LayerID], &WindowCurrentPosition);
+	UINT16 Step = WindowLayers.item[LayerID].Step;
+	
+	WindowLayers.item[LayerID].TitleBarHeight = 30;
 
 	UINT16 TitleChineseName[] = {46,50,21,36,21,71,36,52}; //我的电脑
     	
+	WindowCurrentPosition.LayerID = WindowLayers.item[LayerID].LayerID;
+	WindowCurrentPosition.Step = WindowLayers.item[LayerID].Step;
+	WindowCurrentPosition.pBuffer = WindowLayers.item[LayerID].pBuffer;
+	
+	WindowCurrentPosition.CurrentX = 0;
+	WindowCurrentPosition.CurrentY = 0;
+	WindowCurrentPosition.CurrentWidth = WindowLayers.item[LayerID].WindowWidth; //��߿�+�ұ߿��4��
+	WindowCurrentPosition.CurrentHeight = WindowLayers.item[LayerID].WindowHeight; //�ϱ߿�+�±߿��4��
+	
+    //����������ʼ��
+    L3_WINDOW_Initial(&WindowLayers.item[LayerID], &WindowCurrentPosition);
+
+	//��������ʼ��
 	//标题栏 TitleBar, 20 高度，宽度比窗口小些
 	L3_APPLICATION_TitleBarCreate(&WindowLayers.item[LayerID], TitleChineseName, &WindowCurrentPosition);
 	
+	
+	//������Ҫ��һ�������ڱ߿�
+	//white
+	Color.Red = 192;
+	Color.Green = 192;
+	Color.Blue = 192;
+	L1_MEMORY_RectangleFillInrease(WindowLayers.item[LayerID].pBuffer, Step, Step, Step, WindowLayers.item[LayerID].WindowHeight - 1 - 2 * Step, WindowLayers.item[LayerID].WindowWidth, Color); //left
+	L1_MEMORY_RectangleFillInrease(WindowLayers.item[LayerID].pBuffer, Step, Step, WindowLayers.item[LayerID].WindowWidth - 1 - 2 * Step,  Step, WindowLayers.item[LayerID].WindowWidth, Color); //Top
+	
+	//g.setColor(new Color(128,128,128));
+	Color.Red = WhiteColor.Red;
+	Color.Green = WhiteColor.Green;
+	Color.Blue = WhiteColor.Blue;
+	L1_MEMORY_RectangleFillInrease(WindowLayers.item[LayerID].pBuffer, Step, WindowLayers.item[LayerID].WindowHeight - 2 * Step - 1, WindowLayers.item[LayerID].WindowWidth - 2 * Step - 1, Step, WindowLayers.item[LayerID].WindowWidth, Color); //Down
+	L1_MEMORY_RectangleFillInrease(WindowLayers.item[LayerID].pBuffer, WindowLayers.item[LayerID].WindowWidth - 2 * Step - 1, Step, Step, WindowLayers.item[LayerID].WindowHeight - 2 * Step - 1, WindowLayers.item[LayerID].WindowWidth, Color); //Right
+				
+	WindowCurrentPosition.CurrentX += 2 * WindowCurrentPosition.Step;
+	WindowCurrentPosition.CurrentWidth += 2 * WindowCurrentPosition.Step;
+	
+	for (UINT16 i = 0; i < 4; i++)
+	{
+		L3_APPLICATION_WindowBarCreate(&WindowLayers.item[LayerID], TitleChineseName, &WindowCurrentPosition);
+
+		WindowCurrentPosition.CurrentY += 2 * Step;
+	}
+	
 	return;
-	//菜单栏, //灰色背景，文件、编辑、查看、转到、收藏、帮助
-	//UINT16 MenusChineseName[] = "文件";
-	L3_APPLICATION_MenuBarCreate(&WindowLayers.item[LayerID], TitleChineseName, &WindowCurrentPosition);
 
 	//工具栏
 	L3_APPLICATION_ToolBarCreate(&WindowLayers.item[LayerID], TitleChineseName, &WindowCurrentPosition);
