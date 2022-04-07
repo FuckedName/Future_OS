@@ -401,7 +401,7 @@ VOID L3_APPLICATION_WindowBarCreate(WINDOW_LAYER_ITEM *pWindowLayerItem, UINT16 
 		}
 	}
 	
-	TempWidth -= 2 * Step;
+	TempWidth -= 14 * Step;
 	
 	Color.Red = WhiteColor.Red;
 	Color.Green =  WhiteColor.Green;
@@ -412,11 +412,11 @@ VOID L3_APPLICATION_WindowBarCreate(WINDOW_LAYER_ITEM *pWindowLayerItem, UINT16 
 	CurrentX += Step;
 	CurrentY += Step;	
 	
-	Color.Red = 255;
-	Color.Green =  0;
-	Color.Blue =  0;	
+	Color.Red = 100;
+	Color.Green =  100;
+	Color.Blue =  100;	
 	L1_MEMORY_RectangleFillInrease(pWindowLayerItem->pBuffer, CurrentX, CurrentY + Position->CurrentBarHeight - Step, TempWidth, Step, WindowWidth, Color); //down
-	L1_MEMORY_RectangleFillInrease(pWindowLayerItem->pBuffer, TempWidth - Step, CurrentY, Step, Position->CurrentBarHeight, WindowWidth, Color); //right
+	L1_MEMORY_RectangleFillInrease(pWindowLayerItem->pBuffer, TempWidth + 4 * Step, CurrentY, Step, Position->CurrentBarHeight, WindowWidth, Color); //right
 
 	Position->CurrentY += pWindowLayerItem->TitleBarHeight + Step;
 	
@@ -587,7 +587,7 @@ VOID L3_APPLICATION_MyComputerWindow(UINT16 StartX, UINT16 StartY)
 	Color.Green = 50;
 	Color.Blue = 50;
 	L1_MEMORY_RectangleFillInrease(WindowLayers.item[LayerID].pBuffer, WindowCurrentPosition.CurrentX, WindowCurrentPosition.CurrentY, Step, WindowCurrentPosition.CurrentHeight, WindowLayers.item[LayerID].WindowWidth, Color); //left
-	L1_MEMORY_RectangleFillInrease(WindowLayers.item[LayerID].pBuffer, WindowCurrentPosition.CurrentX, WindowCurrentPosition.CurrentY, WindowCurrentPosition.CurrentWidth - 6 * Step,  Step, WindowLayers.item[LayerID].WindowWidth, Color); //Top
+	L1_MEMORY_RectangleFillInrease(WindowLayers.item[LayerID].pBuffer, WindowCurrentPosition.CurrentX, WindowCurrentPosition.CurrentY, WindowCurrentPosition.CurrentWidth - 4 * Step,  Step, WindowLayers.item[LayerID].WindowWidth, Color); //Top
 	
 	//white
 	Color.Red = WhiteColor.Red;
