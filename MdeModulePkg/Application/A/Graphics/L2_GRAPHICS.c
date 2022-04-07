@@ -616,7 +616,7 @@ void L1_MEMORY_RectangleFill(UINT8 *pBuffer,
 *
 *****************************************************************************/
 void L1_MEMORY_RectangleFillInrease(UINT8 *pBuffer,
-        UINTN x0, UINTN y0, UINTN x1, UINTN y1, 
+        UINTN x0, UINTN y0, UINTN IncreaseX, UINTN IncreaseY, 
         UINTN DestWidth,
         EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color)
 {    
@@ -626,7 +626,7 @@ void L1_MEMORY_RectangleFillInrease(UINT8 *pBuffer,
         return ;
     }
 
-	if ( x1 == 0 || 0 == y1)
+	if ( IncreaseX == 0 || 0 == IncreaseY)
 	{
 		return;
 	}
@@ -634,9 +634,9 @@ void L1_MEMORY_RectangleFillInrease(UINT8 *pBuffer,
 
     UINT32 i = 0;
     UINT32 j = 0;
-    for (j = y0; j <= y0 + y1; j++) 
+    for (j = y0; j <= y0 + IncreaseY; j++) 
     {
-        for (i = x0; i <= x0 + x1; i++) 
+        for (i = x0; i <= x0 + IncreaseX; i++) 
         {
             pBuffer[(j * DestWidth + i) * 4]     =  Color.Blue; //Blue   
             pBuffer[(j * DestWidth + i) * 4 + 1] =  Color.Green; //Green 
@@ -1484,7 +1484,7 @@ void L2_GRAPHICS_ParameterInit()
     WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].WindowWidth = MyComputerWidth;
     WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].WindowHeight = MyComputerHeight;
     WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].LayerID = GRAPHICS_LAYER_MY_COMPUTER_WINDOW;
-    WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].Step = 2;
+    WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].Step = 4;
     
     WindowLayers.LayerCount++;
 

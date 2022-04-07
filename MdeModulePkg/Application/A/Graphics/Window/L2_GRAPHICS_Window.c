@@ -61,6 +61,7 @@ typedef struct
 	UINT16 Step;
 	UINT16 CurrentX; //Current Bar StartX, a window may be have many Bars.
 	UINT16 CurrentY; //Current Bar StartY, a window may be have many Bars.
+	UINT16 CurrentBarHeight;
 }WINDOW_CURRENT_POSITION;
 
 
@@ -119,8 +120,8 @@ EFI_STATUS L3_WINDOW_ChineseCharsDraw(UINT8 *pBuffer, INT16 *ChineseChar, UINT16
 *****************************************************************************/
 EFI_STATUS L3_WINDOW_Initial(WINDOW_LAYER_ITEM *pWindowLayerItem, WINDOW_CURRENT_POSITION *Position)
 {	
-	UINT16 step = pWindowLayerItem->Step;
-	//×îÍâµÚÒ»²ãÏñËØ
+	UINT16 Step = pWindowLayerItem->Step;
+	
 	//g.setColor(new Color(191,191,191));
     EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
 	
@@ -130,62 +131,64 @@ EFI_STATUS L3_WINDOW_Initial(WINDOW_LAYER_ITEM *pWindowLayerItem, WINDOW_CURRENT
 	{
 		for (UINT16 width = 0; width < pWindowLayerItem->WindowWidth; width++)	
 		{
-			pBuffer[(height * pWindowLayerItem->WindowWidth + width) * 4 + 0] = 100;
-			pBuffer[(height * pWindowLayerItem->WindowWidth + width) * 4 + 1] = 100;
-			pBuffer[(height * pWindowLayerItem->WindowWidth + width) * 4 + 2] = 100;
+			pBuffer[(height * pWindowLayerItem->WindowWidth + width) * 4 + 0] = 188;
+			pBuffer[(height * pWindowLayerItem->WindowWidth + width) * 4 + 1] = 188;
+			pBuffer[(height * pWindowLayerItem->WindowWidth + width) * 4 + 2] = 188;
 			pBuffer[(height * pWindowLayerItem->WindowWidth + width) * 4 + 3] = pWindowLayerItem->LayerID;
 		}
 	}
 	
-	Color.Red = 226;
-	Color.Green = 230;
-	Color.Blue = 204;
+	//×îÍâµÚÒ»²ãÏñËØ
+	Color.Red = 100;
+	Color.Green = 100;
+	Color.Blue = 100;
 	Color.Reserved = pWindowLayerItem->LayerID;
-	L1_MEMORY_RectangleFillInrease(pBuffer, 0, 0, step, pWindowLayerItem->WindowHeight - 1, MyComputerWidth, Color); //left
-	L1_MEMORY_RectangleFillInrease(pBuffer, 0, 0, pWindowLayerItem->WindowWidth - 1, step, MyComputerWidth, Color); //top
+	L1_MEMORY_RectangleFillInrease(pBuffer, 0, 0, Step, pWindowLayerItem->WindowHeight - 1, pWindowLayerItem->WindowWidth, Color); //left
+	L1_MEMORY_RectangleFillInrease(pBuffer, 0, 0, pWindowLayerItem->WindowWidth - 1, Step, pWindowLayerItem->WindowWidth, Color); //top
 	
 	//Black
 	Color.Red = BlackColor.Red;
 	Color.Green = BlackColor.Green;
 	Color.Blue = BlackColor.Blue;
-	L1_MEMORY_RectangleFillInrease(pBuffer, pWindowLayerItem->WindowWidth - step - 1, 0, step, pWindowLayerItem->WindowHeight - 1, MyComputerWidth, Color); //right
-	L1_MEMORY_RectangleFillInrease(pBuffer, 0, pWindowLayerItem->WindowHeight - step - 1, pWindowLayerItem->WindowWidth - 1,  step, MyComputerWidth, Color); //down
+	L1_MEMORY_RectangleFillInrease(pBuffer, pWindowLayerItem->WindowWidth - Step - 1, 0, Step, pWindowLayerItem->WindowHeight - 1, pWindowLayerItem->WindowWidth, Color); //right
+	L1_MEMORY_RectangleFillInrease(pBuffer, 0, pWindowLayerItem->WindowHeight - Step - 1, pWindowLayerItem->WindowWidth - 1,  Step, pWindowLayerItem->WindowWidth, Color); //down
 		
 	//×îÍâµÚ¶ş²ãÏñËØ
 	//white
 	Color.Red = WhiteColor.Red;
 	Color.Green = WhiteColor.Green;
 	Color.Blue = WhiteColor.Blue;
-	L1_MEMORY_RectangleFillInrease(pWindowLayerItem->pBuffer, step, step, step, pWindowLayerItem->WindowHeight - 1 - 2 * step, pWindowLayerItem->WindowWidth, Color); //left
-	L1_MEMORY_RectangleFillInrease(pWindowLayerItem->pBuffer, step, step, pWindowLayerItem->WindowWidth - 1 - 2 * step,  step, pWindowLayerItem->WindowWidth, Color); //Top
+	L1_MEMORY_RectangleFillInrease(pWindowLayerItem->pBuffer, Step, Step, Step, pWindowLayerItem->WindowHeight - 1 - 2 * Step, pWindowLayerItem->WindowWidth, Color); //left
+	L1_MEMORY_RectangleFillInrease(pWindowLayerItem->pBuffer, Step, Step, pWindowLayerItem->WindowWidth - 1 - 2 * Step,  Step, pWindowLayerItem->WindowWidth, Color); //Top
 	
 	//g.setColor(new Color(128,128,128));
 	Color.Red = 128;
 	Color.Green = 128;
 	Color.Blue = 128;
-	L1_MEMORY_RectangleFillInrease(pWindowLayerItem->pBuffer, step, pWindowLayerItem->WindowHeight - 2 * step - 1, pWindowLayerItem->WindowWidth - 2 * step - 1, step, pWindowLayerItem->WindowWidth, Color); //Down
-	L1_MEMORY_RectangleFillInrease(pWindowLayerItem->pBuffer, pWindowLayerItem->WindowWidth - 2 * step - 1, step, step, pWindowLayerItem->WindowHeight - 2 * step - 1, pWindowLayerItem->WindowWidth, Color); //Right
+	L1_MEMORY_RectangleFillInrease(pWindowLayerItem->pBuffer, Step, pWindowLayerItem->WindowHeight - 2 * Step - 1, pWindowLayerItem->WindowWidth - 2 * Step - 1, Step, pWindowLayerItem->WindowWidth, Color); //Down
+	L1_MEMORY_RectangleFillInrease(pWindowLayerItem->pBuffer, pWindowLayerItem->WindowWidth - 2 * Step - 1, Step, Step, pWindowLayerItem->WindowHeight - 2 * Step - 1, pWindowLayerItem->WindowWidth, Color); //Right
 		
 	//×îÍâµÚÈı²ãÏñËØ
-	//step = windowParameter.DefaultStep * 2;
+	//Step = windowParameter.DefaultStep * 2;
 	//g.setColor(new Color(191,191,191));
 	Color.Red = 186;
 	Color.Green = 188;
 	Color.Blue = 189;
 
-	for (UINT16 i = 0; i < step * 2; i++)
+	for (UINT16 i = 0; i < Step * 2; i++)
 	{
-		L2_GRAPHICS_RectangleDraw(pWindowLayerItem->pBuffer, 2 * step + i, 2 * step + i, pWindowLayerItem->WindowWidth - 2 * step - 1 - i, pWindowLayerItem->WindowHeight - 2 * step - 1 - i, 0, Color, pWindowLayerItem->WindowWidth);
+		L2_GRAPHICS_RectangleDraw(pWindowLayerItem->pBuffer, 2 * Step + i, 2 * Step + i, pWindowLayerItem->WindowWidth - 2 * Step - 1 - i, pWindowLayerItem->WindowHeight - 2 * Step - 1 - i, 0, Color, pWindowLayerItem->WindowWidth);
 	}	
 
 	//Íâ±ß¿òÕ¼ÓÃµÄÏñËØ
-	Position->CurrentX += 4 * step;
-	Position->CurrentY += 4 * step;
+	Position->CurrentX += 4 * Step;
+	Position->CurrentY += 4 * Step;
 
-	Position->CurrentHeight -= 2 * 4 * step;
-	Position->CurrentWidth -= 4 * step;
+	Position->CurrentHeight -= 2 * 4 * Step;
+	Position->CurrentWidth -=  4 * Step;
 
 	return  EFI_SUCCESS;
+
 }
 
 
@@ -273,6 +276,11 @@ EFI_STATUS L3_WINDOW_Create(UINT8 *pBuffer, UINT8 *pParent, UINT16 Width, UINT16
     return EFI_SUCCESS;
 }
 
+VOID L3_APPLICATION_TitleBarCreate2(WINDOW_LAYER_ITEM *pWindowLayerItem, UINT16 *TitleName, WINDOW_CURRENT_POSITION *Position)
+{
+}
+
+
 VOID L3_APPLICATION_TitleBarCreate(WINDOW_LAYER_ITEM *pWindowLayerItem, UINT16 *TitleName, WINDOW_CURRENT_POSITION *Position)
 {
 	//è“è‰²èƒŒæ™¯ï¼Œæ ‡é¢˜â€œæˆ‘çš„ç”µè„‘â€ï¼Œé¢œè‰²ç™½è‰²ï¼Œå³è¾¹æ˜¯æœ€å°åŒ–ï¼Œæœ€å¤§åŒ–ï¼Œå…³é—­çª—å£    
@@ -314,67 +322,103 @@ VOID L3_APPLICATION_TitleBarCreate(WINDOW_LAYER_ITEM *pWindowLayerItem, UINT16 *
 	{
 		for (UINT16 j = CurrentX; j < CurrentWidth; j++)
 		{
-			pWindowLayerItem->pBuffer[(i * WindowWidth + j) * 4 + 0] = 168;
-			pWindowLayerItem->pBuffer[(i * WindowWidth + j) * 4 + 1] = 70;
-			pWindowLayerItem->pBuffer[(i * WindowWidth + j) * 4 + 2] = 9;
+			
+			pWindowLayerItem->pBuffer[(i * WindowWidth + j) * 4 + 0] = 168; //Blue
+			pWindowLayerItem->pBuffer[(i * WindowWidth + j) * 4 + 1] = 70; //Green
+			pWindowLayerItem->pBuffer[(i * WindowWidth + j) * 4 + 2] = 9; //Red
 		}
 	}
 	
 	//Step * 4æ˜¯çª—å£è¾¹æ¡†æ‰€å åƒç´ 
-	CurrentY += (TitleBarHeight - FontSize - 4 * Step) / 2 + Step * 4; 
+	CurrentY += (TitleBarHeight - FontSize - 4 * Step) / 2; 
 
-	Position->CurrentX += 4;
+	//ÒòÎªÏÔÊ¾ÎÒµÄµçÄÔ£¬ºº×ÖĞèÒªÏòÓÒÒÆ¶¯Ğ©
+	UINT16 TempX = Position->CurrentX + 4 * Step;
 
 	//ç°è‰²èƒŒæ™¯ï¼Œæ–‡ä»¶ã€ç¼–è¾‘ã€æŸ¥çœ‹ã€è½¬åˆ°ã€æ”¶è—ã€å¸®åŠ©
 	//è¿™é‡Œä¸èƒ½å†™æˆ{L'æˆ‘',L'æˆ‘',L'æˆ‘',L'æˆ‘'}ï¼Œå› ä¸ºEDK2ä»£ç é‡Œè¾¹ç¼–è¯‘é€‰é¡¹ä¸è®©ä¸€æ¬¡æ€§å®šä¹‰å¤šä¸ªï¼Œå¦‚æœå®šä¹‰ï¼Œéœ€è¦ä¿®æ”¹ç¼–è¯‘é€‰é¡¹ï¼Œä¿®æ”¹ç¼–è¯‘é€‰é¡¹åï¼ŒåŸæ¥EDK2ä»£ç ä¼šç¼–è¯‘ä¸é€šè¿‡ï¼Œæœ‰ç‚¹è›‹ç–¼ï¼Œ
 	int ChineseChars[5] = {L'æˆ‘', L'çš„', L'ç”µ', L'è„‘'};
-	L3_WINDOW_ChineseCharsDraw(pWindowLayerItem->pBuffer, ChineseChars, FontSize, &CurrentX, CurrentY, Color, pWindowLayerItem->WindowWidth);
-							
+	L3_WINDOW_ChineseCharsDraw(pWindowLayerItem->pBuffer, ChineseChars, FontSize, &TempX, CurrentY, Color, WindowWidth);
+
 	//±êÌâÀ¸Õ¼ÓÃµÄ¸ß¶È
-	Position->CurrentY += WindowLayers.item[LayerID].TitleBarHeight + 2 * Step;
+	Position->CurrentY += WindowLayers.item[LayerID].TitleBarHeight;
+
+	Color.Red = 189;
+	Color.Green = 195;
+	Color.Blue = 195;
+	L1_MEMORY_RectangleFillInrease(pWindowLayerItem->pBuffer, Position->CurrentX, Position->CurrentY, CurrentWidth - 4 * Step, Step, WindowWidth, Color); //a line
+							
+	//±êÌâÀ¸ÏÂ±ß»­ÁËÒ»ÌõÏß
+	Position->CurrentY += Step;
+
+	Position->CurrentHeight-= TitleBarHeight;
+
+	Position->CurrentHeight-= Step;
+
+	Position->CurrentWidth -= Step;
 	
 }
 
 
+/****************************************************************************
+*
+*  ÃèÊö: ´´½¨´°¿ÚµÄXXÀ¸£¬±ÈÈç¹¤¾ßÀ¸£¬²Ëµ¥À¸µÈµÈ
+*
+*  ²ÎÊı1£º xxxxx
+*  ²ÎÊı2£º xxxxx
+*  ²ÎÊın£º xxxxx
+*
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
+*
+*
+*****************************************************************************/
 VOID L3_APPLICATION_WindowBarCreate(WINDOW_LAYER_ITEM *pWindowLayerItem, UINT16 *TitleName, WINDOW_CURRENT_POSITION *Position)
 {
     EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
-	UINT16 MenuBarHeight;
 	UINT16 FontSize;
+	
+	UINT16 CurrentX = Position->CurrentX;
+	UINT16 CurrentY = Position->CurrentY;
+	UINT16 TempWidth = Position->CurrentWidth;
+	UINT16 Step = 2;
+	UINT16 WindowWidth = pWindowLayerItem->WindowWidth;
+	Position->CurrentBarHeight = pWindowLayerItem->TitleBarHeight;
 
-	MenuBarHeight = 30;
 	FontSize = 12;
 	Color.Red   = 192;
 	Color.Green = 192;
 	Color.Blue  = 192;
-	Color.Reserved = GRAPHICS_LAYER_MY_COMPUTER_WINDOW;
-	
-	UINT16 CurrentX = Position->CurrentX;
-	UINT16 CurrentY = Position->CurrentY;
-	UINT16 CurrentWidth = Position->CurrentWidth;
-	UINT16 CurrentHeight = Position->CurrentHeight;
-	UINT16 Step = Position->Step;
-	UINT16 WindowWidth = pWindowLayerItem->WindowWidth;
-
+	Color.Reserved = pWindowLayerItem->LayerID;
 	
 	//ÕâÀï¼õ4ÊÇÒòÎª´°¿Ú×îÍâ±ß4 * Step¸öÏñËØ±»±ß¿òÕ¼ÓÃ
-	for (UINT16 i = CurrentY; i <  CurrentY + MenuBarHeight; i++)
+	for (UINT16 i = CurrentY; i <  CurrentY + Position->CurrentBarHeight; i++)
 	{
-		for (UINT16 j = CurrentX; j < CurrentWidth; j++)
+		for (UINT16 j = CurrentX; j < TempWidth; j++)
 		{
-			pWindowLayerItem->pBuffer[(i * WindowWidth + j) * 4 + 0] = 231;
-			pWindowLayerItem->pBuffer[(i * WindowWidth + j) * 4 + 1] = 234;
-			pWindowLayerItem->pBuffer[(i * WindowWidth + j) * 4 + 2] = 237;
+			pWindowLayerItem->pBuffer[(i * WindowWidth + j) * 4 + 0] = 180;
+			pWindowLayerItem->pBuffer[(i * WindowWidth + j) * 4 + 1] = 180;
+			pWindowLayerItem->pBuffer[(i * WindowWidth + j) * 4 + 2] = 180;
 		}
 	}
 	
+	TempWidth -= 2 * Step;
+	
 	Color.Red = WhiteColor.Red;
 	Color.Green =  WhiteColor.Green;
-	Color.Blue =  WhiteColor.Blue;
-	Color.Reserved = pWindowLayerItem->LayerID;
-	L1_MEMORY_RectangleFillInrease(pWindowLayerItem->pBuffer, 0, 0, Step, pWindowLayerItem->WindowHeight - 1, WindowWidth, Color); //left
+	Color.Blue =  WhiteColor.Blue;	
+	L1_MEMORY_RectangleFillInrease(pWindowLayerItem->pBuffer, CurrentX, CurrentY, Step, Position->CurrentBarHeight, WindowWidth, Color); //left
+	L1_MEMORY_RectangleFillInrease(pWindowLayerItem->pBuffer, CurrentX, CurrentY, TempWidth, Step, WindowWidth, Color); //Top
 
-	Position->CurrentY += pWindowLayerItem->TitleBarHeight;
+	CurrentX += Step;
+	CurrentY += Step;	
+	
+	Color.Red = 255;
+	Color.Green =  0;
+	Color.Blue =  0;	
+	L1_MEMORY_RectangleFillInrease(pWindowLayerItem->pBuffer, CurrentX, CurrentY + Position->CurrentBarHeight - Step, TempWidth, Step, WindowWidth, Color); //down
+	L1_MEMORY_RectangleFillInrease(pWindowLayerItem->pBuffer, TempWidth - Step, CurrentY, Step, Position->CurrentBarHeight, WindowWidth, Color); //right
+
+	Position->CurrentY += pWindowLayerItem->TitleBarHeight + Step;
 	
 }
 
@@ -439,9 +483,37 @@ VOID L3_APPLICATION_AddressBarCreate(WINDOW_LAYER_ITEM *pWindowLayerItem, UINT16
 }
 
 
-VOID L3_APPLICATION_WorkSpaceCreate(UINT16 StartX, UINT16 StartY, UINT16 Model)
+VOID L3_APPLICATION_WorkSpaceCreate(WINDOW_LAYER_ITEM *pWindowLayerItem, UINT16 *TitleName, WINDOW_CURRENT_POSITION *Position)
 {
-	//å·¥ä½œç©ºé—´ï¼Œç™½è‰²èƒŒæ™¯ï¼Œé‡Œè¾¹æ”¾è¯»å–çš„æ–‡ä»¶å¤¹ã€æ–‡ä»¶é¡¹
+    EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
+	UINT16 FontSize;
+	
+	UINT16 CurrentX = Position->CurrentX;
+	UINT16 CurrentY = Position->CurrentY;
+	UINT16 TempWidth = Position->CurrentWidth;
+	UINT16 Step = 2;
+	UINT16 WindowWidth = pWindowLayerItem->WindowWidth;
+	Position->CurrentBarHeight = pWindowLayerItem->TitleBarHeight;
+	UINT8 *pBuffer = pWindowLayerItem->pBuffer;
+
+	FontSize = 12;
+	Color.Red   = 192;
+	Color.Green = 192;
+	Color.Blue  = 192;
+	Color.Reserved = pWindowLayerItem->LayerID;
+
+	//å·¥ä½œç©ºé—´ï¼Œç™½è‰²èƒŒæ™¯ï¼Œé‡Œè¾¹æ”¾è¯»å–çš„æ–‡ä»¶å¤¹ã€æ–‡ä»¶é¡¹	
+	for (UINT16 height = CurrentY + 2 * Step; height < Position->CurrentHeight - 2 * Step; height++)
+	{
+		for (UINT16 width = CurrentX + 2 * Step; width < Position->CurrentWidth - 2 * Step; width++)	
+		{
+			pBuffer[(height * WindowWidth + width) * 4 + 0] = WhiteColor.Red;
+			pBuffer[(height * WindowWidth + width) * 4 + 1] = WhiteColor.Green;
+			pBuffer[(height * WindowWidth + width) * 4 + 2] = WhiteColor.Blue;
+			pBuffer[(height * WindowWidth + width) * 4 + 3] = pWindowLayerItem->LayerID;
+		}
+	}
+	
 }
 
 VOID L3_APPLICATION_StateBarCreate(UINT16 StartX, UINT16 StartY, UINT16 Model)
@@ -488,46 +560,54 @@ VOID L3_APPLICATION_MyComputerWindow(UINT16 StartX, UINT16 StartY)
 	UINT16 TitleChineseName[] = {46,50,21,36,21,71,36,52}; //æˆ‘çš„ç”µè„‘
     	
 	WindowCurrentPosition.LayerID = WindowLayers.item[LayerID].LayerID;
-	WindowCurrentPosition.Step = WindowLayers.item[LayerID].Step;
 	WindowCurrentPosition.pBuffer = WindowLayers.item[LayerID].pBuffer;
 	
 	WindowCurrentPosition.CurrentX = 0;
 	WindowCurrentPosition.CurrentY = 0;
 	WindowCurrentPosition.CurrentWidth = WindowLayers.item[LayerID].WindowWidth; //×ó±ß¿ò+ÓÒ±ß¿ò¸÷4¸ö
 	WindowCurrentPosition.CurrentHeight = WindowLayers.item[LayerID].WindowHeight; //ÉÏ±ß¿ò+ÏÂ±ß¿ò¸÷4¸ö
+
+
 	
     //´°¿Ú×îÍâ²ã³õÊ¼»¯
     L3_WINDOW_Initial(&WindowLayers.item[LayerID], &WindowCurrentPosition);
+
+
 
 	//±êÌâÀ¸³õÊ¼»¯
 	//æ ‡é¢˜æ  TitleBar, 20 é«˜åº¦ï¼Œå®½åº¦æ¯”çª—å£å°äº›
 	L3_APPLICATION_TitleBarCreate(&WindowLayers.item[LayerID], TitleChineseName, &WindowCurrentPosition);
 	
+
+
 	
 	//ÕâÀïĞèÒª×öÒ»¸ö´°¿ÚÄÚ±ß¿ò
-	//white
-	Color.Red = 192;
-	Color.Green = 192;
-	Color.Blue = 192;
-	L1_MEMORY_RectangleFillInrease(WindowLayers.item[LayerID].pBuffer, Step, Step, Step, WindowLayers.item[LayerID].WindowHeight - 1 - 2 * Step, WindowLayers.item[LayerID].WindowWidth, Color); //left
-	L1_MEMORY_RectangleFillInrease(WindowLayers.item[LayerID].pBuffer, Step, Step, WindowLayers.item[LayerID].WindowWidth - 1 - 2 * Step,  Step, WindowLayers.item[LayerID].WindowWidth, Color); //Top
+	//gray
+	Color.Red = 50;
+	Color.Green = 50;
+	Color.Blue = 50;
+	L1_MEMORY_RectangleFillInrease(WindowLayers.item[LayerID].pBuffer, WindowCurrentPosition.CurrentX, WindowCurrentPosition.CurrentY, Step, WindowCurrentPosition.CurrentHeight, WindowLayers.item[LayerID].WindowWidth, Color); //left
+	L1_MEMORY_RectangleFillInrease(WindowLayers.item[LayerID].pBuffer, WindowCurrentPosition.CurrentX, WindowCurrentPosition.CurrentY, WindowCurrentPosition.CurrentWidth - 6 * Step,  Step, WindowLayers.item[LayerID].WindowWidth, Color); //Top
 	
-	//g.setColor(new Color(128,128,128));
+	//white
 	Color.Red = WhiteColor.Red;
 	Color.Green = WhiteColor.Green;
 	Color.Blue = WhiteColor.Blue;
-	L1_MEMORY_RectangleFillInrease(WindowLayers.item[LayerID].pBuffer, Step, WindowLayers.item[LayerID].WindowHeight - 2 * Step - 1, WindowLayers.item[LayerID].WindowWidth - 2 * Step - 1, Step, WindowLayers.item[LayerID].WindowWidth, Color); //Down
-	L1_MEMORY_RectangleFillInrease(WindowLayers.item[LayerID].pBuffer, WindowLayers.item[LayerID].WindowWidth - 2 * Step - 1, Step, Step, WindowLayers.item[LayerID].WindowHeight - 2 * Step - 1, WindowLayers.item[LayerID].WindowWidth, Color); //Right
+	L1_MEMORY_RectangleFillInrease(WindowLayers.item[LayerID].pBuffer, WindowCurrentPosition.CurrentX, WindowCurrentPosition.CurrentHeight - 1, WindowCurrentPosition.CurrentWidth, Step, WindowLayers.item[LayerID].WindowWidth, Color); //Down
+	L1_MEMORY_RectangleFillInrease(WindowLayers.item[LayerID].pBuffer, WindowCurrentPosition.CurrentWidth + Step, WindowCurrentPosition.CurrentY, Step, WindowCurrentPosition.CurrentHeight - 1, WindowLayers.item[LayerID].WindowWidth, Color); //Right
 				
-	WindowCurrentPosition.CurrentX += 2 * WindowCurrentPosition.Step;
-	WindowCurrentPosition.CurrentWidth += 2 * WindowCurrentPosition.Step;
+	WindowCurrentPosition.CurrentX += 2 * Step;
+	WindowCurrentPosition.CurrentY += 2 * Step;
+	//WindowCurrentPosition.CurrentWidth -= Step;
 	
 	for (UINT16 i = 0; i < 4; i++)
 	{
 		L3_APPLICATION_WindowBarCreate(&WindowLayers.item[LayerID], TitleChineseName, &WindowCurrentPosition);
 
-		WindowCurrentPosition.CurrentY += 2 * Step;
+		WindowCurrentPosition.CurrentY += Step;
 	}
+
+	L3_APPLICATION_WorkSpaceCreate(&WindowLayers.item[LayerID], TitleChineseName, &WindowCurrentPosition);
 	
 	return;
 
