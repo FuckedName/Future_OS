@@ -401,7 +401,7 @@ VOID L3_APPLICATION_WindowBarCreate(WINDOW_LAYER_ITEM *pWindowLayerItem, UINT16 
 		}
 	}
 	
-	TempWidth -= 14 * Step;
+	TempWidth -= 12 * Step;
 	
 	Color.Red = WhiteColor.Red;
 	Color.Green =  WhiteColor.Green;
@@ -416,7 +416,7 @@ VOID L3_APPLICATION_WindowBarCreate(WINDOW_LAYER_ITEM *pWindowLayerItem, UINT16 
 	Color.Green =  100;
 	Color.Blue =  100;	
 	L1_MEMORY_RectangleFillInrease(pWindowLayerItem->pBuffer, CurrentX, CurrentY + Position->CurrentBarHeight - Step, TempWidth, Step, WindowWidth, Color); //down
-	L1_MEMORY_RectangleFillInrease(pWindowLayerItem->pBuffer, TempWidth + 4 * Step, CurrentY, Step, Position->CurrentBarHeight, WindowWidth, Color); //right
+	L1_MEMORY_RectangleFillInrease(pWindowLayerItem->pBuffer, TempWidth + 14 * Step, CurrentY, Step, Position->CurrentBarHeight, WindowWidth, Color); //right
 
 	Position->CurrentY += pWindowLayerItem->TitleBarHeight + Step;
 	
