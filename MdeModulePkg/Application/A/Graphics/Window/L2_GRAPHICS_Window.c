@@ -92,12 +92,12 @@ WINDOW_LAYERS WindowLayers = {0};
 *  返回值： 成功：XXXX，失败：XXXXX
 *
 *****************************************************************************/
-EFI_STATUS L3_WINDOW_ChineseCharsDraw(UINT8 *pBuffer, INT16 *ChineseChar, UINT16 FontWidth, UINTN *StartX, UINTN StartY, EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color , UINT16 AreaWidth)
+EFI_STATUS L3_WINDOW_ChineseCharsDraw(UINT8 *pBuffer, INT16 *ChineseChar, UINT16 Count, UINT16 FontWidth, UINTN *StartX, UINTN StartY, EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color , UINT16 AreaWidth)
 {		
 	//int word3[] = {L'脑'};
 	GBK_Code Code = {0};
 	
-	for (int i = 0; i < sizeof(ChineseChar) / sizeof(INT16); i++)
+	for (int i = 0; i < Count; i++)
 	{
 		//这里的2 * i是因为汉字的占用两个字节，需要取第一个字节
 		L1_LIBRARY_QueryAreaCodeBitCodeByChineseChar(ChineseChar[2 * i], &Code); 	
@@ -277,11 +277,6 @@ EFI_STATUS L3_WINDOW_Create(UINT8 *pBuffer, UINT8 *pParent, UINT16 Width, UINT16
     return EFI_SUCCESS;
 }
 
-VOID L3_APPLICATION_TitleBarCreate2(WINDOW_LAYER_ITEM *pWindowLayerItem, UINT16 *TitleName, WINDOW_CURRENT_POSITION *Position)
-{
-}
-
-
 VOID L3_APPLICATION_TitleBarCreate(WINDOW_LAYER_ITEM *pWindowLayerItem, UINT16 *TitleName, WINDOW_CURRENT_POSITION *Position)
 {
 	//蓝色背景，标题“我的电脑”，颜色白色，右边是最小化，最大化，关闭窗口    
@@ -339,8 +334,14 @@ VOID L3_APPLICATION_TitleBarCreate(WINDOW_LAYER_ITEM *pWindowLayerItem, UINT16 *
 	//灰色背景，文件、编辑、查看、转到、收藏、帮助
 	//这里不能写成{L'我',L'我',L'我',L'我'}，因为EDK2代码里边编译选项不让一次性定义多个，如果定义，需要修改编译选项，修改编译选项后，原来EDK2代码会编译不通过，有点蛋疼，
 	
-	int ChineseChars[] = {L'我', L'的', L'电', L'脑'};
-	L3_WINDOW_ChineseCharsDraw(pWindowLayerItem->pBuffer, ChineseChars, FontSize, &TempX, CurrentY, Color, WindowWidth);
+	int ChineseChars[1][4] = 
+	{
+		{L'我', L'的', L'电', L'脑'},
+	};
+	
+	L3_WINDOW_ChineseCharsDraw(pWindowLayerItem->pBuffer, ChineseChars[0], sizeof(ChineseChars[0])/sizeof(int), FontSize, &TempX, CurrentY + 4 * Step, Color, WindowWidth);
+
+
 
 	//������ռ�õĸ߶�
 	Position->CurrentY += WindowLayers.item[LayerID].TitleBarHeight;
@@ -455,22 +456,22 @@ VOID L3_APPLICATION_MenuBarCreate(WINDOW_LAYER_ITEM *pWindowLayerItem, UINT16 *T
 
 	UINT16 TempY = (Position->CurrentBarHeight - FontSize) / 2;
 	
-	L3_WINDOW_ChineseCharsDraw(pWindowLayerItem->pBuffer, ChineseChars[0], FontSize, &TempX, CurrentY + TempY, Color, WindowWidth);
+	L3_WINDOW_ChineseCharsDraw(pWindowLayerItem->pBuffer, ChineseChars[0], sizeof(ChineseChars[0])/sizeof(int), FontSize, &TempX, CurrentY + TempY, Color, WindowWidth);
 
 	TempX += 2 * FontSize;
-	L3_WINDOW_ChineseCharsDraw(pWindowLayerItem->pBuffer, ChineseChars[1], FontSize, &TempX, CurrentY + TempY, Color, WindowWidth);
+	L3_WINDOW_ChineseCharsDraw(pWindowLayerItem->pBuffer, ChineseChars[1], sizeof(ChineseChars[1])/sizeof(int), FontSize, &TempX, CurrentY + TempY, Color, WindowWidth);
 	
 	TempX += 2 * FontSize;
-	L3_WINDOW_ChineseCharsDraw(pWindowLayerItem->pBuffer, ChineseChars[2], FontSize, &TempX, CurrentY + TempY, Color, WindowWidth);
+	L3_WINDOW_ChineseCharsDraw(pWindowLayerItem->pBuffer, ChineseChars[2], sizeof(ChineseChars[2])/sizeof(int), FontSize, &TempX, CurrentY + TempY, Color, WindowWidth);
 		
 	TempX += 2 * FontSize;
-	L3_WINDOW_ChineseCharsDraw(pWindowLayerItem->pBuffer, ChineseChars[3], FontSize, &TempX, CurrentY + TempY, Color, WindowWidth);
+	L3_WINDOW_ChineseCharsDraw(pWindowLayerItem->pBuffer, ChineseChars[3], sizeof(ChineseChars[3])/sizeof(int), FontSize, &TempX, CurrentY + TempY, Color, WindowWidth);
 		
 	TempX += 2 * FontSize;
-	L3_WINDOW_ChineseCharsDraw(pWindowLayerItem->pBuffer, ChineseChars[4], FontSize, &TempX, CurrentY + TempY, Color, WindowWidth);
+	L3_WINDOW_ChineseCharsDraw(pWindowLayerItem->pBuffer, ChineseChars[4], sizeof(ChineseChars[4])/sizeof(int), FontSize, &TempX, CurrentY + TempY, Color, WindowWidth);
 		
 	TempX += 2 * FontSize;
-	L3_WINDOW_ChineseCharsDraw(pWindowLayerItem->pBuffer, ChineseChars[5], FontSize, &TempX, CurrentY + TempY, Color, WindowWidth);
+	L3_WINDOW_ChineseCharsDraw(pWindowLayerItem->pBuffer, ChineseChars[5], sizeof(ChineseChars[5])/sizeof(int), FontSize, &TempX, CurrentY + TempY, Color, WindowWidth);
 	Position->CurrentY += Step;
 }
 
@@ -858,33 +859,6 @@ VOID L3_APPLICATION_MyComputerWindow(UINT16 StartX, UINT16 StartY)
     */
 }
 
-/****************************************************************************
-*
-*  描述:   创建我的电脑窗口
-*
-*  参数1： xxxxx
-*  参数2： xxxxx
-*  参数n： xxxxx
-*
-*  返回值： 成功：XXXX，失败：XXXXX
-*
-*****************************************************************************/
-VOID L3_APPLICATION_MyComputerWindowNew(UINT16 StartX, UINT16 StartY)
-{
-    UINT8 *pParent;
-    UINT16 Type;
-    CHAR8 *pWindowTitle;
-    EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
-    
-    Color.Blue  = 0xff;
-    Color.Red   = 0xff;
-    Color.Green = 0xff;
-    Color.Reserved = GRAPHICS_LAYER_MY_COMPUTER_NEW_WINDOW;
-    
-    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: MyComputerWidth: %d \n", __LINE__, MyComputerWidth);
-	
-    
-}
 
 
 
