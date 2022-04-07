@@ -96,7 +96,8 @@ EFI_STATUS L3_WINDOW_ChineseCharsDraw(UINT8 *pBuffer, INT16 *ChineseChar, UINT16
 {		
 	//int word3[] = {L'脑'};
 	GBK_Code Code = {0};
-	for (int i = 0; i < sizeof(ChineseChar) / (2 * sizeof(INT16)); i++)
+	
+	for (int i = 0; i < sizeof(ChineseChar) / sizeof(INT16); i++)
 	{
 		//这里的2 * i是因为汉字的占用两个字节，需要取第一个字节
 		L1_LIBRARY_QueryAreaCodeBitCodeByChineseChar(ChineseChar[2 * i], &Code); 	
@@ -337,7 +338,8 @@ VOID L3_APPLICATION_TitleBarCreate(WINDOW_LAYER_ITEM *pWindowLayerItem, UINT16 *
 
 	//灰色背景，文件、编辑、查看、转到、收藏、帮助
 	//这里不能写成{L'我',L'我',L'我',L'我'}，因为EDK2代码里边编译选项不让一次性定义多个，如果定义，需要修改编译选项，修改编译选项后，原来EDK2代码会编译不通过，有点蛋疼，
-	int ChineseChars[5] = {L'我', L'的', L'电', L'脑'};
+	
+	int ChineseChars[] = {L'我', L'的', L'电', L'脑'};
 	L3_WINDOW_ChineseCharsDraw(pWindowLayerItem->pBuffer, ChineseChars, FontSize, &TempX, CurrentY, Color, WindowWidth);
 
 	//������ռ�õĸ߶�
@@ -431,7 +433,7 @@ VOID L3_APPLICATION_MenuBarCreate(WINDOW_LAYER_ITEM *pWindowLayerItem, UINT16 *T
 	UINT16 CurrentHeight = Position->CurrentHeight;
 	UINT16 WindowWidth = pWindowLayerItem->WindowWidth;
 	UINT16 FontSize = 12;
-	UINT16 TempX = CurrentX;
+	UINT16 TempX = CurrentX + FontSize;
     EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
 	
 	Color.Red = BlackColor.Red;
