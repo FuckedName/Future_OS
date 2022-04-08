@@ -339,7 +339,7 @@ VOID L3_APPLICATION_TitleBarCreate(WINDOW_LAYER_ITEM *pWindowLayerItem, UINT16 *
 		{L'我', L'的', L'电', L'脑'},
 	};
 	
-	L3_WINDOW_ChineseCharsDraw(pWindowLayerItem->pBuffer, ChineseChars[0], sizeof(ChineseChars[0])/sizeof(int), FontSize, &TempX, CurrentY + 4 * Step, Color, WindowWidth);
+	L3_WINDOW_ChineseCharsDraw(pWindowLayerItem->pBuffer, ChineseChars[0], sizeof(ChineseChars[0])/sizeof(int), FontSize, &TempX, CurrentY + 2 * Step, Color, WindowWidth);
 
 
 
@@ -455,23 +455,15 @@ VOID L3_APPLICATION_MenuBarCreate(WINDOW_LAYER_ITEM *pWindowLayerItem, UINT16 *T
 	};
 
 	UINT16 TempY = (Position->CurrentBarHeight - FontSize) / 2;
-	
-	L3_WINDOW_ChineseCharsDraw(pWindowLayerItem->pBuffer, ChineseChars[0], sizeof(ChineseChars[0])/sizeof(int), FontSize, &TempX, CurrentY + TempY, Color, WindowWidth);
 
-	TempX += 2 * FontSize;
-	L3_WINDOW_ChineseCharsDraw(pWindowLayerItem->pBuffer, ChineseChars[1], sizeof(ChineseChars[1])/sizeof(int), FontSize, &TempX, CurrentY + TempY, Color, WindowWidth);
 	
-	TempX += 2 * FontSize;
-	L3_WINDOW_ChineseCharsDraw(pWindowLayerItem->pBuffer, ChineseChars[2], sizeof(ChineseChars[2])/sizeof(int), FontSize, &TempX, CurrentY + TempY, Color, WindowWidth);
-		
-	TempX += 2 * FontSize;
-	L3_WINDOW_ChineseCharsDraw(pWindowLayerItem->pBuffer, ChineseChars[3], sizeof(ChineseChars[3])/sizeof(int), FontSize, &TempX, CurrentY + TempY, Color, WindowWidth);
-		
-	TempX += 2 * FontSize;
-	L3_WINDOW_ChineseCharsDraw(pWindowLayerItem->pBuffer, ChineseChars[4], sizeof(ChineseChars[4])/sizeof(int), FontSize, &TempX, CurrentY + TempY, Color, WindowWidth);
-		
-	TempX += 2 * FontSize;
-	L3_WINDOW_ChineseCharsDraw(pWindowLayerItem->pBuffer, ChineseChars[5], sizeof(ChineseChars[5])/sizeof(int), FontSize, &TempX, CurrentY + TempY, Color, WindowWidth);
+	for (UINT16 i = 0; i < sizeof(ChineseChars)/sizeof(ChineseChars[0]); i++)
+	{
+		L3_WINDOW_ChineseCharsDraw(pWindowLayerItem->pBuffer, ChineseChars[i], sizeof(ChineseChars[0])/sizeof(int), FontSize, &TempX, CurrentY + TempY, Color, WindowWidth);
+
+		TempX += 2 * FontSize;
+	}
+
 	Position->CurrentY += Step;
 }
 
@@ -480,20 +472,55 @@ VOID L3_APPLICATION_ToolBarCreate(WINDOW_LAYER_ITEM *pWindowLayerItem, UINT16 *T
 {
 	UINT16 Step = 2;
 	
+
+	
+	UINT16 CurrentX = Position->CurrentX;
+	UINT16 CurrentY = Position->CurrentY;
+	UINT16 CurrentWidth = Position->CurrentWidth;
+	UINT16 CurrentHeight = Position->CurrentHeight;
+	UINT16 WindowWidth = pWindowLayerItem->WindowWidth;
+	UINT16 FontSize = 12;
+	UINT16 TempX = CurrentX + FontSize;
+    EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
+	
+	Color.Red = BlackColor.Red;
+	Color.Red = BlackColor.Red;
+	Color.Red = BlackColor.Red;
+	
 	L3_APPLICATION_WindowBarCreate(pWindowLayerItem, NULL, Position);
 
+	//int ChineseChars[5] = {L'文件、编辑、查看、转到、收藏、帮助', L'的', L'电', L'脑'};
+	int ChineseChars[10][2] = 
+	{
+		{L'后', L'退'},
+		{L'前', L'进'},
+		{L'向', L'上'},
+		{L'剪', L'切'},
+		{L'复', L'制'},
+		{L'粘', L'贴'},
+		{L'撤', L'消'},
+		{L'删', L'除'},
+		{L'属', L'性'},
+		{L'查', L'看'}
+	};
+
+	UINT16 TempY = (Position->CurrentBarHeight - FontSize) / 2;
+
+	for (UINT16 i = 0; i < sizeof(ChineseChars)/sizeof(ChineseChars[0]); i++)
+	{
+		L3_WINDOW_ChineseCharsDraw(pWindowLayerItem->pBuffer, ChineseChars[i], sizeof(ChineseChars[0])/sizeof(int), FontSize, &TempX, CurrentY + TempY, Color, WindowWidth);
+
+		TempX += 2 * FontSize;
+	}
+
 	Position->CurrentY += Step;
+	
 }
 
 
 VOID L3_APPLICATION_AddressBarCreate(WINDOW_LAYER_ITEM *pWindowLayerItem, UINT16 *TitleName, WINDOW_CURRENT_POSITION *Position)
 {
 	//地址：空白区域，可点击编辑
-	
-	UINT16 Step = 2;
-	
-	L3_APPLICATION_WindowBarCreate(pWindowLayerItem, NULL, Position);
-
 	
 	EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
 	UINT16 AddressBarHeight;
@@ -503,16 +530,21 @@ VOID L3_APPLICATION_AddressBarCreate(WINDOW_LAYER_ITEM *pWindowLayerItem, UINT16
 	UINT16 CurrentWidth = Position->CurrentWidth;
 	UINT16 CurrentHeight = Position->CurrentHeight;
 	UINT16 WindowWidth = pWindowLayerItem->WindowWidth;
+	UINT16 Step = 2;
+	
+	L3_APPLICATION_WindowBarCreate(pWindowLayerItem, NULL, Position);
+
+	
 
 	Position->CurrentY += Step;
 
 	AddressBarHeight = 20;
 	FontSize = 12;
 	UINT16 TempX = CurrentX + FontSize;
-	Color.Red   = WhiteColor.Red;
-	Color.Green = WhiteColor.Green;
-	Color.Blue  = WhiteColor.Blue;
-	Color.Reserved = GRAPHICS_LAYER_MY_COMPUTER_WINDOW;
+	Color.Red   = BlackColor.Red;
+	Color.Green = BlackColor.Green;
+	Color.Blue  = BlackColor.Blue;
+	Color.Reserved = pWindowLayerItem->LayerID;
 	UINT16 TempY = (Position->CurrentBarHeight - FontSize) / 2;
 	
 	//L2_GRAPHICS_ButtonDraw2(pWindowLayerItem, Position->StartX + 5 * FontSize, Position->StartY, pWindowLayerItem->WindowWidth - 6, Position->StartY + FontSize * 2);
@@ -525,12 +557,21 @@ VOID L3_APPLICATION_AddressBarCreate(WINDOW_LAYER_ITEM *pWindowLayerItem, UINT16
 		{L'地', L'址'},
 		{L'刷', L'新'},
 	};
-	TempX += 2 * FontSize;
+	
 	L3_WINDOW_ChineseCharsDraw(pWindowLayerItem->pBuffer, ChineseChars[0], sizeof(ChineseChars[0])/sizeof(ChineseChars[0][0]), FontSize, &TempX, CurrentY + TempY, Color, WindowWidth);
 		
 	TempX = Position->CurrentWidth -  4 * FontSize;
 	L3_WINDOW_ChineseCharsDraw(pWindowLayerItem->pBuffer, ChineseChars[1], sizeof(ChineseChars[1])/sizeof(ChineseChars[1][0]), FontSize, &TempX, CurrentY + TempY, Color, WindowWidth);
 	//L2_GRAPHICS_ChineseCharDraw12(pWindowLayerItem->pBuffer, Position->StartX + 4, Position->StartY, Code.AreaCode, Code.BitCode, WhiteColor, MyComputerWidth);
+
+	Color.Red   = WhiteColor.Red;
+	Color.Green = WhiteColor.Green;
+	Color.Blue  = WhiteColor.Blue;
+
+	L1_MEMORY_RectangleFillInrease(pWindowLayerItem->pBuffer, CurrentX + 6 * FontSize, CurrentY + TempY , CurrentWidth - 12 * FontSize,  2 * FontSize, pWindowLayerItem->WindowWidth, Color); //Top
+
+    L2_DEBUG_Print3(CurrentX + 6 * FontSize, CurrentY + TempY, WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW], 
+                "/OS/XXX.efi\n");
 
 	//Position->StartY += AddressBarHeight + 4;
 }
@@ -593,6 +634,7 @@ VOID L3_APPLICATION_MyComputerWindow(UINT16 StartX, UINT16 StartY)
     CHAR8 *pWindowTitle;
     EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
 	WINDOW_CURRENT_POSITION WindowCurrentPosition;
+	UINT16 FontSize = 12;
     
     Color.Blue  = 0xff;
     Color.Red   = 0xff;
@@ -660,21 +702,7 @@ VOID L3_APPLICATION_MyComputerWindow(UINT16 StartX, UINT16 StartY)
 	L3_APPLICATION_AddressBarCreate(&WindowLayers.item[LayerID], TitleChineseName, &WindowCurrentPosition);
 	
 	L3_APPLICATION_WorkSpaceCreate(&WindowLayers.item[LayerID], TitleChineseName, &WindowCurrentPosition);
-	
-	return;
-	
-
-	L3_APPLICATION_AddressBarCreate(&WindowLayers.item[LayerID], TitleChineseName, &WindowCurrentPosition);
-
-
-	
-	//工作区
-	//L3_APPLICATION_WorkSpaceCreate();	
-
-	//状态栏
-	//L3_APPLICATION_StateBarCreate();
-
-	//窗口边框
+			
 
     UINT8 *pBuffer = pMyComputerBuffer;
 
@@ -695,19 +723,6 @@ VOID L3_APPLICATION_MyComputerWindow(UINT16 StartX, UINT16 StartY)
 
     L1_GRAPHICS_ZoomImage(pSystemIconFolderBuffer, WidthNew, HeightNew, pSystemIconTempBuffer2, SYSTEM_ICON_WIDTH, SYSTEM_ICON_HEIGHT);
     
-    //WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].StartX = StartX;
-    //WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].StartY = StartY;
-    /*
-    for (int j = 0; j < HeightNew; j++)
-    {
-        for (int k = 0; k < WidthNew; k++)
-        {
-            pBuffer[((30 + j) * MyComputerWidth + 100 + k) * 4 ]     = pSystemIconFolderBuffer[((HeightNew - j) * WidthNew + k) * 3 ];
-            pBuffer[((30 + j) * MyComputerWidth + 100 + k) * 4 + 1 ] = pSystemIconFolderBuffer[((HeightNew - j) * WidthNew + k) * 3 + 1 ];
-            pBuffer[((30 + j) * MyComputerWidth + 100 + k) * 4 + 2 ] = pSystemIconFolderBuffer[((HeightNew - j) * WidthNew + k) * 3 + 2 ];
-        }
-    }*/
-
 
     //Skip bmp header.
     for (UINT32 i = 0; i < 384000; i++)
@@ -715,24 +730,11 @@ VOID L3_APPLICATION_MyComputerWindow(UINT16 StartX, UINT16 StartY)
 
     L1_GRAPHICS_ZoomImage(pSystemIconTextBuffer, WidthNew, HeightNew, pSystemIconTempBuffer2, SYSTEM_ICON_WIDTH, SYSTEM_ICON_HEIGHT);
     
-    //WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].StartX = StartX;
-    //WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].StartY = StartY;
-    /*
-    for (int j = 0; j < HeightNew; j++)
-    {
-        for (int k = 0; k < WidthNew; k++)
-        {
-            pBuffer[((130 + j) * MyComputerWidth + 100 + k) * 4 ]     = pSystemIconTextBuffer[((HeightNew - j) * WidthNew + k) * 3 ];
-            pBuffer[((130 + j) * MyComputerWidth + 100 + k) * 4 + 1 ] = pSystemIconTextBuffer[((HeightNew - j) * WidthNew + k) * 3 + 1 ];
-            pBuffer[((130 + j) * MyComputerWidth + 100 + k) * 4 + 2 ] = pSystemIconTextBuffer[((HeightNew - j) * WidthNew + k) * 3 + 2 ];
-        }
-    }
-    */
 
     for (UINT16 i = 0 ; i < PartitionCount; i++)
     {
-        x = 500;
-        y = i * 18 + 16 * 2;        
+        x = WindowCurrentPosition.CurrentX + 2 * FontSize;
+        y = WindowCurrentPosition.CurrentY + 2 * FontSize + i * 18 + 16 * 2;        
 
         if (device[i].DeviceType == 2)
         {
@@ -834,31 +836,6 @@ VOID L3_APPLICATION_MyComputerWindow(UINT16 StartX, UINT16 StartY)
         
     }
     
-    y += 16;
-    y += 16;
-    
-    x = 100;
-    //3658
-    //内
-    //2070
-    //存
-    /*
-    L2_GRAPHICS_ChineseCharDraw(pBuffer, x, y,          (36 - 1 ) * 94 + 58 - 1, Color, MyComputerWidth);  
-    x += 16;
-    
-    L2_GRAPHICS_ChineseCharDraw(pBuffer, x, y,          (20 - 1 ) * 94 + 70 - 1, Color, MyComputerWidth);  
-    x += 16;
-    
-    // Get memory infomation
-    //x = 0;
-    // Note: the other class memory can not use
-    MemorySize = MemorySize * 4;
-    MemorySize = MemorySize / (1024 * 1024);
-    CHAR8 buf[7] = {0};
-    char sizePostfix2[3] = "GB";
-    L2_DEBUG_Print3(x, y, WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW], "%a%a", L1_STRING_FloatToString(MemorySize, 3, buf), sizePostfix2);
-    x += 5 * 8;
-    */
 }
 
 

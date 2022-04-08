@@ -3385,9 +3385,9 @@ VOID L2_STORE_FolderItemsPrint()
 	UINT16 Height = WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].WindowHeight;
 
 	// Clear old display items
-	for (UINT16 i = 200; i < Height; i++)
+	for (UINT16 i = 400; i < Height; i++)
     {
-        for (UINT16 j = 130; j < Width; j++)
+        for (UINT16 j = 430; j < Width; j++)
         {
             pMyComputerBuffer[(i * Width + j) * 4]     = 0xff;
             pMyComputerBuffer[(i * Width + j) * 4 + 1] = 0xff;
@@ -3405,7 +3405,7 @@ VOID L2_STORE_FolderItemsPrint()
         char name[13] = {0};
         x = 130;
 
-        y = valid_count * (HeightNew + 16 * 2) + 200;
+        y = valid_count * (HeightNew + 16 * 2) + 300;
 
         for (UINT8 i = 0; i < 12; i++)
             name[i] = '\0';
