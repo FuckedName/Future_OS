@@ -1,5 +1,5 @@
 /*
- * Copyright 1999-2016 The OpenSSL Project Authors. All Rights Reserved.
+ * Copyright 1999-2018 The OpenSSL Project Authors. All Rights Reserved.
  *
  * Licensed under the OpenSSL license (the "License").  You may not use
  * this file except in compliance with the License.  You can obtain a copy
@@ -10,7 +10,7 @@
 #include <stdio.h>
 #include "internal/cryptlib.h"
 #include <openssl/pkcs12.h>
-#include "p12_lcl.h"
+#include "p12_local.h"
 
 /* Initialise a PKCS12 structure to take data */
 
@@ -22,7 +22,8 @@ PKCS12 *PKCS12_init(int mode)
         PKCS12err(PKCS12_F_PKCS12_INIT, ERR_R_MALLOC_FAILURE);
         return NULL;
     }
-    ASN1_INTEGER_set(pkcs12->version, 3);
+    if (!ASN1_INTEGER_set(pkcs12->version, 3))
+        goto err;
     pkcs12->authsafes->type = OBJ_nid2obj(mode);
     switch (mode) {
     case NID_pkcs7_data:

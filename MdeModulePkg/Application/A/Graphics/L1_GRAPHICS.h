@@ -42,7 +42,7 @@ typedef enum
     GRAPHICS_LAYER_MAX
 }GRAPHICS_LAYER_ID;
 
-double L1_GRAPHICS_Bilinear(double a, double blue, int uv, int u1v, int uv1, int u1v1);
+unsigned char L1_GRAPHICS_Bilinear(double a, double blue, int uv, int u1v, int uv1, int u1v1);
 
 void L1_GRAPHICS_ZoomImage(UINT8* pDest, unsigned int DestWidth, unsigned int DestHeight, UINT8* pSource, unsigned int SourceWidth, unsigned int SourceHeight );
 

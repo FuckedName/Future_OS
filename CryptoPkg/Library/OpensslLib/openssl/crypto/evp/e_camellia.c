@@ -1,5 +1,5 @@
 /*
- * Copyright 2006-2016 The OpenSSL Project Authors. All Rights Reserved.
+ * Copyright 2006-2021 The OpenSSL Project Authors. All Rights Reserved.
  *
  * Licensed under the OpenSSL license (the "License").  You may not use
  * this file except in compliance with the License.  You can obtain a copy
@@ -17,8 +17,8 @@ NON_EMPTY_TRANSLATION_UNIT
 # include <string.h>
 # include <assert.h>
 # include <openssl/camellia.h>
-# include "internal/evp_int.h"
-# include "modes_lcl.h"
+# include "crypto/evp.h"
+# include "modes_local.h"
 
 static int camellia_init_key(EVP_CIPHER_CTX *ctx, const unsigned char *key,
                              const unsigned char *iv, int enc);
@@ -55,16 +55,16 @@ void cmll_t4_decrypt(const unsigned char *in, unsigned char *out,
 
 void cmll128_t4_cbc_encrypt(const unsigned char *in, unsigned char *out,
                             size_t len, const CAMELLIA_KEY *key,
-                            unsigned char *ivec);
+                            unsigned char *ivec, int /*unused*/);
 void cmll128_t4_cbc_decrypt(const unsigned char *in, unsigned char *out,
                             size_t len, const CAMELLIA_KEY *key,
-                            unsigned char *ivec);
+                            unsigned char *ivec, int /*unused*/);
 void cmll256_t4_cbc_encrypt(const unsigned char *in, unsigned char *out,
                             size_t len, const CAMELLIA_KEY *key,
-                            unsigned char *ivec);
+                            unsigned char *ivec, int /*unused*/);
 void cmll256_t4_cbc_decrypt(const unsigned char *in, unsigned char *out,
                             size_t len, const CAMELLIA_KEY *key,
-                            unsigned char *ivec);
+                            unsigned char *ivec, int /*unused*/);
 void cmll128_t4_ctr32_encrypt(const unsigned char *in, unsigned char *out,
                               size_t blocks, const CAMELLIA_KEY *key,
                               unsigned char *ivec);
@@ -325,8 +325,10 @@ static int camellia_cfb1_cipher(EVP_CIPHER_CTX *ctx, unsigned char *out,
         int num = EVP_CIPHER_CTX_num(ctx);
         CRYPTO_cfb128_1_encrypt(in, out, MAXBITCHUNK * 8, &dat->ks,
                                 EVP_CIPHER_CTX_iv_noconst(ctx), &num, EVP_CIPHER_CTX_encrypting(ctx), dat->block);
-        len -= MAXBITCHUNK;
         EVP_CIPHER_CTX_set_num(ctx, num);
+        len -= MAXBITCHUNK;
+        out += MAXBITCHUNK;
+        in  += MAXBITCHUNK;
     }
     if (len) {
         int num = EVP_CIPHER_CTX_num(ctx);

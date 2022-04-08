@@ -1,5 +1,5 @@
 /*
- * Copyright 2000-2016 The OpenSSL Project Authors. All Rights Reserved.
+ * Copyright 2000-2020 The OpenSSL Project Authors. All Rights Reserved.
  *
  * Licensed under the OpenSSL license (the "License").  You may not use
  * this file except in compliance with the License.  You can obtain a copy
@@ -15,11 +15,21 @@
 #include <openssl/buffer.h>
 #include <openssl/err.h>
 #include "internal/numbers.h"
-#include "asn1_locl.h"
+#include "asn1_local.h"
+
+
+/*
+ * Constructed types with a recursive definition (such as can be found in PKCS7)
+ * could eventually exceed the stack given malicious input with excessive
+ * recursion. Therefore we limit the stack depth. This is the maximum number of
+ * recursive invocations of asn1_item_embed_d2i().
+ */
+#define ASN1_MAX_CONSTRUCTED_NEST 30
 
 static int asn1_item_embed_d2i(ASN1_VALUE **pval, const unsigned char **in,
                                long len, const ASN1_ITEM *it,
-                               int tag, int aclass, char opt, ASN1_TLC *ctx);
+                               int tag, int aclass, char opt, ASN1_TLC *ctx,
+                               int depth);
 
 static int asn1_check_eoc(const unsigned char **in, long len);
 static int asn1_find_end(const unsigned char **in, long len, char inf);
@@ -37,11 +47,11 @@ static int asn1_check_tlen(long *olen, int *otag, unsigned char *oclass,
 static int asn1_template_ex_d2i(ASN1_VALUE **pval,
                                 const unsigned char **in, long len,
                                 const ASN1_TEMPLATE *tt, char opt,
-                                ASN1_TLC *ctx);
+                                ASN1_TLC *ctx, int depth);
 static int asn1_template_noexp_d2i(ASN1_VALUE **val,
                                    const unsigned char **in, long len,
                                    const ASN1_TEMPLATE *tt, char opt,
-                                   ASN1_TLC *ctx);
+                                   ASN1_TLC *ctx, int depth);
 static int asn1_d2i_ex_primitive(ASN1_VALUE **pval,
                                  const unsigned char **in, long len,
                                  const ASN1_ITEM *it,
@@ -111,7 +121,7 @@ int ASN1_item_ex_d2i(ASN1_VALUE **pval, const unsigned char **in, long len,
                      int tag, int aclass, char opt, ASN1_TLC *ctx)
 {
     int rv;
-    rv = asn1_item_embed_d2i(pval, in, len, it, tag, aclass, opt, ctx);
+    rv = asn1_item_embed_d2i(pval, in, len, it, tag, aclass, opt, ctx, 0);
     if (rv <= 0)
         ASN1_item_ex_free(pval, it);
     return rv;
@@ -124,7 +134,8 @@ int ASN1_item_ex_d2i(ASN1_VALUE **pval, const unsigned char **in, long len,
 
 static int asn1_item_embed_d2i(ASN1_VALUE **pval, const unsigned char **in,
                                long len, const ASN1_ITEM *it,
-                               int tag, int aclass, char opt, ASN1_TLC *ctx)
+                               int tag, int aclass, char opt, ASN1_TLC *ctx,
+                               int depth)
 {
     const ASN1_TEMPLATE *tt, *errtt = NULL;
     const ASN1_EXTERN_FUNCS *ef;
@@ -145,6 +156,11 @@ static int asn1_item_embed_d2i(ASN1_VALUE **pval, const unsigned char **in,
     else
         asn1_cb = 0;
 
+    if (++depth > ASN1_MAX_CONSTRUCTED_NEST) {
+        ASN1err(ASN1_F_ASN1_ITEM_EMBED_D2I, ASN1_R_NESTED_TOO_DEEP);
+        goto err;
+    }
+
     switch (it->itype) {
     case ASN1_ITYPE_PRIMITIVE:
         if (it->templates) {
@@ -160,12 +176,21 @@ static int asn1_item_embed_d2i(ASN1_VALUE **pval, const unsigned char **in,
                 goto err;
             }
             return asn1_template_ex_d2i(pval, in, len,
-                                        it->templates, opt, ctx);
+                                        it->templates, opt, ctx, depth);
         }
         return asn1_d2i_ex_primitive(pval, in, len, it,
                                      tag, aclass, opt, ctx);
 
     case ASN1_ITYPE_MSTRING:
+        /*
+         * It never makes sense for multi-strings to have implicit tagging, so
+         * if tag != -1, then this looks like an error in the template.
+         */
+        if (tag != -1) {
+            ASN1err(ASN1_F_ASN1_ITEM_EMBED_D2I, ASN1_R_BAD_TEMPLATE);
+            goto err;
+        }
+
         p = *in;
         /* Just read in tag and class */
         ret = asn1_check_tlen(NULL, &otag, &oclass, NULL, NULL,
@@ -183,6 +208,7 @@ static int asn1_item_embed_d2i(ASN1_VALUE **pval, const unsigned char **in,
             ASN1err(ASN1_F_ASN1_ITEM_EMBED_D2I, ASN1_R_MSTRING_NOT_UNIVERSAL);
             goto err;
         }
+
         /* Check tag matches bit map */
         if (!(ASN1_tag2bit(otag) & it->utype)) {
             /* If OPTIONAL, assume this is OK */
@@ -199,6 +225,15 @@ static int asn1_item_embed_d2i(ASN1_VALUE **pval, const unsigned char **in,
         return ef->asn1_ex_d2i(pval, in, len, it, tag, aclass, opt, ctx);
 
     case ASN1_ITYPE_CHOICE:
+        /*
+         * It never makes sense for CHOICE types to have implicit tagging, so
+         * if tag != -1, then this looks like an error in the template.
+         */
+        if (tag != -1) {
+            ASN1err(ASN1_F_ASN1_ITEM_EMBED_D2I, ASN1_R_BAD_TEMPLATE);
+            goto err;
+        }
+
         if (asn1_cb && !asn1_cb(ASN1_OP_D2I_PRE, pval, it, NULL))
             goto auxerr;
         if (*pval) {
@@ -221,7 +256,7 @@ static int asn1_item_embed_d2i(ASN1_VALUE **pval, const unsigned char **in,
             /*
              * We mark field as OPTIONAL so its absence can be recognised.
              */
-            ret = asn1_template_ex_d2i(pchptr, &p, len, tt, 1, ctx);
+            ret = asn1_template_ex_d2i(pchptr, &p, len, tt, 1, ctx, depth);
             /* If field not present, try the next one */
             if (ret == -1)
                 continue;
@@ -344,7 +379,8 @@ static int asn1_item_embed_d2i(ASN1_VALUE **pval, const unsigned char **in,
              * attempt to read in field, allowing each to be OPTIONAL
              */
 
-            ret = asn1_template_ex_d2i(pseqval, &p, len, seqtt, isopt, ctx);
+            ret = asn1_template_ex_d2i(pseqval, &p, len, seqtt, isopt, ctx,
+                                       depth);
             if (!ret) {
                 errtt = seqtt;
                 goto err;
@@ -420,7 +456,7 @@ static int asn1_item_embed_d2i(ASN1_VALUE **pval, const unsigned char **in,
 static int asn1_template_ex_d2i(ASN1_VALUE **val,
                                 const unsigned char **in, long inlen,
                                 const ASN1_TEMPLATE *tt, char opt,
-                                ASN1_TLC *ctx)
+                                ASN1_TLC *ctx, int depth)
 {
     int flags, aclass;
     int ret;
@@ -455,7 +491,7 @@ static int asn1_template_ex_d2i(ASN1_VALUE **val,
             return 0;
         }
         /* We've found the field so it can't be OPTIONAL now */
-        ret = asn1_template_noexp_d2i(val, &p, len, tt, 0, ctx);
+        ret = asn1_template_noexp_d2i(val, &p, len, tt, 0, ctx, depth);
         if (!ret) {
             ASN1err(ASN1_F_ASN1_TEMPLATE_EX_D2I, ERR_R_NESTED_ASN1_ERROR);
             return 0;
@@ -479,7 +515,7 @@ static int asn1_template_ex_d2i(ASN1_VALUE **val,
             }
         }
     } else
-        return asn1_template_noexp_d2i(val, in, inlen, tt, opt, ctx);
+        return asn1_template_noexp_d2i(val, in, inlen, tt, opt, ctx, depth);
 
     *in = p;
     return 1;
@@ -491,7 +527,7 @@ static int asn1_template_ex_d2i(ASN1_VALUE **val,
 static int asn1_template_noexp_d2i(ASN1_VALUE **val,
                                    const unsigned char **in, long len,
                                    const ASN1_TEMPLATE *tt, char opt,
-                                   ASN1_TLC *ctx)
+                                   ASN1_TLC *ctx, int depth)
 {
     int flags, aclass;
     int ret;
@@ -538,7 +574,7 @@ static int asn1_template_noexp_d2i(ASN1_VALUE **val,
         } else if (ret == -1)
             return -1;
         if (!*val)
-            *val = (ASN1_VALUE *)OPENSSL_sk_new_null();
+            *val = (ASN1_VALUE *)sk_ASN1_VALUE_new_null();
         else {
             /*
              * We've got a valid STACK: free up any items present
@@ -573,7 +609,8 @@ static int asn1_template_noexp_d2i(ASN1_VALUE **val,
             }
             skfield = NULL;
             if (!asn1_item_embed_d2i(&skfield, &p, len,
-                                     ASN1_ITEM_ptr(tt->item), -1, 0, 0, ctx)) {
+                                     ASN1_ITEM_ptr(tt->item), -1, 0, 0, ctx,
+                                     depth)) {
                 ASN1err(ASN1_F_ASN1_TEMPLATE_NOEXP_D2I,
                         ERR_R_NESTED_ASN1_ERROR);
                 /* |skfield| may be partially allocated despite failure. */
@@ -595,7 +632,7 @@ static int asn1_template_noexp_d2i(ASN1_VALUE **val,
         /* IMPLICIT tagging */
         ret = asn1_item_embed_d2i(val, &p, len,
                                   ASN1_ITEM_ptr(tt->item), tt->tag, aclass, opt,
-                                  ctx);
+                                  ctx, depth);
         if (!ret) {
             ASN1err(ASN1_F_ASN1_TEMPLATE_NOEXP_D2I, ERR_R_NESTED_ASN1_ERROR);
             goto err;
@@ -604,7 +641,7 @@ static int asn1_template_noexp_d2i(ASN1_VALUE **val,
     } else {
         /* Nothing special */
         ret = asn1_item_embed_d2i(val, &p, len, ASN1_ITEM_ptr(tt->item),
-                                  -1, 0, opt, ctx);
+                                  -1, 0, opt, ctx, depth);
         if (!ret) {
             ASN1err(ASN1_F_ASN1_TEMPLATE_NOEXP_D2I, ERR_R_NESTED_ASN1_ERROR);
             goto err;

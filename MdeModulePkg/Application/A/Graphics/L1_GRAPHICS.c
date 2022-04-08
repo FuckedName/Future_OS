@@ -44,9 +44,9 @@
 *  返回值： 成功：XXXX，失败：XXXXX
 *
 *****************************************************************************/
-double L1_GRAPHICS_Bilinear(double a, double blue, int uv, int u1v, int uv1, int u1v1)
+unsigned char L1_GRAPHICS_Bilinear(double a, double blue, int uv, int u1v, int uv1, int u1v1)
 {
-    return (double) (uv*(1-a)*(1-blue)+u1v*a*(1-blue)+uv1*blue*(1-a)+u1v1*a*blue);
+    return (unsigned char) (uv*(1-a)*(1-blue)+u1v*a*(1-blue)+uv1*blue*(1-a)+u1v1*a*blue);
 }
 
 
@@ -77,7 +77,8 @@ void L1_GRAPHICS_ZoomImage(UINT8* pDest, unsigned int DestWidth, unsigned int De
         for ( j = 0; j < DestWidth; j++ )
         {
             int    HeightRatio, WidthRatio;
-            double    u, v, red, green, blue;
+            double    u, v;
+			unsigned char red, green, blue;
             v    = (i * SourceHeight) / (double) (DestHeight);
             u    = (j * SourceWidth) / (double) (DestWidth);
             HeightRatio    = (int) (v);

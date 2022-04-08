@@ -1,5 +1,5 @@
 /*
- * Copyright 2008-2016 The OpenSSL Project Authors. All Rights Reserved.
+ * Copyright 2008-2021 The OpenSSL Project Authors. All Rights Reserved.
  *
  * Licensed under the OpenSSL license (the "License").  You may not use
  * this file except in compliance with the License.  You can obtain a copy
@@ -14,9 +14,9 @@
 #include <openssl/err.h>
 #include <openssl/cms.h>
 #include <openssl/aes.h>
-#include "cms_lcl.h"
-#include "internal/asn1_int.h"
-#include "internal/evp_int.h"
+#include "cms_local.h"
+#include "crypto/asn1.h"
+#include "crypto/evp.h"
 
 /* CMS EnvelopedData Utilities */
 
@@ -282,6 +282,7 @@ int CMS_RecipientInfo_set0_pkey(CMS_RecipientInfo *ri, EVP_PKEY *pkey)
         CMSerr(CMS_F_CMS_RECIPIENTINFO_SET0_PKEY, CMS_R_NOT_KEY_TRANSPORT);
         return 0;
     }
+    EVP_PKEY_free(ri->d.ktri->pkey);
     ri->d.ktri->pkey = pkey;
     return 1;
 }
@@ -362,12 +363,26 @@ static int cms_RecipientInfo_ktri_decrypt(CMS_ContentInfo *cms,
     unsigned char *ek = NULL;
     size_t eklen;
     int ret = 0;
+    size_t fixlen = 0;
     CMS_EncryptedContentInfo *ec;
     ec = cms->d.envelopedData->encryptedContentInfo;
 
     if (ktri->pkey == NULL) {
         CMSerr(CMS_F_CMS_RECIPIENTINFO_KTRI_DECRYPT, CMS_R_NO_PRIVATE_KEY);
         return 0;
+    }
+
+    if (cms->d.envelopedData->encryptedContentInfo->havenocert
+            && !cms->d.envelopedData->encryptedContentInfo->debug) {
+        X509_ALGOR *calg = ec->contentEncryptionAlgorithm;
+        const EVP_CIPHER *ciph = EVP_get_cipherbyobj(calg->algorithm);
+
+        if (ciph == NULL) {
+            CMSerr(CMS_F_CMS_RECIPIENTINFO_KTRI_DECRYPT, CMS_R_UNKNOWN_CIPHER);
+            return 0;
+        }
+
+        fixlen = EVP_CIPHER_key_length(ciph);
     }
 
     ktri->pctx = EVP_PKEY_CTX_new(pkey, NULL);
@@ -400,7 +415,9 @@ static int cms_RecipientInfo_ktri_decrypt(CMS_ContentInfo *cms,
 
     if (EVP_PKEY_decrypt(ktri->pctx, ek, &eklen,
                          ktri->encryptedKey->data,
-                         ktri->encryptedKey->length) <= 0) {
+                         ktri->encryptedKey->length) <= 0
+            || eklen == 0
+            || (fixlen != 0 && eklen != fixlen)) {
         CMSerr(CMS_F_CMS_RECIPIENTINFO_KTRI_DECRYPT, CMS_R_CMS_LIB);
         goto err;
     }
@@ -720,6 +737,7 @@ static int cms_RecipientInfo_kekri_decrypt(CMS_ContentInfo *cms,
         goto err;
     }
 
+    OPENSSL_clear_free(ec->key, ec->keylen);
     ec->key = ukey;
     ec->keylen = ukeylen;
 
@@ -749,7 +767,7 @@ int CMS_RecipientInfo_decrypt(CMS_ContentInfo *cms, CMS_RecipientInfo *ri)
 
     default:
         CMSerr(CMS_F_CMS_RECIPIENTINFO_DECRYPT,
-               CMS_R_UNSUPPORTED_RECPIENTINFO_TYPE);
+               CMS_R_UNSUPPORTED_RECIPIENTINFO_TYPE);
         return 0;
     }
 }

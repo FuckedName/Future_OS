@@ -498,25 +498,38 @@ VOID L3_APPLICATION_AddressBarCreate(WINDOW_LAYER_ITEM *pWindowLayerItem, UINT16
 	EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
 	UINT16 AddressBarHeight;
 	UINT16 FontSize;
+	UINT16 CurrentX = Position->CurrentX;
+	UINT16 CurrentY = Position->CurrentY;
+	UINT16 CurrentWidth = Position->CurrentWidth;
+	UINT16 CurrentHeight = Position->CurrentHeight;
+	UINT16 WindowWidth = pWindowLayerItem->WindowWidth;
 
 	Position->CurrentY += Step;
 
 	AddressBarHeight = 20;
 	FontSize = 12;
+	UINT16 TempX = CurrentX + FontSize;
 	Color.Red   = WhiteColor.Red;
 	Color.Green = WhiteColor.Green;
 	Color.Blue  = WhiteColor.Blue;
 	Color.Reserved = GRAPHICS_LAYER_MY_COMPUTER_WINDOW;
+	UINT16 TempY = (Position->CurrentBarHeight - FontSize) / 2;
 	
 	//L2_GRAPHICS_ButtonDraw2(pWindowLayerItem, Position->StartX + 5 * FontSize, Position->StartY, pWindowLayerItem->WindowWidth - 6, Position->StartY + FontSize * 2);
 	
 	//L1_MEMORY_RectangleFill(pWindowLayerItem->pBuffer, Position->StartX + 5 * FontSize, Position->StartY, pWindowLayerItem->WindowWidth - 6, Position->StartY + FontSize, pWindowLayerItem->WindowWidth, Color); // line top
 	
-	//灰色背景，文件、编辑、查看、转到、收藏、帮助
-	int word[] = {L'文'};
-	GBK_Code Code = {0};
-	L1_LIBRARY_QueryAreaCodeBitCodeByChineseChar(word[0], &Code);
-
+	//地址栏有地址和刷新
+	int ChineseChars[6][2] = 
+	{
+		{L'地', L'址'},
+		{L'刷', L'新'},
+	};
+	TempX += 2 * FontSize;
+	L3_WINDOW_ChineseCharsDraw(pWindowLayerItem->pBuffer, ChineseChars[0], sizeof(ChineseChars[0])/sizeof(ChineseChars[0][0]), FontSize, &TempX, CurrentY + TempY, Color, WindowWidth);
+		
+	TempX = Position->CurrentWidth -  4 * FontSize;
+	L3_WINDOW_ChineseCharsDraw(pWindowLayerItem->pBuffer, ChineseChars[1], sizeof(ChineseChars[1])/sizeof(ChineseChars[1][0]), FontSize, &TempX, CurrentY + TempY, Color, WindowWidth);
 	//L2_GRAPHICS_ChineseCharDraw12(pWindowLayerItem->pBuffer, Position->StartX + 4, Position->StartY, Code.AreaCode, Code.BitCode, WhiteColor, MyComputerWidth);
 
 	//Position->StartY += AddressBarHeight + 4;
@@ -650,17 +663,6 @@ VOID L3_APPLICATION_MyComputerWindow(UINT16 StartX, UINT16 StartY)
 	
 	return;
 	
-	for (UINT16 i = 0; i < 4; i++)
-	{
-		L3_APPLICATION_WindowBarCreate(&WindowLayers.item[LayerID], TitleChineseName, &WindowCurrentPosition);
-
-		WindowCurrentPosition.CurrentY += Step;
-	}
-
-
-	//工具栏
-	L3_APPLICATION_ToolBarCreate(&WindowLayers.item[LayerID], TitleChineseName, &WindowCurrentPosition);
-
 
 	L3_APPLICATION_AddressBarCreate(&WindowLayers.item[LayerID], TitleChineseName, &WindowCurrentPosition);
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 1995-2016 The OpenSSL Project Authors. All Rights Reserved.
+ * Copyright 1995-2022 The OpenSSL Project Authors. All Rights Reserved.
  *
  * Licensed under the OpenSSL license (the "License").  You may not use
  * this file except in compliance with the License.  You can obtain a copy
@@ -12,8 +12,24 @@
 #include <openssl/objects.h>
 #include <openssl/evp.h>
 #include <openssl/engine.h>
-#include "internal/evp_int.h"
-#include "evp_locl.h"
+#include "crypto/evp.h"
+#include "evp_local.h"
+
+
+static void cleanup_old_md_data(EVP_MD_CTX *ctx, int force)
+{
+    if (ctx->digest != NULL) {
+        if (ctx->digest->cleanup != NULL
+                && !EVP_MD_CTX_test_flags(ctx, EVP_MD_CTX_FLAG_CLEANED))
+            ctx->digest->cleanup(ctx);
+        if (ctx->md_data != NULL && ctx->digest->ctx_size > 0
+                && (!EVP_MD_CTX_test_flags(ctx, EVP_MD_CTX_FLAG_REUSE)
+                    || force)) {
+            OPENSSL_clear_free(ctx->md_data, ctx->digest->ctx_size);
+            ctx->md_data = NULL;
+        }
+    }
+}
 
 /* This call frees resources associated with the context */
 int EVP_MD_CTX_reset(EVP_MD_CTX *ctx)
@@ -25,14 +41,14 @@ int EVP_MD_CTX_reset(EVP_MD_CTX *ctx)
      * Don't assume ctx->md_data was cleaned in EVP_Digest_Final, because
      * sometimes only copies of the context are ever finalised.
      */
-    if (ctx->digest && ctx->digest->cleanup
-        && !EVP_MD_CTX_test_flags(ctx, EVP_MD_CTX_FLAG_CLEANED))
-        ctx->digest->cleanup(ctx);
-    if (ctx->digest && ctx->digest->ctx_size && ctx->md_data
-        && !EVP_MD_CTX_test_flags(ctx, EVP_MD_CTX_FLAG_REUSE)) {
-        OPENSSL_clear_free(ctx->md_data, ctx->digest->ctx_size);
-    }
-    EVP_PKEY_CTX_free(ctx->pctx);
+    cleanup_old_md_data(ctx, 0);
+
+    /*
+     * pctx should be freed by the user of EVP_MD_CTX
+     * if EVP_MD_CTX_FLAG_KEEP_PKEY_CTX is set
+     */
+    if (!EVP_MD_CTX_test_flags(ctx, EVP_MD_CTX_FLAG_KEEP_PKEY_CTX))
+        EVP_PKEY_CTX_free(ctx->pctx);
 #ifndef OPENSSL_NO_ENGINE
     ENGINE_finish(ctx->engine);
 #endif
@@ -71,6 +87,7 @@ int EVP_DigestInit_ex(EVP_MD_CTX *ctx, const EVP_MD *type, ENGINE *impl)
     if (ctx->engine && ctx->digest &&
         (type == NULL || (type->type == ctx->digest->type)))
         goto skip_to_init;
+
     if (type) {
         /*
          * Ensure an ENGINE left lying around from last time is cleared (the
@@ -114,10 +131,8 @@ int EVP_DigestInit_ex(EVP_MD_CTX *ctx, const EVP_MD *type, ENGINE *impl)
     }
 #endif
     if (ctx->digest != type) {
-        if (ctx->digest && ctx->digest->ctx_size) {
-            OPENSSL_clear_free(ctx->md_data, ctx->digest->ctx_size);
-            ctx->md_data = NULL;
-        }
+        cleanup_old_md_data(ctx, 1);
+
         ctx->digest = type;
         if (!(ctx->flags & EVP_MD_CTX_FLAG_NO_INIT) && type->ctx_size) {
             ctx->update = type->update;
@@ -145,6 +160,9 @@ int EVP_DigestInit_ex(EVP_MD_CTX *ctx, const EVP_MD *type, ENGINE *impl)
 
 int EVP_DigestUpdate(EVP_MD_CTX *ctx, const void *data, size_t count)
 {
+    if (count == 0)
+        return 1;
+
     return ctx->update(ctx, data, count);
 }
 
@@ -171,6 +189,27 @@ int EVP_DigestFinal_ex(EVP_MD_CTX *ctx, unsigned char *md, unsigned int *size)
         EVP_MD_CTX_set_flags(ctx, EVP_MD_CTX_FLAG_CLEANED);
     }
     OPENSSL_cleanse(ctx->md_data, ctx->digest->ctx_size);
+    return ret;
+}
+
+int EVP_DigestFinalXOF(EVP_MD_CTX *ctx, unsigned char *md, size_t size)
+{
+    int ret = 0;
+
+    if (ctx->digest->flags & EVP_MD_FLAG_XOF
+        && size <= INT_MAX
+        && ctx->digest->md_ctrl(ctx, EVP_MD_CTRL_XOF_LEN, (int)size, NULL)) {
+        ret = ctx->digest->final(ctx, md);
+
+        if (ctx->digest->cleanup != NULL) {
+            ctx->digest->cleanup(ctx);
+            EVP_MD_CTX_set_flags(ctx, EVP_MD_CTX_FLAG_CLEANED);
+        }
+        OPENSSL_cleanse(ctx->md_data, ctx->digest->ctx_size);
+    } else {
+        EVPerr(EVP_F_EVP_DIGESTFINALXOF, EVP_R_NOT_XOF_OR_INVALID_LENGTH);
+    }
+
     return ret;
 }
 
@@ -202,6 +241,9 @@ int EVP_MD_CTX_copy_ex(EVP_MD_CTX *out, const EVP_MD_CTX *in)
         tmp_buf = NULL;
     EVP_MD_CTX_reset(out);
     memcpy(out, in, sizeof(*out));
+
+    /* copied EVP_MD_CTX should free the copied EVP_PKEY_CTX */
+    EVP_MD_CTX_clear_flags(out, EVP_MD_CTX_FLAG_KEEP_PKEY_CTX);
 
     /* Null these variables, since they are getting fixed up
      * properly below.  Anything else may cause a memleak and/or

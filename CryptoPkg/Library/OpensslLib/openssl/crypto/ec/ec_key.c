@@ -1,5 +1,6 @@
 /*
- * Copyright 2002-2016 The OpenSSL Project Authors. All Rights Reserved.
+ * Copyright 2002-2020 The OpenSSL Project Authors. All Rights Reserved.
+ * Copyright (c) 2002, Oracle and/or its affiliates. All rights reserved
  *
  * Licensed under the OpenSSL license (the "License").  You may not use
  * this file except in compliance with the License.  You can obtain a copy
@@ -7,17 +8,13 @@
  * https://www.openssl.org/source/license.html
  */
 
-/* ====================================================================
- * Copyright 2002 Sun Microsystems, Inc. ALL RIGHTS RESERVED.
- * Portions originally developed by SUN MICROSYSTEMS, INC., and
- * contributed to the OpenSSL project.
- */
-
-#include <internal/cryptlib.h>
+#include "internal/cryptlib.h"
 #include <string.h>
-#include "ec_lcl.h"
+#include "ec_local.h"
+#include "internal/refcount.h"
 #include <openssl/err.h>
 #include <openssl/engine.h>
+#include "crypto/bn.h"
 
 EC_KEY *EC_KEY_new(void)
 {
@@ -49,13 +46,13 @@ void EC_KEY_free(EC_KEY *r)
     if (r == NULL)
         return;
 
-    CRYPTO_atomic_add(&r->references, -1, &i, r->lock);
+    CRYPTO_DOWN_REF(&r->references, &i, r->lock);
     REF_PRINT_COUNT("EC_KEY", r);
     if (i > 0)
         return;
     REF_ASSERT_ISNT(i < 0);
 
-    if (r->meth->finish != NULL)
+    if (r->meth != NULL && r->meth->finish != NULL)
         r->meth->finish(r);
 
 #ifndef OPENSSL_NO_ENGINE
@@ -169,12 +166,17 @@ int EC_KEY_up_ref(EC_KEY *r)
 {
     int i;
 
-    if (CRYPTO_atomic_add(&r->references, 1, &i, r->lock) <= 0)
+    if (CRYPTO_UP_REF(&r->references, &i, r->lock) <= 0)
         return 0;
 
     REF_PRINT_COUNT("EC_KEY", r);
     REF_ASSERT_ISNT(i < 2);
     return ((i > 1) ? 1 : 0);
+}
+
+ENGINE *EC_KEY_get0_engine(const EC_KEY *eckey)
+{
+    return eckey->engine;
 }
 
 int EC_KEY_generate_key(EC_KEY *eckey)
@@ -191,7 +193,6 @@ int EC_KEY_generate_key(EC_KEY *eckey)
 
 int ossl_ec_key_gen(EC_KEY *eckey)
 {
-    OPENSSL_assert(eckey->group->meth->keygen != NULL);
     return eckey->group->meth->keygen(eckey);
 }
 
@@ -218,7 +219,7 @@ int ec_key_simple_generate_key(EC_KEY *eckey)
         goto err;
 
     do
-        if (!BN_rand_range(priv_key, order))
+        if (!BN_priv_rand_range(priv_key, order))
             goto err;
     while (BN_is_zero(priv_key)) ;
 
@@ -341,9 +342,6 @@ int EC_KEY_set_public_key_affine_coordinates(EC_KEY *key, BIGNUM *x,
     BIGNUM *tx, *ty;
     EC_POINT *point = NULL;
     int ok = 0;
-#ifndef OPENSSL_NO_EC2M
-    int tmp_nid, is_char_two = 0;
-#endif
 
     if (key == NULL || key->group == NULL || x == NULL || y == NULL) {
         ECerr(EC_F_EC_KEY_SET_PUBLIC_KEY_AFFINE_COORDINATES,
@@ -365,29 +363,11 @@ int EC_KEY_set_public_key_affine_coordinates(EC_KEY *key, BIGNUM *x,
     if (ty == NULL)
         goto err;
 
-#ifndef OPENSSL_NO_EC2M
-    tmp_nid = EC_METHOD_get_field_type(EC_GROUP_method_of(key->group));
+    if (!EC_POINT_set_affine_coordinates(key->group, point, x, y, ctx))
+        goto err;
+    if (!EC_POINT_get_affine_coordinates(key->group, point, tx, ty, ctx))
+        goto err;
 
-    if (tmp_nid == NID_X9_62_characteristic_two_field)
-        is_char_two = 1;
-
-    if (is_char_two) {
-        if (!EC_POINT_set_affine_coordinates_GF2m(key->group, point,
-                                                  x, y, ctx))
-            goto err;
-        if (!EC_POINT_get_affine_coordinates_GF2m(key->group, point,
-                                                  tx, ty, ctx))
-            goto err;
-    } else
-#endif
-    {
-        if (!EC_POINT_set_affine_coordinates_GFp(key->group, point,
-                                                 x, y, ctx))
-            goto err;
-        if (!EC_POINT_get_affine_coordinates_GFp(key->group, point,
-                                                 tx, ty, ctx))
-            goto err;
-    }
     /*
      * Check if retrieved coordinates match originals and are less than field
      * order: if not values are out of range.
@@ -437,17 +417,86 @@ const BIGNUM *EC_KEY_get0_private_key(const EC_KEY *key)
 
 int EC_KEY_set_private_key(EC_KEY *key, const BIGNUM *priv_key)
 {
+    int fixed_top;
+    const BIGNUM *order = NULL;
+    BIGNUM *tmp_key = NULL;
+
     if (key->group == NULL || key->group->meth == NULL)
         return 0;
+
+    /*
+     * Not only should key->group be set, but it should also be in a valid
+     * fully initialized state.
+     *
+     * Specifically, to operate in constant time, we need that the group order
+     * is set, as we use its length as the fixed public size of any scalar used
+     * as an EC private key.
+     */
+    order = EC_GROUP_get0_order(key->group);
+    if (order == NULL || BN_is_zero(order))
+        return 0; /* This should never happen */
+
     if (key->group->meth->set_private != NULL
         && key->group->meth->set_private(key, priv_key) == 0)
         return 0;
     if (key->meth->set_private != NULL
         && key->meth->set_private(key, priv_key) == 0)
         return 0;
+
+    /*
+     * We should never leak the bit length of the secret scalar in the key,
+     * so we always set the `BN_FLG_CONSTTIME` flag on the internal `BIGNUM`
+     * holding the secret scalar.
+     *
+     * This is important also because `BN_dup()` (and `BN_copy()`) do not
+     * propagate the `BN_FLG_CONSTTIME` flag from the source `BIGNUM`, and
+     * this brings an extra risk of inadvertently losing the flag, even when
+     * the caller specifically set it.
+     *
+     * The propagation has been turned on and off a few times in the past
+     * years because in some conditions has shown unintended consequences in
+     * some code paths, so at the moment we can't fix this in the BN layer.
+     *
+     * In `EC_KEY_set_private_key()` we can work around the propagation by
+     * manually setting the flag after `BN_dup()` as we know for sure that
+     * inside the EC module the `BN_FLG_CONSTTIME` is always treated
+     * correctly and should not generate unintended consequences.
+     *
+     * Setting the BN_FLG_CONSTTIME flag alone is never enough, we also have
+     * to preallocate the BIGNUM internal buffer to a fixed public size big
+     * enough that operations performed during the processing never trigger
+     * a realloc which would leak the size of the scalar through memory
+     * accesses.
+     *
+     * Fixed Length
+     * ------------
+     *
+     * The order of the large prime subgroup of the curve is our choice for
+     * a fixed public size, as that is generally the upper bound for
+     * generating a private key in EC cryptosystems and should fit all valid
+     * secret scalars.
+     *
+     * For preallocating the BIGNUM storage we look at the number of "words"
+     * required for the internal representation of the order, and we
+     * preallocate 2 extra "words" in case any of the subsequent processing
+     * might temporarily overflow the order length.
+     */
+    tmp_key = BN_dup(priv_key);
+    if (tmp_key == NULL)
+        return 0;
+
+    BN_set_flags(tmp_key, BN_FLG_CONSTTIME);
+
+    fixed_top = bn_get_top(order) + 2;
+    if (bn_wexpand(tmp_key, fixed_top) == NULL) {
+        BN_clear_free(tmp_key);
+        return 0;
+    }
+
     BN_clear_free(key->priv_key);
-    key->priv_key = BN_dup(priv_key);
-    return (key->priv_key == NULL) ? 0 : 1;
+    key->priv_key = tmp_key;
+
+    return 1;
 }
 
 const EC_POINT *EC_KEY_get0_public_key(const EC_KEY *key)
@@ -513,6 +562,13 @@ void EC_KEY_set_flags(EC_KEY *key, int flags)
 void EC_KEY_clear_flags(EC_KEY *key, int flags)
 {
     key->flags &= ~flags;
+}
+
+int EC_KEY_decoded_from_explicit_params(const EC_KEY *key)
+{
+    if (key == NULL || key->group == NULL)
+        return -1;
+    return key->group->decoded_from_explicit_params;
 }
 
 size_t EC_KEY_key2buf(const EC_KEY *key, point_conversion_form_t form,
@@ -613,12 +669,14 @@ size_t EC_KEY_priv2buf(const EC_KEY *eckey, unsigned char **pbuf)
 {
     size_t len;
     unsigned char *buf;
+
     len = EC_KEY_priv2oct(eckey, NULL, 0);
     if (len == 0)
         return 0;
-    buf = OPENSSL_malloc(len);
-    if (buf == NULL)
+    if ((buf = OPENSSL_malloc(len)) == NULL) {
+        ECerr(EC_F_EC_KEY_PRIV2BUF, ERR_R_MALLOC_FAILURE);
         return 0;
+    }
     len = EC_KEY_priv2oct(eckey, buf, len);
     if (len == 0) {
         OPENSSL_free(buf);

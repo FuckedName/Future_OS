@@ -8,7 +8,7 @@
  */
 
 #include <openssl/ocsp.h>
-#include "ocsp_lcl.h"
+#include "ocsp_local.h"
 #include <openssl/err.h>
 #include <string.h>
 
@@ -136,6 +136,15 @@ int OCSP_basic_verify(OCSP_BASICRESP *bs, STACK_OF(X509) *certs,
  f_err:
     ret = -1;
     goto end;
+}
+
+int OCSP_resp_get0_signer(OCSP_BASICRESP *bs, X509 **signer,
+                          STACK_OF(X509) *extra_certs)
+{
+    int ret;
+
+    ret = ocsp_find_signer(signer, bs, extra_certs, 0);
+    return (ret > 0) ? 1 : 0;
 }
 
 static int ocsp_find_signer(X509 **psigner, OCSP_BASICRESP *bs,

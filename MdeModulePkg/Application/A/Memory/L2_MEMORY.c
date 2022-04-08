@@ -166,7 +166,7 @@ EFI_STATUS L2_MEMORY_Free(UINT32 *p)
 *  返回值： 成功：XXXX，失败：XXXXX
 *
 *****************************************************************************/
-float L2_MEMORY_UseRecords(UINT32 *p)
+char L2_MEMORY_UseRecords(UINT32 *p)
 {  }
 
 
@@ -183,7 +183,7 @@ float L2_MEMORY_UseRecords(UINT32 *p)
 *  返回值： 成功：XXXX，失败：XXXXX
 *
 *****************************************************************************/
-float L2_MEMORY_Remainings()
+char L2_MEMORY_Remainings()
 {  }
 
 
@@ -201,7 +201,7 @@ float L2_MEMORY_Remainings()
 *  返回值： 成功：XXXX，失败：XXXXX
 *
 *****************************************************************************/
-float L2_MEMORY_GETs()
+UINT16 L2_MEMORY_GETs()
 {  
     EFI_STATUS                           Status;
     UINT8                                TmpMemoryMap[1];
@@ -492,7 +492,7 @@ EFI_STATUS L2_MEMORY_MapInitial()
 *  返回值： 成功：XXXX，失败：XXXXX
 *
 *****************************************************************************/
-float L2_MEMORY_Initial()
+UINT16 L2_MEMORY_Initial()
 {
     MemorySize = (float)L2_MEMORY_GETs();
     L2_MEMORY_MapInitial();

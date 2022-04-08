@@ -1,5 +1,5 @@
 /*
- * Copyright 2001-2016 The OpenSSL Project Authors. All Rights Reserved.
+ * Copyright 2001-2018 The OpenSSL Project Authors. All Rights Reserved.
  *
  * Licensed under the OpenSSL license (the "License").  You may not use
  * this file except in compliance with the License.  You can obtain a copy
@@ -10,7 +10,7 @@
 #include "internal/cryptlib.h"
 #include <openssl/evp.h>
 #include <openssl/lhash.h>
-#include "eng_int.h"
+#include "eng_local.h"
 
 /* The type of the items in the table */
 struct st_engine_pile {
@@ -26,7 +26,7 @@ struct st_engine_pile {
     int uptodate;
 };
 
-/* The type exposed in eng_int.h */
+/* The type exposed in eng_local.h */
 struct st_engine_table {
     LHASH_OF(ENGINE_PILE) piles;
 };                              /* ENGINE_TABLE */
@@ -76,7 +76,7 @@ static int int_table_check(ENGINE_TABLE **t, int create)
 }
 
 /*
- * Privately exposed (via eng_int.h) functions for adding and/or removing
+ * Privately exposed (via eng_local.h) functions for adding and/or removing
  * ENGINEs from the implementation table
  */
 int engine_table_register(ENGINE_TABLE **table, ENGINE_CLEANUP_CB *cleanup,
@@ -109,6 +109,11 @@ int engine_table_register(ENGINE_TABLE **table, ENGINE_CLEANUP_CB *cleanup,
             }
             fnd->funct = NULL;
             (void)lh_ENGINE_PILE_insert(&(*table)->piles, fnd);
+            if (lh_ENGINE_PILE_retrieve(&(*table)->piles, &tmplate) != fnd) {
+                sk_ENGINE_free(fnd->sk);
+                OPENSSL_free(fnd);
+                goto end;
+            }
         }
         /* A registration shouldn't add duplicate entries */
         (void)sk_ENGINE_delete_ptr(fnd->sk, e);

@@ -1,5 +1,5 @@
 /*
- * Copyright 2006-2016 The OpenSSL Project Authors. All Rights Reserved.
+ * Copyright 2006-2020 The OpenSSL Project Authors. All Rights Reserved.
  *
  * Licensed under the OpenSSL license (the "License").  You may not use
  * this file except in compliance with the License.  You can obtain a copy
@@ -14,16 +14,16 @@
 #include <openssl/bn.h>
 #include <openssl/cms.h>
 #include <openssl/asn1t.h>
-#include "internal/asn1_int.h"
-#include "internal/evp_int.h"
-#include "ec_lcl.h"
+#include "crypto/asn1.h"
+#include "crypto/evp.h"
+#include "ec_local.h"
 
 #ifndef OPENSSL_NO_CMS
 static int ecdh_cms_decrypt(CMS_RecipientInfo *ri);
 static int ecdh_cms_encrypt(CMS_RecipientInfo *ri);
 #endif
 
-static int eckey_param2type(int *pptype, void **ppval, EC_KEY *ec_key)
+static int eckey_param2type(int *pptype, void **ppval, const EC_KEY *ec_key)
 {
     const EC_GROUP *group;
     int nid;
@@ -35,7 +35,14 @@ static int eckey_param2type(int *pptype, void **ppval, EC_KEY *ec_key)
         && (nid = EC_GROUP_get_curve_name(group)))
         /* we have a 'named curve' => just set the OID */
     {
-        *ppval = OBJ_nid2obj(nid);
+        ASN1_OBJECT *asn1obj = OBJ_nid2obj(nid);
+
+        if (asn1obj == NULL || OBJ_length(asn1obj) == 0) {
+            ASN1_OBJECT_free(asn1obj);
+            ECerr(EC_F_ECKEY_PARAM2TYPE, EC_R_MISSING_OID);
+            return 0;
+        }
+        *ppval = asn1obj;
         *pptype = V_ASN1_OBJECT;
     } else {                    /* explicit parameters */
 
@@ -43,7 +50,17 @@ static int eckey_param2type(int *pptype, void **ppval, EC_KEY *ec_key)
         pstr = ASN1_STRING_new();
         if (pstr == NULL)
             return 0;
-        pstr->length = i2d_ECParameters(ec_key, &pstr->data);
+
+        /*
+         * The cast in the following line is intentional as the
+         * `i2d_ECParameters` signature can't be constified (see discussion at
+         * https://github.com/openssl/openssl/pull/9347 where related and
+         * required constification backports were rejected).
+         *
+         * This cast should be safe anyway, because we can expect
+         * `i2d_ECParameters()` to treat the first argument as if it was const.
+         */
+        pstr->length = i2d_ECParameters((EC_KEY *)ec_key, &pstr->data);
         if (pstr->length <= 0) {
             ASN1_STRING_free(pstr);
             ECerr(EC_F_ECKEY_PARAM2TYPE, ERR_R_EC_LIB);
@@ -57,7 +74,7 @@ static int eckey_param2type(int *pptype, void **ppval, EC_KEY *ec_key)
 
 static int eckey_pub_encode(X509_PUBKEY *pk, const EVP_PKEY *pkey)
 {
-    EC_KEY *ec_key = pkey->pkey.ec;
+    const EC_KEY *ec_key = pkey->pkey.ec;
     void *pval = NULL;
     int ptype;
     unsigned char *penc = NULL, *p;
@@ -92,19 +109,19 @@ static int eckey_pub_encode(X509_PUBKEY *pk, const EVP_PKEY *pkey)
 static EC_KEY *eckey_type2param(int ptype, const void *pval)
 {
     EC_KEY *eckey = NULL;
+    EC_GROUP *group = NULL;
+
     if (ptype == V_ASN1_SEQUENCE) {
         const ASN1_STRING *pstr = pval;
-        const unsigned char *pm = NULL;
-        int pmlen;
-        pm = pstr->data;
-        pmlen = pstr->length;
+        const unsigned char *pm = pstr->data;
+        int pmlen = pstr->length;
+
         if ((eckey = d2i_ECParameters(NULL, &pm, pmlen)) == NULL) {
             ECerr(EC_F_ECKEY_TYPE2PARAM, EC_R_DECODE_ERROR);
             goto ecerr;
         }
     } else if (ptype == V_ASN1_OBJECT) {
         const ASN1_OBJECT *poid = pval;
-        EC_GROUP *group;
 
         /*
          * type == V_ASN1_OBJECT => the parameters are given by an asn1 OID
@@ -129,6 +146,7 @@ static EC_KEY *eckey_type2param(int ptype, const void *pval)
 
  ecerr:
     EC_KEY_free(eckey);
+    EC_GROUP_free(group);
     return NULL;
 }
 
@@ -503,8 +521,13 @@ static int ec_pkey_ctrl(EVP_PKEY *pkey, int op, long arg1, void *arg2)
 #endif
 
     case ASN1_PKEY_CTRL_DEFAULT_MD_NID:
-        *(int *)arg2 = NID_sha256;
-        return 2;
+        if (EVP_PKEY_id(pkey) == EVP_PKEY_SM2) {
+            /* For SM2, the only valid digest-alg is SM3 */
+            *(int *)arg2 = NID_sm3;
+        } else {
+            *(int *)arg2 = NID_sha256;
+        }
+        return 1;
 
     case ASN1_PKEY_CTRL_SET1_TLS_ENCPT:
         return EC_KEY_oct2key(EVP_PKEY_get0_EC_KEY(pkey), arg2, arg1, NULL);
@@ -518,6 +541,48 @@ static int ec_pkey_ctrl(EVP_PKEY *pkey, int op, long arg1, void *arg2)
 
     }
 
+}
+
+static int ec_pkey_check(const EVP_PKEY *pkey)
+{
+    EC_KEY *eckey = pkey->pkey.ec;
+
+    /* stay consistent to what EVP_PKEY_check demands */
+    if (eckey->priv_key == NULL) {
+        ECerr(EC_F_EC_PKEY_CHECK, EC_R_MISSING_PRIVATE_KEY);
+        return 0;
+    }
+
+    return EC_KEY_check_key(eckey);
+}
+
+static int ec_pkey_public_check(const EVP_PKEY *pkey)
+{
+    EC_KEY *eckey = pkey->pkey.ec;
+
+    /*
+     * Note: it unnecessary to check eckey->pub_key here since
+     * it will be checked in EC_KEY_check_key(). In fact, the
+     * EC_KEY_check_key() mainly checks the public key, and checks
+     * the private key optionally (only if there is one). So if
+     * someone passes a whole EC key (public + private), this
+     * will also work...
+     */
+
+    return EC_KEY_check_key(eckey);
+}
+
+static int ec_pkey_param_check(const EVP_PKEY *pkey)
+{
+    EC_KEY *eckey = pkey->pkey.ec;
+
+    /* stay consistent to what EVP_PKEY_check demands */
+    if (eckey->group == NULL) {
+        ECerr(EC_F_EC_PKEY_PARAM_CHECK, EC_R_MISSING_PARAMETERS);
+        return 0;
+    }
+
+    return EC_GROUP_check(eckey->group, NULL);
 }
 
 const EVP_PKEY_ASN1_METHOD eckey_asn1_meth = {
@@ -551,8 +616,22 @@ const EVP_PKEY_ASN1_METHOD eckey_asn1_meth = {
     int_ec_free,
     ec_pkey_ctrl,
     old_ec_priv_decode,
-    old_ec_priv_encode
+    old_ec_priv_encode,
+
+    0, 0, 0,
+
+    ec_pkey_check,
+    ec_pkey_public_check,
+    ec_pkey_param_check
 };
+
+#if !defined(OPENSSL_NO_SM2)
+const EVP_PKEY_ASN1_METHOD sm2_asn1_meth = {
+   EVP_PKEY_SM2,
+   EVP_PKEY_EC,
+   ASN1_PKEY_ALIAS
+};
+#endif
 
 int EC_KEY_print(BIO *bp, const EC_KEY *x, int off)
 {
@@ -642,7 +721,7 @@ static int ecdh_cms_set_kdf_param(EVP_PKEY_CTX *pctx, int eckdf_nid)
     if (EVP_PKEY_CTX_set_ecdh_cofactor_mode(pctx, cofactor) <= 0)
         return 0;
 
-    if (EVP_PKEY_CTX_set_ecdh_kdf_type(pctx, EVP_PKEY_ECDH_KDF_X9_62) <= 0)
+    if (EVP_PKEY_CTX_set_ecdh_kdf_type(pctx, EVP_PKEY_ECDH_KDF_X9_63) <= 0)
         return 0;
 
     kdf_md = EVP_get_digestbynid(kdfmd_nid);
@@ -807,7 +886,7 @@ static int ecdh_cms_encrypt(CMS_RecipientInfo *ri)
         ecdh_nid = NID_dh_cofactor_kdf;
 
     if (kdf_type == EVP_PKEY_ECDH_KDF_NONE) {
-        kdf_type = EVP_PKEY_ECDH_KDF_X9_62;
+        kdf_type = EVP_PKEY_ECDH_KDF_X9_63;
         if (EVP_PKEY_CTX_set_ecdh_kdf_type(pctx, kdf_type) <= 0)
             goto err;
     } else

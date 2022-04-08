@@ -20,6 +20,7 @@ fi
 
 #EmulatorPkg/build.sh -a IA32 run
 EmulatorPkg/build.sh -a X64
+#OvmfPkg/build.sh -a X64
 if [ $? -ne 0 ]; then
     exit 0;
 fi

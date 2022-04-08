@@ -1,5 +1,5 @@
 /*
- * Copyright 2006-2016 The OpenSSL Project Authors. All Rights Reserved.
+ * Copyright 2006-2019 The OpenSSL Project Authors. All Rights Reserved.
  *
  * Licensed under the OpenSSL license (the "License").  You may not use
  * this file except in compliance with the License.  You can obtain a copy
@@ -11,11 +11,11 @@
 #include "internal/cryptlib.h"
 #include <openssl/x509.h>
 #include <openssl/asn1.h>
-#include "dsa_locl.h"
+#include "dsa_local.h"
 #include <openssl/bn.h>
 #include <openssl/cms.h>
-#include "internal/asn1_int.h"
-#include "internal/evp_int.h"
+#include "crypto/asn1.h"
+#include "crypto/evp.h"
 
 static int dsa_pub_decode(EVP_PKEY *pkey, X509_PUBKEY *pubkey)
 {
@@ -82,6 +82,7 @@ static int dsa_pub_encode(X509_PUBKEY *pk, const EVP_PKEY *pkey)
     int penclen;
     ASN1_STRING *str = NULL;
     ASN1_INTEGER *pubint = NULL;
+    ASN1_OBJECT *aobj;
 
     dsa = pkey->pkey.dsa;
     if (pkey->save_parameters && dsa->p && dsa->q && dsa->g) {
@@ -114,8 +115,11 @@ static int dsa_pub_encode(X509_PUBKEY *pk, const EVP_PKEY *pkey)
         goto err;
     }
 
-    if (X509_PUBKEY_set0_param(pk, OBJ_nid2obj(EVP_PKEY_DSA),
-                               ptype, str, penc, penclen))
+    aobj = OBJ_nid2obj(EVP_PKEY_DSA);
+    if (aobj == NULL)
+        goto err;
+
+    if (X509_PUBKEY_set0_param(pk, aobj, ptype, str, penc, penclen))
         return 1;
 
  err:
@@ -250,7 +254,7 @@ static int dsa_priv_encode(PKCS8_PRIV_KEY_INFO *p8, const EVP_PKEY *pkey)
 
 static int int_dsa_size(const EVP_PKEY *pkey)
 {
-    return (DSA_size(pkey->pkey.dsa));
+    return DSA_size(pkey->pkey.dsa);
 }
 
 static int dsa_bits(const EVP_PKEY *pkey)
@@ -365,7 +369,7 @@ static int do_dsa_print(BIO *bp, const DSA *x, int off, int ptype)
         goto err;
     ret = 1;
  err:
-    return (ret);
+    return ret;
 }
 
 static int dsa_param_decode(EVP_PKEY *pkey,
@@ -499,7 +503,7 @@ static int dsa_pkey_ctrl(EVP_PKEY *pkey, int op, long arg1, void *arg2)
 
     case ASN1_PKEY_CTRL_DEFAULT_MD_NID:
         *(int *)arg2 = NID_sha256;
-        return 2;
+        return 1;
 
     default:
         return -2;
