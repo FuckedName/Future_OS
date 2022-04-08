@@ -2,6 +2,7 @@
 作者：任启红
 日期：20211103
 
+代码基线：https://github.com/tianocore/edk2/releases/tag/edk2-stable202105
 当前代码分支及目录：Split分支MdeModulePkg/Application/A目录
 
 许可证：任何人可以用于任何目的使用本仓库代码。
