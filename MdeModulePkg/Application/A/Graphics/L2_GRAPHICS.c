@@ -1724,7 +1724,7 @@ EFI_STATUS L2_GRAPHICS_StartMenuInit()
     L2_GRAPHICS_ChineseCharDraw(pStartMenuBuffer, x , y,     (36 - 1) * 94 + 52 - 1, Color, StartMenuWidth);   
     x += 16;
     
-    L2_GRAPHICS_ChineseCharDraw2(pStartMenuBuffer, x , y,     12, 84, Color, StartMenuWidth);   
+    L2_GRAPHICS_ChineseCharDraw16(pStartMenuBuffer, x , y,     12, 84, Color, StartMenuWidth);   
 
     //系统设置
     x = 3;
@@ -3243,7 +3243,7 @@ VOID L2_GRAPHICS_DrawMouseToDesk()
 	}
 
 	//然后绘制鼠标光标
-    L2_GRAPHICS_ChineseCharDraw2(pMouseBuffer, 0 , 0,     12, 84, MouseColor, 16);  
+    L2_GRAPHICS_ChineseCharDraw16(pMouseBuffer, 0 , 0,     12, 84, MouseColor, 16);  
     //L2_GRAPHICS_ChineseCharDraw(pMouseBuffer, 0, 0, 12 * 94 + 84, MouseColor, 16);
 
 	//把鼠标光标显示到桌面
@@ -3404,7 +3404,7 @@ VOID L2_STORE_FolderItemsPrint()
         }
     }	
 	
-	MyComputerWindowState.ItemStartX = MyComputerWindowState.PartitionStartX + 100;
+	MyComputerWindowState.ItemStartX = MyComputerWindowState.PartitionStartX + 150;
 	MyComputerWindowState.ItemStartY = MyComputerWindowState.PartitionStartY;
 	MyComputerWindowState.ItemWidth  = WidthNew;
 	MyComputerWindowState.ItemHeight = HeightNew;	
@@ -3986,7 +3986,7 @@ EFI_STATUS L2_GRAPHICS_ChineseCharDraw(UINT8 *pBuffer,
 *  返回值： 成功：XXXX，失败：XXXXX
 *
 *****************************************************************************/
-EFI_STATUS L2_GRAPHICS_ChineseCharDraw2(UINT8 *pBuffer,
+EFI_STATUS L2_GRAPHICS_ChineseCharDraw16(UINT8 *pBuffer,
         IN UINTN x0, UINTN y0, UINT32 AreaCode, UINT32 BitCode,
         IN EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color , UINT16 AreaWidth)
 {
@@ -4169,11 +4169,11 @@ VOID EFIAPI L2_TIMER_Print (
 	//  星   4839    期   3858
     x += 21 * 8 + 3;
     //L2_GRAPHICS_ChineseCharDraw(pDeskBuffer, x, y,  (48 - 1) * 94 + 39 - 1, Color, ScreenWidth); 
-    L2_GRAPHICS_ChineseCharDraw2(pDeskBuffer, x, y, 48, 39, Color, ScreenWidth);
+    L2_GRAPHICS_ChineseCharDraw16(pDeskBuffer, x, y, 48, 39, Color, ScreenWidth);
     
     x += 16;
     //L2_GRAPHICS_ChineseCharDraw(pDeskBuffer, x, y,  (38 - 1) * 94 + 58 - 1, Color, ScreenWidth);
-    L2_GRAPHICS_ChineseCharDraw2(pDeskBuffer, x, y, 38, 58, Color, ScreenWidth);
+    L2_GRAPHICS_ChineseCharDraw16(pDeskBuffer, x, y, 38, 58, Color, ScreenWidth);
 
     x += 16;
 
@@ -4196,7 +4196,7 @@ VOID EFIAPI L2_TIMER_Print (
     }
 
     //L2_GRAPHICS_ChineseCharDraw(pDeskBuffer, x, y, (AreaCode - 1 ) * 94 + BitCode - 1, Color, ScreenWidth);
-    L2_GRAPHICS_ChineseCharDraw2(pDeskBuffer, x, y, AreaCode, BitCode, Color, ScreenWidth);
+    L2_GRAPHICS_ChineseCharDraw16(pDeskBuffer, x, y, AreaCode, BitCode, Color, ScreenWidth);
     
    L2_DEBUG_Print1(DISPLAY_DESK_HEIGHT_WEIGHT_X, DISPLAY_DESK_HEIGHT_WEIGHT_Y, "%d: ScreenWidth:%d, ScreenHeight:%d\n", __LINE__, ScreenWidth, ScreenHeight);
    /*

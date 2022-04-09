@@ -75,6 +75,70 @@ MY_COMPUTER_WINDOW MyComputerWindow;
 
 WINDOW_LAYERS WindowLayers = {0};
 
+typedef enum
+{
+    CHINESE_FONT_SIZE_0 = 0,
+    CHINESE_FONT_SIZE_1,
+	CHINESE_FONT_SIZE_2,
+	CHINESE_FONT_SIZE_3,
+	CHINESE_FONT_SIZE_4,
+	CHINESE_FONT_SIZE_5,
+	CHINESE_FONT_SIZE_6,
+	CHINESE_FONT_SIZE_7,
+	CHINESE_FONT_SIZE_8,
+	CHINESE_FONT_SIZE_9,
+	CHINESE_FONT_SIZE_10,
+	CHINESE_FONT_SIZE_11,
+	CHINESE_FONT_SIZE_12,
+	CHINESE_FONT_SIZE_13,
+	CHINESE_FONT_SIZE_14,
+	CHINESE_FONT_SIZE_15,
+	CHINESE_FONT_SIZE_16,
+    CHINESE_FONT_SIZE_MAX
+}CHINESE_FONT_SIZE_ID;
+
+typedef struct
+{
+    CHINESE_FONT_SIZE_ID           FontSize;
+    EFI_STATUS 	(*pDrawFunction)(UINT8 *pBuffer, UINTN x0, UINTN y0, UINT16 AreaCode,	UINT16 BitCode, EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color , UINT16 AreaWidth);
+}CHINESE_FONT_DRAW_FUNCTION_GET;
+
+
+/****************************************************************************
+*  可以处理桌面所有图层事件，总入口，灰常重要
+*  描述:   根据鼠标光标所在图层，找到图层点击事件，并根据点击事件找到对应的响应处理函数。
+*  第一列：不同图层编号
+*  第二列：根据图层ID获取不同图层的点击事件XXXXXClickEventGet（不同窗口事件提取）
+*  第三列：处理不同事件XXXXXClickEventHandle（不同窗口事件处理入口，比较重要）
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
+CHINESE_FONT_DRAW_FUNCTION_GET ChineseDrawFunctionGet[] =
+{
+    {CHINESE_FONT_SIZE_0,   NULL},
+    {CHINESE_FONT_SIZE_1,   NULL},
+    {CHINESE_FONT_SIZE_2,   NULL},
+    {CHINESE_FONT_SIZE_3,   NULL},
+    {CHINESE_FONT_SIZE_4,   NULL},
+    {CHINESE_FONT_SIZE_5,   NULL},
+    {CHINESE_FONT_SIZE_6,   NULL},
+    {CHINESE_FONT_SIZE_7,   NULL},
+    {CHINESE_FONT_SIZE_8,   NULL},
+    {CHINESE_FONT_SIZE_9,   NULL},
+    {CHINESE_FONT_SIZE_10,   NULL},
+    {CHINESE_FONT_SIZE_11,   NULL},
+    {CHINESE_FONT_SIZE_12,   L2_GRAPHICS_ChineseCharDraw12},
+    {CHINESE_FONT_SIZE_13,   NULL},
+    {CHINESE_FONT_SIZE_14,   NULL},
+    {CHINESE_FONT_SIZE_15,   NULL},
+    {CHINESE_FONT_SIZE_16,   L2_GRAPHICS_ChineseCharDraw16}
+};
+
+
 /****************************************************************************
 *
 *  描述: 将汉字字符串显示到指定内存Buffer
@@ -100,13 +164,13 @@ WINDOW_LAYERS WindowLayers = {0};
 EFI_STATUS L3_WINDOW_ChineseCharsDraw(UINT8 *pBuffer, INT16 *ChineseChar, UINT16 Count, UINT16 FontWidth, UINTN *StartX, UINTN StartY, EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color , UINT16 AreaWidth)
 {		
 	//int word3[] = {L'脑'};
-	GBK_Code Code = {0};
+	GBK_Code Code = {0};				
 	
 	for (int i = 0; i < Count; i++)
 	{
 		//这里的2 * i是因为汉字的占用两个字节，需要取第一个字节
 		L1_LIBRARY_QueryAreaCodeBitCodeByChineseChar(ChineseChar[2 * i], &Code); 	
-		L2_GRAPHICS_ChineseCharDraw12(pBuffer, *StartX, StartY, Code.AreaCode, Code.BitCode, Color, AreaWidth);
+		ChineseDrawFunctionGet[FontWidth].pDrawFunction(pBuffer, *StartX, StartY, Code.AreaCode, Code.BitCode, Color, AreaWidth);
 		*StartX += FontWidth + 1;
 	}
 }
@@ -295,7 +359,7 @@ VOID L3_APPLICATION_TitleBarCreate(WINDOW_LAYER_ITEM *pWindowLayerItem, UINT16 *
 	UINT16 Height;
 	UINT16 LayerID;
 	UINT16 TitleBarHeight;
-	UINT16 FontSize = 12;
+	UINT16 FontSize = 16;
     UINT16 AreaCode;
 	UINT16 BitCode;
 	UINT16 Step;
@@ -438,7 +502,7 @@ VOID L3_APPLICATION_MenuBarCreate(WINDOW_LAYER_ITEM *pWindowLayerItem, UINT16 *T
 	UINT16 CurrentWidth = Position->CurrentWidth;
 	UINT16 CurrentHeight = Position->CurrentHeight;
 	UINT16 WindowWidth = pWindowLayerItem->WindowWidth;
-	UINT16 FontSize = 12;
+	UINT16 FontSize = 16;
 	UINT16 TempX = CurrentX + FontSize;
     EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
 	
@@ -841,7 +905,7 @@ VOID L3_APPLICATION_MyComputerWindow(UINT16 StartX, UINT16 StartY)
 		//L2_FILE_PartitionNameGet(i);
 
 		//原来这里是X坐标0，显示效果比较靠窗口左边，现在改为10
-		L2_DEBUG_Print3(MyComputerWindowState.PartitionStartX  * 2, y, WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW], "%a", device[i].PartitionName);
+		L2_DEBUG_Print3(FontSize * 2, y, WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW], "%a", device[i].PartitionName);
 
         L2_DEBUG_Print3(x + 10, y, WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW], "%a", type);
         
