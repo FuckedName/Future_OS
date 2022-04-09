@@ -228,7 +228,8 @@ EFI_STATUS L2_PARTITION_NameFAT32Analysis(UINT16 DeviceID, UINT8 *Buffer)
 		device[DeviceID].PartitionName[i] = Buffer[i];
 	
 	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d %X %X %X %X\n", __LINE__, device[DeviceID].PartitionName[0], device[DeviceID].PartitionName[1], device[DeviceID].PartitionName[2], device[DeviceID].PartitionName[3]);
-    device[DeviceID].PartitionName[6] = '\0';
+
+    device[DeviceID].PartitionName[6] = '\0'; //这里其实有BUG，只取分区名前6个长度
 }
 
 

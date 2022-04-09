@@ -358,17 +358,31 @@ extern  UINT64 FileLength;
 extern  UINT8 *pReadFileDestBuffer;    
 extern UINT16 PartitionItemID;
 extern UINT16 FolderItemID;
+ 
+typedef struct
+{
+	UINT16 PartitionStartX;
+	UINT16 PartitionStartY;
+	UINT16 PartitionWidth;
+	UINT16 PartitionHeight;
+	UINT16 ItemStartX;
+	UINT16 ItemStartY;
+	UINT16 ItemWidth;
+	UINT16 ItemHeight;
+}MY_COMPUTER_WINDOW_STATE;
+
+extern MY_COMPUTER_WINDOW_STATE MyComputerWindowState;
 
 
- // init -> partition analysised -> root path analysised -> read fat table -> start read file -> reading a file -> read finished
- typedef enum 
- {
+// init -> partition analysised -> root path analysised -> read fat table -> start read file -> reading a file -> read finished
+typedef enum 
+{
 	 READ_FILE_INIT_STATE = 0, //初始状态
 	 READ_FILE_GET_PARTITION_INFO_STATE, //获取分区信息
 	 READ_FILE_GET_ROOT_PATH_INFO_STATE, //获取根目录信息
 	 READ_FILE_GET_FAT_TABLE_STATE,  //获取FAT表数据信息
 	 READ_FILE_GET_DATA_STATE, //获取数据信息
- }READ_FILE_STATE;
+}READ_FILE_STATE;
 
 
 typedef enum 

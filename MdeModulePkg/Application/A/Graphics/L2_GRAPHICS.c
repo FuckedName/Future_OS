@@ -2236,7 +2236,7 @@ START_MENU_SYSTEM_SETTING_SUBITEM_CLICKED_EVENT L2_GRAPHICS_SystemSettingLayerCl
 *****************************************************************************/
 MY_COMPUTER_WINDOW_CLICKED_EVENT L2_GRAPHICS_MyComputerLayerClickEventGet()
 {
-	//L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: L2_GRAPHICS_MyComputerLayerClickEventGet\n", __LINE__);
+	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: L2_GRAPHICS_MyComputerLayerClickEventGet\n", __LINE__);
 		
     UINT16 MyComputerPositionX = WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].StartX;
     UINT16 MyComputerPositionY = WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].StartY;
@@ -2253,15 +2253,22 @@ MY_COMPUTER_WINDOW_CLICKED_EVENT L2_GRAPHICS_MyComputerLayerClickEventGet()
         return MY_COMPUTER_WINDOW_CLOSE_WINDOW_CLICKED_EVENT;
     }
 
+	UINT16 FontSize = 12;
+	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: StartX: %d StartY: %d Width: %d Height:%d\n", __LINE__,
+					MyComputerWindowState.PartitionStartX,
+					MyComputerWindowState.PartitionStartY,
+					MyComputerWindowState.PartitionWidth,
+					MyComputerWindowState.PartitionHeight);
+			
 	//分区被点击事件
     for (UINT16 i = 0 ; i < PartitionCount; i++)
     {
         //需要跟L3_APPLICATION_MyComputerWindow定义保持一致
-		UINT16 StartX = MyComputerPositionX + 10;
-		UINT16 StartY = MyComputerPositionY + i * 18 + 16 * 2;
+		UINT16 StartX = MyComputerWindowState.PartitionStartX + WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].StartX;
+		UINT16 StartY = MyComputerWindowState.PartitionStartY + i * 18 + WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].StartY;
 		
-		if (L1_GRAPHICS_InsideRectangle(StartX, StartX + 16 * 4, 
-                                   StartY + 0, StartY + 16))
+		if (L1_GRAPHICS_InsideRectangle(StartX, StartX + MyComputerWindowState.PartitionWidth, 
+                                   StartY + 0, StartY + MyComputerWindowState.PartitionHeight))
 		{
 			PartitionItemID = i;
 			L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d:14 MY_COMPUTER_PARTITION_ITEM_CLICKED_EVENT PartitionItemID: %d\n", __LINE__, PartitionItemID);
@@ -2271,13 +2278,13 @@ MY_COMPUTER_WINDOW_CLICKED_EVENT L2_GRAPHICS_MyComputerLayerClickEventGet()
 
     UINT16 HeightNew = SYSTEM_ICON_HEIGHT / 8;
     UINT16 WidthNew = SYSTEM_ICON_WIDTH / 8;
-
+	
 	//Only 6 item, need to fix after test.
 	//分区的文件或文件夹被点击事件
     for (UINT16 i = 0 ; i < 11; i++)
     {
-		UINT16 StartX = MyComputerPositionX + 130;
-		UINT16 StartY = MyComputerPositionY + i  * (HeightNew + 16 * 2) + 200;
+		UINT16 StartX = MyComputerWindowState.ItemStartX + WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].StartX;
+		UINT16 StartY = MyComputerWindowState.ItemStartY + i  * (HeightNew + 16 * 2) + WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].StartY;
 		
 		if (L1_GRAPHICS_InsideRectangle(StartX, StartX + WidthNew, 
                                    StartY + 0, StartY + HeightNew))
@@ -3383,6 +3390,7 @@ VOID L2_STORE_FolderItemsPrint()
 
 	UINT16 Width = WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].WindowWidth;
 	UINT16 Height = WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].WindowHeight;
+	
 
 	// Clear old display items
 	for (UINT16 i = 400; i < Height; i++)
@@ -3396,6 +3404,11 @@ VOID L2_STORE_FolderItemsPrint()
         }
     }	
 	
+	MyComputerWindowState.ItemStartX = MyComputerWindowState.PartitionStartX + 100;
+	MyComputerWindowState.ItemStartY = MyComputerWindowState.PartitionStartY;
+	MyComputerWindowState.ItemWidth  = WidthNew;
+	MyComputerWindowState.ItemHeight = HeightNew;	
+	
     for (UINT16 i = 0; i < 32; i++)
     {       
         //如果第一位为0表示这项有问题
@@ -3403,9 +3416,9 @@ VOID L2_STORE_FolderItemsPrint()
             break;
             
         char name[13] = {0};
-        x = 130;
+        x = MyComputerWindowState.ItemStartX;
 
-        y = valid_count * (HeightNew + 16 * 2) + 300;
+        y = valid_count * (HeightNew + 16 * 2) + MyComputerWindowState.ItemStartY;
 
         for (UINT8 i = 0; i < 12; i++)
             name[i] = '\0';

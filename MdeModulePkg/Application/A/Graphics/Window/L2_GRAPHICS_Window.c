@@ -51,6 +51,11 @@ typedef struct
 }MY_COMPUTER_WINDOW;
 
 
+
+MY_COMPUTER_WINDOW_STATE MyComputerWindowState = {0};
+
+
+
 //窗口当前已经初始化的位置信息，方便下一个模块初始化
 typedef struct
 {
@@ -729,11 +734,17 @@ VOID L3_APPLICATION_MyComputerWindow(UINT16 StartX, UINT16 StartY)
         pSystemIconTempBuffer2[i] = pSystemIconBuffer[SYSTEM_ICON_TEXT][0x36 + i];
 
     L1_GRAPHICS_ZoomImage(pSystemIconTextBuffer, WidthNew, HeightNew, pSystemIconTempBuffer2, SYSTEM_ICON_WIDTH, SYSTEM_ICON_HEIGHT);
-    
+
+	//������Ҫ��¼���ڵ�״̬
+	MyComputerWindowState.PartitionStartX = WindowCurrentPosition.CurrentX + 2 * FontSize;
+	MyComputerWindowState.PartitionStartY = WindowCurrentPosition.CurrentY + 2 * FontSize + 16 * 2;
+	MyComputerWindowState.PartitionWidth  = 16 * 4; //4�����ֵĿ�
+	MyComputerWindowState.PartitionHeight = 16;	//���ֵĸ�
+		   
 
     for (UINT16 i = 0 ; i < PartitionCount; i++)
     {
-        x = WindowCurrentPosition.CurrentX + 2 * FontSize;
+    	x = WindowCurrentPosition.CurrentX + 2 * FontSize;
         y = WindowCurrentPosition.CurrentY + 2 * FontSize + i * 18 + 16 * 2;        
 
         if (device[i].DeviceType == 2)
@@ -830,7 +841,7 @@ VOID L3_APPLICATION_MyComputerWindow(UINT16 StartX, UINT16 StartY)
 		//L2_FILE_PartitionNameGet(i);
 
 		//原来这里是X坐标0，显示效果比较靠窗口左边，现在改为10
-		L2_DEBUG_Print3(10, y, WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW], "%a", device[i].PartitionName);
+		L2_DEBUG_Print3(MyComputerWindowState.PartitionStartX  * 2, y, WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW], "%a", device[i].PartitionName);
 
         L2_DEBUG_Print3(x + 10, y, WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW], "%a", type);
         
