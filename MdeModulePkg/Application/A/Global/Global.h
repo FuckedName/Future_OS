@@ -35,6 +35,7 @@
 #include <Graphics/Window/L2_GRAPHICS_Window.h>
 
 #include <Graphics/L1_GRAPHICS.h>
+#include <Graphics/L2_GRAPHICS.h>
 #include <Protocol/Shell.h>
 
 extern UINT8 EFI_FILE_STORE_PATH_PARTITION_NAME[50];
@@ -215,6 +216,15 @@ extern float MemorySize;
 
 extern DollarBootSwitched NTFSBootSwitched;
 extern COMMON_STORAGE_ITEM pCommonStorageItems[100];
+
+
+typedef struct
+{
+    UINT16           FontSize;
+    EFI_STATUS 	(*pDrawFunction)(UINT8 *pBuffer, UINTN x0, UINTN y0, UINT16 AreaCode,	UINT16 BitCode, EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color , UINT16 AreaWidth);
+}CHINESE_FONT_DRAW_FUNCTION_GET;
+
+extern CHINESE_FONT_DRAW_FUNCTION_GET ChineseDrawFunctionGet[17];
 
 
 #define SYSTEM_ICON_WIDTH 400
