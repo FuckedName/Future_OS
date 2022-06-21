@@ -109,7 +109,6 @@ VOID EFIAPI L2_MOUSE_Event (IN EFI_EVENT Event, IN VOID *Context)
     EFI_STATUS Status;
     UINTN Index;
     EFI_SIMPLE_POINTER_STATE State;
-
     Status = gBS->CheckEvent(gMouse->WaitForInput); 
     if (Status == EFI_NOT_READY)
     {
@@ -121,6 +120,8 @@ VOID EFIAPI L2_MOUSE_Event (IN EFI_EVENT Event, IN VOID *Context)
     {
         return ;
     }
+    
+    L2_DEBUG_Print1(0, ScreenHeight - 30 -  2 * 16, "%d: RelativeMovementX: %04d, RelativeMovementY: %04d ", __LINE__, State.RelativeMovementX, State.RelativeMovementY);
     
     //如果鼠标没有按键和鼠标移动，则直接返回。
     if (0 == State.RelativeMovementX && 0 == State.RelativeMovementY && 0 == State.LeftButton && 0 == State.RightButton)
@@ -135,8 +136,8 @@ VOID EFIAPI L2_MOUSE_Event (IN EFI_EVENT Event, IN VOID *Context)
     
     //L2_DEBUG_Print1(0, ScreenHeight - 30 -  8 * 16, "%d: X move: %d Y move: %d left: %d right: %d", __LINE__, State.RelativeMovementX, State.RelativeMovementY, State.LeftButton, State.RightButton);
 	
-	iMouseX = iMouseX + x_move * 3;
-	iMouseY = iMouseY + y_move * 3; 
+	iMouseX = iMouseX + State.RelativeMovementX * 3;
+	iMouseY = iMouseY + State.RelativeMovementY * 3; 
 
 	iMouseX = (iMouseX < 0) ? 0 : iMouseX;
 	iMouseX = (iMouseX > ScreenWidth - 16) ? ScreenWidth - 16 : iMouseX;
