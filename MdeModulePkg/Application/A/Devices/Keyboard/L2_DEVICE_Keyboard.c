@@ -55,6 +55,7 @@ char pKeyboardInputBuffer[KEYBOARD_BUFFER_LENGTH] = {0};
 EFI_HANDLE                        *Handles;
 UINTN                             HandleCount;
 
+#define KEYBOARD_KEY_ENTER (13) 
 
 
 
@@ -119,7 +120,8 @@ VOID EFIAPI L2_KEYBOARD_Init (
 VOID L2_KEYBOARD_CommandHandle (UINT16 uniChar)
 {
     // Enter pressed，显示以输入地址开始的一段内存地址
-    if (0x0D == uniChar)
+    //if (0x0D == uniChar)
+    if (0x0D == 0x0c)
     {
         UINT64 Sumary = 0;
         
@@ -140,17 +142,11 @@ VOID L2_KEYBOARD_CommandHandle (UINT16 uniChar)
         {
             L2_DEBUG_Print1(DISK_READ_BUFFER_X + ScreenWidth * 3 / 4 + (j % 16) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 16), "%02X ", pAddress[j] & 0xff);
         }
-
-        //初始化键盘输入字符数组
-        keyboard_input_count = 0;
-        
-        for (UINT16 i = 0; i < KEYBOARD_BUFFER_LENGTH; i++)
-            pKeyboardInputBuffer[i] = '\0';
                         
         L2_KEYBOARD_KeyPressed();
     }
-    //When click 'a' or 'A' then Clear log window content
-    else if ('a' == uniChar || 'A' == uniChar)
+    //When click 'clear' then Clear log window content
+    else if (L1_STRING_Compare2(pKeyboardInputBuffer, "clear") == 0)
     {
         for (UINT32 i = 23; i < SystemLogWindowHeight - 3; i++)
         {
@@ -235,10 +231,22 @@ VOID EFIAPI L2_KEYBOARD_Event (
         uniChar     = KeyData.Key.UnicodeChar;
         L2_DEBUG_Print1(0, ScreenHeight - 30 - 2 * 16, "%d: L2_KEYBOARD_Event input uniChar: %d", __LINE__, uniChar);
 
-        //
-        pKeyboardInputBuffer[keyboard_input_count++] = uniChar;
-                
-        L2_KEYBOARD_CommandHandle(uniChar);
+		if (KEYBOARD_KEY_ENTER != uniChar)
+	    {
+	    	pKeyboardInputBuffer[keyboard_input_count++] = uniChar;
+	    }
+
+		if (KEYBOARD_KEY_ENTER == uniChar)
+	    {			
+	    	L2_KEYBOARD_CommandHandle(uniChar);
+			
+	        //初始化键盘输入字符数组
+	        keyboard_input_count = 0;
+	        
+	        for (UINT16 i = 0; i < KEYBOARD_BUFFER_LENGTH; i++)
+	            pKeyboardInputBuffer[i] = '\0';
+		}
+        
     }  
     
      //DrawAsciiCharUseBuffer(pDeskBuffer, DISPLAY_KEYBOARD_X, DISPLAY_KEYBOARD_Y, uniChar, Color);
