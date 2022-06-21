@@ -36,8 +36,8 @@ UINT8 *pSystemSettingWindowBuffer = NULL;
 
 
 
-UINT16 MyComputerWidth = 16 * 50;
-UINT16 MyComputerHeight = 16 * 60;
+UINT16 MyComputerWidth = 16 * 30;
+UINT16 MyComputerHeight = 16 * 40;
 
 typedef struct
 {

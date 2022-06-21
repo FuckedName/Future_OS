@@ -168,11 +168,16 @@ VOID L2_KEYBOARD_CommandHandle (UINT16 uniChar)
         //显示输入的按键
         L2_DEBUG_Print1(DISPLAY_KEYBOARD_X, DISPLAY_KEYBOARD_Y, "%a keyboard_input_count: %04d ", pKeyboardInputBuffer, keyboard_input_count);
     }
-    else
+    else if (L1_STRING_Compare2(pKeyboardInputBuffer, "shutdown") == 0)
     {
-        //显示输入的按键
-        L2_DEBUG_Print1(DISPLAY_KEYBOARD_X, DISPLAY_KEYBOARD_Y, "%a keyboard_input_count: %04d ", pKeyboardInputBuffer, keyboard_input_count);
+    	L2_System_Shutdown();
     }
+	else
+	{
+	
+		//显示输入的按键
+		L2_DEBUG_Print1(DISPLAY_KEYBOARD_X, DISPLAY_KEYBOARD_Y, "%a keyboard_input_count: %04d ", pKeyboardInputBuffer, keyboard_input_count);
+	}
 
 }
 
