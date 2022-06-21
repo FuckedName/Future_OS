@@ -2,13 +2,13 @@
 /*************************************************
     .    
     File name:      	*.*
-    Authorï¼š	        	ä»»å¯çº¢
-    IDï¼š					00001
+    Author£º	        	ÈÎÆôºì
+    ID£º					00001
     Date:          		202107
-    Description:    	å›¾å½¢å¤„ç†çš„ä¸€äº›åŸºç¡€ç®—æ³•ï¼Œä¸ä¾èµ–å…¶ä»–æ¨¡å—
-    Others:         	æ— 
+    Description:    	Í¼ĞÎ´¦ÀíµÄÒ»Ğ©»ù´¡Ëã·¨£¬²»ÒÀÀµÆäËûÄ£¿é
+    Others:         	ÎŞ
     
-    History:        	æ— 
+    History:        	ÎŞ
 	    1.  Date:
 		    Author: 
 		    ID:
@@ -35,13 +35,13 @@
 
 /****************************************************************************
 *
-*  æè¿°:   åŒçº¿æ€§æ’å€¼Bilinear Interpolationç®—æ³•
+*  ÃèÊö:   Ë«ÏßĞÔ²åÖµBilinear InterpolationËã·¨
 *
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊı1£º xxxxx
+*  ²ÎÊı2£º xxxxx
+*  ²ÎÊın£º xxxxx
 *
-*  è¿”å›å€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 unsigned char L1_GRAPHICS_Bilinear(double a, double blue, int uv, int u1v, int uv1, int u1v1)
@@ -54,13 +54,13 @@ unsigned char L1_GRAPHICS_Bilinear(double a, double blue, int uv, int u1v, int u
 
 /****************************************************************************
 *
-*  æè¿°: å›¾ç‰‡ç¼©å°ç®—æ³•ï¼ŒæŠŠpSourceå›¾ç‰‡å®½åº¦ã€é«˜åº¦ç¼©å°åˆ°pDestçš„å®½åº¦å’Œé«˜åº¦
+*  ÃèÊö: Í¼Æ¬ËõĞ¡Ëã·¨£¬°ÑpSourceÍ¼Æ¬¿í¶È¡¢¸ß¶ÈËõĞ¡µ½pDestµÄ¿í¶ÈºÍ¸ß¶È
 *
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊı1£º xxxxx
+*  ²ÎÊı2£º xxxxx
+*  ²ÎÊın£º xxxxx
 *
-*  è¿”å›å€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 void L1_GRAPHICS_ZoomImage(UINT8* pDest, unsigned int DestWidth, unsigned int DestHeight, UINT8* pSource, unsigned int SourceWidth, unsigned int SourceHeight )

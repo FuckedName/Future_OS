@@ -2,13 +2,13 @@
 /*************************************************
     .
     File name:      	*.*
-    Authorï¼š	        	ä»»å¯çº¢
-    IDï¼š					00001
+    Author£º	        	ÈÎÆôºì
+    ID£º					00001
     Date:          		202107
     Description:    	
-    Others:         	æ— 
+    Others:         	ÎÞ
 
-    History:        	æ— 
+    History:        	ÎÞ
 	    1.  Date:
 		    Author: 
 		    ID:
@@ -40,14 +40,14 @@ UINT8 *pDateTimeBuffer = NULL; //Mouse layer: 3
 // size: the one unit size is Bytes 
 /****************************************************************************
 *
-*  æè¿°:   å†…å­˜åˆ†é…æŽ¥å£ï¼Œå½“å‰æ˜¯ä»ŽPHYSICAL_ADDRESS_START+ALL_PAGE_COUNTè¿™ä¸ªåœ°å€å¼€å§‹åˆ†é…å†…å­˜ï¼Œ
-*  PHYSICAL_ADDRESS_STARTè¿™ä¸ªåœ°å€åˆ°PHYSICAL_ADDRESS_START+ALL_PAGE_COUNTï¼Œæ˜¯å­˜æ”¾å†…å­˜æ˜¯å¦ä½¿ç”¨çš„Mapè¡¨
+*  ÃèÊö:   ÄÚ´æ·ÖÅä½Ó¿Ú£¬µ±Ç°ÊÇ´ÓPHYSICAL_ADDRESS_START+ALL_PAGE_COUNTÕâ¸öµØÖ·¿ªÊ¼·ÖÅäÄÚ´æ£¬
+*  PHYSICAL_ADDRESS_STARTÕâ¸öµØÖ·µ½PHYSICAL_ADDRESS_START+ALL_PAGE_COUNT£¬ÊÇ´æ·ÅÄÚ´æÊÇ·ñÊ¹ÓÃµÄMap±í
 *
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º xxxxx
+*  ²ÎÊý2£º xxxxx
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 UINT8 *L2_MEMORY_Allocate(char *pApplicationName, UINT16 type, UINT32 SizeRequired)
@@ -132,13 +132,13 @@ UINT8 *L2_MEMORY_Allocate(char *pApplicationName, UINT16 type, UINT32 SizeRequir
 
 /****************************************************************************
 *
-*  æè¿°:   PHYSICAL_ADDRESS_STARTè¿™ä¸ªåœ°å€åˆ°PHYSICAL_ADDRESS_START+ALL_PAGE_COUNTï¼Œæ˜¯å­˜æ”¾å†…å­˜æ˜¯å¦ä½¿ç”¨çš„Mapè¡¨
+*  ÃèÊö:   PHYSICAL_ADDRESS_STARTÕâ¸öµØÖ·µ½PHYSICAL_ADDRESS_START+ALL_PAGE_COUNT£¬ÊÇ´æ·ÅÄÚ´æÊÇ·ñÊ¹ÓÃµÄMap±í
 *
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º xxxxx
+*  ²ÎÊý2£º xxxxx
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 UINT8 *L2_MEMORY_MapperInitial()
@@ -159,13 +159,13 @@ extern UINT8 BufferMFT[DISK_BUFFER_SIZE * 2];
 
 /****************************************************************************
 *
-*  æè¿°:   ä¸ºç³»ç»Ÿæ˜¾ç¤ºä½¿ç”¨çš„ä¸€äº›å›¾å±‚åˆ†é…å†…å­˜ï¼Œè¿™é‡Œè¾¹å…¶å®žå¯ä»¥å†™æˆä¸€ä¸ªforå¾ªçŽ¯ï¼ŒæŠŠå‚æ•°å­˜æ”¾åˆ°å¤šç»´æ•°ç»„
+*  ÃèÊö:   ÎªÏµÍ³ÏÔÊ¾Ê¹ÓÃµÄÒ»Ð©Í¼²ã·ÖÅäÄÚ´æ£¬ÕâÀï±ßÆäÊµ¿ÉÒÔÐ´³ÉÒ»¸öforÑ­»·£¬°Ñ²ÎÊý´æ·Åµ½¶àÎ¬Êý×é
 *
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º xxxxx
+*  ²ÎÊý2£º xxxxx
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 EFI_STATUS L2_COMMON_MemoryAllocate()

@@ -2,13 +2,13 @@
 /*************************************************
     .
     File name:      	*.*
-    Author：	        	任启红
-    ID：					00001
+    Author��	        	������
+    ID��					00001
     Date:          		202107
     Description:    	
-    Others:         	无
+    Others:         	��
 
-    History:        	无
+    History:        	��
 	    1.  Date:
 		    Author: 
 		    ID:
@@ -40,7 +40,7 @@ extern UINT8 BufferMFT[DISK_BUFFER_SIZE * 2];
 // Index of A0 attribute
 IndexInformation A0Indexes[10] = {0};
 
-//用于分析文件系统使用，避免每次都申请释放，浪费时间，所以建一个公用的buffer
+//���ڷ����ļ�ϵͳʹ�ã�����ÿ�ζ������ͷţ��˷�ʱ�䣬���Խ�һ�����õ�buffer
 UINT8 pBufferTemp[DISK_BUFFER_SIZE * 2];
 
 UINT64 FileContentRelativeSector;
@@ -51,13 +51,13 @@ UINT8 pItem[DISK_BUFFER_SIZE * 2] = {0};
 
 /****************************************************************************
 *
-*  描述:   xxxxx
+*  ����:   xxxxx
 *
-*  参数1： xxxxx
-*  参数2： xxxxx
-*  参数n： xxxxx
+*  ����1�� xxxxx
+*  ����2�� xxxxx
+*  ����n�� xxxxx
 *
-*  返回值： 成功：XXXX，失败：XXXXX
+*  ����ֵ�� �ɹ���XXXX��ʧ�ܣ�XXXXX
 *
 *****************************************************************************/
 EFI_STATUS L2_FILE_NTFS_MFT_Item_Read(UINT16 DeviceID, UINT64 SectorStartNumber)
@@ -100,9 +100,9 @@ UINT16 Index = 0;
 
 // Find $Root file from all MFT(may be 15 file,)
 // pBuffer store all MFT
-//比较重要的几个属性如0X30文件名属性，其中记录着该目录或者文件的文件名；
-//0X80数据属性记录着文件中的数据；0X90索引根属性，存放着该目录下的子目录和子文件的索引项；
-//当某个目录下的内容比较多，从而导致0X90属性无法完全存放时，0XA0属性会指向一个索引区域，这个索引区域包含了该目录下所有剩余内容的索引项。
+//�Ƚ���Ҫ�ļ���������0X30�ļ������ԣ����м�¼�Ÿ�Ŀ¼�����ļ����ļ�����
+//0X80�������Լ�¼���ļ��е����ݣ�0X90���������ԣ�����Ÿ�Ŀ¼�µ���Ŀ¼�����ļ��������
+//��ĳ��Ŀ¼�µ����ݱȽ϶࣬�Ӷ�����0X90�����޷���ȫ���ʱ��0XA0���Ի�ָ��һ�������������������������˸�Ŀ¼������ʣ�����ݵ������
 EFI_STATUS  L2_FILE_NTFS_MFTDollarRootFileAnalysis(UINT8 *pBuffer)
 {
     UINT8 *p = NULL;
@@ -189,13 +189,13 @@ EFI_STATUS  L2_FILE_NTFS_MFTDollarRootFileAnalysis(UINT8 *pBuffer)
 
 /****************************************************************************
 *
-*  描述:   xxxxx
+*  ����:   xxxxx
 *
-*  参数1： xxxxx
-*  参数2： xxxxx
-*  参数n： xxxxx
+*  ����1�� xxxxx
+*  ����2�� xxxxx
+*  ����n�� xxxxx
 *
-*  返回值： 成功：XXXX，失败：XXXXX
+*  ����ֵ�� �ɹ���XXXX��ʧ�ܣ�XXXXX
 *
 *****************************************************************************/
 EFI_STATUS L2_FILE_NTFS_RootPathItemsRead(UINT8 PartitionID)
@@ -212,7 +212,7 @@ EFI_STATUS L2_FILE_NTFS_RootPathItemsRead(UINT8 PartitionID)
                                                                      A0Indexes[k].OccupyCluster * 8);
     
     // cluster need to multi with 8 then it is sector.
-    // 读取根目录项的INDEX ITEM 磁盘缓存
+    // ��ȡ��Ŀ¼���INDEX ITEM ���̻���
     Status = L2_STORE_Read(PartitionID, (A0Indexes[k].Offset + lastOffset) * 8 , A0Indexes[k].OccupyCluster * 8, BufferBlock);
     if (EFI_ERROR(Status))
     {
@@ -220,7 +220,7 @@ EFI_STATUS L2_FILE_NTFS_RootPathItemsRead(UINT8 PartitionID)
         return Status;
     }
 
-	// 分析INDEX ITEM 缓存
+	// ����INDEX ITEM ����
     L2_FILE_NTFS_MFTIndexItemsAnalysis(BufferBlock, PartitionID);    
     
     lastOffset = A0Indexes[k].Offset;
@@ -233,13 +233,13 @@ EFI_STATUS L2_FILE_NTFS_RootPathItemsRead(UINT8 PartitionID)
 //Print ROOT Path items.
 /****************************************************************************
 *
-*  描述:   分析NTFS文件系统的索引项
+*  ����:   ����NTFS�ļ�ϵͳ��������
 *
-*  参数1： xxxxx
-*  参数2： xxxxx
-*  参数n： xxxxx
+*  ����1�� xxxxx
+*  ����2�� xxxxx
+*  ����n�� xxxxx
 *
-*  返回值： 成功：XXXX，失败：XXXXX
+*  ����ֵ�� �ɹ���XXXX��ʧ�ܣ�XXXXX
 *
 *****************************************************************************/
 EFI_STATUS  L2_FILE_NTFS_MFTIndexItemsAnalysis(UINT8 *pBuffer, UINT8 DeviceID)
@@ -258,13 +258,13 @@ EFI_STATUS  L2_FILE_NTFS_MFTIndexItemsAnalysis(UINT8 *pBuffer, UINT8 DeviceID)
     for (UINT16 i = 0; i < 512 * 8; i++)
         p[i] = pBuffer[i];
 
-    //IndexEntryOffset:索引项的偏移 相对于当前位置
+    //IndexEntryOffset:�������ƫ�� ����ڵ�ǰλ��
     L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d IndexEntryOffset: %llu IndexEntrySize: %llu\n", __LINE__, 
                                                                      L1_NETWORK_4BytesToUINT32(((NTFS_INDEX_HEADER *)p)->IndexEntryOffset),
                                                                      L1_NETWORK_4BytesToUINT32(((NTFS_INDEX_HEADER *)p)->IndexEntrySize));
 
-    // 相对于当前位置 need to add size before this Byte.
-    // 获取索引头里边的索引项偏移字段。
+    // ����ڵ�ǰλ�� need to add size before this Byte.
+    // ��ȡ����ͷ��ߵ�������ƫ���ֶΡ�
     //
     UINT8 IndexEntryOffset = L1_NETWORK_4BytesToUINT32(((NTFS_INDEX_HEADER *)p)->IndexEntryOffset) + 24;
 	
@@ -276,7 +276,7 @@ EFI_STATUS  L2_FILE_NTFS_MFTIndexItemsAnalysis(UINT8 *pBuffer, UINT8 DeviceID)
 
 	pCommonStorageItems[0].ItemCount = 0;
 
-	//把INDEX ITEM索引项分析出来，并写入公共的文件、文件夹项数据结构，以便后续在我的电脑显示
+	//��INDEX ITEM�����������������д�빫�����ļ����ļ��������ݽṹ���Ա�������ҵĵ�����ʾ
     for (UINT8 i = 0; ; i++)
     {    
          if (index >= L1_NETWORK_4BytesToUINT32(((NTFS_INDEX_HEADER *)p)->IndexEntrySize))
@@ -296,7 +296,7 @@ EFI_STATUS  L2_FILE_NTFS_MFTIndexItemsAnalysis(UINT8 *pBuffer, UINT8 DeviceID)
             
          UINT8 FileNameSize = ((NTFS_INDEX_ITEM *)pItem)->FileNameSize;
 
-		 //前六个字节。。
+		 //ǰ�����ֽڡ���
          FileContentRelativeSector = L1_NETWORK_6BytesToUINT64(((NTFS_INDEX_ITEM *)pItem)->MFTReferNumber);
          /*L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: attribut length2: %d FileNameSize: %d\n", __LINE__, 
                                                                    length2,
@@ -409,13 +409,13 @@ IndexInformation *L2_FILE_NTFS_GetA0Indexes()
 
 /****************************************************************************
 *
-*  描述:   xxxxx
+*  ����:   xxxxx
 *
-*  参数1： xxxxx
-*  参数2： xxxxx
-*  参数n： xxxxx
+*  ����1�� xxxxx
+*  ����2�� xxxxx
+*  ����n�� xxxxx
 *
-*  返回值： 成功：XXXX，失败：XXXXX
+*  ����ֵ�� �ɹ���XXXX��ʧ�ܣ�XXXXX
 *
 *****************************************************************************/
 EFI_STATUS L2_FILE_NTFS_FirstSelectorAnalysis(UINT8 *p, DollarBootSwitched *pNTFSBootSwitched)
@@ -436,13 +436,13 @@ EFI_STATUS L2_FILE_NTFS_FirstSelectorAnalysis(UINT8 *p, DollarBootSwitched *pNTF
 
 /****************************************************************************
 *
-*  描述:   xxxxx
+*  ����:   xxxxx
 *
-*  参数1： xxxxx
-*  参数2： xxxxx
-*  参数n： xxxxx
+*  ����1�� xxxxx
+*  ����2�� xxxxx
+*  ����n�� xxxxx
 *
-*  返回值： 成功：XXXX，失败：XXXXX
+*  ����ֵ�� �ɹ���XXXX��ʧ�ܣ�XXXXX
 *
 *****************************************************************************/
 VOID L1_FILE_NTFS_DollerRootTransfer(DOLLAR_BOOT *pSource, DollarBootSwitched *pDest)
@@ -463,7 +463,7 @@ UINT16  L2_FILE_NTFS_IndexItemHeaderAnalysis(UINT8 *p)
 {
 	NTFS_INDEX_HEADER;
 	
-    // 相对于当前位置的偏移，所以需要加上当前位置前面的24个字节。 need to add size before this Byte.
+    // ����ڵ�ǰλ�õ�ƫ�ƣ�������Ҫ���ϵ�ǰλ��ǰ���24���ֽڡ� need to add size before this Byte.
     UINT16 HeaderLength = L1_NETWORK_4BytesToUINT32(((NTFS_INDEX_HEADER *)p)->IndexEntryOffset) + 24;
 
 	return HeaderLength;
@@ -478,7 +478,7 @@ EFI_STATUS  L2_FILE_NTFS_IndexItemAttributeAnalysis(UINT8 *pBuffer, UINT16 Offse
 	
 	UINT8 pItem[200] = {0};
 
-	// 索引项大小
+	// �������С
 	UINT16 length2 = pBuffer[Offset + 8] + pBuffer[Offset + 9] * 16;
 
 	// copy item into pItem buffer
@@ -505,7 +505,7 @@ EFI_STATUS  L2_FILE_NTFS_IndexItemAttributeAnalysis(UINT8 *pBuffer, UINT16 Offse
 }
 
 
-//NTFS文件系统 索引项分析
+//NTFS�ļ�ϵͳ ���������
 //
 EFI_STATUS  L2_FILE_NTFS_IndexItemBufferAnalysis(UINT8 *pBuffer)
 {
@@ -526,10 +526,10 @@ EFI_STATUS  L2_FILE_NTFS_IndexItemBufferAnalysis(UINT8 *pBuffer)
 	for (UINT16 i = 0; i < 512 * 8; i++)
 		p[i] = pBuffer[i];
 
-	// 获取索引头相关参数
+	// ��ȡ����ͷ��ز���
 	UINT16 Offset = L2_FILE_NTFS_IndexItemHeaderAnalysis(p);
 
-	// 获取各个索引项相关的参数
+	// ��ȡ������������صĲ���
 	for (UINT16 i = 0; i < 10; i++)
 	{
 		UINT16 AttributeSize = L2_FILE_NTFS_IndexItemAttributeAnalysis(p, Offset);
@@ -547,13 +547,13 @@ EFI_STATUS  L2_FILE_NTFS_IndexItemBufferAnalysis(UINT8 *pBuffer)
 
 /****************************************************************************
 *
-*  描述:   xxxxx
+*  ����:   xxxxx
 *
-*  参数1： xxxxx
-*  参数2： xxxxx
-*  参数n： xxxxx
+*  ����1�� xxxxx
+*  ����2�� xxxxx
+*  ����n�� xxxxx
 *
-*  返回值： 成功：XXXX，失败：XXXXX
+*  ����ֵ�� �ɹ���XXXX��ʧ�ܣ�XXXXX
 *
 *****************************************************************************/
 UINT16 L2_FILE_NTFS_FileItemHeaderAnalysis(UINT8 *pBuffer, NTFS_FILE_SWITCHED *pNTFSFileSwitched)
@@ -584,19 +584,19 @@ EFI_STATUS  L2_FILE_NTFS_DollarVolumeNameAttributeAnalysis(UINT8 *pBuffer, UINT8
 
 /****************************************************************************
 *
-*  描述: 分析NTFS的磁盘FILE项（注意不是目录下的文件）里边的属性，每个FILE项一般有很多个属性，到少有4，5个
+*  ����: ����NTFS�Ĵ���FILE�ע�ⲻ��Ŀ¼�µ��ļ�����ߵ����ԣ�ÿ��FILE��һ���кܶ�����ԣ�������4��5��
 *
-*  //比较重要的几个属性如0X30文件名属性，其中记录着该目录或者文件的文件名；
-*  //0X80数据属性记录着文件中的数据；
-*  //0X90索引根属性，存放着该目录下的子目录和子文件的索引项；当某个目录下的内容比较多，从而导致0X90属性无法完全存放时，
-*  //0XA0属性会指向一个索引区域，这个索引区域包含了该目录下所有剩余内容的索引项。
-*  //属性有常驻属性和非常驻属性之分，当一个属性的数据能够在1KB的文件记录中保存的时候，该属性为常驻属性；
-*  //而当属性的数据无法在文件记录中存放，需要存放到MFT外的其他位置时，该属性为非常驻属性。常驻属性和非常驻属性的头部结构定义如下：
-*  参数1： xxxxx
-*  参数2： xxxxx
-*  参数n： xxxxx
+*  //�Ƚ���Ҫ�ļ���������0X30�ļ������ԣ����м�¼�Ÿ�Ŀ¼�����ļ����ļ�����
+*  //0X80�������Լ�¼���ļ��е����ݣ�
+*  //0X90���������ԣ�����Ÿ�Ŀ¼�µ���Ŀ¼�����ļ����������ĳ��Ŀ¼�µ����ݱȽ϶࣬�Ӷ�����0X90�����޷���ȫ���ʱ��
+*  //0XA0���Ի�ָ��һ�������������������������˸�Ŀ¼������ʣ�����ݵ������
+*  //�����г�פ���Ժͷǳ�פ����֮�֣���һ�����Ե������ܹ���1KB���ļ���¼�б����ʱ�򣬸�����Ϊ��פ���ԣ�
+*  //�������Ե������޷����ļ���¼�д�ţ���Ҫ��ŵ�MFT�������λ��ʱ��������Ϊ�ǳ�פ���ԡ���פ���Ժͷǳ�פ���Ե�ͷ���ṹ�������£�
+*  ����1�� xxxxx
+*  ����2�� xxxxx
+*  ����n�� xxxxx
 *
-*  返回值： 成功：XXXX，失败：XXXXX  
+*  ����ֵ�� �ɹ���XXXX��ʧ�ܣ�XXXXX  
 *
 *
 *****************************************************************************/
@@ -616,7 +616,7 @@ UINT16  L2_FILE_NTFS_FileItemAttributeAnalysis(UINT8 *p, UINT16 AttributeOffset,
 		L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: MFT_ATTRIBUTE_INVALID: %X ", __LINE__, __FUNCTION__, pAttributeHeaderSwitched->Type);
 		return 0;
 	}
-    // 属性头和属性体总长度
+    // ����ͷ���������ܳ���
     for (i = 0; i < 4; i++)
         size[i] = p[AttributeOffset + 4 + i];
         
@@ -674,7 +674,7 @@ UINT16  L2_FILE_NTFS_FileItemAttributeAnalysis(UINT8 *p, UINT16 AttributeOffset,
 	                j++;
 	            }
 
-				//用于测试获取的值是否正确
+				//���ڲ��Ի�ȡ��ֵ�Ƿ���ȷ
 				/*L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: %02X %02X %02X %02X %02X %02X %02X %02X\n", __LINE__, 
 															pItem[pAttributeHeaderSwitched->NameOffset + pAttributeHeaderSwitched->NameSize * 2 + 0],
 															pItem[pAttributeHeaderSwitched->NameOffset + pAttributeHeaderSwitched->NameSize * 2 + 1],
@@ -713,11 +713,11 @@ UINT16  L2_FILE_NTFS_FileItemAttributeAnalysis(UINT8 *p, UINT16 AttributeOffset,
 								pItem[pAttributeHeaderSwitched->NameOffset + 5]);
 			break;
 
-		//90 属性分析，有些复杂，里边有些BUG，需要根据实际情况适配下
-		//90 属性包含：NTFS_FILE_ATTRIBUTE_HEADER ResidentAttributeHeader INDEX_ROOT INDEX_ENTRY 这4个结构体。
+		//90 ���Է�������Щ���ӣ������ЩBUG����Ҫ����ʵ�����������
+		//90 ���԰�����NTFS_FILE_ATTRIBUTE_HEADER ResidentAttributeHeader INDEX_ROOT INDEX_ENTRY ��4���ṹ�塣
 		case MFT_ATTRIBUTE_DOLLAR_INDEX_ROOT:
 			{	
-				//如果属性长度太短，表示存放不了数据，估计这里有BUG
+				//������Գ���̫�̣���ʾ��Ų������ݣ�����������BUG
 				if (AttributeSize <= 0x58)
 				{
 					return AttributeSize;
@@ -739,7 +739,7 @@ UINT16  L2_FILE_NTFS_FileItemAttributeAnalysis(UINT8 *p, UINT16 AttributeOffset,
 
 				//L2_PARTITION_BufferPrint(pItem, AttributeSize);
 				
-				if (pAttributeHeaderSwitched->ResidentFlag == 0) //常驻
+				if (pAttributeHeaderSwitched->ResidentFlag == 0) //��פ
 				{
 					UINT16 AttributeHeaderSize = sizeof(NTFS_FILE_ATTRIBUTE_HEADER);
 					UINT16 Offset = AttributeHeaderSize;
@@ -794,14 +794,14 @@ UINT16  L2_FILE_NTFS_FileItemAttributeAnalysis(UINT8 *p, UINT16 AttributeOffset,
 																																pCommonStorageItems[j].Name[8]);
 						pCommonStorageItems[j].Type = COMMON_STORAGE_ITEM_FILE;
 						
-						//这种写法看起来不好看，但是有效，待优化
+						//����д�����������ÿ���������Ч�����Ż�
 						UINT64 RelativeSector = pItem[Offset] + (UINT64)pItem[Offset + 1] * 256 + (UINT64)pItem[Offset + 2] * 256 * 256 + (UINT64)pItem[Offset + 3] * 256 * 256 * 256 + (UINT64)pItem[Offset + 4] * 256 * 256 * 256 * 256 + (UINT64)pItem[Offset + 5] * 256 * 256 * 256 * 256 * 256;
 						L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: RelativeSector: %LLX", __LINE__, 
 																																RelativeSector);
 						pCommonStorageItems[j].FileContentRelativeSector = RelativeSector;
 						
 
-						//这边好像有点BUG，IE_FileFlag获取的值不太对
+						//��ߺ����е�BUG��IE_FileFlag��ȡ��ֵ��̫��
 						switch (IE_FileFlag)
 						{
 							case 0x20:
@@ -852,13 +852,13 @@ UINT16  L2_FILE_NTFS_FileItemAttributeAnalysis(UINT8 *p, UINT16 AttributeOffset,
 //L2_FILE_NTFS_MFTDollarRootFileAnalysis
 /****************************************************************************
 *
-*  描述: 分析NTFS的磁盘FILE项（注意不是目录下的文件），每个FILE项一般占用两个扇区
+*  ����: ����NTFS�Ĵ���FILE�ע�ⲻ��Ŀ¼�µ��ļ�����ÿ��FILE��һ��ռ����������
 *
-*  参数1： xxxxx
-*  参数2： xxxxx
-*  参数n： xxxxx
+*  ����1�� xxxxx
+*  ����2�� xxxxx
+*  ����n�� xxxxx
 *
-*  返回值： 成功：XXXX，失败：XXXXX
+*  ����ֵ�� �ɹ���XXXX��ʧ�ܣ�XXXXX
 *
 *****************************************************************************/
 EFI_STATUS  L2_FILE_NTFS_FileItemBufferAnalysis(UINT8 *pBuffer, NTFS_FILE_SWITCHED *pNTFSFileSwitched)
@@ -869,13 +869,13 @@ EFI_STATUS  L2_FILE_NTFS_FileItemBufferAnalysis(UINT8 *pBuffer, NTFS_FILE_SWITCH
 	for (UINT16 i = 0; i < DISK_BUFFER_SIZE * 2; i++)
 		pBufferTemp[i] = pBuffer[i];
 	
-	// 通过属性头计算第一个属性偏移
-	// 获取文件头信息
+	// ͨ������ͷ�����һ������ƫ��
+	// ��ȡ�ļ�ͷ��Ϣ
 	UINT16 Offset = L2_FILE_NTFS_FileItemHeaderAnalysis(pBufferTemp, pNTFSFileSwitched);
 	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: Offset: %d", __LINE__, Offset);
 		
-	// 获取每个属性信息
-	// 当前只计算10个属性，其实是有缺陷的
+	// ��ȡÿ��������Ϣ
+	// ��ǰֻ����10�����ԣ���ʵ����ȱ�ݵ�
 	for (UINT16 i = 0; ; i++)
 	{
 		L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: For loop analysis attribute count: %d ", __LINE__, i + 1);
@@ -907,19 +907,19 @@ UINT16 L2_FILE_NTFS_FileItemHeaderAnalysis2(UINT8 *pBuffer, NTFS_FILE_SWITCHED *
 
 /****************************************************************************
 *
-*  描述: 分析NTFS的磁盘FILE项（注意不是目录下的文件）里边的属性，每个FILE项一般有很多个属性，到少有4，5个
+*  ����: ����NTFS�Ĵ���FILE�ע�ⲻ��Ŀ¼�µ��ļ�����ߵ����ԣ�ÿ��FILE��һ���кܶ�����ԣ�������4��5��
 *
-*  //比较重要的几个属性如0X30文件名属性，其中记录着该目录或者文件的文件名；
-*  //0X80数据属性记录着文件中的数据；
-*  //0X90索引根属性，存放着该目录下的子目录和子文件的索引项；当某个目录下的内容比较多，从而导致0X90属性无法完全存放时，
-*  //0XA0属性会指向一个索引区域，这个索引区域包含了该目录下所有剩余内容的索引项。
-*  //属性有常驻属性和非常驻属性之分，当一个属性的数据能够在1KB的文件记录中保存的时候，该属性为常驻属性；
-*  //而当属性的数据无法在文件记录中存放，需要存放到MFT外的其他位置时，该属性为非常驻属性。常驻属性和非常驻属性的头部结构定义如下：
-*  参数1： xxxxx
-*  参数2： xxxxx
-*  参数n： xxxxx
+*  //�Ƚ���Ҫ�ļ���������0X30�ļ������ԣ����м�¼�Ÿ�Ŀ¼�����ļ����ļ�����
+*  //0X80�������Լ�¼���ļ��е����ݣ�
+*  //0X90���������ԣ�����Ÿ�Ŀ¼�µ���Ŀ¼�����ļ����������ĳ��Ŀ¼�µ����ݱȽ϶࣬�Ӷ�����0X90�����޷���ȫ���ʱ��
+*  //0XA0���Ի�ָ��һ�������������������������˸�Ŀ¼������ʣ�����ݵ������
+*  //�����г�פ���Ժͷǳ�פ����֮�֣���һ�����Ե������ܹ���1KB���ļ���¼�б����ʱ�򣬸�����Ϊ��פ���ԣ�
+*  //�������Ե������޷����ļ���¼�д�ţ���Ҫ��ŵ�MFT�������λ��ʱ��������Ϊ�ǳ�פ���ԡ���פ���Ժͷǳ�פ���Ե�ͷ���ṹ�������£�
+*  ����1�� xxxxx
+*  ����2�� xxxxx
+*  ����n�� xxxxx
 *
-*  返回值： 成功：XXXX，失败：XXXXX  
+*  ����ֵ�� �ɹ���XXXX��ʧ�ܣ�XXXXX  
 *
 *
 *****************************************************************************/
@@ -940,7 +940,7 @@ UINT16  L2_FILE_NTFS_FileItemAttributeAnalysis2(UINT8 *p, UINT16 AttributeOffset
 		return 0;
 	}
 	
-    // 属性头和属性体总长度
+    // ����ͷ���������ܳ���
     for (i = 0; i < 4; i++)
         size[i] = p[AttributeOffset + 4 + i];
         
@@ -1006,7 +1006,7 @@ UINT16  L2_FILE_NTFS_FileItemAttributeAnalysis2(UINT8 *p, UINT16 AttributeOffset
 	                j++;
 	            }
 
-				//用于测试获取的值是否正确
+				//���ڲ��Ի�ȡ��ֵ�Ƿ���ȷ
 				/*L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: %02X %02X %02X %02X %02X %02X %02X %02X\n", __LINE__, 
 															pItem[pAttributeHeaderSwitched->NameOffset + pAttributeHeaderSwitched->NameSize * 2 + 0],
 															pItem[pAttributeHeaderSwitched->NameOffset + pAttributeHeaderSwitched->NameSize * 2 + 1],
@@ -1043,8 +1043,8 @@ UINT16  L2_FILE_NTFS_FileItemAttributeAnalysis2(UINT8 *p, UINT16 AttributeOffset
 								pItem[pAttributeHeaderSwitched->NameOffset + 5]);
 			break;
 
-		//90 属性分析，有些复杂，里边有些BUG，需要根据实际情况适配下
-		//90 属性包含：NTFS_FILE_ATTRIBUTE_HEADER ResidentAttributeHeader INDEX_ROOT INDEX_ENTRY 这4个结构体。
+		//90 ���Է�������Щ���ӣ������ЩBUG����Ҫ����ʵ�����������
+		//90 ���԰�����NTFS_FILE_ATTRIBUTE_HEADER ResidentAttributeHeader INDEX_ROOT INDEX_ENTRY ��4���ṹ�塣
 		case MFT_ATTRIBUTE_DOLLAR_INDEX_ROOT:
 			{				
 				if (AttributeSize <= 0x58)
@@ -1066,7 +1066,7 @@ UINT16  L2_FILE_NTFS_FileItemAttributeAnalysis2(UINT8 *p, UINT16 AttributeOffset
 
 				//L2_PARTITION_BufferPrint(pItem, AttributeSize);
 				
-				if (pAttributeHeaderSwitched->ResidentFlag == 0) //常驻
+				if (pAttributeHeaderSwitched->ResidentFlag == 0) //��פ
 				{
 					UINT16 AttributeHeaderSize = sizeof(NTFS_FILE_ATTRIBUTE_HEADER);
 					UINT16 Offset = AttributeHeaderSize;
@@ -1124,7 +1124,7 @@ UINT16  L2_FILE_NTFS_FileItemAttributeAnalysis2(UINT8 *p, UINT16 AttributeOffset
 						pCommonStorageItems[j].FileContentRelativeSector = RelativeSector;
 						
 
-						//这边好像有点BUG，IE_FileFlag获取的值不太对
+						//��ߺ����е�BUG��IE_FileFlag��ȡ��ֵ��̫��
 						switch (IE_FileFlag)
 						{
 							case 0x20:
@@ -1177,12 +1177,12 @@ EFI_STATUS  L2_FILE_NTFS_FileItemBufferAnalysis2(UINT8 *pBuffer, NTFS_FILE_SWITC
 	for (UINT16 i = 0; i < DISK_BUFFER_SIZE * 2; i++)
 		pBufferTemp[i] = pBuffer[i];
 	
-	// 通过属性头计算第一个属性偏移
-	// 获取文件头信息
+	// ͨ������ͷ�����һ������ƫ��
+	// ��ȡ�ļ�ͷ��Ϣ
 	UINT16 Offset = L2_FILE_NTFS_FileItemHeaderAnalysis(pBufferTemp, pNTFSFileSwitched);
 	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: Offset: %d ", __LINE__, Offset);
 	
-	// 获取每个属性信息
+	// ��ȡÿ��������Ϣ
 	for (UINT16 i = 0; ; i++)
 	{
 		L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: For loop analysis attribute count: %d ", __LINE__, i + 1);

@@ -2,13 +2,13 @@
 /*************************************************
     .
     File name:      	*.*
-    Authorï¼š	        	ä»»å¯çº¢
-    IDï¼š					00001
+    Author£º	        	ÈÎÆôºì
+    ID£º					00001
     Date:          		202107
     Description:    	
-    Others:         	æ— 
+    Others:         	ÎÞ
 
-    History:        	æ— 
+    History:        	ÎÞ
 	    1.  Date:
 		    Author: 
 		    ID:
@@ -32,13 +32,13 @@
 
 /****************************************************************************
 *
-*  æè¿°:   éœ€è¦è¿›è¡Œå¤§å°ç«¯è½¬æ¢ï¼Œè¿™é‡Œè¾¹åº”è¯¥å¯ä»¥å°è£…æˆæŽ¥å£
+*  ÃèÊö:   ÐèÒª½øÐÐ´óÐ¡¶Ë×ª»»£¬ÕâÀï±ßÓ¦¸Ã¿ÉÒÔ·â×°³É½Ó¿Ú
 *
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º xxxxx
+*  ²ÎÊý2£º xxxxx
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 VOID L2_FILE_Transfer(MasterBootRecord *pSource, MasterBootRecordSwitched *pDest)
@@ -67,13 +67,13 @@ VOID L2_FILE_Transfer(MasterBootRecord *pSource, MasterBootRecordSwitched *pDest
 
 /****************************************************************************
 *
-*  æè¿°:   xxxxx
+*  ÃèÊö:   xxxxx
 *
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º xxxxx
+*  ²ÎÊý2£º xxxxx
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 EFI_STATUS L1_FILE_FAT32_DataSectorAnalysis(UINT8 *p, MasterBootRecordSwitched *pMBRSwitched)
@@ -82,7 +82,7 @@ EFI_STATUS L1_FILE_FAT32_DataSectorAnalysis(UINT8 *p, MasterBootRecordSwitched *
     
     //pMBR = (MasterBootRecord *)AllocateZeroPool(DISK_BUFFER_SIZE);
     
-    //è¿™ç§å¯èƒ½å­˜åœ¨å†…å­˜æ³„éœ²ï¼Œå¦‚æžœæ²¡æ¬¡ç”³è¯·å†…å­˜éƒ½ä¸é‡Šæ”¾
+    //ÕâÖÖ¿ÉÄÜ´æÔÚÄÚ´æÐ¹Â¶£¬Èç¹ûÃ»´ÎÉêÇëÄÚ´æ¶¼²»ÊÍ·Å
     pMBR = (MasterBootRecord *)L2_MEMORY_Allocate("MBR Buffer", MEMORY_TYPE_PARTITION, DISK_BUFFER_SIZE);
     if (NULL == pMBR)
     {
@@ -92,8 +92,8 @@ EFI_STATUS L1_FILE_FAT32_DataSectorAnalysis(UINT8 *p, MasterBootRecordSwitched *
 	//
     L1_MEMORY_Copy(pMBR, p, DISK_BUFFER_SIZE);
 	
-    // å¤§ç«¯å­—èŠ‚åºï¼šä½Žä½å­—èŠ‚åœ¨é«˜åœ°å€ï¼Œé«˜ä½å­—èŠ‚ä½Žåœ°å€ä¸Šã€‚è¿™æ˜¯äººç±»è¯»å†™æ•°å€¼çš„æ–¹æ³•ã€‚
-    // å°ç«¯å­—èŠ‚åºï¼šä¸Žä¸Šé¢ç›¸åã€‚ä½Žä½å­—èŠ‚åœ¨ä½Žåœ°å€ï¼Œé«˜ä½å­—èŠ‚åœ¨é«˜åœ°å€ã€‚
+    // ´ó¶Ë×Ö½ÚÐò£ºµÍÎ»×Ö½ÚÔÚ¸ßµØÖ·£¬¸ßÎ»×Ö½ÚµÍµØÖ·ÉÏ¡£ÕâÊÇÈËÀà¶ÁÐ´ÊýÖµµÄ·½·¨¡£
+    // Ð¡¶Ë×Ö½ÚÐò£ºÓëÉÏÃæÏà·´¡£µÍÎ»×Ö½ÚÔÚµÍµØÖ·£¬¸ßÎ»×Ö½ÚÔÚ¸ßµØÖ·¡£
     
     L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d ReservedSelector:%02X%02X SectorsPerFat:%02X%02X%02X%02X BootPathStartCluster:%02X%02X%02X%02X NumFATS: %X", 
                                         __LINE__,
@@ -114,13 +114,13 @@ EFI_STATUS L1_FILE_FAT32_DataSectorAnalysis(UINT8 *p, MasterBootRecordSwitched *
 
 /****************************************************************************
 *
-*  æè¿°:   xxxxx
+*  ÃèÊö:   xxxxx
 *
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º xxxxx
+*  ²ÎÊý2£º xxxxx
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 EFI_STATUS L2_FILE_FAT32_DataSectorHandle(UINT16 DeviceID)
@@ -151,13 +151,13 @@ EFI_STATUS L2_FILE_FAT32_DataSectorHandle(UINT16 DeviceID)
 
 /****************************************************************************
 *
-*  æè¿°:   xxxxx
+*  ÃèÊö:   xxxxx
 *
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º xxxxx
+*  ²ÎÊý2£º xxxxx
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 EFI_STATUS L2_FILE_FAT32_FileModify(UINT16 DeviceID)
@@ -172,11 +172,11 @@ EFI_STATUS L2_FILE_FAT32_FileModify(UINT16 DeviceID)
         return -1;
     }
 
-    //éœ€è¦æ‰¾èŽ·å–æœ‰æ•ˆçš„é¡¹ç´¢å¼•
+    //ÐèÒªÕÒ»ñÈ¡ÓÐÐ§µÄÏîË÷Òý
     UINT16 index = FolderItemValidIndexArray[FolderItemID];
     L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d index: %d\n", __LINE__, index);
         
-    //FAT32æ–‡ä»¶ç³»ç»Ÿæ ¼å¼
+    //FAT32ÎÄ¼þÏµÍ³¸ñÊ½
     if (device[PartitionItemID].FileSystemType == FILE_SYSTEM_FAT32)
     {
 
@@ -185,8 +185,8 @@ EFI_STATUS L2_FILE_FAT32_FileModify(UINT16 DeviceID)
         UINT32 StartCluster = (UINT32)High2B << 16 | (UINT32)Low2B;
 
         // Start cluster id is 2, exclude 0,1
-        //è¿™æ ·å†™æ­»8192æˆ–è€…1592ï¼Œä¼šæœ‰BUG
-        //æ­£å¸¸åº”è¯¥ç”¨è¿™ä¸ªï¼šdevice[DeviceID].StartSectorNumber
+        //ÕâÑùÐ´ËÀ8192»òÕß1592£¬»áÓÐBUG
+        //Õý³£Ó¦¸ÃÓÃÕâ¸ö£ºdevice[DeviceID].StartSectorNumber
         UINT32 StartSectorNumber = 15920 + (StartCluster - 2) * 8;
         L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], 
                         "%d High2B: %X Low2B: %X StartCluster: %X StartSectorNumber: %X\n", 
@@ -221,20 +221,20 @@ EFI_STATUS L2_FILE_FAT32_FileModify(UINT16 DeviceID)
 
         switch(pItems[index].Attribute[0])
         {
-            //å¦‚æžœæ˜¯ç›®å½•ï¼Œåˆ™æ˜¾ç¤ºå­ç›®å½•
+            //Èç¹ûÊÇÄ¿Â¼£¬ÔòÏÔÊ¾×ÓÄ¿Â¼
             case 0x10:  L1_MEMORY_Memset(&pItems, 0, sizeof(pItems));
                         L1_MEMORY_Copy(&pItems, Buffer, DISK_BUFFER_SIZE);
                         L2_STORE_FolderItemsPrint();
                         break;
 
-            //å¦‚æžœæ˜¯æ–‡ä»¶ï¼Œåˆ™æ˜¾ç¤ºæ–‡ä»¶å†…å®¹
+            //Èç¹ûÊÇÎÄ¼þ£¬ÔòÏÔÊ¾ÎÄ¼þÄÚÈÝ
             case 0x20: L2_PARTITION_FileContentPrint(Buffer); 
 
-                        //æˆ‘ä»¬å°†ä»ŽUç›˜è¯»å–çš„ç¼“å†²åŒºï¼Œå‰5ä½ï¼Œæ¯ä½åœ¨åŽŸæ¥çš„åŸºç¡€ä¸Š+1
+                        //ÎÒÃÇ½«´ÓUÅÌ¶ÁÈ¡µÄ»º³åÇø£¬Ç°5Î»£¬Ã¿Î»ÔÚÔ­À´µÄ»ù´¡ÉÏ+1
                         for (UINT16 i = 0; i < 5; i++)
                             Buffer[i] += 1;
                             
-                        //ç„¶åŽå†™å…¥Uç›˜ï¼Œè¿™æ ·å¯ä»¥çœ‹åˆ°Uç›˜ç›®å½•ä¸‹æ–‡ä»¶çš„å˜åŒ–ï¼Œä¸è¿‡è¿™é‡Œè¾¹æœ‰ç‚¹é—®é¢˜ï¼Œæˆ‘ä»¬ä¿®æ”¹æ–‡ä»¶æ­£å¸¸è¿˜éœ€è¦è®°å½•ä¿®æ”¹æ–‡ä»¶çš„æ—¥æœŸï¼Œæ—¶é—´ä¿¡æ¯
+                        //È»ºóÐ´ÈëUÅÌ£¬ÕâÑù¿ÉÒÔ¿´µ½UÅÌÄ¿Â¼ÏÂÎÄ¼þµÄ±ä»¯£¬²»¹ýÕâÀï±ßÓÐµãÎÊÌâ£¬ÎÒÃÇÐÞ¸ÄÎÄ¼þÕý³£»¹ÐèÒª¼ÇÂ¼ÐÞ¸ÄÎÄ¼þµÄÈÕÆÚ£¬Ê±¼äÐÅÏ¢
                         L2_STORE_Write(PartitionItemID, StartSectorNumber, 1, Buffer);
                         break;
     
@@ -248,13 +248,13 @@ EFI_STATUS L2_FILE_FAT32_FileModify(UINT16 DeviceID)
 
 /****************************************************************************
 *
-*  æè¿°:   xxxxx
+*  ÃèÊö:   xxxxx
 *
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º xxxxx
+*  ²ÎÊý2£º xxxxx
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 EFI_STATUS L2_FILE_FAT32_FileAdd(UINT16 DeviceID)
@@ -263,13 +263,13 @@ EFI_STATUS L2_FILE_FAT32_FileAdd(UINT16 DeviceID)
 
 /****************************************************************************
 *
-*  æè¿°:   xxxxx
+*  ÃèÊö:   xxxxx
 *
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º xxxxx
+*  ²ÎÊý2£º xxxxx
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 EFI_STATUS L2_FILE_FAT32_FileOpen(UINT16 DeviceID)
@@ -278,18 +278,18 @@ EFI_STATUS L2_FILE_FAT32_FileOpen(UINT16 DeviceID)
 
 /****************************************************************************
 *
-*  æè¿°:   xxxxx
+*  ÃèÊö:   xxxxx
 *
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º xxxxx
+*  ²ÎÊý2£º xxxxx
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 EFI_STATUS L2_FILE_FAT32_FileDelete(UINT16 DeviceID)
 {
-    //æš‚æ—¶å…ˆä¸å®žçŽ°
+    //ÔÝÊ±ÏÈ²»ÊµÏÖ
     EFI_STATUS Status;
     
     UINT8 Buffer[DISK_BUFFER_SIZE];
@@ -301,11 +301,11 @@ EFI_STATUS L2_FILE_FAT32_FileDelete(UINT16 DeviceID)
         return -1;
     }
 
-    //éœ€è¦æ‰¾èŽ·å–æœ‰æ•ˆçš„é¡¹ç´¢å¼•
+    //ÐèÒªÕÒ»ñÈ¡ÓÐÐ§µÄÏîË÷Òý
     UINT16 index = FolderItemValidIndexArray[FolderItemID];
     L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d index: %d\n", __LINE__, index);
         
-    //FAT32æ–‡ä»¶ç³»ç»Ÿæ ¼å¼
+    //FAT32ÎÄ¼þÏµÍ³¸ñÊ½
     if (device[PartitionItemID].FileSystemType == FILE_SYSTEM_FAT32)
     {       
 
@@ -314,7 +314,7 @@ EFI_STATUS L2_FILE_FAT32_FileDelete(UINT16 DeviceID)
         UINT32 StartCluster = (UINT32)High2B << 16 | (UINT32)Low2B;
 
         // Start cluster id is 2, exclude 0,1
-        //è¿™æ ·å†™æ­»8192ï¼Œä¼šæœ‰BUG
+        //ÕâÑùÐ´ËÀ8192£¬»áÓÐBUG
         UINT32 StartSectorNumber = 15920 + (StartCluster - 2) * 8;
         L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], 
                         "%d High2B: %X Low2B: %X StartCluster: %X StartSectorNumber: %X\n", 
@@ -326,17 +326,17 @@ EFI_STATUS L2_FILE_FAT32_FileDelete(UINT16 DeviceID)
 
         switch(pItems[index].Attribute[0])
         {
-            //å¦‚æžœæ˜¯ç›®å½•ï¼Œåˆ™æ˜¾ç¤ºå­ç›®å½•
+            //Èç¹ûÊÇÄ¿Â¼£¬ÔòÏÔÊ¾×ÓÄ¿Â¼
             case 0x10:  L1_MEMORY_Memset(&pItems, 0, sizeof(pItems));
                         L1_MEMORY_Copy(&pItems, Buffer, DISK_BUFFER_SIZE);
                         L2_STORE_FolderItemsPrint();
                         break;
 
-            //å¦‚æžœæ˜¯æ–‡ä»¶ï¼Œåˆ™XXX
+            //Èç¹ûÊÇÎÄ¼þ£¬ÔòXXX
             case 0x20: 
                         L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], 
                         "%d File: \n", __LINE__);
-                       //æ‰“å°ä»ŽUç›˜è¯»å–çš„å†…å®¹
+                       //´òÓ¡´ÓUÅÌ¶ÁÈ¡µÄÄÚÈÝ
                        L2_STORE_Read(2, 16384, 1, Buffer);
                        //L2_PARTITION_FileContentPrint(Buffer);
 

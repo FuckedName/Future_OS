@@ -2,13 +2,13 @@
 /*************************************************
     .
     File name:      	*.*
-    Authorï¼š	        	ä»»å¯çº¢
-    IDï¼š					00001
+    Author£º	        	ÈÎÆôºì
+    ID£º					00001
     Date:          		202107
     Description:    	
-    Others:         	æ— 
+    Others:         	ÎÞ
 
-    History:        	æ— 
+    History:        	ÎÞ
 	    1.  Date:
 		    Author: 
 		    ID:
@@ -43,13 +43,13 @@ EFI_HANDLE  TimerOne    = NULL;
 
 /****************************************************************************
 *
-*  æè¿°:   å®šæ—¶å™¨åˆå§‹åŒ–ï¼Œè¿™ä¸ªå‡½æ•°å†™çš„ä¸å¥½ï¼ŒåŠŸèƒ½å¤ªæ‚äº†ï¼Œæœ‰æœºä¼šä¼˜åŒ–ä¸‹ã€‚
+*  ÃèÊö:   ¶¨Ê±Æ÷³õÊ¼»¯£¬Õâ¸öº¯ÊýÐ´µÄ²»ºÃ£¬¹¦ÄÜÌ«ÔÓÁË£¬ÓÐ»ú»áÓÅ»¯ÏÂ¡£
 *
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º xxxxx
+*  ²ÎÊý2£º xxxxx
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 EFI_STATUS L2_TIMER_IntervalInit()
@@ -67,7 +67,7 @@ EFI_STATUS L2_TIMER_IntervalInit()
         return -1;
     }
 
-	//è®¾ç½®æ—¶é—´ç‰‡å›žè°ƒå‡½æ•°L2_TIMER_Slice
+	//ÉèÖÃÊ±¼äÆ¬»Øµ÷º¯ÊýL2_TIMER_Slice
     Status = gBS->CreateEvent(EVT_NOTIFY_SIGNAL | EVT_TIMER,
                             TPL_CALLBACK,
                             L2_TIMER_Slice,
@@ -98,7 +98,7 @@ EFI_STATUS L2_TIMER_IntervalInit()
         //if (*TimerCount % 1000000 == 0)
         L2_DEBUG_Print1(0, ScreenHeight - 30 - 4 * 16, "%d: L2_TIMER_IntervalInit p:%x %lu %llu\n", __LINE__, TimerCount, *TimerCount, QuitTimerCount);
 
-		//å…³æœºç”»é¢
+		//¹Ø»ú»­Ãæ
         if (TRUE == SystemQuitFlag)
         {   
             if (QuitTimerCount == 0)
@@ -110,7 +110,7 @@ EFI_STATUS L2_TIMER_IntervalInit()
 
         SystemQuitCount = *TimerCount - QuitTimerCount;
 
-		//å…³æœºç”»é¢
+		//¹Ø»ú»­Ãæ
         if ((TRUE == SystemQuitFlag) && ( SystemQuitCount % 100 == 0))
         {
             UINT16 count = SystemQuitCount / 100;
@@ -130,7 +130,7 @@ EFI_STATUS L2_TIMER_IntervalInit()
 			L2_SCREEN_Draw(pDeskBuffer, 0, 0, 0, 0, ScreenWidth, ScreenHeight);	   
         }
 
-		//å…³æœºç”»é¢å®ŒæˆåŽçš„å…³æœºæ“ä½œ
+		//¹Ø»ú»­ÃæÍê³ÉºóµÄ¹Ø»ú²Ù×÷
         if ((TRUE == SystemQuitFlag) && ( SystemQuitCount >= ScreenWidth))
         {
             L2_DEBUG_Print1(0, ScreenHeight - 30 - 6 * 16, "%d: L2_TIMER_IntervalInit p:%x %lu \n", __LINE__, TimerCount, *TimerCount);

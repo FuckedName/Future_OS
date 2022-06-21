@@ -2,13 +2,13 @@
 /*************************************************
     .
     File name:      	*.*
-    Authorï¼š	        	ä»»å¯çº¢
-    IDï¼š					00001
+    Author£º	        	ÈÎÆôºì
+    ID£º					00001
     Date:          		202107
     Description:    	
-    Others:         	æ— 
+    Others:         	ÎÞ
 
-    History:        	æ— 
+    History:        	ÎÞ
 	    1.  Date:
 		    Author: 
 		    ID:
@@ -46,14 +46,14 @@
 
 /****************************************************************************
 *
-*  æè¿°:   ç£ç›˜æˆ–ä¼˜ç›˜åˆ†åŒºè¯»å–ï¼Œä»¥ReadSize * 512ä¸ºè¯»å–å¤§å°ï¼Œæ€€ç–‘è¿™é‡Œæœ‰å¯ä»¥ä¼˜åŒ–çš„ç©ºé—´ï¼Œç†è®ºä¸Šï¼Œåˆå§‹åŒ–æŽ¥å£åªåº”è¯¥è°ƒç”¨ä¸€æ¬¡
+*  ÃèÊö:   ´ÅÅÌ»òÓÅÅÌ·ÖÇø¶ÁÈ¡£¬ÒÔReadSize * 512Îª¶ÁÈ¡´óÐ¡£¬»³ÒÉÕâÀïÓÐ¿ÉÒÔÓÅ»¯µÄ¿Õ¼ä£¬ÀíÂÛÉÏ£¬³õÊ¼»¯½Ó¿ÚÖ»Ó¦¸Ãµ÷ÓÃÒ»´Î
 *
-*  å‚æ•°deviceIDï¼š å¾…è¯»å–åˆ†åŒºå¯¹åº”çš„è®¾å¤‡ID
-*  å‚æ•°StartSectorNumberï¼šå¼€å§‹è¯»å–çš„æ‰‡åŒºå·ï¼Œå®žé™…è¯»å–æ—¶ä¼š * 512ï¼Œè½¬åŒ–ä¸ºä»Žå¤šå°‘å­—èŠ‚è¯»å–
-*  å‚æ•°ReadSizeï¼š è¯»å–ReadSize * 512ä¸ºè¯»å–å¤§å°
-*  å‚æ•°pBufferï¼š     æ•°æ®è¯»å–åŽå­˜æ”¾çš„bufferï¼Œæ³¨ï¼šç”±è°ƒç”¨è€…ç”³è¯·å’Œé‡Šæ”¾
+*  ²ÎÊýdeviceID£º ´ý¶ÁÈ¡·ÖÇø¶ÔÓ¦µÄÉè±¸ID
+*  ²ÎÊýStartSectorNumber£º¿ªÊ¼¶ÁÈ¡µÄÉÈÇøºÅ£¬Êµ¼Ê¶ÁÈ¡Ê±»á * 512£¬×ª»¯Îª´Ó¶àÉÙ×Ö½Ú¶ÁÈ¡
+*  ²ÎÊýReadSize£º ¶ÁÈ¡ReadSize * 512Îª¶ÁÈ¡´óÐ¡
+*  ²ÎÊýpBuffer£º     Êý¾Ý¶ÁÈ¡ºó´æ·ÅµÄbuffer£¬×¢£ºÓÉµ÷ÓÃÕßÉêÇëºÍÊÍ·Å
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 EFI_STATUS L2_STORE_Read(UINT8 deviceID, UINT64 StartSectorNumber, UINT16 ReadSize, UINT8 *pBuffer)
@@ -115,13 +115,13 @@ EFI_STATUS L2_STORE_Read(UINT8 deviceID, UINT64 StartSectorNumber, UINT16 ReadSi
 
 /****************************************************************************
 *
-*  æè¿°:    ç£ç›˜æˆ–ä¼˜ç›˜åˆ†åŒºå†™å…¥ï¼Œä»¥ReadSize * 512ä¸ºè¯»å–å¤§å°  ï¼Œæ€€ç–‘è¿™é‡Œæœ‰å¯ä»¥ä¼˜åŒ–çš„ç©ºé—´ï¼Œç†è®ºä¸Šï¼Œåˆå§‹åŒ–æŽ¥å£åªåº”è¯¥è°ƒç”¨ä¸€æ¬¡
+*  ÃèÊö:    ´ÅÅÌ»òÓÅÅÌ·ÖÇøÐ´Èë£¬ÒÔReadSize * 512Îª¶ÁÈ¡´óÐ¡  £¬»³ÒÉÕâÀïÓÐ¿ÉÒÔÓÅ»¯µÄ¿Õ¼ä£¬ÀíÂÛÉÏ£¬³õÊ¼»¯½Ó¿ÚÖ»Ó¦¸Ãµ÷ÓÃÒ»´Î
 *
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º xxxxx
+*  ²ÎÊý2£º xxxxx
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 EFI_STATUS L2_STORE_Write(UINT8 deviceID, UINT64 StartSectorNumber, UINT16 WriteSize, UINT8 *pBuffer)
@@ -185,13 +185,13 @@ EFI_STATUS L2_STORE_Write(UINT8 deviceID, UINT64 StartSectorNumber, UINT16 Write
 
 /****************************************************************************
 *
-*  æè¿°:   å¯¹åˆ†åŒºå­—ç¬¦ä¸²åˆ†æžã€‚ä¸è¿‡æ€€ç–‘è¿™é‡Œè¾¹å¯èƒ½æœ‰BUG
+*  ÃèÊö:   ¶Ô·ÖÇø×Ö·û´®·ÖÎö¡£²»¹ý»³ÒÉÕâÀï±ß¿ÉÄÜÓÐBUG
 *
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º xxxxx
+*  ²ÎÊý2£º xxxxx
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 void L2_STORE_TextDevicePathAnalysis(CHAR16 *p, DEVICE_PARAMETER *device, UINTN count1)
@@ -326,14 +326,14 @@ void L2_STORE_TextDevicePathAnalysis(CHAR16 *p, DEVICE_PARAMETER *device, UINTN 
 
 /****************************************************************************
 *
-*  æè¿°: å¤–éƒ¨å­˜å‚¨è®¾å¤‡å¦‚ç£ç›˜ã€Uç›˜åˆ†åŒºå‚æ•°ï¼Œæ³¨ï¼šåŒä¸€ä¸ªç£ç›˜ã€Uç›˜å¯èƒ½æœ‰å¤šä¸ªåˆ†åŒºã€‚
-*  è¿™ä¸ªä»£ç å†™çš„ä¸å¤ªå¥½ï¼Œæ­£å¸¸æƒ…å†µä¸‹ï¼Œä¸åº”è¯¥å¯¹å–å‡ºæ¥çš„è¿™ä¸ªå€¼ï¼šTextDevicePathï¼Œè§£æžï¼Œå•ä¸€èŒè´£ã€‚
+*  ÃèÊö: Íâ²¿´æ´¢Éè±¸Èç´ÅÅÌ¡¢UÅÌ·ÖÇø²ÎÊý£¬×¢£ºÍ¬Ò»¸ö´ÅÅÌ¡¢UÅÌ¿ÉÄÜÓÐ¶à¸ö·ÖÇø¡£
+*  Õâ¸ö´úÂëÐ´µÄ²»Ì«ºÃ£¬Õý³£Çé¿öÏÂ£¬²»Ó¦¸Ã¶ÔÈ¡³öÀ´µÄÕâ¸öÖµ£ºTextDevicePath£¬½âÎö£¬µ¥Ò»Ö°Ôð¡£
 *
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º xxxxx
+*  ²ÎÊý2£º xxxxx
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 EFI_STATUS L2_STORE_PartitionsParameterGet()

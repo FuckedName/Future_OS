@@ -2,13 +2,13 @@
 /*************************************************
     .
     File name:      	*.*
-    Authorï¼š	        	ä»»å¯çº¢
-    IDï¼š					00001
+    Author£º	        	ÈÎÆôºì
+    ID£º					00001
     Date:          		202107
     Description:    	
-    Others:         	æ— 
+    Others:         	ÎÞ
 
-    History:        	æ— 
+    History:        	ÎÞ
 	    1.  Date:
 		    Author: 
 		    ID:
@@ -32,13 +32,13 @@ unsigned char AsciiBuffer[0x100] = {0};
 
 /****************************************************************************
 *
-*  æè¿°:   å­—ç¬¦ä¸²é•¿åº¦è®¡ç®—
+*  ÃèÊö:   ×Ö·û´®³¤¶È¼ÆËã
 *
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º xxxxx
+*  ²ÎÊý2£º xxxxx
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 unsigned long long L1_STRING_Length(char *String)
@@ -53,13 +53,13 @@ unsigned long long L1_STRING_Length(char *String)
 
 /****************************************************************************
 *
-*  æè¿°:  æŠŠä¸€ä¸ªå­—ç¬¦ä¸²å€’åº
+*  ÃèÊö:  °ÑÒ»¸ö×Ö·û´®µ¹Ðò
 *
-*  å‚æ•°1ï¼š ç¤ºä¾‹ï¼š"/OS/resource/zhufeng.bmp"ï¼Œå…¶ä¸­/OSæ˜¯æŒ‡ç³»ç»Ÿç›®å½•
-*  å‚æ•°2ï¼š pBuffer
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º Ê¾Àý£º"/OS/resource/zhufeng.bmp"£¬ÆäÖÐ/OSÊÇÖ¸ÏµÍ³Ä¿Â¼
+*  ²ÎÊý2£º pBuffer
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 UINT16 L1_STRING_Reverse(UINT8 *s)
@@ -79,13 +79,13 @@ UINT16 L1_STRING_Reverse(UINT8 *s)
 
 /****************************************************************************
 *
-*  æè¿°:  æŠŠå•å­—èŠ‚å­—ç¬¦ä¸²ï¼Œè½¬æ¢æˆåŒå­—èŠ‚å­—ç¬¦ä¸²
+*  ÃèÊö:  °Ñµ¥×Ö½Ú×Ö·û´®£¬×ª»»³ÉË«×Ö½Ú×Ö·û´®
 *
-*  å‚æ•°1ï¼š ç¤ºä¾‹ï¼š"/OS/resource/zhufeng.bmp"ï¼Œå…¶ä¸­/OSæ˜¯æŒ‡ç³»ç»Ÿç›®å½•
-*  å‚æ•°2ï¼š pBuffer
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º Ê¾Àý£º"/OS/resource/zhufeng.bmp"£¬ÆäÖÐ/OSÊÇÖ¸ÏµÍ³Ä¿Â¼
+*  ²ÎÊý2£º pBuffer
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 L1_STRING_AsciiStringToWchar(CHAR8          *pSource, unsigned short *pDest)
@@ -105,13 +105,13 @@ L1_STRING_AsciiStringToWchar(CHAR8          *pSource, unsigned short *pDest)
 
 /****************************************************************************
 *
-*  æè¿°:  æŠŠå°å†™å­—ç¬¦æ”¹ä¸ºå¤§å†™
+*  ÃèÊö:  °ÑÐ¡Ð´×Ö·û¸ÄÎª´óÐ´
 *
-*  å‚æ•°1ï¼š 
-*  å‚æ•°2ï¼š 
-*  å‚æ•°nï¼š 
+*  ²ÎÊý1£º 
+*  ²ÎÊý2£º 
+*  ²ÎÊýn£º 
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 char L1_STRING_UpperCaseString(char c)
@@ -165,13 +165,13 @@ BOOLEAN L1_STRING_IsValidNameChar (CHAR8      NameChar)
 
 /****************************************************************************
 *
-*  æè¿°:   å­—ç¬¦ä¸²æ¯”è¾ƒ
+*  ÃèÊö:   ×Ö·û´®±È½Ï
 *
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º xxxxx
+*  ²ÎÊý2£º xxxxx
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 int L1_STRING_Compare(unsigned char *p1, unsigned char *p2, unsigned int length)
@@ -192,13 +192,13 @@ int L1_STRING_Compare(unsigned char *p1, unsigned char *p2, unsigned int length)
 
 /****************************************************************************
 *
-*  æè¿°:   å­—ç¬¦æ˜¯å¦æ˜¯æ•°å­—ã€å¤§å°å†™å­—æ¯
+*  ÃèÊö:   ×Ö·ûÊÇ·ñÊÇÊý×Ö¡¢´óÐ¡Ð´×ÖÄ¸
 *
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º xxxxx
+*  ²ÎÊý2£º xxxxx
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 int L1_STRING_IsAllNumber (int c)
@@ -214,13 +214,13 @@ int L1_STRING_IsAllNumber (int c)
 
 /****************************************************************************
 *
-*  æè¿°:   å°å†™å­—æ¯è½¬æˆå¤§å†™å­—æ¯
+*  ÃèÊö:   Ð¡Ð´×ÖÄ¸×ª³É´óÐ´×ÖÄ¸
 *
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º xxxxx
+*  ²ÎÊý2£º xxxxx
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 int L1_STRING_ToUpper( int c  )
@@ -236,13 +236,13 @@ int L1_STRING_ToUpper( int c  )
 
 /****************************************************************************
 *
-*  æè¿°:   å­—ç¬¦æ˜¯å¦æ˜¯ç©ºç™½å­—ç¬¦
+*  ÃèÊö:   ×Ö·ûÊÇ·ñÊÇ¿Õ°××Ö·û
 *
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º xxxxx
+*  ²ÎÊý2£º xxxxx
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 int L1_STRING_IsSpace (int c)
@@ -255,13 +255,13 @@ int L1_STRING_IsSpace (int c)
 
 /****************************************************************************
 *
-*  æè¿°:   å°æ•°è½¬æˆå­—ç¬¦ä¸²
+*  ÃèÊö:   Ð¡Êý×ª³É×Ö·û´®
 *
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º xxxxx
+*  ²ÎÊý2£º xxxxx
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 char *L1_STRING_FloatToString(float val, int precision, char *buf)

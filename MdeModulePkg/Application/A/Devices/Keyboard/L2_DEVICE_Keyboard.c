@@ -2,13 +2,13 @@
 /*************************************************
     .
     File name:      	*.*
-    Authorï¼š	        	ä»»å¯çº¢
-    IDï¼š					00001
+    Author£º	        	ÈÎÆôºì
+    ID£º					00001
     Date:          		202107
     Description:    	
-    Others:         	æ— 
+    Others:         	ÎÞ
 
-    History:        	æ— 
+    History:        	ÎÞ
 	    1.  Date:
 		    Author: 
 		    ID:
@@ -49,7 +49,7 @@ UINT16 keyboard_count = 0;
 
 #define KEYBOARD_BUFFER_LENGTH (30) 
 
-//ç”¨äºŽè®°å½•å·²ç»é”®ç›˜è¾“å…¥å­—ç¬¦
+//ÓÃÓÚ¼ÇÂ¼ÒÑ¾­¼üÅÌÊäÈë×Ö·û
 char pKeyboardInputBuffer[KEYBOARD_BUFFER_LENGTH] = {0};
 
 EFI_HANDLE                        *Handles;
@@ -61,13 +61,13 @@ UINTN                             HandleCount;
 
 /****************************************************************************
 *
-*  æè¿°:   xxxxx
+*  ÃèÊö:   xxxxx
 *
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º xxxxx
+*  ²ÎÊý2£º xxxxx
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 VOID L2_KEYBOARD_KeyPressed()
@@ -107,18 +107,18 @@ VOID EFIAPI L2_KEYBOARD_Init (
 
 /****************************************************************************
 *
-*  æè¿°:   å¤„ç†é”®ç›˜è¾“å…¥çš„å‘½ä»¤è¡Œ
+*  ÃèÊö:   ´¦Àí¼üÅÌÊäÈëµÄÃüÁîÐÐ
 *
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º xxxxx
+*  ²ÎÊý2£º xxxxx
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 VOID L2_KEYBOARD_CommandHandle (UINT16 uniChar)
 {
-    // Enter pressedï¼Œæ˜¾ç¤ºä»¥è¾“å…¥åœ°å€å¼€å§‹çš„ä¸€æ®µå†…å­˜åœ°å€
+    // Enter pressed£¬ÏÔÊ¾ÒÔÊäÈëµØÖ·¿ªÊ¼µÄÒ»¶ÎÄÚ´æµØÖ·
     if (0x0D == uniChar)
     {
         UINT64 Sumary = 0;
@@ -141,7 +141,7 @@ VOID L2_KEYBOARD_CommandHandle (UINT16 uniChar)
             L2_DEBUG_Print1(DISK_READ_BUFFER_X + ScreenWidth * 3 / 4 + (j % 16) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 16), "%02X ", pAddress[j] & 0xff);
         }
 
-        //åˆå§‹åŒ–é”®ç›˜è¾“å…¥å­—ç¬¦æ•°ç»„
+        //³õÊ¼»¯¼üÅÌÊäÈë×Ö·ûÊý×é
         keyboard_input_count = 0;
         
         for (UINT16 i = 0; i < KEYBOARD_BUFFER_LENGTH; i++)
@@ -162,15 +162,15 @@ VOID L2_KEYBOARD_CommandHandle (UINT16 uniChar)
             }
         }   
 
-        //åˆå§‹åŒ–åŽï¼Œä»Žç¬¬1è¡Œå¼€å§‹æ˜¾ç¤º
+        //³õÊ¼»¯ºó£¬´ÓµÚ1ÐÐ¿ªÊ¼ÏÔÊ¾
         LogStatusErrorCount = 0;
 
-        //æ˜¾ç¤ºè¾“å…¥çš„æŒ‰é”®
+        //ÏÔÊ¾ÊäÈëµÄ°´¼ü
         L2_DEBUG_Print1(DISPLAY_KEYBOARD_X, DISPLAY_KEYBOARD_Y, "%a keyboard_input_count: %04d ", pKeyboardInputBuffer, keyboard_input_count);
     }
     else
     {
-        //æ˜¾ç¤ºè¾“å…¥çš„æŒ‰é”®
+        //ÏÔÊ¾ÊäÈëµÄ°´¼ü
         L2_DEBUG_Print1(DISPLAY_KEYBOARD_X, DISPLAY_KEYBOARD_Y, "%a keyboard_input_count: %04d ", pKeyboardInputBuffer, keyboard_input_count);
     }
 
@@ -180,13 +180,13 @@ VOID L2_KEYBOARD_CommandHandle (UINT16 uniChar)
 
 /****************************************************************************
 *
-*  æè¿°:   é”®ç›˜æŒ‰é”®äº‹ä»¶å“åº”æ€»å…¥å£å‡½æ•°
+*  ÃèÊö:   ¼üÅÌ°´¼üÊÂ¼þÏìÓ¦×ÜÈë¿Úº¯Êý
 *
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º xxxxx
+*  ²ÎÊý2£º xxxxx
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 VOID EFIAPI L2_KEYBOARD_Event (
@@ -238,9 +238,9 @@ VOID EFIAPI L2_KEYBOARD_Event (
     
      //DrawAsciiCharUseBuffer(pDeskBuffer, DISPLAY_KEYBOARD_X, DISPLAY_KEYBOARD_Y, uniChar, Color);
 
-	//æ›´æ–°å›¾å±‚ä¿¡æ¯ï¼Œè¿™é‡Œå¯ä»¥ç¨ä¼˜åŒ–ä¸‹ï¼Œå¦‚æžœæ²¡æœ‰æŒ‰é”®äº‹ä»¶ï¼Œåˆ™å¯ä»¥ä¸æ›´æ–°å›¾å±‚ï¼Œä»¥èŠ‚çœCPUèµ„æº
-	//ç”±äºŽå±å¹•çš„æ—¶é—´åœ¨ä¸åœçš„èµ°ï¼Œæ—¶é—´ç‰‡ä¿¡æ¯ä¹Ÿåœ¨ä¸æ–­çš„å˜åŒ–ï¼Œæ‰€ä»¥å¹¶ä¸èƒ½å®Œå…¨ä¼˜åŒ–
-	//å¦‚æžœèƒ½åšåˆ°ä¸Šé¢çš„ä¿¡æ¯æ›´æ–°åªåˆ·æ–°å¯¹åº”çš„åŒºåŸŸï¼Œåˆ™æ˜¯å¯ä»¥çš„
+	//¸üÐÂÍ¼²ãÐÅÏ¢£¬ÕâÀï¿ÉÒÔÉÔÓÅ»¯ÏÂ£¬Èç¹ûÃ»ÓÐ°´¼üÊÂ¼þ£¬Ôò¿ÉÒÔ²»¸üÐÂÍ¼²ã£¬ÒÔ½ÚÊ¡CPU×ÊÔ´
+	//ÓÉÓÚÆÁÄ»µÄÊ±¼äÔÚ²»Í£µÄ×ß£¬Ê±¼äÆ¬ÐÅÏ¢Ò²ÔÚ²»¶ÏµÄ±ä»¯£¬ËùÒÔ²¢²»ÄÜÍêÈ«ÓÅ»¯
+	//Èç¹ûÄÜ×öµ½ÉÏÃæµÄÐÅÏ¢¸üÐÂÖ»Ë¢ÐÂ¶ÔÓ¦µÄÇøÓò£¬ÔòÊÇ¿ÉÒÔµÄ
     L2_GRAPHICS_LayerCompute(iMouseX, iMouseY, 0);
 }
 

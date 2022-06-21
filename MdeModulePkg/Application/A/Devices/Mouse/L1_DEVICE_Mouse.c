@@ -2,13 +2,13 @@
 /*************************************************
     .
     File name:      	*.*
-    Author：	        	任启红
-    ID：					00001
+    Author��	        	������
+    ID��					00001
     Date:          		202107
-    Description:    	鼠标处理的初始化操作
-    Others:         	无
+    Description:    	��괦���ĳ�ʼ������
+    Others:         	��
 
-    History:        	无
+    History:        	��
 	    1.  Date:
 		    Author: 
 		    ID:
@@ -39,22 +39,22 @@ INT16 iMouseY = 0;
 UINT16 MouseRightButtonClickWindowWidth = 140;
 UINT16 MouseRightButtonClickWindowHeight = 300;
 
-//用于记录鼠标移动时光标所指的菜单、图标、文件夹、文件等等
-//并保存可点击菜单、图标的位置信息
+//���ڼ�¼����ƶ�ʱ�����ָ�Ĳ˵���ͼ�ꡢ�ļ��С��ļ��ȵ�
+//������ɵ���˵���ͼ���λ����Ϣ
 MOUSE_MOVEOVER_OBJECT MouseMoveoverObject;
 
-//鼠标是否在一个可点击按钮上边标志
+//����Ƿ���һ���ɵ����ť�ϱ߱�־
 BOOLEAN bMouseMoveoverObject;
 
 /****************************************************************************
 *
-*  描述:   xxxxx
+*  ����:   xxxxx
 *
-*  参数1： xxxxx
-*  参数2： xxxxx
-*  参数n： xxxxx
+*  ����1�� xxxxx
+*  ����2�� xxxxx
+*  ����n�� xxxxx
 *
-*  返回值： 成功：XXXX，失败：XXXXX
+*  ����ֵ�� �ɹ���XXXX��ʧ�ܣ�XXXXX
 *
 *****************************************************************************/
 

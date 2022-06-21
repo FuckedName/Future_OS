@@ -2,13 +2,13 @@
 /*************************************************
     .
     File name:      	*.*
-    Author：	        	任启红
-    ID：					00001
+    Author��	        	������
+    ID��					00001
     Date:          		202107
     Description:    	
-    Others:         	无
+    Others:         	��
 
-    History:        	无
+    History:        	��
 	    1.  Date:
 		    Author: 
 		    ID:
@@ -72,17 +72,17 @@ VOID L2_MOUSE_StateAnaysis(EFI_SIMPLE_POINTER_STATE State)
     stMouseState.ucX_RelativeMove = x_move;
     stMouseState.ucX_RelativeMove = y_move;
 
-    //鼠标左键点击
+    //���������
     if (State.LeftButton == TRUE)
     {
-        //如果原来是未点击状态，则改为点击状态，否则改为未点击状态
+        //���ԭ����δ���״̬�����Ϊ���״̬�������Ϊδ���״̬
         MouseClickFlag = (MouseClickFlag == MOUSE_EVENT_TYPE_NO_CLICKED) ? MOUSE_EVENT_TYPE_LEFT_CLICKED : MOUSE_EVENT_TYPE_NO_CLICKED;        
     }
     
-    //鼠标右键点击
+    //����Ҽ����
     if (State.RightButton == TRUE)
     {        
-        //如果原来是未点击状态，则改为点击状态，否则改为未点击状态
+        //���ԭ����δ���״̬�����Ϊ���״̬�������Ϊδ���״̬
         MouseClickFlag = (MouseClickFlag == MOUSE_EVENT_TYPE_NO_CLICKED) ? MOUSE_EVENT_TYPE_RIGHT_CLICKED : MOUSE_EVENT_TYPE_NO_CLICKED;
     }
     
@@ -93,13 +93,13 @@ VOID L2_MOUSE_StateAnaysis(EFI_SIMPLE_POINTER_STATE State)
 
 /****************************************************************************
 *
-*  描述:   鼠标事件的总入口，当鼠标有点击、移动事件时State值不为空，可以触发后续相关的绘图事件
+*  ����:   ����¼�������ڣ�������е�����ƶ��¼�ʱStateֵ��Ϊ�գ����Դ���������صĻ�ͼ�¼�
 *
-*  参数1： xxxxx
-*  参数2： xxxxx
-*  参数n： xxxxx
+*  ����1�� xxxxx
+*  ����2�� xxxxx
+*  ����n�� xxxxx
 *
-*  返回值： 成功：XXXX，失败：XXXXX
+*  ����ֵ�� �ɹ���XXXX��ʧ�ܣ�XXXXX
 *
 *****************************************************************************/
 VOID EFIAPI L2_MOUSE_Event (IN EFI_EVENT Event, IN VOID *Context)
@@ -122,7 +122,7 @@ VOID EFIAPI L2_MOUSE_Event (IN EFI_EVENT Event, IN VOID *Context)
         return ;
     }
     
-    //如果鼠标没有按键和鼠标移动，则直接返回。
+    //������û�а���������ƶ�����ֱ�ӷ��ء�
     if (0 == State.RelativeMovementX && 0 == State.RelativeMovementY && 0 == State.LeftButton && 0 == State.RightButton)
     {
         return;
@@ -154,13 +154,13 @@ VOID EFIAPI L2_MOUSE_Event (IN EFI_EVENT Event, IN VOID *Context)
 
 /****************************************************************************
 *
-*  描述:   鼠标图形事件相关变量初始化
+*  ����:   ���ͼ���¼���ر�����ʼ��
 *
-*  参数1： xxxxx
-*  参数2： xxxxx
-*  参数n： xxxxx
+*  ����1�� xxxxx
+*  ����2�� xxxxx
+*  ����n�� xxxxx
 *
-*  返回值： 成功：XXXX，失败：XXXXX
+*  ����ֵ�� �ɹ���XXXX��ʧ�ܣ�XXXXX
 *
 *****************************************************************************/
 EFI_STATUS L2_MOUSE_GraphicsEventInit()
@@ -180,13 +180,13 @@ EFI_STATUS L2_MOUSE_GraphicsEventInit()
     UINT16 Width = MouseRightButtonClickWindowWidth;
 
 
-    //其实这边有点不严谨，因为鼠标右击可能有多种弹出菜单，比如，有选中的目标，没有选中的目标
+    //��ʵ����е㲻�Ͻ�����Ϊ����һ������ж��ֵ����˵������磬��ѡ�е�Ŀ�꣬û��ѡ�е�Ŀ��
     UINT16 MouseRightButtonClickMenuChineseName[MOUSE_RIGHT_BUTTON_CLICK_MENU_MAX][8] = 
     {
-        {20,82,31,10,12, 84,0,0}, //“打开”文件
-        {41,30,19,93,12, 84,0,0}, //“删除”文件
-        {48,34,52,86,12, 84,0,0}, //“新增”文件
-        {48,62,24,36,12, 84,0,0}, //“修改”文件
+        {20,82,31,10,12, 84,0,0}, //���򿪡��ļ�
+        {41,30,19,93,12, 84,0,0}, //��ɾ�����ļ�
+        {48,34,52,86,12, 84,0,0}, //���������ļ�
+        {48,62,24,36,12, 84,0,0}, //���޸ġ��ļ�
     };
     
     EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
@@ -195,7 +195,7 @@ EFI_STATUS L2_MOUSE_GraphicsEventInit()
     Color.Green = 0x00;
     Color.Reserved = GRAPHICS_LAYER_MOUSE_RIGHT_CLICK_WINDOW;
         
-    //背景颜色初始化
+    //������ɫ��ʼ��
 	for (UINT16 i = 0; i < MouseRightButtonClickWindowHeight; i++)
 	{
 	    for (UINT16 j = 0; j < MouseRightButtonClickWindowWidth; j++)
@@ -236,13 +236,13 @@ EFI_STATUS L2_MOUSE_GraphicsEventInit()
 
 /****************************************************************************
 *
-*  描述:   鼠标设备初始化，后续可以接收鼠标相关移动、点击事件
+*  ����:   ����豸��ʼ�����������Խ����������ƶ�������¼�
 *
-*  参数1： xxxxx
-*  参数2： xxxxx
-*  参数n： xxxxx
+*  ����1�� xxxxx
+*  ����2�� xxxxx
+*  ����n�� xxxxx
 *
-*  返回值： 成功：XXXX，失败：XXXXX
+*  ����ֵ�� �ɹ���XXXX��ʧ�ܣ�XXXXX
 *
 *****************************************************************************/
 EFI_STATUS L2_MOUSE_Init()

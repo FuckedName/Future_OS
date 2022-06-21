@@ -2,13 +2,13 @@
 /*************************************************
     .
     File name:      	*.*
-    Authorï¼š	        	ä»»å¯çº¢
-    IDï¼š					00001
+    Author£º	        	ÈÎÆôºì
+    ID£º					00001
     Date:          		202107
     Description:    	
-    Others:         	æ— 
+    Others:         	ÎÞ
 
-    History:        	æ— 
+    History:        	ÎÞ
 	    1.  Date:
 		    Author: 
 		    ID:
@@ -33,152 +33,152 @@ typedef struct
 }IndexInformation;
 
 
-// æ–‡ä»¶è®°å½•å¤´
+// ÎÄ¼þ¼ÇÂ¼Í·
 typedef struct
 {
-    /*+0x00*/ UINT8 Type[4];    // å›ºå®šå€¼'FILE'
-    /*+0x04*/ UINT8 USNOffset[2]; // æ›´æ–°åºåˆ—å·åç§», ä¸Žæ“ä½œç³»ç»Ÿæœ‰å…³
-    /*+0x06*/ UINT8 USNCount[2]; // å›ºå®šåˆ—è¡¨å¤§å°Size in words of Update Sequence Number & Array (S)
-    /*+0x08*/ UINT8 Lsn[8]; // æ—¥å¿—æ–‡ä»¶åºåˆ—å·(LSN)
-    /*+0x10*/ UINT8 SequenceNumber[2]; // åºåˆ—å·(ç”¨äºŽè®°å½•æ–‡ä»¶è¢«åå¤ä½¿ç”¨çš„æ¬¡æ•°)
-    /*+0x12*/ UINT8 LinkCount[2];// ç¡¬è¿žæŽ¥æ•°
-    /*+0x14*/ UINT8 AttributeOffset[2]; // ç¬¬ä¸€ä¸ªå±žæ€§åç§»
-    /*+0x16*/ UINT8 Flags[2];// flags, 00è¡¨ç¤ºåˆ é™¤æ–‡ä»¶,01è¡¨ç¤ºæ­£å¸¸æ–‡ä»¶,02è¡¨ç¤ºåˆ é™¤ç›®å½•,03è¡¨ç¤ºæ­£å¸¸ç›®å½•
-    /*+0x18*/ UINT8 BytesInUse[4]; // æ–‡ä»¶è®°å½•å®žæ—¶å¤§å°(å­—èŠ‚) å½“å‰MFTè¡¨é¡¹é•¿åº¦,åˆ°FFFFFFçš„é•¿åº¦+4
-    /*+0x1C*/ UINT8 BytesAllocated[4]; // æ–‡ä»¶è®°å½•åˆ†é…å¤§å°(å­—èŠ‚)
-    /*+0x20*/ UINT8 BaseFileRecord[8]; // = 0 åŸºç¡€æ–‡ä»¶è®°å½• File reference to the base FILE record
-    /*+0x28*/ UINT8 NextAttributeNumber[2]; // ä¸‹ä¸€ä¸ªè‡ªç”±IDå·
-    /*+0x2A*/ UINT8 Pading[2]; // è¾¹ç•Œ
-    /*+0x2C*/ UINT8 MFTRecordNumber[4]; // windows xpä¸­ä½¿ç”¨,æœ¬MFTè®°å½•å·
-    /*+0x30*/ UINT8 USN[2]; // æ›´æ–°åºåˆ—å·
-    /*+0x32*/ UINT8 UpdateArray[0]; // æ›´æ–°æ•°ç»„
+    /*+0x00*/ UINT8 Type[4];    // ¹Ì¶¨Öµ'FILE'
+    /*+0x04*/ UINT8 USNOffset[2]; // ¸üÐÂÐòÁÐºÅÆ«ÒÆ, Óë²Ù×÷ÏµÍ³ÓÐ¹Ø
+    /*+0x06*/ UINT8 USNCount[2]; // ¹Ì¶¨ÁÐ±í´óÐ¡Size in words of Update Sequence Number & Array (S)
+    /*+0x08*/ UINT8 Lsn[8]; // ÈÕÖ¾ÎÄ¼þÐòÁÐºÅ(LSN)
+    /*+0x10*/ UINT8 SequenceNumber[2]; // ÐòÁÐºÅ(ÓÃÓÚ¼ÇÂ¼ÎÄ¼þ±»·´¸´Ê¹ÓÃµÄ´ÎÊý)
+    /*+0x12*/ UINT8 LinkCount[2];// Ó²Á¬½ÓÊý
+    /*+0x14*/ UINT8 AttributeOffset[2]; // µÚÒ»¸öÊôÐÔÆ«ÒÆ
+    /*+0x16*/ UINT8 Flags[2];// flags, 00±íÊ¾É¾³ýÎÄ¼þ,01±íÊ¾Õý³£ÎÄ¼þ,02±íÊ¾É¾³ýÄ¿Â¼,03±íÊ¾Õý³£Ä¿Â¼
+    /*+0x18*/ UINT8 BytesInUse[4]; // ÎÄ¼þ¼ÇÂ¼ÊµÊ±´óÐ¡(×Ö½Ú) µ±Ç°MFT±íÏî³¤¶È,µ½FFFFFFµÄ³¤¶È+4
+    /*+0x1C*/ UINT8 BytesAllocated[4]; // ÎÄ¼þ¼ÇÂ¼·ÖÅä´óÐ¡(×Ö½Ú)
+    /*+0x20*/ UINT8 BaseFileRecord[8]; // = 0 »ù´¡ÎÄ¼þ¼ÇÂ¼ File reference to the base FILE record
+    /*+0x28*/ UINT8 NextAttributeNumber[2]; // ÏÂÒ»¸ö×ÔÓÉIDºÅ
+    /*+0x2A*/ UINT8 Pading[2]; // ±ß½ç
+    /*+0x2C*/ UINT8 MFTRecordNumber[4]; // windows xpÖÐÊ¹ÓÃ,±¾MFT¼ÇÂ¼ºÅ
+    /*+0x30*/ UINT8 USN[2]; // ¸üÐÂÐòÁÐºÅ
+    /*+0x32*/ UINT8 UpdateArray[0]; // ¸üÐÂÊý×é
  } NTFS_FILE_HEADER, *pNTFS_FILE_HEADER; 
 
 
-// NTFS FILE å±žæ€§å¤´
+// NTFS FILE ÊôÐÔÍ·
 typedef struct  
 {
-    UINT8 Type[4];   //å±žæ€§ç±»åž‹
-    UINT8 Size[4];   //å±žæ€§å¤´å’Œå±žæ€§ä½“çš„æ€»é•¿åº¦
-    UINT8 ResidentFlag; //æ˜¯å¦æ˜¯å¸¸é©»å±žæ€§ï¼ˆ0å¸¸é©» 1éžå¸¸é©»ï¼‰
-    UINT8 NameSize;   //å±žæ€§åçš„é•¿åº¦
-    UINT8 NameOffset[2]; //å±žæ€§åçš„åç§» ç›¸å¯¹äºŽå±žæ€§å¤´
-    UINT8 Flags[2]; //æ ‡å¿—ï¼ˆ0x0001åŽ‹ç¼© 0x4000åŠ å¯† 0x8000ç¨€ç–ï¼‰
-    UINT8 Id[2]; //å±žæ€§å”¯ä¸€ID
+    UINT8 Type[4];   //ÊôÐÔÀàÐÍ
+    UINT8 Size[4];   //ÊôÐÔÍ·ºÍÊôÐÔÌåµÄ×Ü³¤¶È
+    UINT8 ResidentFlag; //ÊÇ·ñÊÇ³£×¤ÊôÐÔ£¨0³£×¤ 1·Ç³£×¤£©
+    UINT8 NameSize;   //ÊôÐÔÃûµÄ³¤¶È
+    UINT8 NameOffset[2]; //ÊôÐÔÃûµÄÆ«ÒÆ Ïà¶ÔÓÚÊôÐÔÍ·
+    UINT8 Flags[2]; //±êÖ¾£¨0x0001Ñ¹Ëõ 0x4000¼ÓÃÜ 0x8000Ï¡Êè£©
+    UINT8 Id[2]; //ÊôÐÔÎ¨Ò»ID
 }NTFS_FILE_ATTRIBUTE_HEADER;
 
 
-//å¸¸é©»å±žæ€§ å±žæ€§å¤´
+//³£×¤ÊôÐÔ ÊôÐÔÍ·
 typedef struct _ResidentAttributeHeader 
 {
 	//NTFS_FILE_ATTRIBUTE_HEADER ATTR_Common;
-	UINT8 ATTR_DataSize[4]; //å±žæ€§æ•°æ®çš„é•¿åº¦
-	UINT8 ATTR_DataOffset[2]; //å±žæ€§æ•°æ®ç›¸å¯¹äºŽå±žæ€§å¤´çš„åç§»
-	UINT8 ATTR_Index; //ç´¢å¼•
-	UINT8 ATTR_Reserved; //ä¿ç•™
-	UINT8 ATTR_AttrName[8];//å±žæ€§åï¼ŒUnicodeï¼Œç»“å°¾æ— 0
+	UINT8 ATTR_DataSize[4]; //ÊôÐÔÊý¾ÝµÄ³¤¶È
+	UINT8 ATTR_DataOffset[2]; //ÊôÐÔÊý¾ÝÏà¶ÔÓÚÊôÐÔÍ·µÄÆ«ÒÆ
+	UINT8 ATTR_Index; //Ë÷Òý
+	UINT8 ATTR_Reserved; //±£Áô
+	UINT8 ATTR_AttrName[8];//ÊôÐÔÃû£¬Unicode£¬½áÎ²ÎÞ0
 }ResidentAttributeHeader, *pResidentAttributeHeader;
 
-//éžå¸¸é©»å±žæ€§ å±žæ€§å¤´
+//·Ç³£×¤ÊôÐÔ ÊôÐÔÍ·
 typedef struct _NonResidentAttributeHeader 
 {
 	NTFS_FILE_ATTRIBUTE_HEADER ATTR_Common;
-	UINT64 ATTR_StartVCN; //æœ¬å±žæ€§ä¸­æ•°æ®æµèµ·å§‹è™šæ‹Ÿç°‡å·
-	UINT64 ATTR_EndVCN; //æœ¬å±žæ€§ä¸­æ•°æ®æµç»ˆæ­¢è™šæ‹Ÿç°‡å·
-	UINT16 ATTR_DatOff; //ç°‡æµåˆ—è¡¨ç›¸å¯¹äºŽå±žæ€§å¤´çš„åç§»
-	UINT16 ATTR_CmpSz; //åŽ‹ç¼©å•ä½ 2çš„Næ¬¡æ–¹
+	UINT64 ATTR_StartVCN; //±¾ÊôÐÔÖÐÊý¾ÝÁ÷ÆðÊ¼ÐéÄâ´ØºÅ
+	UINT64 ATTR_EndVCN; //±¾ÊôÐÔÖÐÊý¾ÝÁ÷ÖÕÖ¹ÐéÄâ´ØºÅ
+	UINT16 ATTR_DatOff; //´ØÁ÷ÁÐ±íÏà¶ÔÓÚÊôÐÔÍ·µÄÆ«ÒÆ
+	UINT16 ATTR_CmpSz; //Ñ¹Ëõµ¥Î» 2µÄN´Î·½
 	UINT32 ATTR_Resvd;
-	UINT64 ATTR_AllocSz; //å±žæ€§åˆ†é…çš„å¤§å°
-	UINT64 ATTR_ValidSz; //å±žæ€§çš„å®žé™…å¤§å°
-	UINT64 ATTR_InitedSz; //å±žæ€§çš„åˆå§‹å¤§å°
+	UINT64 ATTR_AllocSz; //ÊôÐÔ·ÖÅäµÄ´óÐ¡
+	UINT64 ATTR_ValidSz; //ÊôÐÔµÄÊµ¼Ê´óÐ¡
+	UINT64 ATTR_InitedSz; //ÊôÐÔµÄ³õÊ¼´óÐ¡
 	UINT8 ATTR_AttrNam[0];
 }NonResidentAttributeHeader, *pNonResidentAttributeHeader;
 
-// 90å±žæ€§çš„å±žæ€§ä½“ç”±3éƒ¨åˆ†æž„æˆï¼šç´¢å¼•æ ¹ã€ç´¢å¼•å¤´å’Œç´¢å¼•é¡¹ã€‚ä½†æ˜¯æœ‰äº›æƒ…å†µä¸‹90å±žæ€§ä¸­æ˜¯ä¸å­˜åœ¨ç´¢å¼•é¡¹çš„(ä¸Šå›¾çš„90å±žæ€§ä¸åŒ…å«ç´¢å¼•é¡¹ï¼Œ
-// å›¾8ä¸­çš„90å±žæ€§åŒ…å«2ä¸ªç´¢å¼•é¡¹)ï¼Œè¿™ä¸ªæ—¶å€™è¯¥ç›®å½•çš„ç´¢å¼•é¡¹ç”±A0å±žæ€§ä¸­çš„data runsæŒ‡å‡ºã€‚90å±žæ€§ä½“çš„ç»“æž„å¦‚ä¸‹(ä¸åŒ…å«å±žæ€§å¤´)ï¼š
+// 90ÊôÐÔµÄÊôÐÔÌåÓÉ3²¿·Ö¹¹³É£ºË÷Òý¸ù¡¢Ë÷ÒýÍ·ºÍË÷ÒýÏî¡£µ«ÊÇÓÐÐ©Çé¿öÏÂ90ÊôÐÔÖÐÊÇ²»´æÔÚË÷ÒýÏîµÄ(ÉÏÍ¼µÄ90ÊôÐÔ²»°üº¬Ë÷ÒýÏî£¬
+// Í¼8ÖÐµÄ90ÊôÐÔ°üº¬2¸öË÷ÒýÏî)£¬Õâ¸öÊ±ºò¸ÃÄ¿Â¼µÄË÷ÒýÏîÓÉA0ÊôÐÔÖÐµÄdata runsÖ¸³ö¡£90ÊôÐÔÌåµÄ½á¹¹ÈçÏÂ(²»°üº¬ÊôÐÔÍ·)£º
 typedef struct _INDEX_HEADER 
 {
-	UINT8 IH_EntryOff[4];//ç¬¬ä¸€ä¸ªç›®å½•é¡¹çš„åç§»
-	UINT8 IH_TalSzOfEntries[4];//ç›®å½•é¡¹çš„æ€»å°ºå¯¸(åŒ…æ‹¬ç´¢å¼•å¤´å’Œä¸‹é¢çš„ç´¢å¼•é¡¹)
-	UINT8 IH_AllocSize[4];//ç›®å½•é¡¹åˆ†é…çš„å°ºå¯¸
-	UINT8 IH_Flags;/*æ ‡å¿—ä½ï¼Œæ­¤å€¼å¯èƒ½æ˜¯ä»¥ä¸‹å’Œå€¼ä¹‹ä¸€ï¼š
-					0x00 å°ç›®å½•(æ•°æ®å­˜æ”¾åœ¨æ ¹èŠ‚ç‚¹çš„æ•°æ®åŒºä¸­)
-					0x01 å¤§ç›®å½•(éœ€è¦ç›®å½•é¡¹å­˜å‚¨åŒºå’Œç´¢å¼•é¡¹ä½å›¾)*/
+	UINT8 IH_EntryOff[4];//µÚÒ»¸öÄ¿Â¼ÏîµÄÆ«ÒÆ
+	UINT8 IH_TalSzOfEntries[4];//Ä¿Â¼ÏîµÄ×Ü³ß´ç(°üÀ¨Ë÷ÒýÍ·ºÍÏÂÃæµÄË÷ÒýÏî)
+	UINT8 IH_AllocSize[4];//Ä¿Â¼Ïî·ÖÅäµÄ³ß´ç
+	UINT8 IH_Flags;/*±êÖ¾Î»£¬´ËÖµ¿ÉÄÜÊÇÒÔÏÂºÍÖµÖ®Ò»£º
+					0x00 Ð¡Ä¿Â¼(Êý¾Ý´æ·ÅÔÚ¸ù½ÚµãµÄÊý¾ÝÇøÖÐ)
+					0x01 ´óÄ¿Â¼(ÐèÒªÄ¿Â¼Ïî´æ´¢ÇøºÍË÷ÒýÏîÎ»Í¼)*/
 	UINT8 IH_Resvd[3];
 }INDEX_HEADER,*pINDEX_HEADER;
 
-//INDEX_ROOT 0X90å±žæ€§ä½“
+//INDEX_ROOT 0X90ÊôÐÔÌå
 typedef struct _INDEX_ROOT 
 {
-	//ç´¢å¼•æ ¹
-	UINT8 IR_AttributeType[4];//å±žæ€§çš„ç±»åž‹
-	UINT8 IR_ColRule[4];//æ•´ç†è§„åˆ™
-	UINT8 IR_EntrySize[4];//ç›®å½•é¡¹åˆ†é…å°ºå¯¸
-	UINT8 IR_ClusterPerRec;//æ¯ä¸ªç›®å½•é¡¹å ç”¨çš„ç°‡æ•°
+	//Ë÷Òý¸ù
+	UINT8 IR_AttributeType[4];//ÊôÐÔµÄÀàÐÍ
+	UINT8 IR_ColRule[4];//ÕûÀí¹æÔò
+	UINT8 IR_EntrySize[4];//Ä¿Â¼Ïî·ÖÅä³ß´ç
+	UINT8 IR_ClusterPerRec;//Ã¿¸öÄ¿Â¼ÏîÕ¼ÓÃµÄ´ØÊý
 	UINT8 IR_Reserved[3];
-	//ç´¢å¼•å¤´
+	//Ë÷ÒýÍ·
 	INDEX_HEADER IndexHeader;
-	//ç´¢å¼•é¡¹ å¯èƒ½ä¸å­˜åœ¨
+	//Ë÷ÒýÏî ¿ÉÄÜ²»´æÔÚ
 	UINT8 IR_IndexEntry[0];
 }INDEX_ROOT,*pINDEX_ROOT;
 
-//å…¶ä¸­ï¼Œ30å±žæ€§çš„å±žæ€§ä½“ç»“æž„å®šä¹‰å¦‚ä¸‹(ä¸åŒ…å«å±žæ€§å¤´)ï¼š
-//FILE_NAME 0X30å±žæ€§ä½“
+//ÆäÖÐ£¬30ÊôÐÔµÄÊôÐÔÌå½á¹¹¶¨ÒåÈçÏÂ(²»°üº¬ÊôÐÔÍ·)£º
+//FILE_NAME 0X30ÊôÐÔÌå
 typedef struct _FILE_NAME 
 {
-	UINT64 FN_ParentFR; /*çˆ¶ç›®å½•çš„MFTè®°å½•çš„è®°å½•ç´¢å¼•ã€‚
-	æ³¨æ„ï¼šè¯¥å€¼çš„ä½Ž6å­—èŠ‚æ˜¯MFTè®°å½•å·ï¼Œé«˜2å­—èŠ‚æ˜¯è¯¥MFTè®°å½•çš„åºåˆ—å·*/
+	UINT64 FN_ParentFR; /*¸¸Ä¿Â¼µÄMFT¼ÇÂ¼µÄ¼ÇÂ¼Ë÷Òý¡£
+	×¢Òâ£º¸ÃÖµµÄµÍ6×Ö½ÚÊÇMFT¼ÇÂ¼ºÅ£¬¸ß2×Ö½ÚÊÇ¸ÃMFT¼ÇÂ¼µÄÐòÁÐºÅ*/
 	UINT8 FN_CreatTime[4];
 	UINT8 FN_AlterTime[4];
 	UINT8 FN_MFTChg[4];
 	UINT8 FN_ReadTime[4];
 	UINT64 FN_AllocSz;
-	UINT64 FN_ValidSz;//æ–‡ä»¶çš„çœŸå®žå°ºå¯¸
-	UINT32 FN_DOSAttr;//DOSæ–‡ä»¶å±žæ€§
-	UINT32 FN_EA_Reparse;//æ‰©å±•å±žæ€§ä¸Žé“¾æŽ¥
-	UINT8 FN_NameSz;//æ–‡ä»¶åçš„å­—ç¬¦æ•°
-	UINT8 FN_NamSpace;/*å‘½åç©ºé—´ï¼Œè¯¥å€¼å¯ä¸ºä»¥ä¸‹å€¼ä¸­çš„ä»»æ„ä¸€ä¸ª
-	0ï¼šPOSIXã€€å¯ä»¥ä½¿ç”¨é™¤NULLå’Œåˆ†éš”ç¬¦â€œ/â€ä¹‹å¤–çš„æ‰€æœ‰UNICODEå­—ç¬¦ï¼Œæœ€å¤§å¯ä»¥ä½¿ç”¨255ä¸ªå­—ç¬¦ã€‚æ³¨æ„ï¼šâ€œï¼šâ€æ˜¯åˆæ³•å­—ç¬¦ï¼Œä½†Windowsä¸å…è®¸ä½¿ç”¨ã€‚
-	1ï¼šWin32ã€€Win32æ˜¯POSIXçš„ä¸€ä¸ªå­é›†ï¼Œä¸åŒºåˆ†å¤§å°å†™ï¼Œå¯ä»¥ä½¿ç”¨é™¤â€œâ€œâ€ã€â€œï¼Šâ€ã€â€œ?â€ã€â€œï¼šâ€ã€â€œ/â€ã€â€œ<â€ã€â€œ>â€ã€â€œ/â€ã€â€œ|â€ä¹‹å¤–çš„ä»»æ„UNICODEå­—ç¬¦ï¼Œä½†åå­—ä¸èƒ½ä»¥â€œ.â€æˆ–ç©ºæ ¼ç»“å°¾ã€‚
-	2ï¼šDOSã€€DOSå‘½åç©ºé—´æ˜¯Win32çš„å­é›†ï¼Œåªæ”¯æŒASCIIç å¤§äºŽç©ºæ ¼çš„8BITå¤§å†™å­—ç¬¦å¹¶ä¸”ä¸æ”¯æŒä»¥ä¸‹å­—ç¬¦â€œâ€œâ€ã€â€œï¼Šâ€ã€â€œ?â€ã€â€œï¼šâ€ã€â€œ/â€ã€â€œ<â€ã€â€œ>â€ã€â€œ/â€ã€â€œ|â€ã€â€œ+â€ã€â€œ,â€ã€â€œ;â€ã€â€œ=â€ï¼›åŒæ—¶åå­—å¿…é¡»æŒ‰ä»¥ä¸‹æ ¼å¼å‘½åï¼š1~8ä¸ªå­—ç¬¦ï¼Œç„¶åŽæ˜¯â€œ.â€ï¼Œç„¶åŽå†æ˜¯1~3ä¸ªå­—ç¬¦ã€‚
-	3ï¼šWin32&DOSã€€è¿™ä¸ªå‘½åç©ºé—´æ„å‘³ç€Win32å’ŒDOSæ–‡ä»¶åéƒ½å­˜æ”¾åœ¨åŒä¸€ä¸ªæ–‡ä»¶åå±žæ€§ä¸­ã€‚*/
+	UINT64 FN_ValidSz;//ÎÄ¼þµÄÕæÊµ³ß´ç
+	UINT32 FN_DOSAttr;//DOSÎÄ¼þÊôÐÔ
+	UINT32 FN_EA_Reparse;//À©Õ¹ÊôÐÔÓëÁ´½Ó
+	UINT8 FN_NameSz;//ÎÄ¼þÃûµÄ×Ö·ûÊý
+	UINT8 FN_NamSpace;/*ÃüÃû¿Õ¼ä£¬¸ÃÖµ¿ÉÎªÒÔÏÂÖµÖÐµÄÈÎÒâÒ»¸ö
+	0£ºPOSIX¡¡¿ÉÒÔÊ¹ÓÃ³ýNULLºÍ·Ö¸ô·û¡°/¡±Ö®ÍâµÄËùÓÐUNICODE×Ö·û£¬×î´ó¿ÉÒÔÊ¹ÓÃ255¸ö×Ö·û¡£×¢Òâ£º¡°£º¡±ÊÇºÏ·¨×Ö·û£¬µ«Windows²»ÔÊÐíÊ¹ÓÃ¡£
+	1£ºWin32¡¡Win32ÊÇPOSIXµÄÒ»¸ö×Ó¼¯£¬²»Çø·Ö´óÐ¡Ð´£¬¿ÉÒÔÊ¹ÓÃ³ý¡°¡°¡±¡¢¡°£ª¡±¡¢¡°?¡±¡¢¡°£º¡±¡¢¡°/¡±¡¢¡°<¡±¡¢¡°>¡±¡¢¡°/¡±¡¢¡°|¡±Ö®ÍâµÄÈÎÒâUNICODE×Ö·û£¬µ«Ãû×Ö²»ÄÜÒÔ¡°.¡±»ò¿Õ¸ñ½áÎ²¡£
+	2£ºDOS¡¡DOSÃüÃû¿Õ¼äÊÇWin32µÄ×Ó¼¯£¬Ö»Ö§³ÖASCIIÂë´óÓÚ¿Õ¸ñµÄ8BIT´óÐ´×Ö·û²¢ÇÒ²»Ö§³ÖÒÔÏÂ×Ö·û¡°¡°¡±¡¢¡°£ª¡±¡¢¡°?¡±¡¢¡°£º¡±¡¢¡°/¡±¡¢¡°<¡±¡¢¡°>¡±¡¢¡°/¡±¡¢¡°|¡±¡¢¡°+¡±¡¢¡°,¡±¡¢¡°;¡±¡¢¡°=¡±£»Í¬Ê±Ãû×Ö±ØÐë°´ÒÔÏÂ¸ñÊ½ÃüÃû£º1~8¸ö×Ö·û£¬È»ºóÊÇ¡°.¡±£¬È»ºóÔÙÊÇ1~3¸ö×Ö·û¡£
+	3£ºWin32&DOS¡¡Õâ¸öÃüÃû¿Õ¼äÒâÎ¶×ÅWin32ºÍDOSÎÄ¼þÃû¶¼´æ·ÅÔÚÍ¬Ò»¸öÎÄ¼þÃûÊôÐÔÖÐ¡£*/
 	UINT8 FN_FileName[0];
 }FILE_NAME,*pFILE_NAME;
 
 
 // Index Header
 typedef struct {
-    UINT8 Flag[4]; //å›ºå®šå€¼ "INDX"
-    UINT8 USNOffset[2];//æ›´æ–°åºåˆ—å·åç§»
-    UINT8 USNSize[2];//æ›´æ–°åºåˆ—å·å’Œæ›´æ–°æ•°ç»„å¤§å°
-    UINT8 LogSequenceNumber[8]; // æ—¥å¿—æ–‡ä»¶åºåˆ—å·(LSN)
-    UINT8 IndexCacheVCN[8];//æœ¬ç´¢å¼•ç¼“å†²åŒºåœ¨ç´¢å¼•åˆ†é…ä¸­çš„VCN
-    UINT8 IndexEntryOffset[4];//ç´¢å¼•é¡¹çš„åç§» ç›¸å¯¹äºŽå½“å‰ä½ç½®
-    UINT8 IndexEntrySize[4];//ç´¢å¼•é¡¹çš„å¤§å°
-    UINT8 IndexEntryAllocSize[4];//ç´¢å¼•é¡¹åˆ†é…çš„å¤§å°
-    UINT8 HasLeafNode;//ç½®ä¸€ è¡¨ç¤ºæœ‰å­èŠ‚ç‚¹
-    UINT8 Fill[3];//å¡«å……
-    UINT8 USN[2];//æ›´æ–°åºåˆ—å·
-    UINT8 USNArray[0];//æ›´æ–°åºåˆ—æ•°ç»„
+    UINT8 Flag[4]; //¹Ì¶¨Öµ "INDX"
+    UINT8 USNOffset[2];//¸üÐÂÐòÁÐºÅÆ«ÒÆ
+    UINT8 USNSize[2];//¸üÐÂÐòÁÐºÅºÍ¸üÐÂÊý×é´óÐ¡
+    UINT8 LogSequenceNumber[8]; // ÈÕÖ¾ÎÄ¼þÐòÁÐºÅ(LSN)
+    UINT8 IndexCacheVCN[8];//±¾Ë÷Òý»º³åÇøÔÚË÷Òý·ÖÅäÖÐµÄVCN
+    UINT8 IndexEntryOffset[4];//Ë÷ÒýÏîµÄÆ«ÒÆ Ïà¶ÔÓÚµ±Ç°Î»ÖÃ
+    UINT8 IndexEntrySize[4];//Ë÷ÒýÏîµÄ´óÐ¡
+    UINT8 IndexEntryAllocSize[4];//Ë÷ÒýÏî·ÖÅäµÄ´óÐ¡
+    UINT8 HasLeafNode;//ÖÃÒ» ±íÊ¾ÓÐ×Ó½Úµã
+    UINT8 Fill[3];//Ìî³ä
+    UINT8 USN[2];//¸üÐÂÐòÁÐºÅ
+    UINT8 USNArray[0];//¸üÐÂÐòÁÐÊý×é
 }NTFS_INDEX_HEADER;
 
 typedef struct {
-     UINT8 MFTReferNumber[8];//æ–‡ä»¶çš„MFTå‚è€ƒå·, first 6 Bytes * 2 + MFT table sector = file sector 
-     UINT8 IndexEntrySize[2];//ç´¢å¼•é¡¹çš„å¤§å°
-     UINT8 FileNameAttriBodySize[2];//æ–‡ä»¶åå±žæ€§ä½“çš„å¤§å°
-     UINT8 IndexFlag[2];//ç´¢å¼•æ ‡å¿—:	 0x00 æ™®é€šæ–‡ä»¶é¡¹;    	 0x01 æœ‰å­é¡¹ 0x02 å½“å‰é¡¹æ˜¯æœ€åŽä¸€ä¸ªç›®å½•é¡¹
-     UINT8 Fill[2];//å¡«å……
-     UINT8 FatherDirMFTReferNumber[8];//çˆ¶ç›®å½•MFTæ–‡ä»¶å‚è€ƒå·
-     UINT8 CreatTime[8];//æ–‡ä»¶åˆ›å»ºæ—¶é—´ 8
-     UINT8 AlterTime[8];//æ–‡ä»¶æœ€åŽä¿®æ”¹æ—¶é—´
-     UINT8 MFTChgTime[8];//æ–‡ä»¶è®°å½•æœ€åŽä¿®æ”¹æ—¶é—´
-     UINT8 ReadTime[8];//æ–‡ä»¶æœ€åŽè®¿é—®æ—¶é—´
-     UINT8 FileAllocSize[8];//æ–‡ä»¶åˆ†é…å¤§å°
-     UINT8 FileRealSize[8];//æ–‡ä»¶å®žé™…å¤§å°
-     UINT8 FileFlag[8];//æ–‡ä»¶æ ‡å¿—
-     UINT8 FileNameSize;//æ–‡ä»¶åé•¿åº¦
-     UINT8 FileNamespace;//æ–‡ä»¶å‘½åç©ºé—´
-     UINT8 FileNameAndFill[0];//æ–‡ä»¶åå’Œå¡«å……
+     UINT8 MFTReferNumber[8];//ÎÄ¼þµÄMFT²Î¿¼ºÅ, first 6 Bytes * 2 + MFT table sector = file sector 
+     UINT8 IndexEntrySize[2];//Ë÷ÒýÏîµÄ´óÐ¡
+     UINT8 FileNameAttriBodySize[2];//ÎÄ¼þÃûÊôÐÔÌåµÄ´óÐ¡
+     UINT8 IndexFlag[2];//Ë÷Òý±êÖ¾:	 0x00 ÆÕÍ¨ÎÄ¼þÏî;    	 0x01 ÓÐ×ÓÏî 0x02 µ±Ç°ÏîÊÇ×îºóÒ»¸öÄ¿Â¼Ïî
+     UINT8 Fill[2];//Ìî³ä
+     UINT8 FatherDirMFTReferNumber[8];//¸¸Ä¿Â¼MFTÎÄ¼þ²Î¿¼ºÅ
+     UINT8 CreatTime[8];//ÎÄ¼þ´´½¨Ê±¼ä 8
+     UINT8 AlterTime[8];//ÎÄ¼þ×îºóÐÞ¸ÄÊ±¼ä
+     UINT8 MFTChgTime[8];//ÎÄ¼þ¼ÇÂ¼×îºóÐÞ¸ÄÊ±¼ä
+     UINT8 ReadTime[8];//ÎÄ¼þ×îºó·ÃÎÊÊ±¼ä
+     UINT8 FileAllocSize[8];//ÎÄ¼þ·ÖÅä´óÐ¡
+     UINT8 FileRealSize[8];//ÎÄ¼þÊµ¼Ê´óÐ¡
+     UINT8 FileFlag[8];//ÎÄ¼þ±êÖ¾
+     UINT8 FileNameSize;//ÎÄ¼þÃû³¤¶È
+     UINT8 FileNamespace;//ÎÄ¼þÃüÃû¿Õ¼ä
+     UINT8 FileNameAndFill[0];//ÎÄ¼þÃûºÍÌî³ä
 }NTFS_INDEX_ITEM;
 
 // Master File Table
@@ -203,38 +203,38 @@ typedef enum
 	MFT_ATTRIBUTE_DOLLAR_MAX						
 }MFT_ATTRIBUTE_TYPE;
 
-/****ä¸‹é¢å®šä¹‰çš„å‡æ˜¯å±žæ€§ä½“çš„ç»“æž„ ä¸åŒ…æ‹¬å±žæ€§å¤´****/
-//STANDARD_INFORMATION 0X10å±žæ€§ä½“
+/****ÏÂÃæ¶¨ÒåµÄ¾ùÊÇÊôÐÔÌåµÄ½á¹¹ ²»°üÀ¨ÊôÐÔÍ·****/
+//STANDARD_INFORMATION 0X10ÊôÐÔÌå
 /*
-	SI_DOSAttrå–å€¼ï¼š
-	0x0001åªè¯»
-	0x0002éšè—
-	0x0004ç³»ç»Ÿ
-	0x0020å½’æ¡£
-	0x0040è®¾å¤‡
-	0x0080å¸¸è§„
-	0x0100ä¸´æ—¶æ–‡ä»¶
-	0x0200ç¨€ç–æ–‡ä»¶
-	0x0400é‡è§£æžç‚¹
-	0x0800åŽ‹ç¼©
-	0x1000ç¦»çº¿
-	0x2000æ— å†…å®¹ç´¢å¼•
-	0x4000åŠ å¯†
+	SI_DOSAttrÈ¡Öµ£º
+	0x0001Ö»¶Á
+	0x0002Òþ²Ø
+	0x0004ÏµÍ³
+	0x0020¹éµµ
+	0x0040Éè±¸
+	0x0080³£¹æ
+	0x0100ÁÙÊ±ÎÄ¼þ
+	0x0200Ï¡ÊèÎÄ¼þ
+	0x0400ÖØ½âÎöµã
+	0x0800Ñ¹Ëõ
+	0x1000ÀëÏß
+	0x2000ÎÞÄÚÈÝË÷Òý
+	0x4000¼ÓÃÜ
 */
 typedef struct _STANDARD_INFORMATION 
 {
-	UINT8 SI_CreatTime[4];//åˆ›å»ºæ—¶é—´
-	UINT8 SI_AlterTime[4];//æœ€åŽä¿®æ”¹æ—¶é—´
-	UINT8 SI_MFTChgTime[4];//æ–‡ä»¶çš„MFTä¿®æ”¹çš„æ—¶é—´
-	UINT8 SI_ReadTime[4];//æœ€åŽè®¿é—®æ—¶é—´
-	UINT32 SI_DOSAttr;//DOSæ–‡ä»¶å±žæ€§
-	UINT32 SI_MaxVer;//æ–‡ä»¶å¯ç”¨çš„æœ€å¤§ç‰ˆæœ¬å· 0è¡¨ç¤ºç¦ç”¨
-	UINT32 SI_Ver;//æ–‡ä»¶ç‰ˆæœ¬å· è‹¥æœ€å¤§ç‰ˆæœ¬å·ä¸º0 åˆ™å€¼ä¸º0
+	UINT8 SI_CreatTime[4];//´´½¨Ê±¼ä
+	UINT8 SI_AlterTime[4];//×îºóÐÞ¸ÄÊ±¼ä
+	UINT8 SI_MFTChgTime[4];//ÎÄ¼þµÄMFTÐÞ¸ÄµÄÊ±¼ä
+	UINT8 SI_ReadTime[4];//×îºó·ÃÎÊÊ±¼ä
+	UINT32 SI_DOSAttr;//DOSÎÄ¼þÊôÐÔ
+	UINT32 SI_MaxVer;//ÎÄ¼þ¿ÉÓÃµÄ×î´ó°æ±¾ºÅ 0±íÊ¾½ûÓÃ
+	UINT32 SI_Ver;//ÎÄ¼þ°æ±¾ºÅ Èô×î´ó°æ±¾ºÅÎª0 ÔòÖµÎª0
 	UINT32 SI_ClassId;//??
-	//UINT64 SI_OwnerId;//æ–‡ä»¶æ‹¥æœ‰è€…ID
-	//UINT64 SI_SecurityId;//å®‰å…¨ID
-	//UINT64 SI_QuotaCharged;//æ–‡ä»¶æœ€å¤§å¯ä½¿ç”¨çš„ç©ºé—´é…é¢ 0è¡¨ç¤ºæ— é™åˆ¶
-	//UINT64 SI_USN;//æ–‡ä»¶æœ€åŽä¸€æ¬¡æ›´æ–°çš„è®°å½•å·
+	//UINT64 SI_OwnerId;//ÎÄ¼þÓµÓÐÕßID
+	//UINT64 SI_SecurityId;//°²È«ID
+	//UINT64 SI_QuotaCharged;//ÎÄ¼þ×î´ó¿ÉÊ¹ÓÃµÄ¿Õ¼äÅä¶î 0±íÊ¾ÎÞÏÞÖÆ
+	//UINT64 SI_USN;//ÎÄ¼þ×îºóÒ»´Î¸üÐÂµÄ¼ÇÂ¼ºÅ
 #if 0
 	uint32 QuotaId;
 	uint32 SecurityId;
@@ -243,16 +243,16 @@ typedef struct _STANDARD_INFORMATION
 #endif
 }STANDARD_INFORMATION,*pSTANDARD_INFORMATION;
 
-//ATTRIBUTE_LIST 0X20å±žæ€§ä½“
+//ATTRIBUTE_LIST 0X20ÊôÐÔÌå
 typedef struct _ATTRIBUTE_LIST 
 {
 	UINT32 AL_RD_Type;
 	UINT16 AL_RD_Len;
 	UINT8 AL_RD_NamLen;
 	UINT8 AL_RD_NamOff;
-	UINT64 AL_RD_StartVCN;//æœ¬å±žæ€§ä¸­æ•°æ®æµå¼€å§‹çš„ç°‡å·
-	UINT64 AL_RD_BaseFRS;/*æœ¬å±žæ€§è®°å½•æ‰€å±žçš„MFTè®°å½•çš„è®°å½•å·
-	æ³¨æ„ï¼šè¯¥å€¼çš„ä½Ž6å­—èŠ‚æ˜¯MFTè®°å½•å·ï¼Œé«˜2å­—èŠ‚æ˜¯è¯¥MFTè®°å½•çš„åºåˆ—å·*/
+	UINT64 AL_RD_StartVCN;//±¾ÊôÐÔÖÐÊý¾ÝÁ÷¿ªÊ¼µÄ´ØºÅ
+	UINT64 AL_RD_BaseFRS;/*±¾ÊôÐÔ¼ÇÂ¼ËùÊôµÄMFT¼ÇÂ¼µÄ¼ÇÂ¼ºÅ
+	×¢Òâ£º¸ÃÖµµÄµÍ6×Ö½ÚÊÇMFT¼ÇÂ¼ºÅ£¬¸ß2×Ö½ÚÊÇ¸ÃMFT¼ÇÂ¼µÄÐòÁÐºÅ*/
 	UINT16 AL_RD_AttrId;
 	//UINT8 AL_RD_Name[0];
 	UINT16 AlignmentOrReserved[3];
@@ -266,84 +266,84 @@ typedef struct _VOLUME_VERSION
 }
 VOLUME_VERSION,*pVOLUME_VERSION;
 
-//OBJECT_ID 0X40å±žæ€§ä½“
+//OBJECT_ID 0X40ÊôÐÔÌå
 typedef struct _OBJECT_ID 
 {
-	UINT8 OID_ObjID[16];//æ–‡ä»¶çš„GUID
-	UINT8 OID_BirthVolID[16];//æ–‡ä»¶å»ºç«‹æ—¶æ‰€åœ¨å·çš„ID
-	UINT8 OID_BirthID[16];//æ–‡ä»¶çš„åŽŸå§‹ID
-	UINT8 OID_DomainID[16];//å¯¹è±¡æ‰€åˆ›å»ºæ—¶æ‰€åœ¨åŸŸçš„ID
+	UINT8 OID_ObjID[16];//ÎÄ¼þµÄGUID
+	UINT8 OID_BirthVolID[16];//ÎÄ¼þ½¨Á¢Ê±ËùÔÚ¾íµÄID
+	UINT8 OID_BirthID[16];//ÎÄ¼þµÄÔ­Ê¼ID
+	UINT8 OID_DomainID[16];//¶ÔÏóËù´´½¨Ê±ËùÔÚÓòµÄID
 }OBJECT_ID, *pOBJECT_ID;
 
-//SECRUITY_DESCRIPTOR 0X50å±žæ€§ä½“
+//SECRUITY_DESCRIPTOR 0X50ÊôÐÔÌå
 typedef struct _SECRUITY_DESCRIPTOR 
 {
 	//??
 }SECRUITY_DESCRIPTOR,*pSECRUITY_DESCRIPTOR;
 
-//VOLUME_NAME 0X60å±žæ€§ä½“
+//VOLUME_NAME 0X60ÊôÐÔÌå
 typedef struct _VOLUME_NAME 
 {
 	UINT8 VN_Name[0];
 }VOLUME_NAME,*pVOLUME_NAME;
 
-//VOLUME_INFORMATION 0X70å±žæ€§ä½“
+//VOLUME_INFORMATION 0X70ÊôÐÔÌå
 typedef struct _VOLUME_INFORMATION
 {
 	UINT64 VI_Resvd;
-	UINT8 VI_MajVer;//å·ä¸»ç‰ˆæœ¬å·
-	UINT8 VI_MinVer;//å·å­ç‰ˆæœ¬å·
-	UINT16 VI_Flags;/*æ ‡å¿—ä½ï¼Œå¯ä»¥æ˜¯ä»¥ä¸‹å„å€¼ç»„åˆ
-	0x0001è„ä½ï¼Œå½“è¯¥å€¼è¢«è®¾ç½®æ—¶Windowså°†ä¼šåœ¨ä¸‹æ¬¡å¯åŠ¨æ—¶è¿è¡Œchkdsk/Få‘½ä»¤ã€‚
-	0x0002æ—¥å¿—æ–‡ä»¶æ”¹å˜å°ºå¯¸
-	0x0004å·æŒ‚æŽ¥æ—¶å‡çº§
-	0x0008ç”±Windows NT 4æŒ‚æŽ¥
-	0x0010å¯åŠ¨æ—¶åˆ é™¤USN
-	0x0020ä¿®å¤è¿‡çš„ID
-	0x8000è¢«chkdskä¿®æ”¹è¿‡*/
+	UINT8 VI_MajVer;//¾íÖ÷°æ±¾ºÅ
+	UINT8 VI_MinVer;//¾í×Ó°æ±¾ºÅ
+	UINT16 VI_Flags;/*±êÖ¾Î»£¬¿ÉÒÔÊÇÒÔÏÂ¸÷Öµ×éºÏ
+	0x0001ÔàÎ»£¬µ±¸ÃÖµ±»ÉèÖÃÊ±Windows½«»áÔÚÏÂ´ÎÆô¶¯Ê±ÔËÐÐchkdsk/FÃüÁî¡£
+	0x0002ÈÕÖ¾ÎÄ¼þ¸Ä±ä³ß´ç
+	0x0004¾í¹Ò½ÓÊ±Éý¼¶
+	0x0008ÓÉWindows NT 4¹Ò½Ó
+	0x0010Æô¶¯Ê±É¾³ýUSN
+	0x0020ÐÞ¸´¹ýµÄID
+	0x8000±»chkdskÐÞ¸Ä¹ý*/
 }VOLUME_INFORMATION,*pVOLUME_INFORMATION;
 	
-//DATA 0X80å±žæ€§ä½“
+//DATA 0X80ÊôÐÔÌå
 typedef struct _DATA 
 {
 	//??
-	/*+0x10*/ UINT64 StartVcn; // LowVcn èµ·å§‹VCN èµ·å§‹ç°‡å·
-	/*+0x18*/ UINT64 LastVcn; // HighVcn ç»“æŸVCN ç»“æŸç°‡å·
-	/*+0x20*/ UINT16 RunArrayOffset;// æ•°æ®è¿è¡Œçš„åç§»
-	/*+0x22*/ UINT16 CompressionUnit; // åŽ‹ç¼©å¼•æ“Ž
-	/*+0x24*/ UINT32 Padding0; // å¡«å……
-	/*+0x28*/ UINT32 IndexedFlag;// ä¸ºå±žæ€§å€¼åˆ†é…å¤§å°(æŒ‰åˆ†é…çš„ç°‡çš„å­—èŠ‚æ•°è®¡ç®—)
-	/*+0x30*/ UINT64 AllocatedSize; // å±žæ€§å€¼å®žé™…å¤§å°
-	/*+0x38*/ UINT64 DataSize; // å±žæ€§å€¼åŽ‹ç¼©å¤§å°
-	/*+0x40*/ UINT64 InitializedSize; // å®žé™…æ•°æ®å¤§å°
-	/*+0x48*/ UINT64 CompressedSize;// åŽ‹ç¼©åŽå¤§å°
+	/*+0x10*/ UINT64 StartVcn; // LowVcn ÆðÊ¼VCN ÆðÊ¼´ØºÅ
+	/*+0x18*/ UINT64 LastVcn; // HighVcn ½áÊøVCN ½áÊø´ØºÅ
+	/*+0x20*/ UINT16 RunArrayOffset;// Êý¾ÝÔËÐÐµÄÆ«ÒÆ
+	/*+0x22*/ UINT16 CompressionUnit; // Ñ¹ËõÒýÇæ
+	/*+0x24*/ UINT32 Padding0; // Ìî³ä
+	/*+0x28*/ UINT32 IndexedFlag;// ÎªÊôÐÔÖµ·ÖÅä´óÐ¡(°´·ÖÅäµÄ´ØµÄ×Ö½ÚÊý¼ÆËã)
+	/*+0x30*/ UINT64 AllocatedSize; // ÊôÐÔÖµÊµ¼Ê´óÐ¡
+	/*+0x38*/ UINT64 DataSize; // ÊôÐÔÖµÑ¹Ëõ´óÐ¡
+	/*+0x40*/ UINT64 InitializedSize; // Êµ¼ÊÊý¾Ý´óÐ¡
+	/*+0x48*/ UINT64 CompressedSize;// Ñ¹Ëõºó´óÐ¡
 	UINT8 D_data[0];
 }DATA,*pDATA;
 
 typedef struct _INDEX_ENTRY 
 {
-	UINT8 IE_MftReferNumber[8];/*è¯¥æ–‡ä»¶çš„MFTå‚è€ƒå·ã€‚æ³¨æ„ï¼šè¯¥å€¼çš„ä½Ž6å­—èŠ‚æ˜¯MFTè®°å½•å·ï¼Œé«˜2å­—èŠ‚æ˜¯è¯¥MFTè®°å½•çš„åºåˆ—å·*/
-	UINT8 IE_Size[2];//ç´¢å¼•é¡¹çš„å¤§å° ç›¸å¯¹äºŽç´¢å¼•é¡¹å¼€å§‹çš„åç§»é‡
-	UINT8 IE_FileNAmeAttriBodySize[2];//æ–‡ä»¶åå±žæ€§ä½“çš„å¤§å°
-	UINT8 IE_Flags[2];	/*æ ‡å¿—ã€‚è¯¥å€¼å¯èƒ½æ˜¯ä»¥ä¸‹å€¼ä¹‹ä¸€ï¼š
-						0x00 æ™®é€šæ–‡ä»¶é¡¹
-						0x01 æœ‰å­é¡¹
-						0x02 å½“å‰é¡¹æ˜¯æœ€åŽä¸€ä¸ªç›®å½•é¡¹
-						åœ¨è¯»å–ç´¢å¼•é¡¹æ•°æ®æ—¶åº”è¯¥é¦–å…ˆæ£€æŸ¥è¯¥æˆå‘˜çš„å€¼ä»¥ç¡®å®šå½“å‰é¡¹çš„ç±»åž‹*/
-	UINT8 IE_Fill[2];//å¡«å…… æ— æ„ä¹‰
-	UINT8 IE_FatherDirMftReferNumber[8];//çˆ¶ç›®å½•çš„MFTæ–‡ä»¶å‚è€ƒå·
-	UINT8 IE_CreatTime[8];//æ–‡ä»¶åˆ›å»ºæ—¶é—´
-	UINT8 IE_AlterTime[8];//æ–‡ä»¶æœ€åŽä¿®æ”¹æ—¶é—´
-	UINT8 IE_MFTChgTime[8];//æ–‡ä»¶è®°å½•æœ€åŽä¿®æ”¹æ—¶é—´
-	UINT8 IE_ReadTime[8];//æ–‡ä»¶æœ€åŽè®¿é—®æ—¶é—´
-	UINT8 IE_FileAllocSize[8];//æ–‡ä»¶åˆ†é…å¤§å°
-	UINT8 IE_FileRealSize[8];//æ–‡ä»¶å®žé™…å¤§å°
-	UINT8 IE_FileFlag[8];//æ–‡ä»¶æ ‡å¿—
-	UINT8 IE_FileNameSize;//æ–‡ä»¶åé•¿åº¦
-	UINT8 IE_FileNamespace;//æ–‡ä»¶å‘½åç©ºé—´
-	UINT8 IE_FileNameAndFill[0];//æ–‡ä»¶åå’Œå¡«å……
-	//UINT8 IE_Stream[0];//ç›®å½•é¡¹æ•°æ®ï¼Œç»“æž„ä¸Žæ–‡ä»¶åå±žæ€§çš„æ•°æ®ç›¸åŒ
-	//UINT64 IE_SubNodeFR;//å­é¡¹çš„è®°å½•ç´¢å¼•ã€‚è¯¥å€¼çš„ä½Ž6å­—èŠ‚æ˜¯MFTè®°å½•å·ï¼Œé«˜2å­—èŠ‚æ˜¯è¯¥MFTè®°å½•çš„åºåˆ—å·
+	UINT8 IE_MftReferNumber[8];/*¸ÃÎÄ¼þµÄMFT²Î¿¼ºÅ¡£×¢Òâ£º¸ÃÖµµÄµÍ6×Ö½ÚÊÇMFT¼ÇÂ¼ºÅ£¬¸ß2×Ö½ÚÊÇ¸ÃMFT¼ÇÂ¼µÄÐòÁÐºÅ*/
+	UINT8 IE_Size[2];//Ë÷ÒýÏîµÄ´óÐ¡ Ïà¶ÔÓÚË÷ÒýÏî¿ªÊ¼µÄÆ«ÒÆÁ¿
+	UINT8 IE_FileNAmeAttriBodySize[2];//ÎÄ¼þÃûÊôÐÔÌåµÄ´óÐ¡
+	UINT8 IE_Flags[2];	/*±êÖ¾¡£¸ÃÖµ¿ÉÄÜÊÇÒÔÏÂÖµÖ®Ò»£º
+						0x00 ÆÕÍ¨ÎÄ¼þÏî
+						0x01 ÓÐ×ÓÏî
+						0x02 µ±Ç°ÏîÊÇ×îºóÒ»¸öÄ¿Â¼Ïî
+						ÔÚ¶ÁÈ¡Ë÷ÒýÏîÊý¾ÝÊ±Ó¦¸ÃÊ×ÏÈ¼ì²é¸Ã³ÉÔ±µÄÖµÒÔÈ·¶¨µ±Ç°ÏîµÄÀàÐÍ*/
+	UINT8 IE_Fill[2];//Ìî³ä ÎÞÒâÒå
+	UINT8 IE_FatherDirMftReferNumber[8];//¸¸Ä¿Â¼µÄMFTÎÄ¼þ²Î¿¼ºÅ
+	UINT8 IE_CreatTime[8];//ÎÄ¼þ´´½¨Ê±¼ä
+	UINT8 IE_AlterTime[8];//ÎÄ¼þ×îºóÐÞ¸ÄÊ±¼ä
+	UINT8 IE_MFTChgTime[8];//ÎÄ¼þ¼ÇÂ¼×îºóÐÞ¸ÄÊ±¼ä
+	UINT8 IE_ReadTime[8];//ÎÄ¼þ×îºó·ÃÎÊÊ±¼ä
+	UINT8 IE_FileAllocSize[8];//ÎÄ¼þ·ÖÅä´óÐ¡
+	UINT8 IE_FileRealSize[8];//ÎÄ¼þÊµ¼Ê´óÐ¡
+	UINT8 IE_FileFlag[8];//ÎÄ¼þ±êÖ¾
+	UINT8 IE_FileNameSize;//ÎÄ¼þÃû³¤¶È
+	UINT8 IE_FileNamespace;//ÎÄ¼þÃüÃû¿Õ¼ä
+	UINT8 IE_FileNameAndFill[0];//ÎÄ¼þÃûºÍÌî³ä
+	//UINT8 IE_Stream[0];//Ä¿Â¼ÏîÊý¾Ý£¬½á¹¹ÓëÎÄ¼þÃûÊôÐÔµÄÊý¾ÝÏàÍ¬
+	//UINT64 IE_SubNodeFR;//×ÓÏîµÄ¼ÇÂ¼Ë÷Òý¡£¸ÃÖµµÄµÍ6×Ö½ÚÊÇMFT¼ÇÂ¼ºÅ£¬¸ß2×Ö½ÚÊÇ¸ÃMFT¼ÇÂ¼µÄÐòÁÐºÅ
 }INDEX_ENTRY,*pINDEX_ENTRY;
 
 /*     0  1  2  3  4  5  6  7  8  9  A  B  C  D  E  F  0123456789ABCDEF
@@ -351,80 +351,80 @@ typedef struct _INDEX_ENTRY
 10   98 00 00 00 20 00 00 00 24 00 49 00 33 00 30 00  .... ...$.I.3.0.
 20   30 00 00 00 01 00 00 00 00 10 00 00 01 00 00 00  0...............
 30   10 00 00 00 88 00 00 00 88 00 00 00 00 00 00 00  ................
-åç§» å¤§å° æ„ä¹‰
-0X00 4 å±žæ€§å· 90 00 00 00 
-0X04 4 å±žæ€§é•¿åº¦ B8 00 00 00
-0X08 1 å¸¸é©»æ ‡å¿— 00
-0X09 1 åç§°é•¿åº¦ 04
-0X0A 2 åç§°åç§» 18 00
-0X0C 2 æ ‡å¿—(å¸¸é©»å±žæ€§ä¸èƒ½åŽ‹ç¼©) 00 00 
-0X0E 2 å±žæ€§ID 01 00
-0X10 4 å±žæ€§é•¿åº¦(ä¸å«å¤´) 98 00 00 00
-0X14 2 å±žæ€§åç§» 20 00 00 00
-0X16 1 ç´¢å¼•æ ‡å¿— 00
-0X17 1 å¡«å……  00
-0X18 8 å±žæ€§å 24 00 49 00 33 00 30 00
-0X20 4 ç´¢å¼•å±žæ€§ç±»åž‹ 30 00 00 00
-0X24 4 æŽ’åºè§„åˆ™ 01 00 00 00
-0X28 4 ç´¢å¼•é¡¹åˆ†é…å¤§å° 00 10 00 00
-0X2C 1 æ¯ç´¢å¼•è®°å½•çš„ç°‡æ•° 01
-0X2D 3 å¡«å……  00 00 00
-0X30 4 æ¯ç´¢å¼•çš„åç§» 10 00 00 00 
-0X34 4 ç´¢å¼•é¡¹çš„æ€»å¤§å° 88 00 00 00
-0X38 4 ç´¢å¼•é¡¹çš„åˆ†é… 88 00 00 00
-0X3C 1 æ ‡å¿—ï¼Œï¼ˆ0X01å¤§ç´¢å¼•ï¼‰  00
-0X3C 3 å¡«å…… 00 00 00
+Æ«ÒÆ ´óÐ¡ ÒâÒå
+0X00 4 ÊôÐÔºÅ 90 00 00 00 
+0X04 4 ÊôÐÔ³¤¶È B8 00 00 00
+0X08 1 ³£×¤±êÖ¾ 00
+0X09 1 Ãû³Æ³¤¶È 04
+0X0A 2 Ãû³ÆÆ«ÒÆ 18 00
+0X0C 2 ±êÖ¾(³£×¤ÊôÐÔ²»ÄÜÑ¹Ëõ) 00 00 
+0X0E 2 ÊôÐÔID 01 00
+0X10 4 ÊôÐÔ³¤¶È(²»º¬Í·) 98 00 00 00
+0X14 2 ÊôÐÔÆ«ÒÆ 20 00 00 00
+0X16 1 Ë÷Òý±êÖ¾ 00
+0X17 1 Ìî³ä  00
+0X18 8 ÊôÐÔÃû 24 00 49 00 33 00 30 00
+0X20 4 Ë÷ÒýÊôÐÔÀàÐÍ 30 00 00 00
+0X24 4 ÅÅÐò¹æÔò 01 00 00 00
+0X28 4 Ë÷ÒýÏî·ÖÅä´óÐ¡ 00 10 00 00
+0X2C 1 Ã¿Ë÷Òý¼ÇÂ¼µÄ´ØÊý 01
+0X2D 3 Ìî³ä  00 00 00
+0X30 4 Ã¿Ë÷ÒýµÄÆ«ÒÆ 10 00 00 00 
+0X34 4 Ë÷ÒýÏîµÄ×Ü´óÐ¡ 88 00 00 00
+0X38 4 Ë÷ÒýÏîµÄ·ÖÅä 88 00 00 00
+0X3C 1 ±êÖ¾£¬£¨0X01´óË÷Òý£©  00
+0X3C 3 Ìî³ä 00 00 00
 
-// NTFS FILE å±žæ€§å¤´
+// NTFS FILE ÊôÐÔÍ·
 typedef struct  
 {
-    UINT8 Type[4];   //å±žæ€§ç±»åž‹ 90 00 00 00
-    UINT8 Size[4];   //å±žæ€§å¤´å’Œå±žæ€§ä½“çš„æ€»é•¿åº¦ B8 00 00 00
-    UINT8 ResidentFlag; //æ˜¯å¦æ˜¯å¸¸é©»å±žæ€§ï¼ˆ0å¸¸é©» 1éžå¸¸é©»ï¼‰ 00
-    UINT8 NameSize;   //å±žæ€§åçš„é•¿åº¦ 04 
-    UINT8 NameOffset[2]; //å±žæ€§åçš„åç§» ç›¸å¯¹äºŽå±žæ€§å¤´ 18 00
-    UINT8 Flags[2]; //æ ‡å¿—ï¼ˆ0x0001åŽ‹ç¼© 0x4000åŠ å¯† 0x8000ç¨€ç–ï¼‰ 00 00
-    UINT8 Id[2]; //å±žæ€§å”¯ä¸€ID 01 00
+    UINT8 Type[4];   //ÊôÐÔÀàÐÍ 90 00 00 00
+    UINT8 Size[4];   //ÊôÐÔÍ·ºÍÊôÐÔÌåµÄ×Ü³¤¶È B8 00 00 00
+    UINT8 ResidentFlag; //ÊÇ·ñÊÇ³£×¤ÊôÐÔ£¨0³£×¤ 1·Ç³£×¤£© 00
+    UINT8 NameSize;   //ÊôÐÔÃûµÄ³¤¶È 04 
+    UINT8 NameOffset[2]; //ÊôÐÔÃûµÄÆ«ÒÆ Ïà¶ÔÓÚÊôÐÔÍ· 18 00
+    UINT8 Flags[2]; //±êÖ¾£¨0x0001Ñ¹Ëõ 0x4000¼ÓÃÜ 0x8000Ï¡Êè£© 00 00
+    UINT8 Id[2]; //ÊôÐÔÎ¨Ò»ID 01 00
 }NTFS_FILE_ATTRIBUTE_HEADER;
 
-//å¸¸é©»å±žæ€§ å±žæ€§å¤´
+//³£×¤ÊôÐÔ ÊôÐÔÍ·
 typedef struct _ResidentAttributeHeader 
 {
 	NTFS_FILE_ATTRIBUTE_HEADER ATTR_Common;
-	UINT32 ATTR_DatSz; //å±žæ€§æ•°æ®çš„é•¿åº¦ 98 00 00 00
-	UINT16 ATTR_DatOff; //å±žæ€§æ•°æ®ç›¸å¯¹äºŽå±žæ€§å¤´çš„åç§» 20 00
-	UINT8 ATTR_Indx; //ç´¢å¼• 00
-	UINT8 ATTR_Resvd; //ä¿ç•™ 00
-	UINT8 ATTR_AttrNam[8];//å±žæ€§åï¼ŒUnicodeï¼Œç»“å°¾æ— 0 24
+	UINT32 ATTR_DatSz; //ÊôÐÔÊý¾ÝµÄ³¤¶È 98 00 00 00
+	UINT16 ATTR_DatOff; //ÊôÐÔÊý¾ÝÏà¶ÔÓÚÊôÐÔÍ·µÄÆ«ÒÆ 20 00
+	UINT8 ATTR_Indx; //Ë÷Òý 00
+	UINT8 ATTR_Resvd; //±£Áô 00
+	UINT8 ATTR_AttrNam[8];//ÊôÐÔÃû£¬Unicode£¬½áÎ²ÎÞ0 24
 }ResidentAttributeHeader, *pResidentAttributeHeader;
 
-//INDEX_ROOT 0X90å±žæ€§ä½“
+//INDEX_ROOT 0X90ÊôÐÔÌå
 typedef struct _INDEX_ROOT 
 {
-	//ç´¢å¼•æ ¹
-	UINT32 IR_AttrType;//å±žæ€§çš„ç±»åž‹  30 00 00 00
-	UINT32 IR_ColRule;//æ•´ç†è§„åˆ™ 01 00 00 00
-	UINT32 IR_EntrySz;//ç›®å½•é¡¹åˆ†é…å°ºå¯¸ 00 10 00 00
-	UINT8 IR_ClusPerRec;//æ¯ä¸ªç›®å½•é¡¹å ç”¨çš„ç°‡æ•° 01
+	//Ë÷Òý¸ù
+	UINT32 IR_AttrType;//ÊôÐÔµÄÀàÐÍ  30 00 00 00
+	UINT32 IR_ColRule;//ÕûÀí¹æÔò 01 00 00 00
+	UINT32 IR_EntrySz;//Ä¿Â¼Ïî·ÖÅä³ß´ç 00 10 00 00
+	UINT8 IR_ClusPerRec;//Ã¿¸öÄ¿Â¼ÏîÕ¼ÓÃµÄ´ØÊý 01
 	UINT8 IR_Resvd[3]; 00 00 00 
-	//ç´¢å¼•å¤´
+	//Ë÷ÒýÍ·
 	INDEX_HEADER IH;
-	//ç´¢å¼•é¡¹ å¯èƒ½ä¸å­˜åœ¨
+	//Ë÷ÒýÏî ¿ÉÄÜ²»´æÔÚ
 	UINT8 IR_IndexEntry[0];
 }INDEX_ROOT,*pINDEX_ROOT;
 
 
 
-// 90å±žæ€§çš„å±žæ€§ä½“ç”±3éƒ¨åˆ†æž„æˆï¼šç´¢å¼•æ ¹ã€ç´¢å¼•å¤´å’Œç´¢å¼•é¡¹ã€‚ä½†æ˜¯æœ‰äº›æƒ…å†µä¸‹90å±žæ€§ä¸­æ˜¯ä¸å­˜åœ¨ç´¢å¼•é¡¹çš„(ä¸Šå›¾çš„90å±žæ€§ä¸åŒ…å«ç´¢å¼•é¡¹ï¼Œ
-// å›¾8ä¸­çš„90å±žæ€§åŒ…å«2ä¸ªç´¢å¼•é¡¹)ï¼Œè¿™ä¸ªæ—¶å€™è¯¥ç›®å½•çš„ç´¢å¼•é¡¹ç”±A0å±žæ€§ä¸­çš„data runsæŒ‡å‡ºã€‚90å±žæ€§ä½“çš„ç»“æž„å¦‚ä¸‹(ä¸åŒ…å«å±žæ€§å¤´)ï¼š
+// 90ÊôÐÔµÄÊôÐÔÌåÓÉ3²¿·Ö¹¹³É£ºË÷Òý¸ù¡¢Ë÷ÒýÍ·ºÍË÷ÒýÏî¡£µ«ÊÇÓÐÐ©Çé¿öÏÂ90ÊôÐÔÖÐÊÇ²»´æÔÚË÷ÒýÏîµÄ(ÉÏÍ¼µÄ90ÊôÐÔ²»°üº¬Ë÷ÒýÏî£¬
+// Í¼8ÖÐµÄ90ÊôÐÔ°üº¬2¸öË÷ÒýÏî)£¬Õâ¸öÊ±ºò¸ÃÄ¿Â¼µÄË÷ÒýÏîÓÉA0ÊôÐÔÖÐµÄdata runsÖ¸³ö¡£90ÊôÐÔÌåµÄ½á¹¹ÈçÏÂ(²»°üº¬ÊôÐÔÍ·)£º
 typedef struct _INDEX_HEADER 
 {
-	UINT32 IH_EntryOff;//ç¬¬ä¸€ä¸ªç›®å½•é¡¹çš„åç§» 10 00 00
-	UINT32 IH_TalSzOfEntries;//ç›®å½•é¡¹çš„æ€»å°ºå¯¸(åŒ…æ‹¬ç´¢å¼•å¤´å’Œä¸‹é¢çš„ç´¢å¼•é¡¹) 88 00 00 00
-	UINT32 IH_AllocSize;//ç›®å½•é¡¹åˆ†é…çš„å°ºå¯¸ 88 00 00 00
-	UINT8 IH_Flags;æ ‡å¿—ä½ï¼Œæ­¤å€¼å¯èƒ½æ˜¯ä»¥ä¸‹å’Œå€¼ä¹‹ä¸€ï¼š
-					0x00 å°ç›®å½•(æ•°æ®å­˜æ”¾åœ¨æ ¹èŠ‚ç‚¹çš„æ•°æ®åŒºä¸­)
-					0x01 å¤§ç›®å½•(éœ€è¦ç›®å½•é¡¹å­˜å‚¨åŒºå’Œç´¢å¼•é¡¹ä½å›¾) 00
+	UINT32 IH_EntryOff;//µÚÒ»¸öÄ¿Â¼ÏîµÄÆ«ÒÆ 10 00 00
+	UINT32 IH_TalSzOfEntries;//Ä¿Â¼ÏîµÄ×Ü³ß´ç(°üÀ¨Ë÷ÒýÍ·ºÍÏÂÃæµÄË÷ÒýÏî) 88 00 00 00
+	UINT32 IH_AllocSize;//Ä¿Â¼Ïî·ÖÅäµÄ³ß´ç 88 00 00 00
+	UINT8 IH_Flags;±êÖ¾Î»£¬´ËÖµ¿ÉÄÜÊÇÒÔÏÂºÍÖµÖ®Ò»£º
+					0x00 Ð¡Ä¿Â¼(Êý¾Ý´æ·ÅÔÚ¸ù½ÚµãµÄÊý¾ÝÇøÖÐ)
+					0x01 ´óÄ¿Â¼(ÐèÒªÄ¿Â¼Ïî´æ´¢ÇøºÍË÷ÒýÏîÎ»Í¼) 00
 	UINT8 IH_Resvd[3]; 00 00 00
 }INDEX_HEADER,*pINDEX_HEADER;
 
@@ -438,58 +438,58 @@ typedef struct _INDEX_HEADER
 50   09 03 74 00 65 00 73 00 74 00 32 00 2E 00 74 00  ..t.e.s.t.2...t.
 60   78 00 74 00 00 00 00 00 00 00 00 00 00 00 00 00  x.t.............
 70   10 00 00 00 02 00 00 00 
-è¡¨11 ç´¢å¼•æ ¹å±žæ€§ä¸­ç´¢å¼•å¤´éƒ¨åˆ†ç»“æž„
-åç§» å¤§å° æ„ä¹‰
-0X00 8 æ–‡ä»¶çš„MFTè®°å½•å· 27 00 00 00 00 00 01 00
-0X08 2 ç´¢å¼•é¡¹å¤§å° 68 00
-0X0A 2 åç§°åç§» 54 00
-0X0C 4 ç´¢å¼•æ ‡å¿—ï¼‹å¡«å……  00 00 00 00
-0X10 8 çˆ¶ç›®å½•çš„MFTæ–‡ä»¶å‚è€ƒå· 26 00 00 00 00 00 01 00
-0X18 8 æ–‡ä»¶åˆ›å»ºæ—¶é—´ 5B AE 88 D6 EE D6 04 00
-0X20 8 æ–‡ä»¶ä¿®æ”¹æ—¶é—´ C5 F9 BC 2E E6 C0 D7 01
-0X28 8 æ–‡ä»¶æœ€åŽä¿®æ”¹æ—¶é—´ C5 F9 BC 2E E6 C0 D7 01
-0X30 8 æ–‡ä»¶æœ€åŽè®¿é—®æ—¶é—´ 5B AE 88 D6 EE D6 D7 01
-0X38 8 æ–‡ä»¶åˆ†é…å¤§å° 18 00 00 00 00 00 00 00
-0X40 8 æ–‡ä»¶å®žé™…å¤§å° 18 00 00 00 00 00 00 00
-0X48 8 æ–‡ä»¶æ ‡å¿— 20 00 00 00 00 00 00 00 æ–‡ä»¶è¿˜æ˜¯æ–‡ä»¶å¤¹
-0X50 1 æ–‡ä»¶åé•¿åº¦ï¼ˆFï¼‰ 09 
-0X51 1 æ–‡ä»¶åå‘½åç©ºé—´ 03 
-0X52 2F æ–‡ä»¶åï¼ˆå¡«å……åˆ°8å­—èŠ‚ï¼‰
+±í11 Ë÷Òý¸ùÊôÐÔÖÐË÷ÒýÍ·²¿·Ö½á¹¹
+Æ«ÒÆ ´óÐ¡ ÒâÒå
+0X00 8 ÎÄ¼þµÄMFT¼ÇÂ¼ºÅ 27 00 00 00 00 00 01 00
+0X08 2 Ë÷ÒýÏî´óÐ¡ 68 00
+0X0A 2 Ãû³ÆÆ«ÒÆ 54 00
+0X0C 4 Ë÷Òý±êÖ¾£«Ìî³ä  00 00 00 00
+0X10 8 ¸¸Ä¿Â¼µÄMFTÎÄ¼þ²Î¿¼ºÅ 26 00 00 00 00 00 01 00
+0X18 8 ÎÄ¼þ´´½¨Ê±¼ä 5B AE 88 D6 EE D6 04 00
+0X20 8 ÎÄ¼þÐÞ¸ÄÊ±¼ä C5 F9 BC 2E E6 C0 D7 01
+0X28 8 ÎÄ¼þ×îºóÐÞ¸ÄÊ±¼ä C5 F9 BC 2E E6 C0 D7 01
+0X30 8 ÎÄ¼þ×îºó·ÃÎÊÊ±¼ä 5B AE 88 D6 EE D6 D7 01
+0X38 8 ÎÄ¼þ·ÖÅä´óÐ¡ 18 00 00 00 00 00 00 00
+0X40 8 ÎÄ¼þÊµ¼Ê´óÐ¡ 18 00 00 00 00 00 00 00
+0X48 8 ÎÄ¼þ±êÖ¾ 20 00 00 00 00 00 00 00 ÎÄ¼þ»¹ÊÇÎÄ¼þ¼Ð
+0X50 1 ÎÄ¼þÃû³¤¶È£¨F£© 09 
+0X51 1 ÎÄ¼þÃûÃüÃû¿Õ¼ä 03 
+0X52 2F ÎÄ¼þÃû£¨Ìî³äµ½8×Ö½Ú£©
 0X52+2F P
-0X52 +P+2F 8 å­èŠ‚ç‚¹ç´¢å¼•ç¼“å­˜çš„VCL
-è¡¨12 ç´¢å¼•é¡¹ç»“æž„
-ç´¢å¼•æ ¹å±žæ€§å°±æ˜¯ç”±ç´¢å¼•å¤´å’Œè¿™
+0X52 +P+2F 8 ×Ó½ÚµãË÷Òý»º´æµÄVCL
+±í12 Ë÷ÒýÏî½á¹¹
+Ë÷Òý¸ùÊôÐÔ¾ÍÊÇÓÉË÷ÒýÍ·ºÍÕâ
 
 
 typedef struct _INDEX_ENTRY 
 {
-	UINT64 IE_MftReferNumber;è¯¥æ–‡ä»¶çš„MFTå‚è€ƒå·ã€‚æ³¨æ„ï¼šè¯¥å€¼çš„ä½Ž6å­—èŠ‚æ˜¯MFTè®°å½•å·ï¼Œé«˜2å­—èŠ‚æ˜¯è¯¥MFTè®°å½•çš„åºåˆ—å·
-	UINT16 IE_Size;//ç´¢å¼•é¡¹çš„å¤§å° ç›¸å¯¹äºŽç´¢å¼•é¡¹å¼€å§‹çš„åç§»é‡
-	UINT16 IE_FileNAmeAttriBodySize;//æ–‡ä»¶åå±žæ€§ä½“çš„å¤§å°
-	UINT16 IE_Flags;æ ‡å¿—ã€‚è¯¥å€¼å¯èƒ½æ˜¯ä»¥ä¸‹å€¼ä¹‹ä¸€ï¼š
-                    0x00 æ™®é€šæ–‡ä»¶é¡¹
-                    0x01 æœ‰å­é¡¹
-                    0x02 å½“å‰é¡¹æ˜¯æœ€åŽä¸€ä¸ªç›®å½•é¡¹
-                    åœ¨è¯»å–ç´¢å¼•é¡¹æ•°æ®æ—¶åº”è¯¥é¦–å…ˆæ£€æŸ¥è¯¥æˆå‘˜çš„å€¼ä»¥ç¡®å®šå½“å‰é¡¹çš„ç±»åž‹
-	UINT16 IE_Fill;//å¡«å…… æ— æ„ä¹‰
-	UINT64 IE_FatherDirMftReferNumber;//çˆ¶ç›®å½•çš„MFTæ–‡ä»¶å‚è€ƒå·
-	UINT8 IE_CreatTime[4];//æ–‡ä»¶åˆ›å»ºæ—¶é—´
-	UINT8 IE_AlterTime[4];//æ–‡ä»¶æœ€åŽä¿®æ”¹æ—¶é—´
-	UINT8 IE_MFTChgTime[4];//æ–‡ä»¶è®°å½•æœ€åŽä¿®æ”¹æ—¶é—´
-	UINT8 IE_ReadTime[4];//æ–‡ä»¶æœ€åŽè®¿é—®æ—¶é—´
-	UINT64 IE_FileAllocSize;//æ–‡ä»¶åˆ†é…å¤§å°
-	UINT64 IE_FileRealSize;//æ–‡ä»¶å®žé™…å¤§å°
-	UINT64 IE_FileFlag;//æ–‡ä»¶æ ‡å¿—
-	UINT8 IE_FileNameSize;//æ–‡ä»¶åé•¿åº¦
-	UINT8 IE_FileNamespace;//æ–‡ä»¶å‘½åç©ºé—´
-	UINT8 IE_FileNameAndFill[0];//æ–‡ä»¶åå’Œå¡«å……
-	//UINT8 IE_Stream[0];//ç›®å½•é¡¹æ•°æ®ï¼Œç»“æž„ä¸Žæ–‡ä»¶åå±žæ€§çš„æ•°æ®ç›¸åŒ
-	//UINT64 IE_SubNodeFR;//å­é¡¹çš„è®°å½•ç´¢å¼•ã€‚è¯¥å€¼çš„ä½Ž6å­—èŠ‚æ˜¯MFTè®°å½•å·ï¼Œé«˜2å­—èŠ‚æ˜¯è¯¥MFTè®°å½•çš„åºåˆ—å·
+	UINT64 IE_MftReferNumber;¸ÃÎÄ¼þµÄMFT²Î¿¼ºÅ¡£×¢Òâ£º¸ÃÖµµÄµÍ6×Ö½ÚÊÇMFT¼ÇÂ¼ºÅ£¬¸ß2×Ö½ÚÊÇ¸ÃMFT¼ÇÂ¼µÄÐòÁÐºÅ
+	UINT16 IE_Size;//Ë÷ÒýÏîµÄ´óÐ¡ Ïà¶ÔÓÚË÷ÒýÏî¿ªÊ¼µÄÆ«ÒÆÁ¿
+	UINT16 IE_FileNAmeAttriBodySize;//ÎÄ¼þÃûÊôÐÔÌåµÄ´óÐ¡
+	UINT16 IE_Flags;±êÖ¾¡£¸ÃÖµ¿ÉÄÜÊÇÒÔÏÂÖµÖ®Ò»£º
+                    0x00 ÆÕÍ¨ÎÄ¼þÏî
+                    0x01 ÓÐ×ÓÏî
+                    0x02 µ±Ç°ÏîÊÇ×îºóÒ»¸öÄ¿Â¼Ïî
+                    ÔÚ¶ÁÈ¡Ë÷ÒýÏîÊý¾ÝÊ±Ó¦¸ÃÊ×ÏÈ¼ì²é¸Ã³ÉÔ±µÄÖµÒÔÈ·¶¨µ±Ç°ÏîµÄÀàÐÍ
+	UINT16 IE_Fill;//Ìî³ä ÎÞÒâÒå
+	UINT64 IE_FatherDirMftReferNumber;//¸¸Ä¿Â¼µÄMFTÎÄ¼þ²Î¿¼ºÅ
+	UINT8 IE_CreatTime[4];//ÎÄ¼þ´´½¨Ê±¼ä
+	UINT8 IE_AlterTime[4];//ÎÄ¼þ×îºóÐÞ¸ÄÊ±¼ä
+	UINT8 IE_MFTChgTime[4];//ÎÄ¼þ¼ÇÂ¼×îºóÐÞ¸ÄÊ±¼ä
+	UINT8 IE_ReadTime[4];//ÎÄ¼þ×îºó·ÃÎÊÊ±¼ä
+	UINT64 IE_FileAllocSize;//ÎÄ¼þ·ÖÅä´óÐ¡
+	UINT64 IE_FileRealSize;//ÎÄ¼þÊµ¼Ê´óÐ¡
+	UINT64 IE_FileFlag;//ÎÄ¼þ±êÖ¾
+	UINT8 IE_FileNameSize;//ÎÄ¼þÃû³¤¶È
+	UINT8 IE_FileNamespace;//ÎÄ¼þÃüÃû¿Õ¼ä
+	UINT8 IE_FileNameAndFill[0];//ÎÄ¼þÃûºÍÌî³ä
+	//UINT8 IE_Stream[0];//Ä¿Â¼ÏîÊý¾Ý£¬½á¹¹ÓëÎÄ¼þÃûÊôÐÔµÄÊý¾ÝÏàÍ¬
+	//UINT64 IE_SubNodeFR;//×ÓÏîµÄ¼ÇÂ¼Ë÷Òý¡£¸ÃÖµµÄµÍ6×Ö½ÚÊÇMFT¼ÇÂ¼ºÅ£¬¸ß2×Ö½ÚÊÇ¸ÃMFT¼ÇÂ¼µÄÐòÁÐºÅ
 }INDEX_ENTRY,*pINDEX_ENTRY;
 */
 
 
-//INDEX_ALLOCATION 0XA0å±žæ€§ä½“
+//INDEX_ALLOCATION 0XA0ÊôÐÔÌå
 typedef struct _INDEX_ALLOCATION 
 {
 	//UINT64 IA_DataRuns;
@@ -511,38 +511,38 @@ typedef struct _SYMBOL_LINK
 //REPARSE_POINT
 typedef struct _REPARSE_POINT
 {
-	UINT32 RP_Type;/*é‡è§£æžæ•°æ®ç±»åž‹ï¼Œè¯¥å€¼å¯ä»¥æ˜¯ä»¥ä¸‹å€¼ä¹‹ä¸€
-					0x20000000åˆ«å
-					0x40000000æœ€é«˜ç­‰å¾…æ—¶é—´
-					0x80000000å¾®è½¯ä½¿ç”¨
+	UINT32 RP_Type;/*ÖØ½âÎöÊý¾ÝÀàÐÍ£¬¸ÃÖµ¿ÉÒÔÊÇÒÔÏÂÖµÖ®Ò»
+					0x20000000±ðÃû
+					0x40000000×î¸ßµÈ´ýÊ±¼ä
+					0x80000000Î¢ÈíÊ¹ÓÃ
 					0x68000005NSS
-					0x68000006NSSæ¢å¤
+					0x68000006NSS»Ö¸´
 					0x68000007SIS
 					0x68000008DFS
-					0x88000003å·æŒ‚æŽ¥ç‚¹
+					0x88000003¾í¹Ò½Óµã
 					0xA8000004 HSM
-					0xE8000000 ç¡¬è¿žæŽ¥*/
-	UINT16 RP_DatSz;//é‡è§£æžæ•°æ®å°ºå¯¸
+					0xE8000000 Ó²Á¬½Ó*/
+	UINT16 RP_DatSz;//ÖØ½âÎöÊý¾Ý³ß´ç
 	UINT16 RP_Resvd;//
-	UINT8 RP_Data[0];// é‡è§£æžæ•°æ®
+	UINT8 RP_Data[0];// ÖØ½âÎöÊý¾Ý
 }REPARSE_POINT,*pREPARSE_POINT;
 
 //EA_INFORMATION
 typedef struct _EA_INFORMATION 
 {
-	UINT16 EI_PackedSz;// åŽ‹ç¼©æ‰©å±•å±žæ€§å°ºå¯¸
-	UINT16 EI_NumOfEA;//æ‹¥æœ‰NEED_EAè®°å½•çš„æ‰©å±•å±žæ€§ä¸ªæ•°
-	UINT32 EI_UnpackedSz;//æœªåŽ‹ç¼©æ‰©å±•å±žæ€§å°ºå¯¸
+	UINT16 EI_PackedSz;// Ñ¹ËõÀ©Õ¹ÊôÐÔ³ß´ç
+	UINT16 EI_NumOfEA;//ÓµÓÐNEED_EA¼ÇÂ¼µÄÀ©Õ¹ÊôÐÔ¸öÊý
+	UINT32 EI_UnpackedSz;//Î´Ñ¹ËõÀ©Õ¹ÊôÐÔ³ß´ç
 }EA_INFORMATION,*pEA_INFORMATION;
 
 //EA
 typedef struct _EA 
 {
-	UINT32 EA_Next;//ä¸‹ä¸€ä¸ªæ‰©å±•å±žæ€§çš„åç§»(æœ¬è®°å½•çš„å°ºå¯¸)
-	UINT8 EA_Flags;//æ ‡å¿—ä½ï¼Œå€¼å–0x80è¡¨ç¤ºéœ€è¦EA
-	UINT8 EA_NamLen;//åå­—æ•°æ®çš„é•¿åº¦(M)
-	UINT16 EA_ValLen;//å€¼æ•°æ®çš„é•¿åº¦
-	UINT8 EA_NameVal[0];//åå­—æ•°æ®å’Œå€¼æ•°æ®
+	UINT32 EA_Next;//ÏÂÒ»¸öÀ©Õ¹ÊôÐÔµÄÆ«ÒÆ(±¾¼ÇÂ¼µÄ³ß´ç)
+	UINT8 EA_Flags;//±êÖ¾Î»£¬ÖµÈ¡0x80±íÊ¾ÐèÒªEA
+	UINT8 EA_NamLen;//Ãû×ÖÊý¾ÝµÄ³¤¶È(M)
+	UINT16 EA_ValLen;//ÖµÊý¾ÝµÄ³¤¶È
+	UINT8 EA_NameVal[0];//Ãû×ÖÊý¾ÝºÍÖµÊý¾Ý
 }EA,*pEA;
 
 
@@ -558,11 +558,11 @@ typedef struct
 {
     UINT8 Type;
     UINT32 Size;
-    UINT8 ResidentFlag; //æ˜¯å¦æ˜¯å¸¸é©»å±žæ€§ï¼ˆ0å¸¸é©» 1éžå¸¸é©»ï¼‰
-    UINT8 NameSize;   //å±žæ€§åçš„é•¿åº¦
-    UINT16 NameOffset; //å±žæ€§åçš„åç§» ç›¸å¯¹äºŽå±žæ€§å¤´
-    UINT8 Data[20]; //ç”¨äºŽå­˜æ”¾å±žæ€§çš„æ•°æ®
-    UINT16 DataSize; //ç”¨äºŽå­˜æ”¾å±žæ€§çš„æ•°æ®
+    UINT8 ResidentFlag; //ÊÇ·ñÊÇ³£×¤ÊôÐÔ£¨0³£×¤ 1·Ç³£×¤£©
+    UINT8 NameSize;   //ÊôÐÔÃûµÄ³¤¶È
+    UINT16 NameOffset; //ÊôÐÔÃûµÄÆ«ÒÆ Ïà¶ÔÓÚÊôÐÔÍ·
+    UINT8 Data[20]; //ÓÃÓÚ´æ·ÅÊôÐÔµÄÊý¾Ý
+    UINT16 DataSize; //ÓÃÓÚ´æ·ÅÊôÐÔµÄÊý¾Ý
 }NTFS_FILE_ATTRIBUTE_HEADER_SWITCHED;    
 
 

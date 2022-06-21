@@ -2,13 +2,13 @@
 /*************************************************
     .
     File name:      	*.*
-    AuthorÔºö	        	‰ªªÂêØÁ∫¢
-    IDÔºö					00001
+    Author£∫	        	»Œ∆Ù∫Ï
+    ID£∫					00001
     Date:          		202107
     Description:    	
-    Others:         	Êó†
+    Others:         	Œﬁ
 
-    History:        	Êó†
+    History:        	Œﬁ
 	    1.  Date:
 		    Author: 
 		    ID:

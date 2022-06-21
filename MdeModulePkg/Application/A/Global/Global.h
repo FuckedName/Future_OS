@@ -2,13 +2,13 @@
 /*************************************************
     .
     File name:      	*.*
-    Authorï¼š	        	ä»»å¯çº¢
-    IDï¼š					00001
+    Author£º	        	ÈÎÆôºì
+    ID£º					00001
     Date:          		202107
-    Description:    	å®šä¹‰ç³»ç»Ÿçš„ä¸€äº›å…¨å±€å˜é‡ï¼Œè¿™é‡Œè¾¹å¾ˆå¤šå…¨å±€å˜é‡æ˜¯éœ€è¦å¹²æŽ‰çš„ã€‚
-    Others:         	æ— 
+    Description:    	¶¨ÒåÏµÍ³µÄÒ»Ð©È«¾Ö±äÁ¿£¬ÕâÀï±ßºÜ¶àÈ«¾Ö±äÁ¿ÊÇÐèÒª¸ÉµôµÄ¡£
+    Others:         	ÎÞ
 
-    History:        	æ— 
+    History:        	ÎÞ
 	    1.  Date:
 		    Author: 
 		    ID:
@@ -104,7 +104,7 @@ typedef struct
     // 00001000(Volume name)
     // 00010000(Sub path)
     // 00100000(FILING: guidang)
-    UINT8 Attribute[1];  // if 0x0FH then Long path structor, 0x20æ–‡ä»¶ï¼Œ0x10æ–‡ä»¶å¤¹
+    UINT8 Attribute[1];  // if 0x0FH then Long path structor, 0x20ÎÄ¼þ£¬0x10ÎÄ¼þ¼Ð
     UINT8 Reserved[1];
     UINT8 CreateTimeLow[1];
     UINT8 CreateTimeHigh[2];
@@ -116,9 +116,9 @@ typedef struct
     UINT8 StartClusterLow2B[2]; //*
     UINT8 FileLength[4];
 
-    //ç”¨äºŽæŒ‡å‘å½“å‰æ–‡ä»¶æˆ–è€…ç›®å½•å¯¹åº”çš„æ‰‡åŒºç¼“å­˜ï¼Œå› ä¸ºæœ‰æ—¶å€™ä¸€ä¸ªç¼“å­˜æŒ‡å‘å¾ˆå¤šç›®å½•æˆ–æ–‡ä»¶é¡¹
-    //è¿™æ ·ï¼Œå¦‚æžœéœ€è¦åˆ é™¤æ–‡ä»¶é¡¹æ—¶ï¼Œéœ€è¦æŠŠè¿™ä¸ªæ–‡ä»¶æ‰€åœ¨çš„ç›®å½•é¡¹éƒ½è¦è¯»å–å‡ºæ¥ï¼Œå†å†™å…¥ç£ç›˜
-    //ä¸çŸ¥é“èƒ½ä¸èƒ½ä¼˜åŒ–ä¸‹ï¼Œå½“å‰è®°å½•é¡¹ä¸º1025ï¼Œè¡¨ç¤ºæ˜¯ç¬¬3ä¸ªæ‰‡åŒºç­‰ç­‰ï¼ˆå› ä¸ºè¯»å–å’Œå†™å…¥ï¼Œéœ€è¦ä»¥æ‰‡åŒºä¸ºå•ä½ï¼‰
+    //ÓÃÓÚÖ¸Ïòµ±Ç°ÎÄ¼þ»òÕßÄ¿Â¼¶ÔÓ¦µÄÉÈÇø»º´æ£¬ÒòÎªÓÐÊ±ºòÒ»¸ö»º´æÖ¸ÏòºÜ¶àÄ¿Â¼»òÎÄ¼þÏî
+    //ÕâÑù£¬Èç¹ûÐèÒªÉ¾³ýÎÄ¼þÏîÊ±£¬ÐèÒª°ÑÕâ¸öÎÄ¼þËùÔÚµÄÄ¿Â¼Ïî¶¼Òª¶ÁÈ¡³öÀ´£¬ÔÙÐ´Èë´ÅÅÌ
+    //²»ÖªµÀÄÜ²»ÄÜÓÅ»¯ÏÂ£¬µ±Ç°¼ÇÂ¼ÏîÎª1025£¬±íÊ¾ÊÇµÚ3¸öÉÈÇøµÈµÈ£¨ÒòÎª¶ÁÈ¡ºÍÐ´Èë£¬ÐèÒªÒÔÉÈÇøÎªµ¥Î»£©
     //UINT8 *pSectorBuffer;
 }FAT32_ROOTPATH_SHORT_FILE_ITEM;
 
@@ -142,42 +142,42 @@ typedef struct
 // first sector of partition
 typedef struct
 {
-    UINT8 JMP[3] ; // 0x00 3 è·³è½¬æŒ‡ä»¤ï¼ˆè·³è¿‡å¼€å¤´ä¸€æ®µåŒºåŸŸï¼‰
-    UINT8 OEM[8] ; // 0x03 8 OEMåç§°å¸¸è§å€¼æ˜¯MSDOS5.0, NTFS.
+    UINT8 JMP[3] ; // 0x00 3 Ìø×ªÖ¸Áî£¨Ìø¹ý¿ªÍ·Ò»¶ÎÇøÓò£©
+    UINT8 OEM[8] ; // 0x03 8 OEMÃû³Æ³£¼ûÖµÊÇMSDOS5.0, NTFS.
 
     // 0x0B
-    UINT8 BitsOfSector[2];        //  0x0200ã€€ã€€æ‰‡åŒºå¤§å°ï¼Œ512B
-    UINT8 SectorOfCluster;            //  0x08ã€€ã€€  æ¯ç°‡æ‰‡åŒºæ•°ï¼Œ4KB
-    UINT8 ReservedSelector[2];            // ã€€ã€€ã€€ã€€ã€€ã€€ä¿ç•™æ‰‡åŒº
+    UINT8 BitsOfSector[2];        //  0x0200¡¡¡¡ÉÈÇø´óÐ¡£¬512B
+    UINT8 SectorOfCluster;            //  0x08¡¡¡¡  Ã¿´ØÉÈÇøÊý£¬4KB
+    UINT8 ReservedSelector[2];            // ¡¡¡¡¡¡¡¡¡¡¡¡±£ÁôÉÈÇø
     UINT8 NoUse01[5];            //
     
     // 0x15
     UINT8 Description;            //  0xF8     
     
-    // ç£ç›˜ä»‹è´¨ -- ç¡¬ç›˜
+    // ´ÅÅÌ½éÖÊ -- Ó²ÅÌ
     UINT8 NoUse02[2];            //
     
     // 0x18
-    UINT8 SectorPerTrack[2];     // ã€€0x003F ã€€æ¯é“æ‰‡åŒºæ•° 63
-    UINT8 Headers[2];           //ã€€ 0x00FF  ç£å¤´æ•°
-    UINT8 SectorsHide[4];          // ã€€0x3Fã€€ã€€éšè—æ‰‡åŒº
+    UINT8 SectorPerTrack[2];     // ¡¡0x003F ¡¡Ã¿µÀÉÈÇøÊý 63
+    UINT8 Headers[2];           //¡¡ 0x00FF  ´ÅÍ·Êý
+    UINT8 SectorsHide[4];          // ¡¡0x3F¡¡¡¡Òþ²ØÉÈÇø
     UINT8 NoUse03[8];           //
     
     // 0x28
-    UINT8 AllSectorCount[8];        // å·æ€»æ‰‡åŒºæ•°, é«˜ä½åœ¨å‰, ä½Žä½åœ¨åŽ
+    UINT8 AllSectorCount[8];        // ¾í×ÜÉÈÇøÊý, ¸ßÎ»ÔÚÇ°, µÍÎ»ÔÚºó
     
     // 0x30
-    UINT8 MFT_StartCluster[8];      // MFT èµ·å§‹ç°‡
-    UINT8 MFT_MirrStartCluster[8];  // MTF å¤‡ä»½ MFTMirr ä½ç½®
+    UINT8 MFT_StartCluster[8];      // MFT ÆðÊ¼´Ø
+    UINT8 MFT_MirrStartCluster[8];  // MTF ±¸·Ý MFTMirr Î»ÖÃ
     
     //0x40
-    UINT8 ClusterPerMFT[4];    // æ¯è®°å½•ç°‡æ•° 0xF6
-    UINT8 ClusterPerIndex[4];    // æ¯ç´¢å¼•ç°‡æ•°
+    UINT8 ClusterPerMFT[4];    // Ã¿¼ÇÂ¼´ØÊý 0xF6
+    UINT8 ClusterPerIndex[4];    // Ã¿Ë÷Òý´ØÊý
     
     //0x48
-    UINT8 SerialNumber[8];    // å·åºåˆ—å·
-    UINT8 CheckSum[8];    // æ ¡éªŒå’Œ
-    UINT8 EndFlag[2];    // 0x1FE 2 æ‰‡åŒºç»“æŸç¬¦ï¼ˆ0x55 0xAAï¼‰ ç»“æŸæ ‡å¿—ï¼šMBRçš„ç»“æŸæ ‡å¿—ä¸ŽDBRï¼ŒEBRçš„ç»“æŸæ ‡å¿—ç›¸åŒã€‚
+    UINT8 SerialNumber[8];    // ¾íÐòÁÐºÅ
+    UINT8 CheckSum[8];    // Ð£ÑéºÍ
+    UINT8 EndFlag[2];    // 0x1FE 2 ÉÈÇø½áÊø·û£¨0x55 0xAA£© ½áÊø±êÖ¾£ºMBRµÄ½áÊø±êÖ¾ÓëDBR£¬EBRµÄ½áÊø±êÖ¾ÏàÍ¬¡£
 }DOLLAR_BOOT;
 
 
@@ -242,42 +242,42 @@ typedef struct
 
 typedef struct
 {
-    UINT8 JMP[3] ; // 0x00 3 è·³è½¬æŒ‡ä»¤ï¼ˆè·³è¿‡å¼€å¤´ä¸€æ®µåŒºåŸŸï¼‰
-    UINT8 OEM[8] ; // 0x03 8 OEMåç§°å¸¸è§å€¼æ˜¯MSDOS5.0.
-    UINT8 BitsOfSector[2] ; // 0x0b 2 æ¯ä¸ªæ‰‡åŒºçš„å­—èŠ‚æ•°ã€‚å–å€¼åªèƒ½æ˜¯ä»¥ä¸‹å‡ ç§ï¼š512ï¼Œ1024ï¼Œ2048æˆ–æ˜¯4096ã€‚è®¾ä¸º512ä¼šå–å¾—æœ€å¥½çš„å…¼å®¹æ€§
-    UINT8 SectorOfCluster[1] ; // 0x0d 1 æ¯ç°‡æ‰‡åŒºæ•°ã€‚ å…¶å€¼å¿…é¡»ä¸­2çš„æ•´æ•°æ¬¡æ–¹ï¼ŒåŒæ—¶è¿˜è¦ä¿è¯æ¯ç°‡çš„å­—èŠ‚æ•°ä¸èƒ½è¶…è¿‡32K
-    UINT8 ReservedSelector[2] ; // 0x0e 2 ä¿ç•™æ‰‡åŒºæ•°ï¼ˆåŒ…æ‹¬å¯åŠ¨æ‰‡åŒºï¼‰æ­¤åŸŸä¸èƒ½ä¸º0ï¼ŒFAT12/FAT16å¿…é¡»ä¸º1ï¼ŒFAT32çš„å…¸åž‹å€¼å–ä¸º32
-    UINT8 FATCount[1] ; // 0x10 1 æ–‡ä»¶åˆ†é…è¡¨æ•°ç›®ã€‚ NumFATSï¼Œä»»ä½•FATæ ¼å¼éƒ½å»ºè®®ä¸º2
-    UINT8 RootPathRecords[2] ; // 0x11 2 æœ€å¤§æ ¹ç›®å½•æ¡ç›®ä¸ªæ•°, 0 for fat32, 512 for fat16
-    UINT8 AllSectors[2] ; // 0x13 2 æ€»æ‰‡åŒºæ•°ï¼ˆå¦‚æžœæ˜¯0ï¼Œå°±ä½¿ç”¨åç§»0x20å¤„çš„4å­—èŠ‚å€¼ï¼‰0 for fat32
-    UINT8 Description[1] ; // 0x15 1 ä»‹è´¨æè¿° 0xF8 å•é¢ã€æ¯é¢80ç£é“ã€æ¯ç£é“9æ‰‡åŒº
-    UINT8 xxx1[2] ; // 0x16 2 æ¯ä¸ªæ–‡ä»¶åˆ†é…è¡¨çš„æ‰‡åŒºï¼ˆFAT16ï¼‰,0 for fat32
-    UINT8 xxx2[2] ; // 0x18 2 æ¯ç£é“çš„æ‰‡åŒº, 0x003f
-    UINT8 xxx3[2] ; // 0x1a 2 ç£å¤´æ•°ï¼Œ0xff
-    UINT8 xxx4[4] ; // 0x1c 4 éšè—æ‰‡åŒº, ä¸ŽMBRä¸­åœ°å€0x1C6å¼€å§‹çš„4ä¸ªå­—èŠ‚æ•°å€¼ç›¸ç­‰
-    UINT8 SectorCounts[4] ; // 0x20 4 æ€»æ‰‡åŒºæ•°ï¼ˆå¦‚æžœè¶…è¿‡65535ä½¿ç”¨æ­¤åœ°å€ï¼Œå°äºŽ65536å‚è§åç§»0x13ï¼Œå¯¹FAT32ï¼Œæ­¤åŸŸå¿…é¡»æ˜¯éž0ï¼‰
+    UINT8 JMP[3] ; // 0x00 3 Ìø×ªÖ¸Áî£¨Ìø¹ý¿ªÍ·Ò»¶ÎÇøÓò£©
+    UINT8 OEM[8] ; // 0x03 8 OEMÃû³Æ³£¼ûÖµÊÇMSDOS5.0.
+    UINT8 BitsOfSector[2] ; // 0x0b 2 Ã¿¸öÉÈÇøµÄ×Ö½ÚÊý¡£È¡ÖµÖ»ÄÜÊÇÒÔÏÂ¼¸ÖÖ£º512£¬1024£¬2048»òÊÇ4096¡£ÉèÎª512»áÈ¡µÃ×îºÃµÄ¼æÈÝÐÔ
+    UINT8 SectorOfCluster[1] ; // 0x0d 1 Ã¿´ØÉÈÇøÊý¡£ ÆäÖµ±ØÐëÖÐ2µÄÕûÊý´Î·½£¬Í¬Ê±»¹Òª±£Ö¤Ã¿´ØµÄ×Ö½ÚÊý²»ÄÜ³¬¹ý32K
+    UINT8 ReservedSelector[2] ; // 0x0e 2 ±£ÁôÉÈÇøÊý£¨°üÀ¨Æô¶¯ÉÈÇø£©´ËÓò²»ÄÜÎª0£¬FAT12/FAT16±ØÐëÎª1£¬FAT32µÄµäÐÍÖµÈ¡Îª32
+    UINT8 FATCount[1] ; // 0x10 1 ÎÄ¼þ·ÖÅä±íÊýÄ¿¡£ NumFATS£¬ÈÎºÎFAT¸ñÊ½¶¼½¨ÒéÎª2
+    UINT8 RootPathRecords[2] ; // 0x11 2 ×î´ó¸ùÄ¿Â¼ÌõÄ¿¸öÊý, 0 for fat32, 512 for fat16
+    UINT8 AllSectors[2] ; // 0x13 2 ×ÜÉÈÇøÊý£¨Èç¹ûÊÇ0£¬¾ÍÊ¹ÓÃÆ«ÒÆ0x20´¦µÄ4×Ö½ÚÖµ£©0 for fat32
+    UINT8 Description[1] ; // 0x15 1 ½éÖÊÃèÊö 0xF8 µ¥Ãæ¡¢Ã¿Ãæ80´ÅµÀ¡¢Ã¿´ÅµÀ9ÉÈÇø
+    UINT8 xxx1[2] ; // 0x16 2 Ã¿¸öÎÄ¼þ·ÖÅä±íµÄÉÈÇø£¨FAT16£©,0 for fat32
+    UINT8 xxx2[2] ; // 0x18 2 Ã¿´ÅµÀµÄÉÈÇø, 0x003f
+    UINT8 xxx3[2] ; // 0x1a 2 ´ÅÍ·Êý£¬0xff
+    UINT8 xxx4[4] ; // 0x1c 4 Òþ²ØÉÈÇø, ÓëMBRÖÐµØÖ·0x1C6¿ªÊ¼µÄ4¸ö×Ö½ÚÊýÖµÏàµÈ
+    UINT8 SectorCounts[4] ; // 0x20 4 ×ÜÉÈÇøÊý£¨Èç¹û³¬¹ý65535Ê¹ÓÃ´ËµØÖ·£¬Ð¡ÓÚ65536²Î¼ûÆ«ÒÆ0x13£¬¶ÔFAT32£¬´ËÓò±ØÐëÊÇ·Ç0£©
     UINT8 SectorsPerFat[4] ; // Sectors count each FAT use
-    UINT8 Fat32Flag[2] ; // 0x28 2 Flags (FAT32ç‰¹æœ‰)
-    UINT8 FatVersion[2] ; // 0x2a 2 ç‰ˆæœ¬å· (FAT32ç‰¹æœ‰)
-    UINT8 BootPathStartCluster[4] ; // 0x2c 4 æ ¹ç›®å½•èµ·å§‹ç°‡ (FAT32)ï¼Œä¸€èˆ¬ä¸º2
-    UINT8 ClusterName[11] ; // 0x2b 11 å·æ ‡ï¼ˆéžFAT32ï¼‰
-    UINT8 BootStrap[2] ; // 0x30 2 FSInfo æ‰‡åŒº (FAT32) bootstrap
-    UINT8 BootSectorBackup[2] ; // 0x32 2 å¯åŠ¨æ‰‡åŒºå¤‡ä»½ (FAT32)å¦‚æžœä¸ä¸º0ï¼Œè¡¨ç¤ºåœ¨ä¿ç•™åŒºä¸­å¼•å¯¼è®°å½•çš„å¤‡æ•°æ®æ‰€å çš„æ‰‡åŒºæ•°ï¼Œé€šå¸¸ä¸º6åŒæ—¶ä¸å»ºè®®ä½¿ç”¨6ä»¥å¤–çš„å…¶ä»–æ•°å€¼
-    UINT8 Reserved[2] ; // 0x34 2 ä¿ç•™æœªä½¿ç”¨ (FAT32) æ­¤åŸŸç”¨0å¡«å……
-    UINT8 FileSystemType[8] ; // 0x36 8 FATæ–‡ä»¶ç³»ç»Ÿç±»åž‹ï¼ˆå¦‚FATã€FAT12ã€FAT16ï¼‰å«"FAT"å°±æ˜¯PBR,å¦åˆ™å°±æ˜¯MBR
-    UINT8 SelfBootCode[2] ; // 0x3e 2 æ“ä½œç³»ç»Ÿè‡ªå¼•å¯¼ä»£ç 
-    UINT8 DeviceNumber[1] ; // 0x40 1 BIOSè®¾å¤‡ä»£å· (FAT32)
-    UINT8 NoUse[1] ; // 0x41 1 æœªä½¿ç”¨ (FAT32)
-    UINT8 Flag[1] ; // 0x42 1 æ ‡è®° (FAT32)
-    UINT8 SequeenNumber[4] ; // 0x43 4 å·åºå· (FAT32)
-    UINT8 juanbiao[11] ; // 0x47 11 å·æ ‡ï¼ˆFAT32ï¼‰
-    UINT8 TypeOfFileSystem[8] ; // 0x52 8 FATæ–‡ä»¶ç³»ç»Ÿç±»åž‹ï¼ˆFAT32ï¼‰
+    UINT8 Fat32Flag[2] ; // 0x28 2 Flags (FAT32ÌØÓÐ)
+    UINT8 FatVersion[2] ; // 0x2a 2 °æ±¾ºÅ (FAT32ÌØÓÐ)
+    UINT8 BootPathStartCluster[4] ; // 0x2c 4 ¸ùÄ¿Â¼ÆðÊ¼´Ø (FAT32)£¬Ò»°ãÎª2
+    UINT8 ClusterName[11] ; // 0x2b 11 ¾í±ê£¨·ÇFAT32£©
+    UINT8 BootStrap[2] ; // 0x30 2 FSInfo ÉÈÇø (FAT32) bootstrap
+    UINT8 BootSectorBackup[2] ; // 0x32 2 Æô¶¯ÉÈÇø±¸·Ý (FAT32)Èç¹û²»Îª0£¬±íÊ¾ÔÚ±£ÁôÇøÖÐÒýµ¼¼ÇÂ¼µÄ±¸Êý¾ÝËùÕ¼µÄÉÈÇøÊý£¬Í¨³£Îª6Í¬Ê±²»½¨ÒéÊ¹ÓÃ6ÒÔÍâµÄÆäËûÊýÖµ
+    UINT8 Reserved[2] ; // 0x34 2 ±£ÁôÎ´Ê¹ÓÃ (FAT32) ´ËÓòÓÃ0Ìî³ä
+    UINT8 FileSystemType[8] ; // 0x36 8 FATÎÄ¼þÏµÍ³ÀàÐÍ£¨ÈçFAT¡¢FAT12¡¢FAT16£©º¬"FAT"¾ÍÊÇPBR,·ñÔò¾ÍÊÇMBR
+    UINT8 SelfBootCode[2] ; // 0x3e 2 ²Ù×÷ÏµÍ³×ÔÒýµ¼´úÂë
+    UINT8 DeviceNumber[1] ; // 0x40 1 BIOSÉè±¸´úºÅ (FAT32)
+    UINT8 NoUse[1] ; // 0x41 1 Î´Ê¹ÓÃ (FAT32)
+    UINT8 Flag[1] ; // 0x42 1 ±ê¼Ç (FAT32)
+    UINT8 SequeenNumber[4] ; // 0x43 4 ¾íÐòºÅ (FAT32)
+    UINT8 juanbiao[11] ; // 0x47 11 ¾í±ê£¨FAT32£©
+    UINT8 TypeOfFileSystem[8] ; // 0x52 8 FATÎÄ¼þÏµÍ³ÀàÐÍ£¨FAT32£©
     UINT8 BootAssembleCode[338]; // code
     UINT8 Partition1[16] ; // 0x1be 64 partitions table, DOS_PART_TBL_OFFSET
     UINT8 Partition2[16] ; // 0X1BE ~0X1CD 16 talbe entry for Partition 1
     UINT8 Partition3[16] ; // 0X1CE ~0X1DD 16 talbe entry for Partition 2
     UINT8 Partition4[16] ; // 0X1DE ~0X1ED 16 talbe entry for Partition 3
-    UINT8 EndFlag[2] ; // 0x1FE 2 æ‰‡åŒºç»“æŸç¬¦ï¼ˆ0x55 0xAAï¼‰ ç»“æŸæ ‡å¿—ï¼šMBRçš„ç»“æŸæ ‡å¿—ä¸ŽDBRï¼ŒEBRçš„ç»“æŸæ ‡å¿—ç›¸åŒã€‚
+    UINT8 EndFlag[2] ; // 0x1FE 2 ÉÈÇø½áÊø·û£¨0x55 0xAA£© ½áÊø±êÖ¾£ºMBRµÄ½áÊø±êÖ¾ÓëDBR£¬EBRµÄ½áÊø±êÖ¾ÏàÍ¬¡£
 }MasterBootRecord;
 
 
@@ -387,11 +387,11 @@ extern MY_COMPUTER_WINDOW_STATE MyComputerWindowState;
 // init -> partition analysised -> root path analysised -> read fat table -> start read file -> reading a file -> read finished
 typedef enum 
 {
-	 READ_FILE_INIT_STATE = 0, //åˆå§‹çŠ¶æ€
-	 READ_FILE_GET_PARTITION_INFO_STATE, //èŽ·å–åˆ†åŒºä¿¡æ¯
-	 READ_FILE_GET_ROOT_PATH_INFO_STATE, //èŽ·å–æ ¹ç›®å½•ä¿¡æ¯
-	 READ_FILE_GET_FAT_TABLE_STATE,  //èŽ·å–FATè¡¨æ•°æ®ä¿¡æ¯
-	 READ_FILE_GET_DATA_STATE, //èŽ·å–æ•°æ®ä¿¡æ¯
+	 READ_FILE_INIT_STATE = 0, //³õÊ¼×´Ì¬
+	 READ_FILE_GET_PARTITION_INFO_STATE, //»ñÈ¡·ÖÇøÐÅÏ¢
+	 READ_FILE_GET_ROOT_PATH_INFO_STATE, //»ñÈ¡¸ùÄ¿Â¼ÐÅÏ¢
+	 READ_FILE_GET_FAT_TABLE_STATE,  //»ñÈ¡FAT±íÊý¾ÝÐÅÏ¢
+	 READ_FILE_GET_DATA_STATE, //»ñÈ¡Êý¾ÝÐÅÏ¢
 }READ_FILE_STATE;
 
 
@@ -460,7 +460,7 @@ extern UINT8 *pMapper;
 #define PHYSICAL_ADDRESS_START 0x20000000
 
 
-//å‡è®¾å­˜å‚¨è®¾å¤‡ä¸€å…±æœ‰50ä¸ªåˆ†åŒº
+//¼ÙÉè´æ´¢Éè±¸Ò»¹²ÓÐ50¸ö·ÖÇø
 #define PARTITION_COUNT 50
 
 extern UINT64 FreeNumberOfPages;

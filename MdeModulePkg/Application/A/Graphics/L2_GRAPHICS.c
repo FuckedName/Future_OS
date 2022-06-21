@@ -2,13 +2,13 @@
 /*************************************************
     .
     File name:      	*.*
-    Authorï¼š	        	ä»»å¯çº¢
-    IDï¼š					00001
+    Author£º	        	ÈÎÆôºì
+    ID£º					00001
     Date:          		202107
     Description:    	
-    Others:         	æ— 
+    Others:         	ÎÞ
 
-    History:        	æ— 
+    History:        	ÎÞ
 	    1.  Date:
 		    Author: 
 		    ID:
@@ -117,21 +117,21 @@ UINT8 BufferMFT[DISK_BUFFER_SIZE * 2];
 UINT16 PartitionItemID = 0xffff; // invalid
 UINT16 FolderItemID = 0xffff; // invalid
 
-//ç³»ç»Ÿå…³æœº
+//ÏµÍ³¹Ø»ú
 INT8 SystemQuitFlag = FALSE;
 
-// å½“å‰è®¤ä¸ºæ˜¯ç›®å½•æˆ–æ–‡ä»¶æ‰è®°å½•ä¸ºæœ‰æ•ˆæ–‡ä»¶ç´¢å¼•;
+// µ±Ç°ÈÏÎªÊÇÄ¿Â¼»òÎÄ¼þ²Å¼ÇÂ¼ÎªÓÐÐ§ÎÄ¼þË÷Òý;
 UINT16 FolderItemValidIndexArray[10] = {0};
 
 DESKTOP_ITEM_CLICKED_EVENT    DesktopItemClickEvent = DESKTOP_ITEM_INIT_CLICKED_EVENT;
 
-//å¼€å§‹èœå•çŠ¶æ€è½¬æ¢ï¼Œç”¨äºŽè®°å½•ä¸Šæ¬¡çŠ¶æ€æœºçŠ¶æ€
+//¿ªÊ¼²Ëµ¥×´Ì¬×ª»»£¬ÓÃÓÚ¼ÇÂ¼ÉÏ´Î×´Ì¬»ú×´Ì¬
 START_MENU_STATE 	 StartMenuNextState = START_MENU_ITEM_INIT_EVENT;
 
-//æˆ‘çš„ç”µè„‘çŠ¶æ€è½¬æ¢ï¼Œç”¨äºŽè®°å½•ä¸Šæ¬¡çŠ¶æ€æœºçŠ¶æ€
+//ÎÒµÄµçÄÔ×´Ì¬×ª»»£¬ÓÃÓÚ¼ÇÂ¼ÉÏ´Î×´Ì¬»ú×´Ì¬
 MY_COMPUTER_STATE 	 MyComputerNextState = MY_COMPUTER_INIT_STATE;
 
-// FAT32 æ–‡ä»¶æˆ–è€…ç›®å½•
+// FAT32 ÎÄ¼þ»òÕßÄ¿Â¼
 FAT32_ROOTPATH_SHORT_FILE_ITEM pItems[32];
 
 
@@ -151,16 +151,16 @@ MOUSE_MOVEOVER_OBJECT MouseMoveoverObjectOld;
 
 
 /****************************************************************************
-*  å¯ä»¥å¤„ç†æ¡Œé¢æ‰€æœ‰å›¾å±‚äº‹ä»¶ï¼Œæ€»å…¥å£ï¼Œç°å¸¸é‡è¦
-*  æè¿°:   æ ¹æ®é¼ æ ‡å…‰æ ‡æ‰€åœ¨å›¾å±‚ï¼Œæ‰¾åˆ°å›¾å±‚ç‚¹å‡»äº‹ä»¶ï¼Œå¹¶æ ¹æ®ç‚¹å‡»äº‹ä»¶æ‰¾åˆ°å¯¹åº”çš„å“åº”å¤„ç†å‡½æ•°ã€‚
-*  ç¬¬ä¸€åˆ—ï¼šä¸åŒå›¾å±‚ç¼–å·
-*  ç¬¬äºŒåˆ—ï¼šæ ¹æ®å›¾å±‚IDèŽ·å–ä¸åŒå›¾å±‚çš„ç‚¹å‡»äº‹ä»¶XXXXXClickEventGetï¼ˆä¸åŒçª—å£äº‹ä»¶æå–ï¼‰
-*  ç¬¬ä¸‰åˆ—ï¼šå¤„ç†ä¸åŒäº‹ä»¶XXXXXClickEventHandleï¼ˆä¸åŒçª—å£äº‹ä»¶å¤„ç†å…¥å£ï¼Œæ¯”è¾ƒé‡è¦ï¼‰
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š xxxxx
+*  ¿ÉÒÔ´¦Àí×ÀÃæËùÓÐÍ¼²ãÊÂ¼þ£¬×ÜÈë¿Ú£¬»Ò³£ÖØÒª
+*  ÃèÊö:   ¸ù¾ÝÊó±ê¹â±êËùÔÚÍ¼²ã£¬ÕÒµ½Í¼²ãµã»÷ÊÂ¼þ£¬²¢¸ù¾Ýµã»÷ÊÂ¼þÕÒµ½¶ÔÓ¦µÄÏìÓ¦´¦Àíº¯Êý¡£
+*  µÚÒ»ÁÐ£º²»Í¬Í¼²ã±àºÅ
+*  µÚ¶þÁÐ£º¸ù¾ÝÍ¼²ãID»ñÈ¡²»Í¬Í¼²ãµÄµã»÷ÊÂ¼þXXXXXClickEventGet£¨²»Í¬´°¿ÚÊÂ¼þÌáÈ¡£©
+*  µÚÈýÁÐ£º´¦Àí²»Í¬ÊÂ¼þXXXXXClickEventHandle£¨²»Í¬´°¿ÚÊÂ¼þ´¦ÀíÈë¿Ú£¬±È½ÏÖØÒª£©
+*  ²ÎÊý1£º xxxxx
+*  ²ÎÊý2£º xxxxx
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 CHINESE_FONT_DRAW_FUNCTION_GET ChineseDrawFunctionGet[] =
@@ -329,25 +329,25 @@ typedef struct
 	UINT16 PartitionID;
 	UINT16 ItemID;
 	UINT16 MyComputerNextState;
-	UINT64 SectorStartOld;  //ç”¨äºŽè®°å½•ä¸Šä¸€æ¬¡è®¿é—®æ–‡ä»¶æˆ–è€…ç›®å½•å¯¹åº”çš„æ‰‡åŒºå·æˆ–è€…å—å·
-	UINT64 LastVisitedItemAttribute;  //ç”¨äºŽè®°å½•ä¸Šä¸€æ¬¡è®¿é—®æ–‡ä»¶æˆ–è€…ç›®å½•å¯¹åº”çš„æ‰‡åŒºå·æˆ–è€…å—å·
-	MY_COMPUTER_WINDOW_CLICKED_EVENT CurrentEvent; //å½“å‰è§¦å‘â€˜æˆ‘çš„ç”µè„‘â€™çª—å£äº‹ä»¶
+	UINT64 SectorStartOld;  //ÓÃÓÚ¼ÇÂ¼ÉÏÒ»´Î·ÃÎÊÎÄ¼þ»òÕßÄ¿Â¼¶ÔÓ¦µÄÉÈÇøºÅ»òÕß¿éºÅ
+	UINT64 LastVisitedItemAttribute;  //ÓÃÓÚ¼ÇÂ¼ÉÏÒ»´Î·ÃÎÊÎÄ¼þ»òÕßÄ¿Â¼¶ÔÓ¦µÄÉÈÇøºÅ»òÕß¿éºÅ
+	MY_COMPUTER_WINDOW_CLICKED_EVENT CurrentEvent; //µ±Ç°´¥·¢¡®ÎÒµÄµçÄÔ¡¯´°¿ÚÊÂ¼þ
 }MY_COMPUTER_CURRENT_STATE;
 
-//ç”¨äºŽä¿å­˜æˆ‘çš„ç”µè„‘çª—å£çš„ä¸€äº›äº‹ä»¶ä¿¡æ¯
+//ÓÃÓÚ±£´æÎÒµÄµçÄÔ´°¿ÚµÄÒ»Ð©ÊÂ¼þÐÅÏ¢
 MY_COMPUTER_CURRENT_STATE MyComputerCurrentState;
 
 
 
 /****************************************************************************
 *
-*  æè¿°:     è¿™ä¸ªæŽ¥å£åªç”¨äºŽåˆ†åŒºè¢«ç‚¹å‡»æ—¶ç›®å½•å±•ç¤ºï¼Œæ‰€ä»¥è¿™ä¸ªæŽ¥å£åªèƒ½æ˜¯åˆ†åŒºè¢«ç‚¹å‡»æ‰èƒ½ä½¿ç”¨
+*  ÃèÊö:     Õâ¸ö½Ó¿ÚÖ»ÓÃÓÚ·ÖÇø±»µã»÷Ê±Ä¿Â¼Õ¹Ê¾£¬ËùÒÔÕâ¸ö½Ó¿ÚÖ»ÄÜÊÇ·ÖÇø±»µã»÷²ÅÄÜÊ¹ÓÃ
 *
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º xxxxx
+*  ²ÎÊý2£º xxxxx
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 EFI_STATUS L2_GRAPHICS_PathPushByName(MY_COMPUTER_CURRENT_STATE *pMyComputerCurrentState, UINT8 *pName)
@@ -372,14 +372,14 @@ EFI_STATUS L2_GRAPHICS_PathPushByName(MY_COMPUTER_CURRENT_STATE *pMyComputerCurr
 
 /****************************************************************************
 *
-*  æè¿°:     æŠŠæ–°è®¿é—®çš„ç›®å½•æˆ–è€…æ–‡ä»¶ä¿¡æ¯æ·»åŠ åˆ°æˆ‘çš„ç”µè„‘å½“å‰è®¿é—®è·¯å¾„
-*          å¦‚æžœä¸Šæ¬¡è®¿é—®çš„æ˜¯æ–‡ä»¶ï¼Œåˆ™éœ€è¦æŠŠæ–‡ä»¶åæ›¿æ¢æŽ‰
+*  ÃèÊö:     °ÑÐÂ·ÃÎÊµÄÄ¿Â¼»òÕßÎÄ¼þÐÅÏ¢Ìí¼Óµ½ÎÒµÄµçÄÔµ±Ç°·ÃÎÊÂ·¾¶
+*          Èç¹ûÉÏ´Î·ÃÎÊµÄÊÇÎÄ¼þ£¬ÔòÐèÒª°ÑÎÄ¼þÃûÌæ»»µô
 *
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º xxxxx
+*  ²ÎÊý2£º xxxxx
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 EFI_STATUS L2_GRAPHICS_PathPush(MY_COMPUTER_CURRENT_STATE *pMyComputerCurrentState, UINT16 ItemIndex)
@@ -387,7 +387,7 @@ EFI_STATUS L2_GRAPHICS_PathPush(MY_COMPUTER_CURRENT_STATE *pMyComputerCurrentSta
 	UINT16 PathLength = 0;	
 	UINT16 i = 0;
 
-	//8ä¸ªæ–‡ä»¶åé•¿åº¦ï¼Œ3ä¸ªåŽç¼€åé•¿åº¦ï¼Œ1ä¸ªç‚¹å·å…±12ä¸ªï¼ŒåŠ ä¸€ä¸ª'\0'
+	//8¸öÎÄ¼þÃû³¤¶È£¬3¸öºó×ºÃû³¤¶È£¬1¸öµãºÅ¹²12¸ö£¬¼ÓÒ»¸ö'\0'
 	UINT8  FileName[14] = {0};
 
 	if (ItemIndex > 32)
@@ -396,14 +396,14 @@ EFI_STATUS L2_GRAPHICS_PathPush(MY_COMPUTER_CURRENT_STATE *pMyComputerCurrentSta
 		return;
 	}
 
-	//èŽ·å–å½“å‰çš„è·¯å¾„é•¿åº¦ï¼Œéœ€è¦åœ¨é•¿åº¦è·¯å¾„é•¿åº¦ä¸Šæ·»åŠ æ–°è·¯å¾„é•¿åº¦
+	//»ñÈ¡µ±Ç°µÄÂ·¾¶³¤¶È£¬ÐèÒªÔÚ³¤¶ÈÂ·¾¶³¤¶ÈÉÏÌí¼ÓÐÂÂ·¾¶³¤¶È
 	PathLength = L1_STRING_Length(pMyComputerCurrentState->Path);
 
 	L1_FILE_NameGetUseItem(pItems[ItemIndex], FileName);
 	
 	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d pMyComputerCurrentState->LastVisitedItemAttribute: %d\n", __LINE__, pMyComputerCurrentState->LastVisitedItemAttribute);
 		
-	//å¦‚æžœå‰é¢è®¿é—®çš„é¡¹æ˜¯æ–‡ä»¶ï¼Œåˆ™éœ€è¦ä»Žæ–‡ä»¶å‰é¢çš„/å¼€å§‹å†™æ–°çš„é¡¹åç§°
+	//Èç¹ûÇ°Ãæ·ÃÎÊµÄÏîÊÇÎÄ¼þ£¬ÔòÐèÒª´ÓÎÄ¼þÇ°ÃæµÄ/¿ªÊ¼Ð´ÐÂµÄÏîÃû³Æ
 	if (pMyComputerCurrentState->LastVisitedItemAttribute == FAT32_FILE_SYSTEM_ATTRIBUTE_FILE) 
 	{
 		for (i = PathLength - 1; i > 0; i--)
@@ -416,10 +416,10 @@ EFI_STATUS L2_GRAPHICS_PathPush(MY_COMPUTER_CURRENT_STATE *pMyComputerCurrentSta
 		}
 	}
 
-	//å› ä¸ºéœ€è¦æ–°å¢žåŠ ç›®å½•ï¼Œæ‰€ä»¥éœ€è¦å…ˆå¢žåŠ /
+	//ÒòÎªÐèÒªÐÂÔö¼ÓÄ¿Â¼£¬ËùÒÔÐèÒªÏÈÔö¼Ó/
 	pMyComputerCurrentState->Path[PathLength] = '/';
 			
-	//å› ä¸ºä¸Šè¾¹å·²ç»æ·»åŠ äº†/ï¼Œæ‰€ä»¥æˆ‘ä»¬éœ€è¦ä»Ž1å¼€å§‹å†™å…¥æ–°çš„è·¯å¾„å­—ç¬¦ä¸²
+	//ÒòÎªÉÏ±ßÒÑ¾­Ìí¼ÓÁË/£¬ËùÒÔÎÒÃÇÐèÒª´Ó1¿ªÊ¼Ð´ÈëÐÂµÄÂ·¾¶×Ö·û´®
 	i = 1;	
 	while(L1_STRING_IsValidNameChar(FileName[i - 1]))
 	{
@@ -436,13 +436,13 @@ EFI_STATUS L2_GRAPHICS_PathPush(MY_COMPUTER_CURRENT_STATE *pMyComputerCurrentSta
 
 /****************************************************************************
 *
-*  æè¿°:   æŠŠåŽŸå†…å­˜æ‹·è´åˆ°ç›®çš„å†…å­˜çš„æŒ‡å®šä½ç½®ã€‚å½“å‰è¿˜ç¼ºå°‘ä¸€äº›åˆæ³•æ€§åˆ¤æ–­
+*  ÃèÊö:   °ÑÔ­ÄÚ´æ¿½±´µ½Ä¿µÄÄÚ´æµÄÖ¸¶¨Î»ÖÃ¡£µ±Ç°»¹È±ÉÙÒ»Ð©ºÏ·¨ÐÔÅÐ¶Ï
 *
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º xxxxx
+*  ²ÎÊý2£º xxxxx
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 VOID L3_GRAPHICS_ItemPrint(UINT8 *pDestBuffer, UINT8 *pSourceBuffer, UINT16 pDestWidth, UINT16 pDestHeight, 
@@ -469,13 +469,13 @@ VOID L3_GRAPHICS_ItemPrint(UINT8 *pDestBuffer, UINT8 *pSourceBuffer, UINT16 pDes
 
 /****************************************************************************
 *
-*  æè¿°:   å›¾ç‰‡çš„å†…å­˜æ‹·è´ï¼Œæ„Ÿè§‰è·ŸL3_GRAPHICS_ItemPrintæœ‰äº›æ˜¯é‡å¤çš„ã€‚
+*  ÃèÊö:   Í¼Æ¬µÄÄÚ´æ¿½±´£¬¸Ð¾õ¸úL3_GRAPHICS_ItemPrintÓÐÐ©ÊÇÖØ¸´µÄ¡£
 *
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º xxxxx
+*  ²ÎÊý2£º xxxxx
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 VOID L2_GRAPHICS_MouseMoveoverObjectSetZero()
@@ -487,13 +487,13 @@ VOID L2_GRAPHICS_MouseMoveoverObjectSetZero()
 
 /****************************************************************************
 *
-*  æè¿°:   å›¾ç‰‡çš„å†…å­˜æ‹·è´ï¼Œæ„Ÿè§‰è·ŸL3_GRAPHICS_ItemPrintæœ‰äº›æ˜¯é‡å¤çš„ã€‚
+*  ÃèÊö:   Í¼Æ¬µÄÄÚ´æ¿½±´£¬¸Ð¾õ¸úL3_GRAPHICS_ItemPrintÓÐÐ©ÊÇÖØ¸´µÄ¡£
 *
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º xxxxx
+*  ²ÎÊý2£º xxxxx
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 VOID L2_GRAPHICS_Copy(UINT8 *pDest, UINT8 *pSource, 
@@ -521,13 +521,13 @@ VOID L2_GRAPHICS_Copy(UINT8 *pDest, UINT8 *pSource,
 
 /****************************************************************************
 *
-*  æè¿°:   ç”»ç›´çº¿
+*  ÃèÊö:   »­Ö±Ïß
 *
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º xxxxx
+*  ²ÎÊý2£º xxxxx
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 EFI_STATUS L2_GRAPHICS_LineDraw(UINT8 *pBuffer,
@@ -562,13 +562,13 @@ EFI_STATUS L2_GRAPHICS_LineDraw(UINT8 *pBuffer,
 
 /****************************************************************************
 *
-*  æè¿°:   ç”»çŸ©å½¢ï¼Œå½“å‰çº¿çš„å®½åº¦è¿˜æœªä½¿ç”¨ï¼Œæ¯”è¾ƒç²—ç³™
+*  ÃèÊö:   »­¾ØÐÎ£¬µ±Ç°ÏßµÄ¿í¶È»¹Î´Ê¹ÓÃ£¬±È½Ï´Ö²Ú
 *
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º xxxxx
+*  ²ÎÊý2£º xxxxx
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 void L2_GRAPHICS_RectangleDraw(UINT8 *pBuffer,
@@ -576,7 +576,7 @@ void L2_GRAPHICS_RectangleDraw(UINT8 *pBuffer,
         IN UINTN BorderWidth,
         IN EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color, UINT16 AreaWidth)
 {    
-    //è¿™ä¸ªå…¥å‚åˆ¤æ–­å¾ˆé‡è¦ï¼Œä¸ç„¶ä¼ å…¥çš„å‚æ•°å¯èƒ½å¾ˆå¤§ï¼Œç„¶åŽä¼šç›´æŽ¥æ­»æœºã€‚ - -
+    //Õâ¸öÈë²ÎÅÐ¶ÏºÜÖØÒª£¬²»È»´«ÈëµÄ²ÎÊý¿ÉÄÜºÜ´ó£¬È»ºó»áÖ±½ÓËÀ»ú¡£ - -
     if (x0 > ScreenWidth || y0 > ScreenHeight || x1 > ScreenWidth || y1 > ScreenHeight)
         return;
         
@@ -599,13 +599,13 @@ void L2_GRAPHICS_RectangleDraw(UINT8 *pBuffer,
 
 /****************************************************************************
 *
-*  æè¿°:   çŸ©å½¢å¡«å……
+*  ÃèÊö:   ¾ØÐÎÌî³ä
 *
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º xxxxx
+*  ²ÎÊý2£º xxxxx
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 void L1_MEMORY_RectangleFill(UINT8 *pBuffer,
@@ -643,13 +643,13 @@ void L1_MEMORY_RectangleFill(UINT8 *pBuffer,
 
 /****************************************************************************
 *
-*  æè¿°:   çŸ©å½¢å¡«å……ï¼Œx1,y1æ˜¯åŸºäºŽx0,y0çš„å¢žé‡
+*  ÃèÊö:   ¾ØÐÎÌî³ä£¬x1,y1ÊÇ»ùÓÚx0,y0µÄÔöÁ¿
 *
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º xxxxx
+*  ²ÎÊý2£º xxxxx
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 void L1_MEMORY_RectangleFillInrease(UINT8 *pBuffer,
@@ -687,13 +687,13 @@ void L1_MEMORY_RectangleFillInrease(UINT8 *pBuffer,
 
 /****************************************************************************
 *
-*  æè¿°:   çŸ©å½¢å¡«å……
+*  ÃèÊö:   ¾ØÐÎÌî³ä
 *
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º xxxxx
+*  ²ÎÊý2£º xxxxx
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 void L1_MEMORY_RectangleFill2(UINT8 *pBuffer,
@@ -727,13 +727,13 @@ void L1_MEMORY_RectangleFill2(UINT8 *pBuffer,
 
 /****************************************************************************
 *
-*  æè¿°:   æˆ‘çš„ç”µè„‘çª—å£ç‚¹å‡»äº‹ä»¶ä¸­å…³é—­çª—å£äº‹ä»¶å“åº”ï¼Œæ³¨ï¼šæœªè¿›è¡Œå†…å­˜é‡Šæ”¾ï¼Œæœ‰ä¼˜åŒ–çš„ç©ºé—´
+*  ÃèÊö:   ÎÒµÄµçÄÔ´°¿Úµã»÷ÊÂ¼þÖÐ¹Ø±Õ´°¿ÚÊÂ¼þÏìÓ¦£¬×¢£ºÎ´½øÐÐÄÚ´æÊÍ·Å£¬ÓÐÓÅ»¯µÄ¿Õ¼ä
 *
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º xxxxx
+*  ²ÎÊý2£º xxxxx
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 VOID L2_MOUSE_MyComputerCloseClicked()
@@ -761,13 +761,13 @@ VOID L2_MOUSE_MyComputerCloseClicked()
 
 /****************************************************************************
 *
-*  æè¿°:   åˆ†åŒºè¢«ç‚¹å‡»äº‹ä»¶
+*  ÃèÊö:   ·ÖÇø±»µã»÷ÊÂ¼þ
 *
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º xxxxx
+*  ²ÎÊý2£º xxxxx
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 VOID L2_MOUSE_MyComputerPartitionItemClicked()
@@ -790,7 +790,7 @@ VOID L2_MOUSE_MyComputerPartitionItemClicked()
 
     if (device[PartitionItemID].FileSystemType == FILE_SYSTEM_FAT32)
     {
-        //è¯»å–æ ¹ç›®å½•é¡¹ç›®
+        //¶ÁÈ¡¸ùÄ¿Â¼ÏîÄ¿
         EFI_STATUS Status = L2_FILE_FAT32_DataSectorHandle(PartitionItemID);
         if (0 != Status)
             return;
@@ -809,7 +809,7 @@ VOID L2_MOUSE_MyComputerPartitionItemClicked()
 
 		L1_MEMORY_Memset(&NTFSFileSwitched, 0, sizeof(NTFSFileSwitched)); 
 		
-		//å½“å‰æµ‹è¯•ï¼Œåªæ˜¾ç¤ºä¸€ä¸ªè®¾å¤‡ï¼Œæ˜¾ç¤ºå¤šä¸ªè®¾å¤‡æµ‹è¯•ä¼šæ¯”è¾ƒéº»çƒ¦
+		//µ±Ç°²âÊÔ£¬Ö»ÏÔÊ¾Ò»¸öÉè±¸£¬ÏÔÊ¾¶à¸öÉè±¸²âÊÔ»á±È½ÏÂé·³
 		//if (3 == DeviceID)
 		//L2_PARTITION_FileContentPrint(BufferMFT);
 
@@ -817,7 +817,7 @@ VOID L2_MOUSE_MyComputerPartitionItemClicked()
 
 		for (UINT16 i = 0; i < 10; i++)
 		{
-			//æ‰¾åˆ°A0å±žæ€§
+			//ÕÒµ½A0ÊôÐÔ
 			if (NTFSFileSwitched.NTFSFileAttributeHeaderSwitched[i].Type == MFT_ATTRIBUTE_DOLLAR_INDEX_ALLOCATION)
 			{
 				// Analysis data runs
@@ -850,13 +850,13 @@ VOID L2_MOUSE_MyComputerPartitionItemClicked()
 
 /****************************************************************************
 *
-*  æè¿°:   æ–‡ä»¶å†…å®¹æ˜¾ç¤º
+*  ÃèÊö:   ÎÄ¼þÄÚÈÝÏÔÊ¾
 *
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º xxxxx
+*  ²ÎÊý2£º xxxxx
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 VOID L2_PARTITION_FileContentPrint(UINT8 *Buffer)
@@ -871,13 +871,13 @@ VOID L2_PARTITION_FileContentPrint(UINT8 *Buffer)
 
 /****************************************************************************
 *
-*  æè¿°:   æ–‡ä»¶å†…å®¹æ˜¾ç¤º
+*  ÃèÊö:   ÎÄ¼þÄÚÈÝÏÔÊ¾
 *
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º xxxxx
+*  ²ÎÊý2£º xxxxx
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 VOID L2_PARTITION_BufferPrint(UINT8 *Buffer, UINT16 Length)
@@ -900,13 +900,13 @@ EFI_STATUS L2_FILE_NTFS_90AttributeAnalysis()
 
 /****************************************************************************
 *
-*  æè¿°:   æ–‡ä»¶å¤¹ä¸­æ–‡ä»¶æˆ–è€…ç›®å½•è¢«ç‚¹å‡»åŽæ˜¾ç¤ºæ–‡ä»¶æˆ–è€…æ˜¾ç¤ºå­ç›®å½•æ“ä½œ
+*  ÃèÊö:   ÎÄ¼þ¼ÐÖÐÎÄ¼þ»òÕßÄ¿Â¼±»µã»÷ºóÏÔÊ¾ÎÄ¼þ»òÕßÏÔÊ¾×ÓÄ¿Â¼²Ù×÷
 *
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º xxxxx
+*  ²ÎÊý2£º xxxxx
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 EFI_STATUS L2_MOUSE_MyComputerFolderItemClicked()
@@ -925,7 +925,7 @@ EFI_STATUS L2_MOUSE_MyComputerFolderItemClicked()
 		return -1;
 	}
 
-	//éœ€è¦æ‰¾èŽ·å–æœ‰æ•ˆçš„é¡¹ç´¢å¼•
+	//ÐèÒªÕÒ»ñÈ¡ÓÐÐ§µÄÏîË÷Òý
 	UINT16 index = FolderItemValidIndexArray[FolderItemID];
 	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d index: %d\n", __LINE__, index);
 
@@ -936,7 +936,7 @@ EFI_STATUS L2_MOUSE_MyComputerFolderItemClicked()
     L2_DEBUG_Print3(16 * 23, 32, WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW], "%a",
                                     MyComputerCurrentState.Path);	
 
-	//FAT32æ–‡ä»¶ç³»ç»Ÿæ ¼å¼
+	//FAT32ÎÄ¼þÏµÍ³¸ñÊ½
 	if (device[PartitionItemID].FileSystemType == FILE_SYSTEM_FAT32)
     {    	
 		UINT16 High2B = L1_NETWORK_2BytesToUINT16(pItems[index].StartClusterHigh2B);
@@ -944,7 +944,7 @@ EFI_STATUS L2_MOUSE_MyComputerFolderItemClicked()
 		UINT32 StartCluster = (UINT32)High2B << 16 | (UINT32)Low2B;
 
 		// Start cluster id is 2, exclude 0,1
-		//è¿™æ ·å†™æ­»8192ï¼Œä¼šæœ‰BUG
+		//ÕâÑùÐ´ËÀ8192£¬»áÓÐBUG
 		UINT32 StartSectorNumber = 8192 + (StartCluster - 2) * 8;
 		L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], 
 						"%d High2B: %X Low2B: %X StartCluster: %X StartSectorNumber: %X\n", 
@@ -954,7 +954,7 @@ EFI_STATUS L2_MOUSE_MyComputerFolderItemClicked()
 						StartCluster,
 						StartSectorNumber);
 
-        //å¦‚æžœæ˜¯efiæ–‡ä»¶ï¼Œè®¤ä¸ºæ˜¯å¯æ‰§è¡Œæ–‡ä»¶
+        //Èç¹ûÊÇefiÎÄ¼þ£¬ÈÏÎªÊÇ¿ÉÖ´ÐÐÎÄ¼þ
         if (pItems[index].ExtensionName[0] == 'E' && pItems[index].ExtensionName[1] == 'F' && pItems[index].ExtensionName[2] == 'I' )
         {
             pItems[index].ExtensionName[0] = 'e';
@@ -984,22 +984,22 @@ EFI_STATUS L2_MOUSE_MyComputerFolderItemClicked()
 
 		switch(pItems[index].Attribute[0])
 		{
-		    //å¦‚æžœæ˜¯ç›®å½•ï¼Œåˆ™æ˜¾ç¤ºå­ç›®å½•
+		    //Èç¹ûÊÇÄ¿Â¼£¬ÔòÏÔÊ¾×ÓÄ¿Â¼
 			case FAT32_FILE_SYSTEM_ATTRIBUTE_DIRECTORY:  L1_MEMORY_Memset(&pItems, 0, sizeof(pItems));
 					    L1_MEMORY_Copy(&pItems, Buffer, DISK_BUFFER_SIZE);
 						L2_STORE_FolderItemsPrint();
 						break;
 
-			//å¦‚æžœæ˜¯æ–‡ä»¶ï¼Œåˆ™æ˜¾ç¤ºæ–‡ä»¶å†…å®¹
+			//Èç¹ûÊÇÎÄ¼þ£¬ÔòÏÔÊ¾ÎÄ¼þÄÚÈÝ
 			case FAT32_FILE_SYSTEM_ATTRIBUTE_FILE: L2_PARTITION_FileContentPrint(Buffer); break;
 
 			default: break;
 		}
 	    
     }
-    else if (device[PartitionItemID].FileSystemType == FILE_SYSTEM_NTFS) //NTFSæ–‡ä»¶ç³»ç»Ÿæ ¼å¼
+    else if (device[PartitionItemID].FileSystemType == FILE_SYSTEM_NTFS) //NTFSÎÄ¼þÏµÍ³¸ñÊ½
     {
-		//å¯èƒ½ä¼šæœ‰BUG 6291456=786432 * 8ï¼Œæœ‰çš„MFTä¸åœ¨786432
+		//¿ÉÄÜ»áÓÐBUG 6291456=786432 * 8£¬ÓÐµÄMFT²»ÔÚ786432
 		UINT32 StartSectorNumber = 6291456 + pCommonStorageItems[index].FileContentRelativeSector * 2;
 		L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: StartSector: %llu Sector: %llu",  __LINE__, StartSectorNumber, pCommonStorageItems[index].FileContentRelativeSector);
 
@@ -1017,7 +1017,7 @@ EFI_STATUS L2_MOUSE_MyComputerFolderItemClicked()
 				
 		L2_PARTITION_FileContentPrint(BufferMFT);
 
-		//ä»Žåˆ†åŒºè¯»å–åˆ°çš„ç£ç›˜ç”¨äºŽFILEåˆ†æžï¼Œåˆ†æžæ‰€æœ‰å±žæ€§é¡¹ï¼Œæ–‡ä»¶å’Œæ–‡ä»¶å¤¹æ‹¥æœ‰çš„å±žæ€§é¡¹ä¸ç›¸åŒ
+		//´Ó·ÖÇø¶ÁÈ¡µ½µÄ´ÅÅÌÓÃÓÚFILE·ÖÎö£¬·ÖÎöËùÓÐÊôÐÔÏî£¬ÎÄ¼þºÍÎÄ¼þ¼ÐÓµÓÐµÄÊôÐÔÏî²»ÏàÍ¬
 		
 		L2_FILE_NTFS_FileItemBufferAnalysis(BufferMFT, &NTFSFileSwitched);
 
@@ -1072,7 +1072,7 @@ EFI_STATUS L2_MOUSE_MyComputerFolderItemClicked()
 			// Only file item have MFT_ATTRIBUTE_DOLLAR_DATA attribute.
 			else if (type == MFT_ATTRIBUTE_DOLLAR_DATA)
 			{
-				//æ˜¾ç¤ºæ–‡ä»¶å†…å®¹æ—¶ä¼šèµ°è¿™ä¸ªåˆ†æ”¯ã€‚
+				//ÏÔÊ¾ÎÄ¼þÄÚÈÝÊ±»á×ßÕâ¸ö·ÖÖ§¡£
 	            L2_DEBUG_Print3(300, 300, WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW], "%d: %02X %02X %02X %02X", __LINE__, 
                                 NTFSFileSwitched.NTFSFileAttributeHeaderSwitched[i].Data[0],
                                 NTFSFileSwitched.NTFSFileAttributeHeaderSwitched[i].Data[1],
@@ -1092,16 +1092,16 @@ EFI_STATUS L2_MOUSE_MyComputerFolderItemClicked()
 
 /****************************************************************************
 *
-*  æè¿°:   æˆ‘çš„ç”µè„‘çª—å£çŠ¶æ€è½¬æ¢çš„çŠ¶æ€æœºï¼ŒåŒ…å«çª—å£å…³é—­ã€åˆ†åŒºç‚¹å‡»ã€æ–‡ä»¶å¤¹ç‚¹å‡»ã€æ–‡ä»¶ç‚¹å‡»äº‹ä»¶ã€‚
-   è¿™ä¸ªçŠ¶æ€æœºå½“å‰æ¥çœ‹ï¼Œæ˜¯æœ‰ç‚¹é—®é¢˜çš„ï¼Œå› ä¸ºåœ¨ç‚¹å‡»åˆ†åŒºäº‹ä»¶åŽï¼Œä¹Ÿå¯ä»¥ç»§ç»­ç‚¹å‡»åˆ†åŒºäº‹ä»¶
-   åœ¨ä»»ä½•çŠ¶æ€ä¸‹éƒ½åº”è¯¥å¯ä»¥ç‚¹å‡»çª—å£å…³é—­äº‹ä»¶ï¼Œå½“ç„¶åœ¨å¼€å§‹æµ‹è¯•çš„æ—¶å€™æ˜¯æ»¡è¶³è¦æ±‚çš„ï¼Œè¶Šå¾€åŽæœŸå¼€å‘ï¼Œè¿™é‡Œçš„çŠ¶æ€é¡¹å°±ä¼š
-   æ˜¾å¾—æ¯”è¾ƒå°‘
+*  ÃèÊö:   ÎÒµÄµçÄÔ´°¿Ú×´Ì¬×ª»»µÄ×´Ì¬»ú£¬°üº¬´°¿Ú¹Ø±Õ¡¢·ÖÇøµã»÷¡¢ÎÄ¼þ¼Ðµã»÷¡¢ÎÄ¼þµã»÷ÊÂ¼þ¡£
+   Õâ¸ö×´Ì¬»úµ±Ç°À´¿´£¬ÊÇÓÐµãÎÊÌâµÄ£¬ÒòÎªÔÚµã»÷·ÖÇøÊÂ¼þºó£¬Ò²¿ÉÒÔ¼ÌÐøµã»÷·ÖÇøÊÂ¼þ
+   ÔÚÈÎºÎ×´Ì¬ÏÂ¶¼Ó¦¸Ã¿ÉÒÔµã»÷´°¿Ú¹Ø±ÕÊÂ¼þ£¬µ±È»ÔÚ¿ªÊ¼²âÊÔµÄÊ±ºòÊÇÂú×ãÒªÇóµÄ£¬Ô½ÍùºóÆÚ¿ª·¢£¬ÕâÀïµÄ×´Ì¬Ïî¾Í»á
+   ÏÔµÃ±È½ÏÉÙ
 *
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º xxxxx
+*  ²ÎÊý2£º xxxxx
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 STATE_TRANSFORM MyComputerStateTransformTable[] =
@@ -1118,13 +1118,13 @@ STATE_TRANSFORM MyComputerStateTransformTable[] =
 
 /****************************************************************************
 *
-*  æè¿°:   ç”¨äºŽå¤„ç†é¼ æ ‡åœ¨ä¸åŒçª—å£ç‚¹å‡»äº‹ä»¶çš„å¤„ç†ï¼Œè¢«ç‚¹å‡»çª—å£ä¼šåˆ°æ‰€æœ‰å›¾å±‚æœ€ä¸Šå±‚ã€‚
+*  ÃèÊö:   ÓÃÓÚ´¦ÀíÊó±êÔÚ²»Í¬´°¿Úµã»÷ÊÂ¼þµÄ´¦Àí£¬±»µã»÷´°¿Ú»áµ½ËùÓÐÍ¼²ã×îÉÏ²ã¡£
 *
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º xxxxx
+*  ²ÎÊý2£º xxxxx
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 VOID L1_GRAPHICS_UpdateWindowLayer(UINT16 layer)
@@ -1151,13 +1151,13 @@ VOID L1_GRAPHICS_UpdateWindowLayer(UINT16 layer)
 
 /****************************************************************************
 *
-*  æè¿°:   ç‚¹å‡»â€œæˆ‘çš„ç”µè„‘â€äº‹ä»¶ï¼Œä¼šæ˜¾ç¤ºæˆ‘çš„ç”µè„‘çª—å£
+*  ÃèÊö:   µã»÷¡°ÎÒµÄµçÄÔ¡±ÊÂ¼þ£¬»áÏÔÊ¾ÎÒµÄµçÄÔ´°¿Ú
 *
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º xxxxx
+*  ²ÎÊý2£º xxxxx
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 VOID L2_MOUSE_MyComputerClicked()
@@ -1183,13 +1183,13 @@ VOID L2_MOUSE_MyComputerClicked()
 
 /****************************************************************************
 *
-*  æè¿°:   ç‚¹å‡»â€œç³»ç»Ÿè®¾ç½®â€äº‹ä»¶
+*  ÃèÊö:   µã»÷¡°ÏµÍ³ÉèÖÃ¡±ÊÂ¼þ
 *
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º xxxxx
+*  ²ÎÊý2£º xxxxx
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 VOID L2_MOUSE_SystemSettingClicked()
@@ -1210,13 +1210,13 @@ VOID L2_MOUSE_SystemSettingClicked()
 
 /****************************************************************************
 *
-*  æè¿°:   ç‚¹å‡»â€œå†…å­˜ä¿¡æ¯â€äº‹ä»¶ï¼Œä¼šæ˜¾ç¤ºå†…å­˜ä¿¡æ¯çª—å£
+*  ÃèÊö:   µã»÷¡°ÄÚ´æÐÅÏ¢¡±ÊÂ¼þ£¬»áÏÔÊ¾ÄÚ´æÐÅÏ¢´°¿Ú
 *
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º xxxxx
+*  ²ÎÊý2£º xxxxx
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 VOID L2_MOUSE_MemoryInformationClicked()
@@ -1237,15 +1237,15 @@ VOID L2_MOUSE_MemoryInformationClicked()
 
 /****************************************************************************
 *
-*  æè¿°:   ç‚¹å‡»â€œç³»ç»Ÿæ—¥å¿—â€äº‹ä»¶ï¼Œä¼šæ˜¾ç¤ºç³»ç»Ÿæ—¥å¿—çª—å£ï¼Œè¿™æ ·æ¯”è¾ƒæ–¹ä¾¿ç³»ç»Ÿå¼€å‘ï¼Œé—®é¢˜å®šä½
-*        æ³¨æ„ï¼šç³»ç»Ÿæ—¥å¿—çª—å£ï¼Œæ˜¾ç¤ºçš„æ˜¯L2_DEBUG_Print3å‡½æ•°æ‰“å°çš„æ—¥å¿—
+*  ÃèÊö:   µã»÷¡°ÏµÍ³ÈÕÖ¾¡±ÊÂ¼þ£¬»áÏÔÊ¾ÏµÍ³ÈÕÖ¾´°¿Ú£¬ÕâÑù±È½Ï·½±ãÏµÍ³¿ª·¢£¬ÎÊÌâ¶¨Î»
+*        ×¢Òâ£ºÏµÍ³ÈÕÖ¾´°¿Ú£¬ÏÔÊ¾µÄÊÇL2_DEBUG_Print3º¯Êý´òÓ¡µÄÈÕÖ¾
 *
 *
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º xxxxx
+*  ²ÎÊý2£º xxxxx
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 VOID L2_MOUSE_SystemLogClicked()
@@ -1268,13 +1268,13 @@ VOID L2_MOUSE_SystemLogClicked()
 
 /****************************************************************************
 *
-*  æè¿°: ç‚¹å‡»â€œç³»ç»Ÿé€€å‡ºâ€äº‹ä»¶ï¼Œç”µè„‘ä¼šå…³æœº
+*  ÃèÊö: µã»÷¡°ÏµÍ³ÍË³ö¡±ÊÂ¼þ£¬µçÄÔ»á¹Ø»ú
 *
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º xxxxx
+*  ²ÎÊý2£º xxxxx
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 VOID L2_MOUSE_SystemQuitClicked()
@@ -1289,13 +1289,13 @@ VOID L2_MOUSE_SystemQuitClicked()
 
 /****************************************************************************
 *
-*  æè¿°:   ç‚¹å‡»â€œæ¡Œé¢å£çº¸è®¾ç½®â€äº‹ä»¶ï¼Œæ¡Œé¢å£çº¸ä¼šå˜ç°ï¼Œé¢œè‰²å¯ä»¥è‡ªå·²åœ¨forå¾ªçŽ¯é‡ŒæŽ§åˆ¶
+*  ÃèÊö:   µã»÷¡°×ÀÃæ±ÚÖ½ÉèÖÃ¡±ÊÂ¼þ£¬×ÀÃæ±ÚÖ½»á±ä»Ò£¬ÑÕÉ«¿ÉÒÔ×ÔÒÑÔÚforÑ­»·Àï¿ØÖÆ
 *
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º xxxxx
+*  ²ÎÊý2£º xxxxx
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 VOID L2_MOUSE_WallpaperSettingClicked()
@@ -1383,13 +1383,13 @@ VOID L2_MOUSE_WallpaperSettingClicked()
 
 /****************************************************************************
 *
-*  æè¿°:   ç‚¹å‡»â€œæ¡Œé¢èƒŒæ™¯å›¾ç‰‡æ¢å¤â€äº‹ä»¶ï¼ŒèƒŒæ™¯å›¾ç‰‡ä¼šæ¢å¤æˆç å³°å›¾ç‰‡
+*  ÃèÊö:   µã»÷¡°×ÀÃæ±³¾°Í¼Æ¬»Ö¸´¡±ÊÂ¼þ£¬±³¾°Í¼Æ¬»á»Ö¸´³ÉÖé·åÍ¼Æ¬
 *
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º xxxxx
+*  ²ÎÊý2£º xxxxx
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 VOID L2_MOUSE_WallpaperResetClicked()
@@ -1409,13 +1409,13 @@ VOID L2_MOUSE_WallpaperResetClicked()
 
 /****************************************************************************
 *
-*  æè¿°:   å¼€å§‹èœå•çŠ¶æ€è½¬æ¢è¡¨ï¼Œå¾ˆé‡è¦
+*  ÃèÊö:   ¿ªÊ¼²Ëµ¥×´Ì¬×ª»»±í£¬ºÜÖØÒª
 *
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º xxxxx
+*  ²ÎÊý2£º xxxxx
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 STATE_TRANSFORM StartMenuStateTransformTable[] =
@@ -1437,18 +1437,18 @@ void L2_GRAPHICS_Init()
 
 /****************************************************************************
 *
-*  æè¿°:   å›¾å±‚å‚æ•°åˆå§‹åŒ–
+*  ÃèÊö:   Í¼²ã²ÎÊý³õÊ¼»¯
 *
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º xxxxx
+*  ²ÎÊý2£º xxxxx
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 void L2_GRAPHICS_BootScreenInit()
 {
-    //å¦‚æžœä¸åŠ ä¸‹é¢è¿™å‡ è¡Œï¼Œåˆ™æ˜¯ç›´æŽ¥æ˜¾ç¤ºå†…å­˜ä¿¡æ¯ï¼Œçœ‹èµ·æ¥æœ‰ç‚¹åƒé›ªèŠ±    
+    //Èç¹û²»¼ÓÏÂÃæÕâ¼¸ÐÐ£¬ÔòÊÇÖ±½ÓÏÔÊ¾ÄÚ´æÐÅÏ¢£¬¿´ÆðÀ´ÓÐµãÏñÑ©»¨    
     for (int j = ScreenHeight / 2; j < ScreenHeight; j++)
     {
         for (int i = 0; i < ScreenWidth; i++)
@@ -1466,13 +1466,13 @@ void L2_GRAPHICS_BootScreenInit()
 
 /****************************************************************************
 *
-*  æè¿°:   å›¾å±‚å‚æ•°åˆå§‹åŒ–
+*  ÃèÊö:   Í¼²ã²ÎÊý³õÊ¼»¯
 *
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º xxxxx
+*  ²ÎÊý2£º xxxxx
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 void L2_GRAPHICS_ParameterInit()
@@ -1591,13 +1591,13 @@ void L2_GRAPHICS_ParameterInit()
 
 /****************************************************************************
 *
-*  æè¿°: åœ¨æŒ‡å®šå›¾å±‚æ‰“å°æŒ‡å®šå­—ç¬¦ä¸²ã€‚å…¶ä¸­layeræ˜¯ç›®æ ‡å›¾å±‚
+*  ÃèÊö: ÔÚÖ¸¶¨Í¼²ã´òÓ¡Ö¸¶¨×Ö·û´®¡£ÆäÖÐlayerÊÇÄ¿±êÍ¼²ã
 *
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º xxxxx
+*  ²ÎÊý2£º xxxxx
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 VOID EFIAPI L2_DEBUG_Print3 (UINT16 x, UINT16 y, WINDOW_LAYER_ITEM layer, IN  CONST CHAR8  *Format, ...)
@@ -1639,13 +1639,13 @@ VOID EFIAPI L2_DEBUG_Print3 (UINT16 x, UINT16 y, WINDOW_LAYER_ITEM layer, IN  CO
 
 /****************************************************************************
 *
-*  æè¿°:   è‹±æ–‡å­—ç¬¦ä¸²æ˜¾ç¤ºå‡½æ•°ï¼Œéœ€è¦æ³¨æ„çš„æ˜¯è¿™ä¸ªå‡½æ•°æ‰“å°çš„ä¿¡æ¯éƒ½åœ¨æ¡Œé¢ä¸Šï¼Œç”±WindowLayers.item[GRAPHICS_LAYER_DESK]æŽ§åˆ¶
+*  ÃèÊö:   Ó¢ÎÄ×Ö·û´®ÏÔÊ¾º¯Êý£¬ÐèÒª×¢ÒâµÄÊÇÕâ¸öº¯Êý´òÓ¡µÄÐÅÏ¢¶¼ÔÚ×ÀÃæÉÏ£¬ÓÉWindowLayers.item[GRAPHICS_LAYER_DESK]¿ØÖÆ
 *
-*  å‚æ•°xï¼š æ˜¾ç¤ºçš„å±å¹•çš„Xåæ ‡
-*  å‚æ•°yï¼š æ˜¾ç¤ºåˆ°å±å¹•çš„Yåæ ‡
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊýx£º ÏÔÊ¾µÄÆÁÄ»µÄX×ø±ê
+*  ²ÎÊýy£º ÏÔÊ¾µ½ÆÁÄ»µÄY×ø±ê
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 VOID EFIAPI L2_DEBUG_Print1 (UINT16 x, UINT16 y,  IN  CONST CHAR8  *Format, ...)
@@ -1682,13 +1682,13 @@ VOID EFIAPI L2_DEBUG_Print1 (UINT16 x, UINT16 y,  IN  CONST CHAR8  *Format, ...)
 
 /****************************************************************************
 *
-*  æè¿°:   æ˜¾ç¤ºå™¨å±å¹•åˆå§‹åŒ–ï¼ŒæŠŠUç›˜é‡Œè¾¹çš„æ¡Œé¢èƒŒæ™¯å›¾ç‰‡ï¼Œæˆ‘çš„ç”µè„‘ã€å›žæ”¶ç«™ã€ç³»ç»Ÿè®¾ç½®ã€æ–‡ä»¶ã€æ–‡ä»¶å¤¹å›¾æ ‡éƒ½è¯»å–åˆ°ç¼“å­˜ä¾›æ¡Œé¢æ˜¾ç¤ºç”¨
+*  ÃèÊö:   ÏÔÊ¾Æ÷ÆÁÄ»³õÊ¼»¯£¬°ÑUÅÌÀï±ßµÄ×ÀÃæ±³¾°Í¼Æ¬£¬ÎÒµÄµçÄÔ¡¢»ØÊÕÕ¾¡¢ÏµÍ³ÉèÖÃ¡¢ÎÄ¼þ¡¢ÎÄ¼þ¼ÐÍ¼±ê¶¼¶ÁÈ¡µ½»º´æ¹©×ÀÃæÏÔÊ¾ÓÃ
 *
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º xxxxx
+*  ²ÎÊý2£º xxxxx
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 EFI_STATUS L2_GRAPHICS_ScreenInit()
@@ -1710,11 +1710,11 @@ EFI_STATUS L2_GRAPHICS_ScreenInit()
     
     L2_GRAPHICS_DeskInit();
 
-    // åˆå§‹åŒ–é¼ æ ‡æ˜¾ç¤ºç¼“å­˜
+    // ³õÊ¼»¯Êó±êÏÔÊ¾»º´æ
     L2_GRAPHICS_ChineseCharDraw(pMouseBuffer, 0, 0, (12 - 1) * 94 + 84 - 1, MouseColor, 16);
     //L2_DEBUG_Print1(DISPLAY_X, DISPLAY_Y, "%d: GraphicsLayerCompute\n", __LINE__);
 
-	//æŠŠä¸Šé¢åˆå§‹åŒ–å¥½çš„ç¼“å†²æ˜¾ç¤ºå‡ºæ¥
+	//°ÑÉÏÃæ³õÊ¼»¯ºÃµÄ»º³åÏÔÊ¾³öÀ´
 	L2_SCREEN_Draw(pDeskBuffer, 0, 0, 0, 0, ScreenWidth, ScreenHeight);	   
 
     // Desk graphics layer, buffer can not free!!
@@ -1728,13 +1728,13 @@ EFI_STATUS L2_GRAPHICS_ScreenInit()
 
 /****************************************************************************
 *
-*  æè¿°:   å¼€å§‹èœå•å†…å®¹é¡¹æ·»åŠ 
+*  ÃèÊö:   ¿ªÊ¼²Ëµ¥ÄÚÈÝÏîÌí¼Ó
 *
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º xxxxx
+*  ²ÎÊý2£º xxxxx
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 EFI_STATUS L2_GRAPHICS_StartMenuInit()
@@ -1747,8 +1747,8 @@ EFI_STATUS L2_GRAPHICS_StartMenuInit()
     Color.Blue  = 0x00;
     Color.Reserved  = GRAPHICS_LAYER_START_MENU;
 
-    //è¿™è¾¹çš„åºåˆ—éœ€è¦è·ŸSTART_MENU_BUTTON_SEQUENCEè¿™ä¸ªæžšä¸¾å®šä¹‰çš„ä¸€è‡´
-    //æˆ‘çš„ç”µè„‘
+    //Õâ±ßµÄÐòÁÐÐèÒª¸úSTART_MENU_BUTTON_SEQUENCEÕâ¸öÃ¶¾Ù¶¨ÒåµÄÒ»ÖÂ
+    //ÎÒµÄµçÄÔ
     L2_GRAPHICS_ChineseCharDraw(pStartMenuBuffer, x , y,     (46 - 1 ) * 94 + 50 - 1, Color, StartMenuWidth);    
     x += 16;
     
@@ -1763,7 +1763,7 @@ EFI_STATUS L2_GRAPHICS_StartMenuInit()
     
     L2_GRAPHICS_ChineseCharDraw16(pStartMenuBuffer, x , y,     12, 84, Color, StartMenuWidth);   
 
-    //ç³»ç»Ÿè®¾ç½®
+    //ÏµÍ³ÉèÖÃ
     x = 3;
     y += 16;
     L2_GRAPHICS_ChineseCharDraw(pStartMenuBuffer, x , y,     (47 - 1 ) * 94 + 21 - 1, Color, StartMenuWidth);    
@@ -1778,9 +1778,9 @@ EFI_STATUS L2_GRAPHICS_StartMenuInit()
     L2_GRAPHICS_ChineseCharDraw(pStartMenuBuffer, x , y,     (54 - 1) * 94 + 35 - 1, Color, StartMenuWidth);   
     
 
-    //å†…å­˜æŸ¥çœ‹
-    //æ±‰å­—    åŒºä½ç  æ±‰å­—  åŒºä½ç  æ±‰å­—  åŒºä½ç  æ±‰å­—  åŒºä½ç 
-    //å†… 3658    å­˜       2070    æŸ¥       1873    çœ‹       3120
+    //ÄÚ´æ²é¿´
+    //ºº×Ö    ÇøÎ»Âë ºº×Ö  ÇøÎ»Âë ºº×Ö  ÇøÎ»Âë ºº×Ö  ÇøÎ»Âë
+    //ÄÚ 3658    ´æ       2070    ²é       1873    ¿´       3120
     x = 3;
     y += 16;
     L2_GRAPHICS_ChineseCharDraw(pStartMenuBuffer, x , y,     (36 - 1 ) * 94 + 58 - 1, Color, StartMenuWidth);    
@@ -1794,9 +1794,9 @@ EFI_STATUS L2_GRAPHICS_StartMenuInit()
     
     L2_GRAPHICS_ChineseCharDraw(pStartMenuBuffer, x , y,     (31 - 1) * 94 + 20 - 1, Color, StartMenuWidth);   
     
-    //ç³»ç»Ÿæ—¥å¿—
-    //æ±‰å­—	åŒºä½ç 	æ±‰å­—	åŒºä½ç 	æ±‰å­—	åŒºä½ç 	æ±‰å­—	åŒºä½ç 
-    //ç³»	4721	ç»Ÿ	4519	æ—¥	4053	å¿—	5430
+    //ÏµÍ³ÈÕÖ¾
+    //ºº×Ö	ÇøÎ»Âë	ºº×Ö	ÇøÎ»Âë	ºº×Ö	ÇøÎ»Âë	ºº×Ö	ÇøÎ»Âë
+    //Ïµ	4721	Í³	4519	ÈÕ	4053	Ö¾	5430
     x = 3;
     y += 16;
     L2_GRAPHICS_ChineseCharDraw(pStartMenuBuffer, x , y,     (47 - 1 ) * 94 + 21 - 1, Color, StartMenuWidth);    
@@ -1810,8 +1810,8 @@ EFI_STATUS L2_GRAPHICS_StartMenuInit()
     
     L2_GRAPHICS_ChineseCharDraw(pStartMenuBuffer, x , y,     (54 - 1) * 94 + 30 - 1, Color, StartMenuWidth);   
     
-    //ç³»ç»Ÿé€€å‡º
-    //é€€ 4543    å‡º   1986
+    //ÏµÍ³ÍË³ö
+    //ÍË 4543    ³ö   1986
     x = 3;
     y += 16;
     L2_GRAPHICS_ChineseCharDraw(pStartMenuBuffer, x , y,     (47 - 1 ) * 94 + 21 - 1, Color, StartMenuWidth);    
@@ -1863,7 +1863,7 @@ EFI_STATUS L2_GRAPHICS_StartMenuInit()
     L2_GRAPHICS_ChineseCharDraw12(pStartMenuBuffer, x , y,     45, 43, Color, StartMenuWidth);
     x += 16;
 
-    UINT8 word[3] = "å•Š";
+    UINT8 word[3] = "°¡";
     
     //L2_GRAPHICS_ChineseCharDraw12(pStartMenuBuffer, x , y,     (word[0] - 0xa0- 1) * 94 + word[1] - 0xa0 - 1, Color, StartMenuWidth);   
 
@@ -1877,13 +1877,13 @@ EFI_STATUS L2_GRAPHICS_StartMenuInit()
 
 /****************************************************************************
 *
-*  æè¿°:   ç³»ç»Ÿè®¾ç½®ç¼“å­˜åŒºåˆå§‹åŒ–
+*  ÃèÊö:   ÏµÍ³ÉèÖÃ»º´æÇø³õÊ¼»¯
 *
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º xxxxx
+*  ²ÎÊý2£º xxxxx
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 EFI_STATUS L2_GRAPHICS_SystemSettingInit()
@@ -1896,8 +1896,8 @@ EFI_STATUS L2_GRAPHICS_SystemSettingInit()
     Color.Blue  = 0x00;
     Color.Reserved  = GRAPHICS_LAYER_SYSTEM_SETTING_WINDOW;
 
-    //èƒŒæ™¯è®¾ç½®
-    //èƒŒ 1719    æ™¯   3016    è®¾   4172    ç½®   5435
+    //±³¾°ÉèÖÃ
+    //±³ 1719    ¾°   3016    Éè   4172    ÖÃ   5435
     L2_GRAPHICS_ChineseCharDraw(pSystemSettingWindowBuffer, x , y,   (17 - 1) * 94 + 19 - 1, Color, SystemSettingWindowWidth);   
     x += 16;
     
@@ -1910,8 +1910,8 @@ EFI_STATUS L2_GRAPHICS_SystemSettingInit()
     L2_GRAPHICS_ChineseCharDraw(pSystemSettingWindowBuffer, x , y,   (54 - 1) * 94 + 35 - 1, Color, SystemSettingWindowWidth);
     x += 16;
 
-    //èƒŒæ™¯è¿˜åŽŸ
-    //è¿˜ 2725    åŽŸ   5213
+    //±³¾°»¹Ô­
+    //»¹ 2725    Ô­   5213
     x = 3;
     y += 16;
     L2_GRAPHICS_ChineseCharDraw(pSystemSettingWindowBuffer, x , y,   (17 - 1) * 94 + 19 - 1, Color, SystemSettingWindowWidth);   
@@ -1934,13 +1934,13 @@ EFI_STATUS L2_GRAPHICS_SystemSettingInit()
 
 /****************************************************************************
 *
-*  æè¿°:   å…³æœºå±å¹•
+*  ÃèÊö:   ¹Ø»úÆÁÄ»
 *
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º xxxxx
+*  ²ÎÊý2£º xxxxx
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 EFI_STATUS L2_GRAPHICS_SayGoodBye()
@@ -1956,8 +1956,8 @@ EFI_STATUS L2_GRAPHICS_SayGoodBye()
         }
     }
     
-    // å†    5257    è§   2891    ï¼Œ   0312    æ¬¢   2722    è¿Ž   5113
-    // ä¸‹    4734    æ¬¡   2046    å›ž   2756    æ¥   3220
+    // ÔÙ    5257    ¼û   2891    £¬   0312    »¶   2722    Ó­   5113
+    // ÏÂ    4734    ´Î   2046    »Ø   2756    À´   3220
     // menu chinese
     UINT16 x = ScreenWidth / 2;
     UINT16 y = ScreenHeight / 2;
@@ -2003,24 +2003,24 @@ EFI_STATUS L2_GRAPHICS_SayGoodBye()
 
 /****************************************************************************
 *
-*  æè¿°:   åˆ¤æ–­å½“å‰é¼ æ ‡åæ ‡æ˜¯å¦åœ¨çŸ©å½¢åŒºåŸŸå†…
+*  ÃèÊö:   ÅÐ¶Ïµ±Ç°Êó±ê×ø±êÊÇ·ñÔÚ¾ØÐÎÇøÓòÄÚ
 *
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º xxxxx
+*  ²ÎÊý2£º xxxxx
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 BOOLEAN L1_GRAPHICS_InsideRectangle(UINT16 StartX, UINT16 EndX, UINT16 StartY, UINT16 EndY)
 {
-    //å…‰æ ‡æ˜¯å¦åœ¨æŒ‡å®šåŒºåŸŸ
+    //¹â±êÊÇ·ñÔÚÖ¸¶¨ÇøÓò
     BOOLEAN bInArea = iMouseX >= StartX && iMouseX <= EndX && iMouseY >= StartY && iMouseY <= EndY;
 
     if (!bInArea)
         return bInArea;
     
-    //å¦‚æžœå›¾å±‚ä¸ºæ˜¾ç¤ºçŠ¶æ€ï¼Œå¹¶ä¸”é¼ æ ‡åœ¨äº‹ä»¶è§¦å‘åŒºåŸŸï¼Œåˆ™æ›´æ–°å€¼
+    //Èç¹ûÍ¼²ãÎªÏÔÊ¾×´Ì¬£¬²¢ÇÒÊó±êÔÚÊÂ¼þ´¥·¢ÇøÓò£¬Ôò¸üÐÂÖµ
     if (TRUE == WindowLayers.item[LayerID].DisplayFlag && bInArea)
     {        
         //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: StartX: %d, EndX: %d, StartY: %d, EndY: %d\n", __LINE__, StartX, EndX, StartY, EndY);
@@ -2033,7 +2033,7 @@ BOOLEAN L1_GRAPHICS_InsideRectangle(UINT16 StartX, UINT16 EndX, UINT16 StartY, U
         bMouseMoveoverObject = TRUE;
     }
 
-    //å› ä¸ºæ¯ä¸€ä¸ªå›¾å±‚çš„æ¯ä¸€ä¸ªäº‹ä»¶åŒºåŸŸæ˜¯å”¯ä¸€çš„ï¼Œæ‰€ä»¥åªéœ€è¦åˆ¤æ–­ä¸‰ä¸ªéƒ½ä¸ç›¸ç­‰å°±å¯ä»¥
+    //ÒòÎªÃ¿Ò»¸öÍ¼²ãµÄÃ¿Ò»¸öÊÂ¼þÇøÓòÊÇÎ¨Ò»µÄ£¬ËùÒÔÖ»ÐèÒªÅÐ¶ÏÈý¸ö¶¼²»ÏàµÈ¾Í¿ÉÒÔ
     if (MouseMoveoverObjectOld.StartX != MouseMoveoverObject.StartX 
        && MouseMoveoverObjectOld.StartY != MouseMoveoverObject.StartY
        && MouseMoveoverObjectOld.GraphicsLayerID != MouseMoveoverObject.GraphicsLayerID)
@@ -2062,13 +2062,13 @@ BOOLEAN L1_GRAPHICS_InsideRectangle(UINT16 StartX, UINT16 EndX, UINT16 StartY, U
 
 /****************************************************************************
 *
-*  æè¿°:   æ¡Œé¢å›¾å±‚ç‚¹å‡»äº‹ä»¶ï¼Œå½“å‰åªæœ‰å·¦ä¸‹è§’çš„å¼€å§‹èœå•ç‚¹å‡»äº‹ä»¶
+*  ÃèÊö:   ×ÀÃæÍ¼²ãµã»÷ÊÂ¼þ£¬µ±Ç°Ö»ÓÐ×óÏÂ½ÇµÄ¿ªÊ¼²Ëµ¥µã»÷ÊÂ¼þ
 *
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º xxxxx
+*  ²ÎÊý2£º xxxxx
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 DESKTOP_ITEM_CLICKED_EVENT L2_GRAPHICS_DeskLayerClickEventGet()
@@ -2089,7 +2089,7 @@ DESKTOP_ITEM_CLICKED_EVENT L2_GRAPHICS_DeskLayerClickEventGet()
 
     UINT16 ystep = ItemHeight + 2 * 16;
 
-    //è¿™è¾¹éœ€è¦æ³¨æ„ï¼Œç¬¬ä¸€ä¸ªiä¸ä¸º0æˆ–è€…1
+    //Õâ±ßÐèÒª×¢Òâ£¬µÚÒ»¸öi²»Îª0»òÕß1
     for (UINT16 i = DESKTOP_ITEM_MY_COMPUTER_CLICKED_EVENT; i < DESKTOP_ITEM_MAX_CLICKED_EVENT; i++)
     {
     	if (L1_GRAPHICS_InsideRectangle(x1, x1 + ItemWidth, y1 + (i - 2) * ystep, y1 + (i - 2) * ystep + ItemHeight))
@@ -2110,13 +2110,13 @@ DESKTOP_ITEM_CLICKED_EVENT L2_GRAPHICS_DeskLayerClickEventGet()
 
 /****************************************************************************
 *
-*  æè¿°:   æ¡Œé¢å›¾å±‚ç‚¹å‡»äº‹ä»¶ï¼Œå½“å‰åªæœ‰å·¦ä¸‹è§’çš„å¼€å§‹èœå•ç‚¹å‡»äº‹ä»¶
+*  ÃèÊö:   ×ÀÃæÍ¼²ãµã»÷ÊÂ¼þ£¬µ±Ç°Ö»ÓÐ×óÏÂ½ÇµÄ¿ªÊ¼²Ëµ¥µã»÷ÊÂ¼þ
 *
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º xxxxx
+*  ²ÎÊý2£º xxxxx
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 DESKTOP_ITEM_CLICKED_EVENT L2_GRAPHICS_MouseRightButtonClickEventGet()
@@ -2142,13 +2142,13 @@ DESKTOP_ITEM_CLICKED_EVENT L2_GRAPHICS_MouseRightButtonClickEventGet()
 
 /****************************************************************************
 *
-*  æè¿°:   å¼€å§‹èœå•å›¾å±‚ç‚¹å‡»äº‹ä»¶èŽ·å–
+*  ÃèÊö:   ¿ªÊ¼²Ëµ¥Í¼²ãµã»÷ÊÂ¼þ»ñÈ¡
 *
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º xxxxx
+*  ²ÎÊý2£º xxxxx
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 START_MENU_ITEM_CLICKED_EVENT L2_GRAPHICS_StartMenuLayerClickEventGet()
@@ -2158,7 +2158,7 @@ START_MENU_ITEM_CLICKED_EVENT L2_GRAPHICS_StartMenuLayerClickEventGet()
     UINT16 StartMenuPositionX = WindowLayers.item[GRAPHICS_LAYER_START_MENU].StartX;
     UINT16 StartMenuPositionY = WindowLayers.item[GRAPHICS_LAYER_START_MENU].StartY;
 
-    //å¦‚æžœå¼€å§‹èœå•æ²¡æœ‰æ²¡æœ‰æ˜¾ç¤ºï¼Œåˆ™å›žåˆ°èœå•åˆå§‹çŠ¶æ€
+    //Èç¹û¿ªÊ¼²Ëµ¥Ã»ÓÐÃ»ÓÐÏÔÊ¾£¬Ôò»Øµ½²Ëµ¥³õÊ¼×´Ì¬
     if (FALSE == WindowLayers.item[GRAPHICS_LAYER_START_MENU].DisplayFlag)
     {
         return START_MENU_ITEM_MAX_CLICKED_EVENT;
@@ -2214,13 +2214,13 @@ START_MENU_ITEM_CLICKED_EVENT L2_GRAPHICS_StartMenuLayerClickEventGet()
 
 /****************************************************************************
 *
-*  æè¿°:   ç³»ç»Ÿè®¾ç½®å›¾å±‚ç‚¹å‡»äº‹ä»¶èŽ·å–
+*  ÃèÊö:   ÏµÍ³ÉèÖÃÍ¼²ãµã»÷ÊÂ¼þ»ñÈ¡
 *
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º xxxxx
+*  ²ÎÊý2£º xxxxx
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 START_MENU_SYSTEM_SETTING_SUBITEM_CLICKED_EVENT L2_GRAPHICS_SystemSettingLayerClickEventGet()
@@ -2262,13 +2262,13 @@ START_MENU_SYSTEM_SETTING_SUBITEM_CLICKED_EVENT L2_GRAPHICS_SystemSettingLayerCl
 
 /****************************************************************************
 *
-*  æè¿°:   é€šè¿‡é¼ æ ‡å…‰æ ‡ä½ç½®èŽ·å–æˆ‘çš„ç”µè„‘å›¾å±‚ç‚¹å‡»äº‹ä»¶
+*  ÃèÊö:   Í¨¹ýÊó±ê¹â±êÎ»ÖÃ»ñÈ¡ÎÒµÄµçÄÔÍ¼²ãµã»÷ÊÂ¼þ
 *
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º xxxxx
+*  ²ÎÊý2£º xxxxx
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 MY_COMPUTER_WINDOW_CLICKED_EVENT L2_GRAPHICS_MyComputerLayerClickEventGet()
@@ -2297,10 +2297,10 @@ MY_COMPUTER_WINDOW_CLICKED_EVENT L2_GRAPHICS_MyComputerLayerClickEventGet()
 					MyComputerWindowState.PartitionWidth,
 					MyComputerWindowState.PartitionHeight);
 			
-	//åˆ†åŒºè¢«ç‚¹å‡»äº‹ä»¶
+	//·ÖÇø±»µã»÷ÊÂ¼þ
     for (UINT16 i = 0 ; i < PartitionCount; i++)
     {
-        //éœ€è¦è·ŸL3_APPLICATION_MyComputerWindowå®šä¹‰ä¿æŒä¸€è‡´
+        //ÐèÒª¸úL3_APPLICATION_MyComputerWindow¶¨Òå±£³ÖÒ»ÖÂ
 		UINT16 StartX = MyComputerWindowState.PartitionStartX + WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].StartX;
 		UINT16 StartY = MyComputerWindowState.PartitionStartY + i * 18 + WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].StartY;
 		
@@ -2317,7 +2317,7 @@ MY_COMPUTER_WINDOW_CLICKED_EVENT L2_GRAPHICS_MyComputerLayerClickEventGet()
     UINT16 WidthNew = SYSTEM_ICON_WIDTH / 8;
 	
 	//Only 6 item, need to fix after test.
-	//åˆ†åŒºçš„æ–‡ä»¶æˆ–æ–‡ä»¶å¤¹è¢«ç‚¹å‡»äº‹ä»¶
+	//·ÖÇøµÄÎÄ¼þ»òÎÄ¼þ¼Ð±»µã»÷ÊÂ¼þ
     for (UINT16 i = 0 ; i < 11; i++)
     {
 		UINT16 StartX = MyComputerWindowState.ItemStartX + WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].StartX;
@@ -2343,13 +2343,13 @@ MY_COMPUTER_WINDOW_CLICKED_EVENT L2_GRAPHICS_MyComputerLayerClickEventGet()
 
 /****************************************************************************
 *
-*  æè¿°:   ç³»ç»Ÿæ—¥å¿—å›¾å±‚ç‚¹å‡»äº‹ä»¶èŽ·å–
+*  ÃèÊö:   ÏµÍ³ÈÕÖ¾Í¼²ãµã»÷ÊÂ¼þ»ñÈ¡
 *
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º xxxxx
+*  ²ÎÊý2£º xxxxx
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 SYSTEM_LOG_WINDOW_CLICKED_EVENT L2_GRAPHICS_SystemLogLayerClickEventGet()
@@ -2377,13 +2377,13 @@ SYSTEM_LOG_WINDOW_CLICKED_EVENT L2_GRAPHICS_SystemLogLayerClickEventGet()
 
 /****************************************************************************
 *
-*  æè¿°:   å†…å­˜ä¿¡æ¯çª—å£å›¾å±‚ç‚¹å‡»äº‹ä»¶èŽ·å–
+*  ÃèÊö:   ÄÚ´æÐÅÏ¢´°¿ÚÍ¼²ãµã»÷ÊÂ¼þ»ñÈ¡
 *
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º xxxxx
+*  ²ÎÊý2£º xxxxx
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 MEMORY_INFORMATION_WINDOW_CLICKED_EVENT L2_GRAPHICS_MemoryInformationLayerClickEventGet()
@@ -2409,13 +2409,13 @@ MEMORY_INFORMATION_WINDOW_CLICKED_EVENT L2_GRAPHICS_MemoryInformationLayerClickE
 
 /****************************************************************************
 *
-*  æè¿°:   å¼€å§‹èœå•è¢«ç‚¹å‡»ï¼Œå¤„ç†å‡½æ•°
+*  ÃèÊö:   ¿ªÊ¼²Ëµ¥±»µã»÷£¬´¦Àíº¯Êý
 *
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º xxxxx
+*  ²ÎÊý2£º xxxxx
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 VOID L3_GRAPHICS_StartMenuClicked()
@@ -2454,13 +2454,13 @@ VOID L3_GRAPHICS_StartMenuClicked()
 
 /****************************************************************************
 *
-*  æè¿°:   æ¡Œé¢å›¾å±‚è¢«ç‚¹å‡»å¤„ç†å‡½æ•°
+*  ÃèÊö:   ×ÀÃæÍ¼²ã±»µã»÷´¦Àíº¯Êý
 *
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º xxxxx
+*  ²ÎÊý2£º xxxxx
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 VOID L3_GRAPHICS_DeskClickEventHandle(DESKTOP_ITEM_CLICKED_EVENT event)
@@ -2484,7 +2484,7 @@ VOID L3_GRAPHICS_DeskClickEventHandle(DESKTOP_ITEM_CLICKED_EVENT event)
         case DESKTOP_ITEM_SHUTDOWN_CLICKED_EVENT:
             L2_System_Shutdown(); break;
 
-		//è¿™è¾¹å…¶å®žéœ€è¦æ³¨æ„ä¸‹ï¼Œéœ€è¦è·Ÿäº‹ä»¶èŽ·å–çš„çŠ¶æ€ä¿æŒä¸€è‡´ï¼Œå…¶å®žå°‘äº†ä¸‰ä¸ªäº‹ä»¶ï¼Œæˆ‘çš„ç”µè„‘ã€ç³»ç»Ÿè®¾ç½®ã€å›žæ”¶ç«™ã€‚
+		//Õâ±ßÆäÊµÐèÒª×¢ÒâÏÂ£¬ÐèÒª¸úÊÂ¼þ»ñÈ¡µÄ×´Ì¬±£³ÖÒ»ÖÂ£¬ÆäÊµÉÙÁËÈý¸öÊÂ¼þ£¬ÎÒµÄµçÄÔ¡¢ÏµÍ³ÉèÖÃ¡¢»ØÊÕÕ¾¡£
 		default: break;
 	}
 }
@@ -2495,13 +2495,13 @@ VOID L3_GRAPHICS_DeskClickEventHandle(DESKTOP_ITEM_CLICKED_EVENT event)
 
 /****************************************************************************
 *
-*  æè¿°:   å¼€å§‹èœå•äº‹ä»¶å¤„ç†çŠ¶æ€æœº
+*  ÃèÊö:   ¿ªÊ¼²Ëµ¥ÊÂ¼þ´¦Àí×´Ì¬»ú
 *
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º xxxxx
+*  ²ÎÊý2£º xxxxx
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 VOID L3_GRAPHICS_StartMenuClickEventHandle(START_MENU_ITEM_CLICKED_EVENT event)
@@ -2531,13 +2531,13 @@ VOID L3_GRAPHICS_StartMenuClickEventHandle(START_MENU_ITEM_CLICKED_EVENT event)
 
 /****************************************************************************
 *
-*  æè¿°:   xxxxx
+*  ÃèÊö:   xxxxx
 *
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º xxxxx
+*  ²ÎÊý2£º xxxxx
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 VOID L3_GRAPHICS_SystemSettingClickEventHandle(START_MENU_SYSTEM_SETTING_SUBITEM_CLICKED_EVENT event)
@@ -2565,13 +2565,13 @@ VOID L3_GRAPHICS_SystemSettingClickEventHandle(START_MENU_SYSTEM_SETTING_SUBITEM
 
 /****************************************************************************
 *
-*  æè¿°:   æˆ‘çš„ç”µè„‘è¢«ç‚¹å‡»ï¼Œæ˜¾ç¤ºæˆ‘çš„çª—å£ï¼Œå¹¶ä¸”è¿›å…¥æˆ‘çš„ç”µè„‘çª—å£çŠ¶æ€æœº
+*  ÃèÊö:   ÎÒµÄµçÄÔ±»µã»÷£¬ÏÔÊ¾ÎÒµÄ´°¿Ú£¬²¢ÇÒ½øÈëÎÒµÄµçÄÔ´°¿Ú×´Ì¬»ú
 *
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º xxxxx
+*  ²ÎÊý2£º xxxxx
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 VOID L3_GRAPHICS_MyComupterClickEventHandle(MY_COMPUTER_WINDOW_CLICKED_EVENT event)
@@ -2609,13 +2609,13 @@ VOID L3_GRAPHICS_MyComupterClickEventHandle(MY_COMPUTER_WINDOW_CLICKED_EVENT eve
 
 /****************************************************************************
 *
-*  æè¿°:   æˆ‘çš„ç”µè„‘çª—å£ç‚¹å‡»äº‹ä»¶ä¸­å…³é—­çª—å£äº‹ä»¶å“åº”ï¼Œæ³¨ï¼šæœªè¿›è¡Œå†…å­˜é‡Šæ”¾ï¼Œæœ‰ä¼˜åŒ–çš„ç©ºé—´
+*  ÃèÊö:   ÎÒµÄµçÄÔ´°¿Úµã»÷ÊÂ¼þÖÐ¹Ø±Õ´°¿ÚÊÂ¼þÏìÓ¦£¬×¢£ºÎ´½øÐÐÄÚ´æÊÍ·Å£¬ÓÐÓÅ»¯µÄ¿Õ¼ä
 *
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º xxxxx
+*  ²ÎÊý2£º xxxxx
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 VOID L2_MOUSE_SystemSettingCloseClicked()
@@ -2633,13 +2633,13 @@ VOID L2_MOUSE_SystemSettingCloseClicked()
 
 /****************************************************************************
 *
-*  æè¿°:   æˆ‘çš„ç”µè„‘çª—å£ç‚¹å‡»äº‹ä»¶ä¸­å…³é—­çª—å£äº‹ä»¶å“åº”ï¼Œæ³¨ï¼šæœªè¿›è¡Œå†…å­˜é‡Šæ”¾ï¼Œæœ‰ä¼˜åŒ–çš„ç©ºé—´
+*  ÃèÊö:   ÎÒµÄµçÄÔ´°¿Úµã»÷ÊÂ¼þÖÐ¹Ø±Õ´°¿ÚÊÂ¼þÏìÓ¦£¬×¢£ºÎ´½øÐÐÄÚ´æÊÍ·Å£¬ÓÐÓÅ»¯µÄ¿Õ¼ä
 *
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º xxxxx
+*  ²ÎÊý2£º xxxxx
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 VOID L2_MOUSE_MemoryInformationCloseClicked()
@@ -2657,13 +2657,13 @@ VOID L2_MOUSE_MemoryInformationCloseClicked()
 
 /****************************************************************************
 *
-*  æè¿°:   æˆ‘çš„ç”µè„‘çª—å£ç‚¹å‡»äº‹ä»¶ä¸­å…³é—­çª—å£äº‹ä»¶å“åº”ï¼Œæ³¨ï¼šæœªè¿›è¡Œå†…å­˜é‡Šæ”¾ï¼Œæœ‰ä¼˜åŒ–çš„ç©ºé—´
+*  ÃèÊö:   ÎÒµÄµçÄÔ´°¿Úµã»÷ÊÂ¼þÖÐ¹Ø±Õ´°¿ÚÊÂ¼þÏìÓ¦£¬×¢£ºÎ´½øÐÐÄÚ´æÊÍ·Å£¬ÓÐÓÅ»¯µÄ¿Õ¼ä
 *
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º xxxxx
+*  ²ÎÊý2£º xxxxx
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 VOID L2_MOUSE_SystemLogCloseClicked()
@@ -2681,13 +2681,13 @@ VOID L2_MOUSE_SystemLogCloseClicked()
 
 /****************************************************************************
 *
-*  æè¿°:   xxxxx
+*  ÃèÊö:   xxxxx
 *
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º xxxxx
+*  ²ÎÊý2£º xxxxx
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 VOID L3_GRAPHICS_SystemLogClickEventHandle(SYSTEM_LOG_WINDOW_CLICKED_EVENT event)
@@ -2698,7 +2698,7 @@ VOID L3_GRAPHICS_SystemLogClickEventHandle(SYSTEM_LOG_WINDOW_CLICKED_EVENT event
 		case SYSTEM_LOG_WINDOW_CLOSE_WINDOW_CLICKED_EVENT:
 			L2_MOUSE_SystemLogCloseClicked(); break;
 
-		//è¿™è¾¹å…¶å®žéœ€è¦æ³¨æ„ä¸‹ï¼Œéœ€è¦è·Ÿäº‹ä»¶èŽ·å–çš„çŠ¶æ€ä¿æŒä¸€è‡´ï¼Œå…¶å®žå°‘äº†ä¸‰ä¸ªäº‹ä»¶ï¼Œæˆ‘çš„ç”µè„‘ã€ç³»ç»Ÿè®¾ç½®ã€å›žæ”¶ç«™ã€‚
+		//Õâ±ßÆäÊµÐèÒª×¢ÒâÏÂ£¬ÐèÒª¸úÊÂ¼þ»ñÈ¡µÄ×´Ì¬±£³ÖÒ»ÖÂ£¬ÆäÊµÉÙÁËÈý¸öÊÂ¼þ£¬ÎÒµÄµçÄÔ¡¢ÏµÍ³ÉèÖÃ¡¢»ØÊÕÕ¾¡£
 		default: break;
 	}
 
@@ -2707,13 +2707,13 @@ VOID L3_GRAPHICS_SystemLogClickEventHandle(SYSTEM_LOG_WINDOW_CLICKED_EVENT event
 
 /****************************************************************************
 *
-*  æè¿°:   xxxxx
+*  ÃèÊö:   xxxxx
 *
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º xxxxx
+*  ²ÎÊý2£º xxxxx
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 VOID L3_GRAPHICS_MouseRightButtonClickEventHandle(MOUSE_RIGHT_MENU_CLICKED_EVENT event)
@@ -2754,13 +2754,13 @@ VOID L3_GRAPHICS_MouseRightButtonClickEventHandle(MOUSE_RIGHT_MENU_CLICKED_EVENT
 
 /****************************************************************************
 *
-*  æè¿°:   xxxxx
+*  ÃèÊö:   xxxxx
 *
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º xxxxx
+*  ²ÎÊý2£º xxxxx
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 VOID L3_GRAPHICS_MemoryInformationClickEventHandle(MEMORY_INFORMATION_WINDOW_CLICKED_EVENT event)
@@ -2777,16 +2777,16 @@ VOID L3_GRAPHICS_MemoryInformationClickEventHandle(MEMORY_INFORMATION_WINDOW_CLI
 
 
 /****************************************************************************
-*  å¯ä»¥å¤„ç†æ¡Œé¢æ‰€æœ‰å›¾å±‚äº‹ä»¶ï¼Œæ€»å…¥å£ï¼Œç°å¸¸é‡è¦
-*  æè¿°:   æ ¹æ®é¼ æ ‡å…‰æ ‡æ‰€åœ¨å›¾å±‚ï¼Œæ‰¾åˆ°å›¾å±‚ç‚¹å‡»äº‹ä»¶ï¼Œå¹¶æ ¹æ®ç‚¹å‡»äº‹ä»¶æ‰¾åˆ°å¯¹åº”çš„å“åº”å¤„ç†å‡½æ•°ã€‚
-*  ç¬¬ä¸€åˆ—ï¼šä¸åŒå›¾å±‚ç¼–å·
-*  ç¬¬äºŒåˆ—ï¼šæ ¹æ®å›¾å±‚IDèŽ·å–ä¸åŒå›¾å±‚çš„ç‚¹å‡»äº‹ä»¶XXXXXClickEventGetï¼ˆä¸åŒçª—å£äº‹ä»¶æå–ï¼‰
-*  ç¬¬ä¸‰åˆ—ï¼šå¤„ç†ä¸åŒäº‹ä»¶XXXXXClickEventHandleï¼ˆä¸åŒçª—å£äº‹ä»¶å¤„ç†å…¥å£ï¼Œæ¯”è¾ƒé‡è¦ï¼‰
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š xxxxx
+*  ¿ÉÒÔ´¦Àí×ÀÃæËùÓÐÍ¼²ãÊÂ¼þ£¬×ÜÈë¿Ú£¬»Ò³£ÖØÒª
+*  ÃèÊö:   ¸ù¾ÝÊó±ê¹â±êËùÔÚÍ¼²ã£¬ÕÒµ½Í¼²ãµã»÷ÊÂ¼þ£¬²¢¸ù¾Ýµã»÷ÊÂ¼þÕÒµ½¶ÔÓ¦µÄÏìÓ¦´¦Àíº¯Êý¡£
+*  µÚÒ»ÁÐ£º²»Í¬Í¼²ã±àºÅ
+*  µÚ¶þÁÐ£º¸ù¾ÝÍ¼²ãID»ñÈ¡²»Í¬Í¼²ãµÄµã»÷ÊÂ¼þXXXXXClickEventGet£¨²»Í¬´°¿ÚÊÂ¼þÌáÈ¡£©
+*  µÚÈýÁÐ£º´¦Àí²»Í¬ÊÂ¼þXXXXXClickEventHandle£¨²»Í¬´°¿ÚÊÂ¼þ´¦ÀíÈë¿Ú£¬±È½ÏÖØÒª£©
+*  ²ÎÊý1£º xxxxx
+*  ²ÎÊý2£º xxxxx
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 GRAPHICS_LAYER_EVENT_GET GraphicsLayerEventHandle[] =
@@ -2802,13 +2802,13 @@ GRAPHICS_LAYER_EVENT_GET GraphicsLayerEventHandle[] =
 
 /****************************************************************************
 *
-*  æè¿°:   é¼ æ ‡å·¦é”®ç‚¹å‡»äº‹ä»¶å¤„ç†
+*  ÃèÊö:   Êó±ê×ó¼üµã»÷ÊÂ¼þ´¦Àí
 *
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º xxxxx
+*  ²ÎÊý2£º xxxxx
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 VOID L2_MOUSE_RightClick(UINT16 LayerID, UINT16 event)
@@ -2825,26 +2825,26 @@ VOID L2_MOUSE_RightClick(UINT16 LayerID, UINT16 event)
 
 /****************************************************************************
 *
-*  æè¿°:   é¼ æ ‡å·¦é”®ç‚¹å‡»äº‹ä»¶å¤„ç†
+*  ÃèÊö:   Êó±ê×ó¼üµã»÷ÊÂ¼þ´¦Àí
 *
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º xxxxx
+*  ²ÎÊý2£º xxxxx
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 VOID L2_MOUSE_LeftClick(UINT16 LayerID, UINT16 event)
 {
     //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: iMouseX: %d iMouseY: %d \n",  __LINE__, iMouseX, iMouseY);
-    //é¼ æ ‡æ‹–åŠ¨çª—å£ç§»åŠ¨
+    //Êó±êÍÏ¶¯´°¿ÚÒÆ¶¯
     
     if ( MouseClickFlag != MOUSE_EVENT_TYPE_LEFT_CLICKED)
     {
         return;
     }
 
-    //å¦‚æžœä¸æ˜¯æ¡Œé¢å›¾å±‚ï¼Œåˆ™ç§»åŠ¨ï¼Œä¸è¿‡è¿™é‡Œä¹Ÿæœ‰äº›é—®é¢˜ï¼Œå›¾å±‚é‡Œè¾¹åŒ…å«ç³»ç»Ÿè®¾ç½®å›¾å±‚ï¼Œæ­£å¸¸æƒ…å†µä¸‹ï¼Œè¿™é‡Œæ˜¯èœå•ç»„æˆéƒ¨åˆ†ï¼Œä¸åº”è¯¥å¯ä»¥ç§»åŠ¨
+    //Èç¹û²»ÊÇ×ÀÃæÍ¼²ã£¬ÔòÒÆ¶¯£¬²»¹ýÕâÀïÒ²ÓÐÐ©ÎÊÌâ£¬Í¼²ãÀï±ß°üº¬ÏµÍ³ÉèÖÃÍ¼²ã£¬Õý³£Çé¿öÏÂ£¬ÕâÀïÊÇ²Ëµ¥×é³É²¿·Ö£¬²»Ó¦¸Ã¿ÉÒÔÒÆ¶¯
     if (GRAPHICS_LAYER_DESK != LayerID)
     {
         WindowLayers.item[LayerID].StartX += x_move * 3;
@@ -2853,7 +2853,7 @@ VOID L2_MOUSE_LeftClick(UINT16 LayerID, UINT16 event)
         if (WindowLayers.item[LayerID].StartX >= ScreenWidth )
             WindowLayers.item[LayerID].StartX = ScreenWidth / 2;
 
-        //å¦‚æžœè¶…è¿‡å±å¹•ï¼Œåˆ™æŠŠçª—å£æŒªå›žæ¥
+        //Èç¹û³¬¹ýÆÁÄ»£¬Ôò°Ñ´°¿ÚÅ²»ØÀ´
         if (WindowLayers.item[LayerID].StartY >= ScreenHeight )
             WindowLayers.item[LayerID].StartY =  2;
             
@@ -2879,13 +2879,13 @@ VOID L2_MOUSE_LeftClick(UINT16 LayerID, UINT16 event)
 
 /****************************************************************************
 *
-*  æè¿°:   ç»˜åˆ¶æŒ‰é’®
+*  ÃèÊö:   »æÖÆ°´Å¥
 *
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º xxxxx
+*  ²ÎÊý2£º xxxxx
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 EFI_STATUS L2_GRAPHICS_ButtonDraw()
@@ -2924,13 +2924,13 @@ EFI_STATUS L2_GRAPHICS_ButtonDraw()
 
 /****************************************************************************
 *
-*  æè¿°:   æ¡Œé¢åˆå§‹åŒ–ï¼Œè¿˜æ¯”è¾ƒç²—ç³™
+*  ÃèÊö:   ×ÀÃæ³õÊ¼»¯£¬»¹±È½Ï´Ö²Ú
 *
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º xxxxx
+*  ²ÎÊý2£º xxxxx
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 EFI_STATUS L2_GRAPHICS_DeskInit()
@@ -2943,7 +2943,7 @@ EFI_STATUS L2_GRAPHICS_DeskInit()
 
 	Color.Reserved = GRAPHICS_LAYER_DESK;
 
-    //å£çº¸åˆ†è¾¨çŽ‡1920*1080ï¼Œæ¯ä¸ªåƒç´ ç‚¹å ä¸‰ä¸ªå­—èŠ‚ï¼Œ0x36æ˜¯æŒ‡BMPæ ¼å¼å›¾ç‰‡æ–‡ä»¶çš„å¤´
+    //±ÚÖ½·Ö±æÂÊ1920*1080£¬Ã¿¸öÏñËØµãÕ¼Èý¸ö×Ö½Ú£¬0x36ÊÇÖ¸BMP¸ñÊ½Í¼Æ¬ÎÄ¼þµÄÍ·
     for (int i = 0; i < 1920 * 1080 * 3; i++)
     	pDeskWallpaperBuffer[i] = pDeskWallpaperBuffer[0x36 + i];
 
@@ -2951,7 +2951,7 @@ EFI_STATUS L2_GRAPHICS_DeskInit()
     
 	if (ScreenHeight != 1080 || ScreenWidth != 1920)
 	{
-	    //é»˜è®¤æä¾›çš„BMPå›¾æ ‡å¤ªå¤§ï¼Œæ‰€ä»¥åœ¨æ˜¾ç¤ºä¹‹å‰æŠŠå›¾ç‰‡ç¼©å°äº†ä¸‹
+	    //Ä¬ÈÏÌá¹©µÄBMPÍ¼±êÌ«´ó£¬ËùÒÔÔÚÏÔÊ¾Ö®Ç°°ÑÍ¼Æ¬ËõÐ¡ÁËÏÂ
         L1_GRAPHICS_ZoomImage(pDeskWallpaperZoomedBuffer, ScreenWidth, ScreenHeight, pDeskWallpaperBuffer, 1920, 1080);  
         pWallpaperBuffer = pDeskWallpaperZoomedBuffer;
 
@@ -2993,12 +2993,12 @@ EFI_STATUS L2_GRAPHICS_DeskInit()
 
     UINT16 icon_chinese_name[SYSTEM_ICON_MAX][8] = 
     {
-        {46,50,21,36,21,71,36,52}, //æˆ‘çš„ç”µè„‘
-        {47,21,45,19,41,72,54,35}, //ç³»ç»Ÿè®¾ç½®
-        {27,56,42,53,53,30,0,0},//å›žæ”¶ç«™
-        {46,36,28,94,28,48,0,0},//æ–‡	ä»¶å¤¹
-        {46,36,28,94,0,0,0,0},//æ–‡ä»¶
-        {25,56,27,90,0,0,0,0},//å…³æœº
+        {46,50,21,36,21,71,36,52}, //ÎÒµÄµçÄÔ
+        {47,21,45,19,41,72,54,35}, //ÏµÍ³ÉèÖÃ
+        {27,56,42,53,53,30,0,0},//»ØÊÕÕ¾
+        {46,36,28,94,28,48,0,0},//ÎÄ	¼þ¼Ð
+        {46,36,28,94,0,0,0,0},//ÎÄ¼þ
+        {25,56,27,90,0,0,0,0},//¹Ø»ú
     };
     
     Color.Blue  = 0xff;
@@ -3015,10 +3015,10 @@ EFI_STATUS L2_GRAPHICS_DeskInit()
         for (UINT32 i = 0; i < 384000; i++)
             pSystemIconTempBuffer2[i] = pSystemIconBuffer[j][0x36 + i];
         
-    	//é»˜è®¤æä¾›çš„BMPå›¾æ ‡å¤ªå¤§ï¼Œæ‰€ä»¥åœ¨æ˜¾ç¤ºä¹‹å‰æŠŠå›¾ç‰‡ç¼©å°äº†ä¸‹
+    	//Ä¬ÈÏÌá¹©µÄBMPÍ¼±êÌ«´ó£¬ËùÒÔÔÚÏÔÊ¾Ö®Ç°°ÑÍ¼Æ¬ËõÐ¡ÁËÏÂ
         L1_GRAPHICS_ZoomImage(pSystemIconMyComputerBuffer, WidthNew, HeightNew, pSystemIconTempBuffer2, SYSTEM_ICON_WIDTH, SYSTEM_ICON_HEIGHT);
 
-	    //åœ¨æ¡Œé¢æ˜¾ç¤ºæˆ‘çš„ç”µè„‘å›¾æ ‡
+	    //ÔÚ×ÀÃæÏÔÊ¾ÎÒµÄµçÄÔÍ¼±ê
         L3_GRAPHICS_ItemPrint(pDeskBuffer, pSystemIconMyComputerBuffer, ScreenWidth, ScreenHeight, WidthNew, HeightNew, x1, y1, "", 1, GRAPHICS_LAYER_DESK);
 
         
@@ -3101,7 +3101,7 @@ EFI_STATUS L2_GRAPHICS_DeskInit()
     x1 = ScreenWidth / 2;
     y1 = ScreenHeight - 21;
     
-    //åœ¨æ¡Œé¢å·¦ä¸‹è§’æ˜¾ç¤ºä¸­æ–‡ä»¶â€œä»»å¯çº¢ï¼ŒåŠ æ²¹ã€‚â€å­—æ ·ï¼Œå› ä¸ºåœ¨ç³»ç»Ÿå®žçŽ°çš„è¿‡ç¨‹ä¸­ï¼Œç¢°åˆ°æ— æ•°çš„é—®é¢˜ï¼Œå¸Œæœ›è‡ªå·±èƒ½åšæŒä¸‹æ¥ã€‚
+    //ÔÚ×ÀÃæ×óÏÂ½ÇÏÔÊ¾ÖÐÎÄ¼þ¡°ÈÎÆôºì£¬¼ÓÓÍ¡£¡±×ÖÑù£¬ÒòÎªÔÚÏµÍ³ÊµÏÖµÄ¹ý³ÌÖÐ£¬Åöµ½ÎÞÊýµÄÎÊÌâ£¬Ï£Íû×Ô¼ºÄÜ¼á³ÖÏÂÀ´¡£
     L2_GRAPHICS_ChineseCharDraw(pDeskBuffer,  x1, y1, (40 - 1) * 94 + 46 - 1, Color, ScreenWidth);
     x1 += 16;    
     L2_GRAPHICS_ChineseCharDraw(pDeskBuffer,  x1, y1, (38 - 1) * 94 + 84 - 1, Color, ScreenWidth);
@@ -3118,7 +3118,7 @@ EFI_STATUS L2_GRAPHICS_DeskInit()
     x1 += 16;
 
 
-    //åœ¨æ¡Œé¢å·¦ä¸‹è§’æ˜¾ç¤ºä¸­æ–‡ä»¶â€œèœå•â€å­—æ ·
+    //ÔÚ×ÀÃæ×óÏÂ½ÇÏÔÊ¾ÖÐÎÄ¼þ¡°²Ëµ¥¡±×ÖÑù
     L2_GRAPHICS_ChineseCharDraw(pDeskBuffer,  16, ScreenHeight - 21,     (18 - 1) * 94 + 43 - 1, Color, ScreenWidth);
     L2_GRAPHICS_ChineseCharDraw(pDeskBuffer,  16 * 2, ScreenHeight - 21, (21 - 1) * 94 + 05 - 1, Color, ScreenWidth);
 }
@@ -3130,13 +3130,13 @@ EFI_STATUS L2_GRAPHICS_DeskInit()
 
 /****************************************************************************
 *
-*  æè¿°:   xxxxx
+*  ÃèÊö:   xxxxx
 *
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º xxxxx
+*  ²ÎÊý2£º xxxxx
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 EFI_STATUS L2_GRAPHICS_AsciiCharDraw3(UINT8 *pBuffer,
@@ -3191,13 +3191,13 @@ EFI_STATUS L2_GRAPHICS_AsciiCharDraw3(UINT8 *pBuffer,
 
 /****************************************************************************
 *
-*  æè¿°:   xxxxx
+*  ÃèÊö:   xxxxx
 *
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º xxxxx
+*  ²ÎÊý2£º xxxxx
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 EFI_STATUS L2_GRAPHICS_ChineseHalfDraw(UINT8 *pBuffer,UINT8 d,
@@ -3240,13 +3240,13 @@ EFI_STATUS L2_GRAPHICS_ChineseHalfDraw(UINT8 *pBuffer,UINT8 d,
 
 /****************************************************************************
 *
-*  æè¿°:   å›¾åƒç´ ç‚¹æ‹·è´ä¸å¸¦reservedå­—æ®µï¼Œå‰ä¸‰ä¸ªå­—æ®µåŒ…å«çº¢ã€ç»¿ã€è“ä¸‰ç§é¢œè‰²ï¼Œæœ€åŽä¸€ç§é¢œè‰²æ˜¯å›¾å±‚IDï¼Œå› ä¸ºé¼ æ ‡æ˜¯å›¾å±‚æœ€ä¸Šå±‚ï¼Œæ‰€ä»¥ä¸éœ€è¦å›¾å±‚ID
+*  ÃèÊö:   Í¼ÏñËØµã¿½±´²»´øreserved×Ö¶Î£¬Ç°Èý¸ö×Ö¶Î°üº¬ºì¡¢ÂÌ¡¢À¶ÈýÖÖÑÕÉ«£¬×îºóÒ»ÖÖÑÕÉ«ÊÇÍ¼²ãID£¬ÒòÎªÊó±êÊÇÍ¼²ã×îÉÏ²ã£¬ËùÒÔ²»ÐèÒªÍ¼²ãID
 *
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º xxxxx
+*  ²ÎÊý2£º xxxxx
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 VOID L2_GRAPHICS_CopyNoReserved(UINT8 *pDest, UINT8 *pSource, 
@@ -3268,7 +3268,7 @@ VOID L2_GRAPHICS_CopyNoReserved(UINT8 *pDest, UINT8 *pSource,
 
 VOID L2_GRAPHICS_DrawMouseToDesk()
 {
-    //ä¸ºäº†è®©é¼ æ ‡å…‰æ ‡é€æ˜Žï¼Œéœ€è¦æŠŠå›¾å±‚å¯¹åº”çš„åƒç´ ç‚¹æ‹·è´åˆ°é¼ æ ‡æ˜¾ç¤ºå†…å­˜ç¼“å†²
+    //ÎªÁËÈÃÊó±ê¹â±êÍ¸Ã÷£¬ÐèÒª°ÑÍ¼²ã¶ÔÓ¦µÄÏñËØµã¿½±´µ½Êó±êÏÔÊ¾ÄÚ´æ»º³å
     for (UINT8 i = 0; i < 16; i++)
     {
         for (UINT8 j = 0; j < 16; j++)
@@ -3279,11 +3279,11 @@ VOID L2_GRAPHICS_DrawMouseToDesk()
         }
 	}
 
-	//ç„¶åŽç»˜åˆ¶é¼ æ ‡å…‰æ ‡
+	//È»ºó»æÖÆÊó±ê¹â±ê
     L2_GRAPHICS_ChineseCharDraw16(pMouseBuffer, 0 , 0,     12, 84, MouseColor, 16);  
     //L2_GRAPHICS_ChineseCharDraw(pMouseBuffer, 0, 0, 12 * 94 + 84, MouseColor, 16);
 
-	//æŠŠé¼ æ ‡å…‰æ ‡æ˜¾ç¤ºåˆ°æ¡Œé¢
+	//°ÑÊó±ê¹â±êÏÔÊ¾µ½×ÀÃæ
     L2_GRAPHICS_CopyNoReserved(pDeskDisplayBuffer, pMouseBuffer, ScreenWidth, ScreenHeight, 16, 16, iMouseX, iMouseY);
     //L2_DEBUG_Print1(DISPLAY_X, DISPLAY_Y, "%d: GraphicsLayerCompute\n", __LINE__);
 }
@@ -3320,8 +3320,8 @@ VOID L2_GRAPHICS_TrackMouseMoveoverObject()
         MouseMoveoverObjectDrawColor.Red = 0xff;
     }    
                               
-    //å¦‚æžœé¼ æ ‡æ²¡æœ‰ç‚¹å‡»ï¼Œåˆ™è¿½è¸ªé¼ æ ‡æ‰€æŒ‡çš„ç›®æ ‡
-    //å› ä¸ºæ¡Œé¢å›¾å±‚æ˜¯æ²¡æœ‰ç›¸å¯¹æ¡Œé¢å›¾å±‚èµ·å§‹Xï¼ŒYæ–¹å‘åæ ‡
+    //Èç¹ûÊó±êÃ»ÓÐµã»÷£¬Ôò×·×ÙÊó±êËùÖ¸µÄÄ¿±ê
+    //ÒòÎª×ÀÃæÍ¼²ãÊÇÃ»ÓÐÏà¶Ô×ÀÃæÍ¼²ãÆðÊ¼X£¬Y·½Ïò×ø±ê
     if (0 != MouseMoveoverObject.GraphicsLayerID)
     {        
         DrawStartX -= DrawWindowStartX;
@@ -3354,13 +3354,13 @@ VOID L2_GRAPHICS_TrackMouseMoveoverObject()
 
 /****************************************************************************
 *
-*  æè¿°:   æŠŠæ‰€æœ‰å›¾å±‚å åŠ èµ·æ¥æ˜¾ç¤º
+*  ÃèÊö:   °ÑËùÓÐÍ¼²ãµþ¼ÓÆðÀ´ÏÔÊ¾
 *
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º xxxxx
+*  ²ÎÊý2£º xxxxx
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 VOID L2_GRAPHICS_LayerCompute(UINT16 iMouseX, UINT16 iMouseY, UINT8 MouseClickFlag)
@@ -3368,33 +3368,33 @@ VOID L2_GRAPHICS_LayerCompute(UINT16 iMouseX, UINT16 iMouseY, UINT8 MouseClickFl
     //desk 
     L2_GRAPHICS_Copy(pDeskDisplayBuffer, pDeskBuffer, ScreenWidth, ScreenHeight, ScreenWidth, ScreenHeight, 0, 0);
 
-    //å…³æœº
+    //¹Ø»ú
     if (TRUE == SystemQuitFlag)
     {    
-        //å…³æœºçš„æ—¶å€™ï¼Œä¼šæœ‰ä¸€ä¸ªå°çš„åŠ¨ç”»å†™å…¥åˆ°pDeskBuffer
+        //¹Ø»úµÄÊ±ºò£¬»áÓÐÒ»¸öÐ¡µÄ¶¯»­Ð´Èëµ½pDeskBuffer
 		L2_SCREEN_Draw(pDeskDisplayBuffer, 0, 0, 0, 0, ScreenWidth, ScreenHeight);	
                     
         return;
     }
 
-    //çª—å£å›¾å±‚æ‹·è´
+    //´°¿ÚÍ¼²ã¿½±´
     L2_GRAPHICS_CopyBufferFromWindowsToDesk();
 	        
-    //é¼ æ ‡å³å‡»èœå•ï¼Œæ³¨æ„ï¼Œéœ€è¦åœ¨é¼ æ ‡èŽ·å–äº‹ä»¶å‰æ‹·è´ï¼Œå› ä¸ºé¼ æ ‡å³å‡»äº‹ä»¶ä¹Ÿéœ€è¦è¢«èŽ·å–
+    //Êó±êÓÒ»÷²Ëµ¥£¬×¢Òâ£¬ÐèÒªÔÚÊó±ê»ñÈ¡ÊÂ¼þÇ°¿½±´£¬ÒòÎªÊó±êÓÒ»÷ÊÂ¼þÒ²ÐèÒª±»»ñÈ¡
     if (WindowLayers.item[GRAPHICS_LAYER_MOUSE_RIGHT_CLICK_WINDOW].StartX != 0 || WindowLayers.item[GRAPHICS_LAYER_MOUSE_RIGHT_CLICK_WINDOW].StartY != 0)
     {        
         L2_GRAPHICS_Copy(pDeskDisplayBuffer, pMouseRightButtonClickWindowBuffer, ScreenWidth, ScreenHeight, MouseRightButtonClickWindowWidth, MouseRightButtonClickWindowHeight, WindowLayers.item[GRAPHICS_LAYER_MOUSE_RIGHT_CLICK_WINDOW].StartX, WindowLayers.item[GRAPHICS_LAYER_MOUSE_RIGHT_CLICK_WINDOW].StartY);
     }    
 
-	//èŽ·å–å½“å‰é¼ æ ‡æ‰€åœ¨çš„å›¾å±‚ï¼Œæ ¹æ®é¼ æ ‡å½“å‰çš„ç‚¹å‡»äº‹ä»¶è¿›è¡Œæ“ä½œ
+	//»ñÈ¡µ±Ç°Êó±êËùÔÚµÄÍ¼²ã£¬¸ù¾ÝÊó±êµ±Ç°µÄµã»÷ÊÂ¼þ½øÐÐ²Ù×÷
     L2_MOUSE_Move();
 
-    //è¿½è¸ªé¼ æ ‡äº‹ä»¶éœ€è¦åœ¨ç»˜åˆ¶é¼ æ ‡å›¾æ ‡å‰å®Œæˆï¼Œå› ä¸ºç»˜åˆ¶å›¾æ ‡ä¼šä¿®æ”¹æ˜¾ç¤ºçš„å›¾å±‚
+    //×·×ÙÊó±êÊÂ¼þÐèÒªÔÚ»æÖÆÊó±êÍ¼±êÇ°Íê³É£¬ÒòÎª»æÖÆÍ¼±ê»áÐÞ¸ÄÏÔÊ¾µÄÍ¼²ã
     L2_GRAPHICS_TrackMouseMoveoverObject();
     
 	L2_GRAPHICS_DrawMouseToDesk();
 
-	//æŠŠå‡†å¤‡å¥½çš„æ¡Œé¢ç¼“å†²åŒºæ˜¾ç¤ºåˆ°å±å¹•
+	//°Ñ×¼±¸ºÃµÄ×ÀÃæ»º³åÇøÏÔÊ¾µ½ÆÁÄ»
 	L2_SCREEN_Draw(pDeskDisplayBuffer, 0, 0, 0, 0, ScreenWidth, ScreenHeight);	
 }
 
@@ -3403,13 +3403,13 @@ VOID L2_GRAPHICS_LayerCompute(UINT16 iMouseX, UINT16 iMouseY, UINT8 MouseClickFl
 
 /****************************************************************************
 *
-*  æè¿°:   æŠŠæ–‡ä»¶å¤¹ç›®å½•ä¸‹çš„æ–‡ä»¶å’Œæ–‡ä»¶å¤¹æ˜¾ç¤ºåˆ°æˆ‘çš„ç”µè„‘å›¾å±‚ï¼Œå½“å‰è¿™é‡Œè¾¹å¾ˆå¤šå›ºå®šçš„å€¼ï¼Œä¸å¤ªå¥½
+*  ÃèÊö:   °ÑÎÄ¼þ¼ÐÄ¿Â¼ÏÂµÄÎÄ¼þºÍÎÄ¼þ¼ÐÏÔÊ¾µ½ÎÒµÄµçÄÔÍ¼²ã£¬µ±Ç°ÕâÀï±ßºÜ¶à¹Ì¶¨µÄÖµ£¬²»Ì«ºÃ
 *
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º xxxxx
+*  ²ÎÊý2£º xxxxx
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 VOID L2_STORE_FolderItemsPrint()
@@ -3448,7 +3448,7 @@ VOID L2_STORE_FolderItemsPrint()
 	
     for (UINT16 i = 0; i < 32; i++)
     {       
-        //å¦‚æžœç¬¬ä¸€ä½ä¸º0è¡¨ç¤ºè¿™é¡¹æœ‰é—®é¢˜
+        //Èç¹ûµÚÒ»Î»Îª0±íÊ¾ÕâÏîÓÐÎÊÌâ
         if (pItems[i].FileName[0] == 0)
             break;
             
@@ -3465,7 +3465,7 @@ VOID L2_STORE_FolderItemsPrint()
                 
         if (pItems[i].Attribute[0] == 0x10) //Folder
         {
-            //æ˜¾ç¤ºæ–‡ä»¶å¤¹å°å›¾æ ‡
+            //ÏÔÊ¾ÎÄ¼þ¼ÐÐ¡Í¼±ê
             L3_GRAPHICS_ItemPrint(pMyComputerBuffer, pSystemIconFolderBuffer, MyComputerWidth, MyComputerHeight, WidthNew, HeightNew, x, y, "111", 2, GRAPHICS_LAYER_MY_COMPUTER_WINDOW);
             
             L2_DEBUG_Print3(x, y + HeightNew, WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW], "%a %d Bytes",
@@ -3480,7 +3480,7 @@ VOID L2_STORE_FolderItemsPrint()
                                             name,
                                             L1_NETWORK_4BytesToUINT32(pItems[i].FileLength));
             
-            //æ˜¾ç¤ºæ–‡ä»¶å°å›¾æ ‡
+            //ÏÔÊ¾ÎÄ¼þÐ¡Í¼±ê
             L3_GRAPHICS_ItemPrint(pMyComputerBuffer, pSystemIconTextBuffer, MyComputerWidth, MyComputerHeight, WidthNew, HeightNew, x, y, "222", 2, GRAPHICS_LAYER_MY_COMPUTER_WINDOW);
 			FolderItemValidIndexArray[valid_count] = i;
             valid_count++;
@@ -3492,13 +3492,13 @@ VOID L2_STORE_FolderItemsPrint()
 
 /****************************************************************************
 *
-*  æè¿°:   æŠŠæ–‡ä»¶å¤¹ç›®å½•ä¸‹çš„æ–‡ä»¶å’Œæ–‡ä»¶å¤¹æ˜¾ç¤ºåˆ°æˆ‘çš„ç”µè„‘å›¾å±‚ï¼Œå½“å‰è¿™é‡Œè¾¹å¾ˆå¤šå›ºå®šçš„å€¼ï¼Œä¸å¤ªå¥½
+*  ÃèÊö:   °ÑÎÄ¼þ¼ÐÄ¿Â¼ÏÂµÄÎÄ¼þºÍÎÄ¼þ¼ÐÏÔÊ¾µ½ÎÒµÄµçÄÔÍ¼²ã£¬µ±Ç°ÕâÀï±ßºÜ¶à¹Ì¶¨µÄÖµ£¬²»Ì«ºÃ
 *
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º xxxxx
+*  ²ÎÊý2£º xxxxx
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 VOID L2_STORE_FolderItemsPrint2()
@@ -3529,7 +3529,7 @@ VOID L2_STORE_FolderItemsPrint2()
         }
     }	
 
-	//æ ¹ç›®å½•æ˜¾ç¤ºçš„é¡¹æ•°
+	//¸ùÄ¿Â¼ÏÔÊ¾µÄÏîÊý
     for (UINT16 i = 0; i < 7; i++)
     {                   
     	if (pCommonStorageItems[i].Type == COMMON_STORAGE_ITEM_MAX) //over
@@ -3542,7 +3542,7 @@ VOID L2_STORE_FolderItemsPrint2()
                 
         if (pCommonStorageItems[i].Type == COMMON_STORAGE_ITEM_FOLDER) //Folder
         {
-            //æ˜¾ç¤ºæ–‡ä»¶å¤¹å°å›¾æ ‡
+            //ÏÔÊ¾ÎÄ¼þ¼ÐÐ¡Í¼±ê
             L3_GRAPHICS_ItemPrint(pMyComputerBuffer, pSystemIconFolderBuffer, MyComputerWidth, MyComputerHeight, WidthNew, HeightNew, x, y, "111", 2, GRAPHICS_LAYER_MY_COMPUTER_WINDOW);
             /*
             for (int j = 0; j < HeightNew; j++)
@@ -3577,7 +3577,7 @@ VOID L2_STORE_FolderItemsPrint2()
                                             pCommonStorageItems[i].Name,
                                             pCommonStorageItems[i].Size);
             
-            //æ˜¾ç¤ºæ–‡ä»¶å°å›¾æ ‡
+            //ÏÔÊ¾ÎÄ¼þÐ¡Í¼±ê
             L3_GRAPHICS_ItemPrint(pMyComputerBuffer, pSystemIconTextBuffer, MyComputerWidth, MyComputerHeight, WidthNew, HeightNew, x, y, "222", 2, GRAPHICS_LAYER_MY_COMPUTER_WINDOW);
 			FolderItemValidIndexArray[valid_count] = i;
             valid_count++;
@@ -3590,13 +3590,13 @@ VOID L2_STORE_FolderItemsPrint2()
 
 /****************************************************************************
 *
-*  æè¿°:   å¤šä¸ªå›¾å±‚å åŠ ï¼Œæ ¹æ®å›¾å±‚ä»Žä¸‹å¾€ä¸Šï¼Œä¾æ¬¡å åŠ èµ·æ¥ï¼Œä¸è¿‡è¿™é‡Œè¾¹æ¶‰åŠå¤šå›¾å±‚ï¼Œæ•ˆçŽ‡ä¼šæ¯”è¾ƒåº•ï¼Œå¦å¤–ï¼Œæœªåˆ¤æ–­å›¾å±‚æœªä¿®æ”¹çš„éƒ¨åˆ†ä¸éœ€è¦é‡æ–°å åŠ ã€‚
+*  ÃèÊö:   ¶à¸öÍ¼²ãµþ¼Ó£¬¸ù¾ÝÍ¼²ã´ÓÏÂÍùÉÏ£¬ÒÀ´Îµþ¼ÓÆðÀ´£¬²»¹ýÕâÀï±ßÉæ¼°¶àÍ¼²ã£¬Ð§ÂÊ»á±È½Ïµ×£¬ÁíÍâ£¬Î´ÅÐ¶ÏÍ¼²ãÎ´ÐÞ¸ÄµÄ²¿·Ö²»ÐèÒªÖØÐÂµþ¼Ó¡£
 *
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º xxxxx
+*  ²ÎÊý2£º xxxxx
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 void L2_GRAPHICS_CopyBufferFromWindowsToDesk()
@@ -3626,13 +3626,13 @@ void L2_GRAPHICS_CopyBufferFromWindowsToDesk()
 
 /****************************************************************************
 *
-*  æè¿°:   æ˜¾ç¤ºåˆ†åŒºæ ¹ç›®å½•ä¸‹çš„æ–‡ä»¶å’Œç›®å½•ï¼Œå½“å‰æ”¯æŒFAT32å’ŒNTFSä¸¤ç§æ ¼å¼
+*  ÃèÊö:   ÏÔÊ¾·ÖÇø¸ùÄ¿Â¼ÏÂµÄÎÄ¼þºÍÄ¿Â¼£¬µ±Ç°Ö§³ÖFAT32ºÍNTFSÁ½ÖÖ¸ñÊ½
 *
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º xxxxx
+*  ²ÎÊý2£º xxxxx
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 VOID L2_STORE_PartitionItemsPrint(UINT16 PartitionItemID)
@@ -3646,13 +3646,13 @@ VOID L2_STORE_PartitionItemsPrint(UINT16 PartitionItemID)
 
 /****************************************************************************
 *
-*  æè¿°:   åœ¨å†…å­˜åŒºåŸŸç»˜åˆ¶Asciiå­—ç¬¦ï¼Œå»ºè®®ä½¿ç”¨ï¼šL2_GRAPHICS_AsciiCharDraw2
+*  ÃèÊö:   ÔÚÄÚ´æÇøÓò»æÖÆAscii×Ö·û£¬½¨ÒéÊ¹ÓÃ£ºL2_GRAPHICS_AsciiCharDraw2
 *
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º xxxxx
+*  ²ÎÊý2£º xxxxx
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 EFI_STATUS L2_GRAPHICS_AsciiCharDraw(UINT8 *pBufferDest,
@@ -3663,7 +3663,7 @@ EFI_STATUS L2_GRAPHICS_AsciiCharDraw(UINT8 *pBufferDest,
     UINT8 d;
     UINT8 pBuffer[16 * 8 * 4];
 
-    if ('\0' == c)
+    if ('\0' == c || '\n' == c)
         return;
 
     for(i = 0; i < 16 * 8 * 4; i++)
@@ -3703,7 +3703,7 @@ EFI_STATUS L2_GRAPHICS_AsciiCharDraw(UINT8 *pBufferDest,
 
     L2_GRAPHICS_Copy(pBufferDest, pBuffer, ScreenWidth, ScreenHeight, 8, 16, x0, y0);
 
-	//æ³¨ï¼šä¸‹è¾¹æ³¨é‡ŠæŽ‰è¿™å‡ éƒ¨åˆ†ä»£ç ç”±äºŽæ¶‰åŠå¤ªå¤šIOæ“ä½œï¼Œå¯¹æ•ˆçŽ‡å½±å“è¾ƒé«˜ï¼ŒåŸºæœ¬åºŸå¼ƒã€‚
+	//×¢£ºÏÂ±ß×¢ÊÍµôÕâ¼¸²¿·Ö´úÂëÓÉÓÚÉæ¼°Ì«¶àIO²Ù×÷£¬¶ÔÐ§ÂÊÓ°Ïì½Ï¸ß£¬»ù±¾·ÏÆú¡£
     /*
     GraphicsOutput->Blt(GraphicsOutput, 
                         (EFI_GRAPHICS_OUTPUT_BLT_PIXEL *) pBuffer,
@@ -3721,13 +3721,13 @@ EFI_STATUS L2_GRAPHICS_AsciiCharDraw(UINT8 *pBufferDest,
 
 /****************************************************************************
 *
-*  æè¿°:   åœ¨å†…å­˜åŒºåŸŸç»˜åˆ¶Asciiå­—ç¬¦
+*  ÃèÊö:   ÔÚÄÚ´æÇøÓò»æÖÆAscii×Ö·û
 *
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º xxxxx
+*  ²ÎÊý2£º xxxxx
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 EFI_STATUS L2_GRAPHICS_AsciiCharDraw2(WINDOW_LAYER_ITEM layer,
@@ -3738,7 +3738,7 @@ EFI_STATUS L2_GRAPHICS_AsciiCharDraw2(WINDOW_LAYER_ITEM layer,
     UINT8 d;
     UINT8 pBuffer[16 * 8 * 4];
 
-    if ('\0' == c)
+    if (0 == c || 10 == c)
         return;
 
     for(i = 0; i < 16 * 8 * 4; i++)
@@ -3797,13 +3797,13 @@ EFI_STATUS L2_GRAPHICS_AsciiCharDraw2(WINDOW_LAYER_ITEM layer,
 
 /****************************************************************************
 *
-*  æè¿°:   é¼ æ ‡å³å‡»æ˜¾ç¤ºä¸€ä¸ªå°çš„çª—å£
+*  ÃèÊö:   Êó±êÓÒ»÷ÏÔÊ¾Ò»¸öÐ¡µÄ´°¿Ú
 *
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º xxxxx
+*  ²ÎÊý2£º xxxxx
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 VOID L2_GRAPHICS_RightClickMenuInit(UINT16 iMouseX, UINT16 iMouseY, UINT16 LayerID)
@@ -3839,13 +3839,13 @@ VOID L2_GRAPHICS_RightClickMenuInit(UINT16 iMouseX, UINT16 iMouseY, UINT16 Layer
 
 /****************************************************************************
 *
-*  æè¿°:   å†…å­˜æ‹·è´ï¼Œé¢œè‰²åœ¨æœ¬è´¨ä¸Šæ¥è®²ï¼Œä¹Ÿå°±æ˜¯å†…å­˜
+*  ÃèÊö:   ÄÚ´æ¿½±´£¬ÑÕÉ«ÔÚ±¾ÖÊÉÏÀ´½²£¬Ò²¾ÍÊÇÄÚ´æ
 *
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º xxxxx
+*  ²ÎÊý2£º xxxxx
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 void L1_MEMORY_CopyColor1(UINT8 *pBuffer, EFI_GRAPHICS_OUTPUT_BLT_PIXEL color, UINT16 x0, UINT16 y0, UINT16 AreaWidth)
@@ -3854,7 +3854,7 @@ void L1_MEMORY_CopyColor1(UINT8 *pBuffer, EFI_GRAPHICS_OUTPUT_BLT_PIXEL color, U
     pBuffer[y0 * AreaWidth * 4 + x0 * 4 + 1] = color.Green;
     pBuffer[y0 * AreaWidth * 4 + x0 * 4 + 2] = color.Red;
 
-    //å› ä¸ºæœ‰æ—¶å€™ä¼šæœ‰æœªåˆå§‹åŒ–å†…å­˜éƒ¨åˆ†è¿‡æ¥ï¼Œè¿™æ ·ç›´æŽ¥ä¼šæ­»æœº
+    //ÒòÎªÓÐÊ±ºò»áÓÐÎ´³õÊ¼»¯ÄÚ´æ²¿·Ö¹ýÀ´£¬ÕâÑùÖ±½Ó»áËÀ»ú
     if (color.Reserved < GRAPHICS_LAYER_MOUSE)
         pBuffer[y0 * AreaWidth * 4 + x0 * 4 + 3] = color.Reserved;
 
@@ -3865,13 +3865,13 @@ void L1_MEMORY_CopyColor1(UINT8 *pBuffer, EFI_GRAPHICS_OUTPUT_BLT_PIXEL color, U
 
 /****************************************************************************
 *
-*  æè¿°:   å†…å­˜æ‹·è´ï¼Œé¢œè‰²åœ¨æœ¬è´¨ä¸Šæ¥è®²ï¼Œä¹Ÿå°±æ˜¯å†…å­˜
+*  ÃèÊö:   ÄÚ´æ¿½±´£¬ÑÕÉ«ÔÚ±¾ÖÊÉÏÀ´½²£¬Ò²¾ÍÊÇÄÚ´æ
 *
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š ç›®æ ‡å†…å­˜åŒºåŸŸå®½åº¦å›ºå®š
+*  ²ÎÊý1£º xxxxx
+*  ²ÎÊý2£º xxxxx
+*  ²ÎÊýn£º Ä¿±êÄÚ´æÇøÓò¿í¶È¹Ì¶¨
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 void L1_MEMORY_CopyColor2(UINT8 *pBuffer, EFI_GRAPHICS_OUTPUT_BLT_PIXEL color, UINT16 x0, UINT16 y0)
@@ -3887,13 +3887,13 @@ void L1_MEMORY_CopyColor2(UINT8 *pBuffer, EFI_GRAPHICS_OUTPUT_BLT_PIXEL color, U
 
 /****************************************************************************
 *
-*  æè¿°:   å†…å­˜æ‹·è´ï¼Œé¢œè‰²åœ¨æœ¬è´¨ä¸Šæ¥è®²ï¼Œä¹Ÿå°±æ˜¯å†…å­˜
+*  ÃèÊö:   ÄÚ´æ¿½±´£¬ÑÕÉ«ÔÚ±¾ÖÊÉÏÀ´½²£¬Ò²¾ÍÊÇÄÚ´æ
 *
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š AreaWidthï¼šç›®æ ‡å†…å­˜åŒºåŸŸçš„å®½åº¦
+*  ²ÎÊý1£º xxxxx
+*  ²ÎÊý2£º xxxxx
+*  ²ÎÊýn£º AreaWidth£ºÄ¿±êÄÚ´æÇøÓòµÄ¿í¶È
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 void L1_MEMORY_CopyColor3(UINT8 *pBuffer, EFI_GRAPHICS_OUTPUT_BLT_PIXEL color, UINT16 x0, UINT16 y0, UINT8 AreaWidth)
@@ -3910,13 +3910,13 @@ void L1_MEMORY_CopyColor3(UINT8 *pBuffer, EFI_GRAPHICS_OUTPUT_BLT_PIXEL color, U
 
 /****************************************************************************
 *
-*  æè¿°:   ä¸­æ–‡å­—ç¬¦ç»˜åˆ¶
+*  ÃèÊö:   ÖÐÎÄ×Ö·û»æÖÆ
 *
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º xxxxx
+*  ²ÎÊý2£º xxxxx
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 EFI_STATUS L2_GRAPHICS_ChineseHalfDraw2(UINT8 *pBuffer,UINT8 d,
@@ -3962,16 +3962,16 @@ EFI_STATUS L2_GRAPHICS_ChineseHalfDraw2(UINT8 *pBuffer,UINT8 d,
 
 /****************************************************************************
 *
-*  æè¿°:   ä¸­æ–‡å­—ç¬¦ç»˜åˆ¶å‡½æ•°ï¼Œç»˜åˆ¶ç»“æžœæ˜¯16*16åƒç´ å¤§å°
+*  ÃèÊö:   ÖÐÎÄ×Ö·û»æÖÆº¯Êý£¬»æÖÆ½á¹ûÊÇ16*16ÏñËØ´óÐ¡
 *
-*  å‚æ•°pBufferï¼š 		æŠŠä¸­æ–‡å­—ç¬¦å†™åˆ°çš„ç›®æ ‡ç¼“å­˜
-*  å‚æ•°x0ï¼š 			æŠŠä¸­æ–‡å­—ç¬¦å†™åˆ°çš„Xç›®æ ‡
-*  å‚æ•°y0ï¼š 			æŠŠä¸­æ–‡å­—ç¬¦å†™åˆ°çš„Yç›®æ ‡
-*  å‚æ•°offsetï¼š 		æ±‰å­—åº“ç¼–ç ä½ç§»
-*  å‚æ•°Colorï¼š 		å­—ä½“é¢œè‰²
-*  å‚æ•°AreaWidthï¼š 	ç›®æ ‡ç¼“å­˜å®½åº¦ï¼Œæ¯”å¦‚ï¼šåœ¨æ¡Œé¢ä¸Šç»˜åˆ¶ä¼ æ¡Œé¢çš„å®½åº¦ï¼Œåœ¨æˆ‘çš„ç”µè„‘ç»˜åˆ¶ä¼ æˆ‘çš„ç”µè„‘å®½åº¦ç­‰ç­‰
+*  ²ÎÊýpBuffer£º 		°ÑÖÐÎÄ×Ö·ûÐ´µ½µÄÄ¿±ê»º´æ
+*  ²ÎÊýx0£º 			°ÑÖÐÎÄ×Ö·ûÐ´µ½µÄXÄ¿±ê
+*  ²ÎÊýy0£º 			°ÑÖÐÎÄ×Ö·ûÐ´µ½µÄYÄ¿±ê
+*  ²ÎÊýoffset£º 		ºº×Ö¿â±àÂëÎ»ÒÆ
+*  ²ÎÊýColor£º 		×ÖÌåÑÕÉ«
+*  ²ÎÊýAreaWidth£º 	Ä¿±ê»º´æ¿í¶È£¬±ÈÈç£ºÔÚ×ÀÃæÉÏ»æÖÆ´«×ÀÃæµÄ¿í¶È£¬ÔÚÎÒµÄµçÄÔ»æÖÆ´«ÎÒµÄµçÄÔ¿í¶ÈµÈµÈ
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 EFI_STATUS L2_GRAPHICS_ChineseCharDraw(UINT8 *pBuffer,
@@ -4009,18 +4009,18 @@ EFI_STATUS L2_GRAPHICS_ChineseCharDraw(UINT8 *pBuffer,
 
 /****************************************************************************
 *
-*  æè¿°:   ä¸­æ–‡å­—ç¬¦ç»˜åˆ¶å‡½æ•°ï¼Œç»˜åˆ¶ç»“æžœæ˜¯16*16åƒç´ å¤§å°
-*        è¿™é‡Œä¼°è®¡å¯ä»¥ä¼˜åŒ–ä¸‹ï¼ŒæŠŠå†…å­˜å…ˆå‡†å¤‡å¥½ï¼Œç›´æŽ¥æ‹·è´ï¼Œè¿™æ ·CPUä½¿ç”¨ä¼šå°‘äº›ï¼Œä¸éœ€è¦æ¯æ¬¡æ‰“å°ä¸­æ–‡çš„æ—¶å€™å†æ¯”è¾ƒä¸€æ¬¡
+*  ÃèÊö:   ÖÐÎÄ×Ö·û»æÖÆº¯Êý£¬»æÖÆ½á¹ûÊÇ16*16ÏñËØ´óÐ¡
+*        ÕâÀï¹À¼Æ¿ÉÒÔÓÅ»¯ÏÂ£¬°ÑÄÚ´æÏÈ×¼±¸ºÃ£¬Ö±½Ó¿½±´£¬ÕâÑùCPUÊ¹ÓÃ»áÉÙÐ©£¬²»ÐèÒªÃ¿´Î´òÓ¡ÖÐÎÄµÄÊ±ºòÔÙ±È½ÏÒ»´Î
 *
-*  å‚æ•°pBufferï¼š 		æŠŠä¸­æ–‡å­—ç¬¦å†™åˆ°çš„ç›®æ ‡ç¼“å­˜
-*  å‚æ•°x0ï¼š 			æŠŠä¸­æ–‡å­—ç¬¦å†™åˆ°çš„Xç›®æ ‡
-*  å‚æ•°y0ï¼š 			æŠŠä¸­æ–‡å­—ç¬¦å†™åˆ°çš„Yç›®æ ‡
-*  å‚æ•°AreaCodeï¼š 		æ±‰å­—åº“åŒºç 
-*  å‚æ•°BitCodeï¼š 		æ±‰å­—åº“ä½ç 
-*  å‚æ•°Colorï¼š 		å­—ä½“é¢œè‰²
-*  å‚æ•°AreaWidthï¼š 	ç›®æ ‡ç¼“å­˜å®½åº¦ï¼Œæ¯”å¦‚ï¼šåœ¨æ¡Œé¢ä¸Šç»˜åˆ¶ä¼ æ¡Œé¢çš„å®½åº¦ï¼Œåœ¨æˆ‘çš„ç”µè„‘ç»˜åˆ¶ä¼ æˆ‘çš„ç”µè„‘å®½åº¦ç­‰ç­‰
+*  ²ÎÊýpBuffer£º 		°ÑÖÐÎÄ×Ö·ûÐ´µ½µÄÄ¿±ê»º´æ
+*  ²ÎÊýx0£º 			°ÑÖÐÎÄ×Ö·ûÐ´µ½µÄXÄ¿±ê
+*  ²ÎÊýy0£º 			°ÑÖÐÎÄ×Ö·ûÐ´µ½µÄYÄ¿±ê
+*  ²ÎÊýAreaCode£º 		ºº×Ö¿âÇøÂë
+*  ²ÎÊýBitCode£º 		ºº×Ö¿âÎ»Âë
+*  ²ÎÊýColor£º 		×ÖÌåÑÕÉ«
+*  ²ÎÊýAreaWidth£º 	Ä¿±ê»º´æ¿í¶È£¬±ÈÈç£ºÔÚ×ÀÃæÉÏ»æÖÆ´«×ÀÃæµÄ¿í¶È£¬ÔÚÎÒµÄµçÄÔ»æÖÆ´«ÎÒµÄµçÄÔ¿í¶ÈµÈµÈ
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 EFI_STATUS L2_GRAPHICS_ChineseCharDraw16(UINT8 *pBuffer,
@@ -4057,16 +4057,16 @@ EFI_STATUS L2_GRAPHICS_ChineseCharDraw16(UINT8 *pBuffer,
 
 /****************************************************************************
 *
-*  æè¿°:   ä¸­æ–‡å­—ç¬¦ç»˜åˆ¶å‡½æ•°ï¼Œç»˜åˆ¶ç»“æžœæ˜¯12*12åƒç´ å¤§å°
+*  ÃèÊö:   ÖÐÎÄ×Ö·û»æÖÆº¯Êý£¬»æÖÆ½á¹ûÊÇ12*12ÏñËØ´óÐ¡
 *
-*  å‚æ•°pBufferï¼š 		æŠŠä¸­æ–‡å­—ç¬¦å†™åˆ°çš„ç›®æ ‡ç¼“å­˜
-*  å‚æ•°x0ï¼š 			æŠŠä¸­æ–‡å­—ç¬¦å†™åˆ°çš„Xç›®æ ‡
-*  å‚æ•°y0ï¼š 			æŠŠä¸­æ–‡å­—ç¬¦å†™åˆ°çš„Yç›®æ ‡
-*  å‚æ•°offsetï¼š 		æ±‰å­—åº“ç¼–ç ä½ç§»
-*  å‚æ•°Colorï¼š 		å­—ä½“é¢œè‰²
-*  å‚æ•°AreaWidthï¼š 	ç›®æ ‡ç¼“å­˜å®½åº¦ï¼Œæ¯”å¦‚ï¼šåœ¨æ¡Œé¢ä¸Šç»˜åˆ¶ä¼ æ¡Œé¢çš„å®½åº¦ï¼Œåœ¨æˆ‘çš„ç”µè„‘ç»˜åˆ¶ä¼ æˆ‘çš„ç”µè„‘å®½åº¦ç­‰ç­‰
+*  ²ÎÊýpBuffer£º 		°ÑÖÐÎÄ×Ö·ûÐ´µ½µÄÄ¿±ê»º´æ
+*  ²ÎÊýx0£º 			°ÑÖÐÎÄ×Ö·ûÐ´µ½µÄXÄ¿±ê
+*  ²ÎÊýy0£º 			°ÑÖÐÎÄ×Ö·ûÐ´µ½µÄYÄ¿±ê
+*  ²ÎÊýoffset£º 		ºº×Ö¿â±àÂëÎ»ÒÆ
+*  ²ÎÊýColor£º 		×ÖÌåÑÕÉ«
+*  ²ÎÊýAreaWidth£º 	Ä¿±ê»º´æ¿í¶È£¬±ÈÈç£ºÔÚ×ÀÃæÉÏ»æÖÆ´«×ÀÃæµÄ¿í¶È£¬ÔÚÎÒµÄµçÄÔ»æÖÆ´«ÎÒµÄµçÄÔ¿í¶ÈµÈµÈ
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 EFI_STATUS L2_GRAPHICS_ChineseCharDraw12(UINT8 *pBuffer,
@@ -4112,27 +4112,27 @@ UINT16 GraphicsLayerIDCount = 0;
 
 /****************************************************************************
 *
-*  æè¿°:   é¼ æ ‡ç§»åŠ¨äº‹ä»¶ï¼Œå…¶å®žå¯ä»¥æ·»åŠ é¼ æ ‡ç§»åŠ¨åˆ°èœå•çš„ç‰¹æ•ˆï¼Œä¸è¿‡å½“å‰æš‚æ—¶æ²¡ç©ºæ·»åŠ 
+*  ÃèÊö:   Êó±êÒÆ¶¯ÊÂ¼þ£¬ÆäÊµ¿ÉÒÔÌí¼ÓÊó±êÒÆ¶¯µ½²Ëµ¥µÄÌØÐ§£¬²»¹ýµ±Ç°ÔÝÊ±Ã»¿ÕÌí¼Ó
 *
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º xxxxx
+*  ²ÎÊý2£º xxxxx
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 VOID L2_MOUSE_Move()
 {   
-    //èŽ·å–é¼ æ ‡å…‰æ ‡æ‰€åœ¨çš„å›¾å±‚ï¼Œçª—å£ã€å›¾å±‚åœ¨åˆå§‹åŒ–çš„æ—¶å€™æŠŠç¬¬4ä¸ªå­—èŠ‚ç”¨äºŽå­˜æ”¾å›¾å±‚ID    
+    //»ñÈ¡Êó±ê¹â±êËùÔÚµÄÍ¼²ã£¬´°¿Ú¡¢Í¼²ãÔÚ³õÊ¼»¯µÄÊ±ºò°ÑµÚ4¸ö×Ö½ÚÓÃÓÚ´æ·ÅÍ¼²ãID    
 	LayerID = pDeskDisplayBuffer[(iMouseY * ScreenWidth + iMouseX) * 4 + 3];
 	
     L2_DEBUG_Print1(0, ScreenHeight - 30 -  7 * 16, "%d: iMouseX: %d iMouseY: %d MouseClickFlag: %d Graphics Layer id: %d GraphicsLayerIDCount: %u", __LINE__, iMouseX, iMouseY, MouseClickFlag, LayerID, GraphicsLayerIDCount++);
 
         
-    //èŽ·å–ä¸åŒå›¾å±‚çš„ä¸åŒçŸ©å½¢åŒºåŸŸç‚¹å‡»å¯¹åº”çš„äº‹ä»¶
+    //»ñÈ¡²»Í¬Í¼²ãµÄ²»Í¬¾ØÐÎÇøÓòµã»÷¶ÔÓ¦µÄÊÂ¼þ
 	UINT16 event = GraphicsLayerEventHandle[LayerID].pClickEventGet();
 
-    //å¦‚æžœæ²¡æœ‰ç‚¹å‡»äº‹ä»¶ï¼Œåˆ™ä¸èŽ·å–ç‚¹å‡»äº‹ä»¶ã€‚
+    //Èç¹ûÃ»ÓÐµã»÷ÊÂ¼þ£¬Ôò²»»ñÈ¡µã»÷ÊÂ¼þ¡£
     if (MOUSE_EVENT_TYPE_NO_CLICKED == MouseClickFlag)
         return;
 
@@ -4153,13 +4153,13 @@ VOID L2_MOUSE_Move()
 
 /****************************************************************************
 *
-*  æè¿°:     æ˜¾ç¤ºæ—¥æœŸã€æ—¶é—´ã€æ˜ŸæœŸå‡ 
+*  ÃèÊö:     ÏÔÊ¾ÈÕÆÚ¡¢Ê±¼ä¡¢ÐÇÆÚ¼¸
 *
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º xxxxx
+*  ²ÎÊý2£º xxxxx
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 VOID EFIAPI L2_TIMER_Print (
@@ -4202,8 +4202,8 @@ VOID EFIAPI L2_TIMER_Print (
     L2_DEBUG_Print1(x, y, "%04d-%02d-%02d %02d:%02d:%02d ", 
                   EFITime.Year, EFITime.Month, EFITime.Day, EFITime.Hour, EFITime.Minute, EFITime.Second);
 
-	//è¿™è¾¹å®žé™…ä¸Šæœ‰å¯ä»¥ä¼˜åŒ–çš„ç©ºé—´ï¼Œå› ä¸ºå¹´æœˆæ—¥å’Œæ˜ŸæœŸå‡ æ¯å¤©åªéœ€è¦æ›´æ–°ä¸€æ¬¡å°±è¡Œ
-	//  æ˜Ÿ   4839    æœŸ   3858
+	//Õâ±ßÊµ¼ÊÉÏÓÐ¿ÉÒÔÓÅ»¯µÄ¿Õ¼ä£¬ÒòÎªÄêÔÂÈÕºÍÐÇÆÚ¼¸Ã¿ÌìÖ»ÐèÒª¸üÐÂÒ»´Î¾ÍÐÐ
+	//  ÐÇ   4839    ÆÚ   3858
     x += 21 * 8 + 3;
     //L2_GRAPHICS_ChineseCharDraw(pDeskBuffer, x, y,  (48 - 1) * 94 + 39 - 1, Color, ScreenWidth); 
     L2_GRAPHICS_ChineseCharDraw16(pDeskBuffer, x, y, 48, 39, Color, ScreenWidth);
@@ -4219,7 +4219,7 @@ VOID EFIAPI L2_TIMER_Print (
     UINT8 AreaCode = 0;
     UINT8 BitCode = 0;
     
-    // æ—¥ 4053 ä¸€ 5027 äºŒ 2294 ä¸‰ 4093 å›› 4336 äº” 4669 å…­ 3389
+    // ÈÕ 4053 Ò» 5027 ¶þ 2294 Èý 4093 ËÄ 4336 Îå 4669 Áù 3389
     switch (DayOfWeek)
     {
         case 0: AreaCode = 40; BitCode = 53; break;

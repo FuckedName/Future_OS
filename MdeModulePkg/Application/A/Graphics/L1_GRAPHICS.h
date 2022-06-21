@@ -2,13 +2,13 @@
 /*************************************************
     .
     File name:      	*.*
-    Authorï¼š	        	ä»»å¯çº¢
-    IDï¼š					00001
+    Author£º	        	ÈÎÆôºì
+    ID£º					00001
     Date:          		202107
-    Description:    	å›¾å½¢å¤„ç†çš„ä¸€äº›åŸºç¡€ç®—æ³•ï¼Œä¸ä¾èµ–å…¶ä»–æ¨¡å—
-    Others:         	æ— 
+    Description:    	Í¼ÐÎ´¦ÀíµÄÒ»Ð©»ù´¡Ëã·¨£¬²»ÒÀÀµÆäËûÄ£¿é
+    Others:         	ÎÞ
 
-    History:        	æ— 
+    History:        	ÎÞ
 	    1.  Date:
 		    Author: 
 		    ID:
@@ -37,7 +37,7 @@ typedef enum
     GRAPHICS_LAYER_SYSTEM_LOG_WINDOW, //5
     GRAPHICS_LAYER_MEMORY_INFORMATION_WINDOW, //6
     GRAPHICS_LAYER_MOUSE_RIGHT_CLICK_WINDOW, //7
-    GRAPHICS_LAYER_MOUSE, //æ°¸è¿œä¸ä¼šè§¦å‘è¿™ä¸ªäº‹ä»¶å±‚ï¼Œå› ä¸ºé¼ æ ‡ä¸Šè¾¹æ²¡æœ‰å…¶ä»–äº‹ä»¶ã€‚
+    GRAPHICS_LAYER_MOUSE, //ÓÀÔ¶²»»á´¥·¢Õâ¸öÊÂ¼þ²ã£¬ÒòÎªÊó±êÉÏ±ßÃ»ÓÐÆäËûÊÂ¼þ¡£
     GRAPHICS_LAYER_MAX
 }GRAPHICS_LAYER_ID;
 

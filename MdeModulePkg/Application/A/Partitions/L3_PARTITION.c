@@ -2,13 +2,13 @@
 /*************************************************
     .
     File name:      	*.*
-    Authorï¼š	        	ä»»å¯çº¢
-    IDï¼š					00001
+    Author£º	        	ÈÎÆôºì
+    ID£º					00001
     Date:          		202107
     Description:    	
-    Others:         	æ— 
+    Others:         	ÎÞ
 
-    History:        	æ— 
+    History:        	ÎÞ
 	    1.  Date:
 		    Author: 
 		    ID:
@@ -32,7 +32,7 @@
 
 int READ_FILE_FSM_Event = READ_PATITION_INFO_EVENT;
 
-//æ•´ä¸ªç³»ç»Ÿç¡¬ç›˜ã€Uç›˜ç­‰ç­‰å¤–å­˜çš„åˆ†åŒºæ€»æ•°ï¼Œæ³¨ï¼šä¸€ä¸ªç¡¬ç›˜æˆ–ä¸€ä¸ªUç›˜å¯ä»¥åˆ†æˆå¤šä¸ªåˆ†åŒº
+//Õû¸öÏµÍ³Ó²ÅÌ¡¢UÅÌµÈµÈÍâ´æµÄ·ÖÇø×ÜÊý£¬×¢£ºÒ»¸öÓ²ÅÌ»òÒ»¸öUÅÌ¿ÉÒÔ·Ö³É¶à¸ö·ÖÇø
 UINTN PartitionCount = 0;
 
 READ_FILE_STATE   NextState = READ_FILE_INIT_STATE;
@@ -47,17 +47,17 @@ UINT8 ReadFileNameLength = 0;
 
 UINT8 ReadFileName[20];
 
-//è®°å½•ä¸‹æ¬¡è¯»å–ç¬¬å¤šå°‘å·æ‰‡åŒº
+//¼ÇÂ¼ÏÂ´Î¶ÁÈ¡µÚ¶àÉÙºÅÉÈÇø
 UINT64 sector_count = 0;
 UINT32 ReadFilePartitionID = 0;
 
-//è®°å½•æ–‡ä»¶æ‰€åœ¨ç›®å½•æœ€å¤§ç›®å½•æ·±åº¦
+//¼ÇÂ¼ÎÄ¼þËùÔÚÄ¿Â¼×î´óÄ¿Â¼Éî¶È
 #define FILE_PATH_COUNT 10
 
-//è®°å½•æ–‡ä»¶æ‰€åœ¨ç›®å½•æœ€å¤§ç›®å½•é•¿åº¦
+//¼ÇÂ¼ÎÄ¼þËùÔÚÄ¿Â¼×î´óÄ¿Â¼³¤¶È
 #define FILE_PATH_LENGTH 20
 
-//è®°å½•æ–‡ä»¶åé•¿åº¦
+//¼ÇÂ¼ÎÄ¼þÃû³¤¶È
 #define FILE_NAME_LENGTH 50
 
 // all partitions analysis
@@ -67,15 +67,15 @@ BOOLEAN TestFlag = FALSE;
 
 typedef struct
 {
-	//æ–‡ä»¶è·¯å¾„å’Œæ–‡ä»¶åä¿¡æ¯
-	//å› ä¸ºå•ç‹¬ä»Žæ–‡ä»¶åæ¥çœ‹ï¼Œä¸èƒ½ç¡®è®¤æ˜¯å¦æ˜¯è·¯å¾„è¿˜æ˜¯æ–‡ä»¶å
+	//ÎÄ¼þÂ·¾¶ºÍÎÄ¼þÃûÐÅÏ¢
+	//ÒòÎªµ¥¶À´ÓÎÄ¼þÃûÀ´¿´£¬²»ÄÜÈ·ÈÏÊÇ·ñÊÇÂ·¾¶»¹ÊÇÎÄ¼þÃû
 	UINT8 FilePaths[FILE_PATH_COUNT][FILE_PATH_LENGTH]; 
-	UINT8 *pDestBuffer; //æ–‡ä»¶è¯»å–åŽå­˜æ”¾çš„ç¼“å†²åŒº
-	UINT16 CurrentPathID; //å½“å‰æ“ä½œçš„è·¯å¾„ç¼–å·
+	UINT8 *pDestBuffer; //ÎÄ¼þ¶ÁÈ¡ºó´æ·ÅµÄ»º³åÇø
+	UINT16 CurrentPathID; //µ±Ç°²Ù×÷µÄÂ·¾¶±àºÅ
 	UINT16 PathCount;
-    UINT16 CurrentPartitionID; //å½“å‰æ“ä½œåˆ†åŒºç¼–å· 
-	UINT8 *pItemBuffer; //å­˜æ”¾æ–‡ä»¶æ‰€åœ¨ç›®å½•ï¼Œç›®å½•å¯¹åº”çš„ç£ç›˜ç¼“å†²åŒº
-	UINT8 *pItemID; //å­˜æ”¾æ–‡ä»¶æ‰€åœ¨ç›®å½•çš„ç¼–å·
+    UINT16 CurrentPartitionID; //µ±Ç°²Ù×÷·ÖÇø±àºÅ 
+	UINT8 *pItemBuffer; //´æ·ÅÎÄ¼þËùÔÚÄ¿Â¼£¬Ä¿Â¼¶ÔÓ¦µÄ´ÅÅÌ»º³åÇø
+	UINT8 *pItemID; //´æ·ÅÎÄ¼þËùÔÚÄ¿Â¼µÄ±àºÅ
 
 }FILE_READ_DATA;
 
@@ -83,13 +83,13 @@ typedef struct
 
 /****************************************************************************
 *
-*  æè¿°:   xxxxx
+*  ÃèÊö:   xxxxx
 *
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º xxxxx
+*  ²ÎÊý2£º xxxxx
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 EFI_STATUS L2_STORE_PartitionAnalysisFSM()
@@ -121,13 +121,13 @@ EFI_STATUS L2_STORE_PartitionAnalysisFSM()
 
 /****************************************************************************
 *
-*  æè¿°:   xxxxx
+*  ÃèÊö:   xxxxx
 *
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º xxxxx
+*  ²ÎÊý2£º xxxxx
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 void L1_FILE_NameGet(UINT8 ItemID, UINT8 *FileName)
@@ -167,13 +167,13 @@ void L1_FILE_NameGet(UINT8 ItemID, UINT8 *FileName)
 
 /****************************************************************************
 *
-*  æè¿°:   xxxxx
+*  ÃèÊö:   xxxxx
 *
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º xxxxx
+*  ²ÎÊý2£º xxxxx
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 void L1_FILE_NameMerge(UINT8 ItemID, UINT8 *FileName)
@@ -219,13 +219,13 @@ void L1_FILE_NameMerge(UINT8 ItemID, UINT8 *FileName)
 
 /****************************************************************************
 *
-*  æè¿°:   xxxxx
+*  ÃèÊö:   xxxxx
 *
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º xxxxx
+*  ²ÎÊý2£º xxxxx
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 void L1_FILE_NameGetUseItem(FAT32_ROOTPATH_SHORT_FILE_ITEM pItem, UINT8 *FileName)
@@ -246,14 +246,14 @@ void L1_FILE_NameGetUseItem(FAT32_ROOTPATH_SHORT_FILE_ITEM pItem, UINT8 *FileNam
         i++;
     }
 				
-	//è¡¨ç¤ºæ²¡æœ‰åŽç¼€å
+	//±íÊ¾Ã»ÓÐºó×ºÃû
 	if (pItem.ExtensionName[0] == 0x20)
 	{
 		FileName[i] = '\0';
 		return;
 	}
 
-	//æœ‰åŽç¼€åï¼Œåˆ™éœ€è¦åŠ ç‚¹å·
+	//ÓÐºó×ºÃû£¬ÔòÐèÒª¼ÓµãºÅ
     FileName[i] = '.';
     i++;
 
@@ -278,13 +278,13 @@ void L1_FILE_NameGetUseItem(FAT32_ROOTPATH_SHORT_FILE_ITEM pItem, UINT8 *FileNam
 
 /****************************************************************************
 *
-*  æè¿°:   xxxxx
+*  ÃèÊö:   xxxxx
 *
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º xxxxx
+*  ²ÎÊý2£º xxxxx
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 void L1_FILE_NameGet2(UINT8 deviceID, UINT8 *FileName)
@@ -309,13 +309,13 @@ void L1_FILE_NameGet2(UINT8 deviceID, UINT8 *FileName)
 
 /****************************************************************************
 *
-*  æè¿°:   xxxxx
+*  ÃèÊö:   xxxxx
 *
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º xxxxx
+*  ²ÎÊý2£º xxxxx
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 EFI_STATUS L1_FILE_RootPathAnalysis(UINT8 *p)
@@ -348,7 +348,7 @@ EFI_STATUS L1_FILE_RootPathAnalysis(UINT8 *p)
             L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: FileName2: %a\n", __LINE__, FileName2);
             L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: ReadFileName: %a\n", __LINE__, ReadFileName);
 
-            //è¿™é‡Œå†™çš„ä¸å¤ªå¥½ï¼Œåº”è¯¥åªéœ€è¦ä¸¤ä¸ªå‚æ•°å°±è¡Œäº†ï¼Œä¸åº”è¯¥æœ‰Lengthè¿™ä¸ªå‚æ•°
+            //ÕâÀïÐ´µÄ²»Ì«ºÃ£¬Ó¦¸ÃÖ»ÐèÒªÁ½¸ö²ÎÊý¾ÍÐÐÁË£¬²»Ó¦¸ÃÓÐLengthÕâ¸ö²ÎÊý
             if (L1_STRING_Compare(FileName2, ReadFileName, ReadFileNameLength) == EFI_SUCCESS)
             {
                 L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d FileName:%2c%2c%2c%2c%2c%2c%2c%2c ExtensionName:%2c%2c%2c StartCluster:%02X%02X%02X%02X FileLength: %02X%02X%02X%02X Attribute: %02X    ",  __LINE__,
@@ -375,13 +375,13 @@ EFI_STATUS L1_FILE_RootPathAnalysis(UINT8 *p)
 
 /****************************************************************************
 *
-*  æè¿°:   xxxxx
+*  ÃèÊö:   xxxxx
 *
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º xxxxx
+*  ²ÎÊý2£º xxxxx
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 EFI_STATUS L2_STORE_RootPathAnalysisFSM()
@@ -412,14 +412,14 @@ EFI_STATUS L2_STORE_RootPathAnalysisFSM()
 
 /****************************************************************************
 *
-*  æè¿°: ä»Žåˆ†åŒºè¯»å–FATè¡¨å†…å®¹ï¼Œè¿™é‡Œéœ€è¦æ³¨æ„ï¼Œå¦‚æžœFATè¡¨ä¿¡æ¯æœ‰å˜åŒ–ï¼Œåˆ™éœ€è¦é‡æ–°è¯»å–
-         FATä¸ªä¸€èˆ¬æœ‰ä¸¤ä¸ªï¼Œæˆ‘ä»¬åªè¯»ä¸€ä¸ªï¼Œæ‰€ä»¥æˆ‘ä»¬åœ¨æ–‡ä»¶æ“ä½œæ–°å»ºï¼Œä¿®æ”¹çš„æ—¶å€™ï¼Œè‹¥æ¶‰åŠFATè¡¨å†™å…¥çš„æ—¶å€™ï¼Œä¹Ÿéœ€è¦æ³¨æ„å†™å…¥è¿™ä¸ªFAT
+*  ÃèÊö: ´Ó·ÖÇø¶ÁÈ¡FAT±íÄÚÈÝ£¬ÕâÀïÐèÒª×¢Òâ£¬Èç¹ûFAT±íÐÅÏ¢ÓÐ±ä»¯£¬ÔòÐèÒªÖØÐÂ¶ÁÈ¡
+         FAT¸öÒ»°ãÓÐÁ½¸ö£¬ÎÒÃÇÖ»¶ÁÒ»¸ö£¬ËùÒÔÎÒÃÇÔÚÎÄ¼þ²Ù×÷ÐÂ½¨£¬ÐÞ¸ÄµÄÊ±ºò£¬ÈôÉæ¼°FAT±íÐ´ÈëµÄÊ±ºò£¬Ò²ÐèÒª×¢ÒâÐ´ÈëÕâ¸öFAT
 *
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º xxxxx
+*  ²ÎÊý2£º xxxxx
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 EFI_STATUS L2_STORE_FatTableRead(DEVICE_PARAMETER *pDevice, FILE_READ_DATA FileReadData)
@@ -438,14 +438,14 @@ EFI_STATUS L2_STORE_FatTableRead(DEVICE_PARAMETER *pDevice, FILE_READ_DATA FileR
 
 /****************************************************************************
 *
-*  æè¿°:     æŠŠFATè¡¨æŒ‡å®šBLOCKæ•°å€¼è®¾ç½®ä¸º0
+*  ÃèÊö:     °ÑFAT±íÖ¸¶¨BLOCKÊýÖµÉèÖÃÎª0
 *
 *
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º xxxxx
+*  ²ÎÊý2£º xxxxx
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 EFI_STATUS L2_STORE_FatTableSetZero(DEVICE_PARAMETER *pDevice, FILE_READ_DATA FileReadData, UINT64 BlockNumber)
@@ -466,13 +466,13 @@ EFI_STATUS L2_STORE_FatTableSetZero(DEVICE_PARAMETER *pDevice, FILE_READ_DATA Fi
 
 /****************************************************************************
 *
-*  æè¿°:   xxxxx
+*  ÃèÊö:   xxxxx
 *
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º xxxxx
+*  ²ÎÊý2£º xxxxx
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 EFI_STATUS L2_STORE_GetFatTableFSM()
@@ -529,13 +529,13 @@ EFI_STATUS L2_STORE_GetFatTableFSM()
 
 /****************************************************************************
 *
-*  æè¿°:   xxxxx
+*  ÃèÊö:   xxxxx
 *
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º xxxxx
+*  ²ÎÊý2£º xxxxx
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 UINT32 L2_FILE_GetNextBlockNumber()
@@ -566,13 +566,13 @@ UINT32 L2_FILE_GetNextBlockNumber()
 
 /****************************************************************************
 *
-*  æè¿°:   xxxxx
+*  ÃèÊö:   xxxxx
 *
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º xxxxx
+*  ²ÎÊý2£º xxxxx
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 EFI_STATUS L2_STORE_ReadFileFSM()
@@ -588,7 +588,7 @@ EFI_STATUS L2_STORE_ReadFileFSM()
 
     UINT8 AddOneFlag = (FileLength % (512 * 8)) == 0 ? 0 : 1;
 
-    //æŠŠæ•´ä¸ªæ–‡ä»¶ä»Žå¤–å­˜è¯»å–åˆ°å†…å­˜
+    //°ÑÕû¸öÎÄ¼þ´ÓÍâ´æ¶ÁÈ¡µ½ÄÚ´æ
     for (UINT16 k = 0; k < FileLength / (512 * 8) + AddOneFlag; k++)
     {
         Status = L2_STORE_Read(i, sector_count, 8, BufferBlock); 
@@ -638,8 +638,8 @@ EFI_STATUS L2_STORE_ReadFileFSM()
 
 
 
-//å¯ä¼˜åŒ–ï¼ŒåŒä¸€ä¸ªåˆ†åŒºï¼Œç¬¬ä¸€æ¬¡è¯»å…¥åŽï¼Œä¸éœ€è¦å†åˆå§‹åŒ–ä¸€é
-//è¿™é‡Œéœ€è¦æ³¨æ„ï¼ŒFATè¡¨æ ¼æ˜¯å˜åŒ–çš„ï¼Œå› ä¸ºå¦‚æžœæ¶‰åŠæ–‡ä»¶å†™å…¥ï¼Œåˆ é™¤ï¼Œæ–°å»ºæ–‡ä»¶ï¼Œè¿™äº›åœºæ™¯FATè¡¨ä¼šå˜åŒ–
+//¿ÉÓÅ»¯£¬Í¬Ò»¸ö·ÖÇø£¬µÚÒ»´Î¶ÁÈëºó£¬²»ÐèÒªÔÙ³õÊ¼»¯Ò»±é
+//ÕâÀïÐèÒª×¢Òâ£¬FAT±í¸ñÊÇ±ä»¯µÄ£¬ÒòÎªÈç¹ûÉæ¼°ÎÄ¼þÐ´Èë£¬É¾³ý£¬ÐÂ½¨ÎÄ¼þ£¬ÕâÐ©³¡¾°FAT±í»á±ä»¯
 STATE_TRANSFORM FileReadTransitionTable[] =
 {
     { READ_FILE_INIT_STATE,                READ_PATITION_INFO_EVENT,   READ_FILE_GET_PARTITION_INFO_STATE, L2_STORE_PartitionAnalysisFSM},
@@ -652,11 +652,11 @@ STATE_TRANSFORM FileReadTransitionTable[] =
 
 
 
-//å‡†å¤‡æŠŠæ–‡ä»¶è¯»å–åŠŸèƒ½é‡æž„ï¼š
-//1ã€åŽŸæ¥çš„ACTIONå‡½æ•°æ²¡æœ‰å…¥å‚ï¼Œå‡†å¤‡æ–°å†™ä¸€ä¸ªå¸¦å…¥å‚ï¼Œå‡å°‘å…¨å±€å˜é‡ï¼Œä¾¿äºŽåŽæœŸç»´æŠ¤ï¼›
-//2ã€åŽŸæ¥æ–‡ä»¶è¯»å–ä¸æ”¯æŒå¸¦æ–‡ä»¶è·¯å¾„ï¼Œæ–°çš„ç‰ˆæœ¬å‡†å¤‡å¸¦æ–‡ä»¶è·¯å¾„ï¼›
-//3ã€ä¸ºäº†æ›´å¥½çš„å¯¹å›¾å½¢åŒ–ç•Œé¢æ–‡ä»¶æ–°å¢žã€ä¿®æ”¹ã€åˆ é™¤ã€æŸ¥è¯¢çš„æ“ä½œï¼›
-//4ã€æ›´å¥½çš„æ”¯æŒç‹¬ç«‹ç›®å½•ã€æ–‡ä»¶å•ç‹¬è¯»å–
+//×¼±¸°ÑÎÄ¼þ¶ÁÈ¡¹¦ÄÜÖØ¹¹£º
+//1¡¢Ô­À´µÄACTIONº¯ÊýÃ»ÓÐÈë²Î£¬×¼±¸ÐÂÐ´Ò»¸ö´øÈë²Î£¬¼õÉÙÈ«¾Ö±äÁ¿£¬±ãÓÚºóÆÚÎ¬»¤£»
+//2¡¢Ô­À´ÎÄ¼þ¶ÁÈ¡²»Ö§³Ö´øÎÄ¼þÂ·¾¶£¬ÐÂµÄ°æ±¾×¼±¸´øÎÄ¼þÂ·¾¶£»
+//3¡¢ÎªÁË¸üºÃµÄ¶ÔÍ¼ÐÎ»¯½çÃæÎÄ¼þÐÂÔö¡¢ÐÞ¸Ä¡¢É¾³ý¡¢²éÑ¯µÄ²Ù×÷£»
+//4¡¢¸üºÃµÄÖ§³Ö¶ÀÁ¢Ä¿Â¼¡¢ÎÄ¼þµ¥¶À¶ÁÈ¡
 STATE_TRANSFORM_NEW FileReadNewTransitionTable[] =
 {
     { READ_FILE_INIT_STATE,                READ_PATITION_INFO_EVENT,   READ_FILE_GET_PARTITION_INFO_STATE, L2_STORE_PartitionAnalysisFSM},
@@ -670,21 +670,21 @@ STATE_TRANSFORM_NEW FileReadNewTransitionTable[] =
 
 /****************************************************************************
 *
-*  æè¿°:   ä»”ç»†çœ‹äº†ä¸‹çŠ¶æ€æœºä»£ç ï¼Œå‘çŽ°ä»£ç æœ‰é—®é¢˜ï¼ŒCurrentStateè¿™ä¸ªå˜é‡æ²¡æœ‰ä½¿ç”¨ï¼Œä¸è¿‡åŽŸæ¥åªéœ€è¦çŠ¶æ€ä¾æ¬¡ä»Žå°åˆ°å¤§è§¦å‘å°±å¯ä»¥
-*        æ‰€ä»¥è¿™å—ä»£ç æ˜¯æœ‰ç¼ºé™·çš„
+*  ÃèÊö:   ×ÐÏ¸¿´ÁËÏÂ×´Ì¬»ú´úÂë£¬·¢ÏÖ´úÂëÓÐÎÊÌâ£¬CurrentStateÕâ¸ö±äÁ¿Ã»ÓÐÊ¹ÓÃ£¬²»¹ýÔ­À´Ö»ÐèÒª×´Ì¬ÒÀ´Î´ÓÐ¡µ½´ó´¥·¢¾Í¿ÉÒÔ
+*        ËùÒÔÕâ¿é´úÂëÊÇÓÐÈ±ÏÝµÄ
 *
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º xxxxx
+*  ²ÎÊý2£º xxxxx
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 int L2_STORE_FileRead(EVENT event)
 {
     EFI_STATUS Status;
 
-    //å¦‚æžœè¯»å–çš„æ‰‡åŒºæ•°é‡ï¼Œè¶…è¿‡æ–‡ä»¶é•¿åº¦é™¤ä»¥æ¯ä¸ªæ‰‡åŒºæ‰€å ç”¨çš„å­—èŠ‚ï¼Œåˆ™åœæ­¢è¯»å–
+    //Èç¹û¶ÁÈ¡µÄÉÈÇøÊýÁ¿£¬³¬¹ýÎÄ¼þ³¤¶È³ýÒÔÃ¿¸öÉÈÇøËùÕ¼ÓÃµÄ×Ö½Ú£¬ÔòÍ£Ö¹¶ÁÈ¡
     if (FileReadCount > FileLength / (512 * 8))
     {
         L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: Status:%X \n", __LINE__, Status);
@@ -719,13 +719,13 @@ int L2_STORE_FileRead(EVENT event)
 
 /****************************************************************************
 *
-*  æè¿°:   xxxxx
+*  ÃèÊö:   xxxxx
 *
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º xxxxx
+*  ²ÎÊý2£º xxxxx
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 EFI_STATUS L3_APPLICATION_ReadFile(UINT8 *FileName, UINT8 NameLength, UINT8 *pBuffer)
@@ -748,7 +748,7 @@ EFI_STATUS L3_APPLICATION_ReadFile(UINT8 *FileName, UINT8 NameLength, UINT8 *pBu
     NextState = READ_FILE_INIT_STATE;
     READ_FILE_FSM_Event = 0;
 
-    //å½“å‰è¯»å–ç³»ç»Ÿæ–‡ä»¶ï¼Œéƒ½æ˜¯åœ¨"OS"è¿™ä¸ªåˆ†åŒº
+    //µ±Ç°¶ÁÈ¡ÏµÍ³ÎÄ¼þ£¬¶¼ÊÇÔÚ"OS"Õâ¸ö·ÖÇø
     for (int i = 0; i < PartitionCount; i++)
     {
         if (device[i].PartitionName[0] == EFI_FILE_STORE_PATH_PARTITION_NAME[0] && device[i].PartitionName[1] == EFI_FILE_STORE_PATH_PARTITION_NAME[1])
@@ -759,7 +759,7 @@ EFI_STATUS L3_APPLICATION_ReadFile(UINT8 *FileName, UINT8 NameLength, UINT8 *pBu
         }
     }
 
-    //é»˜è®¤ç¬¬ä¸€ä¸ªåˆ†åŒºæ˜¯FAT32
+    //Ä¬ÈÏµÚÒ»¸ö·ÖÇøÊÇFAT32
     //ReadFilePartitionID = 1;
 
     for (int i = 0; i < 5; i++)
@@ -767,10 +767,10 @@ EFI_STATUS L3_APPLICATION_ReadFile(UINT8 *FileName, UINT8 NameLength, UINT8 *pBu
         L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: i: %d \n", __LINE__, i);
         //DEBUG ((EFI_D_INFO, "%d HandleEnterPressed FSM_Event: %d\n", __LINE__, READ_FILE_FSM_Event));
 
-        //è¿™é‡Œå°±æ˜¯æŒ‰ç…§è¯»å–æ–‡ä»¶çš„çŠ¶æ€æœºï¼Œä¸€ä¸ªä¸€ä¸ªäº‹ä»¶çš„è§¦å‘
+        //ÕâÀï¾ÍÊÇ°´ÕÕ¶ÁÈ¡ÎÄ¼þµÄ×´Ì¬»ú£¬Ò»¸öÒ»¸öÊÂ¼þµÄ´¥·¢
         L2_STORE_FileRead(READ_FILE_FSM_Event++);
 
-        //å‰å‡ ä¸ªäº‹ä»¶åªéœ€è¦è§¦å‘ä¸€æ¬¡ï¼Œä½†æ˜¯æ–‡ä»¶è¯»å–çš„æ—¶å€™ï¼Œéœ€è¦è§¦å‘å¾ˆå¤šæ¬¡
+        //Ç°¼¸¸öÊÂ¼þÖ»ÐèÒª´¥·¢Ò»´Î£¬µ«ÊÇÎÄ¼þ¶ÁÈ¡µÄÊ±ºò£¬ÐèÒª´¥·¢ºÜ¶à´Î
         if (READ_FILE_EVENT <= READ_FILE_FSM_Event)
             READ_FILE_FSM_Event = READ_FILE_EVENT;
     }
@@ -782,14 +782,14 @@ EFI_STATUS L3_APPLICATION_ReadFile(UINT8 *FileName, UINT8 NameLength, UINT8 *pBu
 
 /****************************************************************************
 *
-*  æè¿°:    è§£æžæ–‡ä»¶æ‰€åœ¨çš„è·¯å¾„åˆ—è¡¨ï¼Œä»¥/åˆ†å‰²ï¼ŒæŠŠæ ¹ç›®å½•å†™åˆ°FilePaths[0]ï¼Œä¸‹ä¸€çº§ç›®å½•å†™åˆ°FilePaths[1]ï¼Œä¾æ¬¡ç±»æŽ¨
-*         ç¤ºä¾‹ï¼š"/OS/resource/zhufeng.bmp"ï¼ŒæŠŠOSå†™åˆ°FilePaths[0]ï¼Œresourceå†™åˆ°FilePaths[1]
+*  ÃèÊö:    ½âÎöÎÄ¼þËùÔÚµÄÂ·¾¶ÁÐ±í£¬ÒÔ/·Ö¸î£¬°Ñ¸ùÄ¿Â¼Ð´µ½FilePaths[0]£¬ÏÂÒ»¼¶Ä¿Â¼Ð´µ½FilePaths[1]£¬ÒÀ´ÎÀàÍÆ
+*         Ê¾Àý£º"/OS/resource/zhufeng.bmp"£¬°ÑOSÐ´µ½FilePaths[0]£¬resourceÐ´µ½FilePaths[1]
 *
-*  å‚æ•°1ï¼š ç¤ºä¾‹ï¼š"/OS/resource/zhufeng.bmp"ï¼Œå…¶ä¸­/OSæ˜¯æŒ‡ç³»ç»Ÿç›®å½•
-*  å‚æ•°2ï¼š pBuffer
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º Ê¾Àý£º"/OS/resource/zhufeng.bmp"£¬ÆäÖÐ/OSÊÇÖ¸ÏµÍ³Ä¿Â¼
+*  ²ÎÊý2£º pBuffer
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 UINT16 L3_APPLICATION_GetFilePaths(UINT8 *pPath, FILE_READ_DATA *FileReadData)
@@ -798,7 +798,7 @@ UINT16 L3_APPLICATION_GetFilePaths(UINT8 *pPath, FILE_READ_DATA *FileReadData)
     UINT16 j = 0;
     UINT16 PathCount = 0;
 
-	//å¦‚æžœä¸æ˜¯ä»¥/å¼€å¤´çš„è·¯å¾„ï¼Œæˆ‘ä»¬è®¤ä¸ºä¸åˆæ³•
+	//Èç¹û²»ÊÇÒÔ/¿ªÍ·µÄÂ·¾¶£¬ÎÒÃÇÈÏÎª²»ºÏ·¨
     if ('/' != pPath[0])
     {
     	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d File name does not start with '/'. \n", __LINE__);
@@ -808,7 +808,7 @@ UINT16 L3_APPLICATION_GetFilePaths(UINT8 *pPath, FILE_READ_DATA *FileReadData)
 
     for (i = 1; i <= AsciiStrLen(pPath); i++)
     {
-    	//ä»Žç¬¬2ä¸ªå­—ç¬¦å¼€å§‹å¾€åŽæ‰¾ï¼Œå¦‚æžœæ‰¾åˆ°/ï¼Œåˆ™è¡¨ç¤ºå·²ç»æ‰¾åˆ°ä¸€ä¸ªè·¯å¾„
+    	//´ÓµÚ2¸ö×Ö·û¿ªÊ¼ÍùºóÕÒ£¬Èç¹ûÕÒµ½/£¬Ôò±íÊ¾ÒÑ¾­ÕÒµ½Ò»¸öÂ·¾¶
         if('/' == pPath[i] || '\0' == pPath[i])
         {
             FileReadData->FilePaths[PathCount][j] = '\0';
@@ -823,7 +823,7 @@ UINT16 L3_APPLICATION_GetFilePaths(UINT8 *pPath, FILE_READ_DATA *FileReadData)
         }
     }
 
-	//ç”¨äºŽè®°å½•ä¸€å…±æ‰¾åˆ°è·¯å¾„ä¸ªæ•°
+	//ÓÃÓÚ¼ÇÂ¼Ò»¹²ÕÒµ½Â·¾¶¸öÊý
 	FileReadData->PathCount = PathCount;
 }
 
@@ -831,13 +831,13 @@ UINT16 L3_APPLICATION_GetFilePaths(UINT8 *pPath, FILE_READ_DATA *FileReadData)
 
 /****************************************************************************
 *
-*  æè¿°:    è§£æžæ–‡ä»¶åï¼Œæ˜¯ä»Žæœ€åŽä¸€ä¸ªå­—ç¬¦è§£æž
+*  ÃèÊö:    ½âÎöÎÄ¼þÃû£¬ÊÇ´Ó×îºóÒ»¸ö×Ö·û½âÎö
 *
-*  å‚æ•°1ï¼š ç¤ºä¾‹ï¼š"/OS/resource/zhufeng.bmp"ï¼Œå…¶ä¸­/OSæ˜¯æŒ‡ç³»ç»Ÿç›®å½•
-*  å‚æ•°2ï¼š pBuffer
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º Ê¾Àý£º"/OS/resource/zhufeng.bmp"£¬ÆäÖÐ/OSÊÇÖ¸ÏµÍ³Ä¿Â¼
+*  ²ÎÊý2£º pBuffer
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 UINT16 L3_APPLICATION_GetFileName(UINT8 *pPath, UINT8 *FileName)
@@ -847,10 +847,10 @@ UINT16 L3_APPLICATION_GetFileName(UINT8 *pPath, UINT8 *FileName)
     
     for (UINT16 i = Length - 1; i >= 0; i--)
     {
-    	//ä»Žæœ€åŽä¸€ä½ï¼Œå¾€å‰æ‰¾ï¼Œå¦‚æžœæ‰¾åˆ°/è¡¨ç¤ºéƒ½æ˜¯æ–‡ä»¶åï¼Œæ–‡ä»¶åä¸åˆæ³•çš„åœºæ™¯æš‚æ—¶æ²¡æœ‰åˆ¤æ–­ï¼Œæ¯”å¦‚æ˜¯å¦æœ‰ï¼šå­—ç¬¦ç­‰ç­‰
+    	//´Ó×îºóÒ»Î»£¬ÍùÇ°ÕÒ£¬Èç¹ûÕÒµ½/±íÊ¾¶¼ÊÇÎÄ¼þÃû£¬ÎÄ¼þÃû²»ºÏ·¨µÄ³¡¾°ÔÝÊ±Ã»ÓÐÅÐ¶Ï£¬±ÈÈçÊÇ·ñÓÐ£º×Ö·ûµÈµÈ
         if ('/' == pPath[i])
         {
-            //å› ä¸ºå–æ–‡ä»¶åæ˜¯ä»Žæœ€åŽä¸€ä½å¾€å‰æ”¾æ–‡ä»¶åï¼Œæ‰€ä»¥éœ€è¦å€’åºä¸‹
+            //ÒòÎªÈ¡ÎÄ¼þÃûÊÇ´Ó×îºóÒ»Î»ÍùÇ°·ÅÎÄ¼þÃû£¬ËùÒÔÐèÒªµ¹ÐòÏÂ
             L1_STRING_Reverse(FileName);
 			
             L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d File name: %a\n", __LINE__, FileName);
@@ -878,13 +878,13 @@ EFI_STATUS L2_STORE_PartitionMBRAnalysis(UINT8 *Buffer, DEVICE_PARAMETER *pDevic
 
 /****************************************************************************
 *
-*  æè¿°:   xxxxx
+*  ÃèÊö:   xxxxx
 *
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º xxxxx
+*  ²ÎÊý2£º xxxxx
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 UINT32 L2_FILE_GetNextBlockNumber2(UINT16 PartitionID, UINT64 PreviousBlockNumber)
@@ -912,25 +912,25 @@ UINT32 L2_FILE_GetNextBlockNumber2(UINT16 PartitionID, UINT64 PreviousBlockNumbe
 
 /****************************************************************************
 *
-*  æè¿°:    é€šè¿‡æ–‡ä»¶æ‰€åœ¨çš„å®Œæ•´è·¯å¾„ï¼Œè¯»å–æ–‡ä»¶
+*  ÃèÊö:    Í¨¹ýÎÄ¼þËùÔÚµÄÍêÕûÂ·¾¶£¬¶ÁÈ¡ÎÄ¼þ
 *
-*  å‚æ•°1ï¼š ç¤ºä¾‹ï¼š"/OS/resource/zhufeng.bmp"ï¼Œå…¶ä¸­/OSæ˜¯æŒ‡ç³»ç»Ÿç›®å½•
-*  å‚æ•°2ï¼š pBuffer
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º Ê¾Àý£º"/OS/resource/zhufeng.bmp"£¬ÆäÖÐ/OSÊÇÖ¸ÏµÍ³Ä¿Â¼
+*  ²ÎÊý2£º pBuffer
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 UINT16 L3_APPLICATION_PartitionQueryByPath(DEVICE_PARAMETER *pDevice, FILE_READ_DATA *pFileReadData)
 {
 	UINT16 j = 0;
 	
-	//æ‰¾åˆ°å¯¹åº”çš„åˆ†åŒº
+	//ÕÒµ½¶ÔÓ¦µÄ·ÖÇø
     for (UINT16 i = 0; i < PartitionCount; i++)
     {
         L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: FileInPartitionID: %a \n", __LINE__, pDevice[i].PartitionName);
             
-        //åˆ†åŒºéƒ½åœ¨FilePathsç¬¬ä¸€ä¸ªå­—ç¬¦ä¸²
+        //·ÖÇø¶¼ÔÚFilePathsµÚÒ»¸ö×Ö·û´®
         for (j = 0; L1_STRING_IsValidNameChar(pDevice[i].PartitionName[j]) && L1_STRING_IsValidNameChar(pFileReadData->FilePaths[0][j]); j++)
         {
             if (pDevice[i].PartitionName[j] != pFileReadData->FilePaths[0][j])            
@@ -939,7 +939,7 @@ UINT16 L3_APPLICATION_PartitionQueryByPath(DEVICE_PARAMETER *pDevice, FILE_READ_
             }
         }
 
-        //è¿™é‡Œéœ€è¦æ³¨æ„ï¼Œåˆ†åŒºåç§°å¦‚æžœä¸ºç©ºï¼Œå€¼æ˜¯0x20
+        //ÕâÀïÐèÒª×¢Òâ£¬·ÖÇøÃû³ÆÈç¹ûÎª¿Õ£¬ÖµÊÇ0x20
         if (pDevice[i].PartitionName[j] == 0x20 && pFileReadData->FilePaths[0][j] == 0)
         {
 			pFileReadData->CurrentPartitionID = i;
@@ -957,7 +957,7 @@ UINT16 L3_APPLICATION_FileDataGetByItemID(FAT32_ROOTPATH_SHORT_FILE_ITEM *pItems
 {
     UINT16 FileInPartitionID = pFileReadData->CurrentPartitionID;
 	
-	//èŽ·å–ä¸‹ä¸€æ¬¡è®¿é—®çš„æ‰‡åŒºç¼–å·
+	//»ñÈ¡ÏÂÒ»´Î·ÃÎÊµÄÉÈÇø±àºÅ
 	UINT64 BlockNumber = (UINT64)pItemsInPath[j].StartClusterLow2B[0] | (UINT64)pItemsInPath[j].StartClusterLow2B[1] << 8 | (UINT64)pItemsInPath[j].StartClusterHigh2B[0] << 16 | (UINT64)pItemsInPath[j].StartClusterHigh2B[1] << 24;
 	
 	*pNextReadSectorNumber = device[FileInPartitionID].stMBRSwitched.ReservedSelector + device[FileInPartitionID].stMBRSwitched.SectorsPerFat * device[FileInPartitionID].stMBRSwitched.FATCount + device[FileInPartitionID].stMBRSwitched.BootPathStartCluster - 2 + (BlockNumber - 2) * 8;			
@@ -966,7 +966,7 @@ UINT16 L3_APPLICATION_FileDataGetByItemID(FAT32_ROOTPATH_SHORT_FILE_ITEM *pItems
 
 	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: File In Items: %d NextReadSectorNumber: %d FileLength: %d\n", __LINE__, j, *pNextReadSectorNumber, FileLength);
 
-	//æ–‡ä»¶
+	//ÎÄ¼þ
 	if (pItemsInPath[j].Attribute[0] == 0x20)
 	{
 		UINT64 SectorCount = FileLength / (512 * 8);
@@ -976,7 +976,7 @@ UINT16 L3_APPLICATION_FileDataGetByItemID(FAT32_ROOTPATH_SHORT_FILE_ITEM *pItems
 
 		for (UINT64 ReadTimes = 0; ReadTimes < FileLength / (512 * 8); ReadTimes++)
 		{
-			//è¿™æ ·è¯»å–æ–‡ä»¶ä¼šæœ‰é—®é¢˜ï¼Œå¦‚æžœæ–‡ä»¶æ˜¯è¿žç»­å­˜æ”¾ï¼Œåˆ™æ²¡æœ‰é—®é¢˜ï¼Œå¦‚æžœæ˜¯éžè¿žç»­å­˜æ”¾ï¼Œåˆ™ä¸è¡Œ
+			//ÕâÑù¶ÁÈ¡ÎÄ¼þ»áÓÐÎÊÌâ£¬Èç¹ûÎÄ¼þÊÇÁ¬Ðø´æ·Å£¬ÔòÃ»ÓÐÎÊÌâ£¬Èç¹ûÊÇ·ÇÁ¬Ðø´æ·Å£¬Ôò²»ÐÐ
 			EFI_STATUS Status = L2_STORE_Read(FileInPartitionID, *pNextReadSectorNumber, 8, BufferBlock); 
 			if (EFI_SUCCESS != Status)
 			{
@@ -1005,10 +1005,10 @@ UINT16 L3_APPLICATION_ItemFindByName(FAT32_ROOTPATH_SHORT_FILE_ITEM *pItemsInPat
 	UINT16 CurrentPathID  = pFileReadData->CurrentPathID;
 	UINT64 NextReadSectorNumber = 0;
 	
-	//è§£æžç›®å½•ä¸‹çš„é¡¹ç›®ï¼Œå› ä¸ºæ¯é¡¹32ä¸ªå­—èŠ‚é•¿åº¦ï¼Œæˆ‘ä»¬è¯»å–çš„512å­—èŠ‚ï¼Œæ‰€ä»¥512/32=16
+	//½âÎöÄ¿Â¼ÏÂµÄÏîÄ¿£¬ÒòÎªÃ¿Ïî32¸ö×Ö½Ú³¤¶È£¬ÎÒÃÇ¶ÁÈ¡µÄ512×Ö½Ú£¬ËùÒÔ512/32=16
 	for (UINT16 j = 0; j < DISK_BUFFER_SIZE * 2 / 32; j++)
 	{
-		//å¤–å±‚å¾ªçŽ¯ä¸€å…±æ˜¯32é¡¹ï¼Œä½†å®žé™…ç›®å½•ä¸‹å¯èƒ½æ²¡æœ‰å­˜æ”¾32ä¸ªé¡¹ï¼Œæ¯”å¦‚å°‘äºŽ32é¡¹
+		//Íâ²ãÑ­»·Ò»¹²ÊÇ32Ïî£¬µ«Êµ¼ÊÄ¿Â¼ÏÂ¿ÉÄÜÃ»ÓÐ´æ·Å32¸öÏî£¬±ÈÈçÉÙÓÚ32Ïî
 		if (pItemsInPath[j].FileName[0] == 0 )
 		{
 			L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: pItemsInPath[j].FileName[0] == 0 || pItemsInPath[j].FileName[0] == 0xE5\n", __LINE__);
@@ -1016,12 +1016,12 @@ UINT16 L3_APPLICATION_ItemFindByName(FAT32_ROOTPATH_SHORT_FILE_ITEM *pItemsInPat
 			break;
 		}
 
-		//è¦ä¹ˆæ˜¯æ–‡ä»¶ï¼Œè¦ä¹ˆæ˜¯æ–‡ä»¶å¤¹
+		//ÒªÃ´ÊÇÎÄ¼þ£¬ÒªÃ´ÊÇÎÄ¼þ¼Ð
 		if (pItemsInPath[j].FileName[0] != 0xE5 && (pItemsInPath[j].Attribute[0] == 0x20 || pItemsInPath[j].Attribute[0] == 0x10))
 		{
 			UINT16 k;
-			//8ä½æ–‡ä»¶å+.+3ä½åŽç¼€å=12ä½ï¼ŒåŠ '\0'å…±13ä½
-			//å½“å‰æš‚ä¸å¤„ç†é•¿æ–‡ä»¶åï¼Œé•¿ç›®å½•å
+			//8Î»ÎÄ¼þÃû+.+3Î»ºó×ºÃû=12Î»£¬¼Ó'\0'¹²13Î»
+			//µ±Ç°ÔÝ²»´¦Àí³¤ÎÄ¼þÃû£¬³¤Ä¿Â¼Ãû
 			UINT8 FileName[14] = {0};
 			L1_FILE_NameGetUseItem(pItemsInPath[j], FileName);
 			//L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: FileName: %a\n", __LINE__, FileName);
@@ -1035,7 +1035,7 @@ UINT16 L3_APPLICATION_ItemFindByName(FAT32_ROOTPATH_SHORT_FILE_ITEM *pItemsInPat
 											pItemsInPath[j].Attribute[0],
 											FileName);
 
-			//æŸ¥æ‰¾CurrentPathIDå¯¹åº”çš„è·¯å¾„
+			//²éÕÒCurrentPathID¶ÔÓ¦µÄÂ·¾¶
 			for (k = 0; L1_STRING_IsValidNameChar(FileName[k]) && L1_STRING_IsValidNameChar(pFileReadData->FilePaths[CurrentPathID][k]); k++)
 			{
 				if (FileName[k] != pFileReadData->FilePaths[CurrentPathID][k])			
@@ -1044,7 +1044,7 @@ UINT16 L3_APPLICATION_ItemFindByName(FAT32_ROOTPATH_SHORT_FILE_ITEM *pItemsInPat
 				}
 			}
 
-			//è¿™é‡Œéœ€è¦æ³¨æ„ï¼Œåˆ†åŒºåç§°å¦‚æžœä¸ºç©ºï¼Œå€¼æ˜¯0x20
+			//ÕâÀïÐèÒª×¢Òâ£¬·ÖÇøÃû³ÆÈç¹ûÎª¿Õ£¬ÖµÊÇ0x20
 			if (FileName[k] == 0 && pFileReadData->FilePaths[CurrentPathID][k] == 0)
 			{					
 				pFileReadData->pItemBuffer = pItemsInPath;
@@ -1076,15 +1076,15 @@ EFI_STATUS L3_APPLICATION_FileReadWithPath(UINT8 *pPath, UINT8 *pDestBuffer)
     UINT16 Length = AsciiStrLen(pPath);
     L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d string length: %d\n", __LINE__, Length);
         
-	//åˆ†æžæ–‡ä»¶è·¯å¾„ï¼ŒæŠŠè·¯å¾„å’Œæ–‡ä»¶åæŒ‰ç…§/æ‹†åˆ†ï¼Œæ–¹ä¾¿åŽç»­æ“ä½œ
+	//·ÖÎöÎÄ¼þÂ·¾¶£¬°ÑÂ·¾¶ºÍÎÄ¼þÃû°´ÕÕ/²ð·Ö£¬·½±ãºóÐø²Ù×÷
     L3_APPLICATION_GetFilePaths(pPath, &FileReadData);
 	
 	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: FileReadData.FilePaths[0]: %a \n", __LINE__, FileReadData.FilePaths[0]);
 
-	//æ‰¾åˆ°åˆ†åŒºå¯¹åº”çš„è®¾å¤‡ç´¢å¼•ï¼ŒåŽç»­å¯¹æ–‡ä»¶è¿›è¡Œè¯»å†™çš„æ—¶å€™éœ€è¦ã€‚
+	//ÕÒµ½·ÖÇø¶ÔÓ¦µÄÉè±¸Ë÷Òý£¬ºóÐø¶ÔÎÄ¼þ½øÐÐ¶ÁÐ´µÄÊ±ºòÐèÒª¡£
 	FileInPartitionID = L3_APPLICATION_PartitionQueryByPath(&device, &FileReadData);
         	
-	//è¯»å–ç¬¬ä¸€ä¸ªæ‰‡åŒºï¼Œåˆ†æžåˆ†åŒºå‚æ•°ï¼Œæ¯”å¦‚ï¼šFATè¡¨å¤§å°ï¼ŒFATè¡¨ä¸ªæ•°ï¼Œä¿ç•™æ‰‡åŒºæ•°
+	//¶ÁÈ¡µÚÒ»¸öÉÈÇø£¬·ÖÎö·ÖÇø²ÎÊý£¬±ÈÈç£ºFAT±í´óÐ¡£¬FAT±í¸öÊý£¬±£ÁôÉÈÇøÊý
 	EFI_STATUS Status = L2_STORE_Read(FileInPartitionID, 0, 1, Buffer); 
     if (EFI_SUCCESS != Status)
     {
@@ -1094,23 +1094,23 @@ EFI_STATUS L3_APPLICATION_FileReadWithPath(UINT8 *pPath, UINT8 *pDestBuffer)
 	
 	L2_STORE_PartitionMBRAnalysis(Buffer, &device[FileInPartitionID]);
 
-	//è¯»å–FATè¡¨
+	//¶ÁÈ¡FAT±í
 	L2_STORE_FatTableRead(&device[FileInPartitionID], FileReadData);
 
 	NextReadSectorNumber = device[FileInPartitionID].stMBRSwitched.ReservedSelector + device[FileInPartitionID].stMBRSwitched.SectorsPerFat * device[FileInPartitionID].stMBRSwitched.FATCount + (device[FileInPartitionID].stMBRSwitched.BootPathStartCluster - 2) * 8;;
 
 	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: NextReadSectorNumber: %d \n", __LINE__, NextReadSectorNumber);
 
-	//ç”¨äºŽå­˜æ”¾ä»Žç›®å½•ä¸‹è¯»å–æ–‡ä»¶æˆ–ç›®å½•æ•°æ®ï¼Œç”¨äºŽè§£æž
+	//ÓÃÓÚ´æ·Å´ÓÄ¿Â¼ÏÂ¶ÁÈ¡ÎÄ¼þ»òÄ¿Â¼Êý¾Ý£¬ÓÃÓÚ½âÎö
     FAT32_ROOTPATH_SHORT_FILE_ITEM pItemsInPath[32];
 
-	//è§£æžå„ä¸ªè·¯å¾„å‚æ•°
-	//è¿™é‡Œéœ€è¦æ³¨æ„ï¼Œç¬¬ä¸€ä¸ªè·¯å¾„æ˜¯åˆ†åŒºåå­—ï¼Œæ‰€ä»¥æ ¹ç›®å½•ä¸‹çš„è·¯å¾„éœ€è¦ä»Žç¬¬äºŒä¸ªåå­—å¼€å§‹æ‰¾ï¼Œç´¢å¼•å·æ˜¯1
+	//½âÎö¸÷¸öÂ·¾¶²ÎÊý
+	//ÕâÀïÐèÒª×¢Òâ£¬µÚÒ»¸öÂ·¾¶ÊÇ·ÖÇøÃû×Ö£¬ËùÒÔ¸ùÄ¿Â¼ÏÂµÄÂ·¾¶ÐèÒª´ÓµÚ¶þ¸öÃû×Ö¿ªÊ¼ÕÒ£¬Ë÷ÒýºÅÊÇ1
 	for (UINT16 i = 1; i < FileReadData.PathCount; i++)
 	{
 		L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: FilePaths: %a \n", __LINE__, FileReadData.FilePaths[i]);
             
-		//å½“å‰åªè¯»ä¸€ä¸ªæ‰‡åŒºï¼Œè¿™æ ·è¿™é‡Œæ˜¯æœ‰ç¼ºé™·çš„ï¼Œå¦‚æžœè·¯å¾„é‡Œçš„é¡¹ç›®è¶…è¿‡16ä¸ªï¼Œåˆ™ä¸èƒ½æ­£å¸¸è¯»å–
+		//µ±Ç°Ö»¶ÁÒ»¸öÉÈÇø£¬ÕâÑùÕâÀïÊÇÓÐÈ±ÏÝµÄ£¬Èç¹ûÂ·¾¶ÀïµÄÏîÄ¿³¬¹ý16¸ö£¬Ôò²»ÄÜÕý³£¶ÁÈ¡
 		EFI_STATUS Status = L2_STORE_Read(FileInPartitionID, NextReadSectorNumber, 2, Buffer); 
 		if (EFI_SUCCESS != Status)
 		{
@@ -1131,13 +1131,13 @@ EFI_STATUS L3_APPLICATION_FileReadWithPath(UINT8 *pPath, UINT8 *pDestBuffer)
 
 /****************************************************************************
 *
-*  æè¿°:    é€šè¿‡æ–‡ä»¶æ‰€åœ¨çš„å®Œæ•´è·¯å¾„ï¼Œåˆ é™¤æ–‡ä»¶
+*  ÃèÊö:    Í¨¹ýÎÄ¼þËùÔÚµÄÍêÕûÂ·¾¶£¬É¾³ýÎÄ¼þ
 *
-*  å‚æ•°1ï¼š ç¤ºä¾‹ï¼š"/OS/resource/zhufeng.bmp"ï¼Œå…¶ä¸­/OSæ˜¯æŒ‡ç³»ç»Ÿç›®å½•
-*  å‚æ•°2ï¼š pBuffer
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º Ê¾Àý£º"/OS/resource/zhufeng.bmp"£¬ÆäÖÐ/OSÊÇÖ¸ÏµÍ³Ä¿Â¼
+*  ²ÎÊý2£º pBuffer
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 EFI_STATUS L3_APPLICATION_FileDeleteWithPath(UINT8 *pPath, UINT8 *pDestBuffer)
@@ -1157,15 +1157,15 @@ EFI_STATUS L3_APPLICATION_FileDeleteWithPath(UINT8 *pPath, UINT8 *pDestBuffer)
     UINT16 Length = AsciiStrLen(pPath);
     L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d string length: %d\n", __LINE__, Length);
         
-	//åˆ†æžæ–‡ä»¶è·¯å¾„ï¼ŒæŠŠè·¯å¾„å’Œæ–‡ä»¶åæŒ‰ç…§/æ‹†åˆ†ï¼Œæ–¹ä¾¿åŽç»­æ“ä½œ
+	//·ÖÎöÎÄ¼þÂ·¾¶£¬°ÑÂ·¾¶ºÍÎÄ¼þÃû°´ÕÕ/²ð·Ö£¬·½±ãºóÐø²Ù×÷
     L3_APPLICATION_GetFilePaths(pPath, &FileReadData);
 	
 	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: FileReadData.FilePaths[0]: %a \n", __LINE__, FileReadData.FilePaths[0]);
 
-	//æ‰¾åˆ°åˆ†åŒºå¯¹åº”çš„è®¾å¤‡ç´¢å¼•ï¼ŒåŽç»­å¯¹æ–‡ä»¶è¿›è¡Œè¯»å†™çš„æ—¶å€™éœ€è¦ã€‚
+	//ÕÒµ½·ÖÇø¶ÔÓ¦µÄÉè±¸Ë÷Òý£¬ºóÐø¶ÔÎÄ¼þ½øÐÐ¶ÁÐ´µÄÊ±ºòÐèÒª¡£
 	FileInPartitionID = L3_APPLICATION_PartitionQueryByPath(&device, &FileReadData);
         	
-	//è¯»å–ç¬¬ä¸€ä¸ªæ‰‡åŒºï¼Œåˆ†æžåˆ†åŒºå‚æ•°ï¼Œæ¯”å¦‚ï¼šFATè¡¨å¤§å°ï¼ŒFATè¡¨ä¸ªæ•°ï¼Œä¿ç•™æ‰‡åŒºæ•°
+	//¶ÁÈ¡µÚÒ»¸öÉÈÇø£¬·ÖÎö·ÖÇø²ÎÊý£¬±ÈÈç£ºFAT±í´óÐ¡£¬FAT±í¸öÊý£¬±£ÁôÉÈÇøÊý
 	EFI_STATUS Status = L2_STORE_Read(FileInPartitionID, 0, 1, Buffer); 
     if (EFI_SUCCESS != Status)
     {
@@ -1175,23 +1175,23 @@ EFI_STATUS L3_APPLICATION_FileDeleteWithPath(UINT8 *pPath, UINT8 *pDestBuffer)
 	
 	L2_STORE_PartitionMBRAnalysis(Buffer, &device[FileInPartitionID]);
 
-	//è¯»å–FATè¡¨
+	//¶ÁÈ¡FAT±í
 	L2_STORE_FatTableRead(&device[FileInPartitionID], FileReadData);
 
 	NextReadSectorNumber = device[FileInPartitionID].stMBRSwitched.ReservedSelector + device[FileInPartitionID].stMBRSwitched.SectorsPerFat * device[FileInPartitionID].stMBRSwitched.FATCount + (device[FileInPartitionID].stMBRSwitched.BootPathStartCluster - 2) * 8;;
 
 	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: NextReadSectorNumber: %d \n", __LINE__, NextReadSectorNumber);
 
-	//ç”¨äºŽå­˜æ”¾ä»Žç›®å½•ä¸‹è¯»å–æ–‡ä»¶æˆ–ç›®å½•æ•°æ®ï¼Œç”¨äºŽè§£æž
+	//ÓÃÓÚ´æ·Å´ÓÄ¿Â¼ÏÂ¶ÁÈ¡ÎÄ¼þ»òÄ¿Â¼Êý¾Ý£¬ÓÃÓÚ½âÎö
     FAT32_ROOTPATH_SHORT_FILE_ITEM pItemsInPath[32];
 
-	//è§£æžå„ä¸ªè·¯å¾„å‚æ•°
-	//è¿™é‡Œéœ€è¦æ³¨æ„ï¼Œç¬¬ä¸€ä¸ªè·¯å¾„æ˜¯åˆ†åŒºåå­—ï¼Œæ‰€ä»¥æ ¹ç›®å½•ä¸‹çš„è·¯å¾„éœ€è¦ä»Žç¬¬äºŒä¸ªåå­—å¼€å§‹æ‰¾ï¼Œç´¢å¼•å·æ˜¯1
+	//½âÎö¸÷¸öÂ·¾¶²ÎÊý
+	//ÕâÀïÐèÒª×¢Òâ£¬µÚÒ»¸öÂ·¾¶ÊÇ·ÖÇøÃû×Ö£¬ËùÒÔ¸ùÄ¿Â¼ÏÂµÄÂ·¾¶ÐèÒª´ÓµÚ¶þ¸öÃû×Ö¿ªÊ¼ÕÒ£¬Ë÷ÒýºÅÊÇ1
 	for (UINT16 i = 1; i < FileReadData.PathCount; i++)
 	{
 		L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: FilePaths: %a \n", __LINE__, FileReadData.FilePaths[i]);
             
-		//å½“å‰åªè¯»ä¸€ä¸ªæ‰‡åŒºï¼Œè¿™æ ·è¿™é‡Œæ˜¯æœ‰ç¼ºé™·çš„ï¼Œå¦‚æžœè·¯å¾„é‡Œçš„é¡¹ç›®è¶…è¿‡16ä¸ªï¼Œåˆ™ä¸èƒ½æ­£å¸¸è¯»å–
+		//µ±Ç°Ö»¶ÁÒ»¸öÉÈÇø£¬ÕâÑùÕâÀïÊÇÓÐÈ±ÏÝµÄ£¬Èç¹ûÂ·¾¶ÀïµÄÏîÄ¿³¬¹ý16¸ö£¬Ôò²»ÄÜÕý³£¶ÁÈ¡
 		EFI_STATUS Status = L2_STORE_Read(FileInPartitionID, NextReadSectorNumber, 2, Buffer); 
 		if (EFI_SUCCESS != Status)
 		{
@@ -1204,7 +1204,7 @@ EFI_STATUS L3_APPLICATION_FileDeleteWithPath(UINT8 *pPath, UINT8 *pDestBuffer)
 		
 		UINT16 index = L3_APPLICATION_ItemFindByName(&pItemsInPath, &FileReadData);
 		
-		//1ã€æŠŠç›®å½•é¡¹åç§°çš„ç¬¬ä¸€ä¸ªå­—èŠ‚ä¿®æ”¹ä¸º0xE5
+		//1¡¢°ÑÄ¿Â¼ÏîÃû³ÆµÄµÚÒ»¸ö×Ö½ÚÐÞ¸ÄÎª0xE5
 		pItemsInPath[index].FileName[0] = 0xE5;
 		L1_MEMORY_Copy(Buffer, &pItemsInPath, DISK_BUFFER_SIZE * 2);
 		
@@ -1212,7 +1212,7 @@ EFI_STATUS L3_APPLICATION_FileDeleteWithPath(UINT8 *pPath, UINT8 *pDestBuffer)
 
 		L3_APPLICATION_FileDataGetByItemID(&pItemsInPath, &FileReadData, &NextReadSectorNumber, index);
 		
-		//èŽ·å–æ–‡ä»¶æ‰€åœ¨çš„å—å·
+		//»ñÈ¡ÎÄ¼þËùÔÚµÄ¿éºÅ
 		UINT64 BlockNumber = (UINT64)pItemsInPath[index].StartClusterLow2B[0] | (UINT64)pItemsInPath[index].StartClusterLow2B[1] << 8 | (UINT64)pItemsInPath[index].StartClusterHigh2B[0] << 16 | (UINT64)pItemsInPath[index].StartClusterHigh2B[1] << 24;
 
 
@@ -1224,21 +1224,21 @@ EFI_STATUS L3_APPLICATION_FileDeleteWithPath(UINT8 *pPath, UINT8 *pDestBuffer)
 		
 	}
 
-	//åˆ é™¤æ–‡ä»¶éœ€è¦çš„æ“ä½œï¼š
-	//2ã€æŠŠFAT Tableå¯¹åº”çš„ç´¢å¼•æ¸…ç©º
-	//3ã€
+	//É¾³ýÎÄ¼þÐèÒªµÄ²Ù×÷£º
+	//2¡¢°ÑFAT Table¶ÔÓ¦µÄË÷ÒýÇå¿Õ
+	//3¡¢
 }
 
 
 /****************************************************************************
 *
-*  æè¿°:    é€šè¿‡æ–‡ä»¶æ‰€åœ¨çš„å®Œæ•´è·¯å¾„ï¼Œåˆ é™¤æ–‡ä»¶
+*  ÃèÊö:    Í¨¹ýÎÄ¼þËùÔÚµÄÍêÕûÂ·¾¶£¬É¾³ýÎÄ¼þ
 *
-*  å‚æ•°1ï¼š ç¤ºä¾‹ï¼š"/OS/resource/zhufeng.bmp"ï¼Œå…¶ä¸­/OSæ˜¯æŒ‡ç³»ç»Ÿç›®å½•
-*  å‚æ•°2ï¼š pBuffer
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º Ê¾Àý£º"/OS/resource/zhufeng.bmp"£¬ÆäÖÐ/OSÊÇÖ¸ÏµÍ³Ä¿Â¼
+*  ²ÎÊý2£º pBuffer
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 EFI_STATUS L3_APPLICATION_FileAddWithPath(UINT8 *pPath, UINT8 *pDestBuffer)
@@ -1258,15 +1258,15 @@ EFI_STATUS L3_APPLICATION_FileAddWithPath(UINT8 *pPath, UINT8 *pDestBuffer)
     UINT16 Length = AsciiStrLen(pPath);
     L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d string length: %d\n", __LINE__, Length);
         
-	//åˆ†æžæ–‡ä»¶è·¯å¾„ï¼ŒæŠŠè·¯å¾„å’Œæ–‡ä»¶åæŒ‰ç…§/æ‹†åˆ†ï¼Œæ–¹ä¾¿åŽç»­æ“ä½œ
+	//·ÖÎöÎÄ¼þÂ·¾¶£¬°ÑÂ·¾¶ºÍÎÄ¼þÃû°´ÕÕ/²ð·Ö£¬·½±ãºóÐø²Ù×÷
     L3_APPLICATION_GetFilePaths(pPath, &FileReadData);
 	
 	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: FileReadData.FilePaths[0]: %a \n", __LINE__, FileReadData.FilePaths[0]);
 
-	//æ‰¾åˆ°åˆ†åŒºå¯¹åº”çš„è®¾å¤‡ç´¢å¼•ï¼ŒåŽç»­å¯¹æ–‡ä»¶è¿›è¡Œè¯»å†™çš„æ—¶å€™éœ€è¦ã€‚
+	//ÕÒµ½·ÖÇø¶ÔÓ¦µÄÉè±¸Ë÷Òý£¬ºóÐø¶ÔÎÄ¼þ½øÐÐ¶ÁÐ´µÄÊ±ºòÐèÒª¡£
 	FileInPartitionID = L3_APPLICATION_PartitionQueryByPath(&device, &FileReadData);
         	
-	//è¯»å–ç¬¬ä¸€ä¸ªæ‰‡åŒºï¼Œåˆ†æžåˆ†åŒºå‚æ•°ï¼Œæ¯”å¦‚ï¼šFATè¡¨å¤§å°ï¼ŒFATè¡¨ä¸ªæ•°ï¼Œä¿ç•™æ‰‡åŒºæ•°
+	//¶ÁÈ¡µÚÒ»¸öÉÈÇø£¬·ÖÎö·ÖÇø²ÎÊý£¬±ÈÈç£ºFAT±í´óÐ¡£¬FAT±í¸öÊý£¬±£ÁôÉÈÇøÊý
 	EFI_STATUS Status = L2_STORE_Read(FileInPartitionID, 0, 1, Buffer); 
     if (EFI_SUCCESS != Status)
     {
@@ -1276,23 +1276,23 @@ EFI_STATUS L3_APPLICATION_FileAddWithPath(UINT8 *pPath, UINT8 *pDestBuffer)
 	
 	L2_STORE_PartitionMBRAnalysis(Buffer, &device[FileInPartitionID]);
 
-	//è¯»å–FATè¡¨
+	//¶ÁÈ¡FAT±í
 	L2_STORE_FatTableRead(&device[FileInPartitionID], FileReadData);
 
 	NextReadSectorNumber = device[FileInPartitionID].stMBRSwitched.ReservedSelector + device[FileInPartitionID].stMBRSwitched.SectorsPerFat * device[FileInPartitionID].stMBRSwitched.FATCount + (device[FileInPartitionID].stMBRSwitched.BootPathStartCluster - 2) * 8;;
 
 	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: NextReadSectorNumber: %d \n", __LINE__, NextReadSectorNumber);
 
-	//ç”¨äºŽå­˜æ”¾ä»Žç›®å½•ä¸‹è¯»å–æ–‡ä»¶æˆ–ç›®å½•æ•°æ®ï¼Œç”¨äºŽè§£æž
+	//ÓÃÓÚ´æ·Å´ÓÄ¿Â¼ÏÂ¶ÁÈ¡ÎÄ¼þ»òÄ¿Â¼Êý¾Ý£¬ÓÃÓÚ½âÎö
     FAT32_ROOTPATH_SHORT_FILE_ITEM pItemsInPath[32];
 
-	//è§£æžå„ä¸ªè·¯å¾„å‚æ•°
-	//è¿™é‡Œéœ€è¦æ³¨æ„ï¼Œç¬¬ä¸€ä¸ªè·¯å¾„æ˜¯åˆ†åŒºåå­—ï¼Œæ‰€ä»¥æ ¹ç›®å½•ä¸‹çš„è·¯å¾„éœ€è¦ä»Žç¬¬äºŒä¸ªåå­—å¼€å§‹æ‰¾ï¼Œç´¢å¼•å·æ˜¯1
+	//½âÎö¸÷¸öÂ·¾¶²ÎÊý
+	//ÕâÀïÐèÒª×¢Òâ£¬µÚÒ»¸öÂ·¾¶ÊÇ·ÖÇøÃû×Ö£¬ËùÒÔ¸ùÄ¿Â¼ÏÂµÄÂ·¾¶ÐèÒª´ÓµÚ¶þ¸öÃû×Ö¿ªÊ¼ÕÒ£¬Ë÷ÒýºÅÊÇ1
 	for (UINT16 i = 1; i < FileReadData.PathCount; i++)
 	{
 		L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: FilePaths: %a \n", __LINE__, FileReadData.FilePaths[i]);
             
-		//å½“å‰åªè¯»ä¸€ä¸ªæ‰‡åŒºï¼Œè¿™æ ·è¿™é‡Œæ˜¯æœ‰ç¼ºé™·çš„ï¼Œå¦‚æžœè·¯å¾„é‡Œçš„é¡¹ç›®è¶…è¿‡16ä¸ªï¼Œåˆ™ä¸èƒ½æ­£å¸¸è¯»å–
+		//µ±Ç°Ö»¶ÁÒ»¸öÉÈÇø£¬ÕâÑùÕâÀïÊÇÓÐÈ±ÏÝµÄ£¬Èç¹ûÂ·¾¶ÀïµÄÏîÄ¿³¬¹ý16¸ö£¬Ôò²»ÄÜÕý³£¶ÁÈ¡
 		EFI_STATUS Status = L2_STORE_Read(FileInPartitionID, NextReadSectorNumber, 2, Buffer); 
 		if (EFI_SUCCESS != Status)
 		{
@@ -1313,13 +1313,13 @@ EFI_STATUS L3_APPLICATION_FileAddWithPath(UINT8 *pPath, UINT8 *pDestBuffer)
 
 /****************************************************************************
 *
-*  æè¿°:    é€šè¿‡æ–‡ä»¶æ‰€åœ¨çš„å®Œæ•´è·¯å¾„ï¼Œä¿®æ”¹æ–‡ä»¶
+*  ÃèÊö:    Í¨¹ýÎÄ¼þËùÔÚµÄÍêÕûÂ·¾¶£¬ÐÞ¸ÄÎÄ¼þ
 *
-*  å‚æ•°1ï¼š ç¤ºä¾‹ï¼š"/OS/resource/zhufeng.bmp"ï¼Œå…¶ä¸­/OSæ˜¯æŒ‡ç³»ç»Ÿç›®å½•
-*  å‚æ•°2ï¼š pBuffer
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º Ê¾Àý£º"/OS/resource/zhufeng.bmp"£¬ÆäÖÐ/OSÊÇÖ¸ÏµÍ³Ä¿Â¼
+*  ²ÎÊý2£º pBuffer
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 EFI_STATUS L3_APPLICATION_FileModifyWithPath(UINT8 *pPath, UINT8 *pDestBuffer)
@@ -1339,15 +1339,15 @@ EFI_STATUS L3_APPLICATION_FileModifyWithPath(UINT8 *pPath, UINT8 *pDestBuffer)
     UINT16 Length = AsciiStrLen(pPath);
     L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d string length: %d\n", __LINE__, Length);
         
-	//åˆ†æžæ–‡ä»¶è·¯å¾„ï¼ŒæŠŠè·¯å¾„å’Œæ–‡ä»¶åæŒ‰ç…§/æ‹†åˆ†ï¼Œæ–¹ä¾¿åŽç»­æ“ä½œ
+	//·ÖÎöÎÄ¼þÂ·¾¶£¬°ÑÂ·¾¶ºÍÎÄ¼þÃû°´ÕÕ/²ð·Ö£¬·½±ãºóÐø²Ù×÷
     L3_APPLICATION_GetFilePaths(pPath, &FileReadData);
 	
 	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: FileReadData.FilePaths[0]: %a \n", __LINE__, FileReadData.FilePaths[0]);
 
-	//æ‰¾åˆ°åˆ†åŒºå¯¹åº”çš„è®¾å¤‡ç´¢å¼•ï¼ŒåŽç»­å¯¹æ–‡ä»¶è¿›è¡Œè¯»å†™çš„æ—¶å€™éœ€è¦ã€‚
+	//ÕÒµ½·ÖÇø¶ÔÓ¦µÄÉè±¸Ë÷Òý£¬ºóÐø¶ÔÎÄ¼þ½øÐÐ¶ÁÐ´µÄÊ±ºòÐèÒª¡£
 	FileInPartitionID = L3_APPLICATION_PartitionQueryByPath(&device, &FileReadData);
         	
-	//è¯»å–ç¬¬ä¸€ä¸ªæ‰‡åŒºï¼Œåˆ†æžåˆ†åŒºå‚æ•°ï¼Œæ¯”å¦‚ï¼šFATè¡¨å¤§å°ï¼ŒFATè¡¨ä¸ªæ•°ï¼Œä¿ç•™æ‰‡åŒºæ•°
+	//¶ÁÈ¡µÚÒ»¸öÉÈÇø£¬·ÖÎö·ÖÇø²ÎÊý£¬±ÈÈç£ºFAT±í´óÐ¡£¬FAT±í¸öÊý£¬±£ÁôÉÈÇøÊý
 	EFI_STATUS Status = L2_STORE_Read(FileInPartitionID, 0, 1, Buffer); 
     if (EFI_SUCCESS != Status)
     {
@@ -1357,23 +1357,23 @@ EFI_STATUS L3_APPLICATION_FileModifyWithPath(UINT8 *pPath, UINT8 *pDestBuffer)
 	
 	L2_STORE_PartitionMBRAnalysis(Buffer, &device[FileInPartitionID]);
 
-	//è¯»å–FATè¡¨
+	//¶ÁÈ¡FAT±í
 	L2_STORE_FatTableRead(&device[FileInPartitionID], FileReadData);
 
 	NextReadSectorNumber = device[FileInPartitionID].stMBRSwitched.ReservedSelector + device[FileInPartitionID].stMBRSwitched.SectorsPerFat * device[FileInPartitionID].stMBRSwitched.FATCount + (device[FileInPartitionID].stMBRSwitched.BootPathStartCluster - 2) * 8;;
 
 	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: NextReadSectorNumber: %d \n", __LINE__, NextReadSectorNumber);
 
-	//ç”¨äºŽå­˜æ”¾ä»Žç›®å½•ä¸‹è¯»å–æ–‡ä»¶æˆ–ç›®å½•æ•°æ®ï¼Œç”¨äºŽè§£æž
+	//ÓÃÓÚ´æ·Å´ÓÄ¿Â¼ÏÂ¶ÁÈ¡ÎÄ¼þ»òÄ¿Â¼Êý¾Ý£¬ÓÃÓÚ½âÎö
     FAT32_ROOTPATH_SHORT_FILE_ITEM pItemsInPath[32];
 
-	//è§£æžå„ä¸ªè·¯å¾„å‚æ•°
-	//è¿™é‡Œéœ€è¦æ³¨æ„ï¼Œç¬¬ä¸€ä¸ªè·¯å¾„æ˜¯åˆ†åŒºåå­—ï¼Œæ‰€ä»¥æ ¹ç›®å½•ä¸‹çš„è·¯å¾„éœ€è¦ä»Žç¬¬äºŒä¸ªåå­—å¼€å§‹æ‰¾ï¼Œç´¢å¼•å·æ˜¯1
+	//½âÎö¸÷¸öÂ·¾¶²ÎÊý
+	//ÕâÀïÐèÒª×¢Òâ£¬µÚÒ»¸öÂ·¾¶ÊÇ·ÖÇøÃû×Ö£¬ËùÒÔ¸ùÄ¿Â¼ÏÂµÄÂ·¾¶ÐèÒª´ÓµÚ¶þ¸öÃû×Ö¿ªÊ¼ÕÒ£¬Ë÷ÒýºÅÊÇ1
 	for (UINT16 i = 1; i < FileReadData.PathCount; i++)
 	{
 		L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: FilePaths: %a \n", __LINE__, FileReadData.FilePaths[i]);
             
-		//å½“å‰åªè¯»ä¸€ä¸ªæ‰‡åŒºï¼Œè¿™æ ·è¿™é‡Œæ˜¯æœ‰ç¼ºé™·çš„ï¼Œå¦‚æžœè·¯å¾„é‡Œçš„é¡¹ç›®è¶…è¿‡16ä¸ªï¼Œåˆ™ä¸èƒ½æ­£å¸¸è¯»å–
+		//µ±Ç°Ö»¶ÁÒ»¸öÉÈÇø£¬ÕâÑùÕâÀïÊÇÓÐÈ±ÏÝµÄ£¬Èç¹ûÂ·¾¶ÀïµÄÏîÄ¿³¬¹ý16¸ö£¬Ôò²»ÄÜÕý³£¶ÁÈ¡
 		EFI_STATUS Status = L2_STORE_Read(FileInPartitionID, NextReadSectorNumber, 2, Buffer); 
 		if (EFI_SUCCESS != Status)
 		{
@@ -1401,13 +1401,13 @@ UINT8 PreviousItem = -1;
 
 /****************************************************************************
 *
-*  æè¿°:   xxxxx
+*  ÃèÊö:   xxxxx
 *
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º xxxxx
+*  ²ÎÊý2£º xxxxx
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 EFI_STATUS L3_PARTITION_RootPathAccess()
@@ -1467,13 +1467,13 @@ EFI_STATUS L3_PARTITION_RootPathAccess()
 
 /****************************************************************************
 *
-*  æè¿°:   xxxxx
+*  ÃèÊö:   xxxxx
 *
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º xxxxx
+*  ²ÎÊý2£º xxxxx
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 EFI_STATUS L3_PARTITION_FileAccess(UINT16 DeviceID)
@@ -1495,13 +1495,13 @@ EFI_STATUS L3_PARTITION_FileAccess(UINT16 DeviceID)
 
 /****************************************************************************
 *
-*  æè¿°:   xxxxx
+*  ÃèÊö:   xxxxx
 *
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º xxxxx
+*  ²ÎÊý2£º xxxxx
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 EFI_STATUS L3_PARTITION_SubPathAccess()
@@ -1515,13 +1515,13 @@ EFI_STATUS L3_PARTITION_SubPathAccess()
 
 /****************************************************************************
 *
-*  æè¿°:   xxxxx
+*  ÃèÊö:   xxxxx
 *
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º xxxxx
+*  ²ÎÊý2£º xxxxx
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 EFI_STATUS L3_PARTITION_AccessFinish()
@@ -1537,13 +1537,13 @@ EFI_STATUS L3_PARTITION_AccessFinish()
 
 /****************************************************************************
 *
-*  æè¿°:   xxxxx
+*  ÃèÊö:   xxxxx
 *
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º xxxxx
+*  ²ÎÊý2£º xxxxx
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 EFI_STATUS L3_PARTITION_ParentPathAccess()
@@ -1581,23 +1581,23 @@ PARTITION_ITEM_ACCESS_STATE PartitionItemAccessNextState = INIT_ACCESS_STATE;
 PARTITION_ITEM_ACCESS_EVENT PartitionItemAccessEvent = ROOT_PATH_ACCESS_EVENT;
 
 
-//æˆ‘çš„ç”µè„‘çª—å£ï¼Œå¯¹æ–‡ä»¶å¤„ç†çš„çŠ¶æ€æœºï¼Œå¼€å§‹å¯ä»¥åªå¯¹FAT32æ–‡ä»¶ç³»ç»Ÿæ ¼å¼æ“ä½œï¼ŒåŽç»­å¯ä»¥å¢žåŠ å¯¹NTFSæ–‡ä»¶ç³»ç»Ÿå¯¹åº”æ“ä½œï¼Œå› ä¸ºFAT32ç›¸å¯¹ç®€å•ä¸€äº›
-//å…¥å‚ï¼šç›®å½•ã€æ–‡ä»¶ï¼ˆæˆ–ï¼šæœªé€‰ä¸­æ–‡ä»¶ï¼Œå› ä¸ºå¯ä»¥åœ¨æŸä¸ªç›®å½•åˆ›å»ºæ–‡ä»¶ï¼Œè¿™ä¸ªåœºæ™¯ä¸éœ€è¦é€‰æ‹©æŸæ–‡ä»¶ï¼‰
-//äº‹ä»¶ï¼šæ–°å¢žã€æ‰“å¼€ã€åˆ é™¤ã€ä¿®æ”¹
-//æ“ä½œå¤„ç†å‡½æ•°
+//ÎÒµÄµçÄÔ´°¿Ú£¬¶ÔÎÄ¼þ´¦ÀíµÄ×´Ì¬»ú£¬¿ªÊ¼¿ÉÒÔÖ»¶ÔFAT32ÎÄ¼þÏµÍ³¸ñÊ½²Ù×÷£¬ºóÐø¿ÉÒÔÔö¼Ó¶ÔNTFSÎÄ¼þÏµÍ³¶ÔÓ¦²Ù×÷£¬ÒòÎªFAT32Ïà¶Ô¼òµ¥Ò»Ð©
+//Èë²Î£ºÄ¿Â¼¡¢ÎÄ¼þ£¨»ò£ºÎ´Ñ¡ÖÐÎÄ¼þ£¬ÒòÎª¿ÉÒÔÔÚÄ³¸öÄ¿Â¼´´½¨ÎÄ¼þ£¬Õâ¸ö³¡¾°²»ÐèÒªÑ¡ÔñÄ³ÎÄ¼þ£©
+//ÊÂ¼þ£ºÐÂÔö¡¢´ò¿ª¡¢É¾³ý¡¢ÐÞ¸Ä
+//²Ù×÷´¦Àíº¯Êý
 
 /****************************************************************************
 *
-*  æè¿°:   xxxxx
+*  ÃèÊö:   xxxxx
 *
-*  å‚æ•°1ï¼š xxxxx
-*  å‚æ•°2ï¼š xxxxx
-*  å‚æ•°nï¼š xxxxx
+*  ²ÎÊý1£º xxxxx
+*  ²ÎÊý2£º xxxxx
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
-VOID L3_PARTITION_Access() //æš‚æ—¶æœªä½¿ç”¨
+VOID L3_PARTITION_Access() //ÔÝÊ±Î´Ê¹ÓÃ
 {
 	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: L3_PARTITION_Access\n", __LINE__);
 	

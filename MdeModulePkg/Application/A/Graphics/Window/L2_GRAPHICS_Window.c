@@ -144,7 +144,7 @@ EFI_STATUS L3_WINDOW_Initial(WINDOW_LAYER_ITEM *pWindowLayerItem, WINDOW_CURRENT
 		}
 	}
 	
-	//×îÍâµÚÒ»²ãÏñËØ
+	//??Î¼??2??
 	Color.Red = 100;
 	Color.Green = 100;
 	Color.Blue = 100;
@@ -159,7 +159,7 @@ EFI_STATUS L3_WINDOW_Initial(WINDOW_LAYER_ITEM *pWindowLayerItem, WINDOW_CURRENT
 	L1_MEMORY_RectangleFillInrease(pBuffer, pWindowLayerItem->WindowWidth - Step - 1, 0, Step, pWindowLayerItem->WindowHeight - 1, pWindowLayerItem->WindowWidth, Color); //right
 	L1_MEMORY_RectangleFillInrease(pBuffer, 0, pWindowLayerItem->WindowHeight - Step - 1, pWindowLayerItem->WindowWidth - 1,  Step, pWindowLayerItem->WindowWidth, Color); //down
 		
-	//×îÍâµÚ¶ş²ãÏñËØ
+	//??Î¼?t2??
 	//white
 	Color.Red = WhiteColor.Red;
 	Color.Green = WhiteColor.Green;
@@ -174,7 +174,7 @@ EFI_STATUS L3_WINDOW_Initial(WINDOW_LAYER_ITEM *pWindowLayerItem, WINDOW_CURRENT
 	L1_MEMORY_RectangleFillInrease(pWindowLayerItem->pBuffer, Step, pWindowLayerItem->WindowHeight - 2 * Step - 1, pWindowLayerItem->WindowWidth - 2 * Step - 1, Step, pWindowLayerItem->WindowWidth, Color); //Down
 	L1_MEMORY_RectangleFillInrease(pWindowLayerItem->pBuffer, pWindowLayerItem->WindowWidth - 2 * Step - 1, Step, Step, pWindowLayerItem->WindowHeight - 2 * Step - 1, pWindowLayerItem->WindowWidth, Color); //Right
 		
-	//×îÍâµÚÈı²ãÏñËØ
+	//??Î¼?y2??
 	//Step = windowParameter.DefaultStep * 2;
 	//g.setColor(new Color(191,191,191));
 	Color.Red = 186;
@@ -186,7 +186,7 @@ EFI_STATUS L3_WINDOW_Initial(WINDOW_LAYER_ITEM *pWindowLayerItem, WINDOW_CURRENT
 		L2_GRAPHICS_RectangleDraw(pWindowLayerItem->pBuffer, 2 * Step + i, 2 * Step + i, pWindowLayerItem->WindowWidth - 2 * Step - 1 - i, pWindowLayerItem->WindowHeight - 2 * Step - 1 - i, 0, Color, pWindowLayerItem->WindowWidth);
 	}	
 
-	//Íâ±ß¿òÕ¼ÓÃµÄÏñËØ
+	//?Â±???????
 	Position->CurrentX += 4 * Step;
 	Position->CurrentY += 4 * Step;
 
@@ -291,7 +291,7 @@ VOID L3_APPLICATION_TitleBarCreate(WINDOW_LAYER_ITEM *pWindowLayerItem, UINT16 *
 	UINT16 CurrentY;
     UINT16 CurrentWidth;
 	UINT16 CurrentHeight;
-	UINT16 WindowWidth; //´°¿Ú±¾À´´óĞ¡£¬»æÖÆ´°¿ÚÊ±²»»áĞŞ¸Ä´óĞ¡
+	UINT16 WindowWidth; //â€²Â°???Ã â€²â€²????æ–†â€²Â°??Â±2???????
 	UINT16 Height;
 	UINT16 LayerID;
 	UINT16 TitleBarHeight;
@@ -333,7 +333,7 @@ VOID L3_APPLICATION_TitleBarCreate(WINDOW_LAYER_ITEM *pWindowLayerItem, UINT16 *
 	//Step * 4æ˜¯çª—å£è¾¹æ¡†æ‰€å åƒç´ 
 	CurrentY += (TitleBarHeight - FontSize - 4 * Step) / 2; 
 
-	//ÒòÎªÏÔÊ¾ÎÒµÄµçÄÔ£¬ºº×ÖĞèÒªÏòÓÒÒÆ¶¯Ğ©
+	//????Î’Î¼?ç„”ï¿¡?oo?Ğ¨?????Ë‰Ğ©
 	UINT16 TempX = Position->CurrentX + 4 * Step;
 
 	//ç°è‰²èƒŒæ™¯ï¼Œæ–‡ä»¶ã€ç¼–è¾‘ã€æŸ¥çœ‹ã€è½¬åˆ°ã€æ”¶è—ã€å¸®åŠ©
@@ -348,7 +348,7 @@ VOID L3_APPLICATION_TitleBarCreate(WINDOW_LAYER_ITEM *pWindowLayerItem, UINT16 *
 
 
 
-	//±êÌâÀ¸Õ¼ÓÃµÄ¸ß¶È
+	//Â±?Ã ???Î¼???
 	Position->CurrentY += WindowLayers.item[LayerID].TitleBarHeight;
 
 	Color.Red = 189;
@@ -356,7 +356,7 @@ VOID L3_APPLICATION_TitleBarCreate(WINDOW_LAYER_ITEM *pWindowLayerItem, UINT16 *
 	Color.Blue = 195;
 	L1_MEMORY_RectangleFillInrease(pWindowLayerItem->pBuffer, Position->CurrentX, Position->CurrentY, CurrentWidth - 4 * Step, Step, WindowWidth, Color); //a line
 							
-	//±êÌâÀ¸ÏÂ±ß»­ÁËÒ»ÌõÏß
+	//Â±?Ã ??Â±?-Ã¡????
 	Position->CurrentY += Step;
 
 	Position->CurrentHeight-= TitleBarHeight;
@@ -370,13 +370,13 @@ VOID L3_APPLICATION_TitleBarCreate(WINDOW_LAYER_ITEM *pWindowLayerItem, UINT16 *
 
 /****************************************************************************
 *
-*  ÃèÊö: ´´½¨´°¿ÚµÄXXÀ¸£¬±ÈÈç¹¤¾ßÀ¸£¬²Ëµ¥À¸µÈµÈ
+*  Ã¨?: â€²â€²?Â¨â€²Â°???XÃ ?ï¿¡?Â±?ç¹¤???ï¿¡?2?ï¿¥Ã ?Î¼??
 *
-*  ²ÎÊı1£º xxxxx
-*  ²ÎÊı2£º xxxxx
-*  ²ÎÊın£º xxxxx
+*  2?y1ï¿¡o xxxxx
+*  2?y2ï¿¡o xxxxx
+*  2?ynï¿¡o xxxxx
 *
-*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
+*  Â·Î¼??Î¼ï¿¡o 3?|ï¿¡oXXXXï¿¡??Â°?oXXXXX
 *
 *
 *****************************************************************************/
@@ -398,7 +398,7 @@ VOID L3_APPLICATION_WindowBarCreate(WINDOW_LAYER_ITEM *pWindowLayerItem, UINT16 
 	Color.Blue  = 192;
 	Color.Reserved = pWindowLayerItem->LayerID;
 	
-	//ÕâÀï¼õ4ÊÇÒòÎª´°¿Ú×îÍâ±ß4 * Step¸öÏñËØ±»±ß¿òÕ¼ÓÃ
+	//?Ã ï¼µ4???â€²Â°??î¢Â±? * Step????Â±?Â±???Ã­
 	for (UINT16 i = CurrentY; i <  CurrentY + Position->CurrentBarHeight; i++)
 	{
 		for (UINT16 j = CurrentX; j < TempWidth; j++)
@@ -664,25 +664,24 @@ VOID L3_APPLICATION_MyComputerWindow(UINT16 StartX, UINT16 StartY)
 	
 	WindowCurrentPosition.CurrentX = 0;
 	WindowCurrentPosition.CurrentY = 0;
-	WindowCurrentPosition.CurrentWidth = WindowLayers.item[LayerID].WindowWidth; //×ó±ß¿ò+ÓÒ±ß¿ò¸÷4¸ö
-	WindowCurrentPosition.CurrentHeight = WindowLayers.item[LayerID].WindowHeight; //ÉÏ±ß¿ò+ÏÂ±ß¿ò¸÷4¸ö
+	WindowCurrentPosition.CurrentWidth = WindowLayers.item[LayerID].WindowWidth; //?Â±???Â±?????
+	WindowCurrentPosition.CurrentHeight = WindowLayers.item[LayerID].WindowHeight; //?Â±???Â±?????
 
 
 	
-    //´°¿Ú×îÍâ²ã³õÊ¼»¯
+    //â€²Â°??î¢2???Ë‰
     L3_WINDOW_Initial(&WindowLayers.item[LayerID], &WindowCurrentPosition);
 
 
 
-	//±êÌâÀ¸³õÊ¼»¯
+	//Â±?Ã ?3???Ë‰
 	//æ ‡é¢˜æ  TitleBar, 20 é«˜åº¦ï¼Œå®½åº¦æ¯”çª—å£å°äº›
 	L3_APPLICATION_TitleBarCreate(&WindowLayers.item[LayerID], TitleChineseName, &WindowCurrentPosition);
 	
 
 
 	
-	//ÕâÀïĞèÒª×öÒ»¸ö´°¿ÚÄÚ±ß¿ò
-	//gray
+	//?Ã ??????â€²Â°??????//gray
 	Color.Red = 50;
 	Color.Green = 50;
 	Color.Blue = 50;
@@ -735,11 +734,10 @@ VOID L3_APPLICATION_MyComputerWindow(UINT16 StartX, UINT16 StartY)
 
     L1_GRAPHICS_ZoomImage(pSystemIconTextBuffer, WidthNew, HeightNew, pSystemIconTempBuffer2, SYSTEM_ICON_WIDTH, SYSTEM_ICON_HEIGHT);
 
-	//ÕâÀïĞèÒª¼ÇÂ¼´°¿ÚµÄ×´Ì¬
+	//?Ã ?????â€²Â°???â€²?
 	MyComputerWindowState.PartitionStartX = WindowCurrentPosition.CurrentX + 2 * FontSize;
 	MyComputerWindowState.PartitionStartY = WindowCurrentPosition.CurrentY + 2 * FontSize + 16 * 2;
-	MyComputerWindowState.PartitionWidth  = 16 * 4; //4¸öºº×ÖµÄ¿í
-	MyComputerWindowState.PartitionHeight = 16;	//ºº×ÖµÄ¸ß
+	MyComputerWindowState.PartitionWidth  = 16 * 4; //4??oo?Î¼??	MyComputerWindowState.PartitionHeight = 16;	//oo?Î¼??
 		   
 
     for (UINT16 i = 0 ; i < PartitionCount; i++)

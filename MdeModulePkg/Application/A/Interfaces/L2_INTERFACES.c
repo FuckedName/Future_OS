@@ -2,13 +2,13 @@
 /*************************************************
     .
     File name:      	*.*
-    Author：	        	任启红
-    ID：					00001
+    Author��	        	������
+    ID��					00001
     Date:          		202107
-    Description:    	用于给应用提供接口
-    Others:         	无
+    Description:    	���ڸ�Ӧ���ṩ�ӿ�
+    Others:         	��
 
-    History:        	无
+    History:        	��
 	    1.  Date:
 		    Author: 
 		    ID:
@@ -43,10 +43,10 @@ UINT32 *pApplicationCallFlag = 0x20000000;
 
 double (*pAPPLICATION_CALL_ID)(double, double);
 
-//这是给系统调用结构体分配的内存地址
+//���Ǹ�ϵͳ���ýṹ�������ڴ��ַ
 APPLICATION_CALL_DATA *APPLICATION_CALL_FLAG_ADDRESS = (APPLICATION_CALL_DATA *)(0x40000000 - 0x1000);
 
-//这是给应用程序分配的内存地址
+//���Ǹ�Ӧ�ó��������ڴ��ַ
 #define APPLICATION_DYNAMIC_MEMORY_ADDRESS_START 0x40000000
 
 APPLICATION_CALL_DATA *pApplicationCallData;
@@ -54,20 +54,20 @@ APPLICATION_CALL_DATA *pApplicationCallData;
 
 typedef struct
 {
-    APPLICATION_CALL_ID             ApplicationCallID; //类似Linux系统调用
-    EFI_STATUS                      (*pApplicationCallFunction)();  //不用调用ID对应的处理函数
+    APPLICATION_CALL_ID             ApplicationCallID; //����Linuxϵͳ����
+    EFI_STATUS                      (*pApplicationCallFunction)();  //���õ���ID��Ӧ�Ĵ�������
 }APPLICATION_CALL_TABLE;
 
 
 /****************************************************************************
 *
-*  描述:   桌面图层点击事件，当前只有左下角的开始菜单点击事件
+*  ����:   ����ͼ�����¼�����ǰֻ�����½ǵĿ�ʼ�˵�����¼�
 *
-*  参数1： xxxxx
-*  参数2： xxxxx
-*  参数n： xxxxx
+*  ����1�� xxxxx
+*  ����2�� xxxxx
+*  ����n�� xxxxx
 *
-*  返回值： 成功：XXXX，失败：XXXXX
+*  ����ֵ�� �ɹ���XXXX��ʧ�ܣ�XXXXX
 *
 ****************************************************************************
 MOUSE_CLICK_EVENT L2_GRAPHICS_DeskLayerClickEventGet()
@@ -92,14 +92,14 @@ EFI_STATUS L2_INTERFACES_PrintString()
 
 /****************************************************************************
 *
-*  描述:   根据应用调用的接口类型，找到对应的处理函数。
-*  第一列：接口类型定义
-*  第二列：处理函数
-*  参数1： xxxxx
-*  参数2： xxxxx
-*  参数n： xxxxx
+*  ����:   ����Ӧ�õ��õĽӿ����ͣ��ҵ���Ӧ�Ĵ���������
+*  ��һ�У��ӿ����Ͷ���
+*  �ڶ��У���������
+*  ����1�� xxxxx
+*  ����2�� xxxxx
+*  ����n�� xxxxx
 *
-*  返回值： 成功：XXXX，失败：XXXXX
+*  ����ֵ�� �ɹ���XXXX��ʧ�ܣ�XXXXX
 *
 *****************************************************************************/
 APPLICATION_CALL_TABLE InterfaceCallTable[] =
@@ -113,13 +113,13 @@ APPLICATION_CALL_TABLE InterfaceCallTable[] =
 
 /****************************************************************************
 *
-*  描述:   给操作系统应用程序提供调用的接口
+*  ����:   ������ϵͳӦ�ó����ṩ���õĽӿ�
 *
-*  ApplicationCallID：     应用调用接口编号
-*  pParameters：           参数列表
-*  参数n： xxxxx
+*  ApplicationCallID��     Ӧ�õ��ýӿڱ��
+*  pParameters��           �����б�
+*  ����n�� xxxxx
 *
-*  返回值： 成功：XXXX，失败：XXXXX
+*  ����ֵ�� �ɹ���XXXX��ʧ�ܣ�XXXXX
 *
 *****************************************************************************/
 VOID L2_INTERFACES_ApplicationCall (EFI_EVENT Event,  VOID           *Context)
@@ -131,16 +131,16 @@ VOID L2_INTERFACES_ApplicationCall (EFI_EVENT Event,  VOID           *Context)
     
     L2_DEBUG_Print1(x, y, "%d  L2_INTERFACES_ApplicationCall.\n", __LINE__);
     
-    //进入系统调用
+    //����ϵͳ����
     if (APPLICATION_CALL_ID_INIT != pApplicationCallData->ID)
     {
-        //执行系统调用
+        //ִ��ϵͳ����
         EFI_STATUS RanStatus = InterfaceCallTable[pApplicationCallData->ID].pApplicationCallFunction();
 
-        //如果回调函数执行成功，则给应用程序一个反馈。这里测试，发现回调函数不能执行成功
+        //����ص�����ִ�гɹ������Ӧ�ó���һ��������������ԣ����ֻص���������ִ�гɹ�
         pApplicationCallData->RanStatus = RanStatus;
 
-        //把系统调用类型设置为初始化，不然会进入死循环
+        //��ϵͳ������������Ϊ��ʼ������Ȼ�������ѭ��
         pApplicationCallData->ID = APPLICATION_CALL_ID_INIT;
     }    
     
@@ -150,13 +150,13 @@ VOID L2_INTERFACES_ApplicationCall (EFI_EVENT Event,  VOID           *Context)
 
 /****************************************************************************
 *
-*  描述:   给操作系统应用程序提供调用的接口
+*  ����:   ������ϵͳӦ�ó����ṩ���õĽӿ�
 *
-*  ApplicationCallID：     应用调用接口编号
-*  pParameters：           参数列表
-*  参数n： xxxxx
+*  ApplicationCallID��     Ӧ�õ��ýӿڱ��
+*  pParameters��           �����б�
+*  ����n�� xxxxx
 *
-*  返回值： 成功：XXXX，失败：XXXXX
+*  ����ֵ�� �ɹ���XXXX��ʧ�ܣ�XXXXX
 *
 *****************************************************************************/
 VOID L2_INTERFACES_Shutdown()
@@ -168,13 +168,13 @@ VOID L2_INTERFACES_Shutdown()
 
 /****************************************************************************
 *
-*  描述:   给操作系统应用程序提供调用的接口
+*  ����:   ������ϵͳӦ�ó����ṩ���õĽӿ�
 *
-*  ApplicationCallID：     应用调用接口编号
-*  pParameters：           参数列表
-*  参数n： xxxxx
+*  ApplicationCallID��     Ӧ�õ��ýӿڱ��
+*  pParameters��           �����б�
+*  ����n�� xxxxx
 *
-*  返回值： 成功：XXXX，失败：XXXXX
+*  ����ֵ�� �ɹ���XXXX��ʧ�ܣ�XXXXX
 *
 *****************************************************************************/
 VOID L2_INTERFACES_Initial()

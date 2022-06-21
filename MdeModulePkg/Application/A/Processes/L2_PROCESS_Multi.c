@@ -2,13 +2,13 @@
 /*************************************************
     .
     File name:      	*.*
-    Author：	        	任启红
-    ID：					00001
+    Author��	        	������
+    ID��					00001
     Date:          		202107
     Description:    	
-    Others:         	无
+    Others:         	��
 
-    History:        	无
+    History:        	��
 	    1.  Date:
 		    Author: 
 		    ID:
@@ -52,20 +52,20 @@ UINT8 *pApplication = NULL;
 VOID (*pFunction)();
 
 
-//时间片记数，用于区分不同调度频率的任务。
+//ʱ��Ƭ�������������ֲ�ͬ����Ƶ�ʵ�����
 UINT32 TimerSliceCount = 0;
 
 
 
 /****************************************************************************
 *
-*  描述:   xxxxx
+*  ����:   xxxxx
 *
-*  参数1： xxxxx
-*  参数2： xxxxx
-*  参数n： xxxxx
+*  ����1�� xxxxx
+*  ����2�� xxxxx
+*  ����n�� xxxxx
 *
-*  返回值： 成功：XXXX，失败：XXXXX
+*  ����ֵ�� �ɹ���XXXX��ʧ�ܣ�XXXXX
 *
 *****************************************************************************/
 L2_SYSTEM_Start (IN EFI_EVENT Event, IN VOID *Context)
@@ -76,13 +76,13 @@ L2_SYSTEM_Start (IN EFI_EVENT Event, IN VOID *Context)
 
 /****************************************************************************
 *
-*  描述:   整个系统的时间片，多任务全靠这个函数驱动。
+*  ����:   ����ϵͳ��ʱ��Ƭ��������ȫ���������������
 *
-*  参数1： xxxxx
-*  参数2： xxxxx
-*  参数n： xxxxx
+*  ����1�� xxxxx
+*  ����2�� xxxxx
+*  ����n�� xxxxx
 *
-*  返回值： 成功：XXXX，失败：XXXXX
+*  ����ֵ�� �ɹ���XXXX��ʧ�ܣ�XXXXX
 *
 *****************************************************************************/
 VOID EFIAPI L2_TIMER_Slice(
@@ -92,22 +92,22 @@ VOID EFIAPI L2_TIMER_Slice(
 {
     L2_DEBUG_Print1(0, ScreenHeight - 30 - 5 * 16, "%d: TimeSlice %x %lu \n", __LINE__, Context, *((UINT32 *)Context));
 
-	//时间片计数
+	//ʱ��Ƭ����
     L2_DEBUG_Print1(0, ScreenHeight - 30 - 6 * 16, "%d: TimerSliceCount: %lu \n", __LINE__, TimerSliceCount);
     //Print(L"%lu\n", *((UINT32 *)Context));
 
-	//第一个事件分组是鼠标、键盘，所以需要频率更高的运行
+	//��һ���¼���������ꡢ���̣�������ҪƵ�ʸ��ߵ�����
     if (TimerSliceCount % 10 == 0)
     {
         gBS->SignalEvent (MultiTaskTriggerGroupEventSystem);
         gBS->SignalEvent (MultiTaskTriggerGroupEventTCPHandle);        
     }
 
-	//第二个事件分组是屏幕右下角显示日期、时间、星期几，所以频率可以低些以节约CPU资源
+	//�ڶ����¼���������Ļ���½���ʾ���ڡ�ʱ�䡢���ڼ�������Ƶ�ʿ��Ե�Щ�Խ�ԼCPU��Դ
     if (TimerSliceCount % 20 == 0)
        gBS->SignalEvent (MultiTaskTriggerGroupEventDateTimePrint);
 
-    //系统调用如果不为零，表示应用层有系统调用，则触发对应的事件组。
+    //ϵͳ���������Ϊ�㣬��ʾӦ�ò���ϵͳ���ã��򴥷���Ӧ���¼��顣
     //if (0 != *APPLICATION_CALL_FLAG_ADDRESS)
     if (TimerSliceCount == 100)
     {
@@ -129,15 +129,15 @@ VOID EFIAPI L2_TIMER_Slice(
 
 /****************************************************************************
 *
-*  描述:   多进程组，每个进程组里有多个进程，不过跟真正操作系统的进程有些差别。
-*        当前系统的多进程还有些问题，比如：不能让指定的进程在指定的内存地址执行。
+*  ����:   ������飬ÿ�����������ж�����̣���������������ϵͳ�Ľ�����Щ���
+*        ��ǰϵͳ�Ķ���̻���Щ���⣬���磺������ָ���Ľ�����ָ�����ڴ��ִַ�С�
 *
 
-*  参数1： xxxxx
-*  参数2： xxxxx
-*  参数n： xxxxx
+*  ����1�� xxxxx
+*  ����2�� xxxxx
+*  ����n�� xxxxx
 *
-*  返回值： 成功：XXXX，失败：XXXXX
+*  ����ֵ�� �ɹ���XXXX��ʧ�ܣ�XXXXX
 *
 *****************************************************************************/
 EFI_STATUS L2_COMMON_MultiProcessInit ()
@@ -156,13 +156,13 @@ EFI_STATUS L2_COMMON_MultiProcessInit ()
     
     EFI_GUID gMultiProcessGroupGuidSystemResponse  = { 0x0579257E, 0x1843, 0x45FB, { 0x83, 0x9D, 0x6B, 0x79, 0x09, 0x38, 0x29, 0xAD } };
 
-    //系统事件：键盘处理，鼠标处理，
+    //ϵͳ�¼������̴�������괦����
     EFI_EVENT_NOTIFY       TaskProcessesGroupSystem[] = {L2_KEYBOARD_Event, L2_MOUSE_Event};
 
-    //系统日期和时间在桌面右下角显示
+    //ϵͳ���ں�ʱ�����������½���ʾ
     EFI_EVENT_NOTIFY       TaskProcessesGroupDateTimePrint[] = {L2_TIMER_Print};
 
-    //TCP通信处理相关事件
+    //TCPͨ�Ŵ�������¼�
     EFI_EVENT_NOTIFY       TaskProcessesGroupTCPHandle[] = {L2_TCP4_HeartBeatNotify, L2_TCP4_ReceiveNotify, L2_TCP4_SendNotify};
 
     //step 1: run application 

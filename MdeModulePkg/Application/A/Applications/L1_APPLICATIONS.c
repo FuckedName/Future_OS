@@ -2,13 +2,13 @@
 /*************************************************
     .
     File name:      	*.*
-    Authorï¼š	        	ä»»å¯çº¢
-    IDï¼š					00001
+    Author£º	        	ÈÎÆôºì
+    ID£º					00001
     Date:          		202201
-    Description:    	ç”¨äºŽç»™åº”ç”¨æä¾›æŽ¥å£
-    Others:         	æ— 
+    Description:    	ÓÃÓÚ¸øÓ¦ÓÃÌá¹©½Ó¿Ú
+    Others:         	ÎÞ
 
-    History:        	æ— 
+    History:        	ÎÞ
 	    1.  Date:
 		    Author: 
 		    ID:
@@ -36,13 +36,13 @@
 
 /****************************************************************************
 *
-*  æè¿°:   æ“ä½œç³»ç»Ÿè¿è¡Œåº”ç”¨ç¨‹åº
+*  ÃèÊö:   ²Ù×÷ÏµÍ³ÔËÐÐÓ¦ÓÃ³ÌÐò
 *
-*  pELF_Buffer     ELFæ–‡ä»¶ç¼“å†²å†…å­˜å­˜å‚¨
-*  pReturnCodeï¼š    è¿”å›žä»ŽELFæ–‡ä»¶è§£æžçš„æœºå™¨ç 
-*  å‚æ•°nï¼š xxxxx
+*  pELF_Buffer     ELFÎÄ¼þ»º³åÄÚ´æ´æ´¢
+*  pReturnCode£º    ·µ»Ø´ÓELFÎÄ¼þ½âÎöµÄ»úÆ÷Âë
+*  ²ÎÊýn£º xxxxx
 *
-*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
+*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
 *
 *****************************************************************************/
 EFI_STATUS L2_ApplicationAnalysisELF(UINT8 *pELF_Buffer, UINT8 *pReturnCode)
