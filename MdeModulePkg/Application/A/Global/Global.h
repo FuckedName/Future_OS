@@ -355,6 +355,8 @@ extern UINT8 *pDateTimeBuffer;
 extern UINT8 *pMouseBuffer;
 extern UINT8 *pMouseSelectedBuffer;
 extern UINT8 *pStartMenuBuffer ;
+extern UINT8 *pTerminalWindowBuffer;
+
 extern UINT8 *pMyComputerBuffer;
 extern UINT8 *pMyComputerNewBuffer;
 extern UINT8 *pSystemIconMyComputerBuffer;
@@ -405,6 +407,7 @@ typedef enum
     START_MENU_BUTTON_SYSTEM_SETTING,
     START_MENU_BUTTON_MEMORY_INFORMATION,
     START_MENU_BUTTON_SYSTEM_LOG,
+    START_MENU_BUTTON_TERMINAL,
     START_MENU_BUTTON_SYSTEM_QUIT,
     START_MENU_BUTTON_MAX
 }START_MENU_BUTTON_SEQUENCE;
@@ -551,6 +554,8 @@ extern UINT16 StartMenuHeight;
 extern UINT16 MyComputerWidth;
 extern UINT16 MyComputerHeight;
 extern UINT16 SystemLogWindowWidth;
+extern UINT16 TerminalWindowWidth;
+extern UINT16 TerminalWindowHeight;
 
 extern UINT16 SystemSettingWindowWidth;
 extern UINT16 SystemSettingWindowHeight;

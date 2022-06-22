@@ -951,6 +951,68 @@ VOID L3_APPLICATION_MemoryInformationWindow(UINT16 StartX, UINT16 StartY)
 }
 
 
+	
+/****************************************************************************
+*
+*  描述:	 创建系统日志窗口，用于显示系统运行时调试日志显示，对应的图层：WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW]
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
+VOID L3_APPLICATION_TerminalWindow(UINT16 StartX, UINT16 StartY)
+{
+    UINT8 *pParent;
+    UINT16 Type;
+    CHAR8 *pWindowTitle;
+    UINT16 i = 0;
+    UINT16 j = 0;
+    
+    UINT16 Width = WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW].WindowWidth;
+    UINT16 Height = WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW].WindowHeight;
+	
+    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: SystemLogWindow: %d \n", __LINE__, Width);
+    L3_WINDOW_Create(WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW].pBuffer, pParent, Width, Height, GRAPHICS_LAYER_TERMINAL_WINDOW, pWindowTitle);
+
+    UINT8 *pBuffer = WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW].pBuffer;
+
+	WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW].StartX = StartX;
+	WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW].StartY = StartY;
+        
+    EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
+    
+    Color.Blue  = 0xff;
+    Color.Red   = 0xff;
+    Color.Green = 0xff;
+    Color.Reserved = GRAPHICS_LAYER_TERMINAL_WINDOW;
+    
+    //汉字	区位码	汉字	区位码	汉字	区位码	汉字	区位码
+    //系	4721	统	4519	日	4053	志	5430
+    UINT16 TitleX = 3;
+    UINT16 TitleY = 6;
+    
+    // 系统日志
+    L2_GRAPHICS_ChineseCharDraw(pBuffer, TitleX, TitleY, (47 - 1) * 94 + 21 - 1, Color, Width); 
+
+    TitleX += 16;
+    L2_GRAPHICS_ChineseCharDraw(pBuffer, TitleX, TitleY, (45 - 1) * 94 + 19 - 1, Color, Width);
+    
+    TitleX += 16;
+    L2_GRAPHICS_ChineseCharDraw(pBuffer, TitleX, TitleY, (40 - 1) * 94 + 53 - 1, Color, Width);
+    
+    TitleX += 16;
+    L2_GRAPHICS_ChineseCharDraw(pBuffer, TitleX, TitleY, (54 - 1) * 94 + 30 - 1, Color, Width);
+
+    L2_GRAPHICS_ChineseCharDraw(pBuffer, Width - 3 * 16 - 3, 6, (12 - 1) * 94 + 58 - 1, Color, Width);
+    L2_GRAPHICS_ChineseCharDraw(pBuffer, Width - 2 * 16 - 3, 6, (01 - 1) * 94 + 85 - 1, Color, Width);
+    L2_GRAPHICS_ChineseCharDraw(pBuffer, Width - 1 * 16 - 3, 6, (14 - 1) * 94 + 21 - 1, Color, Width);
+            
+    return EFI_SUCCESS;
+
+}
 
 
 
@@ -1078,6 +1140,8 @@ VOID L3_APPLICATION_WindowsInitial()
     L3_APPLICATION_MyComputerWindow(0, 50);
         
     L3_APPLICATION_SystemLogWindow(300, 10);
+	
+    L3_APPLICATION_TerminalWindow(100, 100);
     
     L3_APPLICATION_MemoryInformationWindow(600, 100);
 	

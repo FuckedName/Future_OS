@@ -251,7 +251,14 @@ EFI_STATUS L2_COMMON_MemoryAllocate()
         L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: pStartMenuBuffer AllocateZeroPool failed\n",  __LINE__);
         return -1;
     }   
-    
+
+	pTerminalWindowBuffer = (UINT8 *)L2_MEMORY_Allocate("Terminal Window Buffer", MEMORY_TYPE_GRAPHICS, TerminalWindowWidth * TerminalWindowHeight * 4); 
+	if (pTerminalWindowBuffer == NULL)
+	{
+		//DEBUG ((EFI_D_INFO, "MyComputer , AllocateZeroPool failed... "));
+		return -1;
+	}	 
+	
     pMyComputerBuffer = (UINT8 *)L2_MEMORY_Allocate("My Computer Buffer", MEMORY_TYPE_GRAPHICS, MyComputerWidth * MyComputerHeight * 4); 
     if (pMyComputerBuffer == NULL)
     {
