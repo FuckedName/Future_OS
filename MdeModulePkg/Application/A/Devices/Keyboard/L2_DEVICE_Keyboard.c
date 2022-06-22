@@ -46,6 +46,8 @@ UINT16 keyboard_count = 0;
 //Line 2
 #define DISPLAY_KEYBOARD_X (0) 
 #define DISPLAY_KEYBOARD_Y (ScreenHeight - 16 * 3  - 30)
+#define PARAMETER_COUNT 10
+#define PARAMETER_LENGTH 10
 
 
 //用于记录已经键盘输入字符
@@ -76,6 +78,34 @@ VOID EFIAPI L2_KEYBOARD_Init (
 }
 
 
+/****************************************************************************
+*
+*  描述:   处理键盘输入的命令行
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
+UINT32 L2_KEYBOARD_ParametersGet(UINT8 *ps, UINT8 parameters[PARAMETER_COUNT][PARAMETER_LENGTH], UINT8 *pParameterCount)
+{
+	UINT32 i = 0;	
+	while(*ps != '\0')
+	{
+		if (*ps == '-')
+		{
+			parameters[*pParameterCount][--i] = '\0';	
+			(*pParameterCount)++;
+			i = 0;
+		}
+		
+		parameters[*pParameterCount][i++] = *ps++;
+	}
+}
+
+
 
 /****************************************************************************
 *
@@ -88,17 +118,22 @@ VOID EFIAPI L2_KEYBOARD_Init (
 *  返回值： 成功：XXXX，失败：XXXXX
 *
 *****************************************************************************/
-VOID L2_KEYBOARD_CommandHandle ()
+VOID L2_KEYBOARD_CommandHandle()
 {    
-    if (L1_STRING_Compare2(pKeyboardInputBuffer, "address") == 0) // Enter pressed，显示以输入地址开始的一段内存地址
+	int parametercount = 0;
+	char parameters[PARAMETER_COUNT][PARAMETER_LENGTH] = {0};
+	
+	L2_KEYBOARD_ParametersGet(pKeyboardInputBuffer, parameters, &parametercount);
+	
+    if (L1_STRING_Compare2(parameters[0], "address") == 0) // Enter pressed，显示以输入地址开始的一段内存地址
     {
         L2_System_PrintMemoryBuffer();                        
     }    
-    else if (L1_STRING_Compare2(pKeyboardInputBuffer, "clear") == 0) //When click 'clear' then Clear log window content
+    else if (L1_STRING_Compare2(parameters[0], "clear") == 0) //When click 'clear' then Clear log window content
     {
 		L2_GRAPHICS_SystemLogBufferClear();        
     }
-    else if (L1_STRING_Compare2(pKeyboardInputBuffer, "shutdown") == 0)  //When click 'shutdown' then Shutdown System
+    else if (L1_STRING_Compare2(parameters[0], "shutdown") == 0)  //When click 'shutdown' then Shutdown System
     {
     	L2_System_Shutdown();
     }
@@ -172,7 +207,7 @@ VOID EFIAPI L2_KEYBOARD_Event (
 			
 	        //初始化键盘输入字符数组
 	        keyboard_input_count = 0;
-	        
+
 	        for (UINT16 i = 0; i < KEYBOARD_BUFFER_LENGTH; i++)
 	            pKeyboardInputBuffer[i] = '\0';
 		}

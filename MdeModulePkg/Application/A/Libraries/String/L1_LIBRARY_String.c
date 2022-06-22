@@ -319,5 +319,8 @@ char *L1_STRING_FloatToString(float val, int precision, char *buf)
 }
 
 
+char *L1_STRING_ParametersGet()
+{
+}
 
 
