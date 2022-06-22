@@ -971,16 +971,16 @@ VOID L3_APPLICATION_TerminalWindow(UINT16 StartX, UINT16 StartY)
     UINT16 i = 0;
     UINT16 j = 0;
     
-    UINT16 Width = WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW].WindowWidth;
-    UINT16 Height = WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW].WindowHeight;
+    UINT16 Width = WindowLayers.item[GRAPHICS_LAYER_TERMINAL_WINDOW].WindowWidth;
+    UINT16 Height = WindowLayers.item[GRAPHICS_LAYER_TERMINAL_WINDOW].WindowHeight;
 	
-    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: SystemLogWindow: %d \n", __LINE__, Width);
-    L3_WINDOW_Create(WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW].pBuffer, pParent, Width, Height, GRAPHICS_LAYER_TERMINAL_WINDOW, pWindowTitle);
+    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: L3_APPLICATION_TerminalWindow: %d \n", __LINE__, Width);
+    L3_WINDOW_Create(WindowLayers.item[GRAPHICS_LAYER_TERMINAL_WINDOW].pBuffer, pParent, Width, Height, GRAPHICS_LAYER_TERMINAL_WINDOW, pWindowTitle);
 
-    UINT8 *pBuffer = WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW].pBuffer;
+    UINT8 *pBuffer = WindowLayers.item[GRAPHICS_LAYER_TERMINAL_WINDOW].pBuffer;
 
-	WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW].StartX = StartX;
-	WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW].StartY = StartY;
+	WindowLayers.item[GRAPHICS_LAYER_TERMINAL_WINDOW].StartX = StartX;
+	WindowLayers.item[GRAPHICS_LAYER_TERMINAL_WINDOW].StartY = StartY;
         
     EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
     
