@@ -1931,6 +1931,34 @@ EFI_STATUS L2_GRAPHICS_SystemSettingInit()
 
 
 
+/****************************************************************************
+*
+*  描述:   关机屏幕
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
+EFI_STATUS L2_GRAPHICS_SystemLogBufferClear()
+{
+	for (UINT32 i = 23; i < SystemLogWindowHeight - 3; i++)
+	{
+		for (UINT32 j = 3; j < SystemLogWindowWidth - 3; j++)
+		{
+			pSystemLogWindowBuffer[4 * (i * SystemLogWindowWidth + j)] = 0;
+			pSystemLogWindowBuffer[4 * (i * SystemLogWindowWidth + j) + 1] = 0;
+			pSystemLogWindowBuffer[4 * (i * SystemLogWindowWidth + j) + 2] = 0;
+		}
+	}	
+
+	//初始化后，从第1行开始显示
+	LogStatusErrorCount = 0;
+
+}
+
 
 /****************************************************************************
 *

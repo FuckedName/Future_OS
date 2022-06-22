@@ -40,6 +40,8 @@
 
 extern UINT8 EFI_FILE_STORE_PATH_PARTITION_NAME[50];
 
+#define KEYBOARD_BUFFER_LENGTH (512) 
+
 
 #define INFO_SELF(...)   \
             do {   \
@@ -341,6 +343,8 @@ extern UINT8 *pDeskWallpaperTempBuffer;
 extern UINT8 *sChineseChar;
 extern UINT8 *sChineseChar12;
 extern UINT8 *pSystemIconBuffer[SYSTEM_ICON_MAX];
+extern char  pKeyboardInputBuffer[KEYBOARD_BUFFER_LENGTH];
+
 
 extern UINT8 *pSystemIconFolderBuffer;
 extern UINT8 *pSystemIconTextBuffer;
