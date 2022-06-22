@@ -1300,7 +1300,7 @@ VOID L2_MOUSE_SystemLogClicked()
 *****************************************************************************/
 VOID L2_MOUSE_TerminalWindowClicked()
 {   
-    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d L2_MOUSE_SystemLogClicked\n", __LINE__);
+    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d L2_MOUSE_TerminalWindowClicked\n", __LINE__);
     //DisplaySystemLogWindowFlag = TRUE;  
     //WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW].DisplayFlag = TRUE;
     //if (FALSE == WindowLayers.item[GRAPHICS_LAYER_TERMINAL_WINDOW].DisplayFlag)
@@ -1597,7 +1597,7 @@ void L2_GRAPHICS_ParameterInit()
 
     WindowLayers.LayerCount++;
 	
-    WindowLayers.item[GRAPHICS_LAYER_TERMINAL_WINDOW].DisplayFlag = TRUE;
+    WindowLayers.item[GRAPHICS_LAYER_TERMINAL_WINDOW].DisplayFlag = FALSE;
     L1_MEMORY_Copy((UINT8 *)WindowLayers.item[GRAPHICS_LAYER_TERMINAL_WINDOW].Name, "Terminal layer", sizeof("Terminal layer"));
     WindowLayers.item[GRAPHICS_LAYER_TERMINAL_WINDOW].pBuffer = pTerminalWindowBuffer;
     WindowLayers.item[GRAPHICS_LAYER_TERMINAL_WINDOW].StartX = 0;
@@ -1629,7 +1629,8 @@ void L2_GRAPHICS_ParameterInit()
     WindowLayers.LayerSequences[1] = GRAPHICS_LAYER_MY_COMPUTER_WINDOW;
     WindowLayers.LayerSequences[2] = GRAPHICS_LAYER_MEMORY_INFORMATION_WINDOW;
     WindowLayers.LayerSequences[3] = GRAPHICS_LAYER_SYSTEM_LOG_WINDOW;
-    WindowLayers.LayerSequences[4] = GRAPHICS_LAYER_SYSTEM_SETTING_WINDOW;
+    WindowLayers.LayerSequences[4] = GRAPHICS_LAYER_TERMINAL_WINDOW;
+    WindowLayers.LayerSequences[5] = GRAPHICS_LAYER_SYSTEM_SETTING_WINDOW;
 	
     WindowLayers.ActiveWindowCount = WindowLayers.LayerCount - 1;
 

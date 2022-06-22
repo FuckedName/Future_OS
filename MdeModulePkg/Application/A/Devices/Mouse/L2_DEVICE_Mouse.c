@@ -136,8 +136,8 @@ VOID EFIAPI L2_MOUSE_Event (IN EFI_EVENT Event, IN VOID *Context)
     
     //L2_DEBUG_Print1(0, ScreenHeight - 30 -  8 * 16, "%d: X move: %d Y move: %d left: %d right: %d", __LINE__, State.RelativeMovementX, State.RelativeMovementY, State.LeftButton, State.RightButton);
 	
-	iMouseX = iMouseX + State.RelativeMovementX;
-	iMouseY = iMouseY + State.RelativeMovementY; 
+	iMouseX = iMouseX + State.RelativeMovementX % 20;
+	iMouseY = iMouseY + State.RelativeMovementY % 20; 
 
 	iMouseX = (iMouseX < 0) ? 0 : iMouseX;
 	iMouseX = (iMouseX > ScreenWidth - 16) ? ScreenWidth - 16 : iMouseX;
