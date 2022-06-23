@@ -94,6 +94,9 @@ EFI_GRAPHICS_OUTPUT_BLT_PIXEL WhiteColor;
 EFI_GRAPHICS_OUTPUT_BLT_PIXEL BlackColor;
 
 
+#define WINDOW_DEFAULT_WIDTH  (ScreenWidth / 2)
+#define WINDOW_DEFAULT_HEIGHT (ScreenHeight / 2)
+
 
 EFI_GRAPHICS_OUTPUT_BLT_PIXEL MouseMoveoverObjectDrawColor;
 
@@ -734,7 +737,7 @@ VOID L2_MOUSE_TerminalWindowCloseClicked()
     //WindowLayers.item[3].DisplayFlag = 0;
 
 
-	L3_APPLICATION_MyComputerWindow(0, 50);
+	//L3_APPLICATION_MyComputerWindow(0, 50);
 	
     if (TRUE == WindowLayers.item[GRAPHICS_LAYER_TERMINAL_WINDOW].DisplayFlag)
     {
@@ -1534,8 +1537,8 @@ void L2_GRAPHICS_ParameterInit()
     WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW].pBuffer = pSystemLogWindowBuffer;
     WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW].StartX = 0;
     WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW].StartY = 0;
-    WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW].WindowWidth  = SystemLogWindowWidth;
-    WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW].WindowHeight = SystemLogWindowHeight;
+    WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW].WindowWidth =  WINDOW_DEFAULT_WIDTH;
+    WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW].WindowHeight = WINDOW_DEFAULT_HEIGHT;
     WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW].LayerID = GRAPHICS_LAYER_SYSTEM_LOG_WINDOW;
 
     WindowLayers.LayerCount++;
@@ -1568,8 +1571,8 @@ void L2_GRAPHICS_ParameterInit()
     WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].pBuffer = pMyComputerBuffer;
     WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].StartX = 0;
     WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].StartY = 0;
-    WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].WindowWidth = MyComputerWidth;
-    WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].WindowHeight = MyComputerHeight;
+    WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].WindowWidth = WINDOW_DEFAULT_WIDTH;
+    WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].WindowHeight = WINDOW_DEFAULT_HEIGHT;
     WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].LayerID = GRAPHICS_LAYER_MY_COMPUTER_WINDOW;
     WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].Step = 4;
     
@@ -1602,8 +1605,8 @@ void L2_GRAPHICS_ParameterInit()
     WindowLayers.item[GRAPHICS_LAYER_TERMINAL_WINDOW].pBuffer = pTerminalWindowBuffer;
     WindowLayers.item[GRAPHICS_LAYER_TERMINAL_WINDOW].StartX = 0;
     WindowLayers.item[GRAPHICS_LAYER_TERMINAL_WINDOW].StartY = 0;
-    WindowLayers.item[GRAPHICS_LAYER_TERMINAL_WINDOW].WindowWidth = TerminalWindowWidth;
-    WindowLayers.item[GRAPHICS_LAYER_TERMINAL_WINDOW].WindowHeight= TerminalWindowHeight;
+    WindowLayers.item[GRAPHICS_LAYER_TERMINAL_WINDOW].WindowWidth = WINDOW_DEFAULT_WIDTH;
+    WindowLayers.item[GRAPHICS_LAYER_TERMINAL_WINDOW].WindowHeight = WINDOW_DEFAULT_HEIGHT;
     WindowLayers.item[GRAPHICS_LAYER_TERMINAL_WINDOW].LayerID = GRAPHICS_LAYER_TERMINAL_WINDOW;
 
     WindowLayers.LayerCount++;
@@ -1873,23 +1876,21 @@ EFI_STATUS L2_GRAPHICS_StartMenuInit()
     
     L2_GRAPHICS_ChineseCharDraw(pStartMenuBuffer, x , y,     (54 - 1) * 94 + 30 - 1, Color, StartMenuWidth);  
 
+	int ChineseChars[1][4] = 
+	{
+		{L'Áªà', L'Á´Ø', L'Á™ó', L'Âè£'},
+	};
+
+
 	
     //œµÕ≥»’÷æ
     //∫∫◊÷	«¯Œª¬Î	∫∫◊÷	«¯Œª¬Î	∫∫◊÷	«¯Œª¬Î	∫∫◊÷	«¯Œª¬Î
     //œµ	4721	Õ≥	4519	»’	4053	÷æ	5430
     x = 3;
     y += 16;
-    L2_GRAPHICS_ChineseCharDraw(pStartMenuBuffer, x , y,     (47 - 1 ) * 94 + 21 - 1, Color, StartMenuWidth);    
-    x += 16;
     
-    L2_GRAPHICS_ChineseCharDraw(pStartMenuBuffer, x , y,     (45 - 1) * 94 + 19 - 1, Color, StartMenuWidth);
-    x += 16;
-    
-    L2_GRAPHICS_ChineseCharDraw(pStartMenuBuffer, x , y,     (40 - 1) * 94 + 53 - 1, Color, StartMenuWidth);
-    x += 16;
-    
-    L2_GRAPHICS_ChineseCharDraw(pStartMenuBuffer, x , y,     (54 - 1) * 94 + 30 - 1, Color, StartMenuWidth);   
-    
+	L3_WINDOW_ChineseCharsDraw(pStartMenuBuffer, ChineseChars[0], sizeof(ChineseChars[0])/sizeof(int), 12, &x , y, Color, StartMenuWidth);
+	
     //œµÕ≥ÕÀ≥ˆ
     //ÕÀ 4543    ≥ˆ   1986
     x = 3;
@@ -2394,13 +2395,15 @@ MY_COMPUTER_WINDOW_CLICKED_EVENT L2_GRAPHICS_TerminalLayerClickEventGet()
 		
     UINT16 PositionX = WindowLayers.item[GRAPHICS_LAYER_TERMINAL_WINDOW].StartX;
     UINT16 PositionY = WindowLayers.item[GRAPHICS_LAYER_TERMINAL_WINDOW].StartY;
+    UINT16 WindowWidth = WindowLayers.item[GRAPHICS_LAYER_TERMINAL_WINDOW].WindowWidth;
+    UINT16 WindowHeight = WindowLayers.item[GRAPHICS_LAYER_TERMINAL_WINDOW].WindowHeight;
     
     if (FALSE == WindowLayers.item[GRAPHICS_LAYER_TERMINAL_WINDOW].DisplayFlag)
     {
         return START_MENU_ITEM_INIT_EVENT;
     }
     
-    if (L1_GRAPHICS_InsideRectangle(PositionX + TerminalWindowWidth - 20, PositionX + TerminalWindowWidth - 4, 
+    if (L1_GRAPHICS_InsideRectangle(PositionX + WindowWidth - 20, PositionX + WindowWidth - 4, 
                                        PositionY + 0, PositionY + 16))  
     {
         L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_TERMINAL_WINDOW], "%d: TERMINAL_WINDOW_CLOSE_WINDOW_CLICKED_EVENT\n", __LINE__);
@@ -2430,13 +2433,15 @@ MY_COMPUTER_WINDOW_CLICKED_EVENT L2_GRAPHICS_MyComputerLayerClickEventGet()
 		
     UINT16 MyComputerPositionX = WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].StartX;
     UINT16 MyComputerPositionY = WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].StartY;
+    UINT16 WindowWidth = WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].WindowWidth;
+    UINT16 WindowHeight = WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].WindowHeight;
     
     if (FALSE == WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW].DisplayFlag)
     {
         return START_MENU_ITEM_INIT_EVENT;
     }
     
-    if (L1_GRAPHICS_InsideRectangle(MyComputerPositionX + MyComputerWidth - 20, MyComputerPositionX + MyComputerWidth - 4, 
+    if (L1_GRAPHICS_InsideRectangle(MyComputerPositionX + WindowWidth - 20, MyComputerPositionX + MyComputerWidth - 4, 
                                        MyComputerPositionY + 0, MyComputerPositionY + 16))  
     {
         L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: MY_COMPUTER_CLOSE_CLICKED_EVENT\n", __LINE__);
@@ -2768,9 +2773,7 @@ VOID L3_GRAPHICS_MyComputerClickEventHandle(MY_COMPUTER_WINDOW_CLICKED_EVENT eve
 *
 *****************************************************************************/
 VOID L3_GRAPHICS_MyComupterClickEventHandle(MY_COMPUTER_WINDOW_CLICKED_EVENT event)
-{    
-	MyComputerCurrentState;
-	
+{    	
 	switch(event)
 	{
 		case MY_COMPUTER_WINDOW_CLOSE_WINDOW_CLICKED_EVENT:
@@ -2810,33 +2813,14 @@ VOID L3_GRAPHICS_MyComupterClickEventHandle(MY_COMPUTER_WINDOW_CLICKED_EVENT eve
 *
 *****************************************************************************/
 VOID L3_GRAPHICS_TerminalClickEventHandle(MY_COMPUTER_WINDOW_CLICKED_EVENT event)
-{    
-	MyComputerCurrentState;
-	
+{    	
 	switch(event)
 	{
-		case MY_COMPUTER_WINDOW_CLOSE_WINDOW_CLICKED_EVENT:
-			L2_MOUSE_MyComputerCloseClicked(); break;
+		case TERMINAL_WINDOW_CLOSE_WINDOW_CLICKED_EVENT:
+			L2_MOUSE_TerminalWindowCloseClicked(); break;
 
 		default: break;
 	}
-	
-    for (int i = 0; i <  sizeof(MyComputerStateTransformTable)/sizeof(MyComputerStateTransformTable[0]); i++ )
-    {
-        //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: MyComputerStateTransformTable[i].CurrentState: %d\n", __LINE__, MyComputerStateTransformTable[i].CurrentState);
-        //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: i: %d\n", __LINE__, i);
-        if (MyComputerStateTransformTable[i].CurrentState == MyComputerNextState 
-            && event == MyComputerStateTransformTable[i].event )
-        {
-            MyComputerNextState = MyComputerStateTransformTable[i].NextState;
-
-            // need to check the return value after function runs..... 
-            MyComputerStateTransformTable[i].pAction();
-            L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: MouseClickEvent: %d StartMenuNextState: %d\n", __LINE__, event, StartMenuNextState);
-            break;
-        }   
-    }
-
 }
 
 

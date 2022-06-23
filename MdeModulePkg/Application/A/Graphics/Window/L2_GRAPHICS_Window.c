@@ -988,23 +988,32 @@ VOID L3_APPLICATION_TerminalWindow(UINT16 StartX, UINT16 StartY)
     Color.Red   = 0xff;
     Color.Green = 0xff;
     Color.Reserved = GRAPHICS_LAYER_TERMINAL_WINDOW;
-    
+
+
+    // The Left of Window
+    for (i = 23; i < Height; i++)
+    {
+        for (j = 0; j < Width; j++)
+        {
+            pBuffer[(i * Width + j) * 4]     = 235;
+            pBuffer[(i * Width + j) * 4 + 1] = 235;
+            pBuffer[(i * Width + j) * 4 + 2] = 235;
+            pBuffer[(i * Width + j) * 4 + 3] = GRAPHICS_LAYER_TERMINAL_WINDOW;
+        }
+    }
+
+	
     //汉字	区位码	汉字	区位码	汉字	区位码	汉字	区位码
     //系	4721	统	4519	日	4053	志	5430
     UINT16 TitleX = 3;
     UINT16 TitleY = 6;
     
-    // 系统日志
-    L2_GRAPHICS_ChineseCharDraw(pBuffer, TitleX, TitleY, (47 - 1) * 94 + 21 - 1, Color, Width); 
-
-    TitleX += 16;
-    L2_GRAPHICS_ChineseCharDraw(pBuffer, TitleX, TitleY, (45 - 1) * 94 + 19 - 1, Color, Width);
-    
-    TitleX += 16;
-    L2_GRAPHICS_ChineseCharDraw(pBuffer, TitleX, TitleY, (40 - 1) * 94 + 53 - 1, Color, Width);
-    
-    TitleX += 16;
-    L2_GRAPHICS_ChineseCharDraw(pBuffer, TitleX, TitleY, (54 - 1) * 94 + 30 - 1, Color, Width);
+	int ChineseChars[1][4] = 
+	{
+		{L'终', L'端', L'窗', L'口'},
+	};
+	
+	L3_WINDOW_ChineseCharsDraw(pBuffer, ChineseChars[0], sizeof(ChineseChars[0])/sizeof(int), 12, &TitleX, TitleY, Color, Width);
 
     L2_GRAPHICS_ChineseCharDraw(pBuffer, Width - 3 * 16 - 3, 6, (12 - 1) * 94 + 58 - 1, Color, Width);
     L2_GRAPHICS_ChineseCharDraw(pBuffer, Width - 2 * 16 - 3, 6, (01 - 1) * 94 + 85 - 1, Color, Width);

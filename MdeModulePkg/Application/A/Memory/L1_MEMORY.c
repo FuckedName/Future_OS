@@ -182,6 +182,7 @@ EFI_STATUS L2_COMMON_MemoryAllocate()
     
     pDeskDisplayBuffer = L2_MEMORY_Allocate("Desk Display Buffer", MEMORY_TYPE_GRAPHICS, ScreenWidth * ScreenHeight * 4);
 
+	//这个是存放壁纸的，所以大小为1920*1080
     pDeskWallpaperBuffer = L2_MEMORY_Allocate("Desk Wall paper Buffer", MEMORY_TYPE_GRAPHICS, 1920 * 1080 * 3 + 0x36);
     
     pDeskWallpaperZoomedBuffer = L2_MEMORY_Allocate("Desk Wall paper Zoomed Buffer", MEMORY_TYPE_GRAPHICS, ScreenWidth * ScreenHeight * 3);

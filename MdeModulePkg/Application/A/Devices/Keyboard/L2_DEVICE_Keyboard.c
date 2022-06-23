@@ -43,6 +43,9 @@ UINT16 display_sector_number = 0;
 
 UINT16 keyboard_count = 0;
 
+//当前终端窗口显示的行:
+UINT16 TerminalCurrentLineCount = 0;
+
 //Line 2
 #define DISPLAY_KEYBOARD_X (0) 
 #define DISPLAY_KEYBOARD_Y (ScreenHeight - 16 * 3  - 30)
@@ -199,14 +202,23 @@ VOID EFIAPI L2_KEYBOARD_Event (
 		if (KEYBOARD_KEY_ENTER != uniChar)
 	    {
 	    	pKeyboardInputBuffer[keyboard_input_count++] = uniChar;
+
+			//计算
+			int i= 0;
+			i = (ScreenHeight - 23) / 2;
+			i /= 16;
+			
+			//写入键盘缓存到终端窗口。
+	        L2_DEBUG_Print3(3, 23 + TerminalCurrentLineCount % i * 16, WindowLayers.item[GRAPHICS_LAYER_TERMINAL_WINDOW], "%a", pKeyboardInputBuffer);
 	    }
 
 		if (KEYBOARD_KEY_ENTER == uniChar)
-	    {			
+	    {						
 	    	L2_KEYBOARD_CommandHandle();
 			
 	        //初始化键盘输入字符数组
 	        keyboard_input_count = 0;
+			TerminalCurrentLineCount++;
 
 	        for (UINT16 i = 0; i < KEYBOARD_BUFFER_LENGTH; i++)
 	            pKeyboardInputBuffer[i] = '\0';
@@ -214,6 +226,7 @@ VOID EFIAPI L2_KEYBOARD_Event (
         
     }  
     
+
      //DrawAsciiCharUseBuffer(pDeskBuffer, DISPLAY_KEYBOARD_X, DISPLAY_KEYBOARD_Y, uniChar, Color);
 
 	//更新图层信息，这里可以稍优化下，如果没有按键事件，则可以不更新图层，以节省CPU资源
