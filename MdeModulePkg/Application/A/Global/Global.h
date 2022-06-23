@@ -41,7 +41,7 @@
 extern UINT8 EFI_FILE_STORE_PATH_PARTITION_NAME[50];
 
 #define KEYBOARD_BUFFER_LENGTH (512) 
-
+#define COMMAND_LINE_PREFIX_BUFFER_LENGTH (512) 
 
 #define INFO_SELF(...)   \
             do {   \

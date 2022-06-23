@@ -55,6 +55,7 @@ UINT16 TerminalCurrentLineCount = 0;
 
 //用于记录已经键盘输入字符
 char pKeyboardInputBuffer[KEYBOARD_BUFFER_LENGTH] = {0};
+char pCommandLinePrefixBuffer[COMMAND_LINE_PREFIX_BUFFER_LENGTH] = {0};
 
 EFI_HANDLE                        *Handles;
 UINTN                             HandleCount;
@@ -202,14 +203,15 @@ VOID EFIAPI L2_KEYBOARD_Event (
 		if (KEYBOARD_KEY_ENTER != uniChar)
 	    {
 	    	pKeyboardInputBuffer[keyboard_input_count++] = uniChar;
-
+			L1_STRING_Copy(pCommandLinePrefixBuffer, "[root@Notepad /home/Jason/]# ");
+			//char pCommandLinePrefixBuffer[COMMAND_LINE_PREFIX_BUFFER_LENGTH] = ;
 			//计算
 			int i= 0;
 			i = (ScreenHeight - 23) / 2;
 			i /= 16;
 			
 			//写入键盘缓存到终端窗口。
-	        L2_DEBUG_Print3(3, 23 + TerminalCurrentLineCount % i * 16, WindowLayers.item[GRAPHICS_LAYER_TERMINAL_WINDOW], "%a", pKeyboardInputBuffer);
+	        L2_DEBUG_Print3(3, 23 + TerminalCurrentLineCount % i * 16, WindowLayers.item[GRAPHICS_LAYER_TERMINAL_WINDOW], "%a%a", pCommandLinePrefixBuffer, pKeyboardInputBuffer);
 	    }
 
 		if (KEYBOARD_KEY_ENTER == uniChar)
