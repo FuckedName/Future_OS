@@ -49,8 +49,6 @@ UINT16 TerminalCurrentLineCount = 0;
 //Line 2
 #define DISPLAY_KEYBOARD_X (0) 
 #define DISPLAY_KEYBOARD_Y (ScreenHeight - 16 * 3  - 30)
-#define PARAMETER_COUNT 10
-#define PARAMETER_LENGTH 10
 
 
 //用于记录已经键盘输入字符
@@ -98,15 +96,19 @@ UINT32 L2_KEYBOARD_ParametersGet(UINT8 *ps, UINT8 parameters[PARAMETER_COUNT][PA
 	UINT32 i = 0;	
 	while(*ps != '\0')
 	{
-		if (*ps == '-')
+		// for example: clear -a aaa -b bbb -c ccc
+		// for example: cd /, cd .., cd xxx
+		if (' ' == *ps)
 		{
-			parameters[*pParameterCount][--i] = '\0';	
+			parameters[*pParameterCount][i] = '\0';	
 			(*pParameterCount)++;
 			i = 0;
 		}
 		
 		parameters[*pParameterCount][i++] = *ps++;
 	}
+
+	parameters[*pParameterCount][i] = '\0';	
 }
 
 
@@ -141,7 +143,15 @@ VOID L2_KEYBOARD_CommandHandle()
     {
     	L2_System_Shutdown();
     }
-	
+    else if (L1_STRING_Compare2(parameters[0], "cd") == 0)  //When click 'shutdown' then Shutdown System
+    {
+    	L2_APPLICATIONS_Command_cd(parameters);
+    }
+    else if (L1_STRING_Compare2(parameters[0], "ls") == 0)  //When click 'shutdown' then Shutdown System
+    {
+    	L2_APPLICATIONS_Command_ls(parameters);
+    }
+
 	//显示输入的按键
 	L2_DEBUG_Print1(DISPLAY_KEYBOARD_X, DISPLAY_KEYBOARD_Y, "%a keyboard_input_count: %04d ", pKeyboardInputBuffer, keyboard_input_count);	  
 }
@@ -206,12 +216,12 @@ VOID EFIAPI L2_KEYBOARD_Event (
 			L1_STRING_Copy(pCommandLinePrefixBuffer, "[root@Notepad /home/Jason/]# ");
 			//char pCommandLinePrefixBuffer[COMMAND_LINE_PREFIX_BUFFER_LENGTH] = ;
 			//计算
-			int i= 0;
-			i = (ScreenHeight - 23) / 2;
-			i /= 16;
+			int TerminalWindowMaxLineCount = 0;
+			TerminalWindowMaxLineCount = (ScreenHeight - 23) / 2;
+			TerminalWindowMaxLineCount /= 16;
 			
 			//写入键盘缓存到终端窗口。
-	        L2_DEBUG_Print3(3, 23 + TerminalCurrentLineCount % i * 16, WindowLayers.item[GRAPHICS_LAYER_TERMINAL_WINDOW], "%a%a", pCommandLinePrefixBuffer, pKeyboardInputBuffer);
+	        L2_DEBUG_Print3(3, 23 + TerminalCurrentLineCount % TerminalWindowMaxLineCount * 16, WindowLayers.item[GRAPHICS_LAYER_TERMINAL_WINDOW], "%a%a", pCommandLinePrefixBuffer, pKeyboardInputBuffer);
 	    }
 
 		if (KEYBOARD_KEY_ENTER == uniChar)
@@ -220,6 +230,8 @@ VOID EFIAPI L2_KEYBOARD_Event (
 			
 	        //初始化键盘输入字符数组
 	        keyboard_input_count = 0;
+
+			//如果敲回车，则表示需要新起一行
 			TerminalCurrentLineCount++;
 
 	        for (UINT16 i = 0; i < KEYBOARD_BUFFER_LENGTH; i++)

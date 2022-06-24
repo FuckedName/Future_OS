@@ -821,20 +821,11 @@ VOID L3_APPLICATION_MyComputerWindow(UINT16 StartX, UINT16 StartY)
         //UINT8 FileSystemType = L2_FILE_PartitionTypeAnalysis(i);
         if (FILE_SYSTEM_FAT32 == device[i].FileSystemType)
         {
-            type[0] = 'F';
-            type[1] = 'A';
-            type[2] = 'T';
-            type[3] = '3';
-            type[4] = '2';
-            type[5] = '\0';
+        	L1_STRING_Copy(type, "FAT32");
         }
         else if(FILE_SYSTEM_NTFS == device[i].FileSystemType) 
         {   
-            type[0] = 'N';
-            type[1] = 'T';
-            type[2] = 'F';
-            type[3] = 'S';
-            type[4] = '\0';
+        	L1_STRING_Copy(type, "NTFS");
         }
 		//L2_FILE_PartitionNameGet(i);
 
@@ -1018,7 +1009,13 @@ VOID L3_APPLICATION_TerminalWindow(UINT16 StartX, UINT16 StartY)
     L2_GRAPHICS_ChineseCharDraw(pBuffer, Width - 3 * 16 - 3, 6, (12 - 1) * 94 + 58 - 1, Color, Width);
     L2_GRAPHICS_ChineseCharDraw(pBuffer, Width - 2 * 16 - 3, 6, (01 - 1) * 94 + 85 - 1, Color, Width);
     L2_GRAPHICS_ChineseCharDraw(pBuffer, Width - 1 * 16 - 3, 6, (14 - 1) * 94 + 21 - 1, Color, Width);
-            
+
+	L1_STRING_Copy(pCommandLinePrefixBuffer, "[root@Notepad /home/Jason/]# ");
+	
+	//Ð´Èë¼üÅÌ»º´æµ½ÖÕ¶Ë´°¿Ú¡£
+    L2_DEBUG_Print3(3, 23, WindowLayers.item[GRAPHICS_LAYER_TERMINAL_WINDOW], "%a", pCommandLinePrefixBuffer);
+
+    
     return EFI_SUCCESS;
 
 }

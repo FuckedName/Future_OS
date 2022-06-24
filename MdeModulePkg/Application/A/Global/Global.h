@@ -43,6 +43,11 @@ extern UINT8 EFI_FILE_STORE_PATH_PARTITION_NAME[50];
 #define KEYBOARD_BUFFER_LENGTH (512) 
 #define COMMAND_LINE_PREFIX_BUFFER_LENGTH (512) 
 
+
+#define PARAMETER_COUNT 10
+#define PARAMETER_LENGTH 10
+
+
 #define INFO_SELF(...)   \
             do {   \
                  Print(L"%d ",__LINE__);  \
@@ -365,6 +370,8 @@ extern UINT8 *pSystemIconRecycleBuffer;
 extern UINT8 *pSystemLogWindowBuffer;
 extern UINT8 *pSystemSettingWindowBuffer;
 extern UINT16 SystemLogWindowHeight;
+extern char pCommandLinePrefixBuffer[COMMAND_LINE_PREFIX_BUFFER_LENGTH];
+extern UINT16 TerminalCurrentLineCount;
                       
 extern UINT32 BlockSize;                                     
 extern UINTN PartitionCount;                                    

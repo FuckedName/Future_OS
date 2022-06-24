@@ -68,6 +68,10 @@
   	Applications/L1_APPLICATIONS.h
   	Applications/L2_APPLICATIONS.c
   	Applications/L2_APPLICATIONS.h
+  	Applications/Commands/L2_APPLICATIONS_Command_cd.c
+  	Applications/Commands/L2_APPLICATIONS_Command_cd.h
+  	Applications/Commands/L2_APPLICATIONS_Command_ls.c
+  	Applications/Commands/L2_APPLICATIONS_Command_ls.h
   	Partitions/NTFS/L2_PARTITION_NTFS.c
 	Partitions/NTFS/L2_PARTITION_NTFS.h
 	Partitions/NTFS/L1_PARTITION_NTFS.c

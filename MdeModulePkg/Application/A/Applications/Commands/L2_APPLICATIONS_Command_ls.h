@@ -23,11 +23,13 @@
 
 
 
+#pragma once
 
-#include <L1_DEVICE_Keyboard.h>
-//#include <Device/Mouse/L2_DEVICE_Mouse.h>
+#include <Protocol/GraphicsOutput.h>
+#include <Library/BaseLib.h>
 
-//#include <L2_GRAPHICS.h>
+#include <Global/Global.h>
 
 
+EFI_STATUS L2_APPLICATIONS_Command_ls(UINT8 parameters[PARAMETER_COUNT][PARAMETER_LENGTH], UINT8 *pReturnCode);
 
