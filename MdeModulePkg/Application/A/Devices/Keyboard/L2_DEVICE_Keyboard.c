@@ -151,6 +151,10 @@ VOID L2_KEYBOARD_CommandHandle()
     {
     	L2_APPLICATIONS_Command_ls(parameters);
     }
+    else if (L1_STRING_Compare2(parameters[0], "curl") == 0)  //When click 'shutdown' then Shutdown System
+    {
+    	L2_APPLICATIONS_Command_curl(parameters);
+    }
 
 	//显示输入的按键
 	L2_DEBUG_Print1(DISPLAY_KEYBOARD_X, DISPLAY_KEYBOARD_Y, "%a keyboard_input_count: %04d ", pKeyboardInputBuffer, keyboard_input_count);	  

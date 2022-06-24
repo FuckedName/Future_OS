@@ -72,6 +72,8 @@
   	Applications/Commands/L2_APPLICATIONS_Command_cd.h
   	Applications/Commands/L2_APPLICATIONS_Command_ls.c
   	Applications/Commands/L2_APPLICATIONS_Command_ls.h
+  	Applications/Commands/L2_APPLICATIONS_Command_curl.c
+  	Applications/Commands/L2_APPLICATIONS_Command_curl.h
   	Partitions/NTFS/L2_PARTITION_NTFS.c
 	Partitions/NTFS/L2_PARTITION_NTFS.h
 	Partitions/NTFS/L1_PARTITION_NTFS.c
