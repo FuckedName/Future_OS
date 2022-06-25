@@ -74,6 +74,8 @@
   	Applications/Commands/L2_APPLICATIONS_Command_ls.h
   	Applications/Commands/L2_APPLICATIONS_Command_curl.c
   	Applications/Commands/L2_APPLICATIONS_Command_curl.h
+  	Applications/Commands/L2_APPLICATIONS_Command_ping.c
+  	Applications/Commands/L2_APPLICATIONS_Command_ping.h
   	Partitions/NTFS/L2_PARTITION_NTFS.c
 	Partitions/NTFS/L2_PARTITION_NTFS.h
 	Partitions/NTFS/L1_PARTITION_NTFS.c
@@ -149,6 +151,14 @@
   gEfiTcp4ProtocolGuid
   gEfiWiFiProtocolGuid
   gEfiShellProtocolGuid
+  gEfiIp4ServiceBindingProtocolGuid
+  gEfiIp6ConfigProtocolGuid
+  gEfiIp4Config2ProtocolGuid
+  gEfiIp6ProtocolGuid
+  gEfiIp4ProtocolGuid
+  gEfiIp6ServiceBindingProtocolGuid
+  gEfiAdapterInformationProtocolGuid
+  gEfiAdapterInfoMediaStateGuid
 
 [FeaturePcd]
 

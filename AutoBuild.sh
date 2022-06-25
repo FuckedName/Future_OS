@@ -1,3 +1,5 @@
+//./AutoBuild.sh > /mnt/hgfs/Share/code/output/compile.log 2>&1
+
 clear
 
 rm -rf MdeModulePkg/Application/*
