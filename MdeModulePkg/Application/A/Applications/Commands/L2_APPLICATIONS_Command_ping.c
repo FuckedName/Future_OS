@@ -439,6 +439,293 @@ typedef struct {
 
 
 
+
+/**
+  Get handle with Simple Network Protocol installed on it.
+
+  There should be MNP Service Binding Protocol installed on the input ServiceHandle.
+  If Simple Network Protocol is already installed on the ServiceHandle, the
+  ServiceHandle will be returned. If SNP is not installed on the ServiceHandle,
+  try to find its parent handle with SNP installed.
+
+  @param[in]   ServiceHandle    The handle where network service binding protocols are
+                                installed on.
+  @param[out]  Snp              The pointer to store the address of the SNP instance.
+                                This is an optional parameter that may be NULL.
+
+  @return The SNP handle, or NULL if not found.
+
+**/
+EFI_HANDLE
+EFIAPI
+NetLibGetSnpHandle2 (
+  IN   EFI_HANDLE                  ServiceHandle,
+  OUT  EFI_SIMPLE_NETWORK_PROTOCOL **Snp  OPTIONAL
+  )
+{
+  EFI_STATUS                   Status;
+  EFI_SIMPLE_NETWORK_PROTOCOL  *SnpInstance;
+  EFI_DEVICE_PATH_PROTOCOL     *DevicePath;
+  EFI_HANDLE                   SnpHandle;
+
+  //
+  // Try to open SNP from ServiceHandle
+  //
+  SnpInstance = NULL;
+  Status = gBS->HandleProtocol (ServiceHandle, &gEfiSimpleNetworkProtocolGuid, (VOID **) &SnpInstance);
+  if (!EFI_ERROR (Status)) {
+    if (Snp != NULL) {
+      *Snp = SnpInstance;
+    }
+    return ServiceHandle;
+  }
+
+  //
+  // Failed to open SNP, try to get SNP handle by LocateDevicePath()
+  //
+  DevicePath = DevicePathFromHandle (ServiceHandle);
+  if (DevicePath == NULL) {
+    return NULL;
+  }
+
+  SnpHandle = NULL;
+  Status = gBS->LocateDevicePath (&gEfiSimpleNetworkProtocolGuid, &DevicePath, &SnpHandle);
+  if (EFI_ERROR (Status)) {
+    //
+    // Failed to find SNP handle
+    //
+    return NULL;
+  }
+
+  Status = gBS->HandleProtocol (SnpHandle, &gEfiSimpleNetworkProtocolGuid, (VOID **) &SnpInstance);
+  if (!EFI_ERROR (Status)) {
+    if (Snp != NULL) {
+      *Snp = SnpInstance;
+    }
+    return SnpHandle;
+  }
+
+  return NULL;
+}
+
+
+
+/**
+  Detect media status for specified network device.
+
+  If MediaPresent is NULL, then ASSERT().
+
+  The underlying UNDI driver may or may not support reporting media status from
+  GET_STATUS command (PXE_STATFLAGS_GET_STATUS_NO_MEDIA_SUPPORTED). This routine
+  will try to invoke Snp->GetStatus() to get the media status: if media already
+  present, it return directly; if media not present, it will stop SNP and then
+  restart SNP to get the latest media status, this give chance to get the correct
+  media status for old UNDI driver which doesn't support reporting media status
+  from GET_STATUS command.
+  Note: there will be two limitations for current algorithm:
+  1) for UNDI with this capability, in case of cable is not attached, there will
+     be an redundant Stop/Start() process;
+  2) for UNDI without this capability, in case that network cable is attached when
+     Snp->Initialize() is invoked while network cable is unattached later,
+     NetLibDetectMedia() will report MediaPresent as TRUE, causing upper layer
+     apps to wait for timeout time.
+
+  @param[in]   ServiceHandle    The handle where network service binding protocols are
+                                installed on.
+  @param[out]  MediaPresent     The pointer to store the media status.
+
+  @retval EFI_SUCCESS           Media detection success.
+  @retval EFI_INVALID_PARAMETER ServiceHandle is not valid network device handle.
+  @retval EFI_UNSUPPORTED       Network device does not support media detection.
+  @retval EFI_DEVICE_ERROR      SNP is in unknown state.
+
+**/
+EFI_STATUS
+EFIAPI
+NetLibDetectMedia2 (
+  IN  EFI_HANDLE            ServiceHandle,
+  OUT BOOLEAN               *MediaPresent
+  )
+{
+  EFI_STATUS                   Status;
+  EFI_HANDLE                   SnpHandle;
+  EFI_SIMPLE_NETWORK_PROTOCOL  *Snp;
+  UINT32                       InterruptStatus;
+  UINT32                       OldState;
+  EFI_MAC_ADDRESS              *MCastFilter;
+  UINT32                       MCastFilterCount;
+  UINT32                       EnableFilterBits;
+  UINT32                       DisableFilterBits;
+  BOOLEAN                      ResetMCastFilters;
+
+  ASSERT (MediaPresent != NULL);
+
+  //
+  // Get SNP handle
+  //
+  Snp = NULL;
+  SnpHandle = NetLibGetSnpHandle2 (ServiceHandle, &Snp);
+  if (SnpHandle == NULL) {
+    return EFI_INVALID_PARAMETER;
+  }
+
+  //
+  // Check whether SNP support media detection
+  //
+  if (!Snp->Mode->MediaPresentSupported) {
+    return EFI_UNSUPPORTED;
+  }
+
+  //
+  // Invoke Snp->GetStatus() to refresh MediaPresent field in SNP mode data
+  //
+  Status = Snp->GetStatus (Snp, &InterruptStatus, NULL);
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
+
+  if (Snp->Mode->MediaPresent) {
+    //
+    // Media is present, return directly
+    //
+    *MediaPresent = TRUE;
+    return EFI_SUCCESS;
+  }
+
+  //
+  // Till now, GetStatus() report no media; while, in case UNDI not support
+  // reporting media status from GetStatus(), this media status may be incorrect.
+  // So, we will stop SNP and then restart it to get the correct media status.
+  //
+  OldState = Snp->Mode->State;
+  if (OldState >= EfiSimpleNetworkMaxState) {
+    return EFI_DEVICE_ERROR;
+  }
+
+  MCastFilter = NULL;
+
+  if (OldState == EfiSimpleNetworkInitialized) {
+    //
+    // SNP is already in use, need Shutdown/Stop and then Start/Initialize
+    //
+
+    //
+    // Backup current SNP receive filter settings
+    //
+    EnableFilterBits  = Snp->Mode->ReceiveFilterSetting;
+    DisableFilterBits = Snp->Mode->ReceiveFilterMask ^ EnableFilterBits;
+
+    ResetMCastFilters = TRUE;
+    MCastFilterCount  = Snp->Mode->MCastFilterCount;
+    if (MCastFilterCount != 0) {
+      MCastFilter = AllocateCopyPool (
+                      MCastFilterCount * sizeof (EFI_MAC_ADDRESS),
+                      Snp->Mode->MCastFilter
+                      );
+      ASSERT (MCastFilter != NULL);
+      if (MCastFilter == NULL) {
+        Status = EFI_OUT_OF_RESOURCES;
+        goto Exit;
+      }
+
+      ResetMCastFilters = FALSE;
+    }
+
+    //
+    // Shutdown/Stop the simple network
+    //
+    Status = Snp->Shutdown (Snp);
+    if (!EFI_ERROR (Status)) {
+      Status = Snp->Stop (Snp);
+    }
+    if (EFI_ERROR (Status)) {
+      goto Exit;
+    }
+
+    //
+    // Start/Initialize the simple network
+    //
+    Status = Snp->Start (Snp);
+    if (!EFI_ERROR (Status)) {
+      Status = Snp->Initialize (Snp, 0, 0);
+    }
+    if (EFI_ERROR (Status)) {
+      goto Exit;
+    }
+
+    //
+    // Here we get the correct media status
+    //
+    *MediaPresent = Snp->Mode->MediaPresent;
+
+    //
+    // Restore SNP receive filter settings
+    //
+    Status = Snp->ReceiveFilters (
+                    Snp,
+                    EnableFilterBits,
+                    DisableFilterBits,
+                    ResetMCastFilters,
+                    MCastFilterCount,
+                    MCastFilter
+                    );
+
+    if (MCastFilter != NULL) {
+      FreePool (MCastFilter);
+    }
+
+    return Status;
+  }
+
+  //
+  // SNP is not in use, it's in state of EfiSimpleNetworkStopped or EfiSimpleNetworkStarted
+  //
+  if (OldState == EfiSimpleNetworkStopped) {
+    //
+    // SNP not start yet, start it
+    //
+    Status = Snp->Start (Snp);
+    if (EFI_ERROR (Status)) {
+      goto Exit;
+    }
+  }
+
+  //
+  // Initialize the simple network
+  //
+  Status = Snp->Initialize (Snp, 0, 0);
+  if (EFI_ERROR (Status)) {
+    Status = EFI_DEVICE_ERROR;
+    goto Exit;
+  }
+
+  //
+  // Here we get the correct media status
+  //
+  *MediaPresent = Snp->Mode->MediaPresent;
+
+  //
+  // Shut down the simple network
+  //
+  Snp->Shutdown (Snp);
+
+Exit:
+  if (OldState == EfiSimpleNetworkStopped) {
+    //
+    // Original SNP sate is Stopped, restore to original state
+    //
+    Snp->Stop (Snp);
+  }
+
+  if (MCastFilter != NULL) {
+    FreePool (MCastFilter);
+  }
+
+  return Status;
+}
+
+
+
 /**
 
   Detect media state for a network device. This routine will wait for a period of time at
@@ -493,7 +780,7 @@ NetLibDetectMediaWaitTimeout2 (
   // Get SNP handle
   //
   Snp = NULL;
-  SnpHandle = NetLibGetSnpHandle (ServiceHandle, &Snp);
+  SnpHandle = NetLibGetSnpHandle2 (ServiceHandle, &Snp);
   if (SnpHandle == NULL) {
     return EFI_INVALID_PARAMETER;
   }
@@ -506,7 +793,7 @@ NetLibDetectMediaWaitTimeout2 (
   if (EFI_ERROR (Status)) {
 
     MediaPresent = TRUE;
-    Status = NetLibDetectMedia (ServiceHandle, &MediaPresent);
+    Status = NetLibDetectMedia2 (ServiceHandle, &MediaPresent);
     if (!EFI_ERROR (Status)) {
       if (MediaPresent) {
         *MediaState = EFI_SUCCESS;
@@ -547,7 +834,7 @@ NetLibDetectMediaWaitTimeout2 (
       // If gEfiAdapterInfoMediaStateGuid is not supported, call NetLibDetectMedia to get media state!
       //
       MediaPresent = TRUE;
-      Status = NetLibDetectMedia (ServiceHandle, &MediaPresent);
+      Status = NetLibDetectMedia2 (ServiceHandle, &MediaPresent);
       if (!EFI_ERROR (Status)) {
         if (MediaPresent) {
           *MediaState = EFI_SUCCESS;
@@ -576,7 +863,7 @@ NetLibDetectMediaWaitTimeout2 (
     Status = gBS->SetTimer (
                     Timer,
                     TimerRelative,
-                    MEDIA_STATE_DETECT_TIME_INTERVAL
+                    MEDIA_STATE_DETECT_TIME_INTERVAL2
                     );
     if (EFI_ERROR (Status)) {
       gBS->CloseEvent(Timer);
@@ -587,7 +874,7 @@ NetLibDetectMediaWaitTimeout2 (
       TimerStatus = gBS->CheckEvent (Timer);
       if (!EFI_ERROR (TimerStatus)) {
 
-        TimeRemained -= MEDIA_STATE_DETECT_TIME_INTERVAL;
+        TimeRemained -= MEDIA_STATE_DETECT_TIME_INTERVAL2;
         Status = Aip->GetInformation (
                         Aip,
                         &gEfiAdapterInfoMediaStateGuid,
@@ -608,10 +895,10 @@ NetLibDetectMediaWaitTimeout2 (
         }
       }
     } while (TimerStatus == EFI_NOT_READY);
-  } while (*MediaState == EFI_NOT_READY && TimeRemained >= MEDIA_STATE_DETECT_TIME_INTERVAL);
+  } while (*MediaState == EFI_NOT_READY && TimeRemained >= MEDIA_STATE_DETECT_TIME_INTERVAL2);
 
   gBS->CloseEvent(Timer);
-  if (*MediaState == EFI_NOT_READY && TimeRemained < MEDIA_STATE_DETECT_TIME_INTERVAL) {
+  if (*MediaState == EFI_NOT_READY && TimeRemained < MEDIA_STATE_DETECT_TIME_INTERVAL2) {
     return EFI_TIMEOUT;
   } else {
     return EFI_SUCCESS;
