@@ -1246,6 +1246,9 @@ Ping6MatchEchoReply2 (
   LIST_ENTRY             *Entry;
   LIST_ENTRY             *NextEntry;
 
+  L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: Ping6MatchEchoReply2: \n", __LINE__);
+  
+
   NET_LIST_FOR_EACH_SAFE2 (Entry, NextEntry, &Private->TxList) {
     TxInfo = BASE_CR2 (Entry, PING_ICMPX_TX_INFO2, Link);
 
@@ -1314,6 +1317,9 @@ Ping6OnEchoReplyReceived2 (
   UINT32                      PayLoad;
   UINT32                      Rtt;
 
+  L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: Ping6OnEchoReplyReceived2: \n", __LINE__);
+  
+
   Private = (PING_PRIVATE_DATA2 *) Context;
 
   if (Private == NULL || Private->Status == EFI_ABORTED || Private->Signature != PING_PRIVATE_DATA2_SIGNATURE2) {
@@ -1370,6 +1376,9 @@ Ping6OnEchoReplyReceived2 (
   Private->RttSum += Rtt;
   Private->RttMin  = Private->RttMin > Rtt ? Rtt : Private->RttMin;
   Private->RttMax  = Private->RttMax < Rtt ? Rtt : Private->RttMax;
+
+  L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: Ping6OnEchoReplyReceived2: %d %d %d %d %d %d %d %d %d %d\n", __LINE__, Reply->SequenceNum, Rtt, Private->DstAddress[0], Private->DstAddress[1], Private->DstAddress[2], Private->DstAddress[3], Private->SrcAddress[0], Private->SrcAddress[1], Private->SrcAddress[2], Private->SrcAddress[3]);
+  
 
   /*//ShellPrintHiiEx (
     -1,
@@ -1619,6 +1628,9 @@ Ping6ReceiveEchoReply2 (
   )
 {
   EFI_STATUS    Status;
+
+  L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: Ping6ReceiveEchoReply2: \n", __LINE__);
+  
 
   ZeroMem (&Private->RxToken, sizeof (PING_IPX_COMPLETION_TOKEN2));
 
@@ -2679,7 +2691,8 @@ EFI_STATUS L2_APPLICATIONS_Command_ping(UINT8 parameters[PARAMETER_COUNT][PARAME
       //Status = NetLibStrToIp6 ("192.168.3.3", &DstAddress);
       //Status = NetLibStrToIp6 ("192.168.3.3", &DstAddress);
       Status = NetLibStrToIp42 (L"192.168.3.2", (EFI_IPv4_ADDRESS*)&SrcAddress);
-      Status = NetLibStrToIp42 (L"192.168.3.3", (EFI_IPv4_ADDRESS*)&DstAddress);
+      Status = NetLibStrToIp42 (L"192.168.3.4", (EFI_IPv4_ADDRESS*)&DstAddress);
+      //Status = NetLibStrToIp42 (L"180.101.49.11", (EFI_IPv4_ADDRESS*)&DstAddress);
 	  
 	  L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: L2_APPLICATIONS_Command_ping:%a \n", __LINE__, parameters[1]);
 
