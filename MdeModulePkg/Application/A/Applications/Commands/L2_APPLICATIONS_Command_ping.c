@@ -1589,6 +1589,9 @@ PingSendEchoRequest2 (
   InsertTailList (&Private->TxList, &TxInfo->Link);
 
   Status = Private->ProtocolPointers.Transmit (Private->IpProtocol, TxInfo->Token);
+  
+  L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: PingSendEchoRequest2: \n", __LINE__);
+  
 
   if (EFI_ERROR (Status)) {
     RemoveEntryList (&TxInfo->Link);
@@ -2430,6 +2433,8 @@ ShellPing2 (
   IN UINT32              IpChoice
   )
 {
+	
+  L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: ShellPing2: \n", __LINE__);
   EFI_STATUS             Status;
   PING_PRIVATE_DATA2      *Private;
   PING_ICMPX_TX_INFO2     *TxInfo;
@@ -2473,6 +2478,8 @@ ShellPing2 (
   // Create a ipv6 token to receive the first icmp6 echo reply packet.
   //
   Status = Ping6ReceiveEchoReply2 (Private);
+  L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: ShellPing2: \n", __LINE__);
+  
 
   if (EFI_ERROR (Status)) {
     ShellStatus = SHELL_ACCESS_DENIED;
@@ -2503,6 +2510,10 @@ ShellPing2 (
     goto ON_EXIT;
   }
 
+  L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: ShellPing2: \n", __LINE__);
+  
+
+
   //
   // Create a ipv6 token to send the first icmp6 echo request packet.
   //
@@ -2514,14 +2525,26 @@ ShellPing2 (
     ShellStatus = SHELL_ACCESS_DENIED;
     if(Status == EFI_NOT_FOUND) {
       ////ShellPrintHiiEx (-1, -1, NULL, STRING_TOKEN (STR_PING_NOSOURCE_INDO), gShellNetwork1HiiHandle, mDstString);
+      
+  		L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: ShellPing2: \n", __LINE__);
+  
     } else if (Status == RETURN_NO_MAPPING) {
+    	
+  		L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: ShellPing2: \n", __LINE__);
+  
       ////ShellPrintHiiEx (-1, -1, NULL, STRING_TOKEN (STR_PING_NOROUTE_FOUND), gShellNetwork1HiiHandle, mDstString, mSrcString);
     } else {
+    	
+  		L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: ShellPing2: \n", __LINE__);
+  
       ////ShellPrintHiiEx (-1, -1, NULL, STRING_TOKEN (STR_PING_NETWORK_ERROR), gShellNetwork1HiiHandle, L"ping", Status);
     }
 
     goto ON_EXIT;
   }
+
+  L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: ShellPing2: \n", __LINE__);
+  
 
   Status = gBS->SetTimer (
                   Private->Timer,
@@ -2533,6 +2556,9 @@ ShellPing2 (
     ShellStatus = SHELL_ACCESS_DENIED;
     goto ON_EXIT;
   }
+
+  return;  
+
   //
   // Control the ping6 process by two factors:
   // 1. Hot key
@@ -2548,6 +2574,10 @@ ShellPing2 (
       goto ON_STAT;
     }
   }
+
+
+  L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: ShellPing2: \n", __LINE__);
+  
 
 ON_STAT:
   //
@@ -2650,6 +2680,8 @@ EFI_STATUS L2_APPLICATIONS_Command_ping(UINT8 parameters[PARAMETER_COUNT][PARAME
       //Status = NetLibStrToIp6 ("192.168.3.3", &DstAddress);
       Status = NetLibStrToIp42 (L"192.168.3.2", (EFI_IPv4_ADDRESS*)&SrcAddress);
       Status = NetLibStrToIp42 (L"192.168.3.3", (EFI_IPv4_ADDRESS*)&DstAddress);
+	  
+	  L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: L2_APPLICATIONS_Command_ping:%a \n", __LINE__, parameters[1]);
 
 	  ShellStatus = ShellPing2 (
 	             10,

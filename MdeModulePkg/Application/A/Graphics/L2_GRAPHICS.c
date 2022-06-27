@@ -79,7 +79,7 @@ UINT16 StartMenuWidth = 16 * 10;
 UINT16 StartMenuHeight = 16 * 20;
 UINT16 StatusErrorCount = 0;
 UINT16 SystemLogWindowWidth = 16 * 48;
-UINT16 SystemLogWindowHeight = 16 * 60;
+UINT16 SystemLogWindowHeight = 16 * 26;
 UINT16 TerminalWindowWidth = 16 * 48;
 UINT16 TerminalWindowHeight = 16 * 48;
 UINT16 SystemSettingWindowWidth = 16 * 10;
@@ -1537,8 +1537,8 @@ void L2_GRAPHICS_ParameterInit()
     WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW].pBuffer = pSystemLogWindowBuffer;
     WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW].StartX = 0;
     WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW].StartY = 0;
-    WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW].WindowWidth =  WINDOW_DEFAULT_WIDTH;
-    WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW].WindowHeight = WINDOW_DEFAULT_HEIGHT;
+    WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW].WindowWidth =  WINDOW_DEFAULT_WIDTH + 10 * 16;
+    WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW].WindowHeight = WINDOW_DEFAULT_HEIGHT + 10 * 16;
     WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW].LayerID = GRAPHICS_LAYER_SYSTEM_LOG_WINDOW;
 
     WindowLayers.LayerCount++;
@@ -2391,7 +2391,7 @@ START_MENU_SYSTEM_SETTING_SUBITEM_CLICKED_EVENT L2_GRAPHICS_SystemSettingLayerCl
 *****************************************************************************/
 MY_COMPUTER_WINDOW_CLICKED_EVENT L2_GRAPHICS_TerminalLayerClickEventGet()
 {
-	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: L2_GRAPHICS_TerminalLayerClickEventGet\n", __LINE__);
+	//L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: L2_GRAPHICS_TerminalLayerClickEventGet\n", __LINE__);
 		
     UINT16 PositionX = WindowLayers.item[GRAPHICS_LAYER_TERMINAL_WINDOW].StartX;
     UINT16 PositionY = WindowLayers.item[GRAPHICS_LAYER_TERMINAL_WINDOW].StartY;
@@ -3826,7 +3826,7 @@ void L2_GRAPHICS_CopyBufferFromWindowsToDesk()
         UINT16 j = WindowLayers.LayerSequences[i];
         if (TRUE == WindowLayers.item[j].DisplayFlag)
         {
-			L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], 
+			/*L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], 
 							"%d LayerID: %d pBuffer: %X StartX: %d StartY: %d WindowWidth: %d WindowHeight: %d j: %d\n", 
 							__LINE__, 
 							WindowLayers.item[j].LayerID,
@@ -3835,7 +3835,7 @@ void L2_GRAPHICS_CopyBufferFromWindowsToDesk()
 							WindowLayers.item[j].StartY,
 							WindowLayers.item[j].WindowWidth,
 							WindowLayers.item[j].WindowHeight,
-							j);
+							j);*/
             L2_GRAPHICS_Copy(pDeskDisplayBuffer, WindowLayers.item[j].pBuffer, ScreenWidth, ScreenHeight, WindowLayers.item[j].WindowWidth, WindowLayers.item[j].WindowHeight, WindowLayers.item[j].StartX, WindowLayers.item[j].StartY);
         }
     }

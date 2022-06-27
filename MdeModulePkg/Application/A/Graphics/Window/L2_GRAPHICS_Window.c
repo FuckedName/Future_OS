@@ -1145,9 +1145,9 @@ VOID L3_APPLICATION_WindowsInitial()
 	
     L3_APPLICATION_MyComputerWindow(0, 50);
         
-    L3_APPLICATION_SystemLogWindow(300, 10);
+    L3_APPLICATION_SystemLogWindow(100, 10);
 	
-    L3_APPLICATION_TerminalWindow(100, 100);
+    L3_APPLICATION_TerminalWindow(50, 200);
     
     L3_APPLICATION_MemoryInformationWindow(600, 100);
 	
