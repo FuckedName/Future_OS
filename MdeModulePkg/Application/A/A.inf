@@ -159,6 +159,8 @@
   gEfiIp6ServiceBindingProtocolGuid
   gEfiAdapterInformationProtocolGuid
   gEfiAdapterInfoMediaStateGuid
+  gEfiManagedNetworkServiceBindingProtocolGuid
+  gEfiManagedNetworkProtocolGuid
 
 [FeaturePcd]
 
