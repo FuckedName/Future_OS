@@ -88,18 +88,12 @@ UINT16 L1_STRING_Reverse(UINT8 *s)
 *  返回值： 成功：XXXX，失败：XXXXX
 *
 *****************************************************************************/
-L1_STRING_AsciiStringToWchar(CHAR8          *pSource, unsigned short *pDest)
+L1_STRING_AsciiStringToWchar(CONST CHAR8 *pSource, short *pDest, int count)
 {
-    if (pSource == NULL || pDest == NULL)
-    {
-        return NULL;
-    }
-
-    unsigned long long  i;
-    for (i = 0; *pSource != '\0'; pSource++, i++)
-    {
-        pDest[i] = pSource[i];
-    }
+	for(int i=0; i < count; i++)
+	{
+		pDest[i] = pSource[i];
+	}
 }
 
 

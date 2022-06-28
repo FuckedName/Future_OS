@@ -56,7 +56,20 @@ EFI_STATUS L2_APPLICATIONS_Command_curl(UINT8 parameters[PARAMETER_COUNT][PARAME
 	
     //Ð´Èë¼üÅÌ»º´æµ½ÖÕ¶Ë´°¿Ú¡£
 	L2_DEBUG_Print3(3, 23 + (++TerminalCurrentLineCount) % TerminalWindowMaxLineCount * 16, WindowLayers.item[GRAPHICS_LAYER_TERMINAL_WINDOW], "%a", "Curl");
-	
+
+	//HttpCreateService;
+	//HttpDxeStart
+	//RunHttp
+	//DownloadFile
+
+	/*EFI_HTTP_PROTOCOL  mEfiHttpTemplate = {
+		EfiHttpGetModeData,
+		EfiHttpConfigure,
+		EfiHttpRequest,
+		EfiHttpCancel,
+		EfiHttpResponse,
+		EfiHttpPoll
+	};*/
 }
 
 

@@ -1377,7 +1377,16 @@ Ping6OnEchoReplyReceived2 (
   Private->RttMin  = Private->RttMin > Rtt ? Rtt : Private->RttMin;
   Private->RttMax  = Private->RttMax < Rtt ? Rtt : Private->RttMax;
 
-  L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: Ping6OnEchoReplyReceived2: %d %d %d %d %d %d %d %d %d %d\n", __LINE__, Reply->SequenceNum, Rtt, Private->DstAddress[0], Private->DstAddress[1], Private->DstAddress[2], Private->DstAddress[3], Private->SrcAddress[0], Private->SrcAddress[1], Private->SrcAddress[2], Private->SrcAddress[3]);
+  L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: Ping6OnEchoReplyReceived2: %d %d Dest ip:%d.%d.%d.%d Source ip:%d.%d.%d.%d\n", __LINE__, 
+  																			Reply->SequenceNum, Rtt, 
+  																			Private->DstAddress[0], 
+  																			Private->DstAddress[1], 
+  																			Private->DstAddress[2], 
+  																			Private->DstAddress[3], 
+  																			Private->SrcAddress[0], 
+  																			Private->SrcAddress[1], 
+  																			Private->SrcAddress[2], 
+  																			Private->SrcAddress[3]);
   
 
   /*//ShellPrintHiiEx (
@@ -2644,6 +2653,82 @@ ON_EXIT:
   return ShellStatus;
 }
 
+UINTN
+EFIAPI
+AsciiAtoi (
+  CHAR8  *Str
+  )
+{
+  UINTN   RetVal;
+  CHAR8   TempChar;
+  UINTN   MaxVal;
+  UINTN   ResteVal;
+
+  ASSERT (Str != NULL);
+
+  MaxVal = (UINTN) -1 / 10;
+  ResteVal = (UINTN) -1 % 10;
+  //
+  // skip preceeding white space
+  //
+  while (*Str != '\0' && *Str == ' ') {
+    Str += 1;
+  }
+  //
+  // convert digits
+  //
+  RetVal = 0;
+  TempChar = *(Str++);
+  while (TempChar != '\0') {
+    if (TempChar >= '0' && TempChar <= '9') {
+      if (RetVal > MaxVal || (RetVal == MaxVal && TempChar - '0' > (INTN) ResteVal)) {
+        return (UINTN) -1;
+      }
+
+      RetVal = (RetVal * 10) + TempChar - '0';
+    } else {
+      break;
+    }
+
+    TempChar = *(Str++);
+  }
+
+  return RetVal;
+}
+
+
+//ipv4µØÖ·×ª»»
+int ipv4_to_i(const char *ip, EFI_IPv6_ADDRESS *DstAddress)
+{
+    char str_ip_index[4] = {'\0'};
+    unsigned int ip_int;
+    unsigned int j = 0, i = 0, k = 0;;
+    
+
+    for(i = 0; i < 16; i++) 
+	{
+        if (ip[i] == '\0' || ip[i] == '.') 
+		{
+            ip_int = AsciiAtoi(str_ip_index);
+            //printf("%d\n", ip_int);
+            DstAddress->Addr[k++] = ip_int;
+            if (ip_int > 255)
+                return 0;
+
+            //memset(str_ip_index, 0, sizeof(str_ip_index));
+			L1_MEMORY_SetValue(str_ip_index, 0, 4);
+
+            j = 0;
+            continue;
+        }
+
+        str_ip_index[j] = ip[i];
+        j++;
+    }
+
+    return 1;
+}
+
 
 /****************************************************************************
 *
@@ -2688,16 +2773,42 @@ EFI_STATUS L2_APPLICATIONS_Command_ping(UINT8 parameters[PARAMETER_COUNT][PARAME
 	    ValueStr = ShellCommandLineGetValue (ParamPackage, L"-_s");
 	  }
 	  
-      //Status = NetLibStrToIp6 ("192.168.3.3", &DstAddress);
-      //Status = NetLibStrToIp6 ("192.168.3.3", &DstAddress);
-      Status = NetLibStrToIp42 (L"192.168.3.2", (EFI_IPv4_ADDRESS*)&SrcAddress);
-      Status = NetLibStrToIp42 (L"192.168.3.4", (EFI_IPv4_ADDRESS*)&DstAddress);
-      //Status = NetLibStrToIp42 (L"180.101.49.11", (EFI_IPv4_ADDRESS*)&DstAddress);
+      //Status = NetLibStrToIp6 (L"192.168.3.3", &DstAddress);
+      //Status = NetLibStrToIp6 (L"192.168.3.3", &DstAddress);
+      Status = NetLibStrToIp42 (L"192.168.3.4", (EFI_IPv4_ADDRESS*)&SrcAddress);
+	  CHAR16 DestIP[16] = {L"0"};
+	  L1_STRING_AsciiStringToWchar(parameters[1], DestIP, 16);
+	  
+	  unsigned char ArrayIP[4] = {0};
+	  ipv4_to_i(parameters[1], &DstAddress);
+	  
+      //Status = NetLibStrToIp42 (L"192.168.3.3", (EFI_IPv4_ADDRESS*)&DstAddress);
+      //Status = NetLibStrToIp42 (DestIP, (EFI_IPv4_ADDRESS*)&DstAddress);
+      //Status = NetLibStrToIp42 (L"180.101.49.11", (EFI_IPv4_ADDRESS*)&DstAddress); // www.baidu.com
 	  
 	  L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: L2_APPLICATIONS_Command_ping:%a \n", __LINE__, parameters[1]);
+	  	  
+	  L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d %d\n", __LINE__, 
+	  																										DstAddress.Addr[0],
+	  																										DstAddress.Addr[1],
+	  																										DstAddress.Addr[2],
+	  																										DstAddress.Addr[3],
+	  																										DstAddress.Addr[4],
+	  																										DstAddress.Addr[5],
+	  																										DstAddress.Addr[6],
+	  																										DstAddress.Addr[7],
+	  																										DstAddress.Addr[8],
+	  																										DstAddress.Addr[9],
+	  																										DstAddress.Addr[10],
+	  																										DstAddress.Addr[11],
+	  																										DstAddress.Addr[12],
+	  																										DstAddress.Addr[13],
+	  																										DstAddress.Addr[14],
+	  																										DstAddress.Addr[15]);
+	
 
 	  ShellStatus = ShellPing2 (
-	             10,
+	             2,
 	             16,
 	             &SrcAddress,
 	             &DstAddress,
