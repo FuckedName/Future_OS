@@ -161,6 +161,9 @@
   gEfiAdapterInfoMediaStateGuid
   gEfiManagedNetworkServiceBindingProtocolGuid
   gEfiManagedNetworkProtocolGuid
+  gEfiShellParametersProtocolGuid  
+  gEfiHttpServiceBindingProtocolGuid
+  gEfiHttpProtocolGuid
 
 [FeaturePcd]
 

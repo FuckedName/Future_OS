@@ -36,6 +36,9 @@
 
 typedef struct _EFI_HTTP_PROTOCOL2 EFI_HTTP_PROTOCOL2;
 
+extern EFI_GUID gEfiHttpServiceBindingProtocolGuid;
+extern EFI_GUID gEfiHttpProtocolGuid;
+
 ///
 /// EFI_HTTP_VERSION
 ///
@@ -815,8 +818,6 @@ struct _EFI_MANAGED_NETWORK_PROTOCOL {
 #define HTTP_PROGRESS_MESSAGE_SIZE  \
   ((sizeof (HTTP_PROGR_FRAME) / sizeof (CHAR16)) + 12)
   
-extern EFI_GUID gEfiHttpServiceBindingProtocolGuid;
-extern EFI_GUID gEfiHttpProtocolGuid;
 
 //
 // Buffer size. Note that larger buffer does not mean better speed.
@@ -1109,7 +1110,7 @@ TrimSpaces2 (
   CHAR16 *Str;
   UINTN  Len;
 
-  ////ASSERT (String != NULL);
+  //////ASSERT (String != NULL);
 
   if (String == NULL) {
     return EFI_INVALID_PARAMETER;
@@ -1216,7 +1217,7 @@ EfiGetEpochDays2 (
   JulianDate = Time->Day + ((153 * m + 2) / 5) + (365 * y) + (y / 4) -
                (y / 100) + (y / 400) - 32045;
 
-  //ASSERT (JulianDate >= EPOCH_JULIAN_DATE);
+  ////ASSERT (JulianDate >= EPOCH_JULIAN_DATE);
   EpochDays = JulianDate - EPOCH_JULIAN_DATE;
 
   return EpochDays;
@@ -1249,6 +1250,444 @@ EfiTimeToEpoch2 (
 
   return EpochSeconds;
 }
+
+typedef struct {
+  LIST_ENTRY     Link;
+  CHAR16         *Name;
+  SHELL_PARAM_TYPE2      Type;
+  CHAR16         *Value;
+  UINTN          OriginalPosition;
+} SHELL_PARAM_PACKAGE;
+
+/**
+  Checks the command line arguments passed against the list of valid ones.
+
+  If no initialization is required, then return RETURN_SUCCESS.
+
+  @param[in] CheckList          pointer to list of parameters to check
+  @param[out] CheckPackage      pointer to pointer to list checked values
+  @param[out] ProblemParam      optional pointer to pointer to unicode string for
+                                the paramater that caused failure.  If used then the
+                                caller is responsible for freeing the memory.
+  @param[in] AutoPageBreak      will automatically set PageBreakEnabled for "b" parameter
+  @param[in] Argv               pointer to array of parameters
+  @param[in] Argc               Count of parameters in Argv
+  @param[in] AlwaysAllowNumbers TRUE to allow numbers always, FALSE otherwise.
+
+  @retval EFI_SUCCESS           The operation completed sucessfully.
+  @retval EFI_OUT_OF_RESOURCES  A memory allocation failed
+  @retval EFI_INVALID_PARAMETER A parameter was invalid
+  @retval EFI_VOLUME_CORRUPTED  the command line was corrupt.  an argument was
+                                duplicated.  the duplicated command line argument
+                                was returned in ProblemParam if provided.
+  @retval EFI_NOT_FOUND         a argument required a value that was missing.
+                                the invalid command line argument was returned in
+                                ProblemParam if provided.
+**/
+EFI_STATUS
+InternalCommandLineParse2 (
+  IN CONST SHELL_PARAM_ITEM2     *CheckList,
+  OUT LIST_ENTRY                **CheckPackage,
+  OUT CHAR16                    **ProblemParam OPTIONAL,
+  IN BOOLEAN                    AutoPageBreak,
+  IN CONST CHAR16               **Argv,
+  IN UINTN                      Argc,
+  IN BOOLEAN                    AlwaysAllowNumbers
+  )
+{
+  UINTN                         LoopCounter;
+  SHELL_PARAM_TYPE2              CurrentItemType;
+  SHELL_PARAM_PACKAGE           *CurrentItemPackage;
+  UINTN                         GetItemValue;
+  UINTN                         ValueSize;
+  UINTN                         Count;
+  CONST CHAR16                  *TempPointer;
+  UINTN                         CurrentValueSize;
+  CHAR16                        *NewValue;
+
+  CurrentItemPackage = NULL;
+  GetItemValue = 0;
+  ValueSize = 0;
+  Count = 0;
+
+  //
+  // If there is only 1 item we dont need to do anything
+  //
+  if (Argc < 1) {
+    *CheckPackage = NULL;
+    return (EFI_SUCCESS);
+  }
+
+  //
+  // ASSERTs
+  //
+  //ASSERT(CheckList  != NULL);
+  //ASSERT(Argv       != NULL);
+
+  //
+  // initialize the linked list
+  //
+  *CheckPackage = (LIST_ENTRY*)AllocateZeroPool(sizeof(LIST_ENTRY));
+  if (*CheckPackage == NULL) {
+    return (EFI_OUT_OF_RESOURCES);
+  }
+
+  InitializeListHead(*CheckPackage);
+
+  //
+  // loop through each of the arguments
+  //
+  for (LoopCounter = 0 ; LoopCounter < Argc ; ++LoopCounter) {
+    if (Argv[LoopCounter] == NULL) {
+      //
+      // do nothing for NULL argv
+      //
+    } else if (InternalIsOnCheckList(Argv[LoopCounter], CheckList, &CurrentItemType)) {
+      //
+      // We might have leftover if last parameter didnt have optional value
+      //
+      if (GetItemValue != 0) {
+        GetItemValue = 0;
+        InsertHeadList(*CheckPackage, &CurrentItemPackage->Link);
+      }
+      //
+      // this is a flag
+      //
+      CurrentItemPackage = AllocateZeroPool(sizeof(SHELL_PARAM_PACKAGE));
+      if (CurrentItemPackage == NULL) {
+        ShellCommandLineFreeVarList(*CheckPackage);
+        *CheckPackage = NULL;
+        return (EFI_OUT_OF_RESOURCES);
+      }
+      CurrentItemPackage->Name  = AllocateCopyPool(StrSize(Argv[LoopCounter]), Argv[LoopCounter]);
+      if (CurrentItemPackage->Name == NULL) {
+        ShellCommandLineFreeVarList(*CheckPackage);
+        *CheckPackage = NULL;
+        return (EFI_OUT_OF_RESOURCES);
+      }
+      CurrentItemPackage->Type  = CurrentItemType;
+      CurrentItemPackage->OriginalPosition = (UINTN)(-1);
+      CurrentItemPackage->Value = NULL;
+
+      //
+      // Does this flag require a value
+      //
+      switch (CurrentItemPackage->Type) {
+        //
+        // possibly trigger the next loop(s) to populate the value of this item
+        //
+        case TypeValue:
+        case TypeTimeValue:
+          GetItemValue = 1;
+          ValueSize = 0;
+          break;
+        case TypeDoubleValue:
+          GetItemValue = 2;
+          ValueSize = 0;
+          break;
+        case TypeMaxValue:
+          GetItemValue = (UINTN)(-1);
+          ValueSize = 0;
+          break;
+        default:
+          //
+          // this item has no value expected; we are done
+          //
+          InsertHeadList(*CheckPackage, &CurrentItemPackage->Link);
+          //ASSERT(GetItemValue == 0);
+          break;
+      }
+    } else if (GetItemValue != 0 && CurrentItemPackage != NULL && !InternalIsFlag(Argv[LoopCounter], AlwaysAllowNumbers, (BOOLEAN)(CurrentItemPackage->Type == TypeTimeValue))) {
+      //
+      // get the item VALUE for a previous flag
+      //
+      CurrentValueSize = ValueSize + StrSize(Argv[LoopCounter]) + sizeof(CHAR16);
+      NewValue = ReallocatePool(ValueSize, CurrentValueSize, CurrentItemPackage->Value);
+      if (NewValue == NULL) {
+        //SHELL_FREE_NON_NULL (CurrentItemPackage->Value);
+        //SHELL_FREE_NON_NULL (CurrentItemPackage);
+        ShellCommandLineFreeVarList (*CheckPackage);
+        *CheckPackage = NULL;
+        return EFI_OUT_OF_RESOURCES;
+      }
+      CurrentItemPackage->Value = NewValue;
+      if (ValueSize == 0) {
+        StrCpyS( CurrentItemPackage->Value,
+                  CurrentValueSize/sizeof(CHAR16),
+                  Argv[LoopCounter]
+                  );
+      } else {
+        StrCatS( CurrentItemPackage->Value,
+                  CurrentValueSize/sizeof(CHAR16),
+                  L" "
+                  );
+        StrCatS( CurrentItemPackage->Value,
+                  CurrentValueSize/sizeof(CHAR16),
+                  Argv[LoopCounter]
+                  );
+      }
+      ValueSize += StrSize(Argv[LoopCounter]) + sizeof(CHAR16);
+
+      GetItemValue--;
+      if (GetItemValue == 0) {
+        InsertHeadList(*CheckPackage, &CurrentItemPackage->Link);
+      }
+    } else if (!InternalIsFlag(Argv[LoopCounter], AlwaysAllowNumbers, FALSE)){
+      //
+      // add this one as a non-flag
+      //
+
+      TempPointer = Argv[LoopCounter];
+      if ((*TempPointer == L'^' && *(TempPointer+1) == L'-')
+       || (*TempPointer == L'^' && *(TempPointer+1) == L'/')
+       || (*TempPointer == L'^' && *(TempPointer+1) == L'+')
+      ){
+        TempPointer++;
+      }
+      CurrentItemPackage = AllocateZeroPool(sizeof(SHELL_PARAM_PACKAGE));
+      if (CurrentItemPackage == NULL) {
+        ShellCommandLineFreeVarList(*CheckPackage);
+        *CheckPackage = NULL;
+        return (EFI_OUT_OF_RESOURCES);
+      }
+      CurrentItemPackage->Name  = NULL;
+      CurrentItemPackage->Type  = TypePosition;
+      CurrentItemPackage->Value = AllocateCopyPool(StrSize(TempPointer), TempPointer);
+      if (CurrentItemPackage->Value == NULL) {
+        ShellCommandLineFreeVarList(*CheckPackage);
+        *CheckPackage = NULL;
+        return (EFI_OUT_OF_RESOURCES);
+      }
+      CurrentItemPackage->OriginalPosition = Count++;
+      InsertHeadList(*CheckPackage, &CurrentItemPackage->Link);
+    } else {
+      //
+      // this was a non-recognised flag... error!
+      //
+      if (ProblemParam != NULL) {
+        *ProblemParam = AllocateCopyPool(StrSize(Argv[LoopCounter]), Argv[LoopCounter]);
+      }
+      ShellCommandLineFreeVarList(*CheckPackage);
+      *CheckPackage = NULL;
+      return (EFI_VOLUME_CORRUPTED);
+    }
+  }
+  if (GetItemValue != 0) {
+    GetItemValue = 0;
+    InsertHeadList(*CheckPackage, &CurrentItemPackage->Link);
+  }
+  //
+  // support for AutoPageBreak
+  //
+  if (AutoPageBreak && ShellCommandLineGetFlag(*CheckPackage, L"-b")) {
+    ShellSetPageBreakMode(TRUE);
+  }
+  return (EFI_SUCCESS);
+}
+
+typedef VOID *SHELL_FILE_HANDLE;
+
+///
+/// Bit definitions for EFI_SHELL_ARG_INFO
+///
+typedef enum {
+  ARG_NO_ATTRIB         = 0x0,
+  ARG_IS_QUOTED         = BIT0,
+  ARG_PARTIALLY_QUOTED  = BIT1,
+  ARG_FIRST_HALF_QUOTED = BIT2,
+  ARG_FIRST_CHAR_IS_ESC = BIT3
+} EFI_SHELL_ARG_INFO_TYPES;
+
+///
+/// Attributes for an argument.
+///
+typedef struct _EFI_SHELL_ARG_INFO {
+  UINT32  Attributes;
+} EFI_SHELL_ARG_INFO;
+
+///
+/// Can be used on any image handle to obtain information about the loaded image.
+///
+typedef struct {
+  UINT32            Revision;       ///< Defines the revision of the EFI_LOADED_IMAGE_PROTOCOL structure.
+                                    ///< All future revisions will be backward compatible to the current revision.
+  EFI_HANDLE        ParentHandle;   ///< Parent image's image handle. NULL if the image is loaded directly from
+                                    ///< the firmware's boot manager.
+  EFI_SYSTEM_TABLE  *SystemTable;   ///< the image's EFI system table pointer.
+
+  //
+  // Source location of image
+  //
+  EFI_HANDLE        DeviceHandle;   ///< The device handle that the EFI Image was loaded from.
+  EFI_DEVICE_PATH_PROTOCOL  *FilePath;  ///< A pointer to the file path portion specific to DeviceHandle
+                                        ///< that the EFI Image was loaded from.
+  VOID              *Reserved;      ///< Reserved. DO NOT USE.
+
+  //
+  // Images load options
+  //
+  UINT32            LoadOptionsSize;///< The size in bytes of LoadOptions.
+  VOID              *LoadOptions;   ///< A pointer to the image's binary load options.
+
+  //
+  // Location of where image was loaded
+  //
+  VOID              *ImageBase;     ///< The base address at which the image was loaded.
+  UINT64            ImageSize;      ///< The size in bytes of the loaded image.
+  EFI_MEMORY_TYPE   ImageCodeType;  ///< The memory type that the code sections were loaded as.
+  EFI_MEMORY_TYPE   ImageDataType;  ///< The memory type that the data sections were loaded as.
+  EFI_IMAGE_UNLOAD  Unload;
+} EFI_LOADED_IMAGE_PROTOCOL;
+
+///
+/// This protocol provides access to additional information about a shell application.
+///
+typedef struct {
+  ///
+  /// Handle back to original image handle & image information.
+  ///
+  EFI_HANDLE                ImageHandle;
+  EFI_LOADED_IMAGE_PROTOCOL *Info;
+
+  ///
+  /// Parsed arg list converted more C-like format.
+  ///
+  CHAR16                    **Argv;
+  UINTN                     Argc;
+
+  ///
+  /// Storage for file redirection args after parsing.
+  ///
+  CHAR16                    **RedirArgv;
+  UINTN                     RedirArgc;
+
+  ///
+  /// A file style handle for console io.
+  ///
+  EFI_FILE_PROTOCOL         *StdIn;
+  EFI_FILE_PROTOCOL         *StdOut;
+  EFI_FILE_PROTOCOL         *StdErr;
+
+  ///
+  /// List of attributes for each argument.
+  ///
+  EFI_SHELL_ARG_INFO        *ArgInfo;
+
+  ///
+  /// Whether we are echoing.
+  ///
+  BOOLEAN                   EchoOn;
+} EFI_SHELL_INTERFACE;
+
+extern EFI_SHELL_INTERFACE           *mEfiShellInterface;
+
+typedef struct _EFI_SHELL_PARAMETERS_PROTOCOL {
+  ///
+  /// Points to an Argc-element array of points to NULL-terminated strings containing
+  /// the command-line parameters. The first entry in the array is always the full file
+  /// path of the executable. Any quotation marks that were used to preserve
+  /// whitespace have been removed.
+  ///
+  CHAR16 **Argv;
+
+  ///
+  /// The number of elements in the Argv array.
+  ///
+  UINTN Argc;
+
+  ///
+  /// The file handle for the standard input for this executable. This may be different
+  /// from the ConInHandle in EFI_SYSTEM_TABLE.
+  ///
+  SHELL_FILE_HANDLE StdIn;
+
+  ///
+  /// The file handle for the standard output for this executable. This may be different
+  /// from the ConOutHandle in EFI_SYSTEM_TABLE.
+  ///
+  SHELL_FILE_HANDLE StdOut;
+
+  ///
+  /// The file handle for the standard error output for this executable. This may be
+  /// different from the StdErrHandle in EFI_SYSTEM_TABLE.
+  ///
+  SHELL_FILE_HANDLE StdErr;
+} EFI_SHELL_PARAMETERS_PROTOCOL;
+
+extern EFI_SHELL_PARAMETERS_PROTOCOL *gEfiShellParametersProtocol;
+
+
+/**
+  Checks the command line arguments passed against the list of valid ones.
+  Optionally removes NULL values first.
+
+  If no initialization is required, then return RETURN_SUCCESS.
+
+  @param[in] CheckList          The pointer to list of parameters to check.
+  @param[out] CheckPackage      The package of checked values.
+  @param[out] ProblemParam      Optional pointer to pointer to unicode string for
+                                the paramater that caused failure.
+  @param[in] AutoPageBreak      Will automatically set PageBreakEnabled.
+  @param[in] AlwaysAllowNumbers Will never fail for number based flags.
+
+  @retval EFI_SUCCESS           The operation completed sucessfully.
+  @retval EFI_OUT_OF_RESOURCES  A memory allocation failed.
+  @retval EFI_INVALID_PARAMETER A parameter was invalid.
+  @retval EFI_VOLUME_CORRUPTED  The command line was corrupt.
+  @retval EFI_DEVICE_ERROR      The commands contained 2 opposing arguments.  One
+                                of the command line arguments was returned in
+                                ProblemParam if provided.
+  @retval EFI_NOT_FOUND         A argument required a value that was missing.
+                                The invalid command line argument was returned in
+                                ProblemParam if provided.
+**/
+EFI_STATUS
+EFIAPI
+ShellCommandLineParseEx2 (
+  IN CONST SHELL_PARAM_ITEM2     *CheckList,
+  OUT LIST_ENTRY                **CheckPackage,
+  OUT CHAR16                    **ProblemParam OPTIONAL,
+  IN BOOLEAN                    AutoPageBreak,
+  IN BOOLEAN                    AlwaysAllowNumbers
+  )
+{
+  //
+  // //ASSERT that CheckList and CheckPackage aren't NULL
+  //
+  //ASSERT(CheckList    != NULL);
+  //ASSERT(CheckPackage != NULL);
+
+  //
+  // Check for UEFI Shell 2.0 protocols
+  //
+  if (gEfiShellParametersProtocol != NULL) {
+    return (InternalCommandLineParse2(CheckList,
+                                     CheckPackage,
+                                     ProblemParam,
+                                     AutoPageBreak,
+                                     (CONST CHAR16**) gEfiShellParametersProtocol->Argv,
+                                     gEfiShellParametersProtocol->Argc,
+                                     AlwaysAllowNumbers));
+  }
+
+  //
+  // //ASSERT That EFI Shell is not required
+  //
+  //ASSERT (mEfiShellInterface != NULL);
+  return (InternalCommandLineParse2(CheckList,
+                                   CheckPackage,
+                                   ProblemParam,
+                                   AutoPageBreak,
+                                   (CONST CHAR16**) mEfiShellInterface->Argv,
+                                   mEfiShellInterface->Argc,
+                                   AlwaysAllowNumbers));
+}
+
+
+/// Make it easy to upgrade from older versions of the shell library.
+#define ShellCommandLineParse(CheckList,CheckPackage,ProblemParam,AutoPageBreak) ShellCommandLineParseEx2(CheckList,CheckPackage,ProblemParam,AutoPageBreak,FALSE)
+
+
 
 //
 // Download Flags.
@@ -1335,7 +1774,7 @@ RunHttp2 (
       //PRINT_HII_APP (STRING_TOKEN (STR_GEN_PROBLEM), ProblemParam);
       ////SHELL_FREE_NON_NULL (ProblemParam);
     } else {
-      //ASSERT (FALSE);
+      ////ASSERT (FALSE);
     }
 
     goto Error;
@@ -1681,6 +2120,137 @@ Error:
 
   return Status;
 }
+
+
+///
+/// Forward reference for pure ANSI compatability
+///
+typedef struct _EFI_SERVICE_BINDING_PROTOCOL EFI_SERVICE_BINDING_PROTOCOL;
+
+/**
+  Creates a child handle and installs a protocol.
+
+  The CreateChild() function installs a protocol on ChildHandle.
+  If ChildHandle is a pointer to NULL, then a new handle is created and returned in ChildHandle.
+  If ChildHandle is not a pointer to NULL, then the protocol installs on the existing ChildHandle.
+
+  @param  This        Pointer to the EFI_SERVICE_BINDING_PROTOCOL instance.
+  @param  ChildHandle Pointer to the handle of the child to create. If it is NULL,
+                      then a new handle is created. If it is a pointer to an existing UEFI handle,
+                      then the protocol is added to the existing UEFI handle.
+
+  @retval EFI_SUCCES            The protocol was added to ChildHandle.
+  @retval EFI_INVALID_PARAMETER ChildHandle is NULL.
+  @retval EFI_OUT_OF_RESOURCES  There are not enough resources available to create
+                                the child
+  @retval other                 The child handle was not created
+
+**/
+typedef
+EFI_STATUS
+(EFIAPI *EFI_SERVICE_BINDING_CREATE_CHILD)(
+  IN     EFI_SERVICE_BINDING_PROTOCOL  *This,
+  IN OUT EFI_HANDLE                    *ChildHandle
+  );
+
+/**
+  Destroys a child handle with a protocol installed on it.
+
+  The DestroyChild() function does the opposite of CreateChild(). It removes a protocol
+  that was installed by CreateChild() from ChildHandle. If the removed protocol is the
+  last protocol on ChildHandle, then ChildHandle is destroyed.
+
+  @param  This        Pointer to the EFI_SERVICE_BINDING_PROTOCOL instance.
+  @param  ChildHandle Handle of the child to destroy
+
+  @retval EFI_SUCCES            The protocol was removed from ChildHandle.
+  @retval EFI_UNSUPPORTED       ChildHandle does not support the protocol that is being removed.
+  @retval EFI_INVALID_PARAMETER Child handle is NULL.
+  @retval EFI_ACCESS_DENIED     The protocol could not be removed from the ChildHandle
+                                because its services are being used.
+  @retval other                 The child handle was not destroyed
+
+**/
+typedef
+EFI_STATUS
+(EFIAPI *EFI_SERVICE_BINDING_DESTROY_CHILD)(
+  IN EFI_SERVICE_BINDING_PROTOCOL          *This,
+  IN EFI_HANDLE                            ChildHandle
+  );
+
+///
+/// The EFI_SERVICE_BINDING_PROTOCOL provides member functions to create and destroy
+/// child handles. A driver is responsible for adding protocols to the child handle
+/// in CreateChild() and removing protocols in DestroyChild(). It is also required
+/// that the CreateChild() function opens the parent protocol BY_CHILD_CONTROLLER
+/// to establish the parent-child relationship, and closes the protocol in DestroyChild().
+/// The pseudo code for CreateChild() and DestroyChild() is provided to specify the
+/// required behavior, not to specify the required implementation. Each consumer of
+/// a software protocol is responsible for calling CreateChild() when it requires the
+/// protocol and calling DestroyChild() when it is finished with that protocol.
+///
+struct _EFI_SERVICE_BINDING_PROTOCOL {
+  EFI_SERVICE_BINDING_CREATE_CHILD         CreateChild;
+  EFI_SERVICE_BINDING_DESTROY_CHILD        DestroyChild;
+};
+
+
+
+/**
+  Create a child of the service that is identified by ServiceBindingGuid.
+
+  Get the ServiceBinding Protocol first, then use it to create a child.
+
+  If ServiceBindingGuid is NULL, then //ASSERT().
+  If ChildHandle is NULL, then //ASSERT().
+
+  @param[in]       Controller            The controller which has the service installed.
+  @param[in]       Image                 The image handle used to open service.
+  @param[in]       ServiceBindingGuid    The service's Guid.
+  @param[in, out]  ChildHandle           The handle to receive the create child.
+
+  @retval EFI_SUCCESS           The child is successfully created.
+  @retval Others                Failed to create the child.
+
+**/
+EFI_STATUS
+EFIAPI
+NetLibCreateServiceChild (
+  IN  EFI_HANDLE            Controller,
+  IN  EFI_HANDLE            Image,
+  IN  EFI_GUID              *ServiceBindingGuid,
+  IN  OUT EFI_HANDLE        *ChildHandle
+  )
+{
+  EFI_STATUS                    Status;
+  EFI_SERVICE_BINDING_PROTOCOL  *Service;
+
+
+  //ASSERT ((ServiceBindingGuid != NULL) && (ChildHandle != NULL));
+
+  //
+  // Get the ServiceBinding Protocol
+  //
+  Status = gBS->OpenProtocol (
+                  Controller,
+                  ServiceBindingGuid,
+                  (VOID **) &Service,
+                  Image,
+                  Controller,
+                  EFI_OPEN_PROTOCOL_GET_PROTOCOL
+                  );
+
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
+
+  //
+  // Create a child
+  //
+  Status = Service->CreateChild (Service, ChildHandle);
+  return Status;
+}
+
 
 /**
   Create a child for the service identified by its service binding protocol GUID
@@ -2304,6 +2874,627 @@ ParseMsg2 (
 #define REQ_NEED_REPEAT  1
 
 
+typedef
+EFI_STATUS
+(EFIAPI *HTTP_BODY_PARSER_CALLBACK) (
+  IN HTTP_BODY_PARSE_EVENT      EventType,
+  IN CHAR8                      *Data,
+  IN UINTN                      Length,
+  IN VOID                       *Context
+);
+
+
+typedef enum {
+  BodyParserBodyStart,
+  BodyParserBodyIdentity,
+  BodyParserChunkSizeStart,
+  BodyParserChunkSize,
+  BodyParserChunkSizeEndCR,
+  BodyParserChunkExtStart,
+  BodyParserChunkDataStart,
+  BodyParserChunkDataEnd,
+  BodyParserChunkDataEndCR,
+  BodyParserTrailer,
+  BodyParserLastCRLF,
+  BodyParserLastCRLFEnd,
+  BodyParserComplete,
+  BodyParserStateMax
+} HTTP_BODY_PARSE_STATE;
+
+typedef struct {
+  BOOLEAN                       IgnoreBody;    // "MUST NOT" include a message-body
+  BOOLEAN                       IsChunked;     // "chunked" transfer-coding.
+  BOOLEAN                       ContentLengthIsValid;
+  UINTN                         ContentLength; // Entity length (not the message-body length), invalid until ContentLengthIsValid is TRUE
+
+  HTTP_BODY_PARSER_CALLBACK     Callback;
+  VOID                          *Context;
+  UINTN                         ParsedBodyLength;
+  HTTP_BODY_PARSE_STATE         State;
+  UINTN                         CurrentChunkSize;
+  UINTN                         CurrentChunkParsedSize;
+} HTTP_BODY_PARSER;
+
+
+/**
+  Check whether the HTTP message should have a message-body.
+
+  @param[in]    Method             The HTTP method (e.g. GET, POST) for this HTTP message.
+  @param[in]    StatusCode         Response status code returned by the remote host.
+
+  @return       The message should have a message-body (FALSE) or not (TRUE).
+
+**/
+BOOLEAN
+HttpIoNoMessageBody (
+  IN   EFI_HTTP_METHOD2          Method,
+  IN   EFI_HTTP_STATUS_CODE2     StatusCode
+  )
+{
+  //
+  // RFC 2616:
+  // All responses to the HEAD request method
+  // MUST NOT include a message-body, even though the presence of entity-
+  // header fields might lead one to believe they do. All 1xx
+  // (informational), 204 (no content), and 304 (not modified) responses
+  // MUST NOT include a message-body. All other responses do include a
+  // message-body, although it MAY be of zero length.
+  //
+  if (Method == HttpMethodHead) {
+    return TRUE;
+  }
+
+  if ((StatusCode == HTTP_STATUS_100_CONTINUE) ||
+      (StatusCode == HTTP_STATUS_101_SWITCHING_PROTOCOLS) ||
+      (StatusCode == HTTP_STATUS_204_NO_CONTENT) ||
+      (StatusCode == HTTP_STATUS_304_NOT_MODIFIED))
+  {
+    return TRUE;
+  }
+
+  return FALSE;
+}
+
+/**
+  Find a specified header field according to the field name.
+
+  @param[in]   HeaderCount      Number of HTTP header structures in Headers list.
+  @param[in]   Headers          Array containing list of HTTP headers.
+  @param[in]   FieldName        Null terminated string which describes a field name.
+
+  @return    Pointer to the found header or NULL.
+
+**/
+EFI_HTTP_HEADER2 *
+EFIAPI
+HttpFindHeader (
+  IN  UINTN                HeaderCount,
+  IN  EFI_HTTP_HEADER2      *Headers,
+  IN  CHAR8                *FieldName
+  )
+{
+  UINTN                 Index;
+
+  if (HeaderCount == 0 || Headers == NULL || FieldName == NULL) {
+    return NULL;
+  }
+
+  for (Index = 0; Index < HeaderCount; Index++){
+    //
+    // Field names are case-insensitive (RFC 2616).
+    //
+    if (AsciiStriCmp (Headers[Index].FieldName, FieldName) == 0) {
+      return &Headers[Index];
+    }
+  }
+  return NULL;
+}
+
+#define HTTP_HEADER_TRANSFER_ENCODING  "Transfer-Encoding"
+#define HTTP_HEADER_TRANSFER_ENCODING_CHUNKED "chunked"
+#define CHUNKED_TRANSFER_CODING_CR '\r'
+#define CHUNKED_TRANSFER_CODING_LF '\n'
+#define CHUNKED_TRANSFER_CODING_LAST_CHUNK '0'
+#define CHUNKED_TRANSFER_CODING_EXTENSION_SEPARATOR ';'
+
+/**
+
+  Check whether the HTTP message is using the "chunked" transfer-coding.
+
+  @param[in]    HeaderCount        Number of HTTP header structures in Headers.
+  @param[in]    Headers            Array containing list of HTTP headers.
+
+  @return       The message is "chunked" transfer-coding (TRUE) or not (FALSE).
+
+**/
+BOOLEAN
+HttpIoIsChunked (
+  IN   UINTN                    HeaderCount,
+  IN   EFI_HTTP_HEADER2          *Headers
+  )
+{
+  EFI_HTTP_HEADER2       *Header;
+
+
+  Header = HttpFindHeader (HeaderCount, Headers, HTTP_HEADER_TRANSFER_ENCODING);
+  if (Header == NULL) {
+    return FALSE;
+  }
+
+  if (AsciiStriCmp (Header->FieldValue, "identity") != 0) {
+    return TRUE;
+  }
+
+  return FALSE;
+}
+
+#define HTTP_HEADER_CONTENT_LENGTH     "Content-Length"
+
+
+/**
+  Get the value of the content length if there is a "Content-Length" header.
+
+  @param[in]    HeaderCount        Number of HTTP header structures in Headers.
+  @param[in]    Headers            Array containing list of HTTP headers.
+  @param[out]   ContentLength      Pointer to save the value of the content length.
+
+  @retval EFI_SUCCESS              Successfully get the content length.
+  @retval EFI_NOT_FOUND            No "Content-Length" header in the Headers.
+
+**/
+EFI_STATUS
+HttpIoParseContentLengthHeader (
+  IN     UINTN                HeaderCount,
+  IN     EFI_HTTP_HEADER2      *Headers,
+     OUT UINTN                *ContentLength
+  )
+{
+  EFI_HTTP_HEADER2       *Header;
+
+  Header = HttpFindHeader (HeaderCount, Headers, HTTP_HEADER_CONTENT_LENGTH);
+  if (Header == NULL) {
+    return EFI_NOT_FOUND;
+  }
+
+  return AsciiStrDecimalToUintnS (Header->FieldValue, (CHAR8 **) NULL, ContentLength);
+}
+
+
+/**
+  Check whether the message-body is complete or not.
+
+  @param[in]    MsgParser            Pointer to the message parser.
+
+  @retval TRUE                       Message-body is complete.
+  @retval FALSE                      Message-body is not complete.
+
+**/
+BOOLEAN
+EFIAPI
+HttpIsMessageComplete (
+  IN VOID              *MsgParser
+  )
+{
+  HTTP_BODY_PARSER      *Parser;
+
+  if (MsgParser == NULL) {
+    return FALSE;
+  }
+
+  Parser = (HTTP_BODY_PARSER *) MsgParser;
+
+  if (Parser->State == BodyParserComplete) {
+    return TRUE;
+  }
+  return FALSE;
+}
+
+
+/**
+  Convert an hexadecimal char to a value of type UINTN.
+
+  @param[in]       Char           Ascii character.
+
+  @return          Value translated from Char.
+
+**/
+UINTN
+HttpIoHexCharToUintn (
+  IN CHAR8           Char
+  )
+{
+  if (Char >= '0' && Char <= '9') {
+    return Char - '0';
+  }
+
+  return (10 + AsciiCharToUpper (Char) - 'A');
+}
+
+#define NET_IS_HEX_CHAR(Ch)   \
+  ((('0' <= (Ch)) && ((Ch) <= '9')) ||  \
+   (('A' <= (Ch)) && ((Ch) <= 'F')) ||  \
+   (('a' <= (Ch)) && ((Ch) <= 'f')))
+
+
+/**
+  Parse message body.
+
+  Parse BodyLength of message-body. This function can be called repeatedly to parse the message-body partially.
+
+  @param[in, out]    MsgParser            Pointer to the message parser.
+  @param[in]         BodyLength           Length in bytes of the Body.
+  @param[in]         Body                 Pointer to the buffer of the message-body to be parsed.
+
+  @retval EFI_SUCCESS                Successfully parse the message-body.
+  @retval EFI_INVALID_PARAMETER      MsgParser is NULL or Body is NULL or BodyLength is 0.
+  @retval EFI_ABORTED                Operation aborted.
+  @retval Other                      Error happened while parsing message body.
+
+**/
+EFI_STATUS
+EFIAPI
+HttpParseMessageBody (
+  IN OUT VOID              *MsgParser,
+  IN     UINTN             BodyLength,
+  IN     CHAR8             *Body
+  )
+{
+  CHAR8                 *Char;
+  UINTN                 RemainderLengthInThis;
+  UINTN                 LengthForCallback;
+  UINTN                 PortionLength;
+  EFI_STATUS            Status;
+  HTTP_BODY_PARSER      *Parser;
+
+  if (BodyLength == 0 || Body == NULL) {
+    return EFI_INVALID_PARAMETER;
+  }
+
+  if (MsgParser == NULL) {
+    return EFI_INVALID_PARAMETER;
+  }
+
+  Parser = (HTTP_BODY_PARSER *) MsgParser;
+
+  if (Parser->IgnoreBody) {
+    Parser->State = BodyParserComplete;
+    if (Parser->Callback != NULL) {
+      Status = Parser->Callback (
+                         BodyParseEventOnComplete,
+                         Body,
+                         0,
+                         Parser->Context
+                         );
+      if (EFI_ERROR (Status)) {
+        return Status;
+      }
+    }
+    return EFI_SUCCESS;
+  }
+
+  if (Parser->State == BodyParserBodyStart) {
+    Parser->ParsedBodyLength = 0;
+    if (Parser->IsChunked) {
+      Parser->State = BodyParserChunkSizeStart;
+    } else {
+      Parser->State = BodyParserBodyIdentity;
+    }
+  }
+
+  //
+  // The message body might be truncated in anywhere, so we need to parse is byte-by-byte.
+  //
+  for (Char = Body; Char < Body + BodyLength; ) {
+
+    switch (Parser->State) {
+    case BodyParserStateMax:
+      return EFI_ABORTED;
+
+    case BodyParserBodyIdentity:
+      //
+      // Identity transfer-coding, just notify user to save the body data.
+      //
+      PortionLength = MIN (
+                        BodyLength,
+                        Parser->ContentLength - Parser->ParsedBodyLength
+                        );
+      if (PortionLength == 0) {
+        //
+        // Got BodyLength, but no ContentLength. Use BodyLength.
+        //
+        PortionLength = BodyLength;
+        Parser->ContentLength = PortionLength;
+      }
+
+      if (Parser->Callback != NULL) {
+        Status = Parser->Callback (
+                           BodyParseEventOnData,
+                           Char,
+                           PortionLength,
+                           Parser->Context
+                           );
+        if (EFI_ERROR (Status)) {
+          return Status;
+        }
+      }
+      Char += PortionLength;
+      Parser->ParsedBodyLength += PortionLength;
+      if (Parser->ParsedBodyLength == Parser->ContentLength) {
+        Parser->State = BodyParserComplete;
+        if (Parser->Callback != NULL) {
+          Status = Parser->Callback (
+                             BodyParseEventOnComplete,
+                             Char,
+                             0,
+                             Parser->Context
+                             );
+          if (EFI_ERROR (Status)) {
+            return Status;
+          }
+        }
+      }
+      break;
+
+    case BodyParserChunkSizeStart:
+      //
+      // First byte of chunk-size, the chunk-size might be truncated.
+      //
+      Parser->CurrentChunkSize = 0;
+      Parser->State = BodyParserChunkSize;
+    case BodyParserChunkSize:
+      if (!NET_IS_HEX_CHAR (*Char)) {
+        if (*Char == ';') {
+          Parser->State = BodyParserChunkExtStart;
+          Char++;
+        } else if (*Char == '\r') {
+          Parser->State = BodyParserChunkSizeEndCR;
+          Char++;
+        } else {
+          Parser->State = BodyParserStateMax;
+        }
+        break;
+      }
+
+      if (Parser->CurrentChunkSize > (((~((UINTN) 0)) - 16) / 16)) {
+        return EFI_INVALID_PARAMETER;
+      }
+      Parser->CurrentChunkSize = Parser->CurrentChunkSize * 16 + HttpIoHexCharToUintn (*Char);
+      Char++;
+      break;
+
+    case BodyParserChunkExtStart:
+      //
+      // Ignore all the chunk extensions.
+      //
+      if (*Char == '\r') {
+        Parser->State = BodyParserChunkSizeEndCR;
+       }
+      Char++;
+      break;
+
+    case BodyParserChunkSizeEndCR:
+      if (*Char != '\n') {
+        Parser->State = BodyParserStateMax;
+        break;
+      }
+      Char++;
+      if (Parser->CurrentChunkSize == 0) {
+        //
+        // The last chunk has been parsed and now assumed the state
+        // of HttpBodyParse is ParserLastCRLF. So it need to decide
+        // whether the rest message is trailer or last CRLF in the next round.
+        //
+        Parser->ContentLengthIsValid = TRUE;
+        Parser->State = BodyParserLastCRLF;
+        break;
+      }
+      Parser->State = BodyParserChunkDataStart;
+      Parser->CurrentChunkParsedSize = 0;
+      break;
+
+    case BodyParserLastCRLF:
+      //
+      // Judge the byte is belong to the Last CRLF or trailer, and then
+      // configure the state of HttpBodyParse to corresponding state.
+      //
+      if (*Char == '\r') {
+        Char++;
+        Parser->State = BodyParserLastCRLFEnd;
+        break;
+      } else {
+        Parser->State = BodyParserTrailer;
+        break;
+      }
+
+    case BodyParserLastCRLFEnd:
+      if (*Char == '\n') {
+        Parser->State = BodyParserComplete;
+        Char++;
+        if (Parser->Callback != NULL) {
+          Status = Parser->Callback (
+                             BodyParseEventOnComplete,
+                             Char,
+                             0,
+                             Parser->Context
+                             );
+          if (EFI_ERROR (Status)) {
+            return Status;
+          }
+        }
+        break;
+      } else {
+        Parser->State = BodyParserStateMax;
+        break;
+      }
+
+    case BodyParserTrailer:
+      if (*Char == '\r') {
+        Parser->State = BodyParserChunkSizeEndCR;
+      }
+      Char++;
+      break;
+
+    case BodyParserChunkDataStart:
+      //
+      // First byte of chunk-data, the chunk data also might be truncated.
+      //
+      RemainderLengthInThis = BodyLength - (Char - Body);
+      LengthForCallback = MIN (Parser->CurrentChunkSize - Parser->CurrentChunkParsedSize, RemainderLengthInThis);
+      if (Parser->Callback != NULL) {
+        Status = Parser->Callback (
+                           BodyParseEventOnData,
+                           Char,
+                           LengthForCallback,
+                           Parser->Context
+                           );
+        if (EFI_ERROR (Status)) {
+          return Status;
+        }
+      }
+      Char += LengthForCallback;
+      Parser->ContentLength += LengthForCallback;
+      Parser->CurrentChunkParsedSize += LengthForCallback;
+      if (Parser->CurrentChunkParsedSize == Parser->CurrentChunkSize) {
+        Parser->State = BodyParserChunkDataEnd;
+      }
+      break;
+
+    case BodyParserChunkDataEnd:
+      if (*Char == '\r') {
+        Parser->State = BodyParserChunkDataEndCR;
+      } else {
+        Parser->State = BodyParserStateMax;
+      }
+      Char++;
+      break;
+
+    case BodyParserChunkDataEndCR:
+      if (*Char != '\n') {
+        Parser->State = BodyParserStateMax;
+        break;
+      }
+      Char++;
+      Parser->State = BodyParserChunkSizeStart;
+      break;
+
+    default:
+      break;
+    }
+
+  }
+
+  if (Parser->State == BodyParserStateMax) {
+    return EFI_ABORTED;
+  }
+
+  return EFI_SUCCESS;
+}
+
+
+/**
+  Get the content length of the entity.
+
+  Note that in trunk transfer, the entity length is not valid until the whole message body is received.
+
+  @param[in]    MsgParser            Pointer to the message parser.
+  @param[out]   ContentLength        Pointer to store the length of the entity.
+
+  @retval EFI_SUCCESS                Successfully to get the entity length.
+  @retval EFI_NOT_READY              Entity length is not valid yet.
+  @retval EFI_INVALID_PARAMETER      MsgParser is NULL or ContentLength is NULL.
+
+**/
+EFI_STATUS
+EFIAPI
+HttpGetEntityLength (
+  IN  VOID              *MsgParser,
+  OUT UINTN             *ContentLength
+  )
+{
+  HTTP_BODY_PARSER      *Parser;
+
+  if (MsgParser == NULL || ContentLength == NULL) {
+    return EFI_INVALID_PARAMETER;
+  }
+
+  Parser = (HTTP_BODY_PARSER *) MsgParser;
+
+  if (!Parser->ContentLengthIsValid) {
+    return EFI_NOT_READY;
+  }
+
+  *ContentLength = Parser->ContentLength;
+  return EFI_SUCCESS;
+}
+
+
+
+EFI_STATUS
+EFIAPI
+HttpInitMsgParser (
+  IN     EFI_HTTP_METHOD2               Method,
+  IN     EFI_HTTP_STATUS_CODE2          StatusCode,
+  IN     UINTN                         HeaderCount,
+  IN     EFI_HTTP_HEADER2               *Headers,
+  IN     HTTP_BODY_PARSER_CALLBACK     Callback,
+  IN     VOID                          *Context,
+    OUT  VOID                          **MsgParser
+  )
+{
+  EFI_STATUS            Status;
+  HTTP_BODY_PARSER      *Parser;
+
+  if (HeaderCount != 0 && Headers == NULL) {
+    return EFI_INVALID_PARAMETER;
+  }
+
+  if (MsgParser == NULL) {
+    return EFI_INVALID_PARAMETER;
+  }
+
+  Parser = AllocateZeroPool (sizeof (HTTP_BODY_PARSER));
+  if (Parser == NULL) {
+    return EFI_OUT_OF_RESOURCES;
+  }
+
+  Parser->State = BodyParserBodyStart;
+
+  //
+  // Determine the message length according to RFC 2616.
+  // 1. Check whether the message "MUST NOT" have a message-body.
+  //
+  Parser->IgnoreBody = HttpIoNoMessageBody (Method, StatusCode);
+  //
+  // 2. Check whether the message using "chunked" transfer-coding.
+  //
+  Parser->IsChunked  = HttpIoIsChunked (HeaderCount, Headers);
+  //
+  // 3. Check whether the message has a Content-Length header field.
+  //
+  Status = HttpIoParseContentLengthHeader (HeaderCount, Headers, &Parser->ContentLength);
+  if (!EFI_ERROR (Status)) {
+    Parser->ContentLengthIsValid = TRUE;
+  }
+  //
+  // 4. Range header is not supported now, so we won't meet media type "multipart/byteranges".
+  // 5. By server closing the connection
+  //
+
+  //
+  // Set state to skip body parser if the message shouldn't have a message body.
+  //
+  if (Parser->IgnoreBody) {
+    Parser->State = BodyParserComplete;
+  } else {
+    Parser->Callback = Callback;
+    Parser->Context  = Context;
+  }
+
+  *MsgParser = Parser;
+  return EFI_SUCCESS;
+}
+
+
 /**
   Get HTTP server response and collect the whole body as a file.
   Set appropriate status in Context (REQ_OK, REQ_REPEAT, REQ_ERROR).
@@ -2563,7 +3754,7 @@ DownloadFile2 (
   UINTN                      UrlSize;
   EFI_HANDLE                 HttpChildHandle;
 
-  //ASSERT (Context);
+  ////ASSERT (Context);
   if (Context == NULL) {
     return EFI_INVALID_PARAMETER;
   }
