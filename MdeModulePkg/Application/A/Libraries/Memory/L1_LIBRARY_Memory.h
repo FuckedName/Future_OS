@@ -32,4 +32,5 @@ void *L1_MEMORY_Copy(UINT8 *dest, const UINT8 *src, UINT32 count);
 
 VOID L1_MEMORY_Memset(void *s, UINT8 c, UINT32 n);
 
+VOID L1_MEMORY_MemsetWidth(int *s, int c, UINT32 n);
 

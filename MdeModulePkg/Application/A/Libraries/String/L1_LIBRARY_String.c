@@ -203,6 +203,27 @@ int L1_STRING_Copy(unsigned char *pDestination, unsigned char *pSource)
     return 0;
 }
 
+/****************************************************************************
+*
+*  描述:   字符串比较
+*
+*  参数1： xxxxx
+*  参数2： xxxxx
+*  参数n： xxxxx
+*
+*  返回值： 成功：XXXX，失败：XXXXX
+*
+*****************************************************************************/
+int L1_STRING_CopyWidth(unsigned short *pDestination, unsigned short *pSource)
+{
+	while (*pSource != 0) {
+	  *(pDestination++) = *(pSource++);
+	}
+
+	*pDestination = 0;
+
+    return 0;
+}
 
 /****************************************************************************
 *

@@ -435,11 +435,11 @@ typedef struct {
 	UINTN			Status;
 	UINTN			Flags;
 	UINT8			*Buffer;
-	CHAR16			*ServerAddrAndProto;
-	CHAR16			*Uri;
+	CHAR16			ServerAddrAndProto[100];
+	CHAR16			Uri[200];
 	EFI_HTTP_TOKEN2		ResponseToken;
 	EFI_HTTP_TOKEN2		RequestToken;
-	EFI_HTTP_PROTOCOL2	*Http;
+	EFI_HTTP_PROTOCOL2	Http;
 	EFI_HTTP_CONFIG_DATA2	HttpConfigData;
 } HTTP_DOWNLOAD_CONTEXT2;
 
@@ -998,7 +998,7 @@ struct _EFI_MANAGED_NETWORK_PROTOCOL {
 	} while ( 0 )
 
 typedef enum {
-	HdrHost,
+	HdrHost = 0,
 	HdrConn,
 	HdrAgent,
 	HdrMax
@@ -1354,6 +1354,8 @@ RequestCallback2(
 	IN VOID      *Context
 	)
 {
+	L2_DEBUG_Print3( DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: RequestCallback2\n", __LINE__);
+	
 	gRequestCallbackComplete = TRUE;
 }
 
@@ -2033,8 +2035,8 @@ RunHttp2(
 	IN EFI_SYSTEM_TABLE  *SystemTable
 	)
 {
-
 	L2_DEBUG_Print3( DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: RunHttp2\n", __LINE__);
+	
 	EFI_STATUS			Status;
 	LIST_ENTRY			*CheckPackage;
 	UINTN				ParamCount;
@@ -2044,7 +2046,7 @@ RunHttp2(
 	UINTN				ParamOffset;
 	UINTN				StartSize;
 	CHAR16				*ProblemParam;
-	CHAR16				NicName[IP4_CONFIG2_INTERFACE_INFO_NAME_LENGTH];
+	CHAR16				NicName[IP4_CONFIG2_INTERFACE_INFO_NAME_LENGTH] = L"eth0" ; //L"eth%d" : L"unk%d",
 	CHAR16				*Walker1;
 	CHAR16				*VStr;
 	CONST CHAR16			*UserNicName;
@@ -2079,199 +2081,53 @@ RunHttp2(
 
 	ZeroMem( &Context, sizeof(Context) );
 
-	/*
-	 *
-	 * Parse the command line.
-	 *
-	 */
-	Status = ShellCommandLineParse(
-		ParamList,
-		&CheckPackage,
-		&ProblemParam,
-		TRUE
-		);
-	if ( EFI_ERROR( Status ) )
-	{
-		if ( (Status == EFI_VOLUME_CORRUPTED)
-		     && (ProblemParam != NULL) )
-		{
-			/*
-			 * PRINT_HII_APP (STRING_TOKEN (STR_GEN_PROBLEM), ProblemParam);
-			 * //SHELL_FREE_NON_NULL (ProblemParam);
-			 */
-		} 
-		else 
-		{
-			/* //ASSERT (FALSE); */
-		}
-
-		goto Error;
-	}
-
 	Status = EFI_INVALID_PARAMETER;
 
 	ZeroMem( &Context.HttpConfigData, sizeof(Context.HttpConfigData) );
 	ZeroMem( &IPv4Node, sizeof(IPv4Node) );
+
+	//本地IP信息
 	IPv4Node.UseDefaultAddress = TRUE;
 
+	IPv4Node.LocalAddress.Addr[0] = 192;
+	IPv4Node.LocalAddress.Addr[1] = 168;
+	IPv4Node.LocalAddress.Addr[2] = 3;
+	IPv4Node.LocalAddress.Addr[3] = 3;
+	
+	IPv4Node.LocalSubnet.Addr[0] = 255;
+	IPv4Node.LocalSubnet.Addr[1] = 255;
+	IPv4Node.LocalSubnet.Addr[2] = 255;
+	IPv4Node.LocalSubnet.Addr[3] = 0;
+	
+	IPv4Node.LocalPort = 65345;
+	
+	//HTTP配置信息
 	Context.HttpConfigData.HttpVersion		= HttpVersion11;
+	
 	Context.HttpConfigData.AccessPoint.IPv4Node	= &IPv4Node;
+	
+	Context.HttpConfigData.TimeOutMillisec = 10000000L;
+	
+	Context.HttpConfigData.LocalAddressIsIPv6 = FALSE;
 
-	/*
-	 *
-	 * Get the host address (not necessarily IPv4 format).
-	 *
-	 */
-	ValueStr = ShellCommandLineGetRawValue( CheckPackage, 1 );
-	if ( !ValueStr )
-	{
-		/* PRINT_HII_APP (STRING_TOKEN (STR_GEN_PARAM_INV), ValueStr); */
-		goto Error;
-	} 
-	else 
-	{
-		StartSize = 0;
-		TrimSpaces2( (CHAR16 *) ValueStr );
-		if ( !StrStr( ValueStr, L"://" ) )
-		{
-			Context.ServerAddrAndProto = StrnCatGrow(
-				&Context.ServerAddrAndProto,
-				&StartSize,
-				DEFAULT_HTTP_PROTO,
-				StrLen( DEFAULT_HTTP_PROTO )
-				);
-			Context.ServerAddrAndProto = StrnCatGrow(
-				&Context.ServerAddrAndProto,
-				&StartSize,
-				L"://",
-				StrLen( L"://" )
-				);
-			VStr = (CHAR16 *) ValueStr;
-		} 
-		else 
-		{
-			VStr = StrStr( ValueStr, L"://" ) + StrLen( L"://" );
-		}
+	RemoteFilePath = L"/";
 
-		for ( Walker1 = VStr; *Walker1; Walker1++ )
-		{
-			if ( *Walker1 == L'/' )
-			{
-				break;
-			}
-		}
-
-		if ( *Walker1 == L'/' )
-		{
-			ParamOffset	= 1;
-			RemoteFilePath	= Walker1;
-		}
-
-		Context.ServerAddrAndProto = StrnCatGrow(
-			&Context.ServerAddrAndProto,
-			&StartSize,
-			ValueStr,
-			StrLen( ValueStr ) - StrLen( Walker1 )
-			);
-		if ( !Context.ServerAddrAndProto )
-		{
-			Status = EFI_OUT_OF_RESOURCES;
-			goto Error;
-		}
-	}
-
-	if ( !RemoteFilePath )
-	{
-		RemoteFilePath = ShellCommandLineGetRawValue( CheckPackage, 2 );
-		if ( !RemoteFilePath )
-		{
-			/*
-			 *
-			 * If no path given, assume just "/".
-			 *
-			 */
-			RemoteFilePath = L"/";
-		}
-	}
-
-	TrimSpaces2( (CHAR16 *) RemoteFilePath );
-
-	if ( ParamCount == MAX_PARAM_COUNT - ParamOffset )
-	{
-		mLocalFilePath = ShellCommandLineGetRawValue(
-			CheckPackage,
-			MAX_PARAM_COUNT - 1 - ParamOffset
-			);
-	} 
-	else 
-	{
-		Walker = RemoteFilePath + StrLen( RemoteFilePath );
-		while ( (--Walker) >= RemoteFilePath )
-		{
-			if ( (*Walker == L'\\') ||
-			     (*Walker == L'/') )
-			{
-				break;
-			}
-		}
-
-		mLocalFilePath = Walker + 1;
-	}
-
-	if ( !StrLen( mLocalFilePath ) )
-	{
-		mLocalFilePath = DEFAULT_HTML_FILE;
-	}
-
+	L2_DEBUG_Print3( DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: RunHttp2\n", __LINE__);
+	
 	InitialSize	= 0;
-	Context.Uri	= StrnCatGrow(
-		&Context.Uri,
-		&InitialSize,
-		RemoteFilePath,
-		StrLen( RemoteFilePath )
-		);
-	if ( !Context.Uri )
+
+	for (int i = 0; i < 50; i++)
 	{
-		Status = EFI_OUT_OF_RESOURCES;
-		goto Error;
+		Context.ServerAddrAndProto[i] = L"0";
+		Context.Uri[i] = L"0";
 	}
+	
+	L1_STRING_CopyWidth(Context.ServerAddrAndProto, L"https://180.101.49.12");
 
-	/*
-	 *
-	 * Get the name of the Network Interface Card to be used if any.
-	 *
-	 */
-	UserNicName = ShellCommandLineGetValue( CheckPackage, L"-i" );
+	L1_STRING_CopyWidth(Context.Uri, L"https://180.101.49.12/index.html");
 
-	ValueStr = ShellCommandLineGetValue( CheckPackage, L"-l" );
-	if ( (ValueStr != NULL)
-	     && (!StringToUint162(
-			 ValueStr,
-			 &Context.HttpConfigData.AccessPoint.IPv4Node->LocalPort
-			 )
-		 ) )
-	{
-		goto Error;
-	}
+	//return;
 
-	Context.BufferSize = DEFAULT_BUF_SIZE;
-
-	ValueStr = ShellCommandLineGetValue( CheckPackage, L"-s" );
-	if ( ValueStr != NULL )
-	{
-		Context.BufferSize = ShellStrToUintn( ValueStr );
-		if ( !Context.BufferSize || Context.BufferSize > MAX_BUF_SIZE )
-		{
-			/* PRINT_HII_APP (STRING_TOKEN (STR_GEN_PARAM_INV), ValueStr); */
-			goto Error;
-		}
-	}
-
-	ValueStr = ShellCommandLineGetValue( CheckPackage, L"-t" );
-	if ( ValueStr != NULL )
-	{
-		Context.HttpConfigData.TimeOutMillisec = (UINT32) ShellStrToUintn( ValueStr );
-	}
 
 	/*
 	 *
@@ -2287,6 +2143,9 @@ RunHttp2(
 		);
 	if ( EFI_ERROR( Status ) || (HandleCount == 0) )
 	{
+		
+		L2_DEBUG_Print3( DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: RunHttp2  EFI_ERROR( Status ) || (HandleCount == 0) \n", __LINE__);
+		
 		/* PRINT_HII (STRING_TOKEN (STR_HTTP_ERR_NO_NIC), NULL); */
 		if ( !EFI_ERROR( Status ) )
 		{
@@ -2296,48 +2155,37 @@ RunHttp2(
 		goto Error;
 	}
 
+	L2_DEBUG_Print3( DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: RunHttp2\n", __LINE__);
+	
+	Context.Flags |= DL_FLAG_TIME;
+
+	L2_DEBUG_Print3( DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: RunHttp2 HandleCount: %d Status: %d\n", __LINE__, HandleCount, Status);
+	
 	Status = EFI_NOT_FOUND;
 
-	Context.Flags = 0;
-	if ( ShellCommandLineGetFlag( CheckPackage, L"-m" ) )
-	{
-		Context.Flags |= DL_FLAG_TIME;
-	}
-
-	if ( ShellCommandLineGetFlag( CheckPackage, L"-k" ) )
-	{
-		Context.Flags |= DL_FLAG_KEEP_BAD;
-	}
-
-	for ( NicNumber = 0;
-	      (NicNumber < HandleCount) && (Status != EFI_SUCCESS);
-	      NicNumber++ )
-	{
+		  	
+	for ( NicNumber = 0; (NicNumber < HandleCount) && (Status != EFI_SUCCESS); NicNumber++ )
+	{		
+		L2_DEBUG_Print3( DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: RunHttp2\n", __LINE__);
+	
 		ControllerHandle = Handles[NicNumber];
 
-		Status = GetNicName2( ControllerHandle, NicNumber, NicName );
-		if ( EFI_ERROR( Status ) )
-		{
-			/* PRINT_HII (STRING_TOKEN (STR_HTTP_ERR_NIC_NAME), NicNumber, Status); */
-			continue;
-		}
+		//GetNicName2
 
-		if ( UserNicName != NULL )
-		{
-			if ( StrCmp( NicName, UserNicName ) != 0 )
-			{
-				Status = EFI_NOT_FOUND;
-				continue;
-			}
-
-			NicFound = TRUE;
-		}
+		//GetNicName2 (ControllerHandle, NicNumber, NicName);
 
 		Status = DownloadFile2( &Context, ControllerHandle, NicName );
 		/* PRINT_HII (STRING_TOKEN (STR_GEN_CRLF), NULL); */
+		
+		L2_DEBUG_Print3( DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: RunHttp2\n", __LINE__);
+
+		return;
 
 		if ( EFI_ERROR( Status ) )
 		{
+			
+			L2_DEBUG_Print3( DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: RunHttp2\n", __LINE__);
+	
 			/*PRINT_HII (
 			 * STRING_TOKEN (STR_HTTP_ERR_DOWNLOAD),
 			 * RemoteFilePath,
@@ -2352,12 +2200,18 @@ RunHttp2(
 			 */
 			if ( Status == EFI_ABORTED )
 			{
+				
+				L2_DEBUG_Print3( DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: RunHttp2\n", __LINE__);
+	
 				goto Error;
 			}
 		}
 
 		if ( gHttpError )
 		{
+			
+			L2_DEBUG_Print3( DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: RunHttp2\n", __LINE__);
+	
 			/*
 			 *
 			 * This is not related to connection, so no need to repeat with
@@ -2367,21 +2221,24 @@ RunHttp2(
 			break;
 		}
 	}
-
+		  
+	L2_DEBUG_Print3( DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: RunHttp2\n", __LINE__);
+		  
+	return;
 	if ( (UserNicName != NULL) && (!NicFound) )
 	{
 		/* PRINT_HII (STRING_TOKEN (STR_HTTP_ERR_NIC_NOT_FOUND), UserNicName); */
 	}
 
 Error:
-	ShellCommandLineFreeVarList( CheckPackage );
-	/*
+	/*ShellCommandLineFreeVarList( CheckPackage );
+	
 	 * SHELL_FREE_NON_NULL (Handles);
-	 * SHELL_FREE_NON_NULL (Context.ServerAddrAndProto);
-	 * SHELL_FREE_NON_NULL (Context.Uri);
+	 * SHELL_FREE_NON_NULL (Context->ServerAddrAndProto);
+	 * SHELL_FREE_NON_NULL (Context->Uri);
 	 */
 
-	return(Status & ~MAX_BIT);
+	return (Status & ~MAX_BIT);
 }
 
 
@@ -2441,6 +2298,8 @@ GetNicName2(
 	OUT CHAR16      *NicName
 	)
 {
+	L2_DEBUG_Print3( DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: GetNicName2\n", __LINE__);
+	
 	EFI_STATUS			Status;
 	EFI_HANDLE			MnpHandle;
 	EFI_MANAGED_NETWORK_PROTOCOL	*Mnp;
@@ -2455,23 +2314,38 @@ GetNicName2(
 		);
 	if ( EFI_ERROR( Status ) )
 	{
+		L2_DEBUG_Print3( DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: GetNicName2\n", __LINE__);
+	
 		goto Error;
 	}
+
 
 	Status = Mnp->GetModeData( Mnp, NULL, &SnpMode );
 	if ( EFI_ERROR( Status ) && (Status != EFI_NOT_STARTED) )
 	{
+		
+		L2_DEBUG_Print3( DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: GetNicName2\n", __LINE__);
+	
 		goto Error;
 	}
-
+	
+	L2_DEBUG_Print3( DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: SnpMode.IfType: %d \n", __LINE__, SnpMode.IfType);
+	
+	return;
+	
 	UnicodeSPrint(
 		NicName,
 		IP4_CONFIG2_INTERFACE_INFO_NAME_LENGTH,
 		SnpMode.IfType == NET_IFTYPE_ETHERNET ? L"eth%d" : L"unk%d",
 		NicNumber
 		);
-
 	Status = EFI_SUCCESS;
+	
+	L2_DEBUG_Print3( DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: GetNicName2\n", __LINE__);
+	
+
+	/**/
+	return;
 
 Error:
 
@@ -2484,7 +2358,9 @@ Error:
 			MnpHandle
 			);
 	}
-
+	
+	L2_DEBUG_Print3( DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: GetNicName2 Status: %d\n", __LINE__, Status);
+	
 	return(Status);
 }
 
@@ -2784,7 +2660,7 @@ WaitForCompletion2(
 		&& (!EFI_ERROR( Status ) )
 		&& EFI_ERROR( gBS->CheckEvent( WaitEvt ) ) )
 	{
-		Status = Context->Http->Poll( Context->Http );
+		Status = Context->Http.Poll( &Context->Http );
 		if ( !Context->ContentDownloaded
 		     && CallBackComplete == &gResponseCallbackComplete )
 		{
@@ -2864,8 +2740,7 @@ SendRequest2(
 	RequestHeader[HdrHost].FieldName	= "Host";
 	RequestHeader[HdrConn].FieldName	= "Connection";
 	RequestHeader[HdrAgent].FieldName	= "User-Agent";
-
-	Host = (CHAR16 *) Context->ServerAddrAndProto;
+	Host = Context->ServerAddrAndProto;
 	while ( *Host != CHAR_NULL && *Host != L'/' )
 	{
 		Host++;
@@ -2878,7 +2753,7 @@ SendRequest2(
 
 	/*
 	 *
-	 * Get the next slash.
+	 * Get the next slash.斜杠
 	 *
 	 */
 	Host++;
@@ -2889,12 +2764,15 @@ SendRequest2(
 	 */
 	Host++;
 
+
 	StringSize				= StrLen( Host ) + 1;
-	RequestHeader[HdrHost].FieldValue	= AllocatePool( StringSize );
+	RequestHeader[HdrHost].FieldValue	= L2_MEMORY_Allocate( StringSize );
 	if ( !RequestHeader[HdrHost].FieldValue )
 	{
 		return(EFI_OUT_OF_RESOURCES);
 	}
+
+	return;
 
 	UnicodeStrToAsciiStrS(
 		Host,
@@ -2915,6 +2793,8 @@ SendRequest2(
 	RequestMessage.Body		= NULL;
 	Context->RequestToken.Event	= NULL;
 
+	return;
+
 	/*
 	 *
 	 * Completion callback event to be set when Request completes.
@@ -2929,19 +2809,24 @@ SendRequest2(
 		);
 	/* ASSERT_EFI_ERROR (Status); */
 
+	return;
+
 	Context->RequestToken.Status	= EFI_SUCCESS;
 	Context->RequestToken.Message	= &RequestMessage;
 	gRequestCallbackComplete	= FALSE;
-	Status				= Context->Http->Request( Context->Http, &Context->RequestToken );
+	
+	Status = Context->Http.Request( &Context->Http, &Context->RequestToken );
 	if ( EFI_ERROR( Status ) )
 	{
 		goto Error;
 	}
 
+	return;
+
 	Status = WaitForCompletion2( Context, &gRequestCallbackComplete );
 	if ( EFI_ERROR( Status ) )
 	{
-		Context->Http->Cancel( Context->Http, &Context->RequestToken );
+		Context->Http.Cancel( &Context->Http, &Context->RequestToken );
 	}
 
 Error:
@@ -3214,39 +3099,14 @@ SetHostURI2(
 		}
 
 		Idx = 0;
-		if ( IsAbEmptyUrl )
-		{
-			Context->ServerAddrAndProto = StrnCatGrow(
-				&Context->ServerAddrAndProto,
-				&Idx,
-				L"http://",
-				StrLen( L"http://" )
-				);
-		}
-
-		Context->ServerAddrAndProto = StrnCatGrow(
-			&Context->ServerAddrAndProto,
-			&Idx,
-			Temp,
-			StrLen( Temp )
-			);
-		/* SHELL_FREE_NON_NULL (Temp); */
-		if ( !Context->ServerAddrAndProto )
-		{
-			Status = EFI_OUT_OF_RESOURCES;
-			goto Error;
-		}
+			//L1_MEMORY_MemsetWidth(Context->ServerAddrAndProto, 0, 50);
+			//L1_STRING_CopyWidth(Context->ServerAddrAndProto, L"https://180.101.49.12/");
 	}
 
 	/* SHELL_FREE_NON_NULL (Context->Uri); */
 
 	StringSize	= AsciiStrSize( Location ) * sizeof(CHAR16);
-	Context->Uri	= AllocateZeroPool( StringSize );
-	if ( !Context->Uri )
-	{
-		Status = EFI_OUT_OF_RESOURCES;
-		goto Error;
-	}
+	
 
 	/*
 	 *
@@ -4141,7 +4001,7 @@ GetResponse2(
 			break;
 		}
 
-		Status = Context->Http->Response( Context->Http, &Context->ResponseToken );
+		Status = Context->Http.Response( &Context->Http, &Context->ResponseToken );
 		if ( EFI_ERROR( Status ) )
 		{
 			break;
@@ -4155,7 +4015,7 @@ GetResponse2(
 
 		if ( EFI_ERROR( Status ) )
 		{
-			Context->Http->Cancel( Context->Http, &Context->ResponseToken );
+			Context->Http.Cancel( &Context->Http, &Context->ResponseToken );
 			break;
 		}
 
@@ -4199,7 +4059,7 @@ GetResponse2(
 					Status = EFI_NOT_FOUND;
 				}
 
-				Context->Http->Cancel( Context->Http, &Context->ResponseToken );
+				Context->Http.Cancel( &Context->Http, &Context->ResponseToken );
 				break;
 			}
 
@@ -4365,11 +4225,12 @@ DownloadFile2(
 		goto ON_EXIT;
 	}
 
+	return;
+
 	/*
 	 *
 	 * Open the file.
 	 *
-	 */
 	if ( !EFI_ERROR( ShellFileExists( mLocalFilePath ) ) )
 	{
 		ShellDeleteFileByName( mLocalFilePath );
@@ -4385,13 +4246,18 @@ DownloadFile2(
 		);
 	if ( EFI_ERROR( Status ) )
 	{
-		/* PRINT_HII_APP (STRING_TOKEN (STR_GEN_FILE_OPEN_FAIL), mLocalFilePath); */
+		// PRINT_HII_APP (STRING_TOKEN (STR_GEN_FILE_OPEN_FAIL), mLocalFilePath); 
 		goto ON_EXIT;
 	}
+	
+	*/
 
 	do
 	{
 		/* SHELL_FREE_NON_NULL (DownloadUrl); */
+		
+		L2_DEBUG_Print3( DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: DownloadFile2\n", __LINE__);
+		
 
 		CLOSE_HTTP_HANDLE( ControllerHandle, HttpChildHandle );
 
@@ -4402,19 +4268,30 @@ DownloadFile2(
 			&HttpChildHandle,
 			(VOID * *) &Context->Http
 			);
-
+		//return;
 		if ( EFI_ERROR( Status ) )
 		{
+			L2_DEBUG_Print3( DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: DownloadFile2\n", __LINE__);
+		
 			/* PRINT_HII (STRING_TOKEN (STR_HTTP_ERR_OPEN_PROTOCOL), NicName, Status); */
-			goto ON_EXIT;
+			//goto ON_EXIT;
 		}
 
-		Status = Context->Http->Configure( Context->Http, &Context->HttpConfigData );
+		Status = Context->Http.Configure( &Context->Http, &Context->HttpConfigData );
 		if ( EFI_ERROR( Status ) )
 		{
+			
+		L2_DEBUG_Print3( DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: DownloadFile2\n", __LINE__);
+		
 			/* PRINT_HII (STRING_TOKEN (STR_HTTP_ERR_CONFIGURE), NicName, Status); */
-			goto ON_EXIT;
+			//goto ON_EXIT;
 		}
+
+		//return;
+
+		L2_DEBUG_Print3( DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: DownloadFile2\n", __LINE__);
+		
+		/*
 
 		UrlSize		= 0;
 		DownloadUrl	= StrnCatGrow(
@@ -4439,22 +4316,35 @@ DownloadFile2(
 			Context->Uri,
 			StrLen( Context->Uri ) );
 
-		/* PRINT_HII (STRING_TOKEN (STR_HTTP_DOWNLOADING), DownloadUrl); */
+		 PRINT_HII (STRING_TOKEN (STR_HTTP_DOWNLOADING), DownloadUrl); */
 
-		Status = SendRequest2( Context, DownloadUrl );
+		
+		CHAR16		DownloadUrl2[100] = L"https://180.101.49.12/index.html";
+		L2_DEBUG_Print3( DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: DownloadFile2 DownloadUrl: %a\n", __LINE__, DownloadUrl2);
+		return;
+		Status = SendRequest2( Context, DownloadUrl2 );
 		if ( Status )
 		{
-			goto ON_EXIT;
+			
+		L2_DEBUG_Print3( DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: DownloadFile2\n", __LINE__);
+		
+			//goto ON_EXIT;
 		}
 
-		Status = GetResponse2( Context, DownloadUrl );
+		return;
+		Status = GetResponse2( Context, DownloadUrl2 );
 
 		if ( Status )
 		{
-			goto ON_EXIT;
+			
+		L2_DEBUG_Print3( DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: DownloadFile2\n", __LINE__);
+		
+			//goto ON_EXIT;
 		}
 	}
 	while ( Context->Status == REQ_NEED_REPEAT );
+
+	return;
 
 	if ( Context->Status )
 	{
@@ -4466,25 +4356,26 @@ ON_EXIT:
 	 *
 	 * Close the file.
 	 *
-	 */
 	if ( mFileHandle != NULL )
 	{
 		if ( EFI_ERROR( Status ) && !(Context->Flags & DL_FLAG_KEEP_BAD) )
 		{
 			ShellDeleteFile( &mFileHandle );
 		} 
- else
- {
+ 	else
+ 	{
 			ShellCloseFile( &mFileHandle );
 		}
 	}
+	
+	*/
 
 	/*
 	 * SHELL_FREE_NON_NULL (DownloadUrl);
 	 * SHELL_FREE_NON_NULL (Context->Buffer);
-	 */
 
-	CLOSE_HTTP_HANDLE( ControllerHandle, HttpChildHandle );
+	
+	 CLOSE_HTTP_HANDLE( ControllerHandle, HttpChildHandle );*/
 
 	return(Status);
 }

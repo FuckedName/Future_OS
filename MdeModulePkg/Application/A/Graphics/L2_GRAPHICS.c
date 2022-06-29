@@ -1541,6 +1541,9 @@ void L2_GRAPHICS_ParameterInit()
     WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW].WindowHeight = WINDOW_DEFAULT_HEIGHT + 10 * 16;
     WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW].LayerID = GRAPHICS_LAYER_SYSTEM_LOG_WINDOW;
 
+	SystemLogWindowHeight = WINDOW_DEFAULT_HEIGHT + 10 * 16;
+	SystemLogWindowWidth = WINDOW_DEFAULT_WIDTH + 10 * 16;
+
     WindowLayers.LayerCount++;
     
 
@@ -1684,6 +1687,23 @@ VOID EFIAPI L2_DEBUG_Print3 (UINT16 x, UINT16 y, WINDOW_LAYER_ITEM layer, IN  CO
 
     VA_LIST         VaList;
     VA_START (VaList, Format);
+
+	UINT8 *pBuffer = layer.pBuffer;
+
+	if (LogStatusErrorCount % 27 == 0)
+	{
+		for (int height = 2 * 16; height < SystemLogWindowHeight - 4; height++)
+		{
+			for (int width = 4;  width < SystemLogWindowWidth - 4; width++)
+			{
+				pBuffer[(height * SystemLogWindowWidth + width) * 4 + 0] = 235;
+				pBuffer[(height * SystemLogWindowWidth + width) * 4 + 1] = 235;
+				pBuffer[(height * SystemLogWindowWidth + width) * 4 + 2] = 235;
+			}
+		}	
+		LogStatusErrorCount = 0;
+	}
+	
 	
 	if (layer.LayerID == GRAPHICS_LAYER_SYSTEM_LOG_WINDOW)
 	{
