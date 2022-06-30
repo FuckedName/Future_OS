@@ -4225,7 +4225,7 @@ DownloadFile2(
 		goto ON_EXIT;
 	}
 
-	return;
+	//return;
 
 	/*
 	 *
@@ -4268,7 +4268,7 @@ DownloadFile2(
 			&HttpChildHandle,
 			(VOID * *) &Context->Http
 			);
-		//return;
+		return;
 		if ( EFI_ERROR( Status ) )
 		{
 			L2_DEBUG_Print3( DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: DownloadFile2\n", __LINE__);
