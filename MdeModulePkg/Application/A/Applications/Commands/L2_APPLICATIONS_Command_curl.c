@@ -4268,7 +4268,6 @@ DownloadFile2(
 			&HttpChildHandle,
 			(VOID * *) &Context->Http
 			);
-		return;
 		if ( EFI_ERROR( Status ) )
 		{
 			L2_DEBUG_Print3( DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: DownloadFile2\n", __LINE__);
@@ -4277,11 +4276,13 @@ DownloadFile2(
 			//goto ON_EXIT;
 		}
 
+		return;
+
 		Status = Context->Http.Configure( &Context->Http, &Context->HttpConfigData );
 		if ( EFI_ERROR( Status ) )
 		{
 			
-		L2_DEBUG_Print3( DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: DownloadFile2\n", __LINE__);
+		L2_DEBUG_Print3( DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: DownloadFile2: %d \n", __LINE__, Status);
 		
 			/* PRINT_HII (STRING_TOKEN (STR_HTTP_ERR_CONFIGURE), NicName, Status); */
 			//goto ON_EXIT;
