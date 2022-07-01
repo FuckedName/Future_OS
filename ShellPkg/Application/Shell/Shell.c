@@ -328,8 +328,6 @@ UefiMain (
   IN EFI_SYSTEM_TABLE  *SystemTable
   )
 {
-  Print(L"%d %a %a \r\n", __LINE__, __FILE__, __FUNCTION__);
-  
   EFI_STATUS                      Status;
   CHAR16                          *TempString;
   UINTN                           Size;
@@ -925,7 +923,7 @@ ProcessCommandLine(
   ShellInfoObject.ShellInitSettings.BitUnion.Bits.Delay        = FALSE;
   ShellInfoObject.ShellInitSettings.BitUnion.Bits.Exit         = FALSE;
   ShellInfoObject.ShellInitSettings.BitUnion.Bits.NoNest       = FALSE;
-  ShellInfoObject.ShellInitSettings.Delay = 1;
+  ShellInfoObject.ShellInitSettings.Delay = 5;
 
   //
   // Start LoopVar at 0 to parse only optional arguments at Argv[0]
@@ -1346,8 +1344,6 @@ DoShellPrompt (
   // Read a line from the console
   //
   Status = ShellInfoObject.NewEfiShellProtocol->ReadFile(ShellInfoObject.NewShellParametersProtocol->StdIn, &BufferSize, CmdLine);
-
-  Print(L"%d %a %a \r\n", __LINE__, __FILE__, __FUNCTION__);
 
   //
   // Null terminate the string and parse it
@@ -2443,9 +2439,6 @@ RunCommandOrFile(
   EFI_DEVICE_PATH_PROTOCOL  *DevPath;
   SHELL_STATUS              CalleeExitStatus;
 
-  Print(L"%d %a %a \r\n", __LINE__, __FILE__, __FUNCTION__);
-
-
   Status            = EFI_SUCCESS;
   CommandWithPath   = NULL;
   DevPath           = NULL;
@@ -2501,8 +2494,6 @@ RunCommandOrFile(
           // Get the device path of the application image
           //
           DevPath = ShellInfoObject.NewEfiShellProtocol->GetDevicePathFromFilePath(CommandWithPath);
-          
-          Print(L"%d %a DevPath: %d, %d, %d, %d\r\n", __LINE__, __FILE__, DevPath->Type, DevPath->SubType, DevPath->Length[0], DevPath->Length[1]);
           if (DevPath == NULL){
             Status = EFI_OUT_OF_RESOURCES;
             break;
@@ -2642,8 +2633,6 @@ RunShellCommand(
   CHAR16                    *TempWalker;
   SHELL_OPERATION_TYPES     Type;
   CONST CHAR16              *CurDir;
-    
-  Print(L"%d %a %a \r\n", __LINE__, __FILE__, __FUNCTION__);
 
   ASSERT(CmdLine != NULL);
   if (StrLen(CmdLine) == 0) {

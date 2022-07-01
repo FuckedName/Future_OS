@@ -2,13 +2,13 @@
 /*************************************************
     .
     File name:      	*.*
-    Author£º	        	ÈÎÆôºì
-    ID£º					00001
+    Authorï¼š	        	ä»»å¯çº¢
+    IDï¼š					00001
     Date:          		202107
     Description:    	
-    Others:         	ÎŞ
+    Others:         	æ— 
 
-    History:        	ÎŞ
+    History:        	æ— 
 	    1.  Date:
 		    Author: 
 		    ID:
@@ -40,7 +40,7 @@ extern UINT8 BufferMFT[DISK_BUFFER_SIZE * 2];
 // Index of A0 attribute
 IndexInformation A0Indexes[10] = {0};
 
-//ÓÃÓÚ·ÖÎöÎÄ¼şÏµÍ³Ê¹ÓÃ£¬±ÜÃâÃ¿´Î¶¼ÉêÇëÊÍ·Å£¬ÀË·ÑÊ±¼ä£¬ËùÒÔ½¨Ò»¸ö¹«ÓÃµÄbuffer
+//ç”¨äºåˆ†ææ–‡ä»¶ç³»ç»Ÿä½¿ç”¨ï¼Œé¿å…æ¯æ¬¡éƒ½ç”³è¯·é‡Šæ”¾ï¼Œæµªè´¹æ—¶é—´ï¼Œæ‰€ä»¥å»ºä¸€ä¸ªå…¬ç”¨çš„buffer
 UINT8 pBufferTemp[DISK_BUFFER_SIZE * 2];
 
 UINT64 FileContentRelativeSector;
@@ -51,13 +51,13 @@ UINT8 pItem[DISK_BUFFER_SIZE * 2] = {0};
 
 /****************************************************************************
 *
-*  ÃèÊö:   xxxxx
+*  æè¿°:   xxxxx
 *
-*  ²ÎÊı1£º xxxxx
-*  ²ÎÊı2£º xxxxx
-*  ²ÎÊın£º xxxxx
+*  å‚æ•°1ï¼š xxxxx
+*  å‚æ•°2ï¼š xxxxx
+*  å‚æ•°nï¼š xxxxx
 *
-*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
+*  è¿”å›å€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
 *
 *****************************************************************************/
 EFI_STATUS L2_FILE_NTFS_MFT_Item_Read(UINT16 DeviceID, UINT64 SectorStartNumber)
@@ -70,7 +70,7 @@ EFI_STATUS L2_FILE_NTFS_MFT_Item_Read(UINT16 DeviceID, UINT64 SectorStartNumber)
 
     //sector_count is MFT start sector, 5 * 2 means $ROOT sector...
     //Every MFT Item use 2 sector .
-    Status = L2_STORE_Read(DeviceID, SectorStartNumber, 2, BufferMFT); 
+    Status = L1_STORE_READ(DeviceID, SectorStartNumber, 2, BufferMFT); 
     if (EFI_ERROR(Status))
     {
         L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d Status: %X\n", __LINE__, Status);
@@ -100,9 +100,9 @@ UINT16 Index = 0;
 
 // Find $Root file from all MFT(may be 15 file,)
 // pBuffer store all MFT
-//±È½ÏÖØÒªµÄ¼¸¸öÊôĞÔÈç0X30ÎÄ¼şÃûÊôĞÔ£¬ÆäÖĞ¼ÇÂ¼×Å¸ÃÄ¿Â¼»òÕßÎÄ¼şµÄÎÄ¼şÃû£»
-//0X80Êı¾İÊôĞÔ¼ÇÂ¼×ÅÎÄ¼şÖĞµÄÊı¾İ£»0X90Ë÷Òı¸ùÊôĞÔ£¬´æ·Å×Å¸ÃÄ¿Â¼ÏÂµÄ×ÓÄ¿Â¼ºÍ×ÓÎÄ¼şµÄË÷ÒıÏî£»
-//µ±Ä³¸öÄ¿Â¼ÏÂµÄÄÚÈİ±È½Ï¶à£¬´Ó¶øµ¼ÖÂ0X90ÊôĞÔÎŞ·¨ÍêÈ«´æ·ÅÊ±£¬0XA0ÊôĞÔ»áÖ¸ÏòÒ»¸öË÷ÒıÇøÓò£¬Õâ¸öË÷ÒıÇøÓò°üº¬ÁË¸ÃÄ¿Â¼ÏÂËùÓĞÊ£ÓàÄÚÈİµÄË÷ÒıÏî¡£
+//æ¯”è¾ƒé‡è¦çš„å‡ ä¸ªå±æ€§å¦‚0X30æ–‡ä»¶åå±æ€§ï¼Œå…¶ä¸­è®°å½•ç€è¯¥ç›®å½•æˆ–è€…æ–‡ä»¶çš„æ–‡ä»¶åï¼›
+//0X80æ•°æ®å±æ€§è®°å½•ç€æ–‡ä»¶ä¸­çš„æ•°æ®ï¼›0X90ç´¢å¼•æ ¹å±æ€§ï¼Œå­˜æ”¾ç€è¯¥ç›®å½•ä¸‹çš„å­ç›®å½•å’Œå­æ–‡ä»¶çš„ç´¢å¼•é¡¹ï¼›
+//å½“æŸä¸ªç›®å½•ä¸‹çš„å†…å®¹æ¯”è¾ƒå¤šï¼Œä»è€Œå¯¼è‡´0X90å±æ€§æ— æ³•å®Œå…¨å­˜æ”¾æ—¶ï¼Œ0XA0å±æ€§ä¼šæŒ‡å‘ä¸€ä¸ªç´¢å¼•åŒºåŸŸï¼Œè¿™ä¸ªç´¢å¼•åŒºåŸŸåŒ…å«äº†è¯¥ç›®å½•ä¸‹æ‰€æœ‰å‰©ä½™å†…å®¹çš„ç´¢å¼•é¡¹ã€‚
 EFI_STATUS  L2_FILE_NTFS_MFTDollarRootFileAnalysis(UINT8 *pBuffer)
 {
     UINT8 *p = NULL;
@@ -189,13 +189,13 @@ EFI_STATUS  L2_FILE_NTFS_MFTDollarRootFileAnalysis(UINT8 *pBuffer)
 
 /****************************************************************************
 *
-*  ÃèÊö:   xxxxx
+*  æè¿°:   xxxxx
 *
-*  ²ÎÊı1£º xxxxx
-*  ²ÎÊı2£º xxxxx
-*  ²ÎÊın£º xxxxx
+*  å‚æ•°1ï¼š xxxxx
+*  å‚æ•°2ï¼š xxxxx
+*  å‚æ•°nï¼š xxxxx
 *
-*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
+*  è¿”å›å€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
 *
 *****************************************************************************/
 EFI_STATUS L2_FILE_NTFS_RootPathItemsRead(UINT8 PartitionID)
@@ -212,15 +212,15 @@ EFI_STATUS L2_FILE_NTFS_RootPathItemsRead(UINT8 PartitionID)
                                                                      A0Indexes[k].OccupyCluster * 8);
     
     // cluster need to multi with 8 then it is sector.
-    // ¶ÁÈ¡¸ùÄ¿Â¼ÏîµÄINDEX ITEM ´ÅÅÌ»º´æ
-    Status = L2_STORE_Read(PartitionID, (A0Indexes[k].Offset + lastOffset) * 8 , A0Indexes[k].OccupyCluster * 8, BufferBlock);
+    // è¯»å–æ ¹ç›®å½•é¡¹çš„INDEX ITEM ç£ç›˜ç¼“å­˜
+    Status = L1_STORE_READ(PartitionID, (A0Indexes[k].Offset + lastOffset) * 8 , A0Indexes[k].OccupyCluster * 8, BufferBlock);
     if (EFI_ERROR(Status))
     {
         L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d Status: %X\n", __LINE__, Status);
         return Status;
     }
 
-	// ·ÖÎöINDEX ITEM »º´æ
+	// åˆ†æINDEX ITEM ç¼“å­˜
     L2_FILE_NTFS_MFTIndexItemsAnalysis(BufferBlock, PartitionID);    
     
     lastOffset = A0Indexes[k].Offset;
@@ -233,13 +233,13 @@ EFI_STATUS L2_FILE_NTFS_RootPathItemsRead(UINT8 PartitionID)
 //Print ROOT Path items.
 /****************************************************************************
 *
-*  ÃèÊö:   ·ÖÎöNTFSÎÄ¼şÏµÍ³µÄË÷ÒıÏî
+*  æè¿°:   åˆ†æNTFSæ–‡ä»¶ç³»ç»Ÿçš„ç´¢å¼•é¡¹
 *
-*  ²ÎÊı1£º xxxxx
-*  ²ÎÊı2£º xxxxx
-*  ²ÎÊın£º xxxxx
+*  å‚æ•°1ï¼š xxxxx
+*  å‚æ•°2ï¼š xxxxx
+*  å‚æ•°nï¼š xxxxx
 *
-*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
+*  è¿”å›å€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
 *
 *****************************************************************************/
 EFI_STATUS  L2_FILE_NTFS_MFTIndexItemsAnalysis(UINT8 *pBuffer, UINT8 DeviceID)
@@ -258,13 +258,13 @@ EFI_STATUS  L2_FILE_NTFS_MFTIndexItemsAnalysis(UINT8 *pBuffer, UINT8 DeviceID)
     for (UINT16 i = 0; i < 512 * 8; i++)
         p[i] = pBuffer[i];
 
-    //IndexEntryOffset:Ë÷ÒıÏîµÄÆ«ÒÆ Ïà¶ÔÓÚµ±Ç°Î»ÖÃ
+    //IndexEntryOffset:ç´¢å¼•é¡¹çš„åç§» ç›¸å¯¹äºå½“å‰ä½ç½®
     L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d IndexEntryOffset: %llu IndexEntrySize: %llu\n", __LINE__, 
                                                                      L1_NETWORK_4BytesToUINT32(((NTFS_INDEX_HEADER *)p)->IndexEntryOffset),
                                                                      L1_NETWORK_4BytesToUINT32(((NTFS_INDEX_HEADER *)p)->IndexEntrySize));
 
-    // Ïà¶ÔÓÚµ±Ç°Î»ÖÃ need to add size before this Byte.
-    // »ñÈ¡Ë÷ÒıÍ·Àï±ßµÄË÷ÒıÏîÆ«ÒÆ×Ö¶Î¡£
+    // ç›¸å¯¹äºå½“å‰ä½ç½® need to add size before this Byte.
+    // è·å–ç´¢å¼•å¤´é‡Œè¾¹çš„ç´¢å¼•é¡¹åç§»å­—æ®µã€‚
     //
     UINT8 IndexEntryOffset = L1_NETWORK_4BytesToUINT32(((NTFS_INDEX_HEADER *)p)->IndexEntryOffset) + 24;
 	
@@ -276,7 +276,7 @@ EFI_STATUS  L2_FILE_NTFS_MFTIndexItemsAnalysis(UINT8 *pBuffer, UINT8 DeviceID)
 
 	pCommonStorageItems[0].ItemCount = 0;
 
-	//°ÑINDEX ITEMË÷ÒıÏî·ÖÎö³öÀ´£¬²¢Ğ´Èë¹«¹²µÄÎÄ¼ş¡¢ÎÄ¼ş¼ĞÏîÊı¾İ½á¹¹£¬ÒÔ±ãºóĞøÔÚÎÒµÄµçÄÔÏÔÊ¾
+	//æŠŠINDEX ITEMç´¢å¼•é¡¹åˆ†æå‡ºæ¥ï¼Œå¹¶å†™å…¥å…¬å…±çš„æ–‡ä»¶ã€æ–‡ä»¶å¤¹é¡¹æ•°æ®ç»“æ„ï¼Œä»¥ä¾¿åç»­åœ¨æˆ‘çš„ç”µè„‘æ˜¾ç¤º
     for (UINT8 i = 0; ; i++)
     {    
          if (index >= L1_NETWORK_4BytesToUINT32(((NTFS_INDEX_HEADER *)p)->IndexEntrySize))
@@ -296,7 +296,7 @@ EFI_STATUS  L2_FILE_NTFS_MFTIndexItemsAnalysis(UINT8 *pBuffer, UINT8 DeviceID)
             
          UINT8 FileNameSize = ((NTFS_INDEX_ITEM *)pItem)->FileNameSize;
 
-		 //Ç°Áù¸ö×Ö½Ú¡£¡£
+		 //å‰å…­ä¸ªå­—èŠ‚ã€‚ã€‚
          FileContentRelativeSector = L1_NETWORK_6BytesToUINT64(((NTFS_INDEX_ITEM *)pItem)->MFTReferNumber);
          /*L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: attribut length2: %d FileNameSize: %d\n", __LINE__, 
                                                                    length2,
@@ -409,13 +409,13 @@ IndexInformation *L2_FILE_NTFS_GetA0Indexes()
 
 /****************************************************************************
 *
-*  ÃèÊö:   xxxxx
+*  æè¿°:   xxxxx
 *
-*  ²ÎÊı1£º xxxxx
-*  ²ÎÊı2£º xxxxx
-*  ²ÎÊın£º xxxxx
+*  å‚æ•°1ï¼š xxxxx
+*  å‚æ•°2ï¼š xxxxx
+*  å‚æ•°nï¼š xxxxx
 *
-*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
+*  è¿”å›å€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
 *
 *****************************************************************************/
 EFI_STATUS L2_FILE_NTFS_FirstSelectorAnalysis(UINT8 *p, DollarBootSwitched *pNTFSBootSwitched)
@@ -436,13 +436,13 @@ EFI_STATUS L2_FILE_NTFS_FirstSelectorAnalysis(UINT8 *p, DollarBootSwitched *pNTF
 
 /****************************************************************************
 *
-*  ÃèÊö:   xxxxx
+*  æè¿°:   xxxxx
 *
-*  ²ÎÊı1£º xxxxx
-*  ²ÎÊı2£º xxxxx
-*  ²ÎÊın£º xxxxx
+*  å‚æ•°1ï¼š xxxxx
+*  å‚æ•°2ï¼š xxxxx
+*  å‚æ•°nï¼š xxxxx
 *
-*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
+*  è¿”å›å€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
 *
 *****************************************************************************/
 VOID L1_FILE_NTFS_DollerRootTransfer(DOLLAR_BOOT *pSource, DollarBootSwitched *pDest)
@@ -463,7 +463,7 @@ UINT16  L2_FILE_NTFS_IndexItemHeaderAnalysis(UINT8 *p)
 {
 	NTFS_INDEX_HEADER;
 	
-    // Ïà¶ÔÓÚµ±Ç°Î»ÖÃµÄÆ«ÒÆ£¬ËùÒÔĞèÒª¼ÓÉÏµ±Ç°Î»ÖÃÇ°ÃæµÄ24¸ö×Ö½Ú¡£ need to add size before this Byte.
+    // ç›¸å¯¹äºå½“å‰ä½ç½®çš„åç§»ï¼Œæ‰€ä»¥éœ€è¦åŠ ä¸Šå½“å‰ä½ç½®å‰é¢çš„24ä¸ªå­—èŠ‚ã€‚ need to add size before this Byte.
     UINT16 HeaderLength = L1_NETWORK_4BytesToUINT32(((NTFS_INDEX_HEADER *)p)->IndexEntryOffset) + 24;
 
 	return HeaderLength;
@@ -478,7 +478,7 @@ EFI_STATUS  L2_FILE_NTFS_IndexItemAttributeAnalysis(UINT8 *pBuffer, UINT16 Offse
 	
 	UINT8 pItem[200] = {0};
 
-	// Ë÷ÒıÏî´óĞ¡
+	// ç´¢å¼•é¡¹å¤§å°
 	UINT16 length2 = pBuffer[Offset + 8] + pBuffer[Offset + 9] * 16;
 
 	// copy item into pItem buffer
@@ -505,7 +505,7 @@ EFI_STATUS  L2_FILE_NTFS_IndexItemAttributeAnalysis(UINT8 *pBuffer, UINT16 Offse
 }
 
 
-//NTFSÎÄ¼şÏµÍ³ Ë÷ÒıÏî·ÖÎö
+//NTFSæ–‡ä»¶ç³»ç»Ÿ ç´¢å¼•é¡¹åˆ†æ
 //
 EFI_STATUS  L2_FILE_NTFS_IndexItemBufferAnalysis(UINT8 *pBuffer)
 {
@@ -526,10 +526,10 @@ EFI_STATUS  L2_FILE_NTFS_IndexItemBufferAnalysis(UINT8 *pBuffer)
 	for (UINT16 i = 0; i < 512 * 8; i++)
 		p[i] = pBuffer[i];
 
-	// »ñÈ¡Ë÷ÒıÍ·Ïà¹Ø²ÎÊı
+	// è·å–ç´¢å¼•å¤´ç›¸å…³å‚æ•°
 	UINT16 Offset = L2_FILE_NTFS_IndexItemHeaderAnalysis(p);
 
-	// »ñÈ¡¸÷¸öË÷ÒıÏîÏà¹ØµÄ²ÎÊı
+	// è·å–å„ä¸ªç´¢å¼•é¡¹ç›¸å…³çš„å‚æ•°
 	for (UINT16 i = 0; i < 10; i++)
 	{
 		UINT16 AttributeSize = L2_FILE_NTFS_IndexItemAttributeAnalysis(p, Offset);
@@ -547,13 +547,13 @@ EFI_STATUS  L2_FILE_NTFS_IndexItemBufferAnalysis(UINT8 *pBuffer)
 
 /****************************************************************************
 *
-*  ÃèÊö:   xxxxx
+*  æè¿°:   xxxxx
 *
-*  ²ÎÊı1£º xxxxx
-*  ²ÎÊı2£º xxxxx
-*  ²ÎÊın£º xxxxx
+*  å‚æ•°1ï¼š xxxxx
+*  å‚æ•°2ï¼š xxxxx
+*  å‚æ•°nï¼š xxxxx
 *
-*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
+*  è¿”å›å€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
 *
 *****************************************************************************/
 UINT16 L2_FILE_NTFS_FileItemHeaderAnalysis(UINT8 *pBuffer, NTFS_FILE_SWITCHED *pNTFSFileSwitched)
@@ -584,19 +584,19 @@ EFI_STATUS  L2_FILE_NTFS_DollarVolumeNameAttributeAnalysis(UINT8 *pBuffer, UINT8
 
 /****************************************************************************
 *
-*  ÃèÊö: ·ÖÎöNTFSµÄ´ÅÅÌFILEÏî£¨×¢Òâ²»ÊÇÄ¿Â¼ÏÂµÄÎÄ¼ş£©Àï±ßµÄÊôĞÔ£¬Ã¿¸öFILEÏîÒ»°ãÓĞºÜ¶à¸öÊôĞÔ£¬µ½ÉÙÓĞ4£¬5¸ö
+*  æè¿°: åˆ†æNTFSçš„ç£ç›˜FILEé¡¹ï¼ˆæ³¨æ„ä¸æ˜¯ç›®å½•ä¸‹çš„æ–‡ä»¶ï¼‰é‡Œè¾¹çš„å±æ€§ï¼Œæ¯ä¸ªFILEé¡¹ä¸€èˆ¬æœ‰å¾ˆå¤šä¸ªå±æ€§ï¼Œåˆ°å°‘æœ‰4ï¼Œ5ä¸ª
 *
-*  //±È½ÏÖØÒªµÄ¼¸¸öÊôĞÔÈç0X30ÎÄ¼şÃûÊôĞÔ£¬ÆäÖĞ¼ÇÂ¼×Å¸ÃÄ¿Â¼»òÕßÎÄ¼şµÄÎÄ¼şÃû£»
-*  //0X80Êı¾İÊôĞÔ¼ÇÂ¼×ÅÎÄ¼şÖĞµÄÊı¾İ£»
-*  //0X90Ë÷Òı¸ùÊôĞÔ£¬´æ·Å×Å¸ÃÄ¿Â¼ÏÂµÄ×ÓÄ¿Â¼ºÍ×ÓÎÄ¼şµÄË÷ÒıÏî£»µ±Ä³¸öÄ¿Â¼ÏÂµÄÄÚÈİ±È½Ï¶à£¬´Ó¶øµ¼ÖÂ0X90ÊôĞÔÎŞ·¨ÍêÈ«´æ·ÅÊ±£¬
-*  //0XA0ÊôĞÔ»áÖ¸ÏòÒ»¸öË÷ÒıÇøÓò£¬Õâ¸öË÷ÒıÇøÓò°üº¬ÁË¸ÃÄ¿Â¼ÏÂËùÓĞÊ£ÓàÄÚÈİµÄË÷ÒıÏî¡£
-*  //ÊôĞÔÓĞ³£×¤ÊôĞÔºÍ·Ç³£×¤ÊôĞÔÖ®·Ö£¬µ±Ò»¸öÊôĞÔµÄÊı¾İÄÜ¹»ÔÚ1KBµÄÎÄ¼ş¼ÇÂ¼ÖĞ±£´æµÄÊ±ºò£¬¸ÃÊôĞÔÎª³£×¤ÊôĞÔ£»
-*  //¶øµ±ÊôĞÔµÄÊı¾İÎŞ·¨ÔÚÎÄ¼ş¼ÇÂ¼ÖĞ´æ·Å£¬ĞèÒª´æ·Åµ½MFTÍâµÄÆäËûÎ»ÖÃÊ±£¬¸ÃÊôĞÔÎª·Ç³£×¤ÊôĞÔ¡£³£×¤ÊôĞÔºÍ·Ç³£×¤ÊôĞÔµÄÍ·²¿½á¹¹¶¨ÒåÈçÏÂ£º
-*  ²ÎÊı1£º xxxxx
-*  ²ÎÊı2£º xxxxx
-*  ²ÎÊın£º xxxxx
+*  //æ¯”è¾ƒé‡è¦çš„å‡ ä¸ªå±æ€§å¦‚0X30æ–‡ä»¶åå±æ€§ï¼Œå…¶ä¸­è®°å½•ç€è¯¥ç›®å½•æˆ–è€…æ–‡ä»¶çš„æ–‡ä»¶åï¼›
+*  //0X80æ•°æ®å±æ€§è®°å½•ç€æ–‡ä»¶ä¸­çš„æ•°æ®ï¼›
+*  //0X90ç´¢å¼•æ ¹å±æ€§ï¼Œå­˜æ”¾ç€è¯¥ç›®å½•ä¸‹çš„å­ç›®å½•å’Œå­æ–‡ä»¶çš„ç´¢å¼•é¡¹ï¼›å½“æŸä¸ªç›®å½•ä¸‹çš„å†…å®¹æ¯”è¾ƒå¤šï¼Œä»è€Œå¯¼è‡´0X90å±æ€§æ— æ³•å®Œå…¨å­˜æ”¾æ—¶ï¼Œ
+*  //0XA0å±æ€§ä¼šæŒ‡å‘ä¸€ä¸ªç´¢å¼•åŒºåŸŸï¼Œè¿™ä¸ªç´¢å¼•åŒºåŸŸåŒ…å«äº†è¯¥ç›®å½•ä¸‹æ‰€æœ‰å‰©ä½™å†…å®¹çš„ç´¢å¼•é¡¹ã€‚
+*  //å±æ€§æœ‰å¸¸é©»å±æ€§å’Œéå¸¸é©»å±æ€§ä¹‹åˆ†ï¼Œå½“ä¸€ä¸ªå±æ€§çš„æ•°æ®èƒ½å¤Ÿåœ¨1KBçš„æ–‡ä»¶è®°å½•ä¸­ä¿å­˜çš„æ—¶å€™ï¼Œè¯¥å±æ€§ä¸ºå¸¸é©»å±æ€§ï¼›
+*  //è€Œå½“å±æ€§çš„æ•°æ®æ— æ³•åœ¨æ–‡ä»¶è®°å½•ä¸­å­˜æ”¾ï¼Œéœ€è¦å­˜æ”¾åˆ°MFTå¤–çš„å…¶ä»–ä½ç½®æ—¶ï¼Œè¯¥å±æ€§ä¸ºéå¸¸é©»å±æ€§ã€‚å¸¸é©»å±æ€§å’Œéå¸¸é©»å±æ€§çš„å¤´éƒ¨ç»“æ„å®šä¹‰å¦‚ä¸‹ï¼š
+*  å‚æ•°1ï¼š xxxxx
+*  å‚æ•°2ï¼š xxxxx
+*  å‚æ•°nï¼š xxxxx
 *
-*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX  
+*  è¿”å›å€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX  
 *
 *
 *****************************************************************************/
@@ -616,7 +616,7 @@ UINT16  L2_FILE_NTFS_FileItemAttributeAnalysis(UINT8 *p, UINT16 AttributeOffset,
 		L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: MFT_ATTRIBUTE_INVALID: %X ", __LINE__, __FUNCTION__, pAttributeHeaderSwitched->Type);
 		return 0;
 	}
-    // ÊôĞÔÍ·ºÍÊôĞÔÌå×Ü³¤¶È
+    // å±æ€§å¤´å’Œå±æ€§ä½“æ€»é•¿åº¦
     for (i = 0; i < 4; i++)
         size[i] = p[AttributeOffset + 4 + i];
         
@@ -674,7 +674,7 @@ UINT16  L2_FILE_NTFS_FileItemAttributeAnalysis(UINT8 *p, UINT16 AttributeOffset,
 	                j++;
 	            }
 
-				//ÓÃÓÚ²âÊÔ»ñÈ¡µÄÖµÊÇ·ñÕıÈ·
+				//ç”¨äºæµ‹è¯•è·å–çš„å€¼æ˜¯å¦æ­£ç¡®
 				/*L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: %02X %02X %02X %02X %02X %02X %02X %02X\n", __LINE__, 
 															pItem[pAttributeHeaderSwitched->NameOffset + pAttributeHeaderSwitched->NameSize * 2 + 0],
 															pItem[pAttributeHeaderSwitched->NameOffset + pAttributeHeaderSwitched->NameSize * 2 + 1],
@@ -713,11 +713,11 @@ UINT16  L2_FILE_NTFS_FileItemAttributeAnalysis(UINT8 *p, UINT16 AttributeOffset,
 								pItem[pAttributeHeaderSwitched->NameOffset + 5]);
 			break;
 
-		//90 ÊôĞÔ·ÖÎö£¬ÓĞĞ©¸´ÔÓ£¬Àï±ßÓĞĞ©BUG£¬ĞèÒª¸ù¾İÊµ¼ÊÇé¿öÊÊÅäÏÂ
-		//90 ÊôĞÔ°üº¬£ºNTFS_FILE_ATTRIBUTE_HEADER ResidentAttributeHeader INDEX_ROOT INDEX_ENTRY Õâ4¸ö½á¹¹Ìå¡£
+		//90 å±æ€§åˆ†æï¼Œæœ‰äº›å¤æ‚ï¼Œé‡Œè¾¹æœ‰äº›BUGï¼Œéœ€è¦æ ¹æ®å®é™…æƒ…å†µé€‚é…ä¸‹
+		//90 å±æ€§åŒ…å«ï¼šNTFS_FILE_ATTRIBUTE_HEADER ResidentAttributeHeader INDEX_ROOT INDEX_ENTRY è¿™4ä¸ªç»“æ„ä½“ã€‚
 		case MFT_ATTRIBUTE_DOLLAR_INDEX_ROOT:
 			{	
-				//Èç¹ûÊôĞÔ³¤¶ÈÌ«¶Ì£¬±íÊ¾´æ·Å²»ÁËÊı¾İ£¬¹À¼ÆÕâÀïÓĞBUG
+				//å¦‚æœå±æ€§é•¿åº¦å¤ªçŸ­ï¼Œè¡¨ç¤ºå­˜æ”¾ä¸äº†æ•°æ®ï¼Œä¼°è®¡è¿™é‡Œæœ‰BUG
 				if (AttributeSize <= 0x58)
 				{
 					return AttributeSize;
@@ -737,9 +737,9 @@ UINT16  L2_FILE_NTFS_FileItemAttributeAnalysis(UINT8 *p, UINT16 AttributeOffset,
 					pCommonStorageItems[i].Type = COMMON_STORAGE_ITEM_MAX;
 				}
 
-				//L2_PARTITION_BufferPrint(pItem, AttributeSize);
+				L2_PARTITION_BufferPrint(pItem, AttributeSize);
 				
-				if (pAttributeHeaderSwitched->ResidentFlag == 0) //³£×¤
+				if (pAttributeHeaderSwitched->ResidentFlag == 0) //å¸¸é©»
 				{
 					UINT16 AttributeHeaderSize = sizeof(NTFS_FILE_ATTRIBUTE_HEADER);
 					UINT16 Offset = AttributeHeaderSize;
@@ -768,11 +768,11 @@ UINT16  L2_FILE_NTFS_FileItemAttributeAnalysis(UINT8 *p, UINT16 AttributeOffset,
 						UINT64 IE_MftReferNumber = L1_NETWORK_8BytesToUINT64(pItem[Offset]);
 						UINT8 IE_FileNameSize = pItem[Offset + 0x50];
 						UINT8 IE_FileNamespace = pItem[Offset + 0x51];
-						UINT64 IE_FileFlag = pItem[Offset + 0x48] | (UINT64)pItem[Offset + 0x48 + 1] << 8 | (UINT64)pItem[Offset + 0x48 + 2]  << 16 |  
-										     (UINT64)pItem[Offset + 0x48 + 3]  << 24 | (UINT64)pItem[Offset + 0x48 + 4]  << 32 |  
-										     (UINT64)pItem[Offset + 0x48 + 5]  << 40 | (UINT64)pItem[Offset + 0x48 + 6]  << 48 |  
-										     (UINT64)pItem[Offset + 0x48 + 7]  << 56 ;
-						UINT16 IE_Size = (UINT16)pItem[Offset + 0x8] | (UINT16)pItem[Offset + 0x9] << 8;
+						UINT64 IE_FileFlag = pItem[Offset + 0x48] + (UINT64)pItem[Offset + 0x48 + 1] * 256 + (UINT64)pItem[Offset + 0x48 + 2] * 256 * 256 + 
+										     (UINT64)pItem[Offset + 0x48 + 3] * 256 * 256 * 256 + (UINT64)pItem[Offset + 0x48 + 4] * 256 * 256 * 256 * 256 + 
+										     (UINT64)pItem[Offset + 0x48 + 5] * 256 * 256 * 256 * 256 * 256 + (UINT64)pItem[Offset + 0x48 + 6] * 256 * 256 * 256 * 256 * 256 * 256 + 
+										     (UINT64)pItem[Offset + 0x48 + 7] * 256 * 256 * 256 * 256 * 256 * 256 * 256;
+						UINT16 IE_Size = pItem[Offset + 0x8] + pItem[Offset + 0x9] * 16 * 16;
 	
 						L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: NameSize: %02X Namespace: %02X IE_FileFlag: %X IE_Size: %X ", __LINE__, IE_FileNameSize, IE_FileNamespace, IE_FileFlag, IE_Size);
 							
@@ -794,14 +794,14 @@ UINT16  L2_FILE_NTFS_FileItemAttributeAnalysis(UINT8 *p, UINT16 AttributeOffset,
 																																pCommonStorageItems[j].Name[8]);
 						pCommonStorageItems[j].Type = COMMON_STORAGE_ITEM_FILE;
 						
-						//ÕâÖÖĞ´·¨¿´ÆğÀ´²»ºÃ¿´£¬µ«ÊÇÓĞĞ§£¬´ıÓÅ»¯
+						//è¿™ç§å†™æ³•çœ‹èµ·æ¥ä¸å¥½çœ‹ï¼Œä½†æ˜¯æœ‰æ•ˆï¼Œå¾…ä¼˜åŒ–
 						UINT64 RelativeSector = pItem[Offset] + (UINT64)pItem[Offset + 1] * 256 + (UINT64)pItem[Offset + 2] * 256 * 256 + (UINT64)pItem[Offset + 3] * 256 * 256 * 256 + (UINT64)pItem[Offset + 4] * 256 * 256 * 256 * 256 + (UINT64)pItem[Offset + 5] * 256 * 256 * 256 * 256 * 256;
 						L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: RelativeSector: %LLX", __LINE__, 
 																																RelativeSector);
 						pCommonStorageItems[j].FileContentRelativeSector = RelativeSector;
 						
 
-						//Õâ±ßºÃÏñÓĞµãBUG£¬IE_FileFlag»ñÈ¡µÄÖµ²»Ì«¶Ô
+						//è¿™è¾¹å¥½åƒæœ‰ç‚¹BUGï¼ŒIE_FileFlagè·å–çš„å€¼ä¸å¤ªå¯¹
 						switch (IE_FileFlag)
 						{
 							case 0x20:
@@ -852,13 +852,13 @@ UINT16  L2_FILE_NTFS_FileItemAttributeAnalysis(UINT8 *p, UINT16 AttributeOffset,
 //L2_FILE_NTFS_MFTDollarRootFileAnalysis
 /****************************************************************************
 *
-*  ÃèÊö: ·ÖÎöNTFSµÄ´ÅÅÌFILEÏî£¨×¢Òâ²»ÊÇÄ¿Â¼ÏÂµÄÎÄ¼ş£©£¬Ã¿¸öFILEÏîÒ»°ãÕ¼ÓÃÁ½¸öÉÈÇø
+*  æè¿°: åˆ†æNTFSçš„ç£ç›˜FILEé¡¹ï¼ˆæ³¨æ„ä¸æ˜¯ç›®å½•ä¸‹çš„æ–‡ä»¶ï¼‰ï¼Œæ¯ä¸ªFILEé¡¹ä¸€èˆ¬å ç”¨ä¸¤ä¸ªæ‰‡åŒº
 *
-*  ²ÎÊı1£º xxxxx
-*  ²ÎÊı2£º xxxxx
-*  ²ÎÊın£º xxxxx
+*  å‚æ•°1ï¼š xxxxx
+*  å‚æ•°2ï¼š xxxxx
+*  å‚æ•°nï¼š xxxxx
 *
-*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
+*  è¿”å›å€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
 *
 *****************************************************************************/
 EFI_STATUS  L2_FILE_NTFS_FileItemBufferAnalysis(UINT8 *pBuffer, NTFS_FILE_SWITCHED *pNTFSFileSwitched)
@@ -869,13 +869,13 @@ EFI_STATUS  L2_FILE_NTFS_FileItemBufferAnalysis(UINT8 *pBuffer, NTFS_FILE_SWITCH
 	for (UINT16 i = 0; i < DISK_BUFFER_SIZE * 2; i++)
 		pBufferTemp[i] = pBuffer[i];
 	
-	// Í¨¹ıÊôĞÔÍ·¼ÆËãµÚÒ»¸öÊôĞÔÆ«ÒÆ
-	// »ñÈ¡ÎÄ¼şÍ·ĞÅÏ¢
+	// é€šè¿‡å±æ€§å¤´è®¡ç®—ç¬¬ä¸€ä¸ªå±æ€§åç§»
+	// è·å–æ–‡ä»¶å¤´ä¿¡æ¯
 	UINT16 Offset = L2_FILE_NTFS_FileItemHeaderAnalysis(pBufferTemp, pNTFSFileSwitched);
 	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: Offset: %d", __LINE__, Offset);
 		
-	// »ñÈ¡Ã¿¸öÊôĞÔĞÅÏ¢
-	// µ±Ç°Ö»¼ÆËã10¸öÊôĞÔ£¬ÆäÊµÊÇÓĞÈ±ÏİµÄ
+	// è·å–æ¯ä¸ªå±æ€§ä¿¡æ¯
+	// å½“å‰åªè®¡ç®—10ä¸ªå±æ€§ï¼Œå…¶å®æ˜¯æœ‰ç¼ºé™·çš„
 	for (UINT16 i = 0; ; i++)
 	{
 		L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: For loop analysis attribute count: %d ", __LINE__, i + 1);
@@ -907,19 +907,19 @@ UINT16 L2_FILE_NTFS_FileItemHeaderAnalysis2(UINT8 *pBuffer, NTFS_FILE_SWITCHED *
 
 /****************************************************************************
 *
-*  ÃèÊö: ·ÖÎöNTFSµÄ´ÅÅÌFILEÏî£¨×¢Òâ²»ÊÇÄ¿Â¼ÏÂµÄÎÄ¼ş£©Àï±ßµÄÊôĞÔ£¬Ã¿¸öFILEÏîÒ»°ãÓĞºÜ¶à¸öÊôĞÔ£¬µ½ÉÙÓĞ4£¬5¸ö
+*  æè¿°: åˆ†æNTFSçš„ç£ç›˜FILEé¡¹ï¼ˆæ³¨æ„ä¸æ˜¯ç›®å½•ä¸‹çš„æ–‡ä»¶ï¼‰é‡Œè¾¹çš„å±æ€§ï¼Œæ¯ä¸ªFILEé¡¹ä¸€èˆ¬æœ‰å¾ˆå¤šä¸ªå±æ€§ï¼Œåˆ°å°‘æœ‰4ï¼Œ5ä¸ª
 *
-*  //±È½ÏÖØÒªµÄ¼¸¸öÊôĞÔÈç0X30ÎÄ¼şÃûÊôĞÔ£¬ÆäÖĞ¼ÇÂ¼×Å¸ÃÄ¿Â¼»òÕßÎÄ¼şµÄÎÄ¼şÃû£»
-*  //0X80Êı¾İÊôĞÔ¼ÇÂ¼×ÅÎÄ¼şÖĞµÄÊı¾İ£»
-*  //0X90Ë÷Òı¸ùÊôĞÔ£¬´æ·Å×Å¸ÃÄ¿Â¼ÏÂµÄ×ÓÄ¿Â¼ºÍ×ÓÎÄ¼şµÄË÷ÒıÏî£»µ±Ä³¸öÄ¿Â¼ÏÂµÄÄÚÈİ±È½Ï¶à£¬´Ó¶øµ¼ÖÂ0X90ÊôĞÔÎŞ·¨ÍêÈ«´æ·ÅÊ±£¬
-*  //0XA0ÊôĞÔ»áÖ¸ÏòÒ»¸öË÷ÒıÇøÓò£¬Õâ¸öË÷ÒıÇøÓò°üº¬ÁË¸ÃÄ¿Â¼ÏÂËùÓĞÊ£ÓàÄÚÈİµÄË÷ÒıÏî¡£
-*  //ÊôĞÔÓĞ³£×¤ÊôĞÔºÍ·Ç³£×¤ÊôĞÔÖ®·Ö£¬µ±Ò»¸öÊôĞÔµÄÊı¾İÄÜ¹»ÔÚ1KBµÄÎÄ¼ş¼ÇÂ¼ÖĞ±£´æµÄÊ±ºò£¬¸ÃÊôĞÔÎª³£×¤ÊôĞÔ£»
-*  //¶øµ±ÊôĞÔµÄÊı¾İÎŞ·¨ÔÚÎÄ¼ş¼ÇÂ¼ÖĞ´æ·Å£¬ĞèÒª´æ·Åµ½MFTÍâµÄÆäËûÎ»ÖÃÊ±£¬¸ÃÊôĞÔÎª·Ç³£×¤ÊôĞÔ¡£³£×¤ÊôĞÔºÍ·Ç³£×¤ÊôĞÔµÄÍ·²¿½á¹¹¶¨ÒåÈçÏÂ£º
-*  ²ÎÊı1£º xxxxx
-*  ²ÎÊı2£º xxxxx
-*  ²ÎÊın£º xxxxx
+*  //æ¯”è¾ƒé‡è¦çš„å‡ ä¸ªå±æ€§å¦‚0X30æ–‡ä»¶åå±æ€§ï¼Œå…¶ä¸­è®°å½•ç€è¯¥ç›®å½•æˆ–è€…æ–‡ä»¶çš„æ–‡ä»¶åï¼›
+*  //0X80æ•°æ®å±æ€§è®°å½•ç€æ–‡ä»¶ä¸­çš„æ•°æ®ï¼›
+*  //0X90ç´¢å¼•æ ¹å±æ€§ï¼Œå­˜æ”¾ç€è¯¥ç›®å½•ä¸‹çš„å­ç›®å½•å’Œå­æ–‡ä»¶çš„ç´¢å¼•é¡¹ï¼›å½“æŸä¸ªç›®å½•ä¸‹çš„å†…å®¹æ¯”è¾ƒå¤šï¼Œä»è€Œå¯¼è‡´0X90å±æ€§æ— æ³•å®Œå…¨å­˜æ”¾æ—¶ï¼Œ
+*  //0XA0å±æ€§ä¼šæŒ‡å‘ä¸€ä¸ªç´¢å¼•åŒºåŸŸï¼Œè¿™ä¸ªç´¢å¼•åŒºåŸŸåŒ…å«äº†è¯¥ç›®å½•ä¸‹æ‰€æœ‰å‰©ä½™å†…å®¹çš„ç´¢å¼•é¡¹ã€‚
+*  //å±æ€§æœ‰å¸¸é©»å±æ€§å’Œéå¸¸é©»å±æ€§ä¹‹åˆ†ï¼Œå½“ä¸€ä¸ªå±æ€§çš„æ•°æ®èƒ½å¤Ÿåœ¨1KBçš„æ–‡ä»¶è®°å½•ä¸­ä¿å­˜çš„æ—¶å€™ï¼Œè¯¥å±æ€§ä¸ºå¸¸é©»å±æ€§ï¼›
+*  //è€Œå½“å±æ€§çš„æ•°æ®æ— æ³•åœ¨æ–‡ä»¶è®°å½•ä¸­å­˜æ”¾ï¼Œéœ€è¦å­˜æ”¾åˆ°MFTå¤–çš„å…¶ä»–ä½ç½®æ—¶ï¼Œè¯¥å±æ€§ä¸ºéå¸¸é©»å±æ€§ã€‚å¸¸é©»å±æ€§å’Œéå¸¸é©»å±æ€§çš„å¤´éƒ¨ç»“æ„å®šä¹‰å¦‚ä¸‹ï¼š
+*  å‚æ•°1ï¼š xxxxx
+*  å‚æ•°2ï¼š xxxxx
+*  å‚æ•°nï¼š xxxxx
 *
-*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX  
+*  è¿”å›å€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX  
 *
 *
 *****************************************************************************/
@@ -940,7 +940,7 @@ UINT16  L2_FILE_NTFS_FileItemAttributeAnalysis2(UINT8 *p, UINT16 AttributeOffset
 		return 0;
 	}
 	
-    // ÊôĞÔÍ·ºÍÊôĞÔÌå×Ü³¤¶È
+    // å±æ€§å¤´å’Œå±æ€§ä½“æ€»é•¿åº¦
     for (i = 0; i < 4; i++)
         size[i] = p[AttributeOffset + 4 + i];
         
@@ -1006,7 +1006,7 @@ UINT16  L2_FILE_NTFS_FileItemAttributeAnalysis2(UINT8 *p, UINT16 AttributeOffset
 	                j++;
 	            }
 
-				//ÓÃÓÚ²âÊÔ»ñÈ¡µÄÖµÊÇ·ñÕıÈ·
+				//ç”¨äºæµ‹è¯•è·å–çš„å€¼æ˜¯å¦æ­£ç¡®
 				/*L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: %02X %02X %02X %02X %02X %02X %02X %02X\n", __LINE__, 
 															pItem[pAttributeHeaderSwitched->NameOffset + pAttributeHeaderSwitched->NameSize * 2 + 0],
 															pItem[pAttributeHeaderSwitched->NameOffset + pAttributeHeaderSwitched->NameSize * 2 + 1],
@@ -1043,8 +1043,8 @@ UINT16  L2_FILE_NTFS_FileItemAttributeAnalysis2(UINT8 *p, UINT16 AttributeOffset
 								pItem[pAttributeHeaderSwitched->NameOffset + 5]);
 			break;
 
-		//90 ÊôĞÔ·ÖÎö£¬ÓĞĞ©¸´ÔÓ£¬Àï±ßÓĞĞ©BUG£¬ĞèÒª¸ù¾İÊµ¼ÊÇé¿öÊÊÅäÏÂ
-		//90 ÊôĞÔ°üº¬£ºNTFS_FILE_ATTRIBUTE_HEADER ResidentAttributeHeader INDEX_ROOT INDEX_ENTRY Õâ4¸ö½á¹¹Ìå¡£
+		//90 å±æ€§åˆ†æï¼Œæœ‰äº›å¤æ‚ï¼Œé‡Œè¾¹æœ‰äº›BUGï¼Œéœ€è¦æ ¹æ®å®é™…æƒ…å†µé€‚é…ä¸‹
+		//90 å±æ€§åŒ…å«ï¼šNTFS_FILE_ATTRIBUTE_HEADER ResidentAttributeHeader INDEX_ROOT INDEX_ENTRY è¿™4ä¸ªç»“æ„ä½“ã€‚
 		case MFT_ATTRIBUTE_DOLLAR_INDEX_ROOT:
 			{				
 				if (AttributeSize <= 0x58)
@@ -1064,9 +1064,9 @@ UINT16  L2_FILE_NTFS_FileItemAttributeAnalysis2(UINT8 *p, UINT16 AttributeOffset
 					pCommonStorageItems[i].Type = COMMON_STORAGE_ITEM_MAX;
 				}
 
-				//L2_PARTITION_BufferPrint(pItem, AttributeSize);
+				L2_PARTITION_BufferPrint(pItem, AttributeSize);
 				
-				if (pAttributeHeaderSwitched->ResidentFlag == 0) //³£×¤
+				if (pAttributeHeaderSwitched->ResidentFlag == 0) //å¸¸é©»
 				{
 					UINT16 AttributeHeaderSize = sizeof(NTFS_FILE_ATTRIBUTE_HEADER);
 					UINT16 Offset = AttributeHeaderSize;
@@ -1097,7 +1097,7 @@ UINT16  L2_FILE_NTFS_FileItemAttributeAnalysis2(UINT8 *p, UINT16 AttributeOffset
 						UINT8 IE_FileNameSize = pItem[Offset + 0x50];
 						UINT8 IE_FileNamespace = pItem[Offset + 0x51];
 						UINT64 IE_FileFlag = L1_NETWORK_8BytesToUINT64(pItem[Offset + 0x48]);
-						UINT16 IE_Size = (UINT16)pItem[Offset + 0x8] | (UINT16)pItem[Offset + 0x9] << 8;
+						UINT16 IE_Size = pItem[Offset + 0x8] + pItem[Offset + 0x9] * 16 * 16;
 	
 						L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: NameSize: %02X Namespace: %02X IE_FileFlag: %X IE_Size: %X ", __LINE__, IE_FileNameSize, IE_FileNamespace, IE_FileFlag, IE_Size);
 							
@@ -1124,7 +1124,7 @@ UINT16  L2_FILE_NTFS_FileItemAttributeAnalysis2(UINT8 *p, UINT16 AttributeOffset
 						pCommonStorageItems[j].FileContentRelativeSector = RelativeSector;
 						
 
-						//Õâ±ßºÃÏñÓĞµãBUG£¬IE_FileFlag»ñÈ¡µÄÖµ²»Ì«¶Ô
+						//è¿™è¾¹å¥½åƒæœ‰ç‚¹BUGï¼ŒIE_FileFlagè·å–çš„å€¼ä¸å¤ªå¯¹
 						switch (IE_FileFlag)
 						{
 							case 0x20:
@@ -1177,12 +1177,12 @@ EFI_STATUS  L2_FILE_NTFS_FileItemBufferAnalysis2(UINT8 *pBuffer, NTFS_FILE_SWITC
 	for (UINT16 i = 0; i < DISK_BUFFER_SIZE * 2; i++)
 		pBufferTemp[i] = pBuffer[i];
 	
-	// Í¨¹ıÊôĞÔÍ·¼ÆËãµÚÒ»¸öÊôĞÔÆ«ÒÆ
-	// »ñÈ¡ÎÄ¼şÍ·ĞÅÏ¢
+	// é€šè¿‡å±æ€§å¤´è®¡ç®—ç¬¬ä¸€ä¸ªå±æ€§åç§»
+	// è·å–æ–‡ä»¶å¤´ä¿¡æ¯
 	UINT16 Offset = L2_FILE_NTFS_FileItemHeaderAnalysis(pBufferTemp, pNTFSFileSwitched);
 	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: Offset: %d ", __LINE__, Offset);
 	
-	// »ñÈ¡Ã¿¸öÊôĞÔĞÅÏ¢
+	// è·å–æ¯ä¸ªå±æ€§ä¿¡æ¯
 	for (UINT16 i = 0; ; i++)
 	{
 		L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: For loop analysis attribute count: %d ", __LINE__, i + 1);

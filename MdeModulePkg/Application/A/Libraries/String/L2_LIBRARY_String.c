@@ -2,13 +2,13 @@
 /*************************************************
     .
     File name:      	*.*
-    Author£º	        	ÈÎÆôºì
-    ID£º					00001
+    Authorï¼š	        	ä»»å¯çº¢
+    IDï¼š					00001
     Date:          		202107
     Description:    	
-    Others:         	ÎÞ
+    Others:         	æ— 
 
-    History:        	ÎÞ
+    History:        	æ— 
 	    1.  Date:
 		    Author: 
 		    ID:
@@ -35,13 +35,13 @@
 
 /****************************************************************************
 *
-*  ÃèÊö:   Éú³É×Ö·û´®
+*  æè¿°:   ç”Ÿæˆå­—ç¬¦ä¸²
 *
-*  ²ÎÊý1£º xxxxx
-*  ²ÎÊý2£º xxxxx
-*  ²ÎÊýn£º xxxxx
+*  å‚æ•°1ï¼š xxxxx
+*  å‚æ•°2ï¼š xxxxx
+*  å‚æ•°nï¼š xxxxx
 *
-*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
+*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
 *
 *****************************************************************************/
 VOID L2_STRING_Maker (UINT16 x, UINT16 y,
@@ -60,13 +60,13 @@ VOID L2_STRING_Maker (UINT16 x, UINT16 y,
 
 /****************************************************************************
 *
-*  ÃèÊö:   Éú³É×Ö·û´®
+*  æè¿°:   ç”Ÿæˆå­—ç¬¦ä¸²
 *
-*  ²ÎÊý1£º xxxxx
-*  ²ÎÊý2£º xxxxx
-*  ²ÎÊýn£º xxxxx
+*  å‚æ•°1ï¼š xxxxx
+*  å‚æ•°2ï¼š xxxxx
+*  å‚æ•°nï¼š xxxxx
 *
-*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
+*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
 *
 *****************************************************************************/
 VOID L2_STRING_Maker2 (UINT16 x, UINT16 y, WINDOW_LAYER_ITEM layer,
@@ -85,13 +85,13 @@ VOID L2_STRING_Maker2 (UINT16 x, UINT16 y, WINDOW_LAYER_ITEM layer,
 
 /****************************************************************************
 *
-*  ÃèÊö:   Éú³É×Ö·û´®
+*  æè¿°:   ç”Ÿæˆå­—ç¬¦ä¸²
 *
-*  ²ÎÊý1£º xxxxx
-*  ²ÎÊý2£º xxxxx
-*  ²ÎÊýn£º xxxxx
+*  å‚æ•°1ï¼š xxxxx
+*  å‚æ•°2ï¼š xxxxx
+*  å‚æ•°nï¼š xxxxx
 *
-*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
+*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
 *
 *****************************************************************************/
 VOID L2_STRING_Maker3 (UINT16 x, UINT16 y, WINDOW_LAYER_ITEM layer,
@@ -105,9 +105,9 @@ VOID L2_STRING_Maker3 (UINT16 x, UINT16 y, WINDOW_LAYER_ITEM layer,
     for (i = 0; i < 0x100; i++)
         AsciiBuffer[i] = 0;
         
-    Color.Blue = 0xFF;
-    Color.Red = 0xFF;
-    Color.Green = 0xFF;
+    Color.Blue = 0x00;
+    Color.Red = 0x00;
+    Color.Green = 0x00;
     Color.Reserved = layer.LayerID;
 
     //ASSERT (Format != NULL);

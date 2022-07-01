@@ -2,13 +2,13 @@
 /*************************************************
     .
     File name:      	*.*
-    Author£º	        	ÈÎÆôºì
-    ID£º					00001
+    Authorï¼š	        	ä»»å¯çº¢
+    IDï¼š					00001
     Date:          		202107
     Description:    	
-    Others:         	ÎÞ
+    Others:         	æ— 
 
-    History:        	ÎÞ
+    History:        	æ— 
 	    1.  Date:
 		    Author: 
 		    ID:
@@ -33,13 +33,13 @@
 
 /****************************************************************************
 *
-*  ÃèÊö:   ÄÚ´æÉèÖÃÎªÖ¸¶¨Öµ£¬Õâ¸öº¯ÊýÐ§ÂÊ²»Ì«¸ß£¬Î´°´ÕÕ»úÆ÷×Ö³¤ÓÅ»¯
+*  æè¿°:   å†…å­˜è®¾ç½®ä¸ºæŒ‡å®šå€¼ï¼Œè¿™ä¸ªå‡½æ•°æ•ˆçŽ‡ä¸å¤ªé«˜ï¼ŒæœªæŒ‰ç…§æœºå™¨å­—é•¿ä¼˜åŒ–
 *
-*  ²ÎÊý1£º xxxxx
-*  ²ÎÊý2£º xxxxx
-*  ²ÎÊýn£º xxxxx
+*  å‚æ•°1ï¼š xxxxx
+*  å‚æ•°2ï¼š xxxxx
+*  å‚æ•°nï¼š xxxxx
 *
-*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
+*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
 *
 *****************************************************************************/
 VOID L1_MEMORY_Memset(void *s, UINT8 c, UINT32 n)
@@ -57,46 +57,19 @@ VOID L1_MEMORY_Memset(void *s, UINT8 c, UINT32 n)
 }
 
 
-
-
-/****************************************************************************
-*
-*  ÃèÊö:   ÄÚ´æÉèÖÃÎªÖ¸¶¨Öµ£¬Õâ¸öº¯ÊýÐ§ÂÊ²»Ì«¸ß£¬Î´°´ÕÕ»úÆ÷×Ö³¤ÓÅ»¯
-*
-*  ²ÎÊý1£º xxxxx
-*  ²ÎÊý2£º xxxxx
-*  ²ÎÊýn£º xxxxx
-*
-*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
-*
-*****************************************************************************/
-VOID L1_MEMORY_MemsetWidth(int *s, int c, UINT32 n)
-{
-  int *d;
-
-  d = s;
-
-  while (n-- != 0) 
-  {
-    *d++ = c;
-  }
-
-  return s;
-}
-
 //InternalMemSetMem
 
 
 
 /****************************************************************************
 *
-*  ÃèÊö:   ÄÚ´æÉèÖÃÎªÖ¸¶¨Öµ
+*  æè¿°:   å†…å­˜è®¾ç½®ä¸ºæŒ‡å®šå€¼
 *
-*  ²ÎÊý1£º xxxxx
-*  ²ÎÊý2£º xxxxx
-*  ²ÎÊýn£º xxxxx
+*  å‚æ•°1ï¼š xxxxx
+*  å‚æ•°2ï¼š xxxxx
+*  å‚æ•°nï¼š xxxxx
 *
-*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
+*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
 *
 *****************************************************************************/
 void L1_MEMORY_SetValue(UINT8 *pBuffer, UINT8 Value, UINT32 Length)
@@ -159,13 +132,13 @@ void L1_MEMORY_SetValue(UINT8 *pBuffer, UINT8 Value, UINT32 Length)
 
 /****************************************************************************
 *
-*  ÃèÊö:   ÄÚ´æ¿½±´
+*  æè¿°:   å†…å­˜æ‹·è´
 *
-*  ²ÎÊý1£º xxxxx
-*  ²ÎÊý2£º xxxxx
-*  ²ÎÊýn£º xxxxx
+*  å‚æ•°1ï¼š xxxxx
+*  å‚æ•°2ï¼š xxxxx
+*  å‚æ•°nï¼š xxxxx
 *
-*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
+*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
 *
 *****************************************************************************/
 void *L1_MEMORY_Copy(UINT8 *dest, const UINT8 *src, UINT32 count)

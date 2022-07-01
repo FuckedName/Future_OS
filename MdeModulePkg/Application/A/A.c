@@ -1,6 +1,6 @@
 
 /*************************************************
-    版本
+    .
     File name:      	*.*
     Author：	        	任启红
     ID：					00001
@@ -41,9 +41,6 @@
 #include <Devices/Timer/L2_DEVICE_Timer.h>
 #include <Devices/Store/L2_DEVICE_Store.h>
 #include <Devices/Screen/L2_DEVICE_Screen.h>
-#include <Graphics/Window/L2_GRAPHICS_Window.h>
-
-
 
 #include <Memory/L2_MEMORY.h>
 #include <Memory/L1_MEMORY.h>
@@ -94,8 +91,6 @@ EFI_STATUS EFIAPI Main (
     INFO_SELF(L"Main: 0x%X Status: 0x%X sASCII: 0x%X p1: 0x%X pBuffer: 0x%X \r\n", Main, &Status, sASCII, p1, pBuffer);  
 
 	L2_SCREEN_Init();
-
-	SystemHandle = ImageHandle;
 	
     L2_COMMON_MemoryAllocate();
 
@@ -105,14 +100,8 @@ EFI_STATUS EFIAPI Main (
 
     L2_MOUSE_Init();
     
-    L2_KEYBOARD_Init();
-    
     L2_TCP4_Init();
-
-    L2_INTERFACES_Initial();
-
-	L2_STORE_PartitionParameterInitial();   
-	
+        
     L2_STORE_PartitionAnalysis();
     
     L2_COMMON_MultiProcessInit();
@@ -124,15 +113,10 @@ EFI_STATUS EFIAPI Main (
     L2_GRAPHICS_SystemSettingInit();
 
 	L3_APPLICATION_WindowsInitial();
-
-    L2_MOUSE_GraphicsEventInit();
     
-    L2_ApplicationInit();
-    
-    L2_TIMER_IntervalInit();  
-    
-    return EFI_SUCCESS;
-}  
+    L2_TIMER_IntervalInit();    
         
+    return EFI_SUCCESS;
+}
 
 

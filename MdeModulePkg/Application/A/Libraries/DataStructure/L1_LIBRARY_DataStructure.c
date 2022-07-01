@@ -2,13 +2,13 @@
 /*************************************************
     .
     File name:      	*.*
-    Author£º	        	ÈÎÆôºì
-    ID£º					00001
+    Authorï¼š	        	ä»»å¯çº¢
+    IDï¼š					00001
     Date:          		202107
-    Description:    	»ù´¡Êý¾Ý½á¹¹
-    Others:         	ÎÞ
+    Description:    	åŸºç¡€æ•°æ®ç»“æž„
+    Others:         	æ— 
 
-    History:        	ÎÞ
+    History:        	æ— 
 	    1.  Date:
 		    Author: 
 		    ID:
@@ -42,13 +42,13 @@ unsigned char L1_BIT_Set(unsigned char *pMapper, unsigned long long StartPageID,
 
 /****************************************************************************
 *
-*  ÃèÊö:   Õ»Êý¾Ý½á¹¹Ñ¹Õ»
+*  æè¿°:   æ ˆæ•°æ®ç»“æž„åŽ‹æ ˆ
 *
-*  ²ÎÊý1£º xxxxx
-*  ²ÎÊý2£º xxxxx
-*  ²ÎÊýn£º xxxxx
+*  å‚æ•°1ï¼š xxxxx
+*  å‚æ•°2ï¼š xxxxx
+*  å‚æ•°nï¼š xxxxx
 *
-*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
+*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
 *
 *****************************************************************************/
 int L1_LIBRARY_StackPush(char* a, int top, char elem)
@@ -63,23 +63,23 @@ int L1_LIBRARY_StackPush(char* a, int top, char elem)
 
 /****************************************************************************
 *
-*  ÃèÊö:   Õ»Êý¾Ý½á¹¹³öÕ»
+*  æè¿°:   æ ˆæ•°æ®ç»“æž„å‡ºæ ˆ
 *
-*  ²ÎÊý1£º xxxxx
-*  ²ÎÊý2£º xxxxx
-*  ²ÎÊýn£º xxxxx
+*  å‚æ•°1ï¼š xxxxx
+*  å‚æ•°2ï¼š xxxxx
+*  å‚æ•°nï¼š xxxxx
 *
-*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
+*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
 *
 *****************************************************************************/
 int L1_LIBRARY_StackPop(char * a,int top)
 {
     if (top==-1) 
     {
-        //printf("¿ÕÕ»");
+        //printf("ç©ºæ ˆ");
         return -1;
     }
-    //printf("µ¯Õ»ÔªËØ£º%c\n",a[top]);
+    //printf("å¼¹æ ˆå…ƒç´ ï¼š%c\n",a[top]);
     top--;
     return top;
 }
@@ -90,13 +90,13 @@ int L1_LIBRARY_StackPop(char * a,int top)
 
 /****************************************************************************
 *
-*  ÃèÊö:   ¶ÓÁÐÊý¾Ý½á¹¹³õÊ¼»¯
+*  æè¿°:   é˜Ÿåˆ—æ•°æ®ç»“æž„åˆå§‹åŒ–
 *
-*  ²ÎÊý1£º xxxxx
-*  ²ÎÊý2£º xxxxx
-*  ²ÎÊýn£º xxxxx
+*  å‚æ•°1ï¼š xxxxx
+*  å‚æ•°2ï¼š xxxxx
+*  å‚æ•°nï¼š xxxxx
 *
-*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
+*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
 *
 *****************************************************************************/
 void L1_LIBRARY_QueueInit(QUEUE *pQueue, unsigned long LineCount)
@@ -104,7 +104,7 @@ void L1_LIBRARY_QueueInit(QUEUE *pQueue, unsigned long LineCount)
 	// Todo: need to allocate buffer before set zero..
 	L1_MEMORY_SetValue(pQueue->Buffer, 0, 40 * 100);
 	pQueue->Size = LineCount;
-    pQueue->Front = pQueue->Rear = 0; //³õÊ¼»¯Í·Î²Ö¸Õë
+    pQueue->Front = pQueue->Rear = 0; //åˆå§‹åŒ–å¤´å°¾æŒ‡é’ˆ
     pQueue->LineCount = 0;
 }
 
@@ -113,13 +113,13 @@ void L1_LIBRARY_QueueInit(QUEUE *pQueue, unsigned long LineCount)
 
 /****************************************************************************
 *
-*  ÃèÊö: ¶ÓÁÐÊý¾Ý½á¹¹Èë¶Ó
+*  æè¿°: é˜Ÿåˆ—æ•°æ®ç»“æž„å…¥é˜Ÿ
 *
-*  ²ÎÊý1£º xxxxx
-*  ²ÎÊý2£º xxxxx
-*  ²ÎÊýn£º xxxxx
+*  å‚æ•°1ï¼š xxxxx
+*  å‚æ•°2ï¼š xxxxx
+*  å‚æ•°nï¼š xxxxx
 *
-*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
+*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
 *
 *****************************************************************************/
 void L1_LIBRARY_QueueIn(QUEUE *pQueue , unsigned char *s, unsigned int Size)
@@ -136,7 +136,7 @@ void L1_LIBRARY_QueueIn(QUEUE *pQueue , unsigned char *s, unsigned int Size)
 
 	pQueue->Buffer[pQueue->Rear][i] = '\0';
 	
-    pQueue->Rear = (pQueue->Rear + 1) % pQueue->Size ;    //Î²Ö¸ÕëÆ«ÒÆ
+    pQueue->Rear = (pQueue->Rear + 1) % pQueue->Size ;    //å°¾æŒ‡é’ˆåç§»
 
 	pQueue->LineCount++;
 
@@ -151,13 +151,13 @@ void L1_LIBRARY_QueueIn(QUEUE *pQueue , unsigned char *s, unsigned int Size)
 
 /****************************************************************************
 *
-*  ÃèÊö:   xxxxx
+*  æè¿°:   xxxxx
 *
-*  ²ÎÊý1£º xxxxx
-*  ²ÎÊý2£º xxxxx
-*  ²ÎÊýn£º xxxxx
+*  å‚æ•°1ï¼š xxxxx
+*  å‚æ•°2ï¼š xxxxx
+*  å‚æ•°nï¼š xxxxx
 *
-*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
+*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
 *
 *****************************************************************************/
 int L1_STACK_Push(char* a,int top,char elem)
@@ -172,23 +172,23 @@ int L1_STACK_Push(char* a,int top,char elem)
 
 /****************************************************************************
 *
-*  ÃèÊö:   xxxxx
+*  æè¿°:   xxxxx
 *
-*  ²ÎÊý1£º xxxxx
-*  ²ÎÊý2£º xxxxx
-*  ²ÎÊýn£º xxxxx
+*  å‚æ•°1ï¼š xxxxx
+*  å‚æ•°2ï¼š xxxxx
+*  å‚æ•°nï¼š xxxxx
 *
-*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
+*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
 *
 *****************************************************************************/
 int L1_STACK_Pop(char * a,int top)
 {
     if (top==-1) 
     {
-        //printf("¿ÕÕ»");
+        //printf("ç©ºæ ˆ");
         return -1;
     }
-    //printf("µ¯Õ»ÔªËØ£º%c\n",a[top]);
+    //printf("å¼¹æ ˆå…ƒç´ ï¼š%c\n",a[top]);
     top--;
     return top;
 }

@@ -2,13 +2,13 @@
 /*************************************************
     .
     File name:      	*.*
-    Author£∫	        	»Œ∆Ù∫Ï
-    ID£∫					00001
+    AuthorÔºö	        	‰ªªÂêØÁ∫¢
+    IDÔºö					00001
     Date:          		202107
-    Description:    	∂®“ÂœµÕ≥µƒ“ª–©»´æ÷±‰¡ø£¨’‚¿Ô±ﬂ∫‹∂‡»´æ÷±‰¡ø «–Ë“™∏…µÙµƒ°£
-    Others:         	Œﬁ
+    Description:    	ÂÆö‰πâÁ≥ªÁªüÁöÑ‰∏Ä‰∫õÂÖ®Â±ÄÂèòÈáèÔºåËøôÈáåËæπÂæàÂ§öÂÖ®Â±ÄÂèòÈáèÊòØÈúÄË¶ÅÂπ≤ÊéâÁöÑ„ÄÇ
+    Others:         	Êó†
 
-    History:        	Œﬁ
+    History:        	Êó†
 	    1.  Date:
 		    Author: 
 		    ID:
@@ -32,20 +32,10 @@
 #include <Graphics/L2_GRAPHICS.h>
 			
 #include <Libraries/DataStructure/L1_LIBRARY_DataStructure.h>
-#include <Graphics/Window/L2_GRAPHICS_Window.h>
 
 #include <Graphics/L1_GRAPHICS.h>
-#include <Graphics/L2_GRAPHICS.h>
-#include <Protocol/Shell.h>
 
 extern UINT8 EFI_FILE_STORE_PATH_PARTITION_NAME[50];
-
-#define KEYBOARD_BUFFER_LENGTH (512) 
-#define COMMAND_LINE_PREFIX_BUFFER_LENGTH (512) 
-
-
-#define PARAMETER_COUNT 10
-#define PARAMETER_LENGTH 30
 
 
 #define INFO_SELF(...)   \
@@ -61,36 +51,8 @@ typedef enum
     SYSTEM_ICON_RECYCLE,
     SYSTEM_ICON_FOLDER,
     SYSTEM_ICON_TEXT,
-    SYSTEM_ICON_SHUTDOWN,
     SYSTEM_ICON_MAX 
 }SYSTEM_ICON_320_400_BMP;
-
-typedef enum
-{
-    DESK_ICON_ITEMS_MYCOMPUTER = 0,
-    DESK_ICON_ITEMS_SETTING,
-    DESK_ICON_ITEMS_RECYCLE,
-    DESK_ICON_ITEMS_SHUTDOWN,
-    DESK_ICON_ITEMS_MAX 
-}DESK_ICON_ITEMS;
-
-
-typedef enum
-{
-    MOUSE_RIGHT_BUTTON_CLICK_MENU_OPEN = 0,
-    MOUSE_RIGHT_BUTTON_CLICK_MENU_DELETE,
-    MOUSE_RIGHT_BUTTON_CLICK_MENU_ADD,
-    MOUSE_RIGHT_BUTTON_CLICK_MENU_MODIFY,
-    MOUSE_RIGHT_BUTTON_CLICK_MENU_MAX 
-}MOUSE_RIGHT_BUTTON_CLICK_MENU;
-
-
-// Line 22
-#define DISK_READ_BUFFER_X (0) 
-#define DISK_READ_BUFFER_Y (6 * 56)
-
-
-#define PARTITION_NAME_LENGTH (50)
 
 //save path and block information.
 typedef struct
@@ -111,7 +73,7 @@ typedef struct
     // 00001000(Volume name)
     // 00010000(Sub path)
     // 00100000(FILING: guidang)
-    UINT8 Attribute[1];  // if 0x0FH then Long path structor, 0x20Œƒº˛£¨0x10Œƒº˛º–
+    UINT8 Attribute[1];  // if 0x0FH then Long path structor
     UINT8 Reserved[1];
     UINT8 CreateTimeLow[1];
     UINT8 CreateTimeHigh[2];
@@ -122,18 +84,7 @@ typedef struct
     UINT8 LatestModiedDate[2];
     UINT8 StartClusterLow2B[2]; //*
     UINT8 FileLength[4];
-
-    //”√”⁄÷∏œÚµ±«∞Œƒº˛ªÚ’ﬂƒø¬º∂‘”¶µƒ…»«¯ª∫¥Ê£¨“ÚŒ™”– ±∫Ú“ª∏ˆª∫¥Ê÷∏œÚ∫‹∂‡ƒø¬ºªÚŒƒº˛œÓ
-    //’‚—˘£¨»Áπ˚–Ë“™…æ≥˝Œƒº˛œÓ ±£¨–Ë“™∞—’‚∏ˆŒƒº˛À˘‘⁄µƒƒø¬ºœÓ∂º“™∂¡»°≥ˆ¿¥£¨‘Ÿ–¥»Î¥≈≈Ã
-    //≤ª÷™µ¿ƒ‹≤ªƒ‹”≈ªØœ¬£¨µ±«∞º«¬ºœÓŒ™1025£¨±Ì æ «µ⁄3∏ˆ…»«¯µ»µ»£®“ÚŒ™∂¡»°∫Õ–¥»Î£¨–Ë“™“‘…»«¯Œ™µ•Œª£©
-    //UINT8 *pSectorBuffer;
 }FAT32_ROOTPATH_SHORT_FILE_ITEM;
-
-
-#define DISK_BUFFER_SIZE (512)
-
-extern UINT8 Buffer1[DISK_BUFFER_SIZE];
-extern BOOLEAN TestFlag;
 
 
 typedef struct 
@@ -149,42 +100,42 @@ typedef struct
 // first sector of partition
 typedef struct
 {
-    UINT8 JMP[3] ; // 0x00 3 Ã¯◊™÷∏¡Ó£®Ã¯π˝ø™Õ∑“ª∂Œ«¯”Ú£©
-    UINT8 OEM[8] ; // 0x03 8 OEM√˚≥∆≥£º˚÷µ «MSDOS5.0, NTFS.
+    UINT8 JMP[3] ; // 0x00 3 Ë∑≥ËΩ¨Êåá‰ª§ÔºàË∑≥ËøáÂºÄÂ§¥‰∏ÄÊÆµÂå∫ÂüüÔºâ
+    UINT8 OEM[8] ; // 0x03 8 OEMÂêçÁß∞Â∏∏ËßÅÂÄºÊòØMSDOS5.0, NTFS.
 
     // 0x0B
-    UINT8 BitsOfSector[2];        //  0x0200°°°°…»«¯¥Û–°£¨512B
-    UINT8 SectorOfCluster;            //  0x08°°°°  √ø¥ÿ…»«¯ ˝£¨4KB
-    UINT8 ReservedSelector[2];            // °°°°°°°°°°°°±£¡Ù…»«¯
+    UINT8 BitsOfSector[2];        //  0x0200„ÄÄ„ÄÄÊâáÂå∫Â§ßÂ∞èÔºå512B
+    UINT8 SectorOfCluster;            //  0x08„ÄÄ„ÄÄ  ÊØèÁ∞áÊâáÂå∫Êï∞Ôºå4KB
+    UINT8 ReservedSelector[2];            // „ÄÄ„ÄÄ„ÄÄ„ÄÄ„ÄÄ„ÄÄ‰øùÁïôÊâáÂå∫
     UINT8 NoUse01[5];            //
     
     // 0x15
     UINT8 Description;            //  0xF8     
     
-    // ¥≈≈ÃΩÈ÷  -- ”≤≈Ã
+    // Á£ÅÁõò‰ªãË¥® -- Á°¨Áõò
     UINT8 NoUse02[2];            //
     
     // 0x18
-    UINT8 SectorPerTrack[2];     // °°0x003F °°√øµ¿…»«¯ ˝ 63
-    UINT8 Headers[2];           //°° 0x00FF  ¥≈Õ∑ ˝
-    UINT8 SectorsHide[4];          // °°0x3F°°°°“˛≤ÿ…»«¯
+    UINT8 SectorPerTrack[2];     // „ÄÄ0x003F „ÄÄÊØèÈÅìÊâáÂå∫Êï∞ 63
+    UINT8 Headers[2];           //„ÄÄ 0x00FF  Á£ÅÂ§¥Êï∞
+    UINT8 SectorsHide[4];          // „ÄÄ0x3F„ÄÄ„ÄÄÈöêËóèÊâáÂå∫
     UINT8 NoUse03[8];           //
     
     // 0x28
-    UINT8 AllSectorCount[8];        // æÌ◊‹…»«¯ ˝, ∏ﬂŒª‘⁄«∞, µÕŒª‘⁄∫Û
+    UINT8 AllSectorCount[8];        // Âç∑ÊÄªÊâáÂå∫Êï∞, È´ò‰ΩçÂú®Ââç, ‰Ωé‰ΩçÂú®Âêé
     
     // 0x30
-    UINT8 MFT_StartCluster[8];      // MFT ∆ º¥ÿ
-    UINT8 MFT_MirrStartCluster[8];  // MTF ±∏∑› MFTMirr Œª÷√
+    UINT8 MFT_StartCluster[8];      // MFT Ëµ∑ÂßãÁ∞á
+    UINT8 MFT_MirrStartCluster[8];  // MTF Â§á‰ªΩ MFTMirr ‰ΩçÁΩÆ
     
     //0x40
-    UINT8 ClusterPerMFT[4];    // √øº«¬º¥ÿ ˝ 0xF6
-    UINT8 ClusterPerIndex[4];    // √øÀ˜“˝¥ÿ ˝
+    UINT8 ClusterPerMFT[4];    // ÊØèËÆ∞ÂΩïÁ∞áÊï∞ 0xF6
+    UINT8 ClusterPerIndex[4];    // ÊØèÁ¥¢ÂºïÁ∞áÊï∞
     
     //0x48
-    UINT8 SerialNumber[8];    // æÌ–Ú¡–∫≈
-    UINT8 CheckSum[8];    // –£—È∫Õ
-    UINT8 EndFlag[2];    // 0x1FE 2 …»«¯Ω· ¯∑˚£®0x55 0xAA£© Ω· ¯±Í÷æ£∫MBRµƒΩ· ¯±Í÷æ”ÎDBR£¨EBRµƒΩ· ¯±Í÷æœ‡Õ¨°£
+    UINT8 SerialNumber[8];    // Âç∑Â∫èÂàóÂè∑
+    UINT8 CheckSum[8];    // Ê†°È™åÂíå
+    UINT8 EndFlag[2];    // 0x1FE 2 ÊâáÂå∫ÁªìÊùüÁ¨¶Ôºà0x55 0xAAÔºâ ÁªìÊùüÊ†áÂøóÔºöMBRÁöÑÁªìÊùüÊ†áÂøó‰∏éDBRÔºåEBRÁöÑÁªìÊùüÊ†áÂøóÁõ∏Âêå„ÄÇ
 }DOLLAR_BOOT;
 
 
@@ -222,17 +173,9 @@ extern float MemorySize;
 #define DISPLAY_DESK_DATE_TIME_Y (ScreenHeight - 21)
 
 extern DollarBootSwitched NTFSBootSwitched;
-extern COMMON_STORAGE_ITEM pCommonStorageItems[100];
+extern COMMON_STORAGE_ITEM pCommonStorageItems[32];
 
-
-typedef struct
-{
-    UINT16           FontSize;
-    EFI_STATUS 	(*pDrawFunction)(UINT8 *pBuffer, UINTN x0, UINTN y0, UINT16 AreaCode,	UINT16 BitCode, EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color , UINT16 AreaWidth);
-}CHINESE_FONT_DRAW_FUNCTION_GET;
-
-extern CHINESE_FONT_DRAW_FUNCTION_GET ChineseDrawFunctionGet[17];
-
+#define DISK_BUFFER_SIZE (512)
 
 #define SYSTEM_ICON_WIDTH 400
 #define SYSTEM_ICON_HEIGHT 320
@@ -243,48 +186,49 @@ typedef struct
     UINT16 ReservedSelector;
     UINT32 SectorsPerFat;   
     UINT32 BootPathStartCluster;
-    UINT8 FATCount;
+    UINT8 NumFATS;
     UINT8 SectorOfCluster;
+    UINT8 *FAT32_Table;
 }MasterBootRecordSwitched;    
 
 typedef struct
 {
-    UINT8 JMP[3] ; // 0x00 3 Ã¯◊™÷∏¡Ó£®Ã¯π˝ø™Õ∑“ª∂Œ«¯”Ú£©
-    UINT8 OEM[8] ; // 0x03 8 OEM√˚≥∆≥£º˚÷µ «MSDOS5.0.
-    UINT8 BitsOfSector[2] ; // 0x0b 2 √ø∏ˆ…»«¯µƒ◊÷Ω⁄ ˝°£»°÷µ÷ªƒ‹ «“‘œ¬º∏÷÷£∫512£¨1024£¨2048ªÚ «4096°£…ËŒ™512ª·»°µ√◊Ó∫√µƒºÊ»›–‘
-    UINT8 SectorOfCluster[1] ; // 0x0d 1 √ø¥ÿ…»«¯ ˝°£ ∆‰÷µ±ÿ–Î÷–2µƒ’˚ ˝¥Œ∑Ω£¨Õ¨ ±ªπ“™±£÷§√ø¥ÿµƒ◊÷Ω⁄ ˝≤ªƒ‹≥¨π˝32K
-    UINT8 ReservedSelector[2] ; // 0x0e 2 ±£¡Ù…»«¯ ˝£®∞¸¿®∆Ù∂Ø…»«¯£©¥À”Ú≤ªƒ‹Œ™0£¨FAT12/FAT16±ÿ–ÎŒ™1£¨FAT32µƒµ‰–Õ÷µ»°Œ™32
-    UINT8 FATCount[1] ; // 0x10 1 Œƒº˛∑÷≈‰±Ì ˝ƒø°£ NumFATS£¨»Œ∫ŒFAT∏Ò Ω∂ºΩ®“ÈŒ™2
-    UINT8 RootPathRecords[2] ; // 0x11 2 ◊Ó¥Û∏˘ƒø¬ºÃıƒø∏ˆ ˝, 0 for fat32, 512 for fat16
-    UINT8 AllSectors[2] ; // 0x13 2 ◊‹…»«¯ ˝£®»Áπ˚ «0£¨æÕ π”√∆´“∆0x20¥¶µƒ4◊÷Ω⁄÷µ£©0 for fat32
-    UINT8 Description[1] ; // 0x15 1 ΩÈ÷ √Ë ˆ 0xF8 µ•√Ê°¢√ø√Ê80¥≈µ¿°¢√ø¥≈µ¿9…»«¯
-    UINT8 xxx1[2] ; // 0x16 2 √ø∏ˆŒƒº˛∑÷≈‰±Ìµƒ…»«¯£®FAT16£©,0 for fat32
-    UINT8 xxx2[2] ; // 0x18 2 √ø¥≈µ¿µƒ…»«¯, 0x003f
-    UINT8 xxx3[2] ; // 0x1a 2 ¥≈Õ∑ ˝£¨0xff
-    UINT8 xxx4[4] ; // 0x1c 4 “˛≤ÿ…»«¯, ”ÎMBR÷–µÿ÷∑0x1C6ø™ ºµƒ4∏ˆ◊÷Ω⁄ ˝÷µœ‡µ»
-    UINT8 SectorCounts[4] ; // 0x20 4 ◊‹…»«¯ ˝£®»Áπ˚≥¨π˝65535 π”√¥Àµÿ÷∑£¨–°”⁄65536≤Œº˚∆´“∆0x13£¨∂‘FAT32£¨¥À”Ú±ÿ–Î «∑«0£©
+    UINT8 JMP[3] ; // 0x00 3 Ë∑≥ËΩ¨Êåá‰ª§ÔºàË∑≥ËøáÂºÄÂ§¥‰∏ÄÊÆµÂå∫ÂüüÔºâ
+    UINT8 OEM[8] ; // 0x03 8 OEMÂêçÁß∞Â∏∏ËßÅÂÄºÊòØMSDOS5.0.
+    UINT8 BitsOfSector[2] ; // 0x0b 2 ÊØè‰∏™ÊâáÂå∫ÁöÑÂ≠óËäÇÊï∞„ÄÇÂèñÂÄºÂè™ËÉΩÊòØ‰ª•‰∏ãÂá†ÁßçÔºö512Ôºå1024Ôºå2048ÊàñÊòØ4096„ÄÇËÆæ‰∏∫512‰ºöÂèñÂæóÊúÄÂ•ΩÁöÑÂÖºÂÆπÊÄß
+    UINT8 SectorOfCluster[1] ; // 0x0d 1 ÊØèÁ∞áÊâáÂå∫Êï∞„ÄÇ ÂÖ∂ÂÄºÂøÖÈ°ª‰∏≠2ÁöÑÊï¥Êï∞Ê¨°ÊñπÔºåÂêåÊó∂ËøòË¶Å‰øùËØÅÊØèÁ∞áÁöÑÂ≠óËäÇÊï∞‰∏çËÉΩË∂ÖËøá32K
+    UINT8 ReservedSelector[2] ; // 0x0e 2 ‰øùÁïôÊâáÂå∫Êï∞ÔºàÂåÖÊã¨ÂêØÂä®ÊâáÂå∫ÔºâÊ≠§Âüü‰∏çËÉΩ‰∏∫0ÔºåFAT12/FAT16ÂøÖÈ°ª‰∏∫1ÔºåFAT32ÁöÑÂÖ∏ÂûãÂÄºÂèñ‰∏∫32
+    UINT8 NumFATS[1] ; // 0x10 1 Êñá‰ª∂ÂàÜÈÖçË°®Êï∞ÁõÆ„ÄÇ NumFATSÔºå‰ªª‰ΩïFATÊ†ºÂºèÈÉΩÂª∫ËÆÆ‰∏∫2
+    UINT8 RootPathRecords[2] ; // 0x11 2 ÊúÄÂ§ßÊ†πÁõÆÂΩïÊù°ÁõÆ‰∏™Êï∞, 0 for fat32, 512 for fat16
+    UINT8 AllSectors[2] ; // 0x13 2 ÊÄªÊâáÂå∫Êï∞ÔºàÂ¶ÇÊûúÊòØ0ÔºåÂ∞±‰ΩøÁî®ÂÅèÁßª0x20Â§ÑÁöÑ4Â≠óËäÇÂÄºÔºâ0 for fat32
+    UINT8 Description[1] ; // 0x15 1 ‰ªãË¥®ÊèèËø∞ 0xF8 ÂçïÈù¢„ÄÅÊØèÈù¢80Á£ÅÈÅì„ÄÅÊØèÁ£ÅÈÅì9ÊâáÂå∫
+    UINT8 xxx1[2] ; // 0x16 2 ÊØè‰∏™Êñá‰ª∂ÂàÜÈÖçË°®ÁöÑÊâáÂå∫ÔºàFAT16Ôºâ,0 for fat32
+    UINT8 xxx2[2] ; // 0x18 2 ÊØèÁ£ÅÈÅìÁöÑÊâáÂå∫, 0x003f
+    UINT8 xxx3[2] ; // 0x1a 2 Á£ÅÂ§¥Êï∞Ôºå0xff
+    UINT8 xxx4[4] ; // 0x1c 4 ÈöêËóèÊâáÂå∫, ‰∏éMBR‰∏≠Âú∞ÂùÄ0x1C6ÂºÄÂßãÁöÑ4‰∏™Â≠óËäÇÊï∞ÂÄºÁõ∏Á≠â
+    UINT8 SectorCounts[4] ; // 0x20 4 ÊÄªÊâáÂå∫Êï∞ÔºàÂ¶ÇÊûúË∂ÖËøá65535‰ΩøÁî®Ê≠§Âú∞ÂùÄÔºåÂ∞è‰∫é65536ÂèÇËßÅÂÅèÁßª0x13ÔºåÂØπFAT32ÔºåÊ≠§ÂüüÂøÖÈ°ªÊòØÈùû0Ôºâ
     UINT8 SectorsPerFat[4] ; // Sectors count each FAT use
-    UINT8 Fat32Flag[2] ; // 0x28 2 Flags (FAT32Ãÿ”–)
-    UINT8 FatVersion[2] ; // 0x2a 2 ∞Ê±æ∫≈ (FAT32Ãÿ”–)
-    UINT8 BootPathStartCluster[4] ; // 0x2c 4 ∏˘ƒø¬º∆ º¥ÿ (FAT32)£¨“ª∞„Œ™2
-    UINT8 ClusterName[11] ; // 0x2b 11 æÌ±Í£®∑«FAT32£©
-    UINT8 BootStrap[2] ; // 0x30 2 FSInfo …»«¯ (FAT32) bootstrap
-    UINT8 BootSectorBackup[2] ; // 0x32 2 ∆Ù∂Ø…»«¯±∏∑› (FAT32)»Áπ˚≤ªŒ™0£¨±Ì æ‘⁄±£¡Ù«¯÷–“˝µºº«¬ºµƒ±∏ ˝æ›À˘’ºµƒ…»«¯ ˝£¨Õ®≥£Œ™6Õ¨ ±≤ªΩ®“È π”√6“‘Õ‚µƒ∆‰À˚ ˝÷µ
-    UINT8 Reserved[2] ; // 0x34 2 ±£¡ÙŒ¥ π”√ (FAT32) ¥À”Ú”√0ÃÓ≥‰
-    UINT8 FileSystemType[8] ; // 0x36 8 FATŒƒº˛œµÕ≥¿‡–Õ£®»ÁFAT°¢FAT12°¢FAT16£©∫¨"FAT"æÕ «PBR,∑Ò‘ÚæÕ «MBR
-    UINT8 SelfBootCode[2] ; // 0x3e 2 ≤Ÿ◊˜œµÕ≥◊‘“˝µº¥˙¬Î
-    UINT8 DeviceNumber[1] ; // 0x40 1 BIOS…Ë±∏¥˙∫≈ (FAT32)
-    UINT8 NoUse[1] ; // 0x41 1 Œ¥ π”√ (FAT32)
-    UINT8 Flag[1] ; // 0x42 1 ±Íº« (FAT32)
-    UINT8 SequeenNumber[4] ; // 0x43 4 æÌ–Ú∫≈ (FAT32)
-    UINT8 juanbiao[11] ; // 0x47 11 æÌ±Í£®FAT32£©
-    UINT8 TypeOfFileSystem[8] ; // 0x52 8 FATŒƒº˛œµÕ≥¿‡–Õ£®FAT32£©
+    UINT8 Fat32Flag[2] ; // 0x28 2 Flags (FAT32ÁâπÊúâ)
+    UINT8 FatVersion[2] ; // 0x2a 2 ÁâàÊú¨Âè∑ (FAT32ÁâπÊúâ)
+    UINT8 BootPathStartCluster[4] ; // 0x2c 4 Ê†πÁõÆÂΩïËµ∑ÂßãÁ∞á (FAT32)Ôºå‰∏ÄËà¨‰∏∫2
+    UINT8 ClusterName[11] ; // 0x2b 11 Âç∑Ê†áÔºàÈùûFAT32Ôºâ
+    UINT8 BootStrap[2] ; // 0x30 2 FSInfo ÊâáÂå∫ (FAT32) bootstrap
+    UINT8 BootSectorBackup[2] ; // 0x32 2 ÂêØÂä®ÊâáÂå∫Â§á‰ªΩ (FAT32)Â¶ÇÊûú‰∏ç‰∏∫0ÔºåË°®Á§∫Âú®‰øùÁïôÂå∫‰∏≠ÂºïÂØºËÆ∞ÂΩïÁöÑÂ§áÊï∞ÊçÆÊâÄÂç†ÁöÑÊâáÂå∫Êï∞ÔºåÈÄöÂ∏∏‰∏∫6ÂêåÊó∂‰∏çÂª∫ËÆÆ‰ΩøÁî®6‰ª•Â§ñÁöÑÂÖ∂‰ªñÊï∞ÂÄº
+    UINT8 Reserved[2] ; // 0x34 2 ‰øùÁïôÊú™‰ΩøÁî® (FAT32) Ê≠§ÂüüÁî®0Â°´ÂÖÖ
+    UINT8 FileSystemType[8] ; // 0x36 8 FATÊñá‰ª∂Á≥ªÁªüÁ±ªÂûãÔºàÂ¶ÇFAT„ÄÅFAT12„ÄÅFAT16ÔºâÂê´"FAT"Â∞±ÊòØPBR,Âê¶ÂàôÂ∞±ÊòØMBR
+    UINT8 SelfBootCode[2] ; // 0x3e 2 Êìç‰ΩúÁ≥ªÁªüËá™ÂºïÂØº‰ª£Á†Å
+    UINT8 DeviceNumber[1] ; // 0x40 1 BIOSËÆæÂ§á‰ª£Âè∑ (FAT32)
+    UINT8 NoUse[1] ; // 0x41 1 Êú™‰ΩøÁî® (FAT32)
+    UINT8 Flag[1] ; // 0x42 1 Ê†áËÆ∞ (FAT32)
+    UINT8 SequeenNumber[4] ; // 0x43 4 Âç∑Â∫èÂè∑ (FAT32)
+    UINT8 juanbiao[11] ; // 0x47 11 Âç∑Ê†áÔºàFAT32Ôºâ
+    UINT8 TypeOfFileSystem[8] ; // 0x52 8 FATÊñá‰ª∂Á≥ªÁªüÁ±ªÂûãÔºàFAT32Ôºâ
     UINT8 BootAssembleCode[338]; // code
     UINT8 Partition1[16] ; // 0x1be 64 partitions table, DOS_PART_TBL_OFFSET
     UINT8 Partition2[16] ; // 0X1BE ~0X1CD 16 talbe entry for Partition 1
     UINT8 Partition3[16] ; // 0X1CE ~0X1DD 16 talbe entry for Partition 2
     UINT8 Partition4[16] ; // 0X1DE ~0X1ED 16 talbe entry for Partition 3
-    UINT8 EndFlag[2] ; // 0x1FE 2 …»«¯Ω· ¯∑˚£®0x55 0xAA£© Ω· ¯±Í÷æ£∫MBRµƒΩ· ¯±Í÷æ”ÎDBR£¨EBRµƒΩ· ¯±Í÷æœ‡Õ¨°£
+    UINT8 EndFlag[2] ; // 0x1FE 2 ÊâáÂå∫ÁªìÊùüÁ¨¶Ôºà0x55 0xAAÔºâ ÁªìÊùüÊ†áÂøóÔºöMBRÁöÑÁªìÊùüÊ†áÂøó‰∏éDBRÔºåEBRÁöÑÁªìÊùüÊ†áÂøóÁõ∏Âêå„ÄÇ
 }MasterBootRecord;
 
 
@@ -302,13 +246,9 @@ typedef struct
     UINT16 DeviceType; // 0 Disk, 1: USB, 2: Sata;
     UINT16 PartitionType; // 0 MBR, 1 GPT;
     UINT16 PartitionID; // a physics device consist of Several parts like c: d: e:
-    UINT64 StartSectorNumber; //Very important
-    UINT64 SectorCount; //0xC93060
-    UINT8  PartitionName[PARTITION_NAME_LENGTH];
-
-    UINT64 FAT_TableStartSectorNumber;
-
-	UINT8 *pFAT_TableBuffer;
+    UINT32 StartSectorNumber; //Very important
+    UINT32 SectorCount; //0xC93060
+    UINT8 PartitionName[50];
 
     //Partition parameter
     MasterBootRecordSwitched stMBRSwitched; //FAT32
@@ -322,9 +262,8 @@ typedef struct
 
 extern UINT64 sector_count;
 
+extern UINT8 *FAT32_Table;
 extern UINT64 FileReadCount;
-extern EFI_GRAPHICS_OUTPUT_BLT_PIXEL WhiteColor;
-extern EFI_GRAPHICS_OUTPUT_BLT_PIXEL BlackColor;
 
 extern EFI_SIMPLE_POINTER_PROTOCOL        *gMouse;
 extern UINT16 mouse_count;
@@ -348,30 +287,23 @@ extern UINT8 *pDeskWallpaperTempBuffer;
 extern UINT8 *sChineseChar;
 extern UINT8 *sChineseChar12;
 extern UINT8 *pSystemIconBuffer[SYSTEM_ICON_MAX];
-extern char  pKeyboardInputBuffer[KEYBOARD_BUFFER_LENGTH];
-
 
 extern UINT8 *pSystemIconFolderBuffer;
 extern UINT8 *pSystemIconTextBuffer;
 extern UINT8 *pSystemIconTempBuffer2;
-extern UINT8 *pMouseRightButtonClickWindowBuffer;
+extern UINT8 *pMouseClickBuffer;
 extern UINT8 *pMemoryInformationBuffer;
 extern UINT8 *pDateTimeBuffer;
 extern UINT8 *pMouseBuffer;
 extern UINT8 *pMouseSelectedBuffer;
 extern UINT8 *pStartMenuBuffer ;
-extern UINT8 *pTerminalWindowBuffer;
-
 extern UINT8 *pMyComputerBuffer;
-extern UINT8 *pMyComputerNewBuffer;
 extern UINT8 *pSystemIconMyComputerBuffer;
 extern UINT8 *pSystemIconMySettingBuffer;
 extern UINT8 *pSystemIconRecycleBuffer;
 extern UINT8 *pSystemLogWindowBuffer;
 extern UINT8 *pSystemSettingWindowBuffer;
 extern UINT16 SystemLogWindowHeight;
-extern char pCommandLinePrefixBuffer[COMMAND_LINE_PREFIX_BUFFER_LENGTH];
-extern UINT16 TerminalCurrentLineCount;
                       
 extern UINT32 BlockSize;                                     
 extern UINTN PartitionCount;                                    
@@ -381,31 +313,17 @@ extern  UINT64 FileLength;
 extern  UINT8 *pReadFileDestBuffer;    
 extern UINT16 PartitionItemID;
 extern UINT16 FolderItemID;
- 
-typedef struct
-{
-	UINT16 PartitionStartX;
-	UINT16 PartitionStartY;
-	UINT16 PartitionWidth;
-	UINT16 PartitionHeight;
-	UINT16 ItemStartX;
-	UINT16 ItemStartY;
-	UINT16 ItemWidth;
-	UINT16 ItemHeight;
-}MY_COMPUTER_WINDOW_STATE;
-
-extern MY_COMPUTER_WINDOW_STATE MyComputerWindowState;
 
 
-// init -> partition analysised -> root path analysised -> read fat table -> start read file -> reading a file -> read finished
-typedef enum 
-{
-	 READ_FILE_INIT_STATE = 0, //≥ı º◊¥Ã¨
-	 READ_FILE_GET_PARTITION_INFO_STATE, //ªÒ»°∑÷«¯–≈œ¢
-	 READ_FILE_GET_ROOT_PATH_INFO_STATE, //ªÒ»°∏˘ƒø¬º–≈œ¢
-	 READ_FILE_GET_FAT_TABLE_STATE,  //ªÒ»°FAT±Ì ˝æ›–≈œ¢
-	 READ_FILE_GET_DATA_STATE, //ªÒ»° ˝æ›–≈œ¢
-}READ_FILE_STATE;
+ // init -> partition analysised -> root path analysised -> read fat table -> start read file -> reading a file -> read finished
+ typedef enum 
+ {
+	 INIT_STATE = 0,
+	 GET_PARTITION_INFO_STATE,
+	 GET_ROOT_PATH_INFO_STATE,
+	 GET_FAT_TABLE_STATE,
+	 READ_FILE_STATE,
+ }STATE;
 
 
 typedef enum 
@@ -414,7 +332,6 @@ typedef enum
     START_MENU_BUTTON_SYSTEM_SETTING,
     START_MENU_BUTTON_MEMORY_INFORMATION,
     START_MENU_BUTTON_SYSTEM_LOG,
-    START_MENU_BUTTON_TERMINAL,
     START_MENU_BUTTON_SYSTEM_QUIT,
     START_MENU_BUTTON_MAX
 }START_MENU_BUTTON_SEQUENCE;
@@ -422,7 +339,7 @@ typedef enum
           
 typedef enum 
 {
-    READ_PATITION_INFO_EVENT = 0,
+    READ_PATITION_EVENT = 0,
     READ_ROOT_PATH_EVENT,
     READ_FAT_TABLE_EVENT,
     READ_FILE_EVENT,
@@ -430,25 +347,20 @@ typedef enum
 
 typedef struct
 {
-    UINT16          CurrentState;
-    UINT16          event;
-    UINT16          NextState;
-    EFI_STATUS    (*pAction)(); 
-}STATE_TRANSFORM;
+    STATE          CurrentState;
+    EVENT          event;
+    STATE          NextState;
+    EFI_STATUS    (*pFunc)(); 
+}STATE_TRANS;
 
-
-typedef struct
-{
-    UINT16          CurrentState;
-    UINT16          event;
-    UINT16          NextState;
-    EFI_STATUS    (*pAction)(VOID *pData); 
-}STATE_TRANSFORM_NEW;
 
 	                      
-extern UINT8 ReadFileName[20];                              
-extern UINT8 ReadFileNameLength;                             
-extern READ_FILE_STATE   NextState;                                    
+extern UINT8 ReadFileName[20];                                
+extern UINT8 *pReadFileDestBuffer;                          
+extern UINT8 ReadFileNameLength;                           
+extern UINT64 PreviousBlockNumber;                          
+extern UINT64 FileBlockStart;                               
+extern STATE   NextState;                                    
 extern int READ_FILE_FSM_Event;     
 
 extern UINT16 StatusErrorCount; 
@@ -465,65 +377,22 @@ extern UINT16 LogStatusErrorCount;
 
 extern UINTN ScreenWidth, ScreenHeight;
 
-extern UINT16 MouseRightButtonClickWindowWidth;
-extern UINT16 MouseRightButtonClickWindowHeight;
+extern UINT16 MouseClickWindowWidth;
+extern UINT16 MouseClickWindowHeight;
 extern UINT8 *pMapper;
 
 // memory: 1G->3G
 #define ALL_PAGE_COUNT 0x80000
 #define PHYSICAL_ADDRESS_START 0x20000000
 
-
-//ºŸ…Ë¥Ê¥¢…Ë±∏“ªπ≤”–50∏ˆ∑÷«¯
-#define PARTITION_COUNT 50
-
 extern UINT64 FreeNumberOfPages;
 extern UINT64 SystemAllPagesAllocated;
-extern DEVICE_PARAMETER device[PARTITION_COUNT];
-extern EFI_HANDLE  TimerOne;
-extern EFI_HANDLE  SystemHandle;
-extern EFI_SHELL_PROTOCOL    *EfiShellProtocol;
-
-typedef struct
-{
-    UINT16 StartX;
-    UINT16 StartY;
-    UINT16 EndX;
-    UINT16 EndY;
-    UINT16 GraphicsLayerID;
-}MOUSE_MOVEOVER_OBJECT;
-
-extern MOUSE_MOVEOVER_OBJECT MouseMoveoverObject;
-extern BOOLEAN ApplicationRunFinished;
-extern BOOLEAN bMouseMoveoverObject;
+extern DEVICE_PARAMETER device[10];
 
 
-typedef enum
-{
-    APPLICATION_CALL_ID_INIT = 0,
-    APPLICATION_CALL_ID_SHUTDOWN,
-    APPLICATION_CALL_ID_PRINT_STRING,
-    APPLICATION_CALL_ID_MAX
-}APPLICATION_CALL_ID;
-
-typedef struct
-{
-    APPLICATION_CALL_ID ID;
-    EFI_STATUS          RanStatus;
-    UINT8 pApplicationCallInput[20];
-    UINT8 (*pCallbackFunction)(EFI_STATUS ret);
-}APPLICATION_CALL_DATA;
-
-// Application call
-extern APPLICATION_CALL_DATA *pApplicationCallData;
-
-typedef enum
-{
-    MOUSE_EVENT_TYPE_NO_CLICKED = 0,
-    MOUSE_EVENT_TYPE_LEFT_CLICKED,
-    MOUSE_EVENT_TYPE_RIGHT_CLICKED,
-    MOUSE_EVENT_TYPE_MAX
-}MOUSE_EVENT_TYPE;
+#define MOUSE_NO_CLICKED 0
+#define MOUSE_LEFT_CLICKED 1
+#define MOUSE_RIGHT_CLICKED 2
 
 
 typedef struct
@@ -561,13 +430,9 @@ extern UINT16 StartMenuHeight;
 extern UINT16 MyComputerWidth;
 extern UINT16 MyComputerHeight;
 extern UINT16 SystemLogWindowWidth;
-extern UINT16 TerminalWindowWidth;
-extern UINT16 TerminalWindowHeight;
 
 extern UINT16 SystemSettingWindowWidth;
 extern UINT16 SystemSettingWindowHeight;
-extern VOID (*pFunction)();
-extern UINT8 *pApplication;
 
 
 

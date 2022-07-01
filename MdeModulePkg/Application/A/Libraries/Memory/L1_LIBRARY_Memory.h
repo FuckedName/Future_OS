@@ -2,13 +2,13 @@
 /*************************************************
     .
     File name:      	*.*
-    Author£∫	        	»Œ∆Ù∫Ï
-    ID£∫					00001
+    AuthorÔºö	        	‰ªªÂêØÁ∫¢
+    IDÔºö					00001
     Date:          		202107
     Description:    	
-    Others:         	Œﬁ
+    Others:         	Êó†
 
-    History:        	Œﬁ
+    History:        	Êó†
 	    1.  Date:
 		    Author: 
 		    ID:
@@ -32,5 +32,4 @@ void *L1_MEMORY_Copy(UINT8 *dest, const UINT8 *src, UINT32 count);
 
 VOID L1_MEMORY_Memset(void *s, UINT8 c, UINT32 n);
 
-VOID L1_MEMORY_MemsetWidth(int *s, int c, UINT32 n);
 

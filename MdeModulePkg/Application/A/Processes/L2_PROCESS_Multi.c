@@ -2,13 +2,13 @@
 /*************************************************
     .
     File name:      	*.*
-    Author£º	        	ÈÎÆôºì
-    ID£º					00001
+    Authorï¼š	        	ä»»å¯çº¢
+    IDï¼š					00001
     Date:          		202107
     Description:    	
-    Others:         	ÎŞ
+    Others:         	æ— 
 
-    History:        	ÎŞ
+    History:        	æ— 
 	    1.  Date:
 		    Author: 
 		    ID:
@@ -37,35 +37,30 @@
 #include <Devices/Timer/L2_DEVICE_Timer.h>
 #include <Devices/Network/L2_DEVICE_Network.h>
 
-#include <Applications/L2_APPLICATIONS.h>
-
-#include "L2_INTERFACES.h"
 
 
-EFI_EVENT MultiTaskTriggerGroupEventSystem;
-EFI_EVENT MultiTaskTriggerGroupEventDateTimePrint;
-EFI_EVENT MultiTaskTriggerGroupEventTCPHandle;
-EFI_EVENT MultiTaskTriggerGroupEventApplicationCall;
-EFI_EVENT MultiTaskTriggerGroupEventSystemResponse;
-UINT8 *pApplication = NULL;
-
-VOID (*pFunction)();
+EFI_EVENT MultiTaskTriggerGroup0Event;
+EFI_EVENT MultiTaskTriggerGroup1Event;
+EFI_EVENT MultiTaskTriggerGroup2Event;
+EFI_EVENT MultiTaskTriggerGroup3Event;
 
 
-//Ê±¼äÆ¬¼ÇÊı£¬ÓÃÓÚÇø·Ö²»Í¬µ÷¶ÈÆµÂÊµÄÈÎÎñ¡£
 UINT32 TimerSliceCount = 0;
+
+VOID
+EFIAPI
 
 
 
 /****************************************************************************
 *
-*  ÃèÊö:   xxxxx
+*  æè¿°:   xxxxx
 *
-*  ²ÎÊı1£º xxxxx
-*  ²ÎÊı2£º xxxxx
-*  ²ÎÊın£º xxxxx
+*  å‚æ•°1ï¼š xxxxx
+*  å‚æ•°2ï¼š xxxxx
+*  å‚æ•°nï¼š xxxxx
 *
-*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
+*  è¿”å›å€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
 *
 *****************************************************************************/
 L2_SYSTEM_Start (IN EFI_EVENT Event, IN VOID *Context)
@@ -76,13 +71,13 @@ L2_SYSTEM_Start (IN EFI_EVENT Event, IN VOID *Context)
 
 /****************************************************************************
 *
-*  ÃèÊö:   Õû¸öÏµÍ³µÄÊ±¼äÆ¬£¬¶àÈÎÎñÈ«¿¿Õâ¸öº¯ÊıÇı¶¯¡£
+*  æè¿°:   æ•´ä¸ªç³»ç»Ÿçš„æ—¶é—´ç‰‡ï¼Œå¤šä»»åŠ¡å…¨é è¿™ä¸ªå‡½æ•°é©±åŠ¨ã€‚
 *
-*  ²ÎÊı1£º xxxxx
-*  ²ÎÊı2£º xxxxx
-*  ²ÎÊın£º xxxxx
+*  å‚æ•°1ï¼š xxxxx
+*  å‚æ•°2ï¼š xxxxx
+*  å‚æ•°nï¼š xxxxx
 *
-*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
+*  è¿”å›å€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
 *
 *****************************************************************************/
 VOID EFIAPI L2_TIMER_Slice(
@@ -92,33 +87,20 @@ VOID EFIAPI L2_TIMER_Slice(
 {
     L2_DEBUG_Print1(0, ScreenHeight - 30 - 5 * 16, "%d: TimeSlice %x %lu \n", __LINE__, Context, *((UINT32 *)Context));
 
-	//Ê±¼äÆ¬¼ÆÊı
+	//æ—¶é—´ç‰‡è®¡æ•°
     L2_DEBUG_Print1(0, ScreenHeight - 30 - 6 * 16, "%d: TimerSliceCount: %lu \n", __LINE__, TimerSliceCount);
     //Print(L"%lu\n", *((UINT32 *)Context));
 
-	//µÚÒ»¸öÊÂ¼ş·Ö×éÊÇÊó±ê¡¢¼üÅÌ£¬ËùÒÔĞèÒªÆµÂÊ¸ü¸ßµÄÔËĞĞ
+	//ç¬¬ä¸€ä¸ªäº‹ä»¶åˆ†ç»„æ˜¯é¼ æ ‡ã€é”®ç›˜ï¼Œæ‰€ä»¥éœ€è¦é¢‘ç‡æ›´é«˜çš„è¿è¡Œ
     if (TimerSliceCount % 10 == 0)
     {
-        gBS->SignalEvent (MultiTaskTriggerGroupEventSystem);
-        gBS->SignalEvent (MultiTaskTriggerGroupEventTCPHandle);        
+        gBS->SignalEvent (MultiTaskTriggerGroup1Event);
+        gBS->SignalEvent (MultiTaskTriggerGroup3Event);        
     }
 
-	//µÚ¶ş¸öÊÂ¼ş·Ö×éÊÇÆÁÄ»ÓÒÏÂ½ÇÏÔÊ¾ÈÕÆÚ¡¢Ê±¼ä¡¢ĞÇÆÚ¼¸£¬ËùÒÔÆµÂÊ¿ÉÒÔµÍĞ©ÒÔ½ÚÔ¼CPU×ÊÔ´
+	//ç¬¬äºŒä¸ªäº‹ä»¶åˆ†ç»„æ˜¯å±å¹•å³ä¸‹è§’æ˜¾ç¤ºæ—¥æœŸã€æ—¶é—´ã€æ˜ŸæœŸå‡ ï¼Œæ‰€ä»¥é¢‘ç‡å¯ä»¥ä½äº›ä»¥èŠ‚çº¦CPUèµ„æº
     if (TimerSliceCount % 20 == 0)
-       gBS->SignalEvent (MultiTaskTriggerGroupEventDateTimePrint);
-
-    //ÏµÍ³µ÷ÓÃÈç¹û²»ÎªÁã£¬±íÊ¾Ó¦ÓÃ²ãÓĞÏµÍ³µ÷ÓÃ£¬Ôò´¥·¢¶ÔÓ¦µÄÊÂ¼ş×é¡£
-    //if (0 != *APPLICATION_CALL_FLAG_ADDRESS)
-    if (TimerSliceCount == 100)
-    {
-        gBS->SignalEvent(MultiTaskTriggerGroupEventApplicationCall);
-    }
-
-    if (APPLICATION_CALL_ID_INIT != pApplicationCallData->ID && ApplicationRunFinished)
-    {
-        gBS->SignalEvent (MultiTaskTriggerGroupEventSystemResponse);
-        pApplicationCallData->ID = APPLICATION_CALL_ID_INIT;
-    }
+       gBS->SignalEvent (MultiTaskTriggerGroup2Event);
     
     ////DEBUG ((EFI_D_INFO, "System time slice Loop ...\n"));
     //gBS->SignalEvent (MultiTaskTriggerEvent);
@@ -127,17 +109,19 @@ VOID EFIAPI L2_TIMER_Slice(
     return;
 }
 
+
+
 /****************************************************************************
 *
-*  ÃèÊö:   ¶à½ø³Ì×é£¬Ã¿¸ö½ø³Ì×éÀïÓĞ¶à¸ö½ø³Ì£¬²»¹ı¸úÕæÕı²Ù×÷ÏµÍ³µÄ½ø³ÌÓĞĞ©²î±ğ¡£
-*        µ±Ç°ÏµÍ³µÄ¶à½ø³Ì»¹ÓĞĞ©ÎÊÌâ£¬±ÈÈç£º²»ÄÜÈÃÖ¸¶¨µÄ½ø³ÌÔÚÖ¸¶¨µÄÄÚ´æµØÖ·Ö´ĞĞ¡£
+*  æè¿°:   å¤šè¿›ç¨‹ç»„ï¼Œæ¯ä¸ªè¿›ç¨‹ç»„é‡Œæœ‰å¤šä¸ªè¿›ç¨‹ï¼Œä¸è¿‡è·ŸçœŸæ­£æ“ä½œç³»ç»Ÿçš„è¿›ç¨‹æœ‰äº›å·®åˆ«ã€‚
+*        å½“å‰ç³»ç»Ÿçš„å¤šè¿›ç¨‹è¿˜æœ‰äº›é—®é¢˜ï¼Œæ¯”å¦‚ï¼šä¸èƒ½è®©æŒ‡å®šçš„è¿›ç¨‹åœ¨æŒ‡å®šçš„å†…å­˜åœ°å€æ‰§è¡Œã€‚
 *
 
-*  ²ÎÊı1£º xxxxx
-*  ²ÎÊı2£º xxxxx
-*  ²ÎÊın£º xxxxx
+*  å‚æ•°1ï¼š xxxxx
+*  å‚æ•°2ï¼š xxxxx
+*  å‚æ•°nï¼š xxxxx
 *
-*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
+*  è¿”å›å€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
 *
 *****************************************************************************/
 EFI_STATUS L2_COMMON_MultiProcessInit ()
@@ -145,84 +129,55 @@ EFI_STATUS L2_COMMON_MultiProcessInit ()
     UINT16 i;
 
     // task group for mouse keyboard
-    EFI_GUID gMultiProcessGroupGuidSystem  = { 0x0579257E, 0x1843, 0x45FB, { 0x83, 0x9D, 0x6B, 0x79, 0x09, 0x38, 0x29, 0xA9 } };
+    EFI_GUID gMultiProcessGroup1Guid  = { 0x0579257E, 0x1843, 0x45FB, { 0x83, 0x9D, 0x6B, 0x79, 0x09, 0x38, 0x29, 0xA9 } };
     
     // task group for display date time
-    EFI_GUID gMultiProcessGroupGuidDateTimePrint  = { 0x0579257E, 0x1843, 0x45FB, { 0x83, 0x9D, 0x6B, 0x79, 0x09, 0x38, 0x29, 0xAA } };
+    EFI_GUID gMultiProcessGroup2Guid  = { 0x0579257E, 0x1843, 0x45FB, { 0x83, 0x9D, 0x6B, 0x79, 0x09, 0x38, 0x29, 0xAA } };
     
-    EFI_GUID gMultiProcessGroupGuidTCPHandle  = { 0x0579257E, 0x1843, 0x45FB, { 0x83, 0x9D, 0x6B, 0x79, 0x09, 0x38, 0x29, 0xAB } };
+    // task group for display date time
+    EFI_GUID gMultiProcessGroup3Guid  = { 0x0579257E, 0x1843, 0x45FB, { 0x83, 0x9D, 0x6B, 0x79, 0x09, 0x38, 0x29, 0xAB } };
     
-    EFI_GUID gMultiProcessGroupGuidApplicationCall  = { 0x0579257E, 0x1843, 0x45FB, { 0x83, 0x9D, 0x6B, 0x79, 0x09, 0x38, 0x29, 0xAC } };
+    //L2_GRAPHICS_ChineseCharDraw(pMouseBuffer, 0, 0, 11 * 94 + 42, Color, 16);
     
-    EFI_GUID gMultiProcessGroupGuidSystemResponse  = { 0x0579257E, 0x1843, 0x45FB, { 0x83, 0x9D, 0x6B, 0x79, 0x09, 0x38, 0x29, 0xAD } };
+    //DrawChineseCharIntoBuffer(pMouseBuffer, 0, 0, 0, Color, 16);
+    
+    EFI_EVENT_NOTIFY       TaskProcessesGroup1[] = {L2_KEYBOARD_Event, L2_MOUSE_Event, L2_SYSTEM_Start};
 
-    //ÏµÍ³ÊÂ¼ş£º¼üÅÌ´¦Àí£¬Êó±ê´¦Àí£¬
-    EFI_EVENT_NOTIFY       TaskProcessesGroupSystem[] = {L2_KEYBOARD_Event, L2_MOUSE_Event};
-
-    //ÏµÍ³ÈÕÆÚºÍÊ±¼äÔÚ×ÀÃæÓÒÏÂ½ÇÏÔÊ¾
-    EFI_EVENT_NOTIFY       TaskProcessesGroupDateTimePrint[] = {L2_TIMER_Print};
-
-    //TCPÍ¨ĞÅ´¦ÀíÏà¹ØÊÂ¼ş
-    EFI_EVENT_NOTIFY       TaskProcessesGroupTCPHandle[] = {L2_TCP4_HeartBeatNotify, L2_TCP4_ReceiveNotify, L2_TCP4_SendNotify};
-
-    //step 1: run application 
-    //EFI_EVENT_NOTIFY       TaskProcessesGroupApplicationCall[] = {L2_ApplicationRun};
-    EFI_EVENT_NOTIFY       TaskProcessesGroupApplicationCall[] = {};
+    EFI_EVENT_NOTIFY       TaskProcessesGroup2[] = {L2_TIMER_Print};
     
-    //step 2: System respond the system call 
-    EFI_EVENT_NOTIFY       TaskProcessesGroupApplicationCall2[] = {L2_INTERFACES_ApplicationCall};
-    
-    for (i = 0; i < sizeof(TaskProcessesGroupSystem) / sizeof(EFI_EVENT_NOTIFY); i++)
+    EFI_EVENT_NOTIFY       TaskProcessesGroup3[] = {L2_TCP4_HeartBeatNotify, L2_TCP4_ReceiveNotify, L2_TCP4_SendNotify};
+
+    for (i = 0; i < sizeof(TaskProcessesGroup1) / sizeof(EFI_EVENT_NOTIFY); i++)
     {
         gBS->CreateEventEx(
                           EVT_NOTIFY_SIGNAL,
                           TPL_NOTIFY,
-                          TaskProcessesGroupSystem[i],
+                          TaskProcessesGroup1[i],
                           NULL,
-                          &gMultiProcessGroupGuidSystem,
-                          &MultiTaskTriggerGroupEventSystem);
+                          &gMultiProcessGroup1Guid,
+                          &MultiTaskTriggerGroup1Event);
     }    
 
-    for (i = 0; i < sizeof(TaskProcessesGroupDateTimePrint) / sizeof(EFI_EVENT_NOTIFY); i++)
+    for (i = 0; i < sizeof(TaskProcessesGroup2) / sizeof(EFI_EVENT_NOTIFY); i++)
     {
         gBS->CreateEventEx(
                           EVT_NOTIFY_SIGNAL,
                           TPL_NOTIFY,
-                          TaskProcessesGroupDateTimePrint[i],
+                          TaskProcessesGroup2[i],
                           NULL,
-                          &gMultiProcessGroupGuidDateTimePrint,
-                          &MultiTaskTriggerGroupEventDateTimePrint);
+                          &gMultiProcessGroup2Guid,
+                          &MultiTaskTriggerGroup2Event);
     }    
 
-    for (i = 0; i < sizeof(TaskProcessesGroupTCPHandle) / sizeof(EFI_EVENT_NOTIFY); i++)
+    for (i = 0; i < sizeof(TaskProcessesGroup3) / sizeof(EFI_EVENT_NOTIFY); i++)
     {
         gBS->CreateEventEx(
                           EVT_NOTIFY_SIGNAL,
                           TPL_NOTIFY,
-                          TaskProcessesGroupTCPHandle[i],
+                          TaskProcessesGroup3[i],
                           NULL,
-                          &gMultiProcessGroupGuidTCPHandle,
-                          &MultiTaskTriggerGroupEventTCPHandle);
-    }    
-
-    for (i = 0; i < sizeof(TaskProcessesGroupApplicationCall) / sizeof(EFI_EVENT_NOTIFY); i++)
-    {
-        gBS->CreateEventEx(EVT_NOTIFY_SIGNAL,
-                          TPL_CALLBACK,
-                          TaskProcessesGroupApplicationCall[i],
-                          NULL,
-                          &gMultiProcessGroupGuidApplicationCall,
-                          &MultiTaskTriggerGroupEventApplicationCall);
-    }    
- 
-    for (i = 0; i < sizeof(TaskProcessesGroupApplicationCall2) / sizeof(EFI_EVENT_NOTIFY); i++)
-    {
-        gBS->CreateEventEx(EVT_NOTIFY_SIGNAL,
-                          TPL_NOTIFY,
-                          TaskProcessesGroupApplicationCall2[i],
-                          NULL,
-                          &gMultiProcessGroupGuidSystemResponse,
-                          &MultiTaskTriggerGroupEventSystemResponse);
+                          &gMultiProcessGroup3Guid,
+                          &MultiTaskTriggerGroup3Event);
     }    
 
     return EFI_SUCCESS;

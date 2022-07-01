@@ -2,13 +2,13 @@
 /*************************************************
     .
     File name:      	*.*
-    Author£∫	        	»Œ∆Ù∫Ï
-    ID£∫					00001
+    AuthorÔºö	        	‰ªªÂêØÁ∫¢
+    IDÔºö					00001
     Date:          		202107
     Description:    	
-    Others:         	Œﬁ
+    Others:         	Êó†
 
-    History:        	Œﬁ
+    History:        	Êó†
 	    1.  Date:
 		    Author: 
 		    ID:
@@ -32,19 +32,44 @@
 
 #include <Graphics/L2_GRAPHICS.h>
 
-typedef struct
-{
-    CHAR8 ucX_RelativeMove;
-    CHAR8 ucY_RelativeMove;
-    BOOLEAN LeftButton;
-    BOOLEAN RightButton;
-    BOOLEAN MiddleButton;
-}MOUSE_STATE;
 
-VOID L2_MOUSE_StateAnaysis(EFI_SIMPLE_POINTER_STATE State)
+
+
+/****************************************************************************
+*
+*  ÊèèËø∞:   Èº†Ê†á‰∫ã‰ª∂ÁöÑÊÄªÂÖ•Âè£ÔºåÂΩìÈº†Ê†áÊúâÁÇπÂáª„ÄÅÁßªÂä®‰∫ã‰ª∂Êó∂StateÂÄº‰∏ç‰∏∫Á©∫ÔºåÂèØ‰ª•Ëß¶ÂèëÂêéÁª≠Áõ∏ÂÖ≥ÁöÑÁªòÂõæ‰∫ã‰ª∂
+*
+*  ÂèÇÊï∞1Ôºö xxxxx
+*  ÂèÇÊï∞2Ôºö xxxxx
+*  ÂèÇÊï∞nÔºö xxxxx
+*
+*  ËøîÂõûÂÄºÔºö ÊàêÂäüÔºöXXXXÔºåÂ§±Ë¥•ÔºöXXXXX
+*
+*****************************************************************************/
+VOID EFIAPI L2_MOUSE_Event (IN EFI_EVENT Event, IN VOID *Context)
 {
-    MOUSE_STATE stMouseState;
-        
+    mouse_count++;
+    //L2_DEBUG_Print1(DISPLAY_X, DISPLAY_Y, "%d: HandleMouseEvent\n", __LINE__);
+    EFI_STATUS Status;
+    UINTN Index;
+    EFI_SIMPLE_POINTER_STATE State;
+
+    Status = gBS->CheckEvent(gMouse->WaitForInput); 
+    if (Status == EFI_NOT_READY)
+    {
+        //return ;
+    }
+    
+    Status = gMouse->GetState(gMouse, &State);
+    if (Status == EFI_DEVICE_ERROR)
+    {
+        return ;
+    }
+    if (0 == State.RelativeMovementX && 0 == State.RelativeMovementY && 0 == State.LeftButton && 0 == State.RightButton)
+    {
+        return;
+    }
+    
     //X
     if (State.RelativeMovementX < 0)
     {
@@ -68,76 +93,14 @@ VOID L2_MOUSE_StateAnaysis(EFI_SIMPLE_POINTER_STATE State)
     {
         y_move = (State.RelativeMovementY >> 16) & 0xff;
     }
-        
-    stMouseState.ucX_RelativeMove = x_move;
-    stMouseState.ucX_RelativeMove = y_move;
-
-    // Û±Í◊Ûº¸µ„ª˜
-    if (State.LeftButton == TRUE)
-    {
-        //»Áπ˚‘≠¿¥ «Œ¥µ„ª˜◊¥Ã¨£¨‘Ú∏ƒŒ™µ„ª˜◊¥Ã¨£¨∑Ò‘Ú∏ƒŒ™Œ¥µ„ª˜◊¥Ã¨
-        MouseClickFlag = (MouseClickFlag == MOUSE_EVENT_TYPE_NO_CLICKED) ? MOUSE_EVENT_TYPE_LEFT_CLICKED : MOUSE_EVENT_TYPE_NO_CLICKED;        
-    }
-    
-    // Û±Í”“º¸µ„ª˜
-    if (State.RightButton == TRUE)
-    {        
-        //»Áπ˚‘≠¿¥ «Œ¥µ„ª˜◊¥Ã¨£¨‘Ú∏ƒŒ™µ„ª˜◊¥Ã¨£¨∑Ò‘Ú∏ƒŒ™Œ¥µ„ª˜◊¥Ã¨
-        MouseClickFlag = (MouseClickFlag == MOUSE_EVENT_TYPE_NO_CLICKED) ? MOUSE_EVENT_TYPE_RIGHT_CLICKED : MOUSE_EVENT_TYPE_NO_CLICKED;
-    }
-    
-
-}
-
-
-
-/****************************************************************************
-*
-*  √Ë ˆ:    Û±Í ¬º˛µƒ◊‹»Îø⁄£¨µ± Û±Í”–µ„ª˜°¢“∆∂Ø ¬º˛ ±State÷µ≤ªŒ™ø’£¨ø…“‘¥•∑¢∫Û–¯œ‡πÿµƒªÊÕº ¬º˛
-*
-*  ≤Œ ˝1£∫ xxxxx
-*  ≤Œ ˝2£∫ xxxxx
-*  ≤Œ ˝n£∫ xxxxx
-*
-*  ∑µªÿ÷µ£∫ ≥…π¶£∫XXXX£¨ ß∞‹£∫XXXXX
-*
-*****************************************************************************/
-VOID EFIAPI L2_MOUSE_Event (IN EFI_EVENT Event, IN VOID *Context)
-{
-    mouse_count++;
-    //L2_DEBUG_Print1(DISPLAY_X, DISPLAY_Y, "%d: HandleMouseEvent\n", __LINE__);
-    EFI_STATUS Status;
-    UINTN Index;
-    EFI_SIMPLE_POINTER_STATE State;
-    Status = gBS->CheckEvent(gMouse->WaitForInput); 
-    if (Status == EFI_NOT_READY)
-    {
-        //return ;
-    }
-    
-    Status = gMouse->GetState(gMouse, &State);
-    if (Status == EFI_DEVICE_ERROR)
-    {
-        return ;
-    }
-    
-    L2_DEBUG_Print1(0, ScreenHeight - 30 -  2 * 16, "%d: RelativeMovementX: %04d, RelativeMovementY: %04d ", __LINE__, State.RelativeMovementX, State.RelativeMovementY);
-    
-    //»Áπ˚ Û±Í√ª”–∞¥º¸∫Õ Û±Í“∆∂Ø£¨‘Ú÷±Ω”∑µªÿ°£
-    if (0 == State.RelativeMovementX && 0 == State.RelativeMovementY && 0 == State.LeftButton && 0 == State.RightButton)
-    {
-        return;
-    }
-
-    L2_MOUSE_StateAnaysis(State);
 
     ////DEBUG ((EFI_D_INFO, "X: %X, Y: %X ", x_move, y_move));
     L2_DEBUG_Print1(0, ScreenHeight - 30 -  8 * 16, "%d: X: %04d, Y: %04d move X: %d move Y: %d", __LINE__, iMouseX, iMouseY, x_move, y_move );
     
     //L2_DEBUG_Print1(0, ScreenHeight - 30 -  8 * 16, "%d: X move: %d Y move: %d left: %d right: %d", __LINE__, State.RelativeMovementX, State.RelativeMovementY, State.LeftButton, State.RightButton);
 	
-	iMouseX = iMouseX + State.RelativeMovementX % 100;
-	iMouseY = iMouseY + State.RelativeMovementY % 100; 
+	iMouseX = iMouseX + x_move * 3;
+	iMouseY = iMouseY + y_move * 3; 
 
 	iMouseX = (iMouseX < 0) ? 0 : iMouseX;
 	iMouseX = (iMouseX > ScreenWidth - 16) ? ScreenWidth - 16 : iMouseX;
@@ -145,6 +108,33 @@ VOID EFIAPI L2_MOUSE_Event (IN EFI_EVENT Event, IN VOID *Context)
 	iMouseY = (iMouseY < 0) ? 0 : iMouseY;
 	iMouseY = (iMouseY > ScreenHeight - 16) ? ScreenHeight - 16 : iMouseY;
 	
+    //Button
+    if (State.LeftButton == MOUSE_LEFT_CLICKED)
+    {
+        //DEBUG ((EFI_D_INFO, "Left button clicked\n"));
+        
+        L2_GRAPHICS_RightClickMenu(iMouseX, iMouseY);
+
+        //WirelessMAC();
+        
+        MouseClickFlag = (MouseClickFlag == MOUSE_NO_CLICKED) ? MOUSE_LEFT_CLICKED : MOUSE_NO_CLICKED;
+        
+        //DrawAsciiCharUseBuffer(GraphicsOutput, 20 + process2_i * 8 + 16, 60, 'E', Color);  
+    }
+    
+    if (State.RightButton == 0x01)
+    {
+        //DEBUG ((EFI_D_INFO, "Right button clicked\n"));
+        //DrawAsciiCharUseBuffer(GraphicsOutput, 20 + process2_i * 8 + 16, 60, 'R', Color);
+
+        L2_GRAPHICS_RightClickMenu(iMouseX, iMouseY);
+        
+        MouseClickFlag = 2;
+
+        
+    }
+    //L2_DEBUG_Print1(DISPLAY_X, DISPLAY_Y, "%d: HandleMouseEvent\n", __LINE__);
+    ////DEBUG ((EFI_D_INFO, "\n"));
     L2_MOUSE_Move();
     
     gBS->WaitForEvent( 1, &gMouse->WaitForInput, &Index );
@@ -153,97 +143,17 @@ VOID EFIAPI L2_MOUSE_Event (IN EFI_EVENT Event, IN VOID *Context)
 
 
 
-/****************************************************************************
-*
-*  √Ë ˆ:    Û±ÍÕº–Œ ¬º˛œ‡πÿ±‰¡ø≥ı ºªØ
-*
-*  ≤Œ ˝1£∫ xxxxx
-*  ≤Œ ˝2£∫ xxxxx
-*  ≤Œ ˝n£∫ xxxxx
-*
-*  ∑µªÿ÷µ£∫ ≥…π¶£∫XXXX£¨ ß∞‹£∫XXXXX
-*
-*****************************************************************************/
-EFI_STATUS L2_MOUSE_GraphicsEventInit()
-{    
-    MouseMoveoverObject.StartX = 0;
-    MouseMoveoverObject.EndX   = 0;
-    MouseMoveoverObject.StartY = 0;
-    MouseMoveoverObject.EndY   = 0;
-    MouseMoveoverObject.GraphicsLayerID = 0;
-    bMouseMoveoverObject = FALSE;
-
-    if (NULL == pMouseRightButtonClickWindowBuffer)
-    {
-        return -1;
-    }
-
-    UINT16 Width = MouseRightButtonClickWindowWidth;
-
-
-    //∆‰ µ’‚±ﬂ”–µ„≤ª—œΩ˜£¨“ÚŒ™ Û±Í”“ª˜ø…ƒ‹”–∂‡÷÷µØ≥ˆ≤Àµ•£¨±»»Á£¨”–—°÷–µƒƒø±Í£¨√ª”–—°÷–µƒƒø±Í
-    UINT16 MouseRightButtonClickMenuChineseName[MOUSE_RIGHT_BUTTON_CLICK_MENU_MAX][8] = 
-    {
-        {20,82,31,10,12, 84,0,0}, //°∞¥Úø™°±Œƒº˛
-        {41,30,19,93,12, 84,0,0}, //°∞…æ≥˝°±Œƒº˛
-        {48,34,52,86,12, 84,0,0}, //°∞–¬‘ˆ°±Œƒº˛
-        {48,62,24,36,12, 84,0,0}, //°∞–ﬁ∏ƒ°±Œƒº˛
-    };
-    
-    EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
-    Color.Blue  = 0x00;
-    Color.Red   = 0x00;
-    Color.Green = 0x00;
-    Color.Reserved = GRAPHICS_LAYER_MOUSE_RIGHT_CLICK_WINDOW;
-        
-    //±≥æ∞—’…´≥ı ºªØ
-	for (UINT16 i = 0; i < MouseRightButtonClickWindowHeight; i++)
-	{
-	    for (UINT16 j = 0; j < MouseRightButtonClickWindowWidth; j++)
-	    {
-	        pMouseRightButtonClickWindowBuffer[(i * Width + j) * 4 + 0] = 0xee;
-	        pMouseRightButtonClickWindowBuffer[(i * Width + j) * 4 + 1] = 0xee;
-	        pMouseRightButtonClickWindowBuffer[(i * Width + j) * 4 + 2] = 0xee;
-	        pMouseRightButtonClickWindowBuffer[(i * Width + j) * 4 + 3] = GRAPHICS_LAYER_MOUSE_RIGHT_CLICK_WINDOW; 
-	    }
-	}
-	
-    UINT16 x1, y1;
-    y1 = 10;
-
-    for (UINT32 j = 0; j < SYSTEM_ICON_MAX; j++)
-    {
-        x1 = 10;
-        
-
-        for (UINT16 i = 0; i < 4; i++)
-        {
-            UINT16 AreaCode = MouseRightButtonClickMenuChineseName[j][2 * i];
-            UINT16 BitCode = MouseRightButtonClickMenuChineseName[j][2 * i + 1];
-            
-            if (0 != AreaCode && 0 != BitCode)
-                L2_GRAPHICS_ChineseCharDraw(pMouseRightButtonClickWindowBuffer, x1, y1, (AreaCode - 1) * 94 + BitCode - 1, Color, MouseRightButtonClickWindowWidth);
-                
-            x1 += 16;
-        }        
-        y1 += 16;
-    }        
-
-    return;    
-}
-
-
 
 
 /****************************************************************************
 *
-*  √Ë ˆ:    Û±Í…Ë±∏≥ı ºªØ£¨∫Û–¯ø…“‘Ω” ’ Û±Íœ‡πÿ“∆∂Ø°¢µ„ª˜ ¬º˛
+*  ÊèèËø∞:   Èº†Ê†áËÆæÂ§áÂàùÂßãÂåñÔºåÂêéÁª≠ÂèØ‰ª•Êé•Êî∂Èº†Ê†áÁõ∏ÂÖ≥ÁßªÂä®„ÄÅÁÇπÂáª‰∫ã‰ª∂
 *
-*  ≤Œ ˝1£∫ xxxxx
-*  ≤Œ ˝2£∫ xxxxx
-*  ≤Œ ˝n£∫ xxxxx
+*  ÂèÇÊï∞1Ôºö xxxxx
+*  ÂèÇÊï∞2Ôºö xxxxx
+*  ÂèÇÊï∞nÔºö xxxxx
 *
-*  ∑µªÿ÷µ£∫ ≥…π¶£∫XXXX£¨ ß∞‹£∫XXXXX
+*  ËøîÂõûÂÄºÔºö ÊàêÂäüÔºöXXXXÔºåÂ§±Ë¥•ÔºöXXXXX
 *
 *****************************************************************************/
 EFI_STATUS L2_MOUSE_Init()
@@ -251,9 +161,9 @@ EFI_STATUS L2_MOUSE_Init()
     EFI_STATUS                         Status;
     EFI_HANDLE                         *PointerHandleBuffer = NULL;
     UINTN                              i = 0;
-	MouseClickFlag 					   = MOUSE_EVENT_TYPE_NO_CLICKED;
+	MouseClickFlag 					   = MOUSE_NO_CLICKED;
     UINTN                              HandleCount = 0;
-        
+    
     //get the handles which supports
     Status = gBS->LocateHandleBuffer(
                                     ByProtocol,
@@ -279,7 +189,9 @@ EFI_STATUS L2_MOUSE_Init()
             return EFI_SUCCESS;
         }
     }   
-        
+    
     return EFI_SUCCESS;
+
 }
+
 

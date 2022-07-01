@@ -2,13 +2,13 @@
 /*************************************************
     .
     File name:      	*.*
-    Author£º	        	ÈÎÆôºì
-    ID£º					00001
+    Authorï¼š	        	ä»»å¯çº¢
+    IDï¼š					00001
     Date:          		202107
-    Description:    	ÊýÑ§Ïà¹Ø»ù´¡¿â
-    Others:         	ÎÞ
+    Description:    	æ•°å­¦ç›¸å…³åŸºç¡€åº“
+    Others:         	æ— 
 
-    History:        	ÎÞ
+    History:        	æ— 
 	    1.  Date:
 		    Author: 
 		    ID:
@@ -37,13 +37,13 @@
 
 /****************************************************************************
 *
-*  ÃèÊö:   Á½¸ö32Î»Êý×ÖÏà³Ë
+*  æè¿°:   ä¸¤ä¸ª32ä½æ•°å­—ç›¸ä¹˜
 *
-*  ²ÎÊý1£º xxxxx
-*  ²ÎÊý2£º xxxxx
-*  ²ÎÊýn£º xxxxx
+*  å‚æ•°1ï¼š xxxxx
+*  å‚æ•°2ï¼š xxxxx
+*  å‚æ•°nï¼š xxxxx
 *
-*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
+*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
 *
 *****************************************************************************/
 
@@ -57,13 +57,13 @@ long long L1_MATH_Multi(long x, long y)
 
 /****************************************************************************
 *
-*  ÃèÊö:   Ê®Áù½øÖÆµÄ×Ö·û×ª³ÉÊý×Ö
+*  æè¿°:   åå…­è¿›åˆ¶çš„å­—ç¬¦è½¬æˆæ•°å­—
 *
-*  ²ÎÊý1£º xxxxx
-*  ²ÎÊý2£º xxxxx
-*  ²ÎÊýn£º xxxxx
+*  å‚æ•°1ï¼š xxxxx
+*  å‚æ•°2ï¼š xxxxx
+*  å‚æ•°nï¼š xxxxx
 *
-*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
+*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
 *
 *****************************************************************************/
 int L1_MATH_DigitToInteger( int c)
@@ -81,13 +81,13 @@ int L1_MATH_DigitToInteger( int c)
 
 /****************************************************************************
 *
-*  ÃèÊö:   ×Ö·û´®×ª³É64Î»ÕûÊý
+*  æè¿°:   å­—ç¬¦ä¸²è½¬æˆ64ä½æ•´æ•°
 *
-*  ²ÎÊý1£º xxxxx
-*  ²ÎÊý2£º xxxxx
-*  ²ÎÊýn£º xxxxx
+*  å‚æ•°1ï¼š xxxxx
+*  å‚æ•°2ï¼š xxxxx
+*  å‚æ•°nï¼š xxxxx
 *
-*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
+*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
 *
 *****************************************************************************/
 long long L1_MATH_StringToLongLong(const char * nptr, char ** endptr, int base)
@@ -149,13 +149,13 @@ long long L1_MATH_StringToLongLong(const char * nptr, char ** endptr, int base)
 
 /****************************************************************************
 *
-*  ÃèÊö:   Çó¾ø¶ÔÖµ
+*  æè¿°:   æ±‚ç»å¯¹å€¼
 *
-*  ²ÎÊý1£º xxxxx
-*  ²ÎÊý2£º xxxxx
-*  ²ÎÊýn£º xxxxx
+*  å‚æ•°1ï¼š xxxxx
+*  å‚æ•°2ï¼š xxxxx
+*  å‚æ•°nï¼š xxxxx
 *
-*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
+*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
 *
 *****************************************************************************/
 long L1_MATH_ABS(long v)
@@ -168,13 +168,13 @@ long L1_MATH_ABS(long v)
 
 /****************************************************************************
 *
-*  ÃèÊö:   Í¨¹ýÄêÔÂÈÕÐÅÏ¢¼ÆËã½ñÌìÊÇÐÇÆÚ¼¸
+*  æè¿°:   é€šè¿‡å¹´æœˆæ—¥ä¿¡æ¯è®¡ç®—ä»Šå¤©æ˜¯æ˜ŸæœŸå‡ 
 *
-*  ²ÎÊý1£º xxxxx
-*  ²ÎÊý2£º xxxxx
-*  ²ÎÊýn£º xxxxx
+*  å‚æ•°1ï¼š xxxxx
+*  å‚æ•°2ï¼š xxxxx
+*  å‚æ•°nï¼š xxxxx
 *
-*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
+*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
 *
 *****************************************************************************/
 UINT8 L1_MATH_DayOfWeek(int y, int m, int d)

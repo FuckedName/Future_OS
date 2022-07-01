@@ -2,13 +2,13 @@
 /*************************************************
     .
     File name:      	*.*
-    Author£º	        	ÈÎÆôºì
-    ID£º					00001
+    Authorï¼š	        	ä»»å¯çº¢
+    IDï¼š					00001
     Date:          		202107
     Description:    	
-    Others:         	ÎÞ
+    Others:         	æ— 
 
-    History:        	ÎÞ
+    History:        	æ— 
 	    1.  Date:
 		    Author: 
 		    ID:
@@ -85,13 +85,13 @@ MEMORY_INFORMATION MemoryInformation = {0};
 
 /****************************************************************************
 *
-*  ÃèÊö:   ÄÚ´æ·ÖÅäµÄÄÚ´æ¿éÏà¹ØÊý¾Ý³õÊ¼»¯
+*  æè¿°:   å†…å­˜åˆ†é…çš„å†…å­˜å—ç›¸å…³æ•°æ®åˆå§‹åŒ–
 *
-*  ²ÎÊý1£º xxxxx
-*  ²ÎÊý2£º xxxxx
-*  ²ÎÊýn£º xxxxx
+*  å‚æ•°1ï¼š xxxxx
+*  å‚æ•°2ï¼š xxxxx
+*  å‚æ•°nï¼š xxxxx
 *
-*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
+*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
 *
 *****************************************************************************/
 void L2_MEMORY_CountInitial()
@@ -109,13 +109,13 @@ void L2_MEMORY_CountInitial()
 
 /****************************************************************************
 *
-*  ÃèÊö:   ÄÚ´æÊÍ·Å
+*  æè¿°:   å†…å­˜é‡Šæ”¾
 *
-*  ²ÎÊý1£º xxxxx
-*  ²ÎÊý2£º xxxxx
-*  ²ÎÊýn£º xxxxx
+*  å‚æ•°1ï¼š xxxxx
+*  å‚æ•°2ï¼š xxxxx
+*  å‚æ•°nï¼š xxxxx
 *
-*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
+*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
 *
 *****************************************************************************/
 EFI_STATUS L2_MEMORY_Free(UINT32 *p)
@@ -157,16 +157,16 @@ EFI_STATUS L2_MEMORY_Free(UINT32 *p)
 
 /****************************************************************************
 *
-*  ÃèÊö:   xxxxx
+*  æè¿°:   xxxxx
 *
-*  ²ÎÊý1£º xxxxx
-*  ²ÎÊý2£º xxxxx
-*  ²ÎÊýn£º xxxxx
+*  å‚æ•°1ï¼š xxxxx
+*  å‚æ•°2ï¼š xxxxx
+*  å‚æ•°nï¼š xxxxx
 *
-*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
+*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
 *
 *****************************************************************************/
-char L2_MEMORY_UseRecords(UINT32 *p)
+float L2_MEMORY_UseRecords(UINT32 *p)
 {  }
 
 
@@ -174,16 +174,16 @@ char L2_MEMORY_UseRecords(UINT32 *p)
 
 /****************************************************************************
 *
-*  ÃèÊö:   xxxxx
+*  æè¿°:   xxxxx
 *
-*  ²ÎÊý1£º xxxxx
-*  ²ÎÊý2£º xxxxx
-*  ²ÎÊýn£º xxxxx
+*  å‚æ•°1ï¼š xxxxx
+*  å‚æ•°2ï¼š xxxxx
+*  å‚æ•°nï¼š xxxxx
 *
-*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
+*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
 *
 *****************************************************************************/
-char L2_MEMORY_Remainings()
+float L2_MEMORY_Remainings()
 {  }
 
 
@@ -192,16 +192,16 @@ char L2_MEMORY_Remainings()
 
 /****************************************************************************
 *
-*  ÃèÊö:   ÄÚ´æÐÅÏ¢»ñÈ¡
+*  æè¿°:   å†…å­˜ä¿¡æ¯èŽ·å–
 *
-*  ²ÎÊý1£º xxxxx
-*  ²ÎÊý2£º xxxxx
-*  ²ÎÊýn£º xxxxx
+*  å‚æ•°1ï¼š xxxxx
+*  å‚æ•°2ï¼š xxxxx
+*  å‚æ•°nï¼š xxxxx
 *
-*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
+*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
 *
 *****************************************************************************/
-UINT16 L2_MEMORY_GETs()
+float L2_MEMORY_GETs()
 {  
     EFI_STATUS                           Status;
     UINT8                                TmpMemoryMap[1];
@@ -406,13 +406,13 @@ UINT16 L2_MEMORY_GETs()
 
 /****************************************************************************
 *
-*  ÃèÊö:   xxxxx
+*  æè¿°:   xxxxx
 *
-*  ²ÎÊý1£º xxxxx
-*  ²ÎÊý2£º xxxxx
-*  ²ÎÊýn£º xxxxx
+*  å‚æ•°1ï¼š xxxxx
+*  å‚æ•°2ï¼š xxxxx
+*  å‚æ•°nï¼š xxxxx
 *
-*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
+*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
 *
 *****************************************************************************/
 EFI_STATUS L2_MEMORY_MapInitial()
@@ -483,16 +483,16 @@ EFI_STATUS L2_MEMORY_MapInitial()
 
 /****************************************************************************
 *
-*  ÃèÊö: ¶à¸öÄÚ´æ¶Î£¬Èç¹ûÊ×Î²ÏàÁ¬µÄÄÚ´æ¶Î£¬ºÏ²¢
+*  æè¿°: å¤šä¸ªå†…å­˜æ®µï¼Œå¦‚æžœé¦–å°¾ç›¸è¿žçš„å†…å­˜æ®µï¼Œåˆå¹¶
 *
-*  ²ÎÊý1£º xxxxx
-*  ²ÎÊý2£º xxxxx
-*  ²ÎÊýn£º xxxxx
+*  å‚æ•°1ï¼š xxxxx
+*  å‚æ•°2ï¼š xxxxx
+*  å‚æ•°nï¼š xxxxx
 *
-*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
+*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
 *
 *****************************************************************************/
-UINT16 L2_MEMORY_Initial()
+float L2_MEMORY_Initial()
 {
     MemorySize = (float)L2_MEMORY_GETs();
     L2_MEMORY_MapInitial();

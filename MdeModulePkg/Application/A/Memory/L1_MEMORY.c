@@ -2,13 +2,13 @@
 /*************************************************
     .
     File name:      	*.*
-    Author£º	        	ÈÎÆôºì
-    ID£º					00001
+    Authorï¼š	        	ä»»å¯çº¢
+    IDï¼š					00001
     Date:          		202107
     Description:    	
-    Others:         	ÎŞ
+    Others:         	æ— 
 
-    History:        	ÎŞ
+    History:        	æ— 
 	    1.  Date:
 		    Author: 
 		    ID:
@@ -35,19 +35,21 @@ UINT64 FreeNumberOfPages = ALL_PAGE_COUNT;
 UINT64 SystemAllPagesAllocated = 0;
 UINT8 *pMapper = (UINT8 *)(PHYSICAL_ADDRESS_START);
 
+UINT8 *FAT32_Table = NULL;
+
 UINT8 *pDateTimeBuffer = NULL; //Mouse layer: 3
 
 // size: the one unit size is Bytes 
 /****************************************************************************
 *
-*  ÃèÊö:   ÄÚ´æ·ÖÅä½Ó¿Ú£¬µ±Ç°ÊÇ´ÓPHYSICAL_ADDRESS_START+ALL_PAGE_COUNTÕâ¸öµØÖ·¿ªÊ¼·ÖÅäÄÚ´æ£¬
-*  PHYSICAL_ADDRESS_STARTÕâ¸öµØÖ·µ½PHYSICAL_ADDRESS_START+ALL_PAGE_COUNT£¬ÊÇ´æ·ÅÄÚ´æÊÇ·ñÊ¹ÓÃµÄMap±í
+*  æè¿°:   å†…å­˜åˆ†é…æ¥å£ï¼Œå½“å‰æ˜¯ä»PHYSICAL_ADDRESS_START+ALL_PAGE_COUNTè¿™ä¸ªåœ°å€å¼€å§‹åˆ†é…å†…å­˜ï¼Œ
+*  PHYSICAL_ADDRESS_STARTè¿™ä¸ªåœ°å€åˆ°PHYSICAL_ADDRESS_START+ALL_PAGE_COUNTï¼Œæ˜¯å­˜æ”¾å†…å­˜æ˜¯å¦ä½¿ç”¨çš„Mapè¡¨
 *
-*  ²ÎÊı1£º xxxxx
-*  ²ÎÊı2£º xxxxx
-*  ²ÎÊın£º xxxxx
+*  å‚æ•°1ï¼š xxxxx
+*  å‚æ•°2ï¼š xxxxx
+*  å‚æ•°nï¼š xxxxx
 *
-*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
+*  è¿”å›å€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
 *
 *****************************************************************************/
 UINT8 *L2_MEMORY_Allocate(char *pApplicationName, UINT16 type, UINT32 SizeRequired)
@@ -132,13 +134,13 @@ UINT8 *L2_MEMORY_Allocate(char *pApplicationName, UINT16 type, UINT32 SizeRequir
 
 /****************************************************************************
 *
-*  ÃèÊö:   PHYSICAL_ADDRESS_STARTÕâ¸öµØÖ·µ½PHYSICAL_ADDRESS_START+ALL_PAGE_COUNT£¬ÊÇ´æ·ÅÄÚ´æÊÇ·ñÊ¹ÓÃµÄMap±í
+*  æè¿°:   PHYSICAL_ADDRESS_STARTè¿™ä¸ªåœ°å€åˆ°PHYSICAL_ADDRESS_START+ALL_PAGE_COUNTï¼Œæ˜¯å­˜æ”¾å†…å­˜æ˜¯å¦ä½¿ç”¨çš„Mapè¡¨
 *
-*  ²ÎÊı1£º xxxxx
-*  ²ÎÊı2£º xxxxx
-*  ²ÎÊın£º xxxxx
+*  å‚æ•°1ï¼š xxxxx
+*  å‚æ•°2ï¼š xxxxx
+*  å‚æ•°nï¼š xxxxx
 *
-*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
+*  è¿”å›å€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
 *
 *****************************************************************************/
 UINT8 *L2_MEMORY_MapperInitial()
@@ -159,13 +161,13 @@ extern UINT8 BufferMFT[DISK_BUFFER_SIZE * 2];
 
 /****************************************************************************
 *
-*  ÃèÊö:   ÎªÏµÍ³ÏÔÊ¾Ê¹ÓÃµÄÒ»Ğ©Í¼²ã·ÖÅäÄÚ´æ£¬ÕâÀï±ßÆäÊµ¿ÉÒÔĞ´³ÉÒ»¸öforÑ­»·£¬°Ñ²ÎÊı´æ·Åµ½¶àÎ¬Êı×é
+*  æè¿°:   ä¸ºç³»ç»Ÿæ˜¾ç¤ºä½¿ç”¨çš„ä¸€äº›å›¾å±‚åˆ†é…å†…å­˜
 *
-*  ²ÎÊı1£º xxxxx
-*  ²ÎÊı2£º xxxxx
-*  ²ÎÊın£º xxxxx
+*  å‚æ•°1ï¼š xxxxx
+*  å‚æ•°2ï¼š xxxxx
+*  å‚æ•°nï¼š xxxxx
 *
-*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
+*  è¿”å›å€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
 *
 *****************************************************************************/
 EFI_STATUS L2_COMMON_MemoryAllocate()
@@ -182,7 +184,6 @@ EFI_STATUS L2_COMMON_MemoryAllocate()
     
     pDeskDisplayBuffer = L2_MEMORY_Allocate("Desk Display Buffer", MEMORY_TYPE_GRAPHICS, ScreenWidth * ScreenHeight * 4);
 
-	//Õâ¸öÊÇ´æ·Å±ÚÖ½µÄ£¬ËùÒÔ´óĞ¡Îª1920*1080
     pDeskWallpaperBuffer = L2_MEMORY_Allocate("Desk Wall paper Buffer", MEMORY_TYPE_GRAPHICS, 1920 * 1080 * 3 + 0x36);
     
     pDeskWallpaperZoomedBuffer = L2_MEMORY_Allocate("Desk Wall paper Zoomed Buffer", MEMORY_TYPE_GRAPHICS, ScreenWidth * ScreenHeight * 3);
@@ -213,8 +214,8 @@ EFI_STATUS L2_COMMON_MemoryAllocate()
     pSystemIconTextBuffer   = L2_MEMORY_Allocate("System pSystemIconText Buffer", MEMORY_TYPE_GRAPHICS, 384054);
     pSystemIconTempBuffer2  = L2_MEMORY_Allocate("System Icon temp2 Buffer", MEMORY_TYPE_GRAPHICS, 384054);
         
-    pMouseRightButtonClickWindowBuffer = (UINT8 *)L2_MEMORY_Allocate("Mouse Click Buffer", MEMORY_TYPE_GRAPHICS, MouseRightButtonClickWindowWidth * MouseRightButtonClickWindowHeight * 4); 
-    if (pMouseRightButtonClickWindowBuffer == NULL)
+    pMouseClickBuffer = (UINT8 *)L2_MEMORY_Allocate("Mouse Click Buffer", MEMORY_TYPE_GRAPHICS, MouseClickWindowWidth * MouseClickWindowHeight * 4); 
+    if (pMouseClickBuffer == NULL)
     {
         return -1;
     }   
@@ -252,20 +253,13 @@ EFI_STATUS L2_COMMON_MemoryAllocate()
         L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: pStartMenuBuffer AllocateZeroPool failed\n",  __LINE__);
         return -1;
     }   
-
-	pTerminalWindowBuffer = (UINT8 *)L2_MEMORY_Allocate("Terminal Window Buffer", MEMORY_TYPE_GRAPHICS, TerminalWindowWidth * TerminalWindowHeight * 4); 
-	if (pTerminalWindowBuffer == NULL)
-	{
-		//DEBUG ((EFI_D_INFO, "MyComputer , AllocateZeroPool failed... "));
-		return -1;
-	}	 
-	
+    
     pMyComputerBuffer = (UINT8 *)L2_MEMORY_Allocate("My Computer Buffer", MEMORY_TYPE_GRAPHICS, MyComputerWidth * MyComputerHeight * 4); 
     if (pMyComputerBuffer == NULL)
     {
         //DEBUG ((EFI_D_INFO, "MyComputer , AllocateZeroPool failed... "));
         return -1;
-    }     
+    }       
 
     pSystemIconMyComputerBuffer = L2_MEMORY_Allocate("System pSystemIconMyComputerBuffer", MEMORY_TYPE_GRAPHICS, 384054);
     pSystemIconMySettingBuffer  = L2_MEMORY_Allocate("System pSystemIconMySettingBuffer", MEMORY_TYPE_GRAPHICS, 384054);
@@ -281,7 +275,6 @@ EFI_STATUS L2_COMMON_MemoryAllocate()
     MouseColor.Blue  = 0x00;
     MouseColor.Red   = 0xff;
     MouseColor.Green = 0x00;
-    MouseColor.Reserved = 0x00;
 
     for (int i = 0; i < StartMenuHeight; i++)
         for (int j = 0; j < StartMenuWidth; j++)
@@ -313,6 +306,7 @@ EFI_STATUS L2_COMMON_MemoryAllocate()
     iMouseY = ScreenHeight / 2;
 
     FileReadCount = 0;
+    FAT32_Table = NULL;
     
     INFO_SELF(L"\r\n");
 

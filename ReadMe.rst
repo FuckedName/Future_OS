@@ -2,10 +2,7 @@
 作者：任启红
 日期：20211103
 
-代码基线：https://github.com/tianocore/edk2/releases/tag/edk2-stable202105
 当前代码分支及目录：Split分支MdeModulePkg/Application/A目录
-
-许可证：任何人可以用于任何目的使用本仓库代码。
 
 系统描述：当前整个系统分成以下几个模块：设备管理模块、图层管理模块、基础库模块、内存管理模块、分区管理模块、进程管理模块
 

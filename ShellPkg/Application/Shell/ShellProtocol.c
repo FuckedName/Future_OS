@@ -1400,8 +1400,6 @@ InternalShellExecuteDevicePath(
   OUT EFI_STATUS                    *StartImageStatus OPTIONAL
   )
 {
-  Print(L"%d %a %a \r\n", __LINE__, __FILE__, __FUNCTION__);
-  
   EFI_STATUS                    Status;
   EFI_STATUS                    StartStatus;
   EFI_STATUS                    CleanupStatus;
@@ -1434,21 +1432,17 @@ InternalShellExecuteDevicePath(
     }
   }
 
-  Print(L"%d %a %a \r\n", __LINE__, __FILE__, __FUNCTION__);
-
-
   //
   // Load the image with:
   // FALSE - not from boot manager and NULL, 0 being not already in memory
   //
   Status = gBS->LoadImage(
-                            FALSE,
-                            *ParentImageHandle,
-                            (EFI_DEVICE_PATH_PROTOCOL*)DevicePath,
-                            NULL,
-                            0,
-                            &NewHandle);
-  Print(L"%d %a %a %d \r\n", __LINE__, __FILE__, __FUNCTION__, Status);
+    FALSE,
+    *ParentImageHandle,
+    (EFI_DEVICE_PATH_PROTOCOL*)DevicePath,
+    NULL,
+    0,
+    &NewHandle);
 
   if (EFI_ERROR(Status)) {
     if (NewHandle != NULL) {
@@ -1464,8 +1458,6 @@ InternalShellExecuteDevicePath(
     gImageHandle,
     NULL,
     EFI_OPEN_PROTOCOL_GET_PROTOCOL);
-
-  Print(L"%d InternalShellExecuteDevicePath Status:%d \r\n", __LINE__, Status);
 
   if (!EFI_ERROR(Status)) {
     //
@@ -1538,8 +1530,6 @@ InternalShellExecuteDevicePath(
 
     Status = gBS->InstallProtocolInterface(&NewHandle, &gEfiShellParametersProtocolGuid, EFI_NATIVE_INTERFACE, &ShellParamsProtocol);
     ASSERT_EFI_ERROR(Status);
-    
-    Print(L"%d InternalShellExecuteDevicePath\r\n", __LINE__);
 
     ///@todo initialize and install ShellInterface protocol on the new image for compatibility if - PcdGetBool(PcdShellSupportOldProtocols)
 
@@ -1552,7 +1542,6 @@ InternalShellExecuteDevicePath(
                           0,
                           NULL
                           );
-      Print(L"%d %a %a %d \r\n", __LINE__, __FILE__, __FUNCTION__, StartStatus);
       if (StartImageStatus != NULL) {
         *StartImageStatus = StartStatus;
       }

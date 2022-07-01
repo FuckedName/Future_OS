@@ -2,13 +2,13 @@
 /*************************************************
     .
     File name:      	*.*
-    Author£∫	        	»Œ∆Ù∫Ï
-    ID£∫					00001
+    AuthorÔºö	        	‰ªªÂêØÁ∫¢
+    IDÔºö					00001
     Date:          		202107
     Description:    	
-    Others:         	Œﬁ
+    Others:         	Êó†
 
-    History:        	Œﬁ
+    History:        	Êó†
 	    1.  Date:
 		    Author: 
 		    ID:
@@ -32,32 +32,31 @@
 
 /****************************************************************************
 *
-*  √Ë ˆ:   –Ë“™Ω¯––¥Û–°∂À◊™ªª£¨’‚¿Ô±ﬂ”¶∏√ø…“‘∑‚◊∞≥…Ω”ø⁄
+*  ÊèèËø∞:   xxxxx
 *
-*  ≤Œ ˝1£∫ xxxxx
-*  ≤Œ ˝2£∫ xxxxx
-*  ≤Œ ˝n£∫ xxxxx
+*  ÂèÇÊï∞1Ôºö xxxxx
+*  ÂèÇÊï∞2Ôºö xxxxx
+*  ÂèÇÊï∞nÔºö xxxxx
 *
-*  ∑µªÿ÷µ£∫ ≥…π¶£∫XXXX£¨ ß∞‹£∫XXXXX
+*  ËøîÂõûÂÄºÔºö ÊàêÂäüÔºöXXXXÔºåÂ§±Ë¥•ÔºöXXXXX
 *
 *****************************************************************************/
 VOID L2_FILE_Transfer(MasterBootRecord *pSource, MasterBootRecordSwitched *pDest)
 {
-    pDest->ReservedSelector = L1_NETWORK_2BytesToUINT16(pSource->ReservedSelector);
-    pDest->SectorsPerFat    = L1_NETWORK_4BytesToUINT32(pSource->SectorsPerFat);
-    pDest->BootPathStartCluster = L1_NETWORK_4BytesToUINT32(pSource->BootPathStartCluster);
-    pDest->FATCount      = pSource->FATCount[0];
+    pDest->ReservedSelector = pSource->ReservedSelector[0] + pSource->ReservedSelector[1] * 16 * 16;
+    pDest->SectorsPerFat    = (UINT32)pSource->SectorsPerFat[0] + (UINT32)(pSource->SectorsPerFat[1]) * 16 * 16 + (UINT32)(pSource->SectorsPerFat[2]) * 16 * 16 * 16 * 16 + (UINT32)(pSource->SectorsPerFat[3]) * 16 * 16 * 16 * 16 * 16 * 16;
+    pDest->BootPathStartCluster = (UINT32)pSource->BootPathStartCluster[0] + (UINT32)pSource->BootPathStartCluster[1] * 16 * 16 + (UINT32)pSource->BootPathStartCluster[2] * 16 * 16 * 16 * 16, (UINT32)pSource->BootPathStartCluster[3] * 16 * 16 * 16 * 16 * 16 * 16;
+    pDest->NumFATS      = pSource->NumFATS[0];
     pDest->SectorOfCluster = pSource->SectorOfCluster[0];
 
     //Todo: the other parameters can compute like above too
     //Current only get parameters we need to use
     
-    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d ReservedSelector:%d SectorsPerFat:%d BootPathStartCluster: %d NumFATS:%d SectorOfCluster:%d", 
-												__LINE__,		
-												pDest->ReservedSelector,
+    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "ReservedSelector:%d SectorsPerFat:%d BootPathStartCluster: %d NumFATS:%d SectorOfCluster:%d", 
+                                                pDest->ReservedSelector,
                                                 pDest->SectorsPerFat,
                                                 pDest->BootPathStartCluster,
-                                                pDest->FATCount,
+                                                pDest->NumFATS,
                                                 pDest->SectorOfCluster);
 }
 
@@ -67,13 +66,13 @@ VOID L2_FILE_Transfer(MasterBootRecord *pSource, MasterBootRecordSwitched *pDest
 
 /****************************************************************************
 *
-*  √Ë ˆ:   xxxxx
+*  ÊèèËø∞:   xxxxx
 *
-*  ≤Œ ˝1£∫ xxxxx
-*  ≤Œ ˝2£∫ xxxxx
-*  ≤Œ ˝n£∫ xxxxx
+*  ÂèÇÊï∞1Ôºö xxxxx
+*  ÂèÇÊï∞2Ôºö xxxxx
+*  ÂèÇÊï∞nÔºö xxxxx
 *
-*  ∑µªÿ÷µ£∫ ≥…π¶£∫XXXX£¨ ß∞‹£∫XXXXX
+*  ËøîÂõûÂÄºÔºö ÊàêÂäüÔºöXXXXÔºåÂ§±Ë¥•ÔºöXXXXX
 *
 *****************************************************************************/
 EFI_STATUS L1_FILE_FAT32_DataSectorAnalysis(UINT8 *p, MasterBootRecordSwitched *pMBRSwitched)
@@ -81,30 +80,27 @@ EFI_STATUS L1_FILE_FAT32_DataSectorAnalysis(UINT8 *p, MasterBootRecordSwitched *
     MasterBootRecord *pMBR;
     
     //pMBR = (MasterBootRecord *)AllocateZeroPool(DISK_BUFFER_SIZE);
-    
-    //’‚÷÷ø…ƒ‹¥Ê‘⁄ƒ⁄¥Ê–π¬∂£¨»Áπ˚√ª¥Œ…Í«Îƒ⁄¥Ê∂º≤ª Õ∑≈
     pMBR = (MasterBootRecord *)L2_MEMORY_Allocate("MBR Buffer", MEMORY_TYPE_PARTITION, DISK_BUFFER_SIZE);
     if (NULL == pMBR)
     {
         return EFI_SUCCESS;
     }
-
-	//
     L1_MEMORY_Copy(pMBR, p, DISK_BUFFER_SIZE);
 	
-    // ¥Û∂À◊÷Ω⁄–Ú£∫µÕŒª◊÷Ω⁄‘⁄∏ﬂµÿ÷∑£¨∏ﬂŒª◊÷Ω⁄µÕµÿ÷∑…œ°£’‚ «»À¿‡∂¡–¥ ˝÷µµƒ∑Ω∑®°£
-    // –°∂À◊÷Ω⁄–Ú£∫”Î…œ√Êœ‡∑¥°£µÕŒª◊÷Ω⁄‘⁄µÕµÿ÷∑£¨∏ﬂŒª◊÷Ω⁄‘⁄∏ﬂµÿ÷∑°£
-    
+    // Â§ßÁ´ØÂ≠óËäÇÂ∫èÔºö‰Ωé‰ΩçÂ≠óËäÇÂú®È´òÂú∞ÂùÄÔºåÈ´ò‰ΩçÂ≠óËäÇ‰ΩéÂú∞ÂùÄ‰∏ä„ÄÇËøôÊòØ‰∫∫Á±ªËØªÂÜôÊï∞ÂÄºÁöÑÊñπÊ≥ï„ÄÇ
+    // Â∞èÁ´ØÂ≠óËäÇÂ∫èÔºö‰∏é‰∏äÈù¢Áõ∏Âèç„ÄÇ‰Ωé‰ΩçÂ≠óËäÇÂú®‰ΩéÂú∞ÂùÄÔºåÈ´ò‰ΩçÂ≠óËäÇÂú®È´òÂú∞ÂùÄ„ÄÇ
+    /*
     L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d ReservedSelector:%02X%02X SectorsPerFat:%02X%02X%02X%02X BootPathStartCluster:%02X%02X%02X%02X NumFATS: %X", 
                                         __LINE__,
                                         pMBR->ReservedSelector[0], pMBR->ReservedSelector[1], 
                                         pMBR->SectorsPerFat[0], pMBR->SectorsPerFat[1], pMBR->SectorsPerFat[2], pMBR->SectorsPerFat[3],
                                         pMBR->BootPathStartCluster[0], pMBR->BootPathStartCluster[1], pMBR->BootPathStartCluster[2], pMBR->BootPathStartCluster[3],
-                                        pMBR->FATCount[0]);
-    
+                                        pMBR->NumFATS[0]);
+    */
     
     L2_FILE_Transfer(pMBR, pMBRSwitched);
 
+    //FreePool(pMBR);
 }
 
 
@@ -114,253 +110,37 @@ EFI_STATUS L1_FILE_FAT32_DataSectorAnalysis(UINT8 *p, MasterBootRecordSwitched *
 
 /****************************************************************************
 *
-*  √Ë ˆ:   xxxxx
+*  ÊèèËø∞:   xxxxx
 *
-*  ≤Œ ˝1£∫ xxxxx
-*  ≤Œ ˝2£∫ xxxxx
-*  ≤Œ ˝n£∫ xxxxx
+*  ÂèÇÊï∞1Ôºö xxxxx
+*  ÂèÇÊï∞2Ôºö xxxxx
+*  ÂèÇÊï∞nÔºö xxxxx
 *
-*  ∑µªÿ÷µ£∫ ≥…π¶£∫XXXX£¨ ß∞‹£∫XXXXX
+*  ËøîÂõûÂÄºÔºö ÊàêÂäüÔºöXXXXÔºåÂ§±Ë¥•ÔºöXXXXX
 *
 *****************************************************************************/
 EFI_STATUS L2_FILE_FAT32_DataSectorHandle(UINT16 DeviceID)
 {
-    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d L2_FILE_FAT32_DataSectorHandle DeviceID: %d sector_count: %u\n", __LINE__, DeviceID, sector_count);
+    //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d DeviceID: %d\n", __LINE__, DeviceID);
     //printf( "RootPathAnalysis\n" );
     EFI_STATUS Status ;
+    UINT8 Buffer1[DISK_BUFFER_SIZE];
     
-    L1_MEMORY_SetValue(Buffer1, 0, DISK_BUFFER_SIZE);
-    
-    Status = L2_STORE_Read(DeviceID, sector_count, 1, Buffer1); 
+    Status = L1_STORE_READ(DeviceID, sector_count, 1, Buffer1); 
     if (EFI_ERROR(Status))
     {
         L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d Status: %X\n", __LINE__, Status);
         return Status;
     }
     
-    L1_MEMORY_Memset(&pItems, 0, sizeof(pItems));
-    L1_MEMORY_Copy(&pItems, Buffer1, DISK_BUFFER_SIZE);
+    //When get root path data sector start number, we can get content of root path.
+    //L1_FILE_FAT32_DataSectorAnalysis(Buffer1, &device[DeviceID].stMBRSwitched);    
 
     // data area start from 1824, HZK16 file start from     FileBlockStart  block, so need to convert into sector by multi 8, block start number is 2   
     // next state is to read FAT table
-    //sector_count = device[DeviceID].stMBRSwitched.ReservedSelector;
+    sector_count = device[DeviceID].stMBRSwitched.ReservedSelector;
     L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: sector_count:%ld FileLength: %d MBRSwitched.ReservedSelector:%ld\n",  __LINE__, sector_count, FileLength, device[DeviceID].stMBRSwitched.ReservedSelector);
 
     return EFI_SUCCESS;
 }
 
-/****************************************************************************
-*
-*  √Ë ˆ:   xxxxx
-*
-*  ≤Œ ˝1£∫ xxxxx
-*  ≤Œ ˝2£∫ xxxxx
-*  ≤Œ ˝n£∫ xxxxx
-*
-*  ∑µªÿ÷µ£∫ ≥…π¶£∫XXXX£¨ ß∞‹£∫XXXXX
-*
-*****************************************************************************/
-EFI_STATUS L2_FILE_FAT32_FileModify(UINT16 DeviceID)
-{
-    EFI_STATUS Status ;
-    UINT8 Buffer[DISK_BUFFER_SIZE];
-    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d L2_FILE_FAT32_FileModify PartitionItemID: %d FolderItemID: %d \n", __LINE__, PartitionItemID, FolderItemID);
-        
-    if (0xffff == PartitionItemID || 0xffff == FolderItemID)
-    {
-        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d 0xffff == PartitionItemID\n", __LINE__);
-        return -1;
-    }
-
-    //–Ë“™’“ªÒ»°”––ßµƒœÓÀ˜“˝
-    UINT16 index = FolderItemValidIndexArray[FolderItemID];
-    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d index: %d\n", __LINE__, index);
-        
-    //FAT32Œƒº˛œµÕ≥∏Ò Ω
-    if (device[PartitionItemID].FileSystemType == FILE_SYSTEM_FAT32)
-    {
-
-        UINT16 High2B = L1_NETWORK_2BytesToUINT16(pItems[index].StartClusterHigh2B);
-        UINT16 Low2B  = L1_NETWORK_2BytesToUINT16(pItems[index].StartClusterLow2B);
-        UINT32 StartCluster = (UINT32)High2B << 16 | (UINT32)Low2B;
-
-        // Start cluster id is 2, exclude 0,1
-        //’‚—˘–¥À¿8192ªÚ’ﬂ1592£¨ª·”–BUG
-        //’˝≥£”¶∏√”√’‚∏ˆ£∫device[DeviceID].StartSectorNumber
-        UINT32 StartSectorNumber = 15920 + (StartCluster - 2) * 8;
-        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], 
-                        "%d High2B: %X Low2B: %X StartCluster: %X StartSectorNumber: %X\n", 
-                        __LINE__, 
-                        High2B,
-                        Low2B,
-                        StartCluster,
-                        StartSectorNumber);
-
-        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], 
-                        "%d ItemName:%c%c%c%c%c%c%c%c, extension Name: %c%c%c\n", 
-                        __LINE__, 
-                        pItems[index].FileName[0],
-                        pItems[index].FileName[1],
-                        pItems[index].FileName[2],
-                        pItems[index].FileName[3],
-                        pItems[index].FileName[4],
-                        pItems[index].FileName[5],
-                        pItems[index].FileName[6],
-                        pItems[index].FileName[7],
-                        pItems[index].ExtensionName[0],
-                        pItems[index].ExtensionName[1],
-                        pItems[index].ExtensionName[2]);
-
-        // Read data from partition(disk or USB etc..)                  
-        Status = L2_STORE_Read(PartitionItemID, StartSectorNumber, 1, Buffer); 
-        if (EFI_ERROR(Status))
-        {
-            L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d Status: %X\n", __LINE__, Status);
-            return Status;
-        }
-
-        switch(pItems[index].Attribute[0])
-        {
-            //»Áπ˚ «ƒø¬º£¨‘Úœ‘ æ◊”ƒø¬º
-            case 0x10:  L1_MEMORY_Memset(&pItems, 0, sizeof(pItems));
-                        L1_MEMORY_Copy(&pItems, Buffer, DISK_BUFFER_SIZE);
-                        L2_STORE_FolderItemsPrint();
-                        break;
-
-            //»Áπ˚ «Œƒº˛£¨‘Úœ‘ æŒƒº˛ƒ⁄»›
-            case 0x20: L2_PARTITION_FileContentPrint(Buffer); 
-
-                        //Œ“√«Ω´¥”U≈Ã∂¡»°µƒª∫≥Â«¯£¨«∞5Œª£¨√øŒª‘⁄‘≠¿¥µƒª˘¥°…œ+1
-                        for (UINT16 i = 0; i < 5; i++)
-                            Buffer[i] += 1;
-                            
-                        //»ª∫Û–¥»ÎU≈Ã£¨’‚—˘ø…“‘ø¥µΩU≈Ãƒø¬ºœ¬Œƒº˛µƒ±‰ªØ£¨≤ªπ˝’‚¿Ô±ﬂ”–µ„Œ Ã‚£¨Œ“√«–ﬁ∏ƒŒƒº˛’˝≥£ªπ–Ë“™º«¬º–ﬁ∏ƒŒƒº˛µƒ»’∆⁄£¨ ±º‰–≈œ¢
-                        L2_STORE_Write(PartitionItemID, StartSectorNumber, 1, Buffer);
-                        break;
-    
-            default: break;
-        }
-        
-    }
-
-
-}
-
-/****************************************************************************
-*
-*  √Ë ˆ:   xxxxx
-*
-*  ≤Œ ˝1£∫ xxxxx
-*  ≤Œ ˝2£∫ xxxxx
-*  ≤Œ ˝n£∫ xxxxx
-*
-*  ∑µªÿ÷µ£∫ ≥…π¶£∫XXXX£¨ ß∞‹£∫XXXXX
-*
-*****************************************************************************/
-EFI_STATUS L2_FILE_FAT32_FileAdd(UINT16 DeviceID)
-{}
-
-
-/****************************************************************************
-*
-*  √Ë ˆ:   xxxxx
-*
-*  ≤Œ ˝1£∫ xxxxx
-*  ≤Œ ˝2£∫ xxxxx
-*  ≤Œ ˝n£∫ xxxxx
-*
-*  ∑µªÿ÷µ£∫ ≥…π¶£∫XXXX£¨ ß∞‹£∫XXXXX
-*
-*****************************************************************************/
-EFI_STATUS L2_FILE_FAT32_FileOpen(UINT16 DeviceID)
-{}
-
-
-/****************************************************************************
-*
-*  √Ë ˆ:   xxxxx
-*
-*  ≤Œ ˝1£∫ xxxxx
-*  ≤Œ ˝2£∫ xxxxx
-*  ≤Œ ˝n£∫ xxxxx
-*
-*  ∑µªÿ÷µ£∫ ≥…π¶£∫XXXX£¨ ß∞‹£∫XXXXX
-*
-*****************************************************************************/
-EFI_STATUS L2_FILE_FAT32_FileDelete(UINT16 DeviceID)
-{
-    //‘› ±œ»≤ª µœ÷
-    EFI_STATUS Status;
-    
-    UINT8 Buffer[DISK_BUFFER_SIZE];
-    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d L2_FILE_FAT32_FileDelete PartitionItemID: %d FolderItemID: %d \n", __LINE__, PartitionItemID, FolderItemID);
-        
-    if (0xffff == PartitionItemID || 0xffff == FolderItemID)
-    {
-        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d 0xffff == PartitionItemID\n", __LINE__);
-        return -1;
-    }
-
-    //–Ë“™’“ªÒ»°”––ßµƒœÓÀ˜“˝
-    UINT16 index = FolderItemValidIndexArray[FolderItemID];
-    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d index: %d\n", __LINE__, index);
-        
-    //FAT32Œƒº˛œµÕ≥∏Ò Ω
-    if (device[PartitionItemID].FileSystemType == FILE_SYSTEM_FAT32)
-    {       
-
-        UINT16 High2B = L1_NETWORK_2BytesToUINT16(pItems[index].StartClusterHigh2B);
-        UINT16 Low2B  = L1_NETWORK_2BytesToUINT16(pItems[index].StartClusterLow2B);
-        UINT32 StartCluster = (UINT32)High2B << 16 | (UINT32)Low2B;
-
-        // Start cluster id is 2, exclude 0,1
-        //’‚—˘–¥À¿8192£¨ª·”–BUG
-        UINT32 StartSectorNumber = 15920 + (StartCluster - 2) * 8;
-        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], 
-                        "%d High2B: %X Low2B: %X StartCluster: %X StartSectorNumber: %X\n", 
-                        __LINE__, 
-                        High2B,
-                        Low2B,
-                        StartCluster,
-                        StartSectorNumber);
-
-        switch(pItems[index].Attribute[0])
-        {
-            //»Áπ˚ «ƒø¬º£¨‘Úœ‘ æ◊”ƒø¬º
-            case 0x10:  L1_MEMORY_Memset(&pItems, 0, sizeof(pItems));
-                        L1_MEMORY_Copy(&pItems, Buffer, DISK_BUFFER_SIZE);
-                        L2_STORE_FolderItemsPrint();
-                        break;
-
-            //»Áπ˚ «Œƒº˛£¨‘ÚXXX
-            case 0x20: 
-                        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], 
-                        "%d File: \n", __LINE__);
-                       //¥Ú”°¥”U≈Ã∂¡»°µƒƒ⁄»›
-                       L2_STORE_Read(2, 16384, 1, Buffer);
-                       //L2_PARTITION_FileContentPrint(Buffer);
-
-                       Buffer[0x20 * 4 + 0] = 0xE5;
-                       //Buffer[0x20 * 4 + 0] = 'E';
-                       //Buffer[0x20 * 4 + 1] = '5';
-                       L2_STORE_Write(2, 16384, 1, Buffer);
-                        break;
-
-                       sector_count = device[DeviceID].stMBRSwitched.ReservedSelector;
-                       L2_STORE_Read(DeviceID, sector_count, 1, Buffer);
-                       
-                       for (UINT8 i = 0; i < 4; i++)
-                       {
-                            Buffer[StartCluster * 4 + i] = 0;
-                       }
-                       
-                       L2_STORE_Write(DeviceID, sector_count, 1, Buffer);
-                       ;
-                    break;
-
-            default: break;
-        }
-        
-    }
-
-}

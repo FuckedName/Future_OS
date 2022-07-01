@@ -2,13 +2,13 @@
 /*************************************************
     .
     File name:      	*.*
-    Author£∫	        	»Œ∆Ù∫Ï
-    ID£∫					00001
+    AuthorÔºö	        	‰ªªÂêØÁ∫¢
+    IDÔºö					00001
     Date:          		202107
     Description:    	
-    Others:         	Œﬁ
+    Others:         	Êó†
 
-    History:        	Œﬁ
+    History:        	Êó†
 	    1.  Date:
 		    Author: 
 		    ID:
@@ -27,9 +27,8 @@
 
 #include <Protocol/GraphicsOutput.h>
 #include <Library/BaseLib.h>
-#include <Global/Global.h>
 
-#include <Graphics/Window/L2_GRAPHICS_Window.h>
+#include <Global/Global.h>
 
 #include <L1_GRAPHICS.h>
 
@@ -57,132 +56,38 @@ typedef enum
 	MFT_ITEM_DOLLAR_MAX
 }MFT_ITEM;
 
-//◊¿√Ê∂‘œÛ∂‘µ„ª˜ ¬º˛£®£©
-typedef enum 
-{
-    DESKTOP_ITEM_INIT_CLICKED_EVENT = 0, 
-    DESKTOP_ITEM_START_MENU_CLICKED_EVENT, //ø™ º≤Àµ•
-    DESKTOP_ITEM_MY_COMPUTER_CLICKED_EVENT,    //Œ“µƒµÁƒ‘
-    DESKTOP_ITEM_SYSTEM_SETTING_CLICKED_EVENT, //œµÕ≥…Ë÷√
-    DESKTOP_ITEM_RECYCLE_BIN_CLICKED_EVENT,    //ªÿ ’’æ
-    DESKTOP_ITEM_FOLDER_CLICKED_EVENT,    //Œƒº˛º–
-    DESKTOP_ITEM_FILE_CLICKED_EVENT,    //Œƒº˛
-    DESKTOP_ITEM_SHUTDOWN_CLICKED_EVENT,    //πÿª˙
-    DESKTOP_ITEM_MAX_CLICKED_EVENT             //ƒ¨»œ◊Ó¥Û÷µ
-}DESKTOP_ITEM_CLICKED_EVENT;
-
-
-// Û±Í”“ª˜≤Àµ•µ„ª˜ ¬º˛
-typedef enum 
-{
-    MOUSE_RIGHT_MENU_OPEN_CLICKED_EVENT = 0, 
-    MOUSE_RIGHT_MENU_DELETE_CLICKED_EVENT,  
-    MOUSE_RIGHT_MENU_ADD_CLICKED_EVENT,     
-    MOUSE_RIGHT_MENU_MODIFY_CLICKED_EVENT,  
-    MOUSE_RIGHT_MENU_MAX_CLICKED_EVENT     
-}MOUSE_RIGHT_MENU_CLICKED_EVENT;
-
-
-//ø™ º≤Àµ• ¬º˛£®◊¢“‚£∫»Áπ˚”–◊”≤Àµ•£¨–Ë“™–¬Ω®“ª∏ˆ√∂æŸ£¨∏˜∏ˆ◊”≤Àµ•∂®“Â ±œ‡ª•∂¿¡¢£¨ºı…ŸÒÓ∫œ£©
-typedef enum 
-{ 
-    START_MENU_ITEM_INIT_EVENT = 0, 
-    START_MENU_ITEM_MY_COMPUTER_CLICKED_EVENT,    //Œ“µƒµÁƒ‘
-    START_MENU_ITEM_SYSTEM_SETTING_CLICKED_EVENT,     //œµÕ≥…Ë÷√
-    START_MENU_ITEM_MEMORY_INFORMATION_CLICKED_EVENT, //ƒ⁄¥Ê π”√–≈œ¢
-    START_MENU_ITEM_SYSTEM_LOG_CLICKED_EVENT,         //œµÕ≥»’÷æ
-    START_MENU_ITEM_TERMINAL_CLICKED_EVENT,         //œµÕ≥»’÷æ
-    START_MENU_ITEM_SHUTDOWN_CLICKED_EVENT,           //œµÕ≥πÿª˙
-    START_MENU_ITEM_MAX_CLICKED_EVENT                 //ƒ¨»œ◊Ó¥Û÷µ
-}START_MENU_ITEM_CLICKED_EVENT;
-
-//ø™ º≤Àµ•÷–œµÕ≥…Ë÷√◊”≤Àµ• ¬º˛
-typedef enum 
-{ 
-    START_MENU_SYSTEM_SETTING_SUBITEM_WALLPAPER_SETTING_CLICKED_EVENT = 0, //◊¿√Ê±⁄÷Ω…Ë÷√
-    START_MENU_SYSTEM_SETTING_SUBITEM_WALLPAPER_RESET_CLICKED_EVENT,       //◊¿√Ê±⁄÷Ωªπ‘≠
-    START_MENU_SYSTEM_SETTING_SUBITEM_CLOSE_SUBITEM_CLICKED_EVENT,         //◊¿√Ê±⁄÷Ωªπ‘≠
-    START_MENU_SYSTEM_SETTING_SUBITEM_MAX_CLICKED_EVENT                    //ƒ¨»œ◊Ó¥Û÷µ
-}START_MENU_SYSTEM_SETTING_SUBITEM_CLICKED_EVENT;
-
-//Œ“µƒµÁƒ‘¥∞ø⁄ ¬º˛
-typedef enum 
-{ 
-    MY_COMPUTER_WINDOW_PARTITION_ITEM_CLICKED_EVENT = 0,  //Œ“µƒµÁƒ‘¥Úø™ƒ≥∏ˆ∑÷«¯ ¬º˛
-    MY_COMPUTER_WINDOW_FOLDER_ITEM_CLICKED_EVENT,         //Œ“µƒµÁƒ‘¥Úø™ƒ≥∏ˆƒø¬º ¬º˛
-    MY_COMPUTER_WINDOW_FILE_ITEM_CLICKED_EVENT,           //Œ“µƒµÁƒ‘¥Úø™ƒ≥∏ˆŒƒº˛ ¬º˛
-    MY_COMPUTER_WINDOW_CLOSE_WINDOW_CLICKED_EVENT,        //πÿ±’Œ“µƒµÁƒ‘¥∞ø⁄ ¬º˛
-    MY_COMPUTER_WINDOW_MAX_CLICKED_EVENT                  //ƒ¨»œ◊Ó¥Û÷µ
-}MY_COMPUTER_WINDOW_CLICKED_EVENT;
-
-
-//Terminal¥∞ø⁄ ¬º˛
-typedef enum 
-{ 
-    TERMINAL_WINDOW_CLOSE_WINDOW_CLICKED_EVENT = 0,  //Œ“µƒµÁƒ‘¥Úø™ƒ≥∏ˆ∑÷«¯ ¬º˛
-    TERMINAL_WINDOW_MAX_CLICKED_EVENT                  //ƒ¨»œ◊Ó¥Û÷µ
-}TERMINAL_WINDOW_CLICKED_EVENT;
-
-
-//œµÕ≥»’÷æ¥∞ø⁄ ¬º˛
-typedef enum 
-{ 
-    SYSTEM_LOG_WINDOW_CLOSE_WINDOW_CLICKED_EVENT = 0,    //πÿ±’¥∞ø⁄
-    SYSTEM_LOG_WINDOW_MAX_CLICKED_EVENT                  //ƒ¨»œ◊Ó¥Û÷µ
-}SYSTEM_LOG_WINDOW_CLICKED_EVENT;
-
-//ƒ⁄¥Ê π”√¥∞ø⁄ ¬º˛
-typedef enum 
-{ 
-    MEMORY_INFORMATION_WINDOW_CLOSE_WINDOW_CLICKED_EVENT = 0,    //πÿ±’¥∞ø⁄
-    MEMORY_INFORMATION_WINDOW_MAX_CLICKED_EVENT                  //ƒ¨»œ◊Ó¥Û÷µ
-}MEMORY_INFORMATION_WINDOW_CLICKED_EVENT;
-
-/*
 typedef enum 
 {
     START_MENU_INIT_CLICKED_EVENT = 0,
-    START_MENU_CLICKED_EVENT, //X
-    MY_COMPUTER_CLICKED_EVENT,//X
-    SETTING_CLICKED_EVENT,//X
-    MEMORY_INFORMATION_CLICKED_EVENT,//X
-    MY_COMPUTER_PARTITION_ITEM_CLICKED_EVENT,//X
-    MY_COMPUTER_FOLDER_ITEM_CLICKED_EVENT,//X
-    MY_COMPUTER_CLOSE_CLICKED_EVENT,//X
-    SYSTEM_LOG_CLOSE_CLICKED_EVENT,//X
-    MEMORY_INFORMATION_CLOSE_CLICKED_EVENT,//X
-    SYSTEM_SETTING_CLOSE_CLICKED_EVENT,//X
-    SYSTEM_LOG_CLICKED_EVENT,//X
-    SYSTEM_QUIT_CLICKED_EVENT,//X
-    WALLPAPER_SETTING_CLICKED_EVENT,//X
-    WALLPAPER_RESET_CLICKED_EVENT,//X
+    START_MENU_CLICKED_EVENT,
+    MY_COMPUTER_CLICKED_EVENT,
+    SETTING_CLICKED_EVENT,
+    MEMORY_INFORMATION_CLICKED_EVENT,
+    MY_COMPUTER_PARTITION_ITEM_CLICKED_EVENT,
+    MY_COMPUTER_FOLDER_ITEM_CLICKED_EVENT,
+    MY_COMPUTER_CLOSE_CLICKED_EVENT,
+    SYSTEM_LOG_CLOSE_CLICKED_EVENT,
+    MEMORY_INFORMATION_CLOSE_CLICKED_EVENT,
+    SYSTEM_SETTING_CLOSE_CLICKED_EVENT,
+    SYSTEM_LOG_CLICKED_EVENT,
+    SYSTEM_QUIT_CLICKED_EVENT,
+    WALLPAPER_SETTING_CLICKED_EVENT,
+    WALLPAPER_RESET_CLICKED_EVENT,
     MAX_CLICKED_EVENT
 }MOUSE_CLICK_EVENT;
-*/
-
-//ø™ º≤Àµ•µƒ◊¥Ã¨ª„◊‹
-typedef enum 
-{
-    START_MENU_CLICK_INIT_STATE = 0, //≥ı º◊¥Ã¨
-    START_MENU_MY_COMPUTER_CLICKED_STATE,
-    START_MENU_MEMORY_INFORMATION_CLICKED_STATE,
-    START_MENU_SYSTEM_SETTING_CLICKED_STATE,
-    START_MENU_SYSTEM_LOG_STATE,
-    START_MENU_TERMINAL_STATE,
-    START_MENU_SYSTEM_QUIT_STATE,
-    START_MENU_MAX_STATE
-}START_MENU_STATE;
-
 
 typedef enum 
 {
-    MY_COMPUTER_INIT_STATE = 0,
+    CLICK_INIT_STATE = 0,
+    MENU_CLICKED_STATE,
+    MY_COMPUTER_CLICKED_STATE,
+    MEMORY_INFORMATION_CLICKED_STATE,
+    SYSTEM_SETTING_CLICKED_STATE,
+    SYSTEM_LOG_STATE,
     MY_COMPUTER_PARTITION_CLICKED_STATE,
     MY_COMPUTER_FOLDER_CLICKED_STATE,
-    MY_COMPUTER_QUIT_STATE,
-    MY_COMPUTER_MAX_STATE
-}MY_COMPUTER_STATE;
-
+    SYSTEM_QUIT_STATE
+}START_MENU_STATE;
 
 extern START_MENU_STATE 	StartMenuNextState;
 
@@ -190,31 +95,19 @@ extern START_MENU_STATE 	StartMenuNextState;
 typedef struct
 {
     GRAPHICS_LAYER_ID           GraphicsLayerID;
-    UINT16                       (*pClickEventGet)(); 
+    MOUSE_CLICK_EVENT           (*pClickEventGet)(); 
     VOID                        (*pClickEventHandle)(MOUSE_CLICK_EVENT); 
 }GRAPHICS_LAYER_EVENT_GET;
 
-typedef enum
+
+typedef struct
 {
-    CHINESE_FONT_SIZE_0 = 0,
-    CHINESE_FONT_SIZE_1,
-	CHINESE_FONT_SIZE_2,
-	CHINESE_FONT_SIZE_3,
-	CHINESE_FONT_SIZE_4,
-	CHINESE_FONT_SIZE_5,
-	CHINESE_FONT_SIZE_6,
-	CHINESE_FONT_SIZE_7,
-	CHINESE_FONT_SIZE_8,
-	CHINESE_FONT_SIZE_9,
-	CHINESE_FONT_SIZE_10,
-	CHINESE_FONT_SIZE_11,
-	CHINESE_FONT_SIZE_12,
-	CHINESE_FONT_SIZE_13,
-	CHINESE_FONT_SIZE_14,
-	CHINESE_FONT_SIZE_15,
-	CHINESE_FONT_SIZE_16,
-    CHINESE_FONT_SIZE_MAX
-}CHINESE_FONT_SIZE_ID;
+    START_MENU_STATE                    CurrentState;
+    MOUSE_CLICK_EVENT            		event;
+    START_MENU_STATE                    NextState;
+    VOID                          (*pFunc)(); 
+}START_MENU_STATE_TRANSFORM;
+
 
 
 
@@ -232,6 +125,9 @@ EFI_STATUS L2_GRAPHICS_StartMenuInit();
 
 EFI_STATUS L2_GRAPHICS_SayGoodBye();
 
+UINT16 L2_MOUSE_ClickEventHandle();
+
+
 VOID L2_MOUSE_Click();
 
 EFI_STATUS L2_GRAPHICS_DeskInit();
@@ -246,7 +142,6 @@ EFI_STATUS L2_GRAPHICS_ChineseHalfDraw(UINT8 *pBuffer,UINT8 d,
         IN EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color, UINT8 fontWidth);
 
 VOID L2_GRAPHICS_LayerCompute(UINT16 iMouseX, UINT16 iMouseY, UINT8 MouseClickFlag);
-VOID L2_GRAPHICS_RightClickMenuInit(UINT16 iMouseX, UINT16 iMouseY, UINT16 LayerID);
 
 VOID L2_STORE_FolderItemsPrint();
 
@@ -263,16 +158,16 @@ EFI_STATUS L2_GRAPHICS_AsciiCharDraw(UINT8 *pBufferDest,
         IN EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color);
         
 EFI_STATUS L2_GRAPHICS_ChineseCharDraw12(UINT8 *pBuffer,
-        UINTN x0, UINTN y0, UINT16 AreaCode,	UINT16 BitCode,
-        EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color , UINT16 AreaWidth);
-        
-EFI_STATUS L2_GRAPHICS_ChineseCharDraw16(UINT8 *pBuffer,
-        UINTN x0, UINTN y0, UINT32 AreaCode, UINT32 BitCode,
-        EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color , UINT16 AreaWidth);
+        IN UINTN x0, UINTN y0, UINT32 offset,
+        IN EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color , UINT16 AreaWidth);
 
 EFI_STATUS L2_GRAPHICS_AsciiCharDraw2(WINDOW_LAYER_ITEM layer,
         IN UINTN x0, UINTN y0, UINT8 c,
         IN EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color);
+
+VOID L2_GRAPHICS_RightClickMenu(UINT16 iMouseX, UINT16 iMouseY);
+
+VOID L2_MOUSE_MoveOver();
 
 VOID L2_MOUSE_Move();
 
@@ -292,6 +187,5 @@ void L1_MEMORY_CopyColor1(UINT8 *pBuffer, EFI_GRAPHICS_OUTPUT_BLT_PIXEL color, U
 void L1_MEMORY_CopyColor2(UINT8 *pBuffer, EFI_GRAPHICS_OUTPUT_BLT_PIXEL color, UINT16 x0, UINT16 y0);
 
 void L1_MEMORY_CopyColor3(UINT8 *pBuffer, EFI_GRAPHICS_OUTPUT_BLT_PIXEL color, UINT16 x0, UINT16 y0, UINT8 AreaWidth);
-
 
 

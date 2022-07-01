@@ -2,13 +2,13 @@
 /*************************************************
     .
     File name:      	*.*
-    Author£º	        	ÈÎÆôºì
-    ID£º					00001
+    Authorï¼š	        	ä»»å¯çº¢
+    IDï¼š					00001
     Date:          		202107
     Description:    	
-    Others:         	ÎÞ
+    Others:         	æ— 
 
-    History:        	ÎÞ
+    History:        	æ— 
 	    1.  Date:
 		    Author: 
 		    ID:
@@ -26,17 +26,17 @@
 #include <L1_LIBRARY_Network.h>
 
 
-// Ð¡¶ËÄ£Ê½
-// byte×ªint  
+// å°ç«¯æ¨¡å¼
+// byteè½¬int  
 /****************************************************************************
 *
-*  ÃèÊö:   8¸ö×Ö½Ú×ª»»³ÉÎÞ·ûºÅ64Î»ÕûÊý
+*  æè¿°:   8ä¸ªå­—èŠ‚è½¬æ¢æˆæ— ç¬¦å·64ä½æ•´æ•°
 *
-*  ²ÎÊý1£º xxxxx
-*  ²ÎÊý2£º xxxxx
-*  ²ÎÊýn£º xxxxx
+*  å‚æ•°1ï¼š xxxxx
+*  å‚æ•°2ï¼š xxxxx
+*  å‚æ•°nï¼š xxxxx
 *
-*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
+*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
 *
 *****************************************************************************/
 unsigned long long L1_NETWORK_8BytesToUINT64(unsigned char *bytes)
@@ -56,17 +56,17 @@ unsigned long long L1_NETWORK_8BytesToUINT64(unsigned char *bytes)
 
 
 
-// Ð¡¶ËÄ£Ê½
-// byte×ªint  
+// å°ç«¯æ¨¡å¼
+// byteè½¬int  
 /****************************************************************************
 *
-*  ÃèÊö:   6¸ö×Ö½Ú×ª»»³ÉÎÞ·ûºÅ64Î»ÕûÊý
+*  æè¿°:   6ä¸ªå­—èŠ‚è½¬æ¢æˆæ— ç¬¦å·64ä½æ•´æ•°
 *
-*  ²ÎÊý1£º xxxxx
-*  ²ÎÊý2£º xxxxx
-*  ²ÎÊýn£º xxxxx
+*  å‚æ•°1ï¼š xxxxx
+*  å‚æ•°2ï¼š xxxxx
+*  å‚æ•°nï¼š xxxxx
 *
-*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
+*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
 *
 *****************************************************************************/
 unsigned long long L1_NETWORK_6BytesToUINT64(unsigned char *bytes)
@@ -84,17 +84,17 @@ unsigned long long L1_NETWORK_6BytesToUINT64(unsigned char *bytes)
 
 
 
-// Ð¡¶ËÄ£Ê½
-// byte×ªint  
+// å°ç«¯æ¨¡å¼
+// byteè½¬int  
 /****************************************************************************
 *
-*  ÃèÊö:   4¸ö×Ö½Ú×ª»»³ÉÎÞ·ûºÅ32Î»ÕûÊý
+*  æè¿°:   4ä¸ªå­—èŠ‚è½¬æ¢æˆæ— ç¬¦å·32ä½æ•´æ•°
 *
-*  ²ÎÊý1£º xxxxx
-*  ²ÎÊý2£º xxxxx
-*  ²ÎÊýn£º xxxxx
+*  å‚æ•°1ï¼š xxxxx
+*  å‚æ•°2ï¼š xxxxx
+*  å‚æ•°nï¼š xxxxx
 *
-*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
+*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
 *
 *****************************************************************************/
 unsigned long L1_NETWORK_4BytesToUINT32(unsigned char *bytes)
@@ -108,17 +108,17 @@ unsigned long L1_NETWORK_4BytesToUINT32(unsigned char *bytes)
 
 
 
-// Ð¡¶ËÄ£Ê½
-// byte×ªint  
+// å°ç«¯æ¨¡å¼
+// byteè½¬int  
 /****************************************************************************
 *
-*  ÃèÊö:   3¸ö×Ö½Ú×ª»»³ÉÎÞ·ûºÅ32Î»ÕûÊý
+*  æè¿°:   3ä¸ªå­—èŠ‚è½¬æ¢æˆæ— ç¬¦å·32ä½æ•´æ•°
 *
-*  ²ÎÊý1£º xxxxx
-*  ²ÎÊý2£º xxxxx
-*  ²ÎÊýn£º xxxxx
+*  å‚æ•°1ï¼š xxxxx
+*  å‚æ•°2ï¼š xxxxx
+*  å‚æ•°nï¼š xxxxx
 *
-*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
+*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
 *
 *****************************************************************************/
 unsigned long L1_NETWORK_3BytesToUINT32(unsigned char *bytes)
@@ -132,17 +132,17 @@ unsigned long L1_NETWORK_3BytesToUINT32(unsigned char *bytes)
 
 
 
-// Ð¡¶ËÄ£Ê½
-// byte×ªint  
+// å°ç«¯æ¨¡å¼
+// byteè½¬int  
 /****************************************************************************
 *
-*  ÃèÊö:   2¸ö×Ö½Ú×ª»»³ÉÎÞ·ûºÅ16Î»ÕûÊý
+*  æè¿°:   2ä¸ªå­—èŠ‚è½¬æ¢æˆæ— ç¬¦å·16ä½æ•´æ•°
 *
-*  ²ÎÊý1£º xxxxx
-*  ²ÎÊý2£º xxxxx
-*  ²ÎÊýn£º xxxxx
+*  å‚æ•°1ï¼š xxxxx
+*  å‚æ•°2ï¼š xxxxx
+*  å‚æ•°nï¼š xxxxx
 *
-*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
+*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
 *
 *****************************************************************************/
 

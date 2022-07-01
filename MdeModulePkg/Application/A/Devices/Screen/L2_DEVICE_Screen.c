@@ -2,13 +2,13 @@
 /*************************************************
     .
     File name:      	*.*
-    Author£º	        	ÈÎÆôºì
-    ID£º					00001
+    Authorï¼š	        	ä»»å¯çº¢
+    IDï¼š					00001
     Date:          		202107
     Description:    	
-    Others:         	ÎÞ
+    Others:         	æ— 
 
-    History:        	ÎÞ
+    History:        	æ— 
 	    1.  Date:
 		    Author: 
 		    ID:
@@ -39,18 +39,18 @@ EFI_GRAPHICS_OUTPUT_PROTOCOL       *GraphicsOutput = NULL;
 
 /****************************************************************************
 *
-*  ÃèÊö:   ÆÁÄ»²ÎÊý³õÊ¼»¯£¬ÓÃÓÚºóÐøÆÁÄ»»æÍ¼£¬»ñÈ¡ÆÁÄ»·Ö±æÂÊÓÃÓÚºóÐøÊ¹ÓÃ
+*  æè¿°:   å±å¹•å‚æ•°åˆå§‹åŒ–ï¼Œç”¨äºŽåŽç»­å±å¹•ç»˜å›¾ï¼ŒèŽ·å–å±å¹•åˆ†è¾¨çŽ‡ç”¨äºŽåŽç»­ä½¿ç”¨
 *
-*  ²ÎÊý1£º xxxxx
-*  ²ÎÊý2£º xxxxx
-*  ²ÎÊýn£º xxxxx
+*  å‚æ•°1ï¼š xxxxx
+*  å‚æ•°2ï¼š xxxxx
+*  å‚æ•°nï¼š xxxxx
 *
-*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
+*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
 *
 *****************************************************************************/
 VOID L2_SCREEN_Init()
 {
-	//³õÊ¼»¯Í¼ÐÎÊä³ö¾ä±ú
+	//åˆå§‹åŒ–å›¾å½¢è¾“å‡ºå¥æŸ„
     EFI_STATUS Status = gBS->LocateProtocol(&gEfiGraphicsOutputProtocolGuid, NULL, (VOID **) &GraphicsOutput);  
 	
     //INFO_SELF(L"\r\n");    
@@ -60,7 +60,7 @@ VOID L2_SCREEN_Init()
         return EFI_UNSUPPORTED;
     }
 
-	//»ñÈ¡ÆÁÄ»µÄË®Æ½·Ö±æÂÊºÍ´¹Ö±·Ö±æÂÊ
+	//èŽ·å–å±å¹•çš„æ°´å¹³åˆ†è¾¨çŽ‡å’Œåž‚ç›´åˆ†è¾¨çŽ‡
     ScreenWidth  = GraphicsOutput->Mode->Info->HorizontalResolution;
     ScreenHeight = GraphicsOutput->Mode->Info->VerticalResolution;	
 }
@@ -69,17 +69,17 @@ VOID L2_SCREEN_Init()
 
 /****************************************************************************
 *
-*  ÃèÊö:   ÆÁÄ»»æÍ¼
+*  æè¿°:   å±å¹•ç»˜å›¾
 *
-*  pBuffer£º       ÓÃÓÚ»æÍ¼ÒÑ×¼±¸µÄÍ¼ÐÎ»º´æ¿Õ¼ä
-*  SourceX£º       »ùÓÚpBufferµÄX×ø±ê¿ªÊ¼ÍùÆÁÄ»»æÖÆ
-*  SourceY£º       »ùÓÚpBufferµÄY×ø±ê¿ªÊ¼ÍùÆÁÄ»»æÖÆ
-*  DestinationX£º »æÖÆµÄÆÁÄ»Ä¿±êX×ø±ê
-*  DestinationY£º »æÖÆµÄÆÁÄ»Ä¿±êY×ø±ê
-*  Width£º         »æÖÆ¿í¶È
-*  Height£º        »æÖÆ¸ß¶È
+*  pBufferï¼š       ç”¨äºŽç»˜å›¾å·²å‡†å¤‡çš„å›¾å½¢ç¼“å­˜ç©ºé—´
+*  SourceXï¼š       åŸºäºŽpBufferçš„Xåæ ‡å¼€å§‹å¾€å±å¹•ç»˜åˆ¶
+*  SourceYï¼š       åŸºäºŽpBufferçš„Yåæ ‡å¼€å§‹å¾€å±å¹•ç»˜åˆ¶
+*  DestinationXï¼š ç»˜åˆ¶çš„å±å¹•ç›®æ ‡Xåæ ‡
+*  DestinationYï¼š ç»˜åˆ¶çš„å±å¹•ç›®æ ‡Yåæ ‡
+*  Widthï¼š         ç»˜åˆ¶å®½åº¦
+*  Heightï¼š        ç»˜åˆ¶é«˜åº¦
 *
-*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
+*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
 *
 *****************************************************************************/
 VOID EFIAPI L2_SCREEN_Draw (EFI_GRAPHICS_OUTPUT_BLT_PIXEL *pBuffer,

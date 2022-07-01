@@ -2,13 +2,13 @@
 /*************************************************
     .
     File name:      	*.*
-    Author£º	        	ÈÎÆôºì
-    ID£º					00001
+    Authorï¼š	        	ä»»å¯çº¢
+    IDï¼š					00001
     Date:          		202107
     Description:    	
-    Others:         	ÎÞ
+    Others:         	æ— 
 
-    History:        	ÎÞ
+    History:        	æ— 
 	    1.  Date:
 		    Author: 
 		    ID:
@@ -46,17 +46,17 @@
 
 /****************************************************************************
 *
-*  ÃèÊö:   ´ÅÅÌ»òÓÅÅÌ·ÖÇø¶ÁÈ¡£¬ÒÔReadSize * 512Îª¶ÁÈ¡´óÐ¡£¬»³ÒÉÕâÀïÓÐ¿ÉÒÔÓÅ»¯µÄ¿Õ¼ä£¬ÀíÂÛÉÏ£¬³õÊ¼»¯½Ó¿ÚÖ»Ó¦¸Ãµ÷ÓÃÒ»´Î
+*  æè¿°:   ç£ç›˜æˆ–ä¼˜ç›˜åˆ†åŒºè¯»å–ï¼Œä»¥ReadSize * 512ä¸ºè¯»å–å¤§å°ï¼Œæ€€ç–‘è¿™é‡Œæœ‰å¯ä»¥ä¼˜åŒ–çš„ç©ºé—´ï¼Œç†è®ºä¸Šï¼Œåˆå§‹åŒ–æŽ¥å£åªåº”è¯¥è°ƒç”¨ä¸€æ¬¡
 *
-*  ²ÎÊýdeviceID£º ´ý¶ÁÈ¡·ÖÇø¶ÔÓ¦µÄÉè±¸ID
-*  ²ÎÊýStartSectorNumber£º¿ªÊ¼¶ÁÈ¡µÄÉÈÇøºÅ£¬Êµ¼Ê¶ÁÈ¡Ê±»á * 512£¬×ª»¯Îª´Ó¶àÉÙ×Ö½Ú¶ÁÈ¡
-*  ²ÎÊýReadSize£º ¶ÁÈ¡ReadSize * 512Îª¶ÁÈ¡´óÐ¡
-*  ²ÎÊýpBuffer£º     Êý¾Ý¶ÁÈ¡ºó´æ·ÅµÄbuffer£¬×¢£ºÓÉµ÷ÓÃÕßÉêÇëºÍÊÍ·Å
+*  å‚æ•°deviceIDï¼š å¾…è¯»å–åˆ†åŒºå¯¹åº”çš„è®¾å¤‡ID
+*  å‚æ•°StartSectorNumberï¼šå¼€å§‹è¯»å–çš„æ‰‡åŒºå·ï¼Œå®žé™…è¯»å–æ—¶ä¼š * 512ï¼Œè½¬åŒ–ä¸ºä»Žå¤šå°‘å­—èŠ‚è¯»å–
+*  å‚æ•°ReadSizeï¼š è¯»å–ReadSize * 512ä¸ºè¯»å–å¤§å°
+*  å‚æ•°pBufferï¼š     æ•°æ®è¯»å–åŽå­˜æ”¾çš„bufferï¼Œæ³¨ï¼šç”±è°ƒç”¨è€…ç”³è¯·å’Œé‡Šæ”¾
 *
-*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
+*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
 *
 *****************************************************************************/
-EFI_STATUS L2_STORE_Read(UINT8 deviceID, UINT64 StartSectorNumber, UINT16 ReadSize, UINT8 *pBuffer)
+EFI_STATUS L1_STORE_READ(UINT8 deviceID, UINT64 StartSectorNumber, UINT16 ReadSize, UINT8 *pBuffer)
 {
     if (StartSectorNumber > device[deviceID].SectorCount)
     {
@@ -64,7 +64,7 @@ EFI_STATUS L2_STORE_Read(UINT8 deviceID, UINT64 StartSectorNumber, UINT16 ReadSi
         return -1;
     }
 
-    //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: deviceID: %d StartSectorNumber: %llu ReadSize: %d\n", __LINE__, deviceID, StartSectorNumber, ReadSize);
+    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: deviceID: %d StartSectorNumber: %ld ReadSize: %d\n", __LINE__, deviceID, StartSectorNumber, ReadSize);
     EFI_STATUS Status;
     UINTN NumHandles;
     EFI_BLOCK_IO_PROTOCOL *BlockIo;
@@ -115,16 +115,16 @@ EFI_STATUS L2_STORE_Read(UINT8 deviceID, UINT64 StartSectorNumber, UINT16 ReadSi
 
 /****************************************************************************
 *
-*  ÃèÊö:    ´ÅÅÌ»òÓÅÅÌ·ÖÇøÐ´Èë£¬ÒÔReadSize * 512Îª¶ÁÈ¡´óÐ¡  £¬»³ÒÉÕâÀïÓÐ¿ÉÒÔÓÅ»¯µÄ¿Õ¼ä£¬ÀíÂÛÉÏ£¬³õÊ¼»¯½Ó¿ÚÖ»Ó¦¸Ãµ÷ÓÃÒ»´Î
+*  æè¿°:    ç£ç›˜æˆ–ä¼˜ç›˜åˆ†åŒºå†™å…¥ï¼Œä»¥ReadSize * 512ä¸ºè¯»å–å¤§å°  ï¼Œæ€€ç–‘è¿™é‡Œæœ‰å¯ä»¥ä¼˜åŒ–çš„ç©ºé—´ï¼Œç†è®ºä¸Šï¼Œåˆå§‹åŒ–æŽ¥å£åªåº”è¯¥è°ƒç”¨ä¸€æ¬¡
 *
-*  ²ÎÊý1£º xxxxx
-*  ²ÎÊý2£º xxxxx
-*  ²ÎÊýn£º xxxxx
+*  å‚æ•°1ï¼š xxxxx
+*  å‚æ•°2ï¼š xxxxx
+*  å‚æ•°nï¼š xxxxx
 *
-*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
+*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
 *
 *****************************************************************************/
-EFI_STATUS L2_STORE_Write(UINT8 deviceID, UINT64 StartSectorNumber, UINT16 WriteSize, UINT8 *pBuffer)
+EFI_STATUS L1_STORE_Write(UINT8 deviceID, UINT64 StartSectorNumber, UINT16 WriteSize, UINT8 *pBuffer)
 {
     if (StartSectorNumber > device[deviceID].SectorCount)
     {
@@ -169,7 +169,7 @@ EFI_STATUS L2_STORE_Write(UINT8 deviceID, UINT64 StartSectorNumber, UINT16 Write
     
     for (int j = 0; j < 250; j++)
     {
-        L2_DEBUG_Print1(DISK_READ_BUFFER_X + (j % 16) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 16), "%02X ", pBuffer[j] & 0xff);
+        //L2_DEBUG_Print1(DISK_READ_BUFFER_X + (j % 16) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 16), "%02X ", pBuffer[j] & 0xff);
     }
     //INFO_SELF("\n");
     //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: Status:%X \n", __LINE__, Status);
@@ -185,13 +185,13 @@ EFI_STATUS L2_STORE_Write(UINT8 deviceID, UINT64 StartSectorNumber, UINT16 Write
 
 /****************************************************************************
 *
-*  ÃèÊö:   ¶Ô·ÖÇø×Ö·û´®·ÖÎö¡£²»¹ý»³ÒÉÕâÀï±ß¿ÉÄÜÓÐBUG
+*  æè¿°:   å¯¹åˆ†åŒºå­—ç¬¦ä¸²åˆ†æžã€‚ä¸è¿‡æ€€ç–‘è¿™é‡Œè¾¹å¯èƒ½æœ‰BUG
 *
-*  ²ÎÊý1£º xxxxx
-*  ²ÎÊý2£º xxxxx
-*  ²ÎÊýn£º xxxxx
+*  å‚æ•°1ï¼š xxxxx
+*  å‚æ•°2ï¼š xxxxx
+*  å‚æ•°nï¼š xxxxx
 *
-*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
+*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
 *
 *****************************************************************************/
 void L2_STORE_TextDevicePathAnalysis(CHAR16 *p, DEVICE_PARAMETER *device, UINTN count1)
@@ -283,7 +283,7 @@ void L2_STORE_TextDevicePathAnalysis(CHAR16 *p, DEVICE_PARAMETER *device, UINTN 
     //puts(temp);
     //DEBUG ((EFI_D_INFO, "line:%d device->StartSectorNumber: %a \n", __LINE__, temp));
     //printf("line:%d start: %d\n", __LINE__, strtol(temp));
-    //device->StartSectorNumber = L1_MATH_StringToLongLong(temp, NULL, 10);
+    device->StartSectorNumber = L1_MATH_StringToLongLong(temp, NULL, 10);
     //putchar('\n');
     
     j = 0;
@@ -326,14 +326,14 @@ void L2_STORE_TextDevicePathAnalysis(CHAR16 *p, DEVICE_PARAMETER *device, UINTN 
 
 /****************************************************************************
 *
-*  ÃèÊö: Íâ²¿´æ´¢Éè±¸Èç´ÅÅÌ¡¢UÅÌ·ÖÇø²ÎÊý£¬×¢£ºÍ¬Ò»¸ö´ÅÅÌ¡¢UÅÌ¿ÉÄÜÓÐ¶à¸ö·ÖÇø¡£
-*  Õâ¸ö´úÂëÐ´µÄ²»Ì«ºÃ£¬Õý³£Çé¿öÏÂ£¬²»Ó¦¸Ã¶ÔÈ¡³öÀ´µÄÕâ¸öÖµ£ºTextDevicePath£¬½âÎö£¬µ¥Ò»Ö°Ôð¡£
+*  æè¿°: å¤–éƒ¨å­˜å‚¨è®¾å¤‡å¦‚ç£ç›˜ã€Uç›˜åˆ†åŒºå‚æ•°ï¼Œæ³¨ï¼šåŒä¸€ä¸ªç£ç›˜ã€Uç›˜å¯èƒ½æœ‰å¤šä¸ªåˆ†åŒºã€‚
+*  è¿™ä¸ªä»£ç å†™çš„ä¸å¤ªå¥½ï¼Œæ­£å¸¸æƒ…å†µä¸‹ï¼Œä¸åº”è¯¥å¯¹å–å‡ºæ¥çš„è¿™ä¸ªå€¼ï¼šTextDevicePathï¼Œè§£æžï¼Œå•ä¸€èŒè´£ã€‚
 *
-*  ²ÎÊý1£º xxxxx
-*  ²ÎÊý2£º xxxxx
-*  ²ÎÊýn£º xxxxx
+*  å‚æ•°1ï¼š xxxxx
+*  å‚æ•°2ï¼š xxxxx
+*  å‚æ•°nï¼š xxxxx
 *
-*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
+*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
 *
 *****************************************************************************/
 EFI_STATUS L2_STORE_PartitionsParameterGet()
@@ -380,11 +380,8 @@ EFI_STATUS L2_STORE_PartitionsParameterGet()
         }
 
         CHAR16 *TextDevicePath = DevPathToText->ConvertDevicePathToText(DiskDevicePath, TRUE, TRUE);
-        
         L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: Status:%X Partition: %s\n", __LINE__, Status, TextDevicePath);
 
-        Print(L"%s\n", TextDevicePath);
-        
         L2_STORE_TextDevicePathAnalysis(TextDevicePath, &device[i], i);
 
         if (FILE_SYSTEM_MAX == L2_FILE_PartitionTypeAnalysis(i))

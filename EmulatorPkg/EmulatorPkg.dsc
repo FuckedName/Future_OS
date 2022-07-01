@@ -399,9 +399,9 @@
 !endif
   MdeModulePkg/Universal/LoadFileOnFv2/LoadFileOnFv2.inf
   MdeModulePkg/Application/Hello/Hello.inf 
-  MdeModulePkg/Application/EchoTcp4/EchoTcp4.inf
+#  MdeModulePkg/Application/EchoTcp4/EchoTcp4.inf
   MdeModulePkg/Application/A/A.inf {
-   <LibraryClasses>
+  <LibraryClasses>
       NULL|MdeModulePkg/Library/DeviceManagerUiLib/DeviceManagerUiLib.inf
       NULL|MdeModulePkg/Library/BootManagerUiLib/BootManagerUiLib.inf
       NULL|MdeModulePkg/Library/BootMaintenanceManagerUiLib/BootMaintenanceManagerUiLib.inf

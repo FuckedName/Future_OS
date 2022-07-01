@@ -2,13 +2,13 @@
 /*************************************************
     .
     File name:      	*.*
-    Author£∫	        	»Œ∆Ù∫Ï
-    ID£∫					00001
+    AuthorÔºö	        	‰ªªÂêØÁ∫¢
+    IDÔºö					00001
     Date:          		202107
     Description:    	
-    Others:         	Œﬁ
+    Others:         	Êó†
 
-    History:        	Œﬁ
+    History:        	Êó†
 	    1.  Date:
 		    Author: 
 		    ID:
@@ -29,7 +29,6 @@
 
 #include <L1_LIBRARY_String.h>
 #include <Graphics/L1_GRAPHICS.h>
-#include <Graphics/Window/L2_GRAPHICS_Window.h>
 
 
 VOID L2_STRING_Maker (UINT16 x, UINT16 y,

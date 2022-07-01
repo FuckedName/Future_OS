@@ -2,13 +2,13 @@
 /*************************************************
     .
     File name:      	*.*
-    Author£∫	        	»Œ∆Ù∫Ï
-    ID£∫					00001
+    AuthorÔºö	        	‰ªªÂêØÁ∫¢
+    IDÔºö					00001
     Date:          		202107
     Description:    	
-    Others:         	Œﬁ
+    Others:         	Êó†
 
-    History:        	Œﬁ
+    History:        	Êó†
 	    1.  Date:
 		    Author: 
 		    ID:
@@ -38,6 +38,4 @@ VOID EFIAPI L2_TIMER_Slice(
 VOID
 EFIAPI
 L2_SYSTEM_Start (IN EFI_EVENT Event, IN VOID *Context);
-
-VOID testfunction();
 

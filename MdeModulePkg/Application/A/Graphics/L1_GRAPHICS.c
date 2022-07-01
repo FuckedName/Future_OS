@@ -2,13 +2,13 @@
 /*************************************************
     .    
     File name:      	*.*
-    Author£º	        	ÈÎÆôºì
-    ID£º					00001
+    Authorï¼š	        	ä»»å¯çº¢
+    IDï¼š					00001
     Date:          		202107
-    Description:    	Í¼ĞÎ´¦ÀíµÄÒ»Ğ©»ù´¡Ëã·¨£¬²»ÒÀÀµÆäËûÄ£¿é
-    Others:         	ÎŞ
+    Description:    	å›¾å½¢å¤„ç†çš„ä¸€äº›åŸºç¡€ç®—æ³•ï¼Œä¸ä¾èµ–å…¶ä»–æ¨¡å—
+    Others:         	æ— 
     
-    History:        	ÎŞ
+    History:        	æ— 
 	    1.  Date:
 		    Author: 
 		    ID:
@@ -26,7 +26,7 @@
 
 #include <L1_GRAPHICS.h>
 
-
+WINDOW_LAYERS WindowLayers;
 
 
 
@@ -35,18 +35,18 @@
 
 /****************************************************************************
 *
-*  ÃèÊö:   Ë«ÏßĞÔ²åÖµBilinear InterpolationËã·¨
+*  æè¿°:   åŒçº¿æ€§æ’å€¼Bilinear Interpolationç®—æ³•
 *
-*  ²ÎÊı1£º xxxxx
-*  ²ÎÊı2£º xxxxx
-*  ²ÎÊın£º xxxxx
+*  å‚æ•°1ï¼š xxxxx
+*  å‚æ•°2ï¼š xxxxx
+*  å‚æ•°nï¼š xxxxx
 *
-*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
+*  è¿”å›å€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
 *
 *****************************************************************************/
-unsigned char L1_GRAPHICS_Bilinear(double a, double blue, int uv, int u1v, int uv1, int u1v1)
+double L1_GRAPHICS_Bilinear(double a, double blue, int uv, int u1v, int uv1, int u1v1)
 {
-    return (unsigned char) (uv*(1-a)*(1-blue)+u1v*a*(1-blue)+uv1*blue*(1-a)+u1v1*a*blue);
+    return (double) (uv*(1-a)*(1-blue)+u1v*a*(1-blue)+uv1*blue*(1-a)+u1v1*a*blue);
 }
 
 
@@ -54,13 +54,13 @@ unsigned char L1_GRAPHICS_Bilinear(double a, double blue, int uv, int u1v, int u
 
 /****************************************************************************
 *
-*  ÃèÊö: Í¼Æ¬ËõĞ¡Ëã·¨£¬°ÑpSourceÍ¼Æ¬¿í¶È¡¢¸ß¶ÈËõĞ¡µ½pDestµÄ¿í¶ÈºÍ¸ß¶È
+*  æè¿°: å›¾ç‰‡ç¼©å°ç®—æ³•ï¼ŒæŠŠpSourceå›¾ç‰‡å®½åº¦ã€é«˜åº¦ç¼©å°åˆ°pDestçš„å®½åº¦å’Œé«˜åº¦
 *
-*  ²ÎÊı1£º xxxxx
-*  ²ÎÊı2£º xxxxx
-*  ²ÎÊın£º xxxxx
+*  å‚æ•°1ï¼š xxxxx
+*  å‚æ•°2ï¼š xxxxx
+*  å‚æ•°nï¼š xxxxx
 *
-*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
+*  è¿”å›å€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
 *
 *****************************************************************************/
 void L1_GRAPHICS_ZoomImage(UINT8* pDest, unsigned int DestWidth, unsigned int DestHeight, UINT8* pSource, unsigned int SourceWidth, unsigned int SourceHeight )
@@ -77,8 +77,7 @@ void L1_GRAPHICS_ZoomImage(UINT8* pDest, unsigned int DestWidth, unsigned int De
         for ( j = 0; j < DestWidth; j++ )
         {
             int    HeightRatio, WidthRatio;
-            double    u, v;
-			unsigned char red, green, blue;
+            double    u, v, red, green, blue;
             v    = (i * SourceHeight) / (double) (DestHeight);
             u    = (j * SourceWidth) / (double) (DestWidth);
             HeightRatio    = (int) (v);

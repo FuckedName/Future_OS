@@ -2,13 +2,13 @@
 /*************************************************
     .
     File name:      	*.*
-    Author£º	        	ÈÎÆôºì
-    ID£º					00001
+    Authorï¼š	        	ä»»å¯çº¢
+    IDï¼š					00001
     Date:          		202107
     Description:    	
-    Others:         	ÎÞ
+    Others:         	æ— 
 
-    History:        	ÎÞ
+    History:        	æ— 
 	    1.  Date:
 		    Author: 
 		    ID:
@@ -161,7 +161,7 @@ UINTN L2_TCP4_SocketCreate(VOID)
         return Status;
     }
 
-    //¸ø³õÊ¼»¯½á¹¹ÌåÖ¸Õë·ÖÅäÄÚ´æ
+    //ç»™åˆå§‹åŒ–ç»“æž„ä½“æŒ‡é’ˆåˆ†é…å†…å­˜
     L2_TCP4_SocketInit();
     	
     return 0;
@@ -181,21 +181,21 @@ EFI_STATUS L2_TCP4_SocketConfig()
     CurSocket->m_pTcp4ConfigData->TypeOfService = 0;
     CurSocket->m_pTcp4ConfigData->TimeToLive = 16;    
     
-    //ÅäÖÃ±¾µØIPµØÖ·£¬Õâ¸ö½Ó¿ÚÊÇµÚÒ»´ÎÊ¹ÓÃ£¬²»ÖªµÀÐÐ²»ÐÐ
-    *(UINTN*)(CurSocket->m_pTcp4ConfigData->AccessPoint.StationAddress.Addr) = IPV4_TO_LONG(10, 152, 148, 201);
+    //é…ç½®æœ¬åœ°IPåœ°å€ï¼Œè¿™ä¸ªæŽ¥å£æ˜¯ç¬¬ä¸€æ¬¡ä½¿ç”¨ï¼Œä¸çŸ¥é“è¡Œä¸è¡Œ
+    *(UINTN*)(CurSocket->m_pTcp4ConfigData->AccessPoint.StationAddress.Addr) = IPV4_TO_LONG(192,168,3,4);
 
-    //ÅäÖÃ±¾µØ¶Ë¿Ú
+    //é…ç½®æœ¬åœ°ç«¯å£
     CurSocket->m_pTcp4ConfigData->AccessPoint.StationPort = 61558;
 
-    //ÅäÖÃÔ¶¶ËIPµØÖ·£¬
-    *(UINTN*)(CurSocket->m_pTcp4ConfigData->AccessPoint.RemoteAddress.Addr) = IPV4_TO_LONG(10, 152, 148, 200);
+    //é…ç½®è¿œç«¯IPåœ°å€ï¼Œ
+    *(UINTN*)(CurSocket->m_pTcp4ConfigData->AccessPoint.RemoteAddress.Addr) = IPV4_TO_LONG(192,168,3,3);
     
-    //ÅäÖÃÔ¶¶Ë¶Ë¿Ú
+    //é…ç½®è¿œç«¯ç«¯å£
     CurSocket->m_pTcp4ConfigData->AccessPoint.RemotePort = 8888;
     
     *(UINT32*)(CurSocket->m_pTcp4ConfigData->AccessPoint.SubnetMask.Addr) = (255 | 255 << 8 | 255 << 16 | 0 << 24) ;
 
-    /// if UseDefaultAddress is FALSE£¬ config StationAddress 
+    /// if UseDefaultAddress is FALSEï¼Œ config StationAddress 
     CurSocket->m_pTcp4ConfigData->AccessPoint.UseDefaultAddress = FALSE;
 
     CurSocket->m_pTcp4ConfigData->AccessPoint.ActiveFlag = TRUE;
@@ -206,7 +206,7 @@ EFI_STATUS L2_TCP4_SocketConfig()
     return Status;
 }
 
-//Á¬½Ó·þÎñÆ÷¶Ë
+//è¿žæŽ¥æœåŠ¡å™¨ç«¯
 EFI_STATUS L2_TCP4_SocketConnect()
 {
     EFI_STATUS Status = EFI_NOT_FOUND;
@@ -229,7 +229,7 @@ EFI_STATUS L2_TCP4_SocketConnect()
     //    return Status;
     //}
 
-    // ¾ÍËãÕâÀïÊ§°Ü£¬Ò²¿ÉÒÔ¼ÌÐøÍùÏÂÔËÐÐ¡£
+    // å°±ç®—è¿™é‡Œå¤±è´¥ï¼Œä¹Ÿå¯ä»¥ç»§ç»­å¾€ä¸‹è¿è¡Œã€‚
     Status = gBS->WaitForEvent(1, &(CurSocket->ConnectToken.CompletionToken.Event), &waitIndex);
     //INFO(L"Connect: WaitForEvent, %r\n", Status);
     L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d :%r \n", __LINE__,  Status);
@@ -387,7 +387,7 @@ EFI_STATUS L2_TCP4_Init()
             
     L2_TCP4_SocketCreate();
 
-    //²ÎÊýÅäÖÃ
+    //å‚æ•°é…ç½®
     L2_TCP4_SocketConfig();   
     
     Status = L2_TCP4_SocketConnect();  
@@ -404,13 +404,13 @@ EFI_STATUS L2_TCP4_Init()
 
 /****************************************************************************
 *
-*  ÃèÊö:   ÓÐÏßÍø¿¨TCPÍ¨ÐÅ²âÊÔ£¨ÓÐºÜ¶à¼ÆËã»úÊÇ²»Ö§³ÖTCPÐ­ÒéµÄ£¬ÐèÒª×¢Òâ£©
+*  æè¿°:   æœ‰çº¿ç½‘å¡TCPé€šä¿¡æµ‹è¯•ï¼ˆæœ‰å¾ˆå¤šè®¡ç®—æœºæ˜¯ä¸æ”¯æŒTCPåè®®çš„ï¼Œéœ€è¦æ³¨æ„ï¼‰
 *
-*  ²ÎÊý1£º xxxxx
-*  ²ÎÊý2£º xxxxx
-*  ²ÎÊýn£º xxxxx
+*  å‚æ•°1ï¼š xxxxx
+*  å‚æ•°2ï¼š xxxxx
+*  å‚æ•°nï¼š xxxxx
 *
-*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
+*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
 *
 *****************************************************************************/
 EFI_STATUS L2_TCP4_Receive()
@@ -421,7 +421,7 @@ EFI_STATUS L2_TCP4_Receive()
     for (UINT32 i = 0; i < 1024; i++)
         ReceiveBuffer[i] = 0;
             
-    //´Ó·þÎñÆ÷½ÓÊÕÊý¾Ý¡£
+    //ä»ŽæœåŠ¡å™¨æŽ¥æ”¶æ•°æ®ã€‚
     Status = L2_TCP4_SocketReceive(ReceiveBuffer, 1024, &recvLen);
     if(EFI_ERROR(Status))    
     {
@@ -430,7 +430,7 @@ EFI_STATUS L2_TCP4_Receive()
     
     L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d TCP: Receive: %r \n", __LINE__, Status);
    
-    //ÏÔÊ¾½ÓÊÕµÄÊý¾Ý¡£
+    //æ˜¾ç¤ºæŽ¥æ”¶çš„æ•°æ®ã€‚
     L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d Receive raw data Length: %d %c%c%c%c \n", __LINE__, recvLen, ReceiveBuffer[0], ReceiveBuffer[1], ReceiveBuffer[2], ReceiveBuffer[3]);
    
     ReceiveBuffer[20] = '\0';
@@ -442,20 +442,20 @@ EFI_STATUS L2_TCP4_Receive()
 
 /****************************************************************************
 *
-*  ÃèÊö:   ÓÐÏßÍø¿¨TCPÍ¨ÐÅ²âÊÔ£¨ÓÐºÜ¶à¼ÆËã»úÊÇ²»Ö§³ÖTCPÐ­ÒéµÄ£¬ÐèÒª×¢Òâ£©
+*  æè¿°:   æœ‰çº¿ç½‘å¡TCPé€šä¿¡æµ‹è¯•ï¼ˆæœ‰å¾ˆå¤šè®¡ç®—æœºæ˜¯ä¸æ”¯æŒTCPåè®®çš„ï¼Œéœ€è¦æ³¨æ„ï¼‰
 *
-*  ²ÎÊý1£º xxxxx
-*  ²ÎÊý2£º xxxxx
-*  ²ÎÊýn£º xxxxx
+*  å‚æ•°1ï¼š xxxxx
+*  å‚æ•°2ï¼š xxxxx
+*  å‚æ•°nï¼š xxxxx
 *
-*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
+*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
 *
 *****************************************************************************/
 EFI_STATUS L2_TCP4_Send()
 {
     EFI_STATUS Status = 0;
     
-    //Ïò·þÎñÆ÷·¢ËÍÊý¾Ý¡£
+    //å‘æœåŠ¡å™¨å‘é€æ•°æ®ã€‚
     Status = L2_TCP4_SocketSend(SendBuffer, AsciiStrLen(SendBuffer));
     
     L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d TCP: Send: %r \n", __LINE__, Status);
@@ -470,13 +470,13 @@ EFI_STATUS L2_TCP4_Send()
 
 /****************************************************************************
 *
-*  ÃèÊö:   ÎÞÏßÍø¿¨²âÊÔ
+*  æè¿°:   æ— çº¿ç½‘å¡æµ‹è¯•
 *
-*  ²ÎÊý1£º xxxxx
-*  ²ÎÊý2£º xxxxx
-*  ²ÎÊýn£º xxxxx
+*  å‚æ•°1ï¼š xxxxx
+*  å‚æ•°2ï¼š xxxxx
+*  å‚æ•°nï¼š xxxxx
 *
-*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
+*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
 *
 *****************************************************************************/
 EFI_STATUS L2_WirelessMAC()

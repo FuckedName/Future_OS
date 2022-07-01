@@ -2,13 +2,13 @@
 /*************************************************
     .
     File name:      	*.*
-    Author£∫	        	»Œ∆Ù∫Ï
-    ID£∫					00001
+    AuthorÔºö	        	‰ªªÂêØÁ∫¢
+    IDÔºö					00001
     Date:          		202107
     Description:    	
-    Others:         	Œﬁ
+    Others:         	Êó†
 
-    History:        	Œﬁ
+    History:        	Êó†
 	    1.  Date:
 		    Author: 
 		    ID:
@@ -32,4 +32,12 @@
 
 #include <L2_GRAPHICS.h>
 
+
+VOID L3_APPLICATION_MyComputerWindow(UINT16 StartX, UINT16 StartY);
+
+VOID L3_APPLICATION_MemoryInformationWindow(UINT16 StartX, UINT16 StartY);
+
+VOID L3_APPLICATION_SystemLogWindow(UINT16 StartX, UINT16 StartY);
+
+VOID L3_APPLICATION_WindowsInitial();
 

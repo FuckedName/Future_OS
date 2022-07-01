@@ -2,13 +2,13 @@
 /*************************************************
     .
     File name:      	*.*
-    Author£º	        	ÈÎÆôºì
-    ID£º					00001
+    Authorï¼š	        	ä»»å¯çº¢
+    IDï¼š					00001
     Date:          		202107
-    Description:    	Êó±ê´¦ÀíµÄ³õÊ¼»¯²Ù×÷
-    Others:         	ÎŞ
+    Description:    	é¼ æ ‡å¤„ç†çš„åˆå§‹åŒ–æ“ä½œ
+    Others:         	æ— 
 
-    History:        	ÎŞ
+    History:        	æ— 
 	    1.  Date:
 		    Author: 
 		    ID:
@@ -27,34 +27,28 @@
 
 EFI_SIMPLE_POINTER_PROTOCOL  *gMouse;
 UINT16 mouse_count = 0;
-UINT8 MouseClickFlag = MOUSE_EVENT_TYPE_NO_CLICKED;
+UINT8 MouseClickFlag = MOUSE_NO_CLICKED;
 
 CHAR8 x_move = 0;
 CHAR8 y_move = 0;
 
 INT16 iMouseX = 0;
 INT16 iMouseY = 0;
+UINT16 MouseClickWindowWidth = 300;
+UINT16 MouseClickWindowHeight = 400;
 
 
-UINT16 MouseRightButtonClickWindowWidth = 140;
-UINT16 MouseRightButtonClickWindowHeight = 300;
 
-//ÓÃÓÚ¼ÇÂ¼Êó±êÒÆ¶¯Ê±¹â±êËùÖ¸µÄ²Ëµ¥¡¢Í¼±ê¡¢ÎÄ¼ş¼Ğ¡¢ÎÄ¼şµÈµÈ
-//²¢±£´æ¿Éµã»÷²Ëµ¥¡¢Í¼±êµÄÎ»ÖÃĞÅÏ¢
-MOUSE_MOVEOVER_OBJECT MouseMoveoverObject;
-
-//Êó±êÊÇ·ñÔÚÒ»¸ö¿Éµã»÷°´Å¥ÉÏ±ß±êÖ¾
-BOOLEAN bMouseMoveoverObject;
 
 /****************************************************************************
 *
-*  ÃèÊö:   xxxxx
+*  æè¿°:   xxxxx
 *
-*  ²ÎÊı1£º xxxxx
-*  ²ÎÊı2£º xxxxx
-*  ²ÎÊın£º xxxxx
+*  å‚æ•°1ï¼š xxxxx
+*  å‚æ•°2ï¼š xxxxx
+*  å‚æ•°nï¼š xxxxx
 *
-*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
+*  è¿”å›å€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
 *
 *****************************************************************************/
 

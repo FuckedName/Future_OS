@@ -2,13 +2,13 @@
 /*************************************************
     .
     File name:      	*.*
-    Author£∫	        	»Œ∆Ù∫Ï
-    ID£∫					00001
+    AuthorÔºö	        	‰ªªÂêØÁ∫¢
+    IDÔºö					00001
     Date:          		202107
     Description:    	
-    Others:         	Œﬁ
+    Others:         	Êó†
 
-    History:        	Œﬁ
+    History:        	Êó†
 	    1.  Date:
 		    Author: 
 		    ID:
@@ -21,69 +21,31 @@
 *************************************************/
 
 
-#include <Library/UefiBootServicesTableLib.h>
 
 #include <Library/UefiRuntimeLib.h>
 #include <Library/UefiRuntimeServicesTableLib.h>
 
 #include "L2_DEVICE_System.h"
-#include <Global/Global.h>
 
 
 /****************************************************************************
 *
-*  √Ë ˆ:   œµÕ≥πÿª˙°£
+*  ÊèèËø∞:   Á≥ªÁªüÂÖ≥Êú∫„ÄÇ
 *
-*  ≤Œ ˝1£∫ xxxxx
-*  ≤Œ ˝2£∫ xxxxx
-*  ≤Œ ˝n£∫ xxxxx
+*  ÂèÇÊï∞1Ôºö xxxxx
+*  ÂèÇÊï∞2Ôºö xxxxx
+*  ÂèÇÊï∞nÔºö xxxxx
 *
-*  ∑µªÿ÷µ£∫ ≥…π¶£∫XXXX£¨ ß∞‹£∫XXXXX
+*  ËøîÂõûÂÄºÔºö ÊàêÂäüÔºöXXXXÔºåÂ§±Ë¥•ÔºöXXXXX
 *
 *****************************************************************************/
 EFI_STATUS L2_System_Shutdown()
 {
-    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: L2_System_Shutdown \n", __LINE__);
-
-    gBS->SetTimer( TimerOne, TimerCancel, 0 );
-    gBS->CloseEvent( TimerOne );  
+    
     gRT->ResetSystem (EfiResetShutdown, EFI_SUCCESS, 0, NULL); 
     
     return EFI_SUCCESS;
 }
 
-/****************************************************************************
-*
-*  √Ë ˆ:   œµÕ≥πÿª˙°£
-*
-*  ≤Œ ˝1£∫ xxxxx
-*  ≤Œ ˝2£∫ xxxxx
-*  ≤Œ ˝n£∫ xxxxx
-*
-*  ∑µªÿ÷µ£∫ ≥…π¶£∫XXXX£¨ ß∞‹£∫XXXXX
-*
-*****************************************************************************/
-EFI_STATUS L2_System_PrintMemoryBuffer()
-{
 
-	UINT64 Sumary = 0;
-        
-    for (UINT16 i = 0; '\0' != pKeyboardInputBuffer[i]; i++)
-    {
-        if(pKeyboardInputBuffer[i] >= '0' && pKeyboardInputBuffer[i] <= '9')
-        {
-            Sumary = Sumary * 10 + (pKeyboardInputBuffer[i] - '0');
-        }
-    }
-    
-    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: Sumary: %d \n", __LINE__, Sumary);
-    
-
-    UINT8 *pAddress = (UINT8 *)Sumary;
-    
-    for (int j = 0; j < 256; j++)
-    {
-        L2_DEBUG_Print1(DISK_READ_BUFFER_X + ScreenWidth * 3 / 4 + (j % 16) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 16), "%02X ", pAddress[j] & 0xff);
-    }
-}
 

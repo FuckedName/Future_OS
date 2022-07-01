@@ -2,13 +2,13 @@
 /*************************************************
     .
     File name:      	*.*
-    Author£º	        	ÈÎÆôºì
-    ID£º					00001
+    Authorï¼š	        	ä»»å¯çº¢
+    IDï¼š					00001
     Date:          		202107
     Description:    	
-    Others:         	ÎÞ
+    Others:         	æ— 
 
-    History:        	ÎÞ
+    History:        	æ— 
 	    1.  Date:
 		    Author: 
 		    ID:
@@ -28,10 +28,8 @@
 
 #include <Protocol/DevicePath.h>
 #include <Protocol/DevicePathToText.h>
+#include <L2_PARTITION.h>
 #include <Partitions/NTFS/L2_PARTITION_NTFS.h>
-#include <Partitions/FAT32/L2_PARTITION_FAT32.h>
-
-#include "L2_PARTITION.h"
 
 #include <Library/UefiBootServicesTableLib.h>
 #include <Protocol/DevicePathToText.h>
@@ -44,25 +42,19 @@
 //#include <NTFS/L2_PARTITION_NTFS.h>
 
 UINT32 BlockSize = 0;
-
-
-//¶¨ÒåÕû¸öÏµÍ³·ÖÇøÊý£¬ÀàËÆC£¬D£¬E£¬UÅÌµÈµÈ£¬×¢Òâ£¬Ò»¿éÓ²ÅÌ»òUÅÌ¿ÉÒÔ·Ö³É¶à¸ö·ÖÇø
-DEVICE_PARAMETER device[PARTITION_COUNT] = {0};
+DEVICE_PARAMETER device[10] = {0};
 UINT64 FileBlockStart = 0;
 DollarBootSwitched NTFSBootSwitched;
 
-//¶¨Òåµ±Ç°²Ù×÷ÏµÍ³¶ÁÈ¡ÏµÍ³ÎÄ¼þËùÔÚµÄ·ÖÇøÃû³Æ£¬ÏµÍ³ÎÄ¼þ°üº¬£º±³¾°Í¼Æ¬£¬Í¼±ê£¬HZK16ÎÄ¼þµÈµÈÕâÐ©
 UINT8 EFI_FILE_STORE_PATH_PARTITION_NAME[50] = "OS";
 
-UINT8 Buffer1[DISK_BUFFER_SIZE];
 
 
 
 
-//Í¨ÓÃÎÄ¼þÏµÍ³ÎÄ¼þ»òÕßÄ¿Â¼
-//ÒòÎªµ±Ç°ÏµÍ³Ö§³ÖNTFSºÍFAT32£¬Êµ¼ÊÉÏºó±ß¿ÉÄÜ»áÖ§³ÖÆäËûÀàÐÍµÄÎÄ¼þÏµÍ³£¬²»Í¬ÎÄ¼þÏµÍ³£¬
-//¶ÁÈ¡³öÀ´µÄÎÄ¼þ¶¼»áÓÐÎÄ¼þÃû¡¢´óÐ¡¡¢ÀàÐÍµÈµÈ£¬ËùÒÔ³éÏó³öÀ´Ò»¸ö¹«¹²µÄÊý¾Ý½á¹¹¡£
-COMMON_STORAGE_ITEM pCommonStorageItems[100];
+//é€šç”¨æ–‡ä»¶ç³»ç»Ÿæ–‡ä»¶æˆ–è€…ç›®å½•
+//å› ä¸ºå½“å‰ç³»ç»Ÿæ”¯æŒNTFSå’ŒFAT32ï¼Œå®žé™…ä¸ŠåŽè¾¹å¯èƒ½ä¼šæ”¯æŒå…¶ä»–ç±»åž‹çš„æ–‡ä»¶ç³»ç»Ÿï¼Œä¸åŒæ–‡ä»¶ç³»ç»Ÿï¼Œè¯»å–å‡ºæ¥çš„æ–‡ä»¶éƒ½ä¼šæœ‰æ–‡ä»¶åã€å¤§å°ã€ç±»åž‹ç­‰ç­‰ï¼Œæ‰€ä»¥æŠ½è±¡å‡ºæ¥ä¸€ä¸ªå…¬å…±çš„æ•°æ®ç»“æž„ã€‚
+COMMON_STORAGE_ITEM pCommonStorageItems[32];
 
 
 // all partitions analysis
@@ -71,25 +63,24 @@ COMMON_STORAGE_ITEM pCommonStorageItems[100];
 
 /****************************************************************************
 *
-*  ÃèÊö:   »ñÈ¡·ÖÇø£¨´ÅÅÌ¡¢UÅÌµÈµÈ£©ÎÄ¼þÏµÍ³ÀàÐÍ£ºNTFS/FAT32µÈµÈ
+*  æè¿°:   èŽ·å–åˆ†åŒºï¼ˆç£ç›˜ã€Uç›˜ç­‰ç­‰ï¼‰æ–‡ä»¶ç³»ç»Ÿç±»åž‹ï¼šNTFS/FAT32ç­‰ç­‰
 *
-*  ²ÎÊý1£º xxxxx
-*  ²ÎÊý2£º xxxxx
-*  ²ÎÊýn£º xxxxx
+*  å‚æ•°1ï¼š xxxxx
+*  å‚æ•°2ï¼š xxxxx
+*  å‚æ•°nï¼š xxxxx
 *
-*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
+*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
 *
 *****************************************************************************/
 EFI_STATUS L2_FILE_PartitionTypeAnalysis(UINT16 DeviceID)
 {    
-    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d DeviceID: %d\n", __LINE__, DeviceID);
+    //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d DeviceID: %d\n", __LINE__, DeviceID);
     EFI_STATUS Status;
+    UINT8 Buffer1[DISK_BUFFER_SIZE] = {0};
 
     sector_count = 0;
 
-    L1_MEMORY_SetValue(Buffer1, 0, DISK_BUFFER_SIZE);
-
-    Status = L2_STORE_Read(DeviceID, 0, 1, Buffer1 );  
+    Status = L1_STORE_READ(DeviceID, 0, 1, Buffer1 );  
     if (EFI_ERROR(Status))
     {
         L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d Status: %X\n", __LINE__, Status);
@@ -104,14 +95,11 @@ EFI_STATUS L2_FILE_PartitionTypeAnalysis(UINT16 DeviceID)
         L1_FILE_FAT32_DataSectorAnalysis(Buffer1, &(device[DeviceID].stMBRSwitched)); 
 
         // data sector number start include: reserved selector, fat sectors(usually is 2: fat1 and fat2), and file system boot path start cluster(usually is 2, data block start number is 2)
-        device[DeviceID].StartSectorNumber = device[DeviceID].stMBRSwitched.ReservedSelector + device[DeviceID].stMBRSwitched.SectorsPerFat * device[DeviceID].stMBRSwitched.FATCount;
+        device[DeviceID].StartSectorNumber = device[DeviceID].stMBRSwitched.ReservedSelector + device[DeviceID].stMBRSwitched.SectorsPerFat * device[DeviceID].stMBRSwitched.NumFATS;
 		sector_count = device[DeviceID].StartSectorNumber + (device[DeviceID].stMBRSwitched.BootPathStartCluster - 2) * 8;
 		device[DeviceID].FileSystemType = FILE_SYSTEM_FAT32;
         BlockSize = device[DeviceID].stMBRSwitched.SectorOfCluster * 512; 
         L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: sector_count:%ld BlockSize: %d StartSectorNumber: %llu FileSystemType: %d\n",  __LINE__, sector_count, BlockSize, device[DeviceID].StartSectorNumber, device[DeviceID].FileSystemType);
-
-
-        
         return FILE_SYSTEM_FAT32;
     }
     // NTFS
@@ -139,13 +127,13 @@ EFI_STATUS L2_FILE_PartitionTypeAnalysis(UINT16 DeviceID)
 
 /****************************************************************************
 *
-*  ÃèÊö:   xxxxx
+*  æè¿°:   xxxxx
 *
-*  ²ÎÊý1£º xxxxx
-*  ²ÎÊý2£º xxxxx
-*  ²ÎÊýn£º xxxxx
+*  å‚æ•°1ï¼š xxxxx
+*  å‚æ•°2ï¼š xxxxx
+*  å‚æ•°nï¼š xxxxx
 *
-*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
+*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
 *
 *****************************************************************************/
 EFI_STATUS L2_FILE_PartitionNameAnalysis(UINT16 DeviceID, UINT8 *pBuffer)
@@ -169,13 +157,13 @@ typedef struct
 
 /****************************************************************************
 *
-*  ÃèÊö:   xxxxx
+*  æè¿°:   xxxxx
 *
-*  ²ÎÊý1£º xxxxx
-*  ²ÎÊý2£º xxxxx
-*  ²ÎÊýn£º xxxxx
+*  å‚æ•°1ï¼š xxxxx
+*  å‚æ•°2ï¼š xxxxx
+*  å‚æ•°nï¼š xxxxx
 *
-*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
+*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
 *
 *****************************************************************************/
 UINT64 L2_PARTITION_NameFAT32StartSectorNumberGet(UINT16 DeviceID)
@@ -190,13 +178,13 @@ UINT64 L2_PARTITION_NameFAT32StartSectorNumberGet(UINT16 DeviceID)
 
 /****************************************************************************
 *
-*  ÃèÊö:   »ñÈ¡¾í±êËùÔÚµÄMFT,¼´µÚËÄÏîÔªÊý¾ÝÎÄ¼þ£ºMFT_ITEM_DOLLAR_VOLUME¡£
+*  æè¿°:   èŽ·å–å·æ ‡æ‰€åœ¨çš„MFT,å³ç¬¬å››é¡¹å…ƒæ•°æ®æ–‡ä»¶ï¼šMFT_ITEM_DOLLAR_VOLUMEã€‚
 *
-*  ²ÎÊý1£º xxxxx
-*  ²ÎÊý2£º xxxxx
-*  ²ÎÊýn£º xxxxx
+*  å‚æ•°1ï¼š xxxxx
+*  å‚æ•°2ï¼š xxxxx
+*  å‚æ•°nï¼š xxxxx
 *
-*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
+*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
 *
 *****************************************************************************/
 UINT64 L2_PARTITION_NameNTFSStartSectorNumberGet(UINT16 DeviceID)
@@ -210,26 +198,23 @@ UINT64 L2_PARTITION_NameNTFSStartSectorNumberGet(UINT16 DeviceID)
 
 /****************************************************************************
 *
-*  ÃèÊö:   
+*  æè¿°:   
 *
-*  ²ÎÊý1£º xxxxx
-*  ²ÎÊý2£º xxxxx
-*  ²ÎÊýn£º xxxxx
+*  å‚æ•°1ï¼š xxxxx
+*  å‚æ•°2ï¼š xxxxx
+*  å‚æ•°nï¼š xxxxx
 *
-*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
+*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
 *
 *****************************************************************************/
 EFI_STATUS L2_PARTITION_NameFAT32Analysis(UINT16 DeviceID, UINT8 *Buffer)
 {
-	L1_MEMORY_SetValue(device[DeviceID].PartitionName, 0, PARTITION_NAME_LENGTH);
-
-	//µÚ¶þ¸ö´ØÇøÇ°¼¸¸ö×Ö·û¾ÍÊÇFAT32·ÖÇøµÄÃû×Ö£¬²¢ÇÒµÚÒ»¸ö´Ø¾ÍÊÇµÚ¶þ¸ö´Ø£¬ÒòÎªÃ»ÓÐ0£¬1ºÅ
+	//ç¬¬äºŒä¸ªç°‡åŒºå‰å‡ ä¸ªå­—ç¬¦å°±æ˜¯FAT32åˆ†åŒºçš„åå­—ï¼Œå¹¶ä¸”ç¬¬ä¸€ä¸ªç°‡å°±æ˜¯ç¬¬äºŒä¸ªç°‡ï¼Œå› ä¸ºæ²¡æœ‰0ï¼Œ1å·
 	for (UINT16 i = 0; i < 6; i++)
 		device[DeviceID].PartitionName[i] = Buffer[i];
 	
 	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d %X %X %X %X\n", __LINE__, device[DeviceID].PartitionName[0], device[DeviceID].PartitionName[1], device[DeviceID].PartitionName[2], device[DeviceID].PartitionName[3]);
-
-    device[DeviceID].PartitionName[6] = '\0'; //?¨¤???BUG¡ê???¡¤????6??3¡è??
+    device[DeviceID].PartitionName[6] = '\0';
 }
 
 
@@ -237,22 +222,21 @@ EFI_STATUS L2_PARTITION_NameFAT32Analysis(UINT16 DeviceID, UINT8 *Buffer)
 
 /****************************************************************************
 *
-*  ÃèÊö:   xxxxx
+*  æè¿°:   xxxxx
 *
-*  ²ÎÊý1£º xxxxx
-*  ²ÎÊý2£º xxxxx
-*  ²ÎÊýn£º xxxxx
+*  å‚æ•°1ï¼š xxxxx
+*  å‚æ•°2ï¼š xxxxx
+*  å‚æ•°nï¼š xxxxx
 *
-*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
+*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
 *
 *****************************************************************************/
 EFI_STATUS L2_PARTITION_NameNTFSAnalysis(UINT16 DeviceID, UINT8 *Buffer)
 {
 	NTFS_FILE_SWITCHED NTFSFileSwitched = {0};
-	L1_MEMORY_SetValue(device[DeviceID].PartitionName, 0, PARTITION_NAME_LENGTH);
 
 
-	//µ±Ç°²âÊÔ£¬Ö»ÏÔÊ¾Ò»¸öÉè±¸£¬ÏÔÊ¾¶à¸öÉè±¸²âÊÔ»á±È½ÏÂé·³
+	//å½“å‰æµ‹è¯•ï¼Œåªæ˜¾ç¤ºä¸€ä¸ªè®¾å¤‡ï¼Œæ˜¾ç¤ºå¤šä¸ªè®¾å¤‡æµ‹è¯•ä¼šæ¯”è¾ƒéº»çƒ¦
 	//if (3 == DeviceID)
 		L2_PARTITION_FileContentPrint(Buffer);
 	
@@ -260,7 +244,7 @@ EFI_STATUS L2_PARTITION_NameNTFSAnalysis(UINT16 DeviceID, UINT8 *Buffer)
 
 	UINT8 j;
 
-	//Ò»¸öFILEÀï±ßÓÐºÜ¶à¸öÊôÐÔ£¬Õý³£VOLUMEÊôÐÔÔÚÔÚ6¸ö×óÓÒ£¬²»¹ýÓÐÐ©ÊôÐÔ²»Ò»¶¨ÓÐ£¬ËùÒÔÕâÀïÈ¡Ð¡ÓÚµÈÓÚ5£¬ÓÐÒ»¶¨µÄ·çÏÕ
+	//ä¸€ä¸ªFILEé‡Œè¾¹æœ‰å¾ˆå¤šä¸ªå±žæ€§ï¼Œæ­£å¸¸VOLUMEå±žæ€§åœ¨åœ¨6ä¸ªå·¦å³ï¼Œä¸è¿‡æœ‰äº›å±žæ€§ä¸ä¸€å®šæœ‰ï¼Œæ‰€ä»¥è¿™é‡Œå–å°äºŽç­‰äºŽ5ï¼Œæœ‰ä¸€å®šçš„é£Žé™©
 	for (UINT8 i = 0; i < 5; i++)
 	{
 		if (NTFSFileSwitched.NTFSFileAttributeHeaderSwitched[i].Type == MFT_ATTRIBUTE_DOLLAR_VOLUME_NAME)
@@ -279,13 +263,13 @@ EFI_STATUS L2_PARTITION_NameNTFSAnalysis(UINT16 DeviceID, UINT8 *Buffer)
 
 /****************************************************************************
 *
-*  ÃèÊö: µÚÒ»ÁÐÊÇ²»Í¬µÄÎÄ¼þÏµÍ³ÀàÐÍ£¬µÚ¶þÁÐÊÇÐèÒª¶ÁÈ¡ÉÈÇøºÅ£¬µÚÈýÁÐÊÇ½âÎö´Ó´æ´¢·ÖÇøµÄÄÚ´æ¡£
+*  æè¿°: ç¬¬ä¸€åˆ—æ˜¯ä¸åŒçš„æ–‡ä»¶ç³»ç»Ÿç±»åž‹ï¼Œç¬¬äºŒåˆ—æ˜¯éœ€è¦è¯»å–æ‰‡åŒºå·ï¼Œç¬¬ä¸‰åˆ—æ˜¯è§£æžä»Žå­˜å‚¨åˆ†åŒºçš„å†…å­˜ã€‚
 *
-*  ²ÎÊý1£º xxxxx
-*  ²ÎÊý2£º xxxxx
-*  ²ÎÊýn£º xxxxx
+*  å‚æ•°1ï¼š xxxxx
+*  å‚æ•°2ï¼š xxxxx
+*  å‚æ•°nï¼š xxxxx
 *
-*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
+*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
 *
 *****************************************************************************/
 PARTITION_NAME_GET PartitionNameGet[]=
@@ -300,13 +284,13 @@ PARTITION_NAME_GET PartitionNameGet[]=
 
 /****************************************************************************
 *
-*  ÃèÊö:   »ñÈ¡·ÖÇøµÄÃû×Ö£¬Õâ¸ö´ÓWINDOWS²Ù×÷ÏµÍ³¿´µ½µÄÀàËÆCÅÌ¡¢DÅÌµÈµÈÅÌµÄÃû³Æ£¨±ÈÈçÈí¼þ·ÖÇø£¬×ÊÁÏ·ÖÇøµÈµÈ£¬µ±Ç°ÔÝ²»Ö§³ÖÖÐÎÄ¼þ£©
+*  æè¿°:   èŽ·å–åˆ†åŒºçš„åå­—ï¼Œè¿™ä¸ªä»ŽWINDOWSæ“ä½œç³»ç»Ÿçœ‹åˆ°çš„ç±»ä¼¼Cç›˜ã€Dç›˜ç­‰ç­‰ç›˜çš„åç§°ï¼ˆæ¯”å¦‚è½¯ä»¶åˆ†åŒºï¼Œèµ„æ–™åˆ†åŒºç­‰ç­‰ï¼Œå½“å‰æš‚ä¸æ”¯æŒä¸­æ–‡ä»¶ï¼‰
 *
-*  ²ÎÊý1£º xxxxx
-*  ²ÎÊý2£º xxxxx
-*  ²ÎÊýn£º xxxxx
+*  å‚æ•°1ï¼š xxxxx
+*  å‚æ•°2ï¼š xxxxx
+*  å‚æ•°nï¼š xxxxx
 *
-*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
+*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
 *
 *****************************************************************************/
 EFI_STATUS L2_FILE_PartitionNameGet(UINT16 DeviceID)
@@ -330,8 +314,8 @@ EFI_STATUS L2_FILE_PartitionNameGet(UINT16 DeviceID)
 
 	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d DeviceID: %d FileSystemType: %d, StartSectorNumber: %llu\n", __LINE__, DeviceID,FileSystemType, StartSectorNumber);
 
-	//Ò»¸öÔªÊý¾ÝÊÇ¶ÁÈ¡Á½¸öÉÈÇø
-	Status = L2_STORE_Read(DeviceID, StartSectorNumber, 2, Buffer);  
+	//ä¸€ä¸ªå…ƒæ•°æ®æ˜¯è¯»å–ä¸¤ä¸ªæ‰‡åŒº
+	Status = L1_STORE_READ(DeviceID, StartSectorNumber, 2, Buffer);  
 	if (EFI_ERROR(Status))
 	{
 		L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d Status: %X\n", __LINE__, Status);
@@ -344,40 +328,19 @@ EFI_STATUS L2_FILE_PartitionNameGet(UINT16 DeviceID)
 
 
 
-/****************************************************************************
-*
-*  ÃèÊö:   xxxxx
-*
-*  ²ÎÊý1£º xxxxx
-*  ²ÎÊý2£º xxxxx
-*  ²ÎÊýn£º xxxxx
-*
-*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
-*
-*****************************************************************************/
-EFI_STATUS L2_STORE_PartitionParameterInitial()
-{
-	for (UINT16 i = 0; i < PARTITION_COUNT; i++)
-	{
-		device[i].pFAT_TableBuffer = NULL;
-	}
-
-}
-
-
 
 /****************************************************************************
 *
-*  ÃèÊö:   xxxxx
+*  æè¿°:   xxxxx
 *
-*  ²ÎÊý1£º xxxxx
-*  ²ÎÊý2£º xxxxx
-*  ²ÎÊýn£º xxxxx
+*  å‚æ•°1ï¼š xxxxx
+*  å‚æ•°2ï¼š xxxxx
+*  å‚æ•°nï¼š xxxxx
 *
-*  ·µ»ØÖµ£º ³É¹¦£ºXXXX£¬Ê§°Ü£ºXXXXX
+*  è¿”å›žå€¼ï¼š æˆåŠŸï¼šXXXXï¼Œå¤±è´¥ï¼šXXXXX
 *
 *****************************************************************************/
 EFI_STATUS L2_STORE_PartitionAnalysis()
-{	
+{
 	L2_STORE_PartitionsParameterGet();
 }

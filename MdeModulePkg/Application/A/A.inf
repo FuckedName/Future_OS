@@ -19,8 +19,6 @@
   	Libraries/String/L1_LIBRARY_String.c
   	Libraries/Memory/L1_LIBRARY_Memory.h
   	Libraries/Memory/L1_LIBRARY_Memory.c
-  	Libraries/Languages/L1_LIBRARY_Language.h
-  	Libraries/Languages/L1_LIBRARY_Language.c
   	Libraries/DataStructure/L1_LIBRARY_DataStructure.h
   	Libraries/DataStructure/L1_LIBRARY_DataStructure.c
   	Graphics/L1_GRAPHICS.c
@@ -29,8 +27,6 @@
   	Graphics/L2_GRAPHICS.h
   	Graphics/L3_GRAPHICS.c
   	Graphics/L3_GRAPHICS.h
-  	Graphics/Window/L2_GRAPHICS_Window.c
-  	Graphics/Window/L2_GRAPHICS_Window.h
   	Devices/Mouse/L1_DEVICE_Mouse.h
   	Devices/Mouse/L1_DEVICE_Mouse.c
   	Devices/Mouse/L2_DEVICE_Mouse.h
@@ -62,20 +58,6 @@
   	Partitions/L2_PARTITION.h
   	Partitions/L3_PARTITION.c
   	Partitions/L3_PARTITION.h
-  	Interfaces/L2_INTERFACES.c
-  	Interfaces/L2_INTERFACES.h
-  	Applications/L1_APPLICATIONS.c
-  	Applications/L1_APPLICATIONS.h
-  	Applications/L2_APPLICATIONS.c
-  	Applications/L2_APPLICATIONS.h
-  	Applications/Commands/L2_APPLICATIONS_Command_cd.c
-  	Applications/Commands/L2_APPLICATIONS_Command_cd.h
-  	Applications/Commands/L2_APPLICATIONS_Command_ls.c
-  	Applications/Commands/L2_APPLICATIONS_Command_ls.h
-  	Applications/Commands/L2_APPLICATIONS_Command_curl.c
-  	Applications/Commands/L2_APPLICATIONS_Command_curl.h
-  	Applications/Commands/L2_APPLICATIONS_Command_ping.c
-  	Applications/Commands/L2_APPLICATIONS_Command_ping.h
   	Partitions/NTFS/L2_PARTITION_NTFS.c
 	Partitions/NTFS/L2_PARTITION_NTFS.h
 	Partitions/NTFS/L1_PARTITION_NTFS.c
@@ -150,20 +132,6 @@
   gEfiTcp4ServiceBindingProtocolGuid
   gEfiTcp4ProtocolGuid
   gEfiWiFiProtocolGuid
-  gEfiShellProtocolGuid
-  gEfiIp4ServiceBindingProtocolGuid
-  gEfiIp6ConfigProtocolGuid
-  gEfiIp4Config2ProtocolGuid
-  gEfiIp6ProtocolGuid
-  gEfiIp4ProtocolGuid
-  gEfiIp6ServiceBindingProtocolGuid
-  gEfiAdapterInformationProtocolGuid
-  gEfiAdapterInfoMediaStateGuid
-  gEfiManagedNetworkServiceBindingProtocolGuid
-  gEfiManagedNetworkProtocolGuid
-  gEfiShellParametersProtocolGuid  
-  gEfiHttpServiceBindingProtocolGuid
-  gEfiHttpProtocolGuid
 
 [FeaturePcd]
 

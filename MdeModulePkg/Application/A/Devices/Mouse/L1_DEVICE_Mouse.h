@@ -2,13 +2,13 @@
 /*************************************************
     .
     File name:      	*.*
-    Author£º	        	ÈÎÆôºì
-    ID£º					00001
+    Authorï¼š	        	ä»»å¯çº¢
+    IDï¼š					00001
     Date:          		202107
-    Description:    	Êó±ê´¦ÀíµÄ³õÊ¼»¯²Ù×÷
-    Others:         	ÎŞ
+    Description:    	é¼ æ ‡å¤„ç†çš„åˆå§‹åŒ–æ“ä½œ
+    Others:         	æ— 
 
-    History:        	ÎŞ
+    History:        	æ— 
 	    1.  Date:
 		    Author: 
 		    ID:
@@ -30,6 +30,5 @@
 
 
 #include <Global/Global.h>
-
 
 

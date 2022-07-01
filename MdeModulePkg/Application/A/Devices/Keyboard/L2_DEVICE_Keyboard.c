@@ -2,13 +2,13 @@
 /*************************************************
     .
     File name:      	*.*
-    Author£∫	        	»Œ∆Ù∫Ï
-    ID£∫					00001
+    AuthorÔºö	        	‰ªªÂêØÁ∫¢
+    IDÔºö					00001
     Date:          		202107
     Description:    	
-    Others:         	Œﬁ
+    Others:         	Êó†
 
-    History:        	Œﬁ
+    History:        	Êó†
 	    1.  Date:
 		    Author: 
 		    ID:
@@ -43,30 +43,82 @@ UINT16 display_sector_number = 0;
 
 UINT16 keyboard_count = 0;
 
-//µ±«∞÷’∂À¥∞ø⁄œ‘ æµƒ––:
-UINT16 TerminalCurrentLineCount = 0;
-
 //Line 2
 #define DISPLAY_KEYBOARD_X (0) 
 #define DISPLAY_KEYBOARD_Y (ScreenHeight - 16 * 3  - 30)
 
-
-//”√”⁄º«¬º“—æ≠º¸≈Ã ‰»Î◊÷∑˚
+#define KEYBOARD_BUFFER_LENGTH (30) 
 char pKeyboardInputBuffer[KEYBOARD_BUFFER_LENGTH] = {0};
-char pCommandLinePrefixBuffer[COMMAND_LINE_PREFIX_BUFFER_LENGTH] = {0};
-
-EFI_HANDLE                        *Handles;
-UINTN                             HandleCount;
-
-#define KEYBOARD_KEY_ENTER (13) 
 
 
-VOID EFIAPI L2_KEYBOARD_Init (
+
+
+
+/****************************************************************************
+*
+*  ÊèèËø∞:   xxxxx
+*
+*  ÂèÇÊï∞1Ôºö xxxxx
+*  ÂèÇÊï∞2Ôºö xxxxx
+*  ÂèÇÊï∞nÔºö xxxxx
+*
+*  ËøîÂõûÂÄºÔºö ÊàêÂäüÔºöXXXXÔºåÂ§±Ë¥•ÔºöXXXXX
+*
+*****************************************************************************/
+VOID L2_KEYBOARD_KeyPressed()
+{
+    //DEBUG ((EFI_D_INFO, "%d HandleEnterPressed\n", __LINE__));
+    
+        
+    EFI_STATUS Status;
+    //PartitionUSBReadSynchronous();
+    //PartitionUSBReadAsynchronous();
+
+    // char buffer[SYSTEM_ICON_WIDTH * SYSTEM_ICON_HEIGHT * 3 + 0x36] = {0};
+    
+    //DEBUG ((EFI_D_INFO, "%d HandleEnterPressed\n", __LINE__));
+}
+
+VOID
+EFIAPI
+
+
+
+/****************************************************************************
+*
+*  ÊèèËø∞:   ÈîÆÁõòÊåâÈîÆ‰∫ã‰ª∂ÂìçÂ∫îÊÄªÂÖ•Âè£ÂáΩÊï∞
+*
+*  ÂèÇÊï∞1Ôºö xxxxx
+*  ÂèÇÊï∞2Ôºö xxxxx
+*  ÂèÇÊï∞nÔºö xxxxx
+*
+*  ËøîÂõûÂÄºÔºö ÊàêÂäüÔºöXXXXÔºåÂ§±Ë¥•ÔºöXXXXX
+*
+*****************************************************************************/
+L2_KEYBOARD_Event (
   IN EFI_EVENT Event,
   IN VOID      *Context
   )
 {
+    keyboard_count++;
+    UINT16 scanCode = 0;
+    UINT16 uniChar = 0;
+    UINT32 shiftState;
     EFI_STATUS Status;
+
+    EFI_KEY_TOGGLE_STATE toggleState;
+    EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color;
+
+    Color.Blue = 0xFF;
+    Color.Red = 0xFF;
+    Color.Green = 0xFF;
+
+    EFI_SIMPLE_TEXT_INPUT_EX_PROTOCOL *SimpleEx;
+    EFI_KEY_DATA                      KeyData;
+    EFI_HANDLE                        *Handles;
+    UINTN                             HandleCount;
+    UINTN                             HandleIndex;
+    UINTN                             Index;
         
     Status = gBS->LocateHandleBuffer ( ByProtocol,
                                         &gEfiSimpleTextInputExProtocolGuid,
@@ -76,125 +128,7 @@ VOID EFIAPI L2_KEYBOARD_Init (
                                         );    
     if(EFI_ERROR (Status))
         return ;
-
-}
-
-
-/****************************************************************************
-*
-*  √Ë ˆ:   ¥¶¿Ìº¸≈Ã ‰»Îµƒ√¸¡Ó––
-*
-*  ≤Œ ˝1£∫ xxxxx
-*  ≤Œ ˝2£∫ xxxxx
-*  ≤Œ ˝n£∫ xxxxx
-*
-*  ∑µªÿ÷µ£∫ ≥…π¶£∫XXXX£¨ ß∞‹£∫XXXXX
-*
-*****************************************************************************/
-UINT32 L2_KEYBOARD_ParametersGet(UINT8 *ps, UINT8 parameters[PARAMETER_COUNT][PARAMETER_LENGTH], UINT8 *pParameterCount)
-{
-	UINT32 i = 0;	
-	while(*ps != '\0')
-	{
-		// for example: clear -a aaa -b bbb -c ccc
-		// for example: cd /, cd .., cd xxx
-		if (' ' == *ps)
-		{
-			parameters[*pParameterCount][i] = '\0';	
-			(*pParameterCount)++;
-			i = 0;
-		}
-		
-		parameters[*pParameterCount][i++] = *ps++;
-	}
-
-	parameters[*pParameterCount][i] = '\0';	
-}
-
-
-
-/****************************************************************************
-*
-*  √Ë ˆ:   ¥¶¿Ìº¸≈Ã ‰»Îµƒ√¸¡Ó––
-*
-*  ≤Œ ˝1£∫ xxxxx
-*  ≤Œ ˝2£∫ xxxxx
-*  ≤Œ ˝n£∫ xxxxx
-*
-*  ∑µªÿ÷µ£∫ ≥…π¶£∫XXXX£¨ ß∞‹£∫XXXXX
-*
-*****************************************************************************/
-VOID L2_KEYBOARD_CommandHandle()
-{    
-	int parametercount = 0;
-	char parameters[PARAMETER_COUNT][PARAMETER_LENGTH] = {0};
-	
-	L2_KEYBOARD_ParametersGet(pKeyboardInputBuffer, parameters, &parametercount);
-	
-    if (L1_STRING_Compare2(parameters[0], "address") == 0) // Enter pressed£¨œ‘ æ“‘ ‰»Îµÿ÷∑ø™ ºµƒ“ª∂Œƒ⁄¥Êµÿ÷∑
-    {
-        L2_System_PrintMemoryBuffer();                        
-    }    
-    else if (L1_STRING_Compare2(parameters[0], "clear") == 0) //When click 'clear' then Clear log window content
-    {
-		L2_GRAPHICS_SystemLogBufferClear();        
-    }
-    else if (L1_STRING_Compare2(parameters[0], "shutdown") == 0)  //When click 'shutdown' then Shutdown System
-    {
-    	L2_System_Shutdown();
-    }
-    else if (L1_STRING_Compare2(parameters[0], "cd") == 0)  //When click 'shutdown' then Shutdown System
-    {
-    	L2_APPLICATIONS_Command_cd(parameters);
-    }
-    else if (L1_STRING_Compare2(parameters[0], "ls") == 0)  //When click 'shutdown' then Shutdown System
-    {
-    	L2_APPLICATIONS_Command_ls(parameters);
-    }
-    else if (L1_STRING_Compare2(parameters[0], "curl") == 0)  //When click 'shutdown' then Shutdown System
-    {
-    	L2_APPLICATIONS_Command_curl(parameters);
-    }
-    else if (L1_STRING_Compare2(parameters[0], "ping") == 0)  //When click 'shutdown' then Shutdown System
-    {
-    	L2_APPLICATIONS_Command_ping(parameters);
-    }
-
-	//œ‘ æ ‰»Îµƒ∞¥º¸
-	L2_DEBUG_Print1(DISPLAY_KEYBOARD_X, DISPLAY_KEYBOARD_Y, "%a keyboard_input_count: %04d ", pKeyboardInputBuffer, keyboard_input_count);	  
-}
-
-
-
-/****************************************************************************
-*
-*  √Ë ˆ:   º¸≈Ã∞¥º¸ ¬º˛œÏ”¶◊‹»Îø⁄∫Ø ˝
-*
-*  ≤Œ ˝1£∫ xxxxx
-*  ≤Œ ˝2£∫ xxxxx
-*  ≤Œ ˝n£∫ xxxxx
-*
-*  ∑µªÿ÷µ£∫ ≥…π¶£∫XXXX£¨ ß∞‹£∫XXXXX
-*
-*****************************************************************************/
-VOID EFIAPI L2_KEYBOARD_Event (
-  IN EFI_EVENT Event,
-  IN VOID      *Context
-  )
-{
-    EFI_STATUS Status;
-    UINTN                             HandleIndex;
-    UINTN                             Index;
-    EFI_KEY_TOGGLE_STATE toggleState;
-
-    EFI_SIMPLE_TEXT_INPUT_EX_PROTOCOL *SimpleEx;
-    EFI_KEY_DATA                      KeyData;
-    UINT16 scanCode = 0;
-    UINT16 uniChar = 0;
-    UINT32 shiftState;
-    
-    keyboard_count++;
-        
+    //L2_DEBUG_Print1(DISPLAY_X, DISPLAY_Y, "%d:HandleKeyboardEvent \n", __LINE__);
     for (HandleIndex = 0; HandleIndex < HandleCount; HandleIndex++) 
     {
         Status = gBS->HandleProtocol (Handles[HandleIndex], &gEfiSimpleTextInputExProtocolGuid, (VOID **) &SimpleEx);
@@ -215,45 +149,65 @@ VOID EFIAPI L2_KEYBOARD_Event (
             continue;
         }
         
+        scanCode    = KeyData.Key.ScanCode;
         uniChar     = KeyData.Key.UnicodeChar;
-        L2_DEBUG_Print1(0, ScreenHeight - 30 - 2 * 16, "%d: L2_KEYBOARD_Event input uniChar: %d", __LINE__, uniChar);
+        shiftState  = KeyData.KeyState.KeyShiftState;
+        toggleState  = KeyData.KeyState.KeyToggleState;
+        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: keyboard input uniChar: %d", __LINE__, uniChar);
+       
+        pKeyboardInputBuffer[keyboard_input_count++] = uniChar;
 
-		if (KEYBOARD_KEY_ENTER != uniChar)
-	    {
-	    	pKeyboardInputBuffer[keyboard_input_count++] = uniChar;
-			L1_STRING_Copy(pCommandLinePrefixBuffer, "[root@Notepad /home/Jason/]# ");
-			//char pCommandLinePrefixBuffer[COMMAND_LINE_PREFIX_BUFFER_LENGTH] = ;
-			//º∆À„
-			int TerminalWindowMaxLineCount = 0;
-			TerminalWindowMaxLineCount = (ScreenHeight - 23) / 2;
-			TerminalWindowMaxLineCount /= 16;
-			
-			//–¥»Îº¸≈Ãª∫¥ÊµΩ÷’∂À¥∞ø⁄°£
-	        L2_DEBUG_Print3(3, 23 + TerminalCurrentLineCount % TerminalWindowMaxLineCount * 16, WindowLayers.item[GRAPHICS_LAYER_TERMINAL_WINDOW], "%a%a", pCommandLinePrefixBuffer, pKeyboardInputBuffer);
-	    }
+        display_sector_number = uniChar - '0';
 
-		if (KEYBOARD_KEY_ENTER == uniChar)
-	    {						
-	    	L2_KEYBOARD_CommandHandle();
-			
-	        //≥ı ºªØº¸≈Ã ‰»Î◊÷∑˚ ˝◊È
-	        keyboard_input_count = 0;
+        if (display_sector_number > 10)
+        {
+            display_sector_number = 10;
+        }
 
-			//»Áπ˚«√ªÿ≥µ£¨‘Ú±Ì æ–Ë“™–¬∆“ª––
-			TerminalCurrentLineCount++;
+        if (display_sector_number < 0)
+        {
+            display_sector_number = 0;
+        }
 
-	        for (UINT16 i = 0; i < KEYBOARD_BUFFER_LENGTH; i++)
-	            pKeyboardInputBuffer[i] = '\0';
-		}
-        
+        //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: uniChar: %d display_sector_number: %d \n", __LINE__, uniChar, display_sector_number);
+
+        // Enter pressed
+        if (0x0D == uniChar)
+        {
+            keyboard_input_count = 0;
+			L1_MEMORY_SetValue(pKeyboardInputBuffer, '\0', KEYBOARD_BUFFER_LENGTH);
+            //memset();
+            //L2_DEBUG_Print1(DISPLAY_KEYBOARD_X, DISPLAY_KEYBOARD_Y, "%a keyboard_input_count: %04d enter pressed", pKeyboardInputBuffer, keyboard_input_count);
+
+            L2_KEYBOARD_KeyPressed();
+        }
+        else if ('a' == uniChar)
+        {
+        	for (UINT8 i = 0; i < SystemLogWindowHeight; i++)
+	        {
+	        	for (UINT8 j = 0; j < SystemLogWindowWidth; j++)
+	        	{
+	        		pSystemLogWindowBuffer[4 * (i * SystemLogWindowWidth + j)] = 0;
+	        		pSystemLogWindowBuffer[4 * (i * SystemLogWindowWidth + j) + 1] = 0;
+	        		pSystemLogWindowBuffer[4 * (i * SystemLogWindowWidth + j) + 2] = 0;
+	        	}
+        	}		
+
+			//L1_LIBRARY_QueueInit(&Queue, 0);
+        	//ÊòæÁ§∫ËæìÂÖ•ÁöÑÊåâÈîÆ
+            L2_DEBUG_Print1(DISPLAY_KEYBOARD_X, DISPLAY_KEYBOARD_Y, "%a keyboard_input_count: %04d ", pKeyboardInputBuffer, keyboard_input_count);
+        }
+        else
+        {
+        	//ÊòæÁ§∫ËæìÂÖ•ÁöÑÊåâÈîÆ
+            L2_DEBUG_Print1(DISPLAY_KEYBOARD_X, DISPLAY_KEYBOARD_Y, "%a keyboard_input_count: %04d ", pKeyboardInputBuffer, keyboard_input_count);
+        }
+       
     }  
     
-
      //DrawAsciiCharUseBuffer(pDeskBuffer, DISPLAY_KEYBOARD_X, DISPLAY_KEYBOARD_Y, uniChar, Color);
 
-	//∏¸–¬Õº≤„–≈œ¢£¨’‚¿Ôø…“‘…‘”≈ªØœ¬£¨»Áπ˚√ª”–∞¥º¸ ¬º˛£¨‘Úø…“‘≤ª∏¸–¬Õº≤„£¨“‘Ω⁄ °CPU◊ ‘¥
-	//”…”⁄∆¡ƒªµƒ ±º‰‘⁄≤ªÕ£µƒ◊ﬂ£¨ ±º‰∆¨–≈œ¢“≤‘⁄≤ª∂œµƒ±‰ªØ£¨À˘“‘≤¢≤ªƒ‹ÕÍ»´”≈ªØ
-	//»Áπ˚ƒ‹◊ˆµΩ…œ√Êµƒ–≈œ¢∏¸–¬÷ªÀ¢–¬∂‘”¶µƒ«¯”Ú£¨‘Ú «ø…“‘µƒ
+	//Êõ¥Êñ∞ÂõæÂ±Ç‰ø°ÊÅØÔºåËøôÈáåÂèØ‰ª•Á®ç‰ºòÂåñ‰∏ãÔºåÂ¶ÇÊûúÊ≤°ÊúâÊåâÈîÆ‰∫ã‰ª∂ÔºåÂàôÂèØ‰ª•‰∏çÊõ¥Êñ∞ÂõæÂ±ÇÔºå‰ª•ËäÇÁúÅCPUËµÑÊ∫ê
     L2_GRAPHICS_LayerCompute(iMouseX, iMouseY, 0);
 }
 
