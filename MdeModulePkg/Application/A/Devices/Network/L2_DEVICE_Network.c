@@ -191,7 +191,7 @@ EFI_STATUS L2_TCP4_SocketConfig()
     *(UINTN*)(CurSocket->m_pTcp4ConfigData->AccessPoint.RemoteAddress.Addr) = IPV4_TO_LONG(192,168,3,3);
     
     //配置远端端口
-    CurSocket->m_pTcp4ConfigData->AccessPoint.RemotePort = 8888;
+    CurSocket->m_pTcp4ConfigData->AccessPoint.RemotePort = 8080;
     
     *(UINT32*)(CurSocket->m_pTcp4ConfigData->AccessPoint.SubnetMask.Addr) = (255 | 255 << 8 | 255 << 16 | 0 << 24) ;
 
@@ -376,6 +376,26 @@ EFI_STATUS L2_TCP4_SocketClose()
 CHAR8 *ReceiveBuffer = NULL;
 CHAR8 *SendBuffer = NULL;
 
+int L2_TCP4_SetKeyValue(char **dest, char *source)
+{
+	int length = L1_STRING_Length(source);
+	L1_MEMORY_Copy(*dest, source, length);
+	*dest += length;
+	
+	return length;
+}
+
+//\r\n
+int L2_TCP4_Set_r_n(char **dest)
+{
+	int length = L1_STRING_Length("\r\n");
+	L1_MEMORY_Copy(*dest, "\r\n", length);
+	*dest += length;
+	
+	return length;
+}
+
+
 EFI_STATUS L2_TCP4_Init()
 {
     EFI_STATUS Status = 0;
@@ -391,15 +411,33 @@ EFI_STATUS L2_TCP4_Init()
     L2_TCP4_SocketConfig();   
     
     Status = L2_TCP4_SocketConnect();  
+    int length;
 
-    ReceiveBuffer = L2_MEMORY_Allocate("Network Receive Buffer", MEMORY_TYPE_NETWORK, 1024);
-    SendBuffer = L2_MEMORY_Allocate("Network Send Buffer", MEMORY_TYPE_NETWORK, 10);    
+    ReceiveBuffer = L2_MEMORY_Allocate("Network Receive Buffer", MEMORY_TYPE_NETWORK, 1024 * 4);
+    SendBuffer = L2_MEMORY_Allocate("Network Send Buffer", MEMORY_TYPE_NETWORK, 1024 * 4);    
+
+	CHAR8 *p = SendBuffer;
+	
+	L2_TCP4_SetKeyValue(&p, "GET / HTTP/1.1");
+	L2_TCP4_Set_r_n(&p);
     
-    SendBuffer[0] = 'U';
-    SendBuffer[1] = 'E';
-    SendBuffer[2] = 'F';
-    SendBuffer[3] = 'I';
-    SendBuffer[4] = '\0';    
+	//Host: 192.168.0.106:8080\r\n
+	L2_TCP4_SetKeyValue(&p, "Host: 192.168.3.3:8080");
+    L2_TCP4_Set_r_n(&p);
+    
+	//User-Agent: Mozilla/4.0 (compatible)\r\n\r\n
+	L2_TCP4_SetKeyValue(&p, "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.182 Safari/537.36");
+	L2_TCP4_Set_r_n(&p);
+
+    L2_TCP4_SetKeyValue(&p, "Connection: keep-alive");
+	L2_TCP4_Set_r_n(&p);
+    
+    L2_TCP4_SetKeyValue(&p, "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9");
+
+	L2_TCP4_Set_r_n(&p);
+	L2_TCP4_Set_r_n(&p);
+
+    *p = '\0';    
 }
 
 /****************************************************************************
