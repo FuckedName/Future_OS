@@ -167,6 +167,26 @@ UINTN L2_TCP4_SocketCreate(VOID)
     return 0;
 }
 
+int L2_TCP4_SetKeyValue(char **dest, char *source)
+{
+	int length = L1_STRING_Length(source);
+	L1_MEMORY_Copy(*dest, source, length);
+	*dest += length;
+	
+	return length;
+}
+
+//\r\n
+int L2_TCP4_Set_r_n(char **dest)
+{
+	int length = L1_STRING_Length("\r\n");
+	L1_MEMORY_Copy(*dest, "\r\n", length);
+	*dest += length;
+	
+	return length;
+}
+
+
 
 EFI_STATUS L2_TCP4_SocketConfig()
 {
@@ -182,16 +202,18 @@ EFI_STATUS L2_TCP4_SocketConfig()
     CurSocket->m_pTcp4ConfigData->TimeToLive = 16;    
     
     //配置本地IP地址，这个接口是第一次使用，不知道行不行
-    *(UINTN*)(CurSocket->m_pTcp4ConfigData->AccessPoint.StationAddress.Addr) = IPV4_TO_LONG(10, 152, 148, 201);
+    *(UINTN*)(CurSocket->m_pTcp4ConfigData->AccessPoint.StationAddress.Addr) = IPV4_TO_LONG(192,168,3,4);
 
     //配置本地端口
     CurSocket->m_pTcp4ConfigData->AccessPoint.StationPort = 61558;
 
     //配置远端IP地址，
-    *(UINTN*)(CurSocket->m_pTcp4ConfigData->AccessPoint.RemoteAddress.Addr) = IPV4_TO_LONG(10, 152, 148, 200);
+    *(UINTN*)(CurSocket->m_pTcp4ConfigData->AccessPoint.RemoteAddress.Addr) = IPV4_TO_LONG(192,168,3,3);
+    //*(UINTN*)(CurSocket->m_pTcp4ConfigData->AccessPoint.RemoteAddress.Addr) = IPV4_TO_LONG(154,214,4,4);
     
     //配置远端端口
-    CurSocket->m_pTcp4ConfigData->AccessPoint.RemotePort = 8888;
+    //CurSocket->m_pTcp4ConfigData->AccessPoint.RemotePort = 80;
+    CurSocket->m_pTcp4ConfigData->AccessPoint.RemotePort = 8080;
     
     *(UINT32*)(CurSocket->m_pTcp4ConfigData->AccessPoint.SubnetMask.Addr) = (255 | 255 << 8 | 255 << 16 | 0 << 24) ;
 
@@ -392,14 +414,9 @@ EFI_STATUS L2_TCP4_Init()
     
     Status = L2_TCP4_SocketConnect();  
 
-    ReceiveBuffer = L2_MEMORY_Allocate("Network Receive Buffer", MEMORY_TYPE_NETWORK, 1024);
-    SendBuffer = L2_MEMORY_Allocate("Network Send Buffer", MEMORY_TYPE_NETWORK, 10);    
+    ReceiveBuffer = L2_MEMORY_Allocate("Network Receive Buffer", MEMORY_TYPE_NETWORK, 1024 * 4);
+    SendBuffer = L2_MEMORY_Allocate("Network Send Buffer", MEMORY_TYPE_NETWORK, 1024 * 4);    
     
-    SendBuffer[0] = 'U';
-    SendBuffer[1] = 'E';
-    SendBuffer[2] = 'F';
-    SendBuffer[3] = 'I';
-    SendBuffer[4] = '\0';    
 }
 
 /****************************************************************************
@@ -431,10 +448,24 @@ EFI_STATUS L2_TCP4_Receive()
     L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d TCP: Receive: %r \n", __LINE__, Status);
    
     //显示接收的数据。
-    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d Receive raw data Length: %d %c%c%c%c \n", __LINE__, recvLen, ReceiveBuffer[0], ReceiveBuffer[1], ReceiveBuffer[2], ReceiveBuffer[3]);
+    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d Receive raw data Length: %d %02X%02X%02X%02X%02X%02X%02X%02X \n", __LINE__, recvLen, 
+    																																											ReceiveBuffer[0], 
+    																																											ReceiveBuffer[1], 
+    																																											ReceiveBuffer[2], 
+    																																											ReceiveBuffer[3], 
+    																																											ReceiveBuffer[4], 
+    																																											ReceiveBuffer[5], 
+    																																											ReceiveBuffer[6], 
+    																																											ReceiveBuffer[7]);
    
-    ReceiveBuffer[20] = '\0';
+    //ReceiveBuffer[60] = '\0';
     L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d TCP: Receive data is: %a \n", __LINE__, ReceiveBuffer);
+
+	
+    for (int j = 0; j < 256; j++)
+    {
+        L2_DEBUG_Print1(DISK_READ_BUFFER_X + ScreenWidth * 3 / 4 + (j % 16) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 16), "%02X ", ReceiveBuffer[j] & 0xff);
+    }
        
     return EFI_SUCCESS;
 }

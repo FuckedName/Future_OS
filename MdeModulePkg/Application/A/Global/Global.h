@@ -450,6 +450,9 @@ extern UINT8 ReadFileName[20];
 extern UINT8 ReadFileNameLength;                             
 extern READ_FILE_STATE   NextState;                                    
 extern int READ_FILE_FSM_Event;     
+extern CHAR8 *ReceiveBuffer;
+extern CHAR8 *SendBuffer;
+
 
 extern UINT16 StatusErrorCount; 
 

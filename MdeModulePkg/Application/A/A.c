@@ -109,7 +109,7 @@ EFI_STATUS EFIAPI Main (
     
     L2_TCP4_Init();
 
-    L2_INTERFACES_Initial();
+    //L2_INTERFACES_Initial();
 
 	L2_STORE_PartitionParameterInitial();   
 	

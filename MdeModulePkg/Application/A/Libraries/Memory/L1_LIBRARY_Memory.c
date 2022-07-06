@@ -176,7 +176,9 @@ void *L1_MEMORY_Copy(UINT8 *dest, const UINT8 *src, UINT32 count)
     d = dest;
     s = src;
     while (count--)
-        *d++ = *s++;        
+        *d++ = *s++;    
+        
+    *d = '\0';
     
     return dest;
 }
