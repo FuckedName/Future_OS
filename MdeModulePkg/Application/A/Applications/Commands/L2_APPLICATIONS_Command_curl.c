@@ -4419,6 +4419,8 @@ EFI_STATUS L2_APPLICATIONS_Command_curl( UINT8 parameters[PARAMETER_COUNT][PARAM
 	EFI_HANDLE	HttpChildHandle;
 
 	CHAR8 *p = SendBuffer;
+
+	L1_MEMORY_Memset(SendBuffer, 0, 4 * 1024);
 	
 	L2_TCP4_SetKeyValue(&p, "GET / HTTP/1.1");
 	L2_TCP4_Set_r_n(&p);
@@ -4482,12 +4484,13 @@ EFI_STATUS L2_APPLICATIONS_Command_curl( UINT8 parameters[PARAMETER_COUNT][PARAM
 
     *p = '\0';    
     
-	L2_TCP4_Send();
-
 	int i = 0;
-	while(i++ < 10)
-	L2_TCP4_Receive();
-	
+	while(i++ < 3)
+	{
+		L2_TCP4_Send();
+
+		L2_TCP4_Receive();
+	}
 }
 
 
