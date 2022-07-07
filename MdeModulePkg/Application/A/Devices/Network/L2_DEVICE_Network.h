@@ -33,6 +33,22 @@
 
 #include <L1_DEVICE_Network.h>
 
+#define MEDIA_STATE_DETECT_TIME_INTERVAL2 1000000U
+
+#define DEFAULT_TIMEOUT2	5000
+#define MAX_SEND_NUMBER2	10000
+#define MAX_BUFFER_SIZE2	32768
+#define DEFAULT_TIMER_PERIOD2	358049
+#define ONE_SECOND2		10000000
+#define PING_IP_CHOICE_IP4_2	1
+#define PING_IP_CHOICE_IP6_2	2
+#define ICMP_V6_ECHO_REQUEST2	0x80
+#define DEFAULT_SEND_COUNT2	10
+#define DEFAULT_BUFFER_SIZE2	16
+#define ICMP_V4_ECHO_REQUEST2	0x8
+#define ICMP_V4_ECHO_REPLY2	0x0
+#define STALL_1_MILLI_SECOND2	1000
+#define ICMP_V6_ECHO_REPLY2	0x81
 
 typedef struct MyTCP4Socket{
 		EFI_HANDLE                     m_SocketHandle;                   
@@ -72,4 +88,9 @@ EFI_STATUS L2_TCP4_SocketReceive(CHAR8* Buffer, UINTN Length, UINTN *recvLength)
 
 EFI_STATUS WirelessMAC();
 
+BOOLEAN
+EFIAPI
+NetIp6IsUnspecifiedAddr2(
+	IN EFI_IPv6_ADDRESS       *Ip6
+	);
 
