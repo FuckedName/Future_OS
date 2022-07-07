@@ -4398,12 +4398,9 @@ EFI_STATUS L2_APPLICATIONS_Command_curl( UINT8 parameters[PARAMETER_COUNT][PARAM
 	UINT8 j = 0;
 	L2_DEBUG_Print3( DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: L2_APPLICATIONS_Command_curl:%a \n", __LINE__, parameters[1] );
 
-	int TerminalWindowMaxLineCount = 0;
-	TerminalWindowMaxLineCount	= (ScreenHeight - 23) / 2;
-	TerminalWindowMaxLineCount	/= 16;
 
 	/* Ð´Èë¼üÅÌ»º´æµ½ÖÕ¶Ë´°¿Ú¡£ */
-	L2_DEBUG_Print3( 3, 23 + (++TerminalCurrentLineCount) % TerminalWindowMaxLineCount * 16, WindowLayers.item[GRAPHICS_LAYER_TERMINAL_WINDOW], "%a", "Curl" );
+	//L2_DEBUG_Print3( 3, 23 + (++TerminalCurrentLineCount) % TerminalWindowMaxLineCount * 16, WindowLayers.item[GRAPHICS_LAYER_TERMINAL_WINDOW], "%a", "Curl" );
 
 	/*
 	 * HttpCreateService;

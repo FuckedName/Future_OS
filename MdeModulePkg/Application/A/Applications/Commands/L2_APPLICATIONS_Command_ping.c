@@ -204,8 +204,8 @@ typedef struct _ICMPX_ECHO_REQUEST_REPLY {
 #define MAX_BUFFER_SIZE2	32768
 #define DEFAULT_TIMER_PERIOD2	358049
 #define ONE_SECOND2		10000000
-#define PING_IP_CHOICE_IP42	1
-#define PING_IP_CHOICE_IP62	2
+#define PING_IP_CHOICE_IP4_2	1
+#define PING_IP_CHOICE_IP6_2	2
 #define ICMP_V6_ECHO_REQUEST2	0x80
 #define DEFAULT_SEND_COUNT2	10
 #define DEFAULT_BUFFER_SIZE2	16
@@ -1309,7 +1309,7 @@ PingDestroyTxInfo2(
 
 		if ( TxInfo->Token->Packet.TxData != NULL )
 		{
-			if ( IpChoice == PING_IP_CHOICE_IP62 )
+			if ( IpChoice == PING_IP_CHOICE_IP6_2 )
 			{
 				Ip6TxData = TxInfo->Token->Packet.TxData;
 
@@ -1470,7 +1470,7 @@ Ping6OnEchoReplyReceived2(
 		return;
 	}
 
-	if ( Private->IpChoice == PING_IP_CHOICE_IP62 )
+	if ( Private->IpChoice == PING_IP_CHOICE_IP6_2 )
 	{
 		Reply	= ( (EFI_IP6_RECEIVE_DATA *) Private->RxToken.Packet.RxData)->FragmentTable[0].FragmentBuffer;
 		PayLoad = ( (EFI_IP6_RECEIVE_DATA *) Private->RxToken.Packet.RxData)->DataLength;
@@ -1530,17 +1530,35 @@ Ping6OnEchoReplyReceived2(
 	Private->RttSum += Rtt;
 	Private->RttMin = Private->RttMin > Rtt ? Rtt : Private->RttMin;
 	Private->RttMax = Private->RttMax < Rtt ? Rtt : Private->RttMax;
+	
+	UINT16 TerminalWindowMaxLineCount;
+	TerminalWindowMaxLineCount	= (ScreenHeight - 23) / 2;
+	TerminalWindowMaxLineCount	/= 16;
+	
+	//写入键盘缓存到终端窗口。
+	L2_DEBUG_Print3(3, 23 + TerminalCurrentLineCount++ % TerminalWindowMaxLineCount * 16, WindowLayers.item[GRAPHICS_LAYER_TERMINAL_WINDOW], "Reply from: %d.%d.%d.%d Source ip:%d.%d.%d.%d bytes=%ld time=%ld TTL=%ld",  
+																																						 Private->DstAddress[0],
+																																						 Private->DstAddress[1],
+																																						 Private->DstAddress[2],
+																																						 Private->DstAddress[3],
+																																						 Private->SrcAddress[0],
+																																						 Private->SrcAddress[1],
+																																						 Private->SrcAddress[2],
+																																						 Private->SrcAddress[3],
+																																						 PayLoad,
+																																						 Private->TimerPeriod,
+																																						 Rtt );
 
 	L2_DEBUG_Print3( DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: Ping6OnEchoReplyReceived2: %d %d Dest ip:%d.%d.%d.%d Source ip:%d.%d.%d.%d\n", __LINE__,
-			 Reply->SequenceNum, Rtt,
-			 Private->DstAddress[0],
-			 Private->DstAddress[1],
-			 Private->DstAddress[2],
-			 Private->DstAddress[3],
-			 Private->SrcAddress[0],
-			 Private->SrcAddress[1],
-			 Private->SrcAddress[2],
-			 Private->SrcAddress[3] );
+																																						 Reply->SequenceNum, Rtt,
+																																						 Private->DstAddress[0],
+																																						 Private->DstAddress[1],
+																																						 Private->DstAddress[2],
+																																						 Private->DstAddress[3],
+																																						 Private->SrcAddress[0],
+																																						 Private->SrcAddress[1],
+																																						 Private->SrcAddress[2],
+																																						 Private->SrcAddress[3] );
 
 
 	/* ShellPrintHiiEx(
@@ -1552,7 +1570,7 @@ Ping6OnEchoReplyReceived2(
 		PayLoad,
 		mDstString,
 		Reply->SequenceNum,
-		Private->IpChoice == PING_IP_CHOICE_IP62 ? ( (EFI_IP6_RECEIVE_DATA *) Private->RxToken.Packet.RxData)->Header->HopLimit : 0,
+		Private->IpChoice == PING_IP_CHOICE_IP6_2 ? ( (EFI_IP6_RECEIVE_DATA *) Private->RxToken.Packet.RxData)->Header->HopLimit : 0,
 		Rtt,
 		Rtt + Private->TimerPeriod
 		);
@@ -1564,7 +1582,7 @@ Ping6OnEchoReplyReceived2(
 	 *
 	 */
 ON_EXIT:
-	gBS->SignalEvent( Private->IpChoice == PING_IP_CHOICE_IP62 ? ( (EFI_IP6_RECEIVE_DATA *) Private->RxToken.Packet.RxData)->RecycleSignal : ( (EFI_IP4_RECEIVE_DATA *) Private->RxToken.Packet.RxData)->RecycleSignal );
+	gBS->SignalEvent( Private->IpChoice == PING_IP_CHOICE_IP6_2 ? ( (EFI_IP6_RECEIVE_DATA *) Private->RxToken.Packet.RxData)->RecycleSignal : ( (EFI_IP4_RECEIVE_DATA *) Private->RxToken.Packet.RxData)->RecycleSignal );
 
 	if ( Private->RxCount < Private->SendNum )
 	{
@@ -1630,7 +1648,7 @@ NetAddChecksum2(
 
 
 /**
- * Create a PING_IPX_COMPLETION_TOKEN2.
+ * Create a PING_IPX_COMPLETION_TOKEN2.封装要发送的ICMP报文。
  *
  * @param[in]    Private        The pointer of PING_PRIVATE_DATA2.
  * @param[in]    TimeStamp      The TimeStamp of request.
@@ -1658,7 +1676,7 @@ PingGenerateToken2(
 	{
 		return(NULL);
 	}
-	TxData = AllocateZeroPool( Private->IpChoice == PING_IP_CHOICE_IP62 ? sizeof(EFI_IP6_TRANSMIT_DATA) : sizeof(EFI_IP4_TRANSMIT_DATA) );
+	TxData = AllocateZeroPool( Private->IpChoice == PING_IP_CHOICE_IP6_2 ? sizeof(EFI_IP6_TRANSMIT_DATA) : sizeof(EFI_IP4_TRANSMIT_DATA) );
 	if ( TxData == NULL )
 	{
 		FreePool( Request );
@@ -1677,7 +1695,7 @@ PingGenerateToken2(
 	 * Assembly echo request packet.
 	 *
 	 */
-	Request->Type		= (UINT8) (Private->IpChoice == PING_IP_CHOICE_IP62 ? ICMP_V6_ECHO_REQUEST2 : ICMP_V4_ECHO_REQUEST2);
+	Request->Type		= (UINT8) (Private->IpChoice == PING_IP_CHOICE_IP6_2 ? ICMP_V6_ECHO_REQUEST2 : ICMP_V4_ECHO_REQUEST2);
 	Request->Code		= 0;
 	Request->SequenceNum	= SequenceNum;
 	Request->Identifier	= 0;
@@ -1688,7 +1706,7 @@ PingGenerateToken2(
 	 * Assembly token for transmit.
 	 *
 	 */
-	if ( Private->IpChoice == PING_IP_CHOICE_IP62 )
+	if ( Private->IpChoice == PING_IP_CHOICE_IP6_2 )
 	{
 		Request->TimeStamp							= TimeStamp;
 		( (EFI_IP6_TRANSMIT_DATA *) TxData)->ExtHdrsLength			= 0;
@@ -1723,13 +1741,12 @@ PingGenerateToken2(
 	Token->Status		= EFI_ABORTED;
 	Token->Packet.TxData	= TxData;
 
-	Status = gBS->CreateEvent(
-		EVT_NOTIFY_SIGNAL,
-		TPL_CALLBACK,
-		Ping6OnEchoRequestSent2,
-		Private,
-		&Token->Event
-		);
+	Status = gBS->CreateEvent(EVT_NOTIFY_SIGNAL,
+								TPL_CALLBACK,
+								Ping6OnEchoRequestSent2,
+								Private,
+								&Token->Event
+								);
 
 	if ( EFI_ERROR( Status ) )
 	{
@@ -1771,10 +1788,10 @@ PingSendEchoRequest2(
 	TxInfo->TimeStamp	= ReadTime2( Private );
 	TxInfo->SequenceNum	= (UINT16) (Private->TxCount + 1);
 	TxInfo->Token		= PingGenerateToken2(
-		Private,
-		TxInfo->TimeStamp,
-		TxInfo->SequenceNum
-		);
+											Private,
+											TxInfo->TimeStamp,
+											TxInfo->SequenceNum
+											);
 
 	if ( TxInfo->Token == NULL )
 	{
@@ -1825,13 +1842,11 @@ Ping6ReceiveEchoReply2(
 
 	ZeroMem( &Private->RxToken, sizeof(PING_IPX_COMPLETION_TOKEN2) );
 
-	Status = gBS->CreateEvent(
-		EVT_NOTIFY_SIGNAL,
-		TPL_CALLBACK,
-		Ping6OnEchoReplyReceived2,
-		Private,
-		&Private->RxToken.Event
-		);
+	Status = gBS->CreateEvent(  EVT_NOTIFY_SIGNAL,
+								TPL_CALLBACK,
+								Ping6OnEchoReplyReceived2,
+								Private,
+								&Private->RxToken.Event);
 
 	if ( EFI_ERROR( Status ) )
 	{
@@ -1912,7 +1927,7 @@ PingCreateIpInstance2(
 	 *
 	 */
 	Status = gBS->LocateHandleBuffer(ByProtocol,
-									Private->IpChoice == PING_IP_CHOICE_IP62 ? &gEfiIp6ServiceBindingProtocolGuid : &gEfiIp4ServiceBindingProtocolGuid,
+									Private->IpChoice == PING_IP_CHOICE_IP6_2 ? &gEfiIp6ServiceBindingProtocolGuid : &gEfiIp4ServiceBindingProtocolGuid,
 									NULL,
 									&HandleNum,
 									&HandleBuffer);
@@ -1921,7 +1936,7 @@ PingCreateIpInstance2(
 		return(EFI_ABORTED);
 	}
 
-	if ( Private->IpChoice == PING_IP_CHOICE_IP62 ? NetIp6IsUnspecifiedAddr2( (EFI_IPv6_ADDRESS *) &Private->SrcAddress ) :	\
+	if ( Private->IpChoice == PING_IP_CHOICE_IP6_2 ? NetIp6IsUnspecifiedAddr2( (EFI_IPv6_ADDRESS *) &Private->SrcAddress ) :	\
 	     PingNetIp4IsUnspecifiedAddr2( (EFI_IPv4_ADDRESS *) &Private->SrcAddress ) )
 	{
 		/*
@@ -1937,7 +1952,7 @@ PingCreateIpInstance2(
 	 * Source address is required when pinging a link-local address.
 	 *
 	 */
-	if ( Private->IpChoice == PING_IP_CHOICE_IP62 )
+	if ( Private->IpChoice == PING_IP_CHOICE_IP6_2 )
 	{
 		if ( NetIp6IsLinkLocalAddr2( (EFI_IPv6_ADDRESS *) &Private->DstAddress ) && UnspecifiedSrc )
 		{
@@ -1948,7 +1963,7 @@ PingCreateIpInstance2(
 	} 
 	else 
 	{
-		ASSERT( Private->IpChoice == PING_IP_CHOICE_IP42 );
+		ASSERT( Private->IpChoice == PING_IP_CHOICE_IP4_2 );
 		if ( PingNetIp4IsLinkLocalAddr2( (EFI_IPv4_ADDRESS *) &Private->DstAddress ) && UnspecifiedSrc )
 		{
 			/* ShellPrintHiiEx (-1, -1, NULL, STRING_TOKEN (STR_PING_INVALID_SOURCE), gShellNetwork1HiiHandle); */
@@ -1989,7 +2004,7 @@ PingCreateIpInstance2(
 
 		Status = gBS->HandleProtocol(
 			HandleBuffer[HandleIndex],
-			Private->IpChoice == PING_IP_CHOICE_IP62 ? &gEfiIp6ServiceBindingProtocolGuid : &gEfiIp4ServiceBindingProtocolGuid,
+			Private->IpChoice == PING_IP_CHOICE_IP6_2 ? &gEfiIp6ServiceBindingProtocolGuid : &gEfiIp4ServiceBindingProtocolGuid,
 			(VOID * *) &EfiSb
 			);
 		if ( EFI_ERROR( Status ) )
@@ -2005,7 +2020,7 @@ PingCreateIpInstance2(
 		 */
 		Status = gBS->HandleProtocol(
 			HandleBuffer[HandleIndex],
-			Private->IpChoice == PING_IP_CHOICE_IP62 ? &gEfiIp6ConfigProtocolGuid : &gEfiIp4Config2ProtocolGuid,
+			Private->IpChoice == PING_IP_CHOICE_IP6_2 ? &gEfiIp6ConfigProtocolGuid : &gEfiIp4Config2ProtocolGuid,
 			(VOID * *) &IpXCfg
 			);
 
@@ -2018,7 +2033,7 @@ PingCreateIpInstance2(
 		 * Get the interface information size.
 		 *
 		 */
-		if ( Private->IpChoice == PING_IP_CHOICE_IP62 )
+		if ( Private->IpChoice == PING_IP_CHOICE_IP6_2 )
 		{
 			Status = ( (EFI_IP6_CONFIG_PROTOCOL *) IpXCfg)->GetData(
 				IpXCfg,
@@ -2065,7 +2080,7 @@ PingCreateIpInstance2(
 		 * Get the interface info.
 		 *
 		 */
-		if ( Private->IpChoice == PING_IP_CHOICE_IP62 )
+		if ( Private->IpChoice == PING_IP_CHOICE_IP6_2 )
 		{
 			Status = ( (EFI_IP6_CONFIG_PROTOCOL *) IpXCfg)->GetData(
 				IpXCfg,
@@ -2094,7 +2109,7 @@ PingCreateIpInstance2(
 		 * Check whether the source address is one of the interface addresses.
 		 *
 		 */
-		if ( Private->IpChoice == PING_IP_CHOICE_IP62 )
+		if ( Private->IpChoice == PING_IP_CHOICE_IP6_2 )
 		{
 			for ( AddrIndex = 0; AddrIndex < ( (EFI_IP6_CONFIG_INTERFACE_INFO *) IpXInterfaceInfo)->AddressInfoCount; AddrIndex++ )
 			{
@@ -2185,7 +2200,7 @@ PingCreateIpInstance2(
 	{
 		goto ON_ERROR;
 	}
-	if ( Private->IpChoice == PING_IP_CHOICE_IP62 )
+	if ( Private->IpChoice == PING_IP_CHOICE_IP6_2 )
 	{
 		Status = gBS->OpenProtocol(
 			Private->IpChildHandle,
@@ -2327,14 +2342,14 @@ Ping6DestroyIp6Instance2(
 
 	gBS->CloseProtocol(
 		Private->IpChildHandle,
-		Private->IpChoice == PING_IP_CHOICE_IP62 ? &gEfiIp6ProtocolGuid : &gEfiIp4ProtocolGuid,
+		Private->IpChoice == PING_IP_CHOICE_IP6_2 ? &gEfiIp6ProtocolGuid : &gEfiIp4ProtocolGuid,
 		gImageHandle,
 		Private->IpChildHandle
 		);
 
 	Status = gBS->HandleProtocol(
 		Private->NicHandle,
-		Private->IpChoice == PING_IP_CHOICE_IP62 ? &gEfiIp6ServiceBindingProtocolGuid : &gEfiIp4ServiceBindingProtocolGuid,
+		Private->IpChoice == PING_IP_CHOICE_IP6_2 ? &gEfiIp6ServiceBindingProtocolGuid : &gEfiIp4ServiceBindingProtocolGuid,
 		(VOID * *) &IpSb
 		);
 
@@ -2383,7 +2398,7 @@ ShellCommandRunPing2(
 	ASSERT( sizeof(EFI_IPv4_ADDRESS) <= sizeof(EFI_IPv6_ADDRESS) );
 	ASSERT( sizeof(EFI_IP4_COMPLETION_TOKEN) <= sizeof(EFI_IP6_COMPLETION_TOKEN) );
 
-	IpChoice = PING_IP_CHOICE_IP42;
+	IpChoice = PING_IP_CHOICE_IP4_2;
 
 	ShellStatus	= SHELL_SUCCESS;
 	ProblemParam	= NULL;
@@ -2398,7 +2413,7 @@ ShellCommandRunPing2(
 
 	if ( ShellCommandLineGetFlag( ParamPackage, L"-_ip6" ) )
 	{
-		IpChoice = PING_IP_CHOICE_IP62;
+		IpChoice = PING_IP_CHOICE_IP6_2;
 	}
 
 	/*
@@ -2471,7 +2486,7 @@ ShellCommandRunPing2(
 	if ( ValueStr != NULL )
 	{
 		mSrcString = ValueStr;
-		if ( IpChoice == PING_IP_CHOICE_IP62 )
+		if ( IpChoice == PING_IP_CHOICE_IP6_2 )
 		{
 			Status = NetLibStrToIp6( ValueStr, &SrcAddress );
 		} 
@@ -2508,7 +2523,7 @@ ShellCommandRunPing2(
 	if ( ValueStr != NULL )
 	{
 		mDstString = ValueStr;
-		if ( IpChoice == PING_IP_CHOICE_IP62 )
+		if ( IpChoice == PING_IP_CHOICE_IP6_2 )
 		{
 			Status = NetLibStrToIp6( ValueStr, &DstAddress );
 		} 
@@ -2874,12 +2889,12 @@ ShellPing2(
 	 *
 	 */
 	Status = gBS->CreateEvent(
-		EVT_TIMER | EVT_NOTIFY_SIGNAL,
-		TPL_CALLBACK,
-		Ping6OnTimerRoutine2,
-		Private,
-		&Private->Timer
-		);
+								EVT_TIMER | EVT_NOTIFY_SIGNAL,
+								TPL_CALLBACK,
+								Ping6OnTimerRoutine2,
+								Private,
+								&Private->Timer
+								);
 
 	if ( EFI_ERROR( Status ) )
 	{
@@ -2941,11 +2956,12 @@ ShellPing2(
 	L2_DEBUG_Print3( DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: ShellPing2: \n", __LINE__ );
 
 
+	//每一秒钟周期调度
 	Status = gBS->SetTimer(
-		Private->Timer,
-		TimerPeriodic,
-		ONE_SECOND2
-		);
+				Private->Timer,
+				TimerPeriodic,
+				ONE_SECOND2
+				);
 
 	if ( EFI_ERROR( Status ) )
 	{
@@ -3144,9 +3160,6 @@ EFI_STATUS L2_APPLICATIONS_Command_ping( UINT8 parameters[PARAMETER_COUNT][PARAM
 	UINT8 j = 0;
 	L2_DEBUG_Print3( DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: L2_APPLICATIONS_Command_ping:%a \n", __LINE__, parameters[1] );
 
-	int TerminalWindowMaxLineCount = 0;
-	TerminalWindowMaxLineCount	= (ScreenHeight - 23) / 2;
-	TerminalWindowMaxLineCount	/= 16;
 
 	/*
 	 * ShellCommandRunPing
@@ -3187,11 +3200,6 @@ EFI_STATUS L2_APPLICATIONS_Command_ping( UINT8 parameters[PARAMETER_COUNT][PARAM
 	unsigned char ArrayIP[4] = { 0 };
 	ipv4_to_i( parameters[1], &DstAddress );
 
-	/*
-	 * Status = NetLibStrToIp42 (L"192.168.3.3", (EFI_IPv4_ADDRESS*)&DstAddress);
-	 * Status = NetLibStrToIp42 (DestIP, (EFI_IPv4_ADDRESS*)&DstAddress);
-	 * Status = NetLibStrToIp42 (L"180.101.49.11", (EFI_IPv4_ADDRESS*)&DstAddress); // www.baidu.com
-	 */
 
 	L2_DEBUG_Print3( DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: L2_APPLICATIONS_Command_ping:%a \n", __LINE__, parameters[1] );
 
@@ -3214,13 +3222,11 @@ EFI_STATUS L2_APPLICATIONS_Command_ping( UINT8 parameters[PARAMETER_COUNT][PARAM
 			 DstAddress.Addr[15] );
 
 
-	ShellStatus = ShellPing2(
-		2,
-		16,
-		&SrcAddress,
-		&DstAddress,
-		PING_IP_CHOICE_IP42
-		);
+	ShellStatus = ShellPing2(2,
+							16,
+							&SrcAddress,
+							&DstAddress,
+							PING_IP_CHOICE_IP4_2);
 }
 
 
