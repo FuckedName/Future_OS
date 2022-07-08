@@ -128,8 +128,8 @@ EFI_STATUS
  * /
  */
 typedef struct {
-	PING_IP_CHOICE_IP42	Transmit;
-	PING_IP_CHOICE_IP42	Receive;
+	PING_IPX_TRANSMIT2	Transmit;
+	PING_IPX_RECEIVE2	Receive;
 	PING_IPX_CANCEL2	Cancel;
 	PING_IPX_POLL2		Poll;
 }PING_IPX_PROTOCOL2;
@@ -310,7 +310,7 @@ EFI_STATUS L2_TCP4_SocketInit()
     }
     
     // 3 Create Transmit Event
-    Status = gBS->CreateEvent(EVT_NOTIFY_WAIT, TPL_CALLBACK, (EFI_EVENT_NOTIFY)L2_TCP4_SendNotify , (VOID*)CurSocket, &CurSocket->SendToken.CompletionToken.Event);
+    Status = gBS->CreateEvent(EVT_NOTIFY_WAIT, TPL_CALLBACK, (EFI_EVENT_NOTIFY)L2_TCP4_SendNotify , (VOID*)&CurSocket->SendToken, &CurSocket->SendToken.CompletionToken.Event);
     if(EFI_ERROR(Status)) 
     {
         return Status;     
@@ -319,9 +319,9 @@ EFI_STATUS L2_TCP4_SocketInit()
     CurSocket->m_TransData = L2_MEMORY_Allocate("Network TCP4 Transmit Buffer", MEMORY_TYPE_NETWORK, sizeof(EFI_TCP4_TRANSMIT_DATA));
     
     // 4 Create Recv Event
-    Status = gBS->CreateEvent(EVT_NOTIFY_WAIT, TPL_CALLBACK, (EFI_EVENT_NOTIFY)L2_TCP4_ReceiveNotify , (VOID*)CurSocket, &CurSocket->RecvToken.CompletionToken.Event);
+    Status = gBS->CreateEvent(EVT_NOTIFY_WAIT, TPL_CALLBACK, (EFI_EVENT_NOTIFY)L2_TCP4_ReceiveNotify , (VOID*)&CurSocket->RecvToken, &CurSocket->RecvToken.CompletionToken.Event);
     
-    CurSocket->m_RecvData = L2_MEMORY_Allocate("Network Receive Buffer", MEMORY_TYPE_NETWORK, sizeof(EFI_TCP4_RECEIVE_DATA));
+    CurSocket->m_RecvData = L2_MEMORY_Allocate("Network TCP4 Receive Buffer", MEMORY_TYPE_NETWORK, sizeof(EFI_TCP4_RECEIVE_DATA));
     if(EFI_ERROR(Status)) 
     {
         gST->ConOut->OutputString(gST->ConOut,L"Init: Create Recv Event fail!\n\r");
@@ -498,8 +498,8 @@ EFI_STATUS L2_TCP4_SocketSend(CHAR8* Data, UINTN Lenth)
     CurSocket->m_TransData->Urgent = TRUE;
     CurSocket->m_TransData->DataLength = (UINT32)Lenth;
     CurSocket->m_TransData->FragmentCount = 1;
-    CurSocket->m_TransData->FragmentTable[0].FragmentLength =CurSocket->m_TransData->DataLength;
-    CurSocket->m_TransData->FragmentTable[0].FragmentBuffer =Data;
+    CurSocket->m_TransData->FragmentTable[0].FragmentLength = CurSocket->m_TransData->DataLength;
+    CurSocket->m_TransData->FragmentTable[0].FragmentBuffer = Data;
     CurSocket->SendToken.Packet.TxData=  CurSocket->m_TransData;
 
     //Queues outgoing data into the transmit queue.
@@ -2744,7 +2744,7 @@ PingCreateIpInstance2(
 		}
 
 		Private->ProtocolPointers.Transmit	= (PING_IPX_TRANSMIT2 ) ( (EFI_IP4_PROTOCOL *) Private->IpProtocol)->Transmit;
-		Private->ProtocolPointers.Receive	= (PING_IPX_TRANSMIT2  ) ( (EFI_IP4_PROTOCOL *) Private->IpProtocol)->Receive;
+		Private->ProtocolPointers.Receive	= (PING_IPX_RECEIVE2  ) ( (EFI_IP4_PROTOCOL *) Private->IpProtocol)->Receive;
 		Private->ProtocolPointers.Cancel	= (PING_IPX_CANCEL2   ) ( (EFI_IP4_PROTOCOL *) Private->IpProtocol)->Cancel;
 		Private->ProtocolPointers.Poll		= (PING_IPX_POLL2     ) ( (EFI_IP4_PROTOCOL *) Private->IpProtocol)->Poll;
 	}
@@ -3625,4 +3625,259 @@ NetIp6IsUnspecifiedAddr2(
 
 	return(TRUE);
 }
+
+
+
+/**
+ * The Ping Process.
+ *
+ * @param[in]   SendNumber     The send request count.
+ * @param[in]   BufferSize     The send buffer size.
+ * @param[in]   SrcAddress     The source address.
+ * @param[in]   DstAddress     The destination address.
+ * @param[in]   IpChoice       The choice between IPv4 and IPv6.
+ *
+ * @retval SHELL_SUCCESS  The ping processed successfullly.
+ * @retval others         The ping processed unsuccessfully.
+ **/
+SHELL_STATUS
+ShellCurl(
+	IN UINT32 SendNumber,
+	IN UINT32 BufferSize,
+	IN EFI_IPv6_ADDRESS    *SrcAddress,
+	IN EFI_IPv6_ADDRESS    *DstAddress,
+	IN UINT32 IpChoice
+	)
+{
+	L2_DEBUG_Print3( DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: ShellPing2: \n", __LINE__ );
+	EFI_STATUS		Status;
+	PING_PRIVATE_DATA2	*Private;
+	PING_ICMPX_TX_INFO2	*TxInfo;
+	LIST_ENTRY		*Entry;
+	LIST_ENTRY		*NextEntry;
+	SHELL_STATUS		ShellStatus;
+
+	ShellStatus	= SHELL_SUCCESS;
+	Private		= AllocateZeroPool( sizeof(PING_PRIVATE_DATA2) );
+
+	if ( Private == NULL )
+	{
+		return(SHELL_OUT_OF_RESOURCES);
+	}
+
+	Private->IpChoice	= IpChoice;
+	Private->Signature	= PING_PRIVATE_DATA2_SIGNATURE2;
+	Private->SendNum	= SendNumber;
+	Private->BufferSize	= BufferSize;
+	Private->RttMin		= ~( (UINT64 ) (0x0) );
+	Private->Status		= EFI_NOT_READY;
+
+	CopyMem( &Private->SrcAddress, SrcAddress, sizeof(Private->SrcAddress) );
+	CopyMem( &Private->DstAddress, DstAddress, sizeof(Private->DstAddress) );
+
+	InitializeListHead( &Private->TxList );
+
+	/*
+	 *
+	 * Open and configure a ip instance for us.
+	 *
+	 */
+	Status = PingCreateIpInstance2( Private );
+
+	if ( EFI_ERROR( Status ) )
+	{
+		ShellStatus = SHELL_ACCESS_DENIED;
+		goto ON_EXIT;
+	}
+	/*
+	 *
+	 * Print the command line itself.
+	 *
+	 * //ShellPrintHiiEx (-1, -1, NULL, STRING_TOKEN (STR_PING_START), gShellNetwork1HiiHandle, mDstString, Private->BufferSize);
+	 *
+	 * Create a ipv6 token to receive the first icmp6 echo reply packet.
+	 *
+	 */
+	Status = Ping6ReceiveEchoReply2( Private );
+	L2_DEBUG_Print3( DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: ShellPing2: \n", __LINE__ );
+
+
+	if ( EFI_ERROR( Status ) )
+	{
+		ShellStatus = SHELL_ACCESS_DENIED;
+		goto ON_EXIT;
+	}
+	/*
+	 *
+	 * Create and start timer to send icmp6 echo request packet per second.
+	 *
+	 */
+	Status = gBS->CreateEvent(
+								EVT_TIMER | EVT_NOTIFY_SIGNAL,
+								TPL_CALLBACK,
+								Ping6OnTimerRoutine2,
+								Private,
+								&Private->Timer
+								);
+
+	if ( EFI_ERROR( Status ) )
+	{
+		ShellStatus = SHELL_ACCESS_DENIED;
+		goto ON_EXIT;
+	}
+
+	/*
+	 *
+	 * Start a timer to calculate the RTT.
+	 *
+	 */
+	Status = PingInitRttTimer2( Private );
+	if ( EFI_ERROR( Status ) )
+	{
+		ShellStatus = SHELL_ACCESS_DENIED;
+		goto ON_EXIT;
+	}
+
+	L2_DEBUG_Print3( DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: ShellPing2: \n", __LINE__ );
+
+
+	/*
+	 *
+	 * Create a ipv6 token to send the first icmp6 echo request packet.
+	 *
+	 */
+	Status = PingSendEchoRequest2( Private );
+	/*
+	 *
+	 * EFI_NOT_READY for IPsec is enable and IKE is not established.
+	 *
+	 */
+	if ( EFI_ERROR( Status ) && (Status != EFI_NOT_READY) )
+	{
+		ShellStatus = SHELL_ACCESS_DENIED;
+		if ( Status == EFI_NOT_FOUND )
+		{
+			/* //ShellPrintHiiEx (-1, -1, NULL, STRING_TOKEN (STR_PING_NOSOURCE_INDO), gShellNetwork1HiiHandle, mDstString); */
+
+			L2_DEBUG_Print3( DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: ShellPing2: \n", __LINE__ );
+		} 
+		else if ( Status == RETURN_NO_MAPPING )
+		{
+			L2_DEBUG_Print3( DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: ShellPing2: \n", __LINE__ );
+
+			/* //ShellPrintHiiEx (-1, -1, NULL, STRING_TOKEN (STR_PING_NOROUTE_FOUND), gShellNetwork1HiiHandle, mDstString, mSrcString); */
+		} 
+		else 
+		{
+			L2_DEBUG_Print3( DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: ShellPing2: \n", __LINE__ );
+
+			/* //ShellPrintHiiEx (-1, -1, NULL, STRING_TOKEN (STR_PING_NETWORK_ERROR), gShellNetwork1HiiHandle, L"ping", Status); */
+		}
+
+		goto ON_EXIT;
+	}
+
+	L2_DEBUG_Print3( DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: ShellPing2: \n", __LINE__ );
+
+
+	//每一秒钟周期调度
+	Status = gBS->SetTimer(
+				Private->Timer,
+				TimerPeriodic,
+				ONE_SECOND2
+				);
+
+	if ( EFI_ERROR( Status ) )
+	{
+		ShellStatus = SHELL_ACCESS_DENIED;
+		goto ON_EXIT;
+	}
+
+	return;
+
+	/*
+	 *
+	 * Control the ping6 process by two factors:
+	 * 1. Hot key
+	 * 2. Private->Status
+	 *   2.1. success means all icmp6 echo request packets get reply packets.
+	 *   2.2. timeout means the last icmp6 echo reply request timeout to get reply.
+	 *   2.3. noready means ping6 process is on-the-go.
+	 *
+	 */
+	while ( Private->Status == EFI_NOT_READY )
+	{
+		Status = Private->ProtocolPointers.Poll( Private->IpProtocol );
+		if ( ShellGetExecutionBreakFlag() )
+		{
+			Private->Status = EFI_ABORTED;
+			goto ON_STAT;
+		}
+	}
+
+
+	L2_DEBUG_Print3( DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: ShellPing2: \n", __LINE__ );
+
+
+ON_STAT:
+	/*
+	 *
+	 * Display the statistics in all.
+	 *
+	 */
+	gBS->SetTimer( Private->Timer, TimerCancel, 0 );
+
+	if ( Private->TxCount != 0 )
+	{
+	}
+
+	if ( Private->RxCount > Private->FailedCount )
+	{
+	}
+
+ON_EXIT:
+
+	if ( Private != NULL )
+	{
+		NET_LIST_FOR_EACH_SAFE2( Entry, NextEntry, &Private->TxList )
+		{
+			TxInfo = BASE_CR2( Entry, PING_ICMPX_TX_INFO2, Link );
+
+			if ( Private->IpProtocol != NULL && Private->ProtocolPointers.Cancel != NULL )
+			{
+				Status = Private->ProtocolPointers.Cancel( Private->IpProtocol, TxInfo->Token );
+			}
+
+			RemoveEntryList( &TxInfo->Link );
+			PingDestroyTxInfo2( TxInfo, Private->IpChoice );
+		}
+
+		PingFreeRttTimer2( Private );
+
+		if ( Private->Timer != NULL )
+		{
+			gBS->CloseEvent( Private->Timer );
+		}
+
+		if ( Private->IpProtocol != NULL && Private->ProtocolPointers.Cancel != NULL )
+		{
+			Status = Private->ProtocolPointers.Cancel( Private->IpProtocol, &Private->RxToken );
+		}
+
+		if ( Private->RxToken.Event != NULL )
+		{
+			gBS->CloseEvent( Private->RxToken.Event );
+		}
+
+		if ( Private->IpChildHandle != NULL )
+		{
+			Ping6DestroyIp6Instance2( Private );
+		}
+
+		FreePool( Private );
+	}
+
+	return(ShellStatus);
+}
+
 

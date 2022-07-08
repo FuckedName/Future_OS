@@ -167,9 +167,10 @@ EFI_STATUS L2_APPLICATIONS_Command_curl( UINT8 parameters[PARAMETER_COUNT][PARAM
 	int i = 0;
 	while(i++ < 3)
 	{
-		//L2_TCP4_Send();
-
-		//L2_TCP4_Receive();
+		L2_TCP4_Send();
+		for (int j= 0; j < 6000000;j++);
+		L2_TCP4_Receive();
+		for (int j= 0; j < 6000000;j++);
 	}
 
 	//ShellCurl(2, 1024, "", "", PING_IP_CHOICE_IP4_2);
