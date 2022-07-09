@@ -774,4 +774,11 @@ Tcp6Poll (
   IN EFI_TCP6_PROTOCOL        *This
   );
 
+  EFI_STATUS
+TcpChkDataBuf (
+  IN UINT32                 DataLen,
+  IN UINT32                 FragmentCount,
+  IN EFI_TCP4_FRAGMENT_DATA *FragmentTable
+  );
+
 #endif

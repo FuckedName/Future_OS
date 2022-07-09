@@ -19,11 +19,15 @@
 
 [Includes]
   Include
+  TcpDxe
+
 
 [LibraryClasses]
   ##  @libraryclass  IpIo layer upon EFI IP4 Protocol.
   #   This library is only intended to be used by UEFI network stack modules.
   IpIoLib|Include/Library/IpIoLib.h
+  Socket|TcpDxe/SockInterface.h
+  TcpLib|TcpDxe/TcpMain.h
 
   ##  @libraryclass  Basic function for UEFI network stack.
   #   This library is only intended to be used by UEFI network stack modules.
@@ -47,6 +51,8 @@
 
   ##  @libraryclass  Library for Deferred Procedure Calls.
   DpcLib|Include/Library/DpcLib.h
+
+  
 
 [Guids]
   ## Network package token space guid.

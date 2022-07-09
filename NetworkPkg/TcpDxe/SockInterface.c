@@ -8,6 +8,7 @@
 **/
 
 #include "SockImpl.h"
+#include "SockInterface.h"
 
 /**
   Check whether the Event is in the List.

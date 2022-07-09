@@ -1608,7 +1608,7 @@ void L2_GRAPHICS_ParameterInit()
     WindowLayers.item[GRAPHICS_LAYER_TERMINAL_WINDOW].pBuffer = pTerminalWindowBuffer;
     WindowLayers.item[GRAPHICS_LAYER_TERMINAL_WINDOW].StartX = 0;
     WindowLayers.item[GRAPHICS_LAYER_TERMINAL_WINDOW].StartY = 0;
-    WindowLayers.item[GRAPHICS_LAYER_TERMINAL_WINDOW].WindowWidth = ScreenWidth * 4 / 5;
+    WindowLayers.item[GRAPHICS_LAYER_TERMINAL_WINDOW].WindowWidth = WINDOW_DEFAULT_WIDTH;
     WindowLayers.item[GRAPHICS_LAYER_TERMINAL_WINDOW].WindowHeight = WINDOW_DEFAULT_HEIGHT;
     WindowLayers.item[GRAPHICS_LAYER_TERMINAL_WINDOW].LayerID = GRAPHICS_LAYER_TERMINAL_WINDOW;
 
@@ -1652,8 +1652,6 @@ void L2_GRAPHICS_ParameterInit()
 	BlackColor.Blue  = 0;
 	BlackColor.Red	 = 0;
 	BlackColor.Green  = 0;
-
-	
 
 }
 
