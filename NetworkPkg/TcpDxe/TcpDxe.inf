@@ -32,7 +32,7 @@
   SockImpl.c
   SockInterface.c
   TcpDispatcher.c
-  TcpDispatcher.h
+  #TcpDispatcher.h
   TcpOutput.c
   TcpMain.c
   TcpMain.h

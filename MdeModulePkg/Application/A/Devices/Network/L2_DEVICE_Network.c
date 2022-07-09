@@ -333,6 +333,12 @@ INTN L2_TCP4_SocketDestroy()
     return 0;
 }
 
+VOID  L2_TCP4_SendNotify(EFI_EVENT Event,      VOID *Context){}
+
+VOID  L2_TCP4_ReceiveNotify(EFI_EVENT      Event,  VOID *Context){}
+
+VOID L2_TCP4_HeartBeatNotify (EFI_EVENT  Event,    VOID *Context){}
+
 EFI_STATUS L2_TCP4_SocketClose()
 {
     EFI_STATUS Status;
@@ -420,6 +426,8 @@ EFI_STATUS L2_TCP4_Receive()
        
     return EFI_SUCCESS;
 }
+
+UINTN L2_TCP4_SocketCreate(VOID){}
 
 
 /****************************************************************************

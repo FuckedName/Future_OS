@@ -114,6 +114,7 @@
   UefiHiiServicesLib
   UefiLib
   UefiRuntimeServicesTableLib
+  TcpIoLib
 
 
 [Guids]
