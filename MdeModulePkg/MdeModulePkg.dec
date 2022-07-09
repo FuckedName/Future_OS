@@ -26,8 +26,19 @@
   Application/A/edk2_code/SourceLevelDebugPkg/Include
   Application/A/edk2_code/RedfishPkg/Include
 
+
+
+[Includes.common]
+  Application/A/edk2_code/RedfishPkg/Include
+
+
 [Includes.Common.Private]
   Library/BrotliCustomDecompressLib/brotli/c/include
+  
+  #SourceLevelDebugPkg
+
+
+  #RedfishPkg
   Application/A/edk2_code/RedfishPkg/PrivateInclude                # Private header files for C RTL.
   Application/A/edk2_code/RedfishPkg/PrivateInclude/Crt            # Private header files for C RTL.
   Application/A/edk2_code/RedfishPkg/Library/JsonLib               # Private header files for jansson
@@ -37,6 +48,27 @@
                                 # jansson.h refers to above two configuration
                                 # files for building platform jansson library.
   #Application/A/edk2_code/RedfishPkg/Library/JsonLib/jansson/src   # For referring to jannson.h
+
+
+
+
+  
+
+
+
+
+
+
+
+[Includes.IA32]
+  Application/A/edk2_code/SourceLevelDebugPkg/Include/Ia32
+
+[Includes.X64]
+  Application/A/edk2_code/SourceLevelDebugPkg/Include/Ia32
+
+
+
+
 
 [LibraryClasses]
   ##  @libraryclass  Defines a set of methods to reset whole system.

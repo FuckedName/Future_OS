@@ -18,7 +18,7 @@
 #elif defined(MDE_CPU_AARCH64)
   #include <Chipset/AArch64.h>
 #else
- #error "Unknown chipset."
+// #error "Unknown chipset."
 #endif
 
 #define EFI_MEMORY_CACHETYPE_MASK   (EFI_MEMORY_UC | EFI_MEMORY_WC | \
