@@ -23,6 +23,8 @@
 
 [Includes]
   Include
+  Application/A/edk2_code/SourceLevelDebugPkg/Include
+  Application/A/edk2_code/RedfishPkg/Include
 
 [Includes.Common.Private]
   Library/BrotliCustomDecompressLib/brotli/c/include
