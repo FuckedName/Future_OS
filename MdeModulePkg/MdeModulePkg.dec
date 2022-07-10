@@ -23,13 +23,9 @@
 
 [Includes]
   Include
-  Application/A/edk2_code/SourceLevelDebugPkg/Include
-  Application/A/edk2_code/RedfishPkg/Include
-
 
 
 [Includes.common]
-  Application/A/edk2_code/RedfishPkg/Include
 
 
 [Includes.Common.Private]
@@ -39,9 +35,6 @@
 
 
   #RedfishPkg
-  Application/A/edk2_code/RedfishPkg/PrivateInclude                # Private header files for C RTL.
-  Application/A/edk2_code/RedfishPkg/PrivateInclude/Crt            # Private header files for C RTL.
-  Application/A/edk2_code/RedfishPkg/Library/JsonLib               # Private header files for jansson
                                 # configuration files.
                                 #  - jansson_config.h
                                 #  - jansson_private_config.h
@@ -61,10 +54,8 @@
 
 
 [Includes.IA32]
-  Application/A/edk2_code/SourceLevelDebugPkg/Include/Ia32
 
 [Includes.X64]
-  Application/A/edk2_code/SourceLevelDebugPkg/Include/Ia32
 
 
 
