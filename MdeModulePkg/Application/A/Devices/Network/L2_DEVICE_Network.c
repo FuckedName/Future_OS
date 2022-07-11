@@ -33,9 +33,9 @@
 
 #include <Socket.h>
 #include <TcpMain.h>
-
-
 #include <L2_DEVICE_Network.h>
+
+#include "SockInterface.c"
 
 
 #define IPV4_TO_LONG(a,b,c,d) (a | b<<8 | c << 16 | d <<24)
