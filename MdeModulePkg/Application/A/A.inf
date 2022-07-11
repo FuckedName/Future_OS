@@ -76,7 +76,6 @@
   	Applications/Commands/L2_APPLICATIONS_Command_curl.h
   	Applications/Commands/L2_APPLICATIONS_Command_ping.c
   	Applications/Commands/L2_APPLICATIONS_Command_ping.h
-  	
   	Partitions/NTFS/L2_PARTITION_NTFS.c
 	Partitions/NTFS/L2_PARTITION_NTFS.h
 	Partitions/NTFS/L1_PARTITION_NTFS.c
@@ -89,61 +88,31 @@
 	Processes/L1_PROCESS_Multi.c
 	Processes/L2_PROCESS_Multi.h
 	Processes/L2_PROCESS_Multi.c
-        
-    Edk2_Code/NetworkPkg/TcpDxe/TcpDxe.inf
-    Edk2_Code/NetworkPkg/TcpDxe/TcpMisc.c
-    Edk2_Code/NetworkPkg/TcpDxe/TcpMain.h
-    Edk2_Code/NetworkPkg/TcpDxe/TcpOutput.c
-    Edk2_Code/NetworkPkg/TcpDxe/TcpDriver.c
-    Edk2_Code/NetworkPkg/TcpDxe/TcpDispatcher.c
-    Edk2_Code/NetworkPkg/TcpDxe/SockInterface.h
-    Edk2_Code/NetworkPkg/TcpDxe/TcpDriver.h
-    Edk2_Code/NetworkPkg/TcpDxe/TcpMain.c
-    Edk2_Code/NetworkPkg/TcpDxe/TcpTimer.c
-    Edk2_Code/NetworkPkg/TcpDxe/TcpProto.h
-    Edk2_Code/NetworkPkg/TcpDxe/TcpInput.c
-    Edk2_Code/NetworkPkg/TcpDxe/Socket.h
-    Edk2_Code/NetworkPkg/TcpDxe/TcpFunc.h
-    Edk2_Code/NetworkPkg/TcpDxe/TcpIo.c
-    Edk2_Code/NetworkPkg/TcpDxe/ComponentName.c
-    Edk2_Code/NetworkPkg/TcpDxe/SockImpl.h
-    Edk2_Code/NetworkPkg/TcpDxe/SockInterface.c
-    Edk2_Code/NetworkPkg/TcpDxe/TcpOption.h
-    Edk2_Code/NetworkPkg/TcpDxe/TcpOption.c
-    Edk2_Code/NetworkPkg/TcpDxe/SockImpl.c
-
 
 [Packages]
   MdePkg/MdePkg.dec
   MdeModulePkg/MdeModulePkg.dec
   ShellPkg/ShellPkg.dec
-  #NetworkPkg/NetworkPkg.dec
   
-[LibraryClasses]  
+[LibraryClasses]
   BaseLib
   BaseMemoryLib
   DebugLib
   DevicePathLib
-  DpcLib
   HiiLib
-  IpIoLib
   MemoryAllocationLib
-  NetLib
   PcdLib
   PeCoffGetEntryPointLib
   PrintLib
   ReportStatusCodeLib
   ShellLib
   SortLib
-  TcpIoLib
   UefiApplicationEntryPoint
   UefiBootManagerLib
   UefiBootServicesTableLib
-  #UefiDriverEntryPoint
   UefiHiiServicesLib
   UefiLib
   UefiRuntimeServicesTableLib
-
 
 
 [Guids]
@@ -153,48 +122,48 @@
   gShellAliasGuid                                         ## SOMETIMES_CONSUMES ## GUID
 
 [Protocols]
-  #gEfiAdapterInfoMediaStateGuid
-    gEfiAdapterInformationProtocolGuid
-    gEfiBlockIo2ProtocolGuid
-    gEfiBlockIoProtocolGuid
-    gEfiComponentNameProtocolGuid
-    gEfiDevicePathProtocolGuid
-    gEfiDevicePathToTextProtocolGuid
-    gEfiDiskIo2ProtocolGuid
-    gEfiDiskIoProtocolGuid
-    gEfiDriverBindingProtocolGuid
-    gEfiDriverFamilyOverrideProtocolGuid
-    gEfiDriverHealthProtocolGuid
-    gEfiGraphicsOutputProtocolGuid
-    gEfiHiiConfigAccessProtocolGuid
-    gEfiHiiDatabaseProtocolGuid
-    gEfiHttpProtocolGuid
-    gEfiHttpServiceBindingProtocolGuid
-    gEfiIp4Config2ProtocolGuid
-    gEfiIp4ProtocolGuid
-    gEfiIp4ServiceBindingProtocolGuid
-    gEfiIp6ConfigProtocolGuid
-    gEfiIp6ProtocolGuid
-    gEfiIp6ServiceBindingProtocolGuid
-    gEfiLoadedImageProtocolGuid
-    gEfiManagedNetworkProtocolGuid
-    gEfiManagedNetworkServiceBindingProtocolGuid
-    gEfiPciIoProtocolGuid
-    gEfiPlatformDriverOverrideProtocolGuid
-    gEfiShellParametersProtocolGuid
-    gEfiShellProtocolGuid
-    gEfiSimpleFileSystemProtocolGuid
-    gEfiSimplePointerProtocolGuid
-    gEfiSimpleTextInputExProtocolGuid
-    gEfiSmbiosProtocolGuid
-    gEfiTcp4ProtocolGuid
-    gEfiTcp4ServiceBindingProtocolGuid
-    gEfiTcp6ProtocolGuid
-    gEfiTcp6ServiceBindingProtocolGuid
-    gEfiUnicodeCollation2ProtocolGuid
-    gEfiWiFiProtocolGuid
-
-
+  gEfiBlockIo2ProtocolGuid                
+  gEfiBlockIoProtocolGuid                 
+  gEfiComponentNameProtocolGuid    
+  gEfiDevicePathProtocolGuid
+  gEfiDevicePathProtocolGuid              
+  gEfiDevicePathToTextProtocolGuid        
+  gEfiDiskIo2ProtocolGuid
+  gEfiDiskIoProtocolGuid
+  gEfiDriverBindingProtocolGuid
+  gEfiDriverFamilyOverrideProtocolGuid     
+  gEfiDriverHealthProtocolGuid            
+  gEfiGraphicsOutputProtocolGuid
+  gEfiHiiConfigAccessProtocolGuid         
+  gEfiHiiDatabaseProtocolGuid             
+  gEfiLoadedImageProtocolGuid             
+  gEfiPciIoProtocolGuid
+  gEfiPlatformDriverOverrideProtocolGuid
+  gEfiShellParametersProtocolGuid         
+  gEfiShellProtocolGuid
+  gEfiSimpleFileSystemProtocolGuid
+  gEfiSimpleFileSystemProtocolGuid        
+  gEfiSimplePointerProtocolGuid
+  gEfiSimpleTextInputExProtocolGuid
+  gEfiSmbiosProtocolGuid                  
+  gEfiUnicodeCollation2ProtocolGuid   
+  gEfiTcp4ServiceBindingProtocolGuid
+  gEfiTcp4ProtocolGuid
+  gEfiWiFiProtocolGuid
+  gEfiShellProtocolGuid
+  gEfiIp4ServiceBindingProtocolGuid
+  gEfiIp6ConfigProtocolGuid
+  gEfiIp4Config2ProtocolGuid
+  gEfiIp6ProtocolGuid
+  gEfiIp4ProtocolGuid
+  gEfiIp6ServiceBindingProtocolGuid
+  gEfiAdapterInformationProtocolGuid
+  gEfiAdapterInfoMediaStateGuid
+  gEfiManagedNetworkServiceBindingProtocolGuid
+  gEfiManagedNetworkProtocolGuid
+  gEfiShellParametersProtocolGuid  
+  gEfiHttpServiceBindingProtocolGuid
+  gEfiHttpProtocolGuid
 
 [FeaturePcd]
 
@@ -212,7 +181,5 @@
   gEfiMdeModulePkgTokenSpaceGuid.PcdTestKeyUsed                     ## CONSUMES
 
 
-[UserExtensions.TianoCore."ExtraFiles"]
-    Edk2_Code/NetworkPkg/TcpDxe/TcpDxe.uni
-    Edk2_Code/NetworkPkg/TcpDxe/TcpDxeExtra.uni
+
 

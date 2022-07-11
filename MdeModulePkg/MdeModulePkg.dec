@@ -24,46 +24,8 @@
 [Includes]
   Include
 
-
-[Includes.common]
-
-
 [Includes.Common.Private]
   Library/BrotliCustomDecompressLib/brotli/c/include
-
-Application/A/Edk2_Code/NetworkPkg/Include
-Application/A/Edk2_Code/NetworkPkg/TcpDxe
-
-  
-  #SourceLevelDebugPkg
-
-
-  #RedfishPkg
-                                # configuration files.
-                                #  - jansson_config.h
-                                #  - jansson_private_config.h
-                                # jansson.h refers to above two configuration
-                                # files for building platform jansson library.
-  #Application/A/edk2_code/RedfishPkg/Library/JsonLib/jansson/src   # For referring to jannson.h
-
-
-
-
-  
-
-
-
-
-
-
-
-[Includes.IA32]
-
-[Includes.X64]
-
-
-
-
 
 [LibraryClasses]
   ##  @libraryclass  Defines a set of methods to reset whole system.

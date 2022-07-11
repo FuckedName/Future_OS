@@ -1,4 +1,4 @@
-#//./AutoBuild.sh > /mnt/hgfs/Share/code/output/compile.log 2>&1
+//./AutoBuild.sh > /mnt/hgfs/Share/code/output/compile.log 2>&1
 
 clear
 
@@ -11,8 +11,9 @@ if [ $? -ne 0 ]; then
     exit 0;
 fi
 
-#rm -rf /mnt/hgfs/Share/code/edk2_code/MdeModulePkg/Application/A/*
-#cp -rf MdeModulePkg/Application/A/* /mnt/hgfs/Share/code/edk2_code/MdeModulePkg/Application/A/
+#rm -rf /mnt/hgfs/Share/code/Split/*
+#cp -rf MdeModulePkg/Application/A/* /mnt/hgfs/Share/code/Split/  
+
 
 #EmulatorPkg/build.sh -a IA32
 #if [ $? -ne 0 ]; then
@@ -20,8 +21,8 @@ fi
 #fi
 
 #EmulatorPkg/build.sh -a IA32 run
-#EmulatorPkg/build.sh -a X64
-EmulatorPkg/build.sh -a X64 -m MdeModulePkg/Application/A/A.inf >/mnt/hgfs/Share/code/compile.log 2>&1
+EmulatorPkg/build.sh -a X64
+#EmulatorPkg/build.sh -m MdeModulePkg/Application/A/A.inf
 #OvmfPkg/build.sh -a X64
 if [ $? -ne 0 ]; then
     exit 0;

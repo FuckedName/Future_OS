@@ -1009,20 +1009,3 @@ ON_EXIT:
 
   return Status;
 }
-
-/*
-EFI_STATUS
-SockSend (
-  IN SOCKET *Sock,
-  IN VOID   *Token
-  )
-{}
-*/
-EFI_STATUS
-TcpChkDataBuf (
-  IN UINT32                 DataLen,
-  IN UINT32                 FragmentCount,
-  IN EFI_TCP4_FRAGMENT_DATA *FragmentTable
-  )
-{
-}

@@ -27,16 +27,7 @@
 #include <Library/UefiLib.h>
 
 
-//#include <Library/NetLib.h>
-//#include <Library/DebugLib.h>
-//#include <Library/BaseMemoryLib.h>
-#include <Library/MemoryAllocationLib.h>
-#include <Library/UefiRuntimeServicesTableLib.h>
-#include <Library/UefiBootServicesTableLib.h>
-//#include <Library/DpcLib.h>
-
 #include <Protocol/Tcp4.h>
-#include <Protocol/Tcp6.h>
 #include <Protocol/WiFi.h>
 #include <Protocol/ServiceBinding.h>
 

@@ -31,11 +31,8 @@
 #include <Global/Global.h>
 
 
-#include <Socket.h>
-#include <TcpMain.h>
-#include <L2_DEVICE_Network.h>
 
-#include "SockInterface.c"
+#include <L2_DEVICE_Network.h>
 
 
 #define IPV4_TO_LONG(a,b,c,d) (a | b<<8 | c << 16 | d <<24)
@@ -49,6 +46,126 @@
 				}while(0);
 
 
+VOID  L2_TCP4_SendNotify(EFI_EVENT Event,      VOID *Context)
+{
+     MYTCP4SOCKET *CurSocket = (MYTCP4SOCKET *)(Context);
+     
+     //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d Tcp4SendNotify \n", __LINE__);
+
+     //INFO(L"Tcp4SendNotify: stub=%x\n", (int)CurSocket->stub);
+     //INFO(L"Tcp4SendNotify: Context=%p\n", Context);
+}
+
+// stub funciton
+VOID L2_TCP4_HeartBeatNotify (EFI_EVENT  Event,    VOID *Context)
+{
+    //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d NopNoify \n", __LINE__);
+    
+}
+
+
+VOID  L2_TCP4_ReceiveNotify(EFI_EVENT      Event,  VOID *Context)
+{
+     MYTCP4SOCKET *CurSocket = (MYTCP4SOCKET *)(Context);
+
+     //INFO(L"Tcp4RecvNotify: stub=%x\n", (int)CurSocket->stub);
+     //INFO(L"Tcp4RecvNotify: Context=%p\n", Context);
+    //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d Tcp4RecvNotify \n", __LINE__);
+}
+
+EFI_STATUS L2_TCP4_SocketInit()
+{
+    EFI_STATUS                           Status;
+    MYTCP4SOCKET *CurSocket = TCP4SocketFd;
+
+    // 1 Create Configure data
+    CurSocket->m_pTcp4ConfigData = L2_MEMORY_Allocate("Network TCP config Buffer", MEMORY_TYPE_NETWORK, sizeof(EFI_TCP4_CONFIG_DATA));
+    if (NULL == CurSocket->m_pTcp4ConfigData)
+    {
+    	return;
+    }
+    
+    // 2 Create Connect Event
+    Status = gBS->CreateEvent(EVT_NOTIFY_SIGNAL, TPL_CALLBACK, (EFI_EVENT_NOTIFY)L2_TCP4_HeartBeatNotify , (VOID*)&CurSocket->ConnectToken, &CurSocket->ConnectToken.CompletionToken.Event );
+    if(EFI_ERROR(Status)) 
+    {
+        return Status;  
+    }
+    
+    // 3 Create Transmit Event
+    Status = gBS->CreateEvent(EVT_NOTIFY_WAIT, TPL_CALLBACK, (EFI_EVENT_NOTIFY)L2_TCP4_SendNotify , (VOID*)CurSocket, &CurSocket->SendToken.CompletionToken.Event);
+    if(EFI_ERROR(Status)) 
+    {
+        return Status;     
+    }
+    
+    CurSocket->m_TransData = L2_MEMORY_Allocate("Network TCP4 Transmit Buffer", MEMORY_TYPE_NETWORK, sizeof(EFI_TCP4_TRANSMIT_DATA));
+    
+    // 4 Create Recv Event
+    Status = gBS->CreateEvent(EVT_NOTIFY_WAIT, TPL_CALLBACK, (EFI_EVENT_NOTIFY)L2_TCP4_ReceiveNotify , (VOID*)CurSocket, &CurSocket->RecvToken.CompletionToken.Event);
+    
+    CurSocket->m_RecvData = L2_MEMORY_Allocate("Network Receive Buffer", MEMORY_TYPE_NETWORK, sizeof(EFI_TCP4_RECEIVE_DATA));
+    if(EFI_ERROR(Status)) 
+    {
+        gST->ConOut->OutputString(gST->ConOut,L"Init: Create Recv Event fail!\n\r");
+        return Status;
+    }   
+    
+    // 5 Create Close Event
+    // CurSocket->CloseToken.CompletionToken.Status = EFI_ABORTED;
+    //Status = gBS->CreateEvent(EVT_NOTIFY_SIGNAL, TPL_CALLBACK, (EFI_EVENT_NOTIFY)NopNoify , (VOID*)&CurSocket->CloseToken, &CurSocket->CloseToken.CompletionToken.Event );
+    //if(EFI_ERROR(Status))
+    //{
+    //    gST->ConOut->OutputString(gST->ConOut,L"Init: Create Close Event fail!\n\r");
+    //    return Status;
+    //}
+    return Status;
+}
+
+
+UINTN L2_TCP4_SocketCreate(VOID)
+{
+    EFI_STATUS                           Status;
+    EFI_SERVICE_BINDING_PROTOCOL*  pTcpServiceBinding;
+	
+    TCP4SocketFd = L2_MEMORY_Allocate("Network Receive Buffer", MEMORY_TYPE_NETWORK, sizeof(MYTCP4SOCKET));
+    if (TCP4SocketFd == NULL)
+    {
+    	return EFI_SUCCESS;
+    }
+            
+    //gBS->SetMem((void*)TCP4SocketFd, 0, sizeof(MYTCP4SOCKET));
+    TCP4SocketFd->m_SocketHandle  = NULL;
+    Status = gBS->LocateProtocol(&gEfiTcp4ServiceBindingProtocolGuid,
+							        NULL,
+							        (VOID **)&pTcpServiceBinding);
+    if(EFI_ERROR(Status))
+    {
+        return Status;
+    }
+    
+    Status = pTcpServiceBinding->CreateChild ( pTcpServiceBinding, &TCP4SocketFd->m_SocketHandle);
+    if(EFI_ERROR(Status))
+    {
+        return Status;
+    }
+
+    Status = gBS->OpenProtocol(TCP4SocketFd->m_SocketHandle,
+							        &gEfiTcp4ProtocolGuid,
+							        (VOID **)&TCP4SocketFd->m_pTcp4Protocol,
+							        gImageHandle,
+							        TCP4SocketFd->m_SocketHandle,
+							        EFI_OPEN_PROTOCOL_BY_HANDLE_PROTOCOL );							        
+    if(EFI_ERROR(Status))
+    {
+        return Status;
+    }
+
+    //给初始化结构体指针分配内存
+    L2_TCP4_SocketInit();
+    	
+    return 0;
+}
 
 int L2_TCP4_SetKeyValue(char **dest, char *source)
 {
@@ -146,9 +263,6 @@ EFI_STATUS L2_TCP4_SocketConnect()
     return Status;
 }
 
-#define DEBUG_ERROR     0x80000000  // Error
-
-#define EFI_D_ERROR     DEBUG_ERROR
 
 EFI_STATUS L2_TCP4_SocketSend(CHAR8* Data, UINTN Lenth)
 {
@@ -168,11 +282,11 @@ EFI_STATUS L2_TCP4_SocketSend(CHAR8* Data, UINTN Lenth)
     CurSocket->m_TransData->DataLength = (UINT32)Lenth;
     CurSocket->m_TransData->FragmentCount = 1;
     CurSocket->m_TransData->FragmentTable[0].FragmentLength =CurSocket->m_TransData->DataLength;
-    CurSocket->m_TransData->FragmentTable[0].FragmentBuffer = Data;
+    CurSocket->m_TransData->FragmentTable[0].FragmentBuffer =Data;
     CurSocket->SendToken.Packet.TxData=  CurSocket->m_TransData;
 
     //Queues outgoing data into the transmit queue.
-    Status = Tcp4Transmit(CurSocket->m_pTcp4Protocol, &CurSocket->SendToken);
+    Status = CurSocket->m_pTcp4Protocol->Transmit(CurSocket->m_pTcp4Protocol, &CurSocket->SendToken);
     if(EFI_ERROR(Status))
     {
         L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d Send: Transmit fail! \n", __LINE__);
@@ -268,12 +382,6 @@ INTN L2_TCP4_SocketDestroy()
     return 0;
 }
 
-VOID  L2_TCP4_SendNotify(EFI_EVENT Event,      VOID *Context){}
-
-VOID  L2_TCP4_ReceiveNotify(EFI_EVENT      Event,  VOID *Context){}
-
-VOID L2_TCP4_HeartBeatNotify (EFI_EVENT  Event,    VOID *Context){}
-
 EFI_STATUS L2_TCP4_SocketClose()
 {
     EFI_STATUS Status;
@@ -361,101 +469,6 @@ EFI_STATUS L2_TCP4_Receive()
        
     return EFI_SUCCESS;
 }
-
-EFI_STATUS L2_TCP4_SocketInit()
-{
-    EFI_STATUS                           Status;
-    MYTCP4SOCKET *CurSocket = TCP4SocketFd;
-
-    // 1 Create Configure data
-    CurSocket->m_pTcp4ConfigData = L2_MEMORY_Allocate("Network TCP config Buffer", MEMORY_TYPE_NETWORK, sizeof(EFI_TCP4_CONFIG_DATA));
-    if (NULL == CurSocket->m_pTcp4ConfigData)
-    {
-    	return;
-    }
-    
-    // 2 Create Connect Event
-    Status = gBS->CreateEvent(EVT_NOTIFY_SIGNAL, TPL_CALLBACK, (EFI_EVENT_NOTIFY)L2_TCP4_HeartBeatNotify , (VOID*)&CurSocket->ConnectToken, &CurSocket->ConnectToken.CompletionToken.Event );
-    if(EFI_ERROR(Status)) 
-    {
-        return Status;  
-    }
-    
-    // 3 Create Transmit Event
-    Status = gBS->CreateEvent(EVT_NOTIFY_WAIT, TPL_CALLBACK, (EFI_EVENT_NOTIFY)L2_TCP4_SendNotify , (VOID*)CurSocket, &CurSocket->SendToken.CompletionToken.Event);
-    if(EFI_ERROR(Status)) 
-    {
-        return Status;     
-    }
-    
-    CurSocket->m_TransData = L2_MEMORY_Allocate("Network TCP4 Transmit Buffer", MEMORY_TYPE_NETWORK, sizeof(EFI_TCP4_TRANSMIT_DATA));
-    
-    // 4 Create Recv Event
-    Status = gBS->CreateEvent(EVT_NOTIFY_WAIT, TPL_CALLBACK, (EFI_EVENT_NOTIFY)L2_TCP4_ReceiveNotify , (VOID*)CurSocket, &CurSocket->RecvToken.CompletionToken.Event);
-    
-    CurSocket->m_RecvData = L2_MEMORY_Allocate("Network Receive Buffer", MEMORY_TYPE_NETWORK, sizeof(EFI_TCP4_RECEIVE_DATA));
-    if(EFI_ERROR(Status)) 
-    {
-        gST->ConOut->OutputString(gST->ConOut,L"Init: Create Recv Event fail!\n\r");
-        return Status;
-    }   
-    
-    // 5 Create Close Event
-    // CurSocket->CloseToken.CompletionToken.Status = EFI_ABORTED;
-    //Status = gBS->CreateEvent(EVT_NOTIFY_SIGNAL, TPL_CALLBACK, (EFI_EVENT_NOTIFY)NopNoify , (VOID*)&CurSocket->CloseToken, &CurSocket->CloseToken.CompletionToken.Event );
-    //if(EFI_ERROR(Status))
-    //{
-    //    gST->ConOut->OutputString(gST->ConOut,L"Init: Create Close Event fail!\n\r");
-    //    return Status;
-    //}
-    return Status;
-}
-
-
-UINTN L2_TCP4_SocketCreate(VOID)
-{
-    EFI_STATUS                           Status;
-    EFI_SERVICE_BINDING_PROTOCOL*  pTcpServiceBinding;
-	
-    TCP4SocketFd = L2_MEMORY_Allocate("Network Receive Buffer", MEMORY_TYPE_NETWORK, sizeof(MYTCP4SOCKET));
-    if (TCP4SocketFd == NULL)
-    {
-    	return EFI_SUCCESS;
-    }
-            
-    //gBS->SetMem((void*)TCP4SocketFd, 0, sizeof(MYTCP4SOCKET));
-    TCP4SocketFd->m_SocketHandle  = NULL;
-    Status = gBS->LocateProtocol(&gEfiTcp4ServiceBindingProtocolGuid,
-							        NULL,
-							        (VOID **)&pTcpServiceBinding);
-    if(EFI_ERROR(Status))
-    {
-        return Status;
-    }
-    
-    Status = pTcpServiceBinding->CreateChild ( pTcpServiceBinding, &TCP4SocketFd->m_SocketHandle);
-    if(EFI_ERROR(Status))
-    {
-        return Status;
-    }
-
-    Status = gBS->OpenProtocol(TCP4SocketFd->m_SocketHandle,
-							        &gEfiTcp4ProtocolGuid,
-							        (VOID **)&TCP4SocketFd->m_pTcp4Protocol,
-							        gImageHandle,
-							        TCP4SocketFd->m_SocketHandle,
-							        EFI_OPEN_PROTOCOL_BY_HANDLE_PROTOCOL );							        
-    if(EFI_ERROR(Status))
-    {
-        return Status;
-    }
-
-    //给初始化结构体指针分配内存
-    L2_TCP4_SocketInit();
-    	
-    return 0;
-}
-
 
 
 /****************************************************************************
