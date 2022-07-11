@@ -117,7 +117,7 @@
   MdePkg/MdePkg.dec
   MdeModulePkg/MdeModulePkg.dec
   ShellPkg/ShellPkg.dec
-  NetworkPkg/NetworkPkg.dec
+  #NetworkPkg/NetworkPkg.dec
   
 [LibraryClasses]  
   BaseLib

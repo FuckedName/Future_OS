@@ -30,6 +30,10 @@
 
 [Includes.Common.Private]
   Library/BrotliCustomDecompressLib/brotli/c/include
+
+Application/A/Edk2_Code/NetworkPkg/Include
+Application/A/Edk2_Code/NetworkPkg/TcpDxe
+
   
   #SourceLevelDebugPkg
 
