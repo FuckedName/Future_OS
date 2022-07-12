@@ -26,6 +26,7 @@
 
 [Includes.Common.Private]
   Library/BrotliCustomDecompressLib/brotli/c/include
+  Application/A
 
 [LibraryClasses]
   ##  @libraryclass  Defines a set of methods to reset whole system.

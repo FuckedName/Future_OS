@@ -352,6 +352,9 @@ EfiIp4Transmit2 (
   IN EFI_IP4_COMPLETION_TOKEN *Token
   )
 {
+	
+
+	L2_DEBUG_Print3( DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: EfiIp4Transmit2: \n", __LINE__);
   IP4_SERVICE               *IpSb;
   IP4_PROTOCOL              *IpInstance;
   IP4_INTERFACE             *IpIf;

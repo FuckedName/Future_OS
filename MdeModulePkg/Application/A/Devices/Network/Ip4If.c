@@ -9,6 +9,12 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #include "Ip4Impl.h"
 #include "MnpMain.h"
 
+#include <Graphics/Window/L2_GRAPHICS_Window.h>
+
+#include <Graphics/L1_GRAPHICS.h>
+#include <Graphics/L2_GRAPHICS.h>
+#include <Global/Global.h>
+
 //
 // Mac address with all zero, used to determine whether the ARP
 // resolve succeeded. Failed ARP requests zero the MAC address buffer.
@@ -1070,6 +1076,8 @@ Ip4SendFrame (
   IN IP4_SERVICE            *IpSb
   )
 {
+  L2_DEBUG_Print3( DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: Ip4SendFrame: \n", __LINE__);
+  
   IP4_LINK_TX_TOKEN         *Token;
   LIST_ENTRY                *Entry;
   IP4_ARP_QUE               *ArpQue;

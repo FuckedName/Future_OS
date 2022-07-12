@@ -12,6 +12,10 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #include "Ip4If.h"
 
 
+#include <Graphics/L1_GRAPHICS.h>
+#include <Graphics/L2_GRAPHICS.h>
+#include <Global/Global.h>
+
 
 UINT16  mIp4Id;
 
@@ -223,6 +227,7 @@ Ip4Output (
   IN VOID                   *Context
   )
 {
+  L2_DEBUG_Print3( DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: Ip4Output: \n", __LINE__);
   IP4_INTERFACE             *IpIf;
   IP4_ROUTE_CACHE_ENTRY     *CacheEntry;
   IP4_ADDR                  Dest;

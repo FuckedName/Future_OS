@@ -10,6 +10,8 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #include "MnpVlan.h"
 #include "MnpConfig.h"
 
+#include <Global/Global.h>
+
 
 
 /**
@@ -215,6 +217,9 @@ MnpSyncSendPacket (
   IN OUT EFI_MANAGED_NETWORK_COMPLETION_TOKEN    *Token
   )
 {
+	
+  L2_DEBUG_Print3( DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: MnpSyncSendPacket: \n", __LINE__);
+	
   EFI_STATUS                        Status;
   EFI_SIMPLE_NETWORK_PROTOCOL       *Snp;
   EFI_MANAGED_NETWORK_TRANSMIT_DATA *TxData;
