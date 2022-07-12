@@ -7,6 +7,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 **/
 
 #include "Ip4Impl.h"
+#include "MnpMain.h"
 
 //
 // Mac address with all zero, used to determine whether the ARP
@@ -1174,7 +1175,8 @@ SEND_NOW:
   // Remove it if the returned status is not EFI_SUCCESS.
   //
   InsertTailList (&Interface->SentFrames, &Token->Link);
-  Status = Interface->Mnp->Transmit (Interface->Mnp, &Token->MnpToken);
+  //Status = Interface->Mnp->Transmit (Interface->Mnp, &Token->MnpToken);
+  Status = MnpTransmit(Interface->Mnp, &Token->MnpToken);
   if (EFI_ERROR (Status)) {
     RemoveEntryList (&Token->Link);
     goto ON_ERROR;

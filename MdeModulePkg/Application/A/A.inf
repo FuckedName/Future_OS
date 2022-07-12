@@ -82,6 +82,18 @@
 	Devices/Network/Ip4Route.c
 	Devices/Network/Ip4If.c
 	Devices/Network/Ip4Driver.c
+	Devices/Network/MnpMain.c
+	Devices/Network/MnpMain.h
+	Devices/Network/MnpImpl.h
+	Devices/Network/MnpDriver.h
+	Devices/Network/ComponentName.h
+	Devices/Network/ComponentName.c
+	Devices/Network/MnpIo.c
+	Devices/Network/MnpIo.h
+	Devices/Network/MnpVlan.c
+	Devices/Network/MnpVlan.h
+	Devices/Network/MnpConfig.c
+	Devices/Network/MnpConfig.h
 	
 	Devices/Network/Ip4Common.h
 	Devices/Network/Ip4Config2Impl.h
