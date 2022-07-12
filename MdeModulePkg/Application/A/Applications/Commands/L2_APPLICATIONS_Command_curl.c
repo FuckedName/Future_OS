@@ -2445,67 +2445,6 @@ struct _EFI_SERVICE_BINDING_PROTOCOL {
 
 
 /**
- * Create a child of the service that is identified by ServiceBindingGuid.
- *
- * Get the ServiceBinding Protocol first, then use it to create a child.
- *
- * If ServiceBindingGuid is NULL, then //ASSERT().
- * If ChildHandle is NULL, then //ASSERT().
- *
- * @param[in]       Controller            The controller which has the service installed.
- * @param[in]       Image                 The image handle used to open service.
- * @param[in]       ServiceBindingGuid    The service's Guid.
- * @param[in, out]  ChildHandle           The handle to receive the create child.
- *
- * @retval EFI_SUCCESS           The child is successfully created.
- * @retval Others                Failed to create the child.
- *
- **/
-EFI_STATUS
-EFIAPI
-NetLibCreateServiceChild(
-	IN EFI_HANDLE Controller,
-	IN EFI_HANDLE Image,
-	IN EFI_GUID              *ServiceBindingGuid,
-	IN OUT EFI_HANDLE        *ChildHandle
-	)
-{
-	EFI_STATUS			Status;
-	EFI_SERVICE_BINDING_PROTOCOL	*Service;
-
-
-	/* ASSERT ((ServiceBindingGuid != NULL) && (ChildHandle != NULL)); */
-
-	/*
-	 *
-	 * Get the ServiceBinding Protocol
-	 *
-	 */
-	Status = gBS->OpenProtocol(
-		Controller,
-		ServiceBindingGuid,
-		(VOID * *) &Service,
-		Image,
-		Controller,
-		EFI_OPEN_PROTOCOL_GET_PROTOCOL
-		);
-
-	if ( EFI_ERROR( Status ) )
-	{
-		return(Status);
-	}
-
-	/*
-	 *
-	 * Create a child
-	 *
-	 */
-	Status = Service->CreateChild( Service, ChildHandle );
-	return(Status);
-}
-
-
-/**
  * Create a child for the service identified by its service binding protocol GUID
  * and get from the child the interface of the protocol identified by its GUID.
  *
