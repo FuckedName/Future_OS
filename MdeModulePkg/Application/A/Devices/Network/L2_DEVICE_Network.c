@@ -371,7 +371,7 @@ EfiIp4Transmit2 (
   UINT8                     *OptionsBuffer;
   VOID                      *FirstFragment;
 
-  return;
+  //return;
 
   if (This == NULL) {
     return EFI_INVALID_PARAMETER;

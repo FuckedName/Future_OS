@@ -94,6 +94,10 @@
 	Devices/Network/MnpVlan.h
 	Devices/Network/MnpConfig.c
 	Devices/Network/MnpConfig.h
+	Devices/Network/Transmit.c
+	Devices/Network/Transmit.h
+	Devices/Network/Snp.h
+	
 	
 	Devices/Network/Ip4Common.h
 	Devices/Network/Ip4Config2Impl.h

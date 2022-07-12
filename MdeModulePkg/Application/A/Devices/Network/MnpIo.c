@@ -9,6 +9,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #include "MnpImpl.h"
 #include "MnpVlan.h"
 #include "MnpConfig.h"
+#include "Transmit.h"
 
 #include <Global/Global.h>
 
@@ -274,7 +275,18 @@ MnpSyncSendPacket (
       Token->Status = EFI_DEVICE_ERROR;
       goto SIGNAL_TOKEN;
     }
+	 		
+	Status = SnpUndi32Transmit (
+					Snp,
+					HeaderSize,
+					Length,
+					Packet,
+					TxData->SourceAddress,
+					TxData->DestinationAddress,
+					&ProtocolType
+					);
 
+/*
     Status = Snp->Transmit (
                     Snp,
                     HeaderSize,
@@ -283,7 +295,7 @@ MnpSyncSendPacket (
                     TxData->SourceAddress,
                     TxData->DestinationAddress,
                     &ProtocolType
-                    );
+                    );*/
   }
 
   if (EFI_ERROR (Status)) {
