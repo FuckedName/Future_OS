@@ -49,6 +49,57 @@
   	Devices/System/L2_DEVICE_System.c
   	Devices/Network/L2_DEVICE_Network.c
   	Devices/Network/L2_DEVICE_Network.h
+
+  	Devices/Network/Ip6Common.h
+	Devices/Network/Ip6ConfigImpl.h
+	Devices/Network/Ip6ConfigNv.h
+	Devices/Network/Ip6Driver.h
+	Devices/Network/Ip6Icmp.h
+	Devices/Network/Ip6If.h
+	Devices/Network/Ip6Impl.h
+	Devices/Network/Ip6Input.h
+	Devices/Network/Ip6Mld.h
+	Devices/Network/Ip6Nd.h
+	Devices/Network/Ip6NvData.h
+	Devices/Network/Ip6Option.h
+	Devices/Network/Ip6Output.h
+	Devices/Network/Ip6Route.h
+	Devices/Network/DpcLib.h
+	Devices/Network/Dpc.h
+	Devices/Network/Ip6ConfigHii.h
+	Devices/Network/Ip4Config2Hii.h
+	Devices/Network/Ip4Config2.h
+	Devices/Network/Dhcp4.h
+	Devices/Network/Ip4Impl.c
+	Devices/Network/DxeNetLib.c
+	Devices/Network/DpcLib.c
+	Devices/Network/Ip4Option.c
+	Devices/Network/Ip4Common.c
+	Devices/Network/NetBuffer.c
+	Devices/Network/NetBuffer.h
+	Devices/Network/Ip4Output.c
+	Devices/Network/Ip4Input.c
+	Devices/Network/Ip4Route.c
+	Devices/Network/Ip4If.c
+	Devices/Network/Ip4Driver.c
+	
+	Devices/Network/Ip4Common.h
+	Devices/Network/Ip4Config2Impl.h
+	Devices/Network/Ip4Config2Nv.h
+	Devices/Network/Ip4Driver.h
+	Devices/Network/Ip4Icmp.h
+	Devices/Network/Ip4If.h
+	Devices/Network/Ip4Igmp.h
+	Devices/Network/Ip4Impl.h
+	Devices/Network/Ip4Input.h
+	Devices/Network/Ip4NvData.h
+	Devices/Network/Ip4Option.h
+	Devices/Network/Ip4Output.h
+	Devices/Network/Ip4Route.h
+	Devices/Network/L1_DEVICE_Network.h
+	Devices/Network/L2_DEVICE_Network.h
+	Devices/Network/NetLib.h
+  	
   	Devices/Network/L1_DEVICE_Network.c
   	Devices/Network/L1_DEVICE_Network.h
   	Memory/L1_MEMORY.h
@@ -93,6 +144,7 @@
   MdePkg/MdePkg.dec
   MdeModulePkg/MdeModulePkg.dec
   ShellPkg/ShellPkg.dec
+  NetworkPkg/NetworkPkg.dec
   
 [LibraryClasses]
   BaseLib

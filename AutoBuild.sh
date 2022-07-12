@@ -21,8 +21,8 @@ fi
 #fi
 
 #EmulatorPkg/build.sh -a IA32 run
-EmulatorPkg/build.sh -a X64
-#EmulatorPkg/build.sh -m MdeModulePkg/Application/A/A.inf
+EmulatorPkg/build.sh -a X64 >/mnt/hgfs/Share/code/output/compile.log 2>&1 
+#EmulatorPkg/build.sh -a X64 -n 8 -m MdeModulePkg/Application/A/A.inf
 #OvmfPkg/build.sh -a X64
 if [ $? -ne 0 ]; then
     exit 0;

@@ -4482,12 +4482,11 @@ EFI_STATUS L2_APPLICATIONS_Command_curl( UINT8 parameters[PARAMETER_COUNT][PARAM
     *p = '\0';    
     
 	int i = 0;
-	while(i++ < 3)
-	{
-		L2_TCP4_Send();
+	
+	L2_TCP4_Send();
 
-		L2_TCP4_Receive();
-	}
+	L2_TCP4_Receive();
+	
 }
 
 

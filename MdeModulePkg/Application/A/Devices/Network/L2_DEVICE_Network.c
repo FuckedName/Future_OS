@@ -35,6 +35,44 @@
 #include <L2_DEVICE_Network.h>
 
 
+#include "Ip6Impl.h"
+
+#include "Ip6Common.h"
+#include "Ip6ConfigImpl.h"
+#include "Ip6ConfigNv.h"
+#include "Ip6Driver.h"
+#include "Ip6Icmp.h"
+#include "Ip6If.h"
+#include "Ip6Input.h"
+#include "Ip6Mld.h"
+#include "Ip6Nd.h"
+#include "Ip6NvData.h"
+#include "Ip6Option.h"
+#include "Ip6Output.h"
+#include "Ip6Route.h"
+#include "Ip4Common.h"
+#include "Ip4Config2Impl.h"
+#include "Ip4Config2Nv.h"
+#include "Ip4Driver.h"
+#include "Ip4Icmp.h"
+#include "Ip4If.h"
+#include "Ip4Igmp.h"
+//#include "Ip4Impl.h"
+#include "Ip4Input.h"
+#include "Ip4NvData.h"
+#include "Ip4Option.h"
+#include "Ip4Output.h"
+#include "Ip4Route.h"
+
+#include "Ip4Impl.h"
+
+#include "Ip4Output.h"
+
+
+
+/**/
+
+
 #define IPV4_TO_LONG(a,b,c,d) (a | b<<8 | c << 16 | d <<24)
 #define INFO(...)   \
 				do {   \
@@ -44,13 +82,24 @@
 				    Print(__VA_ARGS__); \
 				    }\
 				}while(0);
+				
+				
+
+#define IP4_PROTOCOL_SIGNATURE  SIGNATURE_32 ('I', 'P', '4', 'P')
+#define IP4_SERVICE_SIGNATURE   SIGNATURE_32 ('I', 'P', '4', 'S')
+
+
+//extern EFI_IPSEC2_PROTOCOL   *mIpSec;
+//extern BOOLEAN               mIpSec2Installed;
+
+
 
 
 VOID  L2_TCP4_SendNotify(EFI_EVENT Event,      VOID *Context)
 {
      MYTCP4SOCKET *CurSocket = (MYTCP4SOCKET *)(Context);
      
-     //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d Tcp4SendNotify \n", __LINE__);
+     L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d Tcp4SendNotify \n", __LINE__);
 
      //INFO(L"Tcp4SendNotify: stub=%x\n", (int)CurSocket->stub);
      //INFO(L"Tcp4SendNotify: Context=%p\n", Context);
@@ -70,7 +119,7 @@ VOID  L2_TCP4_ReceiveNotify(EFI_EVENT      Event,  VOID *Context)
 
      //INFO(L"Tcp4RecvNotify: stub=%x\n", (int)CurSocket->stub);
      //INFO(L"Tcp4RecvNotify: Context=%p\n", Context);
-    //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d Tcp4RecvNotify \n", __LINE__);
+    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d Tcp4RecvNotify \n", __LINE__);
 }
 
 EFI_STATUS L2_TCP4_SocketInit()
@@ -264,6 +313,286 @@ EFI_STATUS L2_TCP4_SocketConnect()
 }
 
 
+
+/**
+  Places outgoing data packets into the transmit queue.
+
+  The Transmit() function places a sending request in the transmit queue of this
+  EFI IPv4 Protocol instance. Whenever the packet in the token is sent out or some
+  errors occur, the event in the token will be signaled and the status is updated.
+
+  @param[in]  This  Pointer to the EFI_IP4_PROTOCOL instance.
+  @param[in]  Token Pointer to the transmit token.
+
+  @retval  EFI_SUCCESS           The data has been queued for transmission.
+  @retval  EFI_NOT_STARTED       This instance has not been started.
+  @retval  EFI_NO_MAPPING        When using the default address, configuration (DHCP, BOOTP,
+                                 RARP, etc.) is not finished yet.
+  @retval  EFI_INVALID_PARAMETER One or more parameters are invalid.
+  @retval  EFI_ACCESS_DENIED     The transmit completion token with the same Token.Event
+                                 was already in the transmit queue.
+  @retval  EFI_NOT_READY         The completion token could not be queued because the transmit
+                                 queue is full.
+  @retval  EFI_NOT_FOUND         Not route is found to destination address.
+  @retval  EFI_OUT_OF_RESOURCES  Could not queue the transmit data.
+  @retval  EFI_BUFFER_TOO_SMALL  Token.Packet.TxData.TotalDataLength is too
+                                 short to transmit.
+  @retval  EFI_BAD_BUFFER_SIZE   The length of the IPv4 header + option length + total data length is
+                                 greater than MTU (or greater than the maximum packet size if
+                                 Token.Packet.TxData.OverrideData.
+                                 DoNotFragment is TRUE).
+
+**/
+
+
+EFI_STATUS
+EFIAPI
+EfiIp4Transmit2 (
+  IN EFI_IP4_PROTOCOL         *This,
+  IN EFI_IP4_COMPLETION_TOKEN *Token
+  )
+{
+  IP4_SERVICE               *IpSb;
+  IP4_PROTOCOL              *IpInstance;
+  IP4_INTERFACE             *IpIf;
+  IP4_TXTOKEN_WRAP          *Wrap;
+  EFI_IP4_TRANSMIT_DATA     *TxData;
+  EFI_IP4_CONFIG_DATA       *Config;
+  EFI_IP4_OVERRIDE_DATA     *Override;
+  IP4_HEAD                  Head;
+  IP4_ADDR                  GateWay;
+  EFI_STATUS                Status;
+  EFI_TPL                   OldTpl;
+  BOOLEAN                   DontFragment;
+  UINT32                    HeadLen;
+  UINT8                     RawHdrLen;
+  UINT32                    OptionsLength;
+  UINT8                     *OptionsBuffer;
+  VOID                      *FirstFragment;
+
+  if (This == NULL) {
+    return EFI_INVALID_PARAMETER;
+  }
+
+  IpInstance = IP4_INSTANCE_FROM_PROTOCOL (This);
+
+  if (IpInstance->State != IP4_STATE_CONFIGED) {
+    return EFI_NOT_STARTED;
+  }
+
+  OldTpl  = gBS->RaiseTPL (TPL_CALLBACK);
+
+  IpSb    = IpInstance->Service;
+  IpIf    = IpInstance->Interface;
+  Config  = &IpInstance->ConfigData;
+
+  if (Config->UseDefaultAddress && IP4_NO_MAPPING (IpInstance)) {
+    Status = EFI_NO_MAPPING;
+    goto ON_EXIT;
+  }
+
+  //
+  // make sure that token is properly formatted
+  //
+  Status = Ip4TxTokenValid (Token, IpIf, Config->RawData);
+
+  if (EFI_ERROR (Status)) {
+    goto ON_EXIT;
+  }
+
+  //
+  // Check whether the token or signal already existed.
+  //
+  if (EFI_ERROR (NetMapIterate (&IpInstance->TxTokens, Ip4TokenExist, Token))) {
+    Status = EFI_ACCESS_DENIED;
+    goto ON_EXIT;
+  }
+
+  //
+  // Build the IP header, need to fill in the Tos, TotalLen, Id,
+  // fragment, Ttl, protocol, Src, and Dst.
+  //
+  TxData = Token->Packet.TxData;
+
+  FirstFragment = NULL;
+
+  if (Config->RawData) {
+    //
+    // When RawData is TRUE, first buffer in FragmentTable points to a raw
+    // IPv4 fragment including IPv4 header and options.
+    //
+    FirstFragment = TxData->FragmentTable[0].FragmentBuffer;
+    CopyMem (&RawHdrLen, FirstFragment, sizeof (UINT8));
+
+    RawHdrLen = (UINT8) (RawHdrLen & 0x0f);
+    if (RawHdrLen < 5) {
+      Status = EFI_INVALID_PARAMETER;
+      goto ON_EXIT;
+    }
+
+    RawHdrLen = (UINT8) (RawHdrLen << 2);
+
+    CopyMem (&Head, FirstFragment, IP4_MIN_HEADLEN);
+
+    Ip4NtohHead (&Head);
+    HeadLen      = 0;
+    DontFragment = IP4_DO_NOT_FRAGMENT (Head.Fragment);
+
+    if (!DontFragment) {
+      Status = EFI_INVALID_PARAMETER;
+      goto ON_EXIT;
+    }
+
+    GateWay = IP4_ALLZERO_ADDRESS;
+
+    //
+    // Get IPv4 options from first fragment.
+    //
+    if (RawHdrLen == IP4_MIN_HEADLEN) {
+      OptionsLength = 0;
+      OptionsBuffer = NULL;
+    } else {
+      OptionsLength = RawHdrLen - IP4_MIN_HEADLEN;
+      OptionsBuffer = (UINT8 *) FirstFragment + IP4_MIN_HEADLEN;
+    }
+
+    //
+    // Trim off IPv4 header and options from first fragment.
+    //
+    TxData->FragmentTable[0].FragmentBuffer = (UINT8 *) FirstFragment + RawHdrLen;
+    TxData->FragmentTable[0].FragmentLength = TxData->FragmentTable[0].FragmentLength - RawHdrLen;
+  } else {
+    CopyMem (&Head.Dst, &TxData->DestinationAddress, sizeof (IP4_ADDR));
+    Head.Dst = NTOHL (Head.Dst);
+
+    if (TxData->OverrideData != NULL) {
+      Override      = TxData->OverrideData;
+      Head.Protocol = Override->Protocol;
+      Head.Tos      = Override->TypeOfService;
+      Head.Ttl      = Override->TimeToLive;
+      DontFragment  = Override->DoNotFragment;
+
+      CopyMem (&Head.Src, &Override->SourceAddress, sizeof (IP4_ADDR));
+      CopyMem (&GateWay, &Override->GatewayAddress, sizeof (IP4_ADDR));
+
+      Head.Src = NTOHL (Head.Src);
+      GateWay  = NTOHL (GateWay);
+    } else {
+      Head.Src      = IpIf->Ip;
+      GateWay       = IP4_ALLZERO_ADDRESS;
+      Head.Protocol = Config->DefaultProtocol;
+      Head.Tos      = Config->TypeOfService;
+      Head.Ttl      = Config->TimeToLive;
+      DontFragment  = Config->DoNotFragment;
+    }
+
+    Head.Fragment = IP4_HEAD_FRAGMENT_FIELD (DontFragment, FALSE, 0);
+    HeadLen       = (TxData->OptionsLength + 3) & (~0x03);
+
+    OptionsLength = TxData->OptionsLength;
+    OptionsBuffer = (UINT8 *) (TxData->OptionsBuffer);
+  }
+
+  //
+  // If don't fragment and fragment needed, return error
+  //
+  if (DontFragment && (TxData->TotalDataLength + HeadLen > IpSb->MaxPacketSize)) {
+    Status = EFI_BAD_BUFFER_SIZE;
+    goto ON_EXIT;
+  }
+
+  //
+  // OK, it survives all the validation check. Wrap the token in
+  // a IP4_TXTOKEN_WRAP and the data in a netbuf
+  //
+  Status = EFI_OUT_OF_RESOURCES;
+  Wrap   = AllocateZeroPool (sizeof (IP4_TXTOKEN_WRAP));
+  if (Wrap == NULL) {
+    goto ON_EXIT;
+  }
+
+  Wrap->IpInstance  = IpInstance;
+  Wrap->Token       = Token;
+  Wrap->Sent        = FALSE;
+  Wrap->Life        = IP4_US_TO_SEC (Config->TransmitTimeout);
+  Wrap->Packet      = NetbufFromExt (
+                        (NET_FRAGMENT *) TxData->FragmentTable,
+                        TxData->FragmentCount,
+                        IP4_MAX_HEADLEN,
+                        0,
+                        Ip4FreeTxToken,
+                        Wrap
+                        );
+
+  if (Wrap->Packet == NULL) {
+    FreePool (Wrap);
+    goto ON_EXIT;
+  }
+
+  Token->Status = EFI_NOT_READY;
+
+  if (EFI_ERROR (NetMapInsertTail (&IpInstance->TxTokens, Token, Wrap))) {
+    //
+    // NetbufFree will call Ip4FreeTxToken, which in turn will
+    // free the IP4_TXTOKEN_WRAP. Now, the token wrap hasn't been
+    // enqueued.
+    //
+    if (Config->RawData) {
+      //
+      // Restore pointer of first fragment in RawData mode.
+      //
+      TxData->FragmentTable[0].FragmentBuffer = (UINT8 *) FirstFragment;
+    }
+
+    NetbufFree (Wrap->Packet);
+    goto ON_EXIT;
+  }
+
+  //
+  // Mark the packet sent before output it. Mark it not sent again if the
+  // returned status is not EFI_SUCCESS;
+  //
+  Wrap->Sent = TRUE;
+
+  Status = Ip4Output (
+             IpSb,
+             IpInstance,
+             Wrap->Packet,
+             &Head,
+             OptionsBuffer,
+             OptionsLength,
+             GateWay,
+             Ip4OnPacketSent,
+             Wrap
+             );
+
+  if (EFI_ERROR (Status)) {
+    Wrap->Sent = FALSE;
+
+    if (Config->RawData) {
+      //
+      // Restore pointer of first fragment in RawData mode.
+      //
+      TxData->FragmentTable[0].FragmentBuffer = (UINT8 *) FirstFragment;
+    }
+
+    NetbufFree (Wrap->Packet);
+  }
+
+  if (Config->RawData) {
+    //
+    // Restore pointer of first fragment in RawData mode.
+    //
+    TxData->FragmentTable[0].FragmentBuffer = (UINT8 *) FirstFragment;
+  }
+
+ON_EXIT:
+  gBS->RestoreTPL (OldTpl);
+  return Status;
+}
+
+
+
 EFI_STATUS L2_TCP4_SocketSend(CHAR8* Data, UINTN Lenth)
 {
     EFI_STATUS Status = EFI_NOT_FOUND;
@@ -286,7 +615,8 @@ EFI_STATUS L2_TCP4_SocketSend(CHAR8* Data, UINTN Lenth)
     CurSocket->SendToken.Packet.TxData=  CurSocket->m_TransData;
 
     //Queues outgoing data into the transmit queue.
-    Status = CurSocket->m_pTcp4Protocol->Transmit(CurSocket->m_pTcp4Protocol, &CurSocket->SendToken);
+    Status = EfiIp4Transmit2(CurSocket->m_pTcp4Protocol, &CurSocket->SendToken);
+    //Status = CurSocket->m_pTcp4Protocol->Transmit(CurSocket->m_pTcp4Protocol, &CurSocket->SendToken);
     if(EFI_ERROR(Status))
     {
         L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d Send: Transmit fail! \n", __LINE__);
@@ -300,6 +630,8 @@ EFI_STATUS L2_TCP4_SocketSend(CHAR8* Data, UINTN Lenth)
 
 EFI_STATUS L2_TCP4_SocketReceive(CHAR8* Buffer, UINTN Length, UINTN *recvLength)
 {
+    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d L2_TCP4_SocketReceive function \n", __LINE__);
+   
     EFI_STATUS Status = EFI_NOT_FOUND;
     MYTCP4SOCKET *CurSocket = TCP4SocketFd;
     UINTN waitIndex = 0;
@@ -435,11 +767,11 @@ EFI_STATUS L2_TCP4_Receive()
     UINTN recvLen = 0;
     EFI_STATUS Status = 0;
 
-    for (UINT32 i = 0; i < 1024; i++)
+    for (UINT32 i = 0; i < 1024 * 4; i++)
         ReceiveBuffer[i] = 0;
             
     //从服务器接收数据。
-    Status = L2_TCP4_SocketReceive(ReceiveBuffer, 1024, &recvLen);
+    Status = L2_TCP4_SocketReceive(ReceiveBuffer, 1024 * 4, &recvLen);
     if(EFI_ERROR(Status))    
     {
         return Status;
