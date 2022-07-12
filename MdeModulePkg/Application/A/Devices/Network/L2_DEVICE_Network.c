@@ -99,7 +99,7 @@ VOID  L2_TCP4_SendNotify(EFI_EVENT Event,      VOID *Context)
 {
      MYTCP4SOCKET *CurSocket = (MYTCP4SOCKET *)(Context);
      
-     L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d Tcp4SendNotify \n", __LINE__);
+     //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d Tcp4SendNotify \n", __LINE__);
 
      //INFO(L"Tcp4SendNotify: stub=%x\n", (int)CurSocket->stub);
      //INFO(L"Tcp4SendNotify: Context=%p\n", Context);
@@ -119,7 +119,7 @@ VOID  L2_TCP4_ReceiveNotify(EFI_EVENT      Event,  VOID *Context)
 
      //INFO(L"Tcp4RecvNotify: stub=%x\n", (int)CurSocket->stub);
      //INFO(L"Tcp4RecvNotify: Context=%p\n", Context);
-    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d Tcp4RecvNotify \n", __LINE__);
+    //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d Tcp4RecvNotify \n", __LINE__);
 }
 
 EFI_STATUS L2_TCP4_SocketInit()
@@ -352,8 +352,6 @@ EfiIp4Transmit2 (
   IN EFI_IP4_COMPLETION_TOKEN *Token
   )
 {
-	
-
 	L2_DEBUG_Print3( DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: EfiIp4Transmit2: \n", __LINE__);
   IP4_SERVICE               *IpSb;
   IP4_PROTOCOL              *IpInstance;
@@ -372,6 +370,8 @@ EfiIp4Transmit2 (
   UINT32                    OptionsLength;
   UINT8                     *OptionsBuffer;
   VOID                      *FirstFragment;
+
+  return;
 
   if (This == NULL) {
     return EFI_INVALID_PARAMETER;
@@ -393,6 +393,7 @@ EfiIp4Transmit2 (
     Status = EFI_NO_MAPPING;
     goto ON_EXIT;
   }
+  
 
   //
   // make sure that token is properly formatted
