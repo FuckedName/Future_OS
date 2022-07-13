@@ -9,6 +9,11 @@
 **/
 
 #include "TcpMain.h"
+#include "SockInterface.h"
+
+#include <Graphics/L1_GRAPHICS.h>
+#include <Graphics/L2_GRAPHICS.h>
+#include <Global/Global.h>
 
 /**
   Check the integrity of the data buffer.
@@ -346,6 +351,8 @@ Tcp4Transmit (
   IN EFI_TCP4_IO_TOKEN            *Token
   )
 {
+	
+	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d %a \n", __LINE__, __FUNCTION__);
   SOCKET      *Sock;
   EFI_STATUS  Status;
 
