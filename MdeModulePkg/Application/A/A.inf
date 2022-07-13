@@ -97,8 +97,17 @@
 	Devices/Network/MnpConfig.h
 	Devices/Network/Transmit.c
 	Devices/Network/Transmit.h
+	Devices/Network/TcpMain.c
+	Devices/Network/TcpMain.h
+	Devices/Network/TcpDriver.c
+	Devices/Network/TcpDriver.h
+	Devices/Network/TcpProto.h
 	Devices/Network/Snp.h
-	
+	Devices/Network/Tcp4.h
+	Devices/Network/Tcp6.h
+	Devices/Network/Socket.h
+	Devices/Network/TcpProto.h
+	Devices/Network/TcpFunc.h
 	
 	Devices/Network/Ip4Common.h
 	Devices/Network/Ip4Config2Impl.h

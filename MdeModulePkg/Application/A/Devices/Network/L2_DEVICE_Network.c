@@ -352,7 +352,8 @@ EfiIp4Transmit2 (
   IN EFI_IP4_COMPLETION_TOKEN *Token
   )
 {
-	L2_DEBUG_Print3( DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: EfiIp4Transmit2: \n", __LINE__);
+  L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d %a \n", __LINE__, __FUNCTION__);
+
   IP4_SERVICE               *IpSb;
   IP4_PROTOCOL              *IpInstance;
   IP4_INTERFACE             *IpIf;
@@ -371,7 +372,6 @@ EfiIp4Transmit2 (
   UINT8                     *OptionsBuffer;
   VOID                      *FirstFragment;
 
-  //return;
 
   if (This == NULL) {
     return EFI_INVALID_PARAMETER;
@@ -379,9 +379,12 @@ EfiIp4Transmit2 (
 
   IpInstance = IP4_INSTANCE_FROM_PROTOCOL (This);
 
-  if (IpInstance->State != IP4_STATE_CONFIGED) {
+  if (IpInstance->State != IP4_STATE_CONFIGED) 
+  {
     return EFI_NOT_STARTED;
   }
+
+  return;
 
   OldTpl  = gBS->RaiseTPL (TPL_CALLBACK);
 
@@ -599,6 +602,7 @@ ON_EXIT:
 
 EFI_STATUS L2_TCP4_SocketSend(CHAR8* Data, UINTN Lenth)
 {
+	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d %a \n", __LINE__, __FUNCTION__);
     EFI_STATUS Status = EFI_NOT_FOUND;
     MYTCP4SOCKET *CurSocket = TCP4SocketFd;
     UINTN waitIndex = 0;
@@ -619,7 +623,7 @@ EFI_STATUS L2_TCP4_SocketSend(CHAR8* Data, UINTN Lenth)
     CurSocket->SendToken.Packet.TxData=  CurSocket->m_TransData;
 
     //Queues outgoing data into the transmit queue.
-    Status = EfiIp4Transmit2(CurSocket->m_pTcp4Protocol, &CurSocket->SendToken);
+    Status = Tcp4Transmit(CurSocket->m_pTcp4Protocol, &CurSocket->SendToken);
     //Status = CurSocket->m_pTcp4Protocol->Transmit(CurSocket->m_pTcp4Protocol, &CurSocket->SendToken);
     if(EFI_ERROR(Status))
     {
@@ -654,8 +658,8 @@ EFI_STATUS L2_TCP4_SocketReceive(CHAR8* Buffer, UINTN Length, UINTN *recvLength)
     CurSocket->RecvToken.Packet.RxData=  CurSocket->m_RecvData;
 
     //Places an asynchronous receive request into the receiving queue.
-    //Status = CurSocket->m_pTcp4Protocol->Receive(CurSocket->m_pTcp4Protocol, &CurSocket->RecvToken);
-    Status = EfiIp4Receive(CurSocket->m_pTcp4Protocol, &CurSocket->RecvToken);
+    Status = CurSocket->m_pTcp4Protocol->Receive(CurSocket->m_pTcp4Protocol, &CurSocket->RecvToken);
+    //Status = EfiIp4Receive(CurSocket->m_pTcp4Protocol, &CurSocket->RecvToken);
     
     if(EFI_ERROR(Status))
     {
@@ -826,7 +830,8 @@ EFI_STATUS L2_TCP4_Send()
     //向服务器发送数据。
     Status = L2_TCP4_SocketSend(SendBuffer, AsciiStrLen(SendBuffer));
     
-    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d TCP: Send: %r \n", __LINE__, Status);
+    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d %a %r\n", __LINE__, __FUNCTION__, Status);
+
     if(EFI_ERROR(Status))    
     {
         return Status;
