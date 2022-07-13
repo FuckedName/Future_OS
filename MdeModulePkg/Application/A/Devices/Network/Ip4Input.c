@@ -10,6 +10,10 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 #include "Ip4Impl.h"
 
+#include <Graphics/L1_GRAPHICS.h>
+#include <Graphics/L2_GRAPHICS.h>
+#include <Global/Global.h>
+
 
 /**
   Create an empty assemble entry for the packet identified by
@@ -1187,6 +1191,9 @@ Ip4WrapRxData (
   IN NET_BUF                *Packet
   )
 {
+
+	L2_DEBUG_Print3( DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: Ip4WrapRxData: \n", __LINE__);
+
   IP4_RXDATA_WRAP           *Wrap;
   EFI_IP4_RECEIVE_DATA      *RxData;
   EFI_STATUS                Status;
@@ -1269,6 +1276,9 @@ Ip4InstanceDeliverPacket (
   IN IP4_PROTOCOL           *IpInstance
   )
 {
+
+	L2_DEBUG_Print3( DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: Ip4InstanceDeliverPacket: \n", __LINE__);
+
   EFI_IP4_COMPLETION_TOKEN  *Token;
   IP4_RXDATA_WRAP           *Wrap;
   NET_BUF                   *Packet;

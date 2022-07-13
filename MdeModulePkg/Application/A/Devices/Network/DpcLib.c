@@ -90,5 +90,6 @@ DispatchDpc (
   //
   // Call the EFI_DPC_PROTOCOL to dispatch previously queued DPCs
   //
-  return mDpc->DispatchDpc (mDpc);
+  return DpcDispatchDpc (mDpc);
+  //return mDpc->DispatchDpc (mDpc);
 }

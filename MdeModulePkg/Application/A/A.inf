@@ -66,6 +66,7 @@
 	Devices/Network/Ip6Route.h
 	Devices/Network/DpcLib.h
 	Devices/Network/Dpc.h
+	Devices/Network/Dpc.c
 	Devices/Network/Ip6ConfigHii.h
 	Devices/Network/Ip4Config2Hii.h
 	Devices/Network/Ip4Config2.h

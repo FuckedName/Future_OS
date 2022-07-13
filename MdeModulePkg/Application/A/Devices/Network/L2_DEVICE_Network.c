@@ -654,7 +654,8 @@ EFI_STATUS L2_TCP4_SocketReceive(CHAR8* Buffer, UINTN Length, UINTN *recvLength)
     CurSocket->RecvToken.Packet.RxData=  CurSocket->m_RecvData;
 
     //Places an asynchronous receive request into the receiving queue.
-    Status = CurSocket->m_pTcp4Protocol->Receive(CurSocket->m_pTcp4Protocol, &CurSocket->RecvToken);
+    //Status = CurSocket->m_pTcp4Protocol->Receive(CurSocket->m_pTcp4Protocol, &CurSocket->RecvToken);
+    Status = EfiIp4Receive(CurSocket->m_pTcp4Protocol, &CurSocket->RecvToken);
     
     if(EFI_ERROR(Status))
     {

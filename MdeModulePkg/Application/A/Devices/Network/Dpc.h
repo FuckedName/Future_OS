@@ -12,17 +12,10 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #define __DPC_H__
 
 //
-// DPC Protocol GUID value
-//
-#define EFI_DPC_PROTOCOL_GUID \
-    { \
-      0x480f8ae9, 0xc46, 0x4aa9, { 0xbc, 0x89, 0xdb, 0x9f, 0xba, 0x61, 0x98, 0x6 } \
-    }
-
-//
 // Forward reference for pure ANSI compatibility
 //
 typedef struct _EFI_DPC_PROTOCOL  EFI_DPC_PROTOCOL;
+
 
 
 /**
@@ -82,6 +75,59 @@ EFI_STATUS
   IN EFI_DPC_PROTOCOL  *This
   );
 
+
+/**
+  Add a Deferred Procedure Call to the end of the DPC queue.
+
+  @param  This          Protocol instance pointer.
+  @param  DpcTpl        The EFI_TPL that the DPC should be invoked.
+  @param  DpcProcedure  Pointer to the DPC's function.
+  @param  DpcContext    Pointer to the DPC's context.  Passed to DpcProcedure
+                        when DpcProcedure is invoked.
+
+  @retval EFI_SUCCESS            The DPC was queued.
+  @retval EFI_INVALID_PARAMETER  DpcTpl is not a valid EFI_TPL.
+  @retval EFI_INVALID_PARAMETER  DpcProcedure is NULL.
+  @retval EFI_OUT_OF_RESOURCES   There are not enough resources available to
+                                 add the DPC to the queue.
+
+**/
+EFI_STATUS
+EFIAPI
+DpcQueueDpc (
+  IN EFI_DPC_PROTOCOL   *This,
+  IN EFI_TPL            DpcTpl,
+  IN EFI_DPC_PROCEDURE  DpcProcedure,
+  IN VOID               *DpcContext    OPTIONAL
+  );
+
+/**
+  Dispatch the queue of DPCs.  ALL DPCs that have been queued with a DpcTpl
+  value greater than or equal to the current TPL are invoked in the order that
+  they were queued.  DPCs with higher DpcTpl values are invoked before DPCs with
+  lower DpcTpl values.
+
+  @param  This  Protocol instance pointer.
+
+  @retval EFI_SUCCESS    One or more DPCs were invoked.
+  @retval EFI_NOT_FOUND  No DPCs were invoked.
+
+**/
+EFI_STATUS
+EFIAPI
+DpcDispatchDpc (
+  IN EFI_DPC_PROTOCOL  *This
+  );
+
+
+//
+// DPC Protocol GUID value
+//
+#define EFI_DPC_PROTOCOL_GUID \
+    { \
+      0x480f8ae9, 0xc46, 0x4aa9, { 0xbc, 0x89, 0xdb, 0x9f, 0xba, 0x61, 0x98, 0x6 } \
+    }
+
 ///
 /// DPC Protocol structure.
 ///
@@ -94,5 +140,16 @@ struct _EFI_DPC_PROTOCOL {
 /// DPC Protocol GUID variable.
 ///
 extern EFI_GUID gEfiDpcProtocolGuid;
+
+
+//
+// Internal data structure for managing DPCs.  A DPC entry is either on the free
+// list or on a DPC queue at a specific EFI_TPL.
+//
+typedef struct {
+  LIST_ENTRY             ListEntry;
+  EFI_DPC_PROCEDURE  DpcProcedure;
+  VOID               *DpcContext;
+} DPC_ENTRY;
 
 #endif
