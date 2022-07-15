@@ -4356,7 +4356,7 @@ EFI_STATUS L2_APPLICATIONS_Command_curl( UINT8 parameters[PARAMETER_COUNT][PARAM
 
 	CHAR8 *p = SendBuffer;
 
-	L1_MEMORY_Memset(SendBuffer, 0, 4 * 1024);
+	L1_MEMORY_Memset(SendBuffer, 0, SendBufferLength);
 	
 	L2_TCP4_SetKeyValue(&p, "GET / HTTP/1.1");
 	L2_TCP4_Set_r_n(&p);

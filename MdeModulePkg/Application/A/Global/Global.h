@@ -452,6 +452,7 @@ extern READ_FILE_STATE   NextState;
 extern int READ_FILE_FSM_Event;     
 extern CHAR8 *ReceiveBuffer;
 extern CHAR8 *SendBuffer;
+extern UINT32 SendBufferLength;
 
 
 extern UINT16 StatusErrorCount; 

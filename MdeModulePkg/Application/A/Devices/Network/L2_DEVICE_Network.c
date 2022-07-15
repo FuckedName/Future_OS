@@ -135,14 +135,22 @@ EFI_STATUS L2_TCP4_SocketInit()
     }
     
     // 2 Create Connect Event
-    Status = gBS->CreateEvent(EVT_NOTIFY_SIGNAL, TPL_CALLBACK, (EFI_EVENT_NOTIFY)L2_TCP4_HeartBeatNotify , (VOID*)&CurSocket->ConnectToken, &CurSocket->ConnectToken.CompletionToken.Event );
+    Status = gBS->CreateEvent(EVT_NOTIFY_SIGNAL, 
+    						  TPL_CALLBACK, 
+    						  (EFI_EVENT_NOTIFY)L2_TCP4_HeartBeatNotify , 
+    						  (VOID*)&CurSocket->ConnectToken, 
+    						  &CurSocket->ConnectToken.CompletionToken.Event );
     if(EFI_ERROR(Status)) 
     {
         return Status;  
     }
     
     // 3 Create Transmit Event
-    Status = gBS->CreateEvent(EVT_NOTIFY_WAIT, TPL_CALLBACK, (EFI_EVENT_NOTIFY)L2_TCP4_SendNotify , (VOID*)CurSocket, &CurSocket->SendToken.CompletionToken.Event);
+    Status = gBS->CreateEvent(EVT_NOTIFY_WAIT, 
+    						  TPL_CALLBACK, 
+    						  (EFI_EVENT_NOTIFY)L2_TCP4_SendNotify , 
+    						  (VOID*)CurSocket, 
+    						  &CurSocket->SendToken.CompletionToken.Event);
     if(EFI_ERROR(Status)) 
     {
         return Status;     
@@ -151,7 +159,11 @@ EFI_STATUS L2_TCP4_SocketInit()
     CurSocket->m_TransData = L2_MEMORY_Allocate("Network TCP4 Transmit Buffer", MEMORY_TYPE_NETWORK, sizeof(EFI_TCP4_TRANSMIT_DATA));
     
     // 4 Create Recv Event
-    Status = gBS->CreateEvent(EVT_NOTIFY_WAIT, TPL_CALLBACK, (EFI_EVENT_NOTIFY)L2_TCP4_ReceiveNotify , (VOID*)CurSocket, &CurSocket->RecvToken.CompletionToken.Event);
+    Status = gBS->CreateEvent(EVT_NOTIFY_WAIT, 
+    						  TPL_CALLBACK, 
+    						  (EFI_EVENT_NOTIFY)L2_TCP4_ReceiveNotify , 
+    						  (VOID*)CurSocket, 
+    						  &CurSocket->RecvToken.CompletionToken.Event);
     
     CurSocket->m_RecvData = L2_MEMORY_Allocate("Network Receive Buffer", MEMORY_TYPE_NETWORK, sizeof(EFI_TCP4_RECEIVE_DATA));
     if(EFI_ERROR(Status)) 
@@ -257,7 +269,7 @@ EFI_STATUS L2_TCP4_SocketConfig()
     CurSocket->m_pTcp4ConfigData->AccessPoint.StationPort = 61558;
 
     //配置远端IP地址，
-    *(UINTN*)(CurSocket->m_pTcp4ConfigData->AccessPoint.RemoteAddress.Addr) = IPV4_TO_LONG(192,168,3,3);
+    *(UINTN*)(CurSocket->m_pTcp4ConfigData->AccessPoint.RemoteAddress.Addr) = IPV4_TO_LONG(192,168,3,6);
     //*(UINTN*)(CurSocket->m_pTcp4ConfigData->AccessPoint.RemoteAddress.Addr) = IPV4_TO_LONG(154,214,4,4);
     
     //配置远端端口
@@ -292,7 +304,7 @@ EFI_STATUS L2_TCP4_SocketConnect()
     
     Status = CurSocket->m_pTcp4Protocol->Connect(CurSocket->m_pTcp4Protocol, &CurSocket->ConnectToken);
     //INFO(L"%r\n", Status);
-    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d :%r \n", __LINE__,  Status);
+    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d %a: %r \n", __LINE__,  __FUNCTION__,Status);
    
     
     //if(EFI_ERROR(Status))    
@@ -303,7 +315,7 @@ EFI_STATUS L2_TCP4_SocketConnect()
     // 就算这里失败，也可以继续往下运行。
     Status = gBS->WaitForEvent(1, &(CurSocket->ConnectToken.CompletionToken.Event), &waitIndex);
     //INFO(L"Connect: WaitForEvent, %r\n", Status);
-    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d :%r \n", __LINE__,  Status);
+    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d %a: %r \n", __LINE__,  __FUNCTION__,Status);
    
     // if( !EFI_ERROR(Status)){
     //     gST->ConOut->OutputString(gST->ConOut,L"Connect: WaitForEvent fail!\n\r");
@@ -613,7 +625,8 @@ EFI_STATUS L2_TCP4_SocketSend(CHAR8* Data, UINTN Lenth)
    
         return Status;  
     }
-    
+    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d %a \n", __LINE__, __FUNCTION__);
+   
     CurSocket->m_TransData->Push = TRUE;
     CurSocket->m_TransData->Urgent = TRUE;
     CurSocket->m_TransData->DataLength = (UINT32)Lenth;
@@ -621,10 +634,12 @@ EFI_STATUS L2_TCP4_SocketSend(CHAR8* Data, UINTN Lenth)
     CurSocket->m_TransData->FragmentTable[0].FragmentLength =CurSocket->m_TransData->DataLength;
     CurSocket->m_TransData->FragmentTable[0].FragmentBuffer =Data;
     CurSocket->SendToken.Packet.TxData=  CurSocket->m_TransData;
-
+	
+	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d %a %X\n", __LINE__, __FUNCTION__, &CurSocket->SendToken);
+	
     //Queues outgoing data into the transmit queue.
-    Status = Tcp4Transmit(CurSocket->m_pTcp4Protocol, &CurSocket->SendToken);
-    //Status = CurSocket->m_pTcp4Protocol->Transmit(CurSocket->m_pTcp4Protocol, &CurSocket->SendToken);
+    //Status = Tcp4Transmit(CurSocket->m_pTcp4Protocol, &CurSocket->SendToken);
+    Status = CurSocket->m_pTcp4Protocol->Transmit(CurSocket->m_pTcp4Protocol, &CurSocket->SendToken);
     if(EFI_ERROR(Status))
     {
         L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d Send: Transmit fail! \n", __LINE__);
@@ -738,6 +753,7 @@ EFI_STATUS L2_TCP4_SocketClose()
 
 CHAR8 *ReceiveBuffer = NULL;
 CHAR8 *SendBuffer = NULL;
+UINT32 SendBufferLength = 1024;
 
 EFI_STATUS L2_TCP4_Init()
 {
@@ -756,7 +772,7 @@ EFI_STATUS L2_TCP4_Init()
     Status = L2_TCP4_SocketConnect();  
 
     ReceiveBuffer = L2_MEMORY_Allocate("Network Receive Buffer", MEMORY_TYPE_NETWORK, 1024 * 4);
-    SendBuffer = L2_MEMORY_Allocate("Network Send Buffer", MEMORY_TYPE_NETWORK, 1024 * 4);    
+    SendBuffer = L2_MEMORY_Allocate("Network Send Buffer", MEMORY_TYPE_NETWORK, SendBufferLength);    
     
 }
 
@@ -825,10 +841,12 @@ EFI_STATUS L2_TCP4_Receive()
 *****************************************************************************/
 EFI_STATUS L2_TCP4_Send()
 {
+	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d %a \n", __LINE__, __FUNCTION__);
+
     EFI_STATUS Status = 0;
     
     //向服务器发送数据。
-    Status = L2_TCP4_SocketSend(SendBuffer, AsciiStrLen(SendBuffer));
+    Status = L2_TCP4_SocketSend(SendBuffer, SendBufferLength);
     
     L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d %a %r\n", __LINE__, __FUNCTION__, Status);
 

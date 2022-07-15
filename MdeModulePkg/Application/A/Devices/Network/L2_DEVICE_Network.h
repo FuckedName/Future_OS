@@ -42,7 +42,8 @@ typedef struct MyTCP4Socket{
 		EFI_TCP4_RECEIVE_DATA*         m_RecvData; 
 		EFI_TCP4_CONNECTION_TOKEN      ConnectToken;
 		EFI_TCP4_CLOSE_TOKEN           CloseToken;
-		EFI_TCP4_IO_TOKEN              SendToken, RecvToken;
+		EFI_TCP4_IO_TOKEN              SendToken;
+		EFI_TCP4_IO_TOKEN              RecvToken;
         int stub;   //robin add for debug
 }MYTCP4SOCKET;
 
