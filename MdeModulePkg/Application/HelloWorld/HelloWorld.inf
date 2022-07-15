@@ -15,15 +15,26 @@
 
 [Packages]
   MdePkg/MdePkg.dec
+  ShellPkg/ShellPkg.dec
   MdeModulePkg/MdeModulePkg.dec
 
 [LibraryClasses]
   UefiApplicationEntryPoint
   UefiLib
   PcdLib
-
+  ShellLib
+  
 [FeaturePcd]
   gEfiMdeModulePkgTokenSpaceGuid.PcdHelloWorldPrintEnable   ## CONSUMES
+[Protocols]
+  gEfiShellParametersProtocolGuid         
+  gEfiShellProtocolGuid
+  
+[Guids]
+  gEfiIfrTianoGuid                              ## CONSUMES ## GUID (Extended IFR Guid Opcode)
+  gEfiIfrFrontPageGuid                          ## CONSUMES ## GUID
+  gShellVariableGuid                                      ## SOMETIMES_CONSUMES ## GUID
+  gShellAliasGuid                                         ## SOMETIMES_CONSUMES ## GUID
 
 [Pcd]
   gEfiMdeModulePkgTokenSpaceGuid.PcdHelloWorldPrintString   ## SOMETIMES_CONSUMES
