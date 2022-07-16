@@ -453,6 +453,9 @@ extern int READ_FILE_FSM_Event;
 extern CHAR8 *ReceiveBuffer;
 extern CHAR8 *SendBuffer;
 extern UINT32 SendBufferLength;
+extern UINT32 ReceiveBufferLength;
+extern UINT32 TimerSliceCount;
+
 
 
 extern UINT16 StatusErrorCount; 

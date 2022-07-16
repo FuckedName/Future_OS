@@ -94,6 +94,17 @@
 
 
 
+VOID  L2_TCP4_SendFinishedNotify(EFI_EVENT Event,      VOID *Context)
+{
+     MYTCP4SOCKET *CurSocket = (MYTCP4SOCKET *)(Context);
+     
+     //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d Tcp4SendNotify \n", __LINE__);
+
+     //INFO(L"Tcp4SendNotify: stub=%x\n", (int)CurSocket->stub);
+     //INFO(L"Tcp4SendNotify: Context=%p\n", Context);
+}
+
+
 
 VOID  L2_TCP4_SendNotify(EFI_EVENT Event,      VOID *Context)
 {
@@ -119,8 +130,27 @@ VOID  L2_TCP4_ReceiveNotify(EFI_EVENT      Event,  VOID *Context)
 
      //INFO(L"Tcp4RecvNotify: stub=%x\n", (int)CurSocket->stub);
      //INFO(L"Tcp4RecvNotify: Context=%p\n", Context);
-    //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d Tcp4RecvNotify \n", __LINE__);
+	 
+	 //Print(L"%d %a DataLength: %d DataLength: %d UrgentFlag: %d Buffer[0]\n", __LINE__, __FUNCTION__, CurSocket->m_RecvData->DataLength,
+	 //																CurSocket->m_RecvData->UrgentFlag);
+	 
+	 
 }
+
+
+VOID  L2_TCP4_ReceiveFinishedNotify(EFI_EVENT      Event,  VOID *Context)
+{
+     MYTCP4SOCKET *CurSocket = (MYTCP4SOCKET *)(Context);
+
+     //INFO(L"Tcp4RecvNotify: stub=%x\n", (int)CurSocket->stub);
+     //INFO(L"Tcp4RecvNotify: Context=%p\n", Context);
+	 
+	 Print(L"%d %a DataLength: %d DataLength: %d UrgentFlag: %d Buffer[0]\n", __LINE__, __FUNCTION__, CurSocket->m_RecvData->DataLength,
+	 																CurSocket->m_RecvData->UrgentFlag);
+	 
+	 
+}
+
 
 EFI_STATUS L2_TCP4_SocketInit()
 {
@@ -148,7 +178,7 @@ EFI_STATUS L2_TCP4_SocketInit()
     // 3 Create Transmit Event
     Status = gBS->CreateEvent(EVT_NOTIFY_WAIT, 
     						  TPL_CALLBACK, 
-    						  (EFI_EVENT_NOTIFY)L2_TCP4_SendNotify , 
+    						  (EFI_EVENT_NOTIFY)L2_TCP4_SendFinishedNotify , 
     						  (VOID*)CurSocket, 
     						  &CurSocket->SendToken.CompletionToken.Event);
     if(EFI_ERROR(Status)) 
@@ -161,7 +191,7 @@ EFI_STATUS L2_TCP4_SocketInit()
     // 4 Create Recv Event
     Status = gBS->CreateEvent(EVT_NOTIFY_WAIT, 
     						  TPL_CALLBACK, 
-    						  (EFI_EVENT_NOTIFY)L2_TCP4_ReceiveNotify , 
+    						  (EFI_EVENT_NOTIFY)L2_TCP4_ReceiveFinishedNotify , 
     						  (VOID*)CurSocket, 
     						  &CurSocket->RecvToken.CompletionToken.Event);
     
@@ -665,17 +695,18 @@ EFI_STATUS L2_TCP4_SocketReceive(CHAR8* Buffer, UINTN Length, UINTN *recvLength)
     }
 
     CurSocket->m_RecvData->UrgentFlag = TRUE;
-    CurSocket->m_RecvData->DataLength = (UINT32)Length;
+    CurSocket->m_RecvData->DataLength = ReceiveBufferLength;
     CurSocket->m_RecvData->FragmentCount = 1;
-    CurSocket->m_RecvData->FragmentTable[0].FragmentLength = CurSocket->m_RecvData->DataLength ;
-    CurSocket->m_RecvData->FragmentTable[0].FragmentBuffer = (void*)Buffer;
+    CurSocket->m_RecvData->FragmentTable[0].FragmentLength = ReceiveBufferLength;
+    CurSocket->m_RecvData->FragmentTable[0].FragmentBuffer = (void*)ReceiveBuffer;
     
-    CurSocket->RecvToken.Packet.RxData=  CurSocket->m_RecvData;
+    CurSocket->RecvToken.Packet.RxData =  CurSocket->m_RecvData;
 
     //Places an asynchronous receive request into the receiving queue.
     Status = CurSocket->m_pTcp4Protocol->Receive(CurSocket->m_pTcp4Protocol, &CurSocket->RecvToken);
     //Status = EfiIp4Receive(CurSocket->m_pTcp4Protocol, &CurSocket->RecvToken);
     
+	//EFI_TCP4_RECEIVE_DATA   *RxData;
     if(EFI_ERROR(Status))
     {
         //gST->ConOut->OutputString(gST->ConOut,L"Recv: Receive fail!\n\r");
@@ -690,6 +721,21 @@ EFI_STATUS L2_TCP4_SocketReceive(CHAR8* Buffer, UINTN Length, UINTN *recvLength)
    
     return CurSocket->RecvToken.CompletionToken.Status;
 }
+
+
+BOOLEAN L2_TCP4_ReceiveFinished()
+{	
+    EFI_STATUS Status;
+    
+	MYTCP4SOCKET *CurSocket = TCP4SocketFd;
+	
+	Status = gBS->CheckEvent(CurSocket->RecvToken.CompletionToken.Event);
+	if (Status == EFI_NOT_READY)
+		FALSE;
+
+	return TRUE;
+}
+
 
 INTN L2_TCP4_SocketDestroy()
 {
@@ -753,7 +799,8 @@ EFI_STATUS L2_TCP4_SocketClose()
 
 CHAR8 *ReceiveBuffer = NULL;
 CHAR8 *SendBuffer = NULL;
-UINT32 SendBufferLength = 1024;
+UINT32 SendBufferLength = 1514;
+UINT32 ReceiveBufferLength = 2 * 1024;
 
 EFI_STATUS L2_TCP4_Init()
 {
@@ -771,7 +818,7 @@ EFI_STATUS L2_TCP4_Init()
     
     Status = L2_TCP4_SocketConnect();  
 
-    ReceiveBuffer = L2_MEMORY_Allocate("Network Receive Buffer", MEMORY_TYPE_NETWORK, 1024 * 4);
+    ReceiveBuffer = L2_MEMORY_Allocate("Network Receive Buffer", MEMORY_TYPE_NETWORK, ReceiveBufferLength);
     SendBuffer = L2_MEMORY_Allocate("Network Send Buffer", MEMORY_TYPE_NETWORK, SendBufferLength);    
     
 }
@@ -792,11 +839,11 @@ EFI_STATUS L2_TCP4_Receive()
     UINTN recvLen = 0;
     EFI_STATUS Status = 0;
 
-    for (UINT32 i = 0; i < 1024 * 4; i++)
+    for (UINT32 i = 0; i < ReceiveBufferLength; i++)
         ReceiveBuffer[i] = 0;
             
     //从服务器接收数据。
-    Status = L2_TCP4_SocketReceive(ReceiveBuffer, 1024 * 4, &recvLen);
+    Status = L2_TCP4_SocketReceive(ReceiveBuffer, ReceiveBufferLength, &recvLen);
     if(EFI_ERROR(Status))    
     {
         return Status;
@@ -804,25 +851,6 @@ EFI_STATUS L2_TCP4_Receive()
     
     L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d TCP: Receive: %r \n", __LINE__, Status);
    
-    //显示接收的数据。
-    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d Receive raw data Length: %d %02X%02X%02X%02X%02X%02X%02X%02X \n", __LINE__, recvLen, 
-    																																											ReceiveBuffer[0], 
-    																																											ReceiveBuffer[1], 
-    																																											ReceiveBuffer[2], 
-    																																											ReceiveBuffer[3], 
-    																																											ReceiveBuffer[4], 
-    																																											ReceiveBuffer[5], 
-    																																											ReceiveBuffer[6], 
-    																																											ReceiveBuffer[7]);
-   
-    //ReceiveBuffer[60] = '\0';
-    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d TCP: Receive data is: %a \n", __LINE__, ReceiveBuffer);
-
-	
-    for (int j = 0; j < 256; j++)
-    {
-        L2_DEBUG_Print1(DISK_READ_BUFFER_X + ScreenWidth * 3 / 4 + (j % 16) * 8 * 3, DISK_READ_BUFFER_Y + 16 * (j / 16), "%02X ", ReceiveBuffer[j] & 0xff);
-    }
        
     return EFI_SUCCESS;
 }
@@ -841,7 +869,7 @@ EFI_STATUS L2_TCP4_Receive()
 *****************************************************************************/
 EFI_STATUS L2_TCP4_Send()
 {
-	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d %a \n", __LINE__, __FUNCTION__);
+	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d %a SendBufferLength: %d \n", __LINE__, __FUNCTION__, SendBufferLength);
 
     EFI_STATUS Status = 0;
     
