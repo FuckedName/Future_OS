@@ -1,23 +1,23 @@
 
 /*************************************************
     .
-    File name:      	*.*
-    Author：	        	任启红
-    ID：					00001
-    Date:          		202107
-    Description:    	
-    Others:         	无
+    File name:          *.*
+    Author：                任启红
+    ID：                    00001
+    Date:                  202107
+    Description:        
+    Others:             无
 
-    History:        	无
-	    1.  Date:
-		    Author: 
-		    ID:
-		    Modification:
-		    
-	    2.  Date:
-		    Author: 
-		    ID:
-		    Modification:
+    History:            无
+        1.  Date:
+            Author: 
+            ID:
+            Modification:
+            
+        2.  Date:
+            Author: 
+            ID:
+            Modification:
 *************************************************/
 
 
@@ -75,15 +75,15 @@
 
 #define IPV4_TO_LONG(a,b,c,d) (a | b<<8 | c << 16 | d <<24)
 #define INFO(...)   \
-				do {   \
-				     if (0)\
-					 {\
-					 Print(L"[INFO  ]%a %a(Line %d): ", __FILE__,__FUNCTION__,__LINE__);  \
-				    Print(__VA_ARGS__); \
-				    }\
-				}while(0);
-				
-				
+                do {   \
+                     if (0)\
+                     {\
+                     Print(L"[INFO  ]%a %a(Line %d): ", __FILE__,__FUNCTION__,__LINE__);  \
+                    Print(__VA_ARGS__); \
+                    }\
+                }while(0);
+                
+                
 
 #define IP4_PROTOCOL_SIGNATURE  SIGNATURE_32 ('I', 'P', '4', 'P')
 #define IP4_SERVICE_SIGNATURE   SIGNATURE_32 ('I', 'P', '4', 'S')
@@ -130,11 +130,11 @@ VOID  L2_TCP4_ReceiveNotify(EFI_EVENT      Event,  VOID *Context)
 
      //INFO(L"Tcp4RecvNotify: stub=%x\n", (int)CurSocket->stub);
      //INFO(L"Tcp4RecvNotify: Context=%p\n", Context);
-	 
-	 //Print(L"%d %a DataLength: %d DataLength: %d UrgentFlag: %d Buffer[0]\n", __LINE__, __FUNCTION__, CurSocket->m_RecvData->DataLength,
-	 //																CurSocket->m_RecvData->UrgentFlag);
-	 
-	 
+     
+     //Print(L"%d %a DataLength: %d DataLength: %d UrgentFlag: %d Buffer[0]\n", __LINE__, __FUNCTION__, CurSocket->m_RecvData->DataLength,
+     //                                                                CurSocket->m_RecvData->UrgentFlag);
+     
+     
 }
 
 
@@ -144,11 +144,11 @@ VOID  L2_TCP4_ReceiveFinishedNotify(EFI_EVENT      Event,  VOID *Context)
 
      //INFO(L"Tcp4RecvNotify: stub=%x\n", (int)CurSocket->stub);
      //INFO(L"Tcp4RecvNotify: Context=%p\n", Context);
-	 
-	 Print(L"%d %a DataLength: %d DataLength: %d UrgentFlag: %d Buffer[0]\n", __LINE__, __FUNCTION__, CurSocket->m_RecvData->DataLength,
-	 																CurSocket->m_RecvData->UrgentFlag);
-	 
-	 
+     
+     Print(L"%d %a DataLength: %d DataLength: %d UrgentFlag: %d Buffer[0]\n", __LINE__, __FUNCTION__, CurSocket->m_RecvData->DataLength,
+                                                                     CurSocket->m_RecvData->UrgentFlag);
+     
+     
 }
 
 
@@ -161,15 +161,15 @@ EFI_STATUS L2_TCP4_SocketInit()
     CurSocket->m_pTcp4ConfigData = L2_MEMORY_Allocate("Network TCP config Buffer", MEMORY_TYPE_NETWORK, sizeof(EFI_TCP4_CONFIG_DATA));
     if (NULL == CurSocket->m_pTcp4ConfigData)
     {
-    	return;
+        return;
     }
     
     // 2 Create Connect Event
     Status = gBS->CreateEvent(EVT_NOTIFY_SIGNAL, 
-    						  TPL_CALLBACK, 
-    						  (EFI_EVENT_NOTIFY)L2_TCP4_HeartBeatNotify , 
-    						  (VOID*)&CurSocket->ConnectToken, 
-    						  &CurSocket->ConnectToken.CompletionToken.Event );
+                              TPL_CALLBACK, 
+                              (EFI_EVENT_NOTIFY)L2_TCP4_HeartBeatNotify , 
+                              (VOID*)&CurSocket->ConnectToken, 
+                              &CurSocket->ConnectToken.CompletionToken.Event );
     if(EFI_ERROR(Status)) 
     {
         return Status;  
@@ -177,10 +177,10 @@ EFI_STATUS L2_TCP4_SocketInit()
     
     // 3 Create Transmit Event
     Status = gBS->CreateEvent(EVT_NOTIFY_WAIT, 
-    						  TPL_CALLBACK, 
-    						  (EFI_EVENT_NOTIFY)L2_TCP4_SendFinishedNotify , 
-    						  (VOID*)CurSocket, 
-    						  &CurSocket->SendToken.CompletionToken.Event);
+                              TPL_CALLBACK, 
+                              (EFI_EVENT_NOTIFY)L2_TCP4_SendFinishedNotify , 
+                              (VOID*)CurSocket, 
+                              &CurSocket->SendToken.CompletionToken.Event);
     if(EFI_ERROR(Status)) 
     {
         return Status;     
@@ -190,10 +190,10 @@ EFI_STATUS L2_TCP4_SocketInit()
     
     // 4 Create Recv Event
     Status = gBS->CreateEvent(EVT_NOTIFY_WAIT, 
-    						  TPL_CALLBACK, 
-    						  (EFI_EVENT_NOTIFY)L2_TCP4_ReceiveFinishedNotify , 
-    						  (VOID*)CurSocket, 
-    						  &CurSocket->RecvToken.CompletionToken.Event);
+                              TPL_CALLBACK, 
+                              (EFI_EVENT_NOTIFY)L2_TCP4_ReceiveFinishedNotify , 
+                              (VOID*)CurSocket, 
+                              &CurSocket->RecvToken.CompletionToken.Event);
     
     CurSocket->m_RecvData = L2_MEMORY_Allocate("Network Receive Buffer", MEMORY_TYPE_NETWORK, sizeof(EFI_TCP4_RECEIVE_DATA));
     if(EFI_ERROR(Status)) 
@@ -218,18 +218,18 @@ UINTN L2_TCP4_SocketCreate(VOID)
 {
     EFI_STATUS                           Status;
     EFI_SERVICE_BINDING_PROTOCOL*  pTcpServiceBinding;
-	
+    
     TCP4SocketFd = L2_MEMORY_Allocate("Network Receive Buffer", MEMORY_TYPE_NETWORK, sizeof(MYTCP4SOCKET));
     if (TCP4SocketFd == NULL)
     {
-    	return EFI_SUCCESS;
+        return EFI_SUCCESS;
     }
             
     //gBS->SetMem((void*)TCP4SocketFd, 0, sizeof(MYTCP4SOCKET));
     TCP4SocketFd->m_SocketHandle  = NULL;
     Status = gBS->LocateProtocol(&gEfiTcp4ServiceBindingProtocolGuid,
-							        NULL,
-							        (VOID **)&pTcpServiceBinding);
+                                    NULL,
+                                    (VOID **)&pTcpServiceBinding);
     if(EFI_ERROR(Status))
     {
         return Status;
@@ -242,11 +242,11 @@ UINTN L2_TCP4_SocketCreate(VOID)
     }
 
     Status = gBS->OpenProtocol(TCP4SocketFd->m_SocketHandle,
-							        &gEfiTcp4ProtocolGuid,
-							        (VOID **)&TCP4SocketFd->m_pTcp4Protocol,
-							        gImageHandle,
-							        TCP4SocketFd->m_SocketHandle,
-							        EFI_OPEN_PROTOCOL_BY_HANDLE_PROTOCOL );							        
+                                    &gEfiTcp4ProtocolGuid,
+                                    (VOID **)&TCP4SocketFd->m_pTcp4Protocol,
+                                    gImageHandle,
+                                    TCP4SocketFd->m_SocketHandle,
+                                    EFI_OPEN_PROTOCOL_BY_HANDLE_PROTOCOL );                                    
     if(EFI_ERROR(Status))
     {
         return Status;
@@ -254,27 +254,27 @@ UINTN L2_TCP4_SocketCreate(VOID)
 
     //给初始化结构体指针分配内存
     L2_TCP4_SocketInit();
-    	
+        
     return 0;
 }
 
 int L2_TCP4_SetKeyValue(char **dest, char *source)
 {
-	int length = L1_STRING_Length(source);
-	L1_MEMORY_Copy(*dest, source, length);
-	*dest += length;
-	
-	return length;
+    int length = L1_STRING_Length(source);
+    L1_MEMORY_Copy(*dest, source, length);
+    *dest += length;
+    
+    return length;
 }
 
 //\r\n
 int L2_TCP4_Set_r_n(char **dest)
 {
-	int length = L1_STRING_Length("\r\n");
-	L1_MEMORY_Copy(*dest, "\r\n", length);
-	*dest += length;
-	
-	return length;
+    int length = L1_STRING_Length("\r\n");
+    L1_MEMORY_Copy(*dest, "\r\n", length);
+    *dest += length;
+    
+    return length;
 }
 
 
@@ -644,7 +644,7 @@ ON_EXIT:
 
 EFI_STATUS L2_TCP4_SocketSend(CHAR8* Data, UINTN Lenth)
 {
-	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d %a \n", __LINE__, __FUNCTION__);
+    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d %a \n", __LINE__, __FUNCTION__);
     EFI_STATUS Status = EFI_NOT_FOUND;
     MYTCP4SOCKET *CurSocket = TCP4SocketFd;
     UINTN waitIndex = 0;
@@ -664,9 +664,9 @@ EFI_STATUS L2_TCP4_SocketSend(CHAR8* Data, UINTN Lenth)
     CurSocket->m_TransData->FragmentTable[0].FragmentLength =CurSocket->m_TransData->DataLength;
     CurSocket->m_TransData->FragmentTable[0].FragmentBuffer =Data;
     CurSocket->SendToken.Packet.TxData=  CurSocket->m_TransData;
-	
-	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d %a %X\n", __LINE__, __FUNCTION__, &CurSocket->SendToken);
-	
+    
+    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d %a %X\n", __LINE__, __FUNCTION__, &CurSocket->SendToken);
+    
     //Queues outgoing data into the transmit queue.
     //Status = Tcp4Transmit(CurSocket->m_pTcp4Protocol, &CurSocket->SendToken);
     Status = CurSocket->m_pTcp4Protocol->Transmit(CurSocket->m_pTcp4Protocol, &CurSocket->SendToken);
@@ -677,7 +677,7 @@ EFI_STATUS L2_TCP4_SocketSend(CHAR8* Data, UINTN Lenth)
         return Status;
     }
                 
-	Status = gBS->WaitForEvent(1, &(CurSocket->SendToken.CompletionToken.Event), &waitIndex);
+    Status = gBS->WaitForEvent(1, &(CurSocket->SendToken.CompletionToken.Event), &waitIndex);
     return CurSocket->SendToken.CompletionToken.Status;
 }
 
@@ -706,7 +706,7 @@ EFI_STATUS L2_TCP4_SocketReceive(CHAR8* Buffer, UINTN Length, UINTN *recvLength)
     Status = CurSocket->m_pTcp4Protocol->Receive(CurSocket->m_pTcp4Protocol, &CurSocket->RecvToken);
     //Status = EfiIp4Receive(CurSocket->m_pTcp4Protocol, &CurSocket->RecvToken);
     
-	//EFI_TCP4_RECEIVE_DATA   *RxData;
+    //EFI_TCP4_RECEIVE_DATA   *RxData;
     if(EFI_ERROR(Status))
     {
         //gST->ConOut->OutputString(gST->ConOut,L"Recv: Receive fail!\n\r");
@@ -724,16 +724,16 @@ EFI_STATUS L2_TCP4_SocketReceive(CHAR8* Buffer, UINTN Length, UINTN *recvLength)
 
 
 BOOLEAN L2_TCP4_ReceiveFinished()
-{	
+{    
     EFI_STATUS Status;
     
-	MYTCP4SOCKET *CurSocket = TCP4SocketFd;
-	
-	Status = gBS->CheckEvent(CurSocket->RecvToken.CompletionToken.Event);
-	if (Status == EFI_NOT_READY)
-		FALSE;
+    MYTCP4SOCKET *CurSocket = TCP4SocketFd;
+    
+    Status = gBS->CheckEvent(CurSocket->RecvToken.CompletionToken.Event);
+    if (Status == EFI_NOT_READY)
+        FALSE;
 
-	return TRUE;
+    return TRUE;
 }
 
 
@@ -767,19 +767,19 @@ INTN L2_TCP4_SocketDestroy()
     
     if(CurSocket->m_pTcp4ConfigData)
     {
-	    //FreePool(CurSocket->m_pTcp4ConfigData);
+        //FreePool(CurSocket->m_pTcp4ConfigData);
     }
     
     if(CurSocket->SendToken.Packet.TxData)
     {
-	    //FreePool(CurSocket->SendToken.Packet.TxData);
-	    CurSocket->SendToken.Packet.TxData = NULL;
+        //FreePool(CurSocket->SendToken.Packet.TxData);
+        CurSocket->SendToken.Packet.TxData = NULL;
     }
     
     if(CurSocket->RecvToken.Packet.RxData)
     {
-	    //FreePool(CurSocket->RecvToken.Packet.RxData);
-	    CurSocket->RecvToken.Packet.RxData = NULL;
+        //FreePool(CurSocket->RecvToken.Packet.RxData);
+        CurSocket->RecvToken.Packet.RxData = NULL;
     }
     return 0;
 }
@@ -788,13 +788,13 @@ EFI_STATUS L2_TCP4_SocketClose()
 {
     EFI_STATUS Status;
     MYTCP4SOCKET *CurSocket = TCP4SocketFd;
-	Status = CurSocket->m_pTcp4Protocol->Close(CurSocket->m_pTcp4Protocol, &CurSocket->CloseToken);
-	
-	L2_TCP4_SocketDestroy();
-	//FreePool(CurSocket);
-	TCP4SocketFd = NULL;
+    Status = CurSocket->m_pTcp4Protocol->Close(CurSocket->m_pTcp4Protocol, &CurSocket->CloseToken);
+    
+    L2_TCP4_SocketDestroy();
+    //FreePool(CurSocket);
+    TCP4SocketFd = NULL;
 
-	return Status;
+    return Status;
 }
 
 CHAR8 *ReceiveBuffer = NULL;
@@ -869,7 +869,7 @@ EFI_STATUS L2_TCP4_Receive()
 *****************************************************************************/
 EFI_STATUS L2_TCP4_Send()
 {
-	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d %a SendBufferLength: %d \n", __LINE__, __FUNCTION__, SendBufferLength);
+    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d %a SendBufferLength: %d \n", __LINE__, __FUNCTION__, SendBufferLength);
 
     EFI_STATUS Status = 0;
     
@@ -902,12 +902,12 @@ EFI_STATUS L2_WirelessMAC()
 {
     EFI_STATUS                             Status;
     EFI_WIRELESS_MAC_CONNECTION_PROTOCOL*  pWirelessMACConnection;
-	
+    
     Status = gBS->LocateProtocol (&gEfiWiFiProtocolGuid,
-							        NULL,
-							        (VOID **)&pWirelessMACConnection);
-							        
-	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d  Status: %d %r \n", __LINE__, Status, Status);
+                                    NULL,
+                                    (VOID **)&pWirelessMACConnection);
+                                    
+    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d  Status: %d %r \n", __LINE__, Status, Status);
     if(EFI_ERROR(Status))
     {
         return Status;

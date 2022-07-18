@@ -1,23 +1,23 @@
 
 /*************************************************
     .
-    File name:      	*.*
-    Author：	        	任启红
-    ID：					00001
-    Date:          		202107
-    Description:    	基础数据结构
-    Others:         	无
+    File name:          *.*
+    Author：                任启红
+    ID：                    00001
+    Date:                  202107
+    Description:        基础数据结构
+    Others:             无
 
-    History:        	无
-	    1.  Date:
-		    Author: 
-		    ID:
-		    Modification:
-		    
-	    2.  Date:
-		    Author: 
-		    ID:
-		    Modification:
+    History:            无
+        1.  Date:
+            Author: 
+            ID:
+            Modification:
+            
+        2.  Date:
+            Author: 
+            ID:
+            Modification:
 *************************************************/
 
 
@@ -101,9 +101,9 @@ int L1_LIBRARY_StackPop(char * a,int top)
 *****************************************************************************/
 void L1_LIBRARY_QueueInit(QUEUE *pQueue, unsigned long LineCount)
 {
-	// Todo: need to allocate buffer before set zero..
-	L1_MEMORY_SetValue(pQueue->Buffer, 0, 40 * 100);
-	pQueue->Size = LineCount;
+    // Todo: need to allocate buffer before set zero..
+    L1_MEMORY_SetValue(pQueue->Buffer, 0, 40 * 100);
+    pQueue->Size = LineCount;
     pQueue->Front = pQueue->Rear = 0; //初始化头尾指针
     pQueue->LineCount = 0;
 }
@@ -124,26 +124,26 @@ void L1_LIBRARY_QueueInit(QUEUE *pQueue, unsigned long LineCount)
 *****************************************************************************/
 void L1_LIBRARY_QueueIn(QUEUE *pQueue , unsigned char *s, unsigned int Size)
 {
-	UINT16 i;
+    UINT16 i;
 
-	if (Size > 100)
-		return;
+    if (Size > 100)
+        return;
 
-	//Todo realize pBuffer save buffer data...
-	// Copy one line into buffer
-	for (i = 0; i < Size; i++)
-		pQueue->Buffer[pQueue->Rear][i] = s[i];
+    //Todo realize pBuffer save buffer data...
+    // Copy one line into buffer
+    for (i = 0; i < Size; i++)
+        pQueue->Buffer[pQueue->Rear][i] = s[i];
 
-	pQueue->Buffer[pQueue->Rear][i] = '\0';
-	
+    pQueue->Buffer[pQueue->Rear][i] = '\0';
+    
     pQueue->Rear = (pQueue->Rear + 1) % pQueue->Size ;    //尾指针偏移
 
-	pQueue->LineCount++;
+    pQueue->LineCount++;
 
-	if (pQueue->LineCount > 40)
-	{
-		pQueue->Front = (pQueue->Front + 1) % pQueue->Size;
-	}
+    if (pQueue->LineCount > 40)
+    {
+        pQueue->Front = (pQueue->Front + 1) % pQueue->Size;
+    }
 }
 
 

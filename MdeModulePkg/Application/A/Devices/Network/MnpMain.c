@@ -5,7 +5,7 @@ Copyright (c) 2005 - 2016, Intel Corporation. All rights reserved.<BR>
 SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
-	
+    
 #include <Graphics/L1_GRAPHICS.h>
 #include <Graphics/L2_GRAPHICS.h>
 #include <Global/Global.h>
@@ -514,9 +514,9 @@ MnpTransmit (
   IN EFI_MANAGED_NETWORK_COMPLETION_TOKEN    *Token
   )
 {
-	
-	L2_DEBUG_Print3( DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: MnpTransmit: \n", __LINE__);
-	
+    
+    L2_DEBUG_Print3( DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: MnpTransmit: \n", __LINE__);
+    
 
   EFI_STATUS        Status;
   MNP_INSTANCE_DATA *Instance;

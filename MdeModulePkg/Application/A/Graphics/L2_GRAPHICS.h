@@ -1,23 +1,23 @@
 
 /*************************************************
     .
-    File name:      	*.*
-    Author：	        	任启红
-    ID：					00001
-    Date:          		202107
-    Description:    	
-    Others:         	无
+    File name:          *.*
+    Author：                任启红
+    ID：                    00001
+    Date:                  202107
+    Description:        
+    Others:             无
 
-    History:        	无
-	    1.  Date:
-		    Author: 
-		    ID:
-		    Modification:
-		    
-	    2.  Date:
-		    Author: 
-		    ID:
-		    Modification:
+    History:            无
+        1.  Date:
+            Author: 
+            ID:
+            Modification:
+            
+        2.  Date:
+            Author: 
+            ID:
+            Modification:
 *************************************************/
 
 
@@ -37,24 +37,24 @@
 // Master File Table
 typedef enum
 {
-	MFT_ITEM_DOLLAR_MFT = 0,
-	MFT_ITEM_DOLLAR_MFT_MIRR,
-	MFT_ITEM_DOLLAR_LOG_FILE,
-	MFT_ITEM_DOLLAR_VOLUME,
-	MFT_ITEM_DOLLAR_ATTR_DEF,
-	MFT_ITEM_DOLLAR_ROOT,
-	MFT_ITEM_DOLLAR_BIT_MAP,
-	MFT_ITEM_DOLLAR_BOOT,
-	MFT_ITEM_DOLLAR_BAD_CLUS,
-	MFT_ITEM_DOLLAR_QUOTA,
-	MFT_ITEM_DOLLAR_SECURE,
-	MFT_ITEM_DOLLAR_UP_CASE,
-	MFT_ITEM_DOLLAR_EXTEND_METADATA_DIRECTORY,
-	MFT_ITEM_DOLLAR_EXTEND_REPARSE,
-	MFT_ITEM_DOLLAR_EXTEND_USNJML,
-	MFT_ITEM_DOLLAR_EXTEND_QUOTA,
-	MFT_ITEM_DOLLAR_EXTEND_OBJECT_ID,
-	MFT_ITEM_DOLLAR_MAX
+    MFT_ITEM_DOLLAR_MFT = 0,
+    MFT_ITEM_DOLLAR_MFT_MIRR,
+    MFT_ITEM_DOLLAR_LOG_FILE,
+    MFT_ITEM_DOLLAR_VOLUME,
+    MFT_ITEM_DOLLAR_ATTR_DEF,
+    MFT_ITEM_DOLLAR_ROOT,
+    MFT_ITEM_DOLLAR_BIT_MAP,
+    MFT_ITEM_DOLLAR_BOOT,
+    MFT_ITEM_DOLLAR_BAD_CLUS,
+    MFT_ITEM_DOLLAR_QUOTA,
+    MFT_ITEM_DOLLAR_SECURE,
+    MFT_ITEM_DOLLAR_UP_CASE,
+    MFT_ITEM_DOLLAR_EXTEND_METADATA_DIRECTORY,
+    MFT_ITEM_DOLLAR_EXTEND_REPARSE,
+    MFT_ITEM_DOLLAR_EXTEND_USNJML,
+    MFT_ITEM_DOLLAR_EXTEND_QUOTA,
+    MFT_ITEM_DOLLAR_EXTEND_OBJECT_ID,
+    MFT_ITEM_DOLLAR_MAX
 }MFT_ITEM;
 
 //桌面对象对点击事件（）
@@ -184,7 +184,7 @@ typedef enum
 }MY_COMPUTER_STATE;
 
 
-extern START_MENU_STATE 	StartMenuNextState;
+extern START_MENU_STATE     StartMenuNextState;
 
 
 typedef struct
@@ -198,21 +198,21 @@ typedef enum
 {
     CHINESE_FONT_SIZE_0 = 0,
     CHINESE_FONT_SIZE_1,
-	CHINESE_FONT_SIZE_2,
-	CHINESE_FONT_SIZE_3,
-	CHINESE_FONT_SIZE_4,
-	CHINESE_FONT_SIZE_5,
-	CHINESE_FONT_SIZE_6,
-	CHINESE_FONT_SIZE_7,
-	CHINESE_FONT_SIZE_8,
-	CHINESE_FONT_SIZE_9,
-	CHINESE_FONT_SIZE_10,
-	CHINESE_FONT_SIZE_11,
-	CHINESE_FONT_SIZE_12,
-	CHINESE_FONT_SIZE_13,
-	CHINESE_FONT_SIZE_14,
-	CHINESE_FONT_SIZE_15,
-	CHINESE_FONT_SIZE_16,
+    CHINESE_FONT_SIZE_2,
+    CHINESE_FONT_SIZE_3,
+    CHINESE_FONT_SIZE_4,
+    CHINESE_FONT_SIZE_5,
+    CHINESE_FONT_SIZE_6,
+    CHINESE_FONT_SIZE_7,
+    CHINESE_FONT_SIZE_8,
+    CHINESE_FONT_SIZE_9,
+    CHINESE_FONT_SIZE_10,
+    CHINESE_FONT_SIZE_11,
+    CHINESE_FONT_SIZE_12,
+    CHINESE_FONT_SIZE_13,
+    CHINESE_FONT_SIZE_14,
+    CHINESE_FONT_SIZE_15,
+    CHINESE_FONT_SIZE_16,
     CHINESE_FONT_SIZE_MAX
 }CHINESE_FONT_SIZE_ID;
 
@@ -263,7 +263,7 @@ EFI_STATUS L2_GRAPHICS_AsciiCharDraw(UINT8 *pBufferDest,
         IN EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color);
         
 EFI_STATUS L2_GRAPHICS_ChineseCharDraw12(UINT8 *pBuffer,
-        UINTN x0, UINTN y0, UINT16 AreaCode,	UINT16 BitCode,
+        UINTN x0, UINTN y0, UINT16 AreaCode,    UINT16 BitCode,
         EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color , UINT16 AreaWidth);
         
 EFI_STATUS L2_GRAPHICS_ChineseCharDraw16(UINT8 *pBuffer,

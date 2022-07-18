@@ -1,23 +1,23 @@
 
 /*************************************************
     .
-    File name:      	*.*
-    Author：	        	任启红
-    ID：					00001
-    Date:          		202107
-    Description:    	
-    Others:         	无
+    File name:          *.*
+    Author：                任启红
+    ID：                    00001
+    Date:                  202107
+    Description:        
+    Others:             无
 
-    History:        	无
-	    1.  Date:
-		    Author: 
-		    ID:
-		    Modification:
-		    
-	    2.  Date:
-		    Author: 
-		    ID:
-		    Modification:
+    History:            无
+        1.  Date:
+            Author: 
+            ID:
+            Modification:
+            
+        2.  Date:
+            Author: 
+            ID:
+            Modification:
 *************************************************/
 
 
@@ -45,7 +45,7 @@ unsigned long long L1_STRING_Length(char *String)
 {
     unsigned long long  Length;
     for (Length = 0; *String != '\0'; String++, Length++) ;
-	
+    
     return Length;
 }
 
@@ -90,10 +90,10 @@ UINT16 L1_STRING_Reverse(UINT8 *s)
 *****************************************************************************/
 L1_STRING_AsciiStringToWchar(CONST CHAR8 *pSource, short *pDest, int count)
 {
-	for(int i=0; i < count; i++)
-	{
-		pDest[i] = pSource[i];
-	}
+    for(int i=0; i < count; i++)
+    {
+        pDest[i] = pSource[i];
+    }
 }
 
 
@@ -110,12 +110,12 @@ L1_STRING_AsciiStringToWchar(CONST CHAR8 *pSource, short *pDest, int count)
 *****************************************************************************/
 char L1_STRING_UpperCaseString(char c)
 {
-	if ('a' <= c && c <= 'z') 
-	{
-		return (c - 'a' + 'A');
-	}
+    if ('a' <= c && c <= 'z') 
+    {
+        return (c - 'a' + 'A');
+    }
 
-	return c;
+    return c;
 }
 
 
@@ -194,11 +194,11 @@ int L1_STRING_Compare(unsigned char *p1, unsigned char *p2, unsigned int length)
 *****************************************************************************/
 int L1_STRING_Copy(unsigned char *pDestination, unsigned char *pSource)
 {
-	while (*pSource != 0) {
-	  *(pDestination++) = *(pSource++);
-	}
+    while (*pSource != 0) {
+      *(pDestination++) = *(pSource++);
+    }
 
-	*pDestination = 0;
+    *pDestination = 0;
 
     return 0;
 }
@@ -216,11 +216,11 @@ int L1_STRING_Copy(unsigned char *pDestination, unsigned char *pSource)
 *****************************************************************************/
 int L1_STRING_CopyWidth(unsigned short *pDestination, unsigned short *pSource)
 {
-	while (*pSource != 0) {
-	  *(pDestination++) = *(pSource++);
-	}
+    while (*pSource != 0) {
+      *(pDestination++) = *(pSource++);
+    }
 
-	*pDestination = 0;
+    *pDestination = 0;
 
     return 0;
 }
@@ -238,12 +238,12 @@ int L1_STRING_CopyWidth(unsigned short *pDestination, unsigned short *pSource)
 *****************************************************************************/
 int L1_STRING_Compare2(unsigned char *p1, unsigned char *p2)
 {
-	while ((*p1 != '\0') && (*p1 == *p2))
-	{
-		p1++;
-		p2++;
-	}
-	
+    while ((*p1 != '\0') && (*p1 == *p2))
+    {
+        p1++;
+        p2++;
+    }
+    
     return *p1 - *p2;
 }
 
@@ -284,11 +284,11 @@ int L1_STRING_IsAllNumber (int c)
 *****************************************************************************/
 int L1_STRING_ToUpper( int c  )
 {
-	if ( (c >= 'a') && (c <= 'z') ) 
-	{
-		c = c - ('a' - 'A');
-	}
-  	return c;
+    if ( (c >= 'a') && (c <= 'z') ) 
+    {
+        c = c - ('a' - 'A');
+    }
+      return c;
 }
 
 
@@ -338,7 +338,7 @@ char *L1_STRING_FloatToString(float val, int precision, char *buf)
 
     if (val > 0)
     {
-    	buf[count++] = (int)val + '0'; 
+        buf[count++] = (int)val + '0'; 
     }
 
     buf[count++] = '.'; 

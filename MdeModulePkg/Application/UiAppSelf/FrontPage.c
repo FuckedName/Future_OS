@@ -771,8 +771,8 @@ UiSetConsoleMode2(
     MaxGopMode    = 0;
     MaxTextMode    = 0;
 
-	Print(L"UiSetConsoleMode2\r\n");
-	
+    Print(L"UiSetConsoleMode2\r\n");
+    
     /*
      *
      * Get current video resolution and text mode
@@ -800,7 +800,7 @@ UiSetConsoleMode2(
 
     if ( (GraphicsOutput == NULL) || (SimpleTextOut == NULL) )
     {
-    	Print(L"return1\r\n");
+        Print(L"return1\r\n");
         return(EFI_UNSUPPORTED);
     }
 
@@ -816,8 +816,8 @@ UiSetConsoleMode2(
         NewColumns        = mSetupTextModeColumn;
         NewRows            = mSetupTextModeRow;
     } 
-	else
-	{
+    else
+    {
         /*
          *
          * The required resolution and text mode is boot mode.
@@ -839,16 +839,16 @@ UiSetConsoleMode2(
         MaxTextMode = SimpleTextOut->Mode->MaxMode;
     }
 
-	
-	Print(L"NewHorizontalResolution:0x%x\r\n", NewHorizontalResolution);
-	Print(L"NewVerticalResolution:0x%x\r\n", NewVerticalResolution);
-	
+    
+    Print(L"NewHorizontalResolution:0x%x\r\n", NewHorizontalResolution);
+    Print(L"NewVerticalResolution:0x%x\r\n", NewVerticalResolution);
+    
 
-	UINT32 MAJOR_VERSION = 11;
+    UINT32 MAJOR_VERSION = 11;
 
-	UINT32 MINOR_VERSION = 12;
+    UINT32 MINOR_VERSION = 12;
 
-	Print (L"DumpDynPcd Version %d.%02d\n", MAJOR_VERSION, MINOR_VERSION);
+    Print (L"DumpDynPcd Version %d.%02d\n", MAJOR_VERSION, MINOR_VERSION);
 
 
     /*
@@ -893,8 +893,8 @@ UiSetConsoleMode2(
                         FreePool( Info );
                         return(EFI_SUCCESS);
                     } 
-					else
-					{
+                    else
+                    {
                         /*
                          *
                          * If current text mode is different from required text mode.    Set new video mode
@@ -1081,7 +1081,7 @@ InitializeUserInterface(
             mBootHorizontalResolution    = GraphicsOutput->Mode->Info->HorizontalResolution;
             mBootVerticalResolution        = GraphicsOutput->Mode->Info->VerticalResolution;
 
-			Print(L"mBootHorizontalResolution:%d!!!\r\n", mBootHorizontalResolution);
+            Print(L"mBootHorizontalResolution:%d!!!\r\n", mBootHorizontalResolution);
         }
 
         if ( SimpleTextOut != NULL )
@@ -1095,7 +1095,7 @@ InitializeUserInterface(
             mBootTextModeColumn    = (UINT32) BootTextColumn;
             mBootTextModeRow    = (UINT32) BootTextRow;
 
-			Print(L"mBootTextModeColumn:%d!!!\r\n", mBootTextModeColumn);
+            Print(L"mBootTextModeColumn:%d!!!\r\n", mBootTextModeColumn);
 
         }
 
@@ -1108,8 +1108,8 @@ InitializeUserInterface(
         mSetupVerticalResolution    = PcdGet32( PcdSetupVideoVerticalResolution );
         mSetupTextModeColumn        = PcdGet32( PcdSetupConOutColumn );
         mSetupTextModeRow        = PcdGet32( PcdSetupConOutRow );
-		
-		Print(L"mSetupHorizontalResolution:%d!!!\r\n", mSetupHorizontalResolution);
+        
+        Print(L"mSetupHorizontalResolution:%d!!!\r\n", mSetupHorizontalResolution);
 
         mModeInitialized = TRUE;
     }
@@ -1125,24 +1125,24 @@ InitializeUserInterface(
 
     HiiHandle = ExportFonts2();
     ASSERT( HiiHandle != NULL );
-	
-	Print(L"Hello Renqihong jiayou!!!!\r\n");	
+    
+    Print(L"Hello Renqihong jiayou!!!!\r\n");    
 
-	UINT32 PackageVersion = 10;
-	Print(L"Version0x%x\r\n", PackageVersion);
-	
+    UINT32 PackageVersion = 10;
+    Print(L"Version0x%x\r\n", PackageVersion);
+    
     InitializeStringSupport2();
-	
+    
 
     UiSetConsoleMode2( TRUE );
-	
+    
     UiEntry2( FALSE );
     /*UiSetConsoleMode2( FALSE );
-	
+    
 
     UninitializeStringSupport();
     HiiRemovePackages( HiiHandle );
-	*/
+    */
     return(EFI_SUCCESS);
 }
 
@@ -1163,11 +1163,11 @@ UiEntry2(
     EFI_STATUS        Status;
     EFI_BOOT_LOGO_PROTOCOL    *BootLogo;
 
-	//CHAR16    s[12] = L"String";
-	
-	Print(L"UiEntry2:line %d, function: %s", __LINE__, __FILE__);
+    //CHAR16    s[12] = L"String";
+    
+    Print(L"UiEntry2:line %d, function: %s", __LINE__, __FILE__);
 
-	/*return ;
+    /*return ;
     
      *
      * Enter Setup page.

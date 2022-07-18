@@ -1,23 +1,23 @@
 
 /*************************************************
     .
-    File name:      	*.*
-    Author：	        	任启红
-    ID：					00001
-    Date:          		202107
-    Description:    	
-    Others:         	无
+    File name:          *.*
+    Author：                任启红
+    ID：                    00001
+    Date:                  202107
+    Description:        
+    Others:             无
 
-    History:        	无
-	    1.  Date:
-		    Author: 
-		    ID:
-		    Modification:
-		    
-	    2.  Date:
-		    Author: 
-		    ID:
-		    Modification:
+    History:            无
+        1.  Date:
+            Author: 
+            ID:
+            Modification:
+            
+        2.  Date:
+            Author: 
+            ID:
+            Modification:
 *************************************************/
 
 
@@ -53,7 +53,7 @@ VOID L2_STRING_Maker (UINT16 x, UINT16 y,
     
     // Note this api do not supported ("%f", float)
     AsciiVSPrint (AsciiBuffer, sizeof (AsciiBuffer), Format, VaList);
-	
+    
 }
 
 
@@ -114,19 +114,19 @@ VOID L2_STRING_Maker3 (UINT16 x, UINT16 y, WINDOW_LAYER_ITEM layer,
 
     AsciiVSPrint (AsciiBuffer, sizeof (AsciiBuffer), Format, VaList);
 
-	//L1_QUEUE_In(&Queue, AsciiBuffer, (sizeof(AsciiBuffer) /sizeof(CHAR8)));
+    //L1_QUEUE_In(&Queue, AsciiBuffer, (sizeof(AsciiBuffer) /sizeof(CHAR8)));
 
-	UINT16 PrintLineCount = Queue.LineCount > 40 ? 40 : Queue.LineCount;
+    UINT16 PrintLineCount = Queue.LineCount > 40 ? 40 : Queue.LineCount;
 
-	for (UINT16 line = 0; line < PrintLineCount; line++)
-	{
-		UINT16 temp = (line + Queue.Front) % Queue.Size;
+    for (UINT16 line = 0; line < PrintLineCount; line++)
+    {
+        UINT16 temp = (line + Queue.Front) % Queue.Size;
 
-		for (i = 0; i < sizeof(Queue.Buffer[temp]) / sizeof(CHAR8); i++)
-    	{
-    		L2_GRAPHICS_AsciiCharDraw2(layer, i * 8, line * 16, Queue.Buffer[temp][i], Color);
-	    }
-	}
+        for (i = 0; i < sizeof(Queue.Buffer[temp]) / sizeof(CHAR8); i++)
+        {
+            L2_GRAPHICS_AsciiCharDraw2(layer, i * 8, line * 16, Queue.Buffer[temp][i], Color);
+        }
+    }
 
 }
 

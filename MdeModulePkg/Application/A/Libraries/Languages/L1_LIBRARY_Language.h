@@ -6,7 +6,7 @@
 typedef struct
 {
     UINT16 AreaCode;
-	UINT16 BitCode;
+    UINT16 BitCode;
 }GBK_Code;
 
 

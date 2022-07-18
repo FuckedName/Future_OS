@@ -1,23 +1,23 @@
 
 /*************************************************
     .
-    File name:      	*.*
-    Author：	        	任启红
-    ID：					00001
-    Date:          		202107
-    Description:    	
-    Others:         	无
+    File name:          *.*
+    Author：                任启红
+    ID：                    00001
+    Date:                  202107
+    Description:        
+    Others:             无
 
-    History:        	无
-	    1.  Date:
-		    Author: 
-		    ID:
-		    Modification:
-		    
-	    2.  Date:
-		    Author: 
-		    ID:
-		    Modification:
+    History:            无
+        1.  Date:
+            Author: 
+            ID:
+            Modification:
+            
+        2.  Date:
+            Author: 
+            ID:
+            Modification:
 *************************************************/
 
 
@@ -54,19 +54,19 @@ typedef struct {
 
 
 /*
-	NTFS文件系统分区访问方法：
-		1、第一个扇区；数据结构DOLLAR_BOOT，获取：MFT_StartCluster的值；
-		2、通过MFT_StartCluster * 8 访问MFT表，有很多项，数据结构：MFT_ITEM，访问通过偏移10个扇区访问MFT_ITEM_DOLLAR_ROOT项；
-		3、每个MFT项,以FILE的ASSCI码开头（占用2个扇区，1024字节大小）包含MFT头部：数据结构：MFT_HEADER;
-			还包含还有很多个属性组成(多个枚举值：MFT_ATTRIBUTE_TYPE)，属性数据结构：NTFSAttribute
-			我们需要找到0x90属性和0xA0属性，并获取data runs
-			0X90索引根属性，存放着该目录下的子目录和子文件的索引项；
-			当某个目录下的内容比较多，从而导致0X90属性无法完全存放时，0XA0属性会指向一个索引区域，
-			这个索引区域包含了该目录下所有剩余内容的索引项。
-		4、
-		5、
+    NTFS文件系统分区访问方法：
+        1、第一个扇区；数据结构DOLLAR_BOOT，获取：MFT_StartCluster的值；
+        2、通过MFT_StartCluster * 8 访问MFT表，有很多项，数据结构：MFT_ITEM，访问通过偏移10个扇区访问MFT_ITEM_DOLLAR_ROOT项；
+        3、每个MFT项,以FILE的ASSCI码开头（占用2个扇区，1024字节大小）包含MFT头部：数据结构：MFT_HEADER;
+            还包含还有很多个属性组成(多个枚举值：MFT_ATTRIBUTE_TYPE)，属性数据结构：NTFSAttribute
+            我们需要找到0x90属性和0xA0属性，并获取data runs
+            0X90索引根属性，存放着该目录下的子目录和子文件的索引项；
+            当某个目录下的内容比较多，从而导致0X90属性无法完全存放时，0XA0属性会指向一个索引区域，
+            这个索引区域包含了该目录下所有剩余内容的索引项。
+        4、
+        5、
 
-		
+        
 */
 
 

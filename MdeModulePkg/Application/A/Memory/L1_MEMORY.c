@@ -1,23 +1,23 @@
 
 /*************************************************
     .
-    File name:      	*.*
-    Author：	        	任启红
-    ID：					00001
-    Date:          		202107
-    Description:    	
-    Others:         	无
+    File name:          *.*
+    Author：                任启红
+    ID：                    00001
+    Date:                  202107
+    Description:        
+    Others:             无
 
-    History:        	无
-	    1.  Date:
-		    Author: 
-		    ID:
-		    Modification:
-		    
-	    2.  Date:
-		    Author: 
-		    ID:
-		    Modification:
+    History:            无
+        1.  Date:
+            Author: 
+            ID:
+            Modification:
+            
+        2.  Date:
+            Author: 
+            ID:
+            Modification:
 *************************************************/
 
 
@@ -182,7 +182,7 @@ EFI_STATUS L2_COMMON_MemoryAllocate()
     
     pDeskDisplayBuffer = L2_MEMORY_Allocate("Desk Display Buffer", MEMORY_TYPE_GRAPHICS, ScreenWidth * ScreenHeight * 4);
 
-	//这个是存放壁纸的，所以大小为1920*1080
+    //这个是存放壁纸的，所以大小为1920*1080
     pDeskWallpaperBuffer = L2_MEMORY_Allocate("Desk Wall paper Buffer", MEMORY_TYPE_GRAPHICS, 1920 * 1080 * 3 + 0x36);
     
     pDeskWallpaperZoomedBuffer = L2_MEMORY_Allocate("Desk Wall paper Zoomed Buffer", MEMORY_TYPE_GRAPHICS, ScreenWidth * ScreenHeight * 3);
@@ -253,13 +253,13 @@ EFI_STATUS L2_COMMON_MemoryAllocate()
         return -1;
     }   
 
-	pTerminalWindowBuffer = (UINT8 *)L2_MEMORY_Allocate("Terminal Window Buffer", MEMORY_TYPE_GRAPHICS, TerminalWindowWidth * TerminalWindowHeight * 4); 
-	if (pTerminalWindowBuffer == NULL)
-	{
-		//DEBUG ((EFI_D_INFO, "MyComputer , AllocateZeroPool failed... "));
-		return -1;
-	}	 
-	
+    pTerminalWindowBuffer = (UINT8 *)L2_MEMORY_Allocate("Terminal Window Buffer", MEMORY_TYPE_GRAPHICS, TerminalWindowWidth * TerminalWindowHeight * 4); 
+    if (pTerminalWindowBuffer == NULL)
+    {
+        //DEBUG ((EFI_D_INFO, "MyComputer , AllocateZeroPool failed... "));
+        return -1;
+    }     
+    
     pMyComputerBuffer = (UINT8 *)L2_MEMORY_Allocate("My Computer Buffer", MEMORY_TYPE_GRAPHICS, MyComputerWidth * MyComputerHeight * 4); 
     if (pMyComputerBuffer == NULL)
     {

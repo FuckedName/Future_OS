@@ -1,23 +1,23 @@
 
 /*************************************************
     .
-    File name:      	*.*
-    Author：	        	任启红
-    ID：					00001
-    Date:          		202107
-    Description:    	数学相关基础库
-    Others:         	无
+    File name:          *.*
+    Author：                任启红
+    ID：                    00001
+    Date:                  202107
+    Description:        数学相关基础库
+    Others:             无
 
-    History:        	无
-	    1.  Date:
-		    Author: 
-		    ID:
-		    Modification:
-		    
-	    2.  Date:
-		    Author: 
-		    ID:
-		    Modification:
+    History:            无
+        1.  Date:
+            Author: 
+            ID:
+            Modification:
+            
+        2.  Date:
+            Author: 
+            ID:
+            Modification:
 *************************************************/
 
 
@@ -68,13 +68,13 @@ long long L1_MATH_Multi(long x, long y)
 *****************************************************************************/
 int L1_MATH_DigitToInteger( int c)
 {
-	if (((c >= 'a') && (c <= 'z')) || ((c >= 'A') && (c <= 'Z'))) 
-	{  
-		/* If c is one of [A-Za-z]... */
-		c = L1_STRING_ToUpper(c) - 7;   // Adjust so 'A' is ('9' + 1)
-	}
+    if (((c >= 'a') && (c <= 'z')) || ((c >= 'A') && (c <= 'Z'))) 
+    {  
+        /* If c is one of [A-Za-z]... */
+        c = L1_STRING_ToUpper(c) - 7;   // Adjust so 'A' is ('9' + 1)
+    }
 
-	return c - '0';   // Value returned is between 0 and 35, inclusive.
+    return c - '0';   // Value returned is between 0 and 35, inclusive.
 }
 
 

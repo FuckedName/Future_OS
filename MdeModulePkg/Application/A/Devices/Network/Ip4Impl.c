@@ -1868,7 +1868,7 @@ EfiIp4Receive (
   IN EFI_IP4_COMPLETION_TOKEN *Token
   )
 {
-	L2_DEBUG_Print3( DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: EfiIp4Receive: \n", __LINE__);
+    L2_DEBUG_Print3( DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: EfiIp4Receive: \n", __LINE__);
   IP4_PROTOCOL              *IpInstance;
   EFI_STATUS                Status;
   EFI_TPL                   OldTpl;

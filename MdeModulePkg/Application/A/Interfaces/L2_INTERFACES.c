@@ -1,23 +1,23 @@
 
 /*************************************************
     .
-    File name:      	*.*
-    Author：	        	任启红
-    ID：					00001
-    Date:          		202107
-    Description:    	用于给应用提供接口
-    Others:         	无
+    File name:          *.*
+    Author：                任启红
+    ID：                    00001
+    Date:                  202107
+    Description:        用于给应用提供接口
+    Others:             无
 
-    History:        	无
-	    1.  Date:
-		    Author: 
-		    ID:
-		    Modification:
-		    
-	    2.  Date:
-		    Author: 
-		    ID:
-		    Modification:
+    History:            无
+        1.  Date:
+            Author: 
+            ID:
+            Modification:
+            
+        2.  Date:
+            Author: 
+            ID:
+            Modification:
 *************************************************/
 
 
@@ -73,7 +73,7 @@ typedef struct
 MOUSE_CLICK_EVENT L2_GRAPHICS_DeskLayerClickEventGet()
 {
 
-	return MAX_CLICKED_EVENT;
+    return MAX_CLICKED_EVENT;
 }*/
 
 EFI_STATUS L2_INTERFACES_PrintString()
@@ -104,9 +104,9 @@ EFI_STATUS L2_INTERFACES_PrintString()
 *****************************************************************************/
 APPLICATION_CALL_TABLE InterfaceCallTable[] =
 {
-    {APPLICATION_CALL_ID_INIT,       		    NULL},
-    {APPLICATION_CALL_ID_SHUTDOWN,       		L2_System_Shutdown},
-    {APPLICATION_CALL_ID_PRINT_STRING,       	L2_INTERFACES_PrintString},
+    {APPLICATION_CALL_ID_INIT,                   NULL},
+    {APPLICATION_CALL_ID_SHUTDOWN,               L2_System_Shutdown},
+    {APPLICATION_CALL_ID_PRINT_STRING,           L2_INTERFACES_PrintString},
     {APPLICATION_CALL_ID_MAX,                   NULL},
 };
 

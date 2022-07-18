@@ -1,23 +1,23 @@
 
 /*************************************************
     .
-    File name:      	*.*
-    Author：	        	任启红
-    ID：					00001
-    Date:          		202107
-    Description:    	定义系统的一些全局变量，这里边很多全局变量是需要干掉的。
-    Others:         	无
+    File name:          *.*
+    Author：                任启红
+    ID：                    00001
+    Date:                  202107
+    Description:        定义系统的一些全局变量，这里边很多全局变量是需要干掉的。
+    Others:             无
 
-    History:        	无
-	    1.  Date:
-		    Author: 
-		    ID:
-		    Modification:
-		    
-	    2.  Date:
-		    Author: 
-		    ID:
-		    Modification:
+    History:            无
+        1.  Date:
+            Author: 
+            ID:
+            Modification:
+            
+        2.  Date:
+            Author: 
+            ID:
+            Modification:
 *************************************************/
 
 
@@ -30,7 +30,7 @@
 #include <Protocol/SimplePointer.h>
 #include <Protocol/GraphicsOutput.h>
 #include <Graphics/L2_GRAPHICS.h>
-			
+            
 #include <Libraries/DataStructure/L1_LIBRARY_DataStructure.h>
 #include <Graphics/Window/L2_GRAPHICS_Window.h>
 
@@ -191,22 +191,22 @@ typedef struct
 // To save folder or file after read from file system.
 typedef struct
 {
-	UINT8 Name[100]; 
-	UINT8 Type; // COMMON_STORAGE_ITEM_FOLDER; COMMON_STORAGE_ITEM_FILE; 
-	UINT16 Size;
-	UINT16 CreateTime;
-	UINT16 LatestModifiedTime;
-	UINT16 ItemCount;
-	UINT64 FileContentRelativeSector; // NTFS relative sector of item 0x26 = 38 (six of header)
-									  // 38 * 2 + 6,291,456 = 6291532
+    UINT8 Name[100]; 
+    UINT8 Type; // COMMON_STORAGE_ITEM_FOLDER; COMMON_STORAGE_ITEM_FILE; 
+    UINT16 Size;
+    UINT16 CreateTime;
+    UINT16 LatestModifiedTime;
+    UINT16 ItemCount;
+    UINT64 FileContentRelativeSector; // NTFS relative sector of item 0x26 = 38 (six of header)
+                                      // 38 * 2 + 6,291,456 = 6291532
 }COMMON_STORAGE_ITEM;
 
 
 typedef enum
 {
-	COMMON_STORAGE_ITEM_FILE = 0,
-	COMMON_STORAGE_ITEM_FOLDER,
-	COMMON_STORAGE_ITEM_MAX
+    COMMON_STORAGE_ITEM_FILE = 0,
+    COMMON_STORAGE_ITEM_FOLDER,
+    COMMON_STORAGE_ITEM_MAX
 }COMMON_STORAGE_ITEM_TYPE;
 
 
@@ -228,7 +228,7 @@ extern COMMON_STORAGE_ITEM pCommonStorageItems[100];
 typedef struct
 {
     UINT16           FontSize;
-    EFI_STATUS 	(*pDrawFunction)(UINT8 *pBuffer, UINTN x0, UINTN y0, UINT16 AreaCode,	UINT16 BitCode, EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color , UINT16 AreaWidth);
+    EFI_STATUS     (*pDrawFunction)(UINT8 *pBuffer, UINTN x0, UINTN y0, UINT16 AreaCode,    UINT16 BitCode, EFI_GRAPHICS_OUTPUT_BLT_PIXEL Color , UINT16 AreaWidth);
 }CHINESE_FONT_DRAW_FUNCTION_GET;
 
 extern CHINESE_FONT_DRAW_FUNCTION_GET ChineseDrawFunctionGet[17];
@@ -290,15 +290,15 @@ typedef struct
 
 typedef enum
 {
-	FILE_SYSTEM_MIN = 0,
-	FILE_SYSTEM_FAT32,
-	FILE_SYSTEM_NTFS,
-	FILE_SYSTEM_MAX
+    FILE_SYSTEM_MIN = 0,
+    FILE_SYSTEM_FAT32,
+    FILE_SYSTEM_NTFS,
+    FILE_SYSTEM_MAX
 }FILE_SYSTEM_TYPE;
 
 typedef struct
-{	
-	UINT16 FileSystemType; //FILE_SYSTEM_FAT32 FILE_SYSTEM_NTFS
+{    
+    UINT16 FileSystemType; //FILE_SYSTEM_FAT32 FILE_SYSTEM_NTFS
     UINT16 DeviceType; // 0 Disk, 1: USB, 2: Sata;
     UINT16 PartitionType; // 0 MBR, 1 GPT;
     UINT16 PartitionID; // a physics device consist of Several parts like c: d: e:
@@ -308,13 +308,13 @@ typedef struct
 
     UINT64 FAT_TableStartSectorNumber;
 
-	UINT8 *pFAT_TableBuffer;
+    UINT8 *pFAT_TableBuffer;
 
     //Partition parameter
     MasterBootRecordSwitched stMBRSwitched; //FAT32
 
-	//Items in folder include some folders and files
-	FAT32_ROOTPATH_SHORT_FILE_ITEM pItems[32]; //FAT32
+    //Items in folder include some folders and files
+    FAT32_ROOTPATH_SHORT_FILE_ITEM pItems[32]; //FAT32
 
     // Path Stack
     PATH_DETAIL PathStack[12];
@@ -384,14 +384,14 @@ extern UINT16 FolderItemID;
  
 typedef struct
 {
-	UINT16 PartitionStartX;
-	UINT16 PartitionStartY;
-	UINT16 PartitionWidth;
-	UINT16 PartitionHeight;
-	UINT16 ItemStartX;
-	UINT16 ItemStartY;
-	UINT16 ItemWidth;
-	UINT16 ItemHeight;
+    UINT16 PartitionStartX;
+    UINT16 PartitionStartY;
+    UINT16 PartitionWidth;
+    UINT16 PartitionHeight;
+    UINT16 ItemStartX;
+    UINT16 ItemStartY;
+    UINT16 ItemWidth;
+    UINT16 ItemHeight;
 }MY_COMPUTER_WINDOW_STATE;
 
 extern MY_COMPUTER_WINDOW_STATE MyComputerWindowState;
@@ -400,11 +400,11 @@ extern MY_COMPUTER_WINDOW_STATE MyComputerWindowState;
 // init -> partition analysised -> root path analysised -> read fat table -> start read file -> reading a file -> read finished
 typedef enum 
 {
-	 READ_FILE_INIT_STATE = 0, //初始状态
-	 READ_FILE_GET_PARTITION_INFO_STATE, //获取分区信息
-	 READ_FILE_GET_ROOT_PATH_INFO_STATE, //获取根目录信息
-	 READ_FILE_GET_FAT_TABLE_STATE,  //获取FAT表数据信息
-	 READ_FILE_GET_DATA_STATE, //获取数据信息
+     READ_FILE_INIT_STATE = 0, //初始状态
+     READ_FILE_GET_PARTITION_INFO_STATE, //获取分区信息
+     READ_FILE_GET_ROOT_PATH_INFO_STATE, //获取根目录信息
+     READ_FILE_GET_FAT_TABLE_STATE,  //获取FAT表数据信息
+     READ_FILE_GET_DATA_STATE, //获取数据信息
 }READ_FILE_STATE;
 
 
@@ -445,7 +445,7 @@ typedef struct
     EFI_STATUS    (*pAction)(VOID *pData); 
 }STATE_TRANSFORM_NEW;
 
-	                      
+                          
 extern UINT8 ReadFileName[20];                              
 extern UINT8 ReadFileNameLength;                             
 extern READ_FILE_STATE   NextState;                                    

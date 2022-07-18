@@ -34,8 +34,8 @@ TcpChkDataBuf (
   IN EFI_TCP4_FRAGMENT_DATA *FragmentTable
   )
 {
-	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d %a \n", __LINE__, __FUNCTION__);
-	  
+    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d %a \n", __LINE__, __FUNCTION__);
+      
 
   UINT32 Index;
 
@@ -355,7 +355,7 @@ Tcp4Transmit (
   EFI_TCP4_IO_TOKEN            *Token
   )
 {
-	
+    
   L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d %a \n", __LINE__, __FUNCTION__);
   SOCKET      *Sock;
   EFI_STATUS  Status;
@@ -366,7 +366,7 @@ Tcp4Transmit (
   L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d %a TxData: %d\n", __LINE__, __FUNCTION__, Token->Packet.TxData);
   L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d %a FragmentCount: %d\n", __LINE__, __FUNCTION__, Token->Packet.TxData->FragmentCount);
   L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d %a DataLength: %d\n", __LINE__, __FUNCTION__, Token->Packet.TxData->DataLength);
-  	
+      
   if (NULL == This ||
       NULL == Token ||
       NULL == Token->CompletionToken.Event ||
@@ -390,7 +390,7 @@ Tcp4Transmit (
     return Status;
   }
   L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d %a \n", __LINE__, __FUNCTION__);
-	
+    
 
   Sock = SOCK_FROM_THIS (This);
 

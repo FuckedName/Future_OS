@@ -49,12 +49,12 @@ BZero (
   IN      UINTN                     Length
   )
  {
-	UINT32 i ;
-	CHAR8 * ptr = (CHAR8 * )Destination;
-	for (i = 0; i < 2*Length ; i ++){
-		ptr [i] = 0;
-	}
-	return EFI_SUCCESS;
+    UINT32 i ;
+    CHAR8 * ptr = (CHAR8 * )Destination;
+    for (i = 0; i < 2*Length ; i ++){
+        ptr [i] = 0;
+    }
+    return EFI_SUCCESS;
  }
 
 EFI_STATUS OpenShellProtocol( EFI_SHELL_PROTOCOL            **gEfiShellProtocol )
@@ -127,8 +127,8 @@ UefiMain (
 /*  
   Status = gEfiShellProtocol->OpenFileByName((CONST CHAR16*)OldLogFileName, &FileHandle, EFI_FILE_MODE_READ); 
   if (EFI_ERROR(Status)){
-	  Print(L"Please Input Valid Filename!\n");
-	  //return (-1);
+      Print(L"Please Input Valid Filename!\n");
+      //return (-1);
   }
   StrnCpyS(NewFileName,128,OldLogFileName,StrLen(OldLogFileName)-4);
   StrCatS(NewFileName,128,L"_New.txt");
@@ -146,8 +146,8 @@ UefiMain (
   Print (L"File FileSize is %d!\n",FileSize);
   
   if (FileSize < 0){
-	  Print (L"File cotent is empty!\n");
-	  return (-1);
+      Print (L"File cotent is empty!\n");
+      return (-1);
   }
   
   FileSize += 1;
@@ -161,16 +161,16 @@ UefiMain (
   Status = gEfiShellProtocol->ReadFile(FileHandle, &FileSize ,ArrayBuffer); 
   
   if (EFI_ERROR(Status)){
-  	Print(L"Read Filename Error!\n");
-  	return (-1);
+      Print(L"Read Filename Error!\n");
+      return (-1);
   }
   */
 
   //创建新的文件句柄
   Status = gEfiShellProtocol->CreateFile((CONST CHAR16*)NewFileName, 0, &FileHandle); 
   if (EFI_ERROR(Status)){
-	  Print(L"Create Filename %s Fail!:%X \n", NewFileName, Status);
-	  return (-1);
+      Print(L"Create Filename %s Fail!:%X \n", NewFileName, Status);
+      return (-1);
   }
   
   //读取的文件内容写入新建文件

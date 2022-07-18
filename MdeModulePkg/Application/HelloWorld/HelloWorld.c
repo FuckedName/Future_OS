@@ -19,17 +19,17 @@ EFI_STATUS EFIAPI UefiMain (IN EFI_HANDLE ImageHandle, IN EFI_SYSTEM_TABLE *Syst
 
     EFI_STATUS Status;
 
-	//INT32 i = 1000000;
-	
+    //INT32 i = 1000000;
+    
     //while(i-- > 0);
-	
-	EFI_SHELL_PROTOCOL	  *EfiShellProtocol;
+    
+    EFI_SHELL_PROTOCOL      *EfiShellProtocol;
 
     //初始化协议
     Status = gBS->LocateProtocol (&gEfiShellProtocolGuid,
                                 NULL,
                                 (VOID **)&EfiShellProtocol);
-	    
+        
     if (EFI_ERROR (Status)) 
     {
         L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: L2_ApplicationRun Status: %d\n", __LINE__, Status);

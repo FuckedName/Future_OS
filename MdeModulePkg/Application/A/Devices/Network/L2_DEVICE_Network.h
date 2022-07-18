@@ -1,23 +1,23 @@
 
 /*************************************************
     .
-    File name:      	*.*
-    Author：	        	任启红
-    ID：					00001
-    Date:          		202107
-    Description:    	
-    Others:         	无
+    File name:          *.*
+    Author：                任启红
+    ID：                    00001
+    Date:                  202107
+    Description:        
+    Others:             无
 
-    History:        	无
-	    1.  Date:
-		    Author: 
-		    ID:
-		    Modification:
-		    
-	    2.  Date:
-		    Author: 
-		    ID:
-		    Modification:
+    History:            无
+        1.  Date:
+            Author: 
+            ID:
+            Modification:
+            
+        2.  Date:
+            Author: 
+            ID:
+            Modification:
 *************************************************/
 
 
@@ -35,15 +35,15 @@
 
 
 typedef struct MyTCP4Socket{
-		EFI_HANDLE                     m_SocketHandle;                   
-		EFI_TCP4_PROTOCOL*             m_pTcp4Protocol;
-		EFI_TCP4_CONFIG_DATA*          m_pTcp4ConfigData;
-		EFI_TCP4_TRANSMIT_DATA*        m_TransData;
-		EFI_TCP4_RECEIVE_DATA*         m_RecvData; 
-		EFI_TCP4_CONNECTION_TOKEN      ConnectToken;
-		EFI_TCP4_CLOSE_TOKEN           CloseToken;
-		EFI_TCP4_IO_TOKEN              SendToken;
-		EFI_TCP4_IO_TOKEN              RecvToken;
+        EFI_HANDLE                     m_SocketHandle;                   
+        EFI_TCP4_PROTOCOL*             m_pTcp4Protocol;
+        EFI_TCP4_CONFIG_DATA*          m_pTcp4ConfigData;
+        EFI_TCP4_TRANSMIT_DATA*        m_TransData;
+        EFI_TCP4_RECEIVE_DATA*         m_RecvData; 
+        EFI_TCP4_CONNECTION_TOKEN      ConnectToken;
+        EFI_TCP4_CLOSE_TOKEN           CloseToken;
+        EFI_TCP4_IO_TOKEN              SendToken;
+        EFI_TCP4_IO_TOKEN              RecvToken;
         int stub;   //robin add for debug
 }MYTCP4SOCKET;
 

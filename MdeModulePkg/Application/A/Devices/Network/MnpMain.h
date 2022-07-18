@@ -246,7 +246,7 @@ MnpTransmit (
   IN EFI_MANAGED_NETWORK_PROTOCOL            *This,
   IN EFI_MANAGED_NETWORK_COMPLETION_TOKEN    *Token
   )
-	;
+    ;
 
 
 

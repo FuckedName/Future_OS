@@ -6,8 +6,8 @@
   SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
-	
-	
+    
+    
 #include "SockInterface.h"
 
 #include "SockImpl.h"
@@ -612,8 +612,8 @@ SockSend (
   IN VOID   *Token
   )
 {
-	
-	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d %a \n", __LINE__, __FUNCTION__);
+    
+    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d %a \n", __LINE__, __FUNCTION__);
   SOCK_IO_TOKEN           *SndToken;
   EFI_EVENT               Event;
   UINT32                  FreeSpace;

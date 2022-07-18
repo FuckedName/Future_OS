@@ -1,23 +1,23 @@
 
 /*************************************************
     .
-    File name:      	*.*
-    Author：	        	任启红
-    ID：					00001
-    Date:          		202107
-    Description:    	
-    Others:         	无
+    File name:          *.*
+    Author：                任启红
+    ID：                    00001
+    Date:                  202107
+    Description:        
+    Others:             无
 
-    History:        	无
-	    1.  Date:
-		    Author: 
-		    ID:
-		    Modification:
-		    
-	    2.  Date:
-		    Author: 
-		    ID:
-		    Modification:
+    History:            无
+        1.  Date:
+            Author: 
+            ID:
+            Modification:
+            
+        2.  Date:
+            Author: 
+            ID:
+            Modification:
 *************************************************/
 
 
@@ -67,7 +67,7 @@ EFI_STATUS L2_TIMER_IntervalInit()
         return -1;
     }
 
-	//设置时间片回调函数L2_TIMER_Slice
+    //设置时间片回调函数L2_TIMER_Slice
     Status = gBS->CreateEvent(EVT_NOTIFY_SIGNAL | EVT_TIMER,
                             TPL_CALLBACK,
                             L2_TIMER_Slice,
@@ -98,7 +98,7 @@ EFI_STATUS L2_TIMER_IntervalInit()
         //if (*TimerCount % 1000000 == 0)
         L2_DEBUG_Print1(0, ScreenHeight - 30 - 4 * 16, "%d: L2_TIMER_IntervalInit p:%x %lu %llu\n", __LINE__, TimerCount, *TimerCount, QuitTimerCount);
 
-		//关机画面
+        //关机画面
         if (TRUE == SystemQuitFlag)
         {   
             if (QuitTimerCount == 0)
@@ -110,7 +110,7 @@ EFI_STATUS L2_TIMER_IntervalInit()
 
         SystemQuitCount = *TimerCount - QuitTimerCount;
 
-		//关机画面
+        //关机画面
         if ((TRUE == SystemQuitFlag) && ( SystemQuitCount % 100 == 0))
         {
             UINT16 count = SystemQuitCount / 100;
@@ -126,11 +126,11 @@ EFI_STATUS L2_TIMER_IntervalInit()
                     pDeskBuffer[(j * ScreenWidth + i) * 4 + 2] = 0;
                 }
             }
-			
-			L2_SCREEN_Draw(pDeskBuffer, 0, 0, 0, 0, ScreenWidth, ScreenHeight);	   
+            
+            L2_SCREEN_Draw(pDeskBuffer, 0, 0, 0, 0, ScreenWidth, ScreenHeight);       
         }
 
-		//关机画面完成后的关机操作
+        //关机画面完成后的关机操作
         if ((TRUE == SystemQuitFlag) && ( SystemQuitCount >= ScreenWidth))
         {
             L2_DEBUG_Print1(0, ScreenHeight - 30 - 6 * 16, "%d: L2_TIMER_IntervalInit p:%x %lu \n", __LINE__, TimerCount, *TimerCount);

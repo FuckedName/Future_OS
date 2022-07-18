@@ -32,12 +32,12 @@
 EFI_STATUS
 EFIAPI
 mainEchoTcp4(
-	IN EFI_HANDLE ImageHandle,
-	IN EFI_SYSTEM_TABLE  *SystemTable
-	)
+    IN EFI_HANDLE ImageHandle,
+    IN EFI_SYSTEM_TABLE  *SystemTable
+    )
 {
-	UINT64 flag;
-	     
+    UINT64 flag;
+         
     return 0;
 }
 

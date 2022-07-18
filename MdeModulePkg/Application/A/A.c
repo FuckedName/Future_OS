@@ -1,23 +1,23 @@
 
 /*************************************************
     版本
-    File name:      	*.*
-    Author：	        	任启红
-    ID：					00001
-    Date:          		202107
-    Description:    	整个模块的主入口函数
-    Others:         	无
+    File name:          *.*
+    Author：                任启红
+    ID：                    00001
+    Date:                  202107
+    Description:        整个模块的主入口函数
+    Others:             无
 
-    History:        	无
-	    1.  Date:
-		    Author: 
-		    ID:
-		    Modification:
-		    
-	    2.  Date:
-		    Author: 
-		    ID:
-		    Modification:
+    History:            无
+        1.  Date:
+            Author: 
+            ID:
+            Modification:
+            
+        2.  Date:
+            Author: 
+            ID:
+            Modification:
 *************************************************/
 
 
@@ -90,16 +90,16 @@ EFI_STATUS EFIAPI Main (
         return -1;
     }
 
-	// 测试内存地址
+    // 测试内存地址
     INFO_SELF(L"Main: 0x%X Status: 0x%X sASCII: 0x%X p1: 0x%X pBuffer: 0x%X \r\n", Main, &Status, sASCII, p1, pBuffer);  
 
-	L2_SCREEN_Init();
+    L2_SCREEN_Init();
 
-	SystemHandle = ImageHandle;
-	
+    SystemHandle = ImageHandle;
+    
     L2_COMMON_MemoryAllocate();
 
-	L2_GRAPHICS_BootScreenInit();
+    L2_GRAPHICS_BootScreenInit();
 
     L2_GRAPHICS_ParameterInit();
 
@@ -110,8 +110,8 @@ EFI_STATUS EFIAPI Main (
 
     //L2_INTERFACES_Initial();
 
-	L2_STORE_PartitionParameterInitial();   
-	
+    L2_STORE_PartitionParameterInitial();   
+    
     L2_STORE_PartitionAnalysis();
     
     L2_COMMON_MultiProcessInit();
@@ -122,7 +122,7 @@ EFI_STATUS EFIAPI Main (
 
     L2_GRAPHICS_SystemSettingInit();
 
-	L3_APPLICATION_WindowsInitial();
+    L3_APPLICATION_WindowsInitial();
 
     L2_MOUSE_GraphicsEventInit();
     

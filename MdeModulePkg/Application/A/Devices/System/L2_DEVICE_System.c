@@ -1,23 +1,23 @@
 
 /*************************************************
     .
-    File name:      	*.*
-    Author：	        	任启红
-    ID：					00001
-    Date:          		202107
-    Description:    	
-    Others:         	无
+    File name:          *.*
+    Author：                任启红
+    ID：                    00001
+    Date:                  202107
+    Description:        
+    Others:             无
 
-    History:        	无
-	    1.  Date:
-		    Author: 
-		    ID:
-		    Modification:
-		    
-	    2.  Date:
-		    Author: 
-		    ID:
-		    Modification:
+    History:            无
+        1.  Date:
+            Author: 
+            ID:
+            Modification:
+            
+        2.  Date:
+            Author: 
+            ID:
+            Modification:
 *************************************************/
 
 
@@ -66,7 +66,7 @@ EFI_STATUS L2_System_Shutdown()
 EFI_STATUS L2_System_PrintMemoryBuffer()
 {
 
-	UINT64 Sumary = 0;
+    UINT64 Sumary = 0;
         
     for (UINT16 i = 0; '\0' != pKeyboardInputBuffer[i]; i++)
     {

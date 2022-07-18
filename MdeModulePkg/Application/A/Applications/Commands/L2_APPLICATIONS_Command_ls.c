@@ -1,23 +1,23 @@
 
 /*************************************************
     .
-    File name:      	*.*
-    Author：	        	任启红
-    ID：					00001
-    Date:          		202201
-    Description:    	用于给应用提供接口
-    Others:         	无
+    File name:          *.*
+    Author：                任启红
+    ID：                    00001
+    Date:                  202201
+    Description:        用于给应用提供接口
+    Others:             无
 
-    History:        	无
-	    1.  Date:
-		    Author: 
-		    ID:
-		    Modification:
-		    
-	    2.  Date:
-		    Author: 
-		    ID:
-		    Modification:
+    History:            无
+        1.  Date:
+            Author: 
+            ID:
+            Modification:
+            
+        2.  Date:
+            Author: 
+            ID:
+            Modification:
 *************************************************/
 
 
@@ -48,17 +48,17 @@
 EFI_STATUS L2_APPLICATIONS_Command_ls(UINT8 parameters[PARAMETER_COUNT][PARAMETER_LENGTH], UINT8 *pReturnCode)
 {
     UINT8 j = 0;
-	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: L2_APPLICATIONS_Command_ls:%a \n", __LINE__, parameters[1]);
-	
-	int TerminalWindowMaxLineCount = 0;
-	TerminalWindowMaxLineCount = (ScreenHeight - 23) / 2;
-	TerminalWindowMaxLineCount /= 16;
-	
+    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: L2_APPLICATIONS_Command_ls:%a \n", __LINE__, parameters[1]);
+    
+    int TerminalWindowMaxLineCount = 0;
+    TerminalWindowMaxLineCount = (ScreenHeight - 23) / 2;
+    TerminalWindowMaxLineCount /= 16;
+    
     for (UINT16 i = 0 ; i < PartitionCount; i++)
     {        
-    	//写入键盘缓存到终端窗口。
-	    L2_DEBUG_Print3(3, 23 + (++TerminalCurrentLineCount) % TerminalWindowMaxLineCount * 16, WindowLayers.item[GRAPHICS_LAYER_TERMINAL_WINDOW], "%a", device[i].PartitionName);
-	   
+        //写入键盘缓存到终端窗口。
+        L2_DEBUG_Print3(3, 23 + (++TerminalCurrentLineCount) % TerminalWindowMaxLineCount * 16, WindowLayers.item[GRAPHICS_LAYER_TERMINAL_WINDOW], "%a", device[i].PartitionName);
+       
         //L2_DEBUG_Print3(x + 10, y, WindowLayers.item[GRAPHICS_LAYER_MY_COMPUTER_WINDOW], "%a", type);        
     }
         

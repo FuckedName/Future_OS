@@ -1,23 +1,23 @@
 
 /*************************************************
     .
-    File name:      	*.*
-    Author：	        	任启红
-    ID：					00001
-    Date:          		202107
-    Description:    	
-    Others:         	无
+    File name:          *.*
+    Author：                任启红
+    ID：                    00001
+    Date:                  202107
+    Description:        
+    Others:             无
 
-    History:        	无
-	    1.  Date:
-		    Author: 
-		    ID:
-		    Modification:
-		    
-	    2.  Date:
-		    Author: 
-		    ID:
-		    Modification:
+    History:            无
+        1.  Date:
+            Author: 
+            ID:
+            Modification:
+            
+        2.  Date:
+            Author: 
+            ID:
+            Modification:
 *************************************************/
 
 
@@ -105,8 +105,8 @@ EFI_STATUS L2_FILE_PartitionTypeAnalysis(UINT16 DeviceID)
 
         // data sector number start include: reserved selector, fat sectors(usually is 2: fat1 and fat2), and file system boot path start cluster(usually is 2, data block start number is 2)
         device[DeviceID].StartSectorNumber = device[DeviceID].stMBRSwitched.ReservedSelector + device[DeviceID].stMBRSwitched.SectorsPerFat * device[DeviceID].stMBRSwitched.FATCount;
-		sector_count = device[DeviceID].StartSectorNumber + (device[DeviceID].stMBRSwitched.BootPathStartCluster - 2) * 8;
-		device[DeviceID].FileSystemType = FILE_SYSTEM_FAT32;
+        sector_count = device[DeviceID].StartSectorNumber + (device[DeviceID].stMBRSwitched.BootPathStartCluster - 2) * 8;
+        device[DeviceID].FileSystemType = FILE_SYSTEM_FAT32;
         BlockSize = device[DeviceID].stMBRSwitched.SectorOfCluster * 512; 
         L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: sector_count:%ld BlockSize: %d StartSectorNumber: %llu FileSystemType: %d\n",  __LINE__, sector_count, BlockSize, device[DeviceID].StartSectorNumber, device[DeviceID].FileSystemType);
 
@@ -118,8 +118,8 @@ EFI_STATUS L2_FILE_PartitionTypeAnalysis(UINT16 DeviceID)
     else if (Buffer1[3] == 'N' && Buffer1[4] == 'T' && Buffer1[5] == 'F' && Buffer1[6] == 'S')
     {
         L2_FILE_NTFS_FirstSelectorAnalysis(Buffer1, &NTFSBootSwitched);
-		device[DeviceID].StartSectorNumber = NTFSBootSwitched.MFT_StartCluster * 8;
-		device[DeviceID].FileSystemType = FILE_SYSTEM_NTFS;
+        device[DeviceID].StartSectorNumber = NTFSBootSwitched.MFT_StartCluster * 8;
+        device[DeviceID].FileSystemType = FILE_SYSTEM_NTFS;
         L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: sector_count:%ld BlockSize: %d StartSectorNumber: %llu FileSystemType: %d\n",  __LINE__, sector_count, BlockSize, device[DeviceID].StartSectorNumber, device[DeviceID].FileSystemType);
         return FILE_SYSTEM_NTFS;
     }
@@ -150,17 +150,17 @@ EFI_STATUS L2_FILE_PartitionTypeAnalysis(UINT16 DeviceID)
 *****************************************************************************/
 EFI_STATUS L2_FILE_PartitionNameAnalysis(UINT16 DeviceID, UINT8 *pBuffer)
 {
-	switch (device[DeviceID].FileSystemType)
-	{
-		case FILE_SYSTEM_FAT32:
-			break;
-	}
+    switch (device[DeviceID].FileSystemType)
+    {
+        case FILE_SYSTEM_FAT32:
+            break;
+    }
 }
 
 typedef struct
 {
-	FILE_SYSTEM_TYPE FileSystemType;
-    UINT64    	  (*pFunctionStartSectorNumberGet)(UINT16); 
+    FILE_SYSTEM_TYPE FileSystemType;
+    UINT64          (*pFunctionStartSectorNumberGet)(UINT16); 
     EFI_STATUS    (*pFunctionBufferAnalysis)(UINT16, UINT8 *); 
 }PARTITION_NAME_GET;
 
@@ -180,9 +180,9 @@ typedef struct
 *****************************************************************************/
 UINT64 L2_PARTITION_NameFAT32StartSectorNumberGet(UINT16 DeviceID)
 {
-	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d DeviceID: %d StartSectorNumber: %d\n", __LINE__, DeviceID, device[DeviceID].StartSectorNumber);
-	// Start with 2 cluster
-	return device[DeviceID].StartSectorNumber;
+    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d DeviceID: %d StartSectorNumber: %d\n", __LINE__, DeviceID, device[DeviceID].StartSectorNumber);
+    // Start with 2 cluster
+    return device[DeviceID].StartSectorNumber;
 }
 
 
@@ -200,8 +200,8 @@ UINT64 L2_PARTITION_NameFAT32StartSectorNumberGet(UINT16 DeviceID)
 *
 *****************************************************************************/
 UINT64 L2_PARTITION_NameNTFSStartSectorNumberGet(UINT16 DeviceID)
-{	// Start with $volume
-	return device[DeviceID].StartSectorNumber + 2 * MFT_ITEM_DOLLAR_VOLUME;
+{    // Start with $volume
+    return device[DeviceID].StartSectorNumber + 2 * MFT_ITEM_DOLLAR_VOLUME;
 }
 
 
@@ -221,13 +221,13 @@ UINT64 L2_PARTITION_NameNTFSStartSectorNumberGet(UINT16 DeviceID)
 *****************************************************************************/
 EFI_STATUS L2_PARTITION_NameFAT32Analysis(UINT16 DeviceID, UINT8 *Buffer)
 {
-	L1_MEMORY_SetValue(device[DeviceID].PartitionName, 0, PARTITION_NAME_LENGTH);
+    L1_MEMORY_SetValue(device[DeviceID].PartitionName, 0, PARTITION_NAME_LENGTH);
 
-	//第二个簇区前几个字符就是FAT32分区的名字，并且第一个簇就是第二个簇，因为没有0，1号
-	for (UINT16 i = 0; i < 6; i++)
-		device[DeviceID].PartitionName[i] = Buffer[i];
-	
-	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d %X %X %X %X\n", __LINE__, device[DeviceID].PartitionName[0], device[DeviceID].PartitionName[1], device[DeviceID].PartitionName[2], device[DeviceID].PartitionName[3]);
+    //第二个簇区前几个字符就是FAT32分区的名字，并且第一个簇就是第二个簇，因为没有0，1号
+    for (UINT16 i = 0; i < 6; i++)
+        device[DeviceID].PartitionName[i] = Buffer[i];
+    
+    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d %X %X %X %X\n", __LINE__, device[DeviceID].PartitionName[0], device[DeviceID].PartitionName[1], device[DeviceID].PartitionName[2], device[DeviceID].PartitionName[3]);
 
     device[DeviceID].PartitionName[6] = '\0'; //?à???BUG￡???·????6??3¤??
 }
@@ -248,30 +248,30 @@ EFI_STATUS L2_PARTITION_NameFAT32Analysis(UINT16 DeviceID, UINT8 *Buffer)
 *****************************************************************************/
 EFI_STATUS L2_PARTITION_NameNTFSAnalysis(UINT16 DeviceID, UINT8 *Buffer)
 {
-	NTFS_FILE_SWITCHED NTFSFileSwitched = {0};
-	L1_MEMORY_SetValue(device[DeviceID].PartitionName, 0, PARTITION_NAME_LENGTH);
+    NTFS_FILE_SWITCHED NTFSFileSwitched = {0};
+    L1_MEMORY_SetValue(device[DeviceID].PartitionName, 0, PARTITION_NAME_LENGTH);
 
 
-	//当前测试，只显示一个设备，显示多个设备测试会比较麻烦
-	//if (3 == DeviceID)
-		L2_PARTITION_FileContentPrint(Buffer);
-	
-	L2_FILE_NTFS_FileItemBufferAnalysis(Buffer, &NTFSFileSwitched);
+    //当前测试，只显示一个设备，显示多个设备测试会比较麻烦
+    //if (3 == DeviceID)
+        L2_PARTITION_FileContentPrint(Buffer);
+    
+    L2_FILE_NTFS_FileItemBufferAnalysis(Buffer, &NTFSFileSwitched);
 
-	UINT8 j;
+    UINT8 j;
 
-	//一个FILE里边有很多个属性，正常VOLUME属性在在6个左右，不过有些属性不一定有，所以这里取小于等于5，有一定的风险
-	for (UINT8 i = 0; i < 5; i++)
-	{
-		if (NTFSFileSwitched.NTFSFileAttributeHeaderSwitched[i].Type == MFT_ATTRIBUTE_DOLLAR_VOLUME_NAME)
-		{
-			for (j = 0; NTFSFileSwitched.NTFSFileAttributeHeaderSwitched[i].Data[j] != '\0'; j++)				
-				device[DeviceID].PartitionName[j] = NTFSFileSwitched.NTFSFileAttributeHeaderSwitched[i].Data[j];
+    //一个FILE里边有很多个属性，正常VOLUME属性在在6个左右，不过有些属性不一定有，所以这里取小于等于5，有一定的风险
+    for (UINT8 i = 0; i < 5; i++)
+    {
+        if (NTFSFileSwitched.NTFSFileAttributeHeaderSwitched[i].Type == MFT_ATTRIBUTE_DOLLAR_VOLUME_NAME)
+        {
+            for (j = 0; NTFSFileSwitched.NTFSFileAttributeHeaderSwitched[i].Data[j] != '\0'; j++)                
+                device[DeviceID].PartitionName[j] = NTFSFileSwitched.NTFSFileAttributeHeaderSwitched[i].Data[j];
 
-			break;
-		}
-	}
-	device[DeviceID].PartitionName[j] = '\0';
+            break;
+        }
+    }
+    device[DeviceID].PartitionName[j] = '\0';
 }
 
 
@@ -291,8 +291,8 @@ EFI_STATUS L2_PARTITION_NameNTFSAnalysis(UINT16 DeviceID, UINT8 *Buffer)
 PARTITION_NAME_GET PartitionNameGet[]=
 {
     {FILE_SYSTEM_MIN, NULL, NULL},
-	{FILE_SYSTEM_FAT32, L2_PARTITION_NameFAT32StartSectorNumberGet,  L2_PARTITION_NameFAT32Analysis},  
-	{FILE_SYSTEM_NTFS,  L2_PARTITION_NameNTFSStartSectorNumberGet,   L2_PARTITION_NameNTFSAnalysis}
+    {FILE_SYSTEM_FAT32, L2_PARTITION_NameFAT32StartSectorNumberGet,  L2_PARTITION_NameFAT32Analysis},  
+    {FILE_SYSTEM_NTFS,  L2_PARTITION_NameNTFSStartSectorNumberGet,   L2_PARTITION_NameNTFSAnalysis}
 };
 
 
@@ -311,35 +311,35 @@ PARTITION_NAME_GET PartitionNameGet[]=
 *****************************************************************************/
 EFI_STATUS L2_FILE_PartitionNameGet(UINT16 DeviceID)
 {
-	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d DeviceID: %X\n", __LINE__, DeviceID);
-	UINT8 Buffer[DISK_BUFFER_SIZE * 2] = {0};
-	UINT64 StartSectorNumber = 0;
-	EFI_STATUS Status;
-	UINT16 FileSystemType;
-	//L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d FileSystemType: %llu\n", __LINE__, FileSystemType);
+    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d DeviceID: %X\n", __LINE__, DeviceID);
+    UINT8 Buffer[DISK_BUFFER_SIZE * 2] = {0};
+    UINT64 StartSectorNumber = 0;
+    EFI_STATUS Status;
+    UINT16 FileSystemType;
+    //L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d FileSystemType: %llu\n", __LINE__, FileSystemType);
 
     
-	FileSystemType = device[DeviceID].FileSystemType;
-	if (FileSystemType == FILE_SYSTEM_MIN || FileSystemType == FILE_SYSTEM_MAX)
-	{
+    FileSystemType = device[DeviceID].FileSystemType;
+    if (FileSystemType == FILE_SYSTEM_MIN || FileSystemType == FILE_SYSTEM_MAX)
+    {
         L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d FileSystemType: %X FileSystemType == FILE_SYSTEM_MIN || FileSystemType == FILE_SYSTEM_MAX\n", __LINE__, FileSystemType);
         return;
-	}
+    }
 
-	StartSectorNumber = PartitionNameGet[FileSystemType].pFunctionStartSectorNumberGet(DeviceID);
+    StartSectorNumber = PartitionNameGet[FileSystemType].pFunctionStartSectorNumberGet(DeviceID);
 
-	L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d DeviceID: %d FileSystemType: %d, StartSectorNumber: %llu\n", __LINE__, DeviceID,FileSystemType, StartSectorNumber);
+    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d DeviceID: %d FileSystemType: %d, StartSectorNumber: %llu\n", __LINE__, DeviceID,FileSystemType, StartSectorNumber);
 
-	//一个元数据是读取两个扇区
-	Status = L2_STORE_Read(DeviceID, StartSectorNumber, 2, Buffer);  
-	if (EFI_ERROR(Status))
-	{
-		L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d Status: %X\n", __LINE__, Status);
-		return Status;
-	}
+    //一个元数据是读取两个扇区
+    Status = L2_STORE_Read(DeviceID, StartSectorNumber, 2, Buffer);  
+    if (EFI_ERROR(Status))
+    {
+        L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d Status: %X\n", __LINE__, Status);
+        return Status;
+    }
 
-	PartitionNameGet[FileSystemType].pFunctionBufferAnalysis(DeviceID, Buffer);
-	return EFI_SUCCESS;
+    PartitionNameGet[FileSystemType].pFunctionBufferAnalysis(DeviceID, Buffer);
+    return EFI_SUCCESS;
 }
 
 
@@ -357,10 +357,10 @@ EFI_STATUS L2_FILE_PartitionNameGet(UINT16 DeviceID)
 *****************************************************************************/
 EFI_STATUS L2_STORE_PartitionParameterInitial()
 {
-	for (UINT16 i = 0; i < PARTITION_COUNT; i++)
-	{
-		device[i].pFAT_TableBuffer = NULL;
-	}
+    for (UINT16 i = 0; i < PARTITION_COUNT; i++)
+    {
+        device[i].pFAT_TableBuffer = NULL;
+    }
 
 }
 
@@ -378,6 +378,6 @@ EFI_STATUS L2_STORE_PartitionParameterInitial()
 *
 *****************************************************************************/
 EFI_STATUS L2_STORE_PartitionAnalysis()
-{	
-	L2_STORE_PartitionsParameterGet();
+{    
+    L2_STORE_PartitionsParameterGet();
 }

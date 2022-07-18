@@ -1,23 +1,23 @@
 
 /*************************************************
     .
-    File name:      	*.*
-    Author：	        	任启红
-    ID：					00001
-    Date:          		202107
-    Description:    	
-    Others:         	无
+    File name:          *.*
+    Author：                任启红
+    ID：                    00001
+    Date:                  202107
+    Description:        
+    Others:             无
 
-    History:        	无
-	    1.  Date:
-		    Author: 
-		    ID:
-		    Modification:
-		    
-	    2.  Date:
-		    Author: 
-		    ID:
-		    Modification:
+    History:            无
+        1.  Date:
+            Author: 
+            ID:
+            Modification:
+            
+        2.  Date:
+            Author: 
+            ID:
+            Modification:
 *************************************************/
 
 
@@ -135,16 +135,16 @@ VOID EFIAPI L2_MOUSE_Event (IN EFI_EVENT Event, IN VOID *Context)
     L2_DEBUG_Print1(0, ScreenHeight - 30 -  8 * 16, "%d: X: %04d, Y: %04d move X: %d move Y: %d", __LINE__, iMouseX, iMouseY, x_move, y_move );
     
     //L2_DEBUG_Print1(0, ScreenHeight - 30 -  8 * 16, "%d: X move: %d Y move: %d left: %d right: %d", __LINE__, State.RelativeMovementX, State.RelativeMovementY, State.LeftButton, State.RightButton);
-	
-	iMouseX = iMouseX + State.RelativeMovementX % 100;
-	iMouseY = iMouseY + State.RelativeMovementY % 100; 
+    
+    iMouseX = iMouseX + State.RelativeMovementX % 100;
+    iMouseY = iMouseY + State.RelativeMovementY % 100; 
 
-	iMouseX = (iMouseX < 0) ? 0 : iMouseX;
-	iMouseX = (iMouseX > ScreenWidth - 16) ? ScreenWidth - 16 : iMouseX;
-	
-	iMouseY = (iMouseY < 0) ? 0 : iMouseY;
-	iMouseY = (iMouseY > ScreenHeight - 16) ? ScreenHeight - 16 : iMouseY;
-	
+    iMouseX = (iMouseX < 0) ? 0 : iMouseX;
+    iMouseX = (iMouseX > ScreenWidth - 16) ? ScreenWidth - 16 : iMouseX;
+    
+    iMouseY = (iMouseY < 0) ? 0 : iMouseY;
+    iMouseY = (iMouseY > ScreenHeight - 16) ? ScreenHeight - 16 : iMouseY;
+    
     L2_MOUSE_Move();
     
     gBS->WaitForEvent( 1, &gMouse->WaitForInput, &Index );
@@ -197,17 +197,17 @@ EFI_STATUS L2_MOUSE_GraphicsEventInit()
     Color.Reserved = GRAPHICS_LAYER_MOUSE_RIGHT_CLICK_WINDOW;
         
     //背景颜色初始化
-	for (UINT16 i = 0; i < MouseRightButtonClickWindowHeight; i++)
-	{
-	    for (UINT16 j = 0; j < MouseRightButtonClickWindowWidth; j++)
-	    {
-	        pMouseRightButtonClickWindowBuffer[(i * Width + j) * 4 + 0] = 0xee;
-	        pMouseRightButtonClickWindowBuffer[(i * Width + j) * 4 + 1] = 0xee;
-	        pMouseRightButtonClickWindowBuffer[(i * Width + j) * 4 + 2] = 0xee;
-	        pMouseRightButtonClickWindowBuffer[(i * Width + j) * 4 + 3] = GRAPHICS_LAYER_MOUSE_RIGHT_CLICK_WINDOW; 
-	    }
-	}
-	
+    for (UINT16 i = 0; i < MouseRightButtonClickWindowHeight; i++)
+    {
+        for (UINT16 j = 0; j < MouseRightButtonClickWindowWidth; j++)
+        {
+            pMouseRightButtonClickWindowBuffer[(i * Width + j) * 4 + 0] = 0xee;
+            pMouseRightButtonClickWindowBuffer[(i * Width + j) * 4 + 1] = 0xee;
+            pMouseRightButtonClickWindowBuffer[(i * Width + j) * 4 + 2] = 0xee;
+            pMouseRightButtonClickWindowBuffer[(i * Width + j) * 4 + 3] = GRAPHICS_LAYER_MOUSE_RIGHT_CLICK_WINDOW; 
+        }
+    }
+    
     UINT16 x1, y1;
     y1 = 10;
 
@@ -251,7 +251,7 @@ EFI_STATUS L2_MOUSE_Init()
     EFI_STATUS                         Status;
     EFI_HANDLE                         *PointerHandleBuffer = NULL;
     UINTN                              i = 0;
-	MouseClickFlag 					   = MOUSE_EVENT_TYPE_NO_CLICKED;
+    MouseClickFlag                        = MOUSE_EVENT_TYPE_NO_CLICKED;
     UINTN                              HandleCount = 0;
         
     //get the handles which supports

@@ -1,23 +1,23 @@
 
 /*************************************************
     .
-    File name:      	*.*
-    Author：	        	任启红
-    ID：					00001
-    Date:          		202107
-    Description:    	
-    Others:         	无
+    File name:          *.*
+    Author：                任启红
+    ID：                    00001
+    Date:                  202107
+    Description:        
+    Others:             无
 
-    History:        	无
-	    1.  Date:
-		    Author: 
-		    ID:
-		    Modification:
-		    
-	    2.  Date:
-		    Author: 
-		    ID:
-		    Modification:
+    History:            无
+        1.  Date:
+            Author: 
+            ID:
+            Modification:
+            
+        2.  Date:
+            Author: 
+            ID:
+            Modification:
 *************************************************/
 
 
@@ -53,8 +53,8 @@ VOID L2_FILE_Transfer(MasterBootRecord *pSource, MasterBootRecordSwitched *pDest
     //Current only get parameters we need to use
     
     L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d ReservedSelector:%d SectorsPerFat:%d BootPathStartCluster: %d NumFATS:%d SectorOfCluster:%d", 
-												__LINE__,		
-												pDest->ReservedSelector,
+                                                __LINE__,        
+                                                pDest->ReservedSelector,
                                                 pDest->SectorsPerFat,
                                                 pDest->BootPathStartCluster,
                                                 pDest->FATCount,
@@ -89,9 +89,9 @@ EFI_STATUS L1_FILE_FAT32_DataSectorAnalysis(UINT8 *p, MasterBootRecordSwitched *
         return EFI_SUCCESS;
     }
 
-	//
+    //
     L1_MEMORY_Copy(pMBR, p, DISK_BUFFER_SIZE);
-	
+    
     // 大端字节序：低位字节在高地址，高位字节低地址上。这是人类读写数值的方法。
     // 小端字节序：与上面相反。低位字节在低地址，高位字节在高地址。
     

@@ -1192,7 +1192,7 @@ Ip4WrapRxData (
   )
 {
 
-	L2_DEBUG_Print3( DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: Ip4WrapRxData: \n", __LINE__);
+    L2_DEBUG_Print3( DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: Ip4WrapRxData: \n", __LINE__);
 
   IP4_RXDATA_WRAP           *Wrap;
   EFI_IP4_RECEIVE_DATA      *RxData;
@@ -1277,7 +1277,7 @@ Ip4InstanceDeliverPacket (
   )
 {
 
-	L2_DEBUG_Print3( DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: Ip4InstanceDeliverPacket: \n", __LINE__);
+    L2_DEBUG_Print3( DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: Ip4InstanceDeliverPacket: \n", __LINE__);
 
   EFI_IP4_COMPLETION_TOKEN  *Token;
   IP4_RXDATA_WRAP           *Wrap;

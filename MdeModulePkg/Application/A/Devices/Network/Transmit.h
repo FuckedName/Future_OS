@@ -35,7 +35,7 @@ PxeFillHeader (
   EFI_MAC_ADDRESS *DestAddr,
   EFI_MAC_ADDRESS *SrcAddr,
   UINT16          *ProtocolPtr
-  )	;
+  )    ;
   
 
 

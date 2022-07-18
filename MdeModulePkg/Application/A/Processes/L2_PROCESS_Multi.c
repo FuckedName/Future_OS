@@ -1,23 +1,23 @@
 
 /*************************************************
     .
-    File name:      	*.*
-    Author：	        	任启红
-    ID：					00001
-    Date:          		202107
-    Description:    	
-    Others:         	无
+    File name:          *.*
+    Author：                任启红
+    ID：                    00001
+    Date:                  202107
+    Description:        
+    Others:             无
 
-    History:        	无
-	    1.  Date:
-		    Author: 
-		    ID:
-		    Modification:
-		    
-	    2.  Date:
-		    Author: 
-		    ID:
-		    Modification:
+    History:            无
+        1.  Date:
+            Author: 
+            ID:
+            Modification:
+            
+        2.  Date:
+            Author: 
+            ID:
+            Modification:
 *************************************************/
 
 
@@ -92,18 +92,18 @@ VOID EFIAPI L2_TIMER_Slice(
 {
     L2_DEBUG_Print1(0, ScreenHeight - 30 - 5 * 16, "%d: TimeSlice %x %lu \n", __LINE__, Context, *((UINT32 *)Context));
 
-	//时间片计数
+    //时间片计数
     L2_DEBUG_Print1(0, ScreenHeight - 30 - 6 * 16, "%d: TimerSliceCount: %lu \n", __LINE__, TimerSliceCount);
     //Print(L"%lu\n", *((UINT32 *)Context));
 
-	//第一个事件分组是鼠标、键盘，所以需要频率更高的运行
+    //第一个事件分组是鼠标、键盘，所以需要频率更高的运行
     if (TimerSliceCount % 10 == 0)
     {
         gBS->SignalEvent (MultiTaskTriggerGroupEventSystem);
         gBS->SignalEvent (MultiTaskTriggerGroupEventTCPHandle);        
     }
 
-	//第二个事件分组是屏幕右下角显示日期、时间、星期几，所以频率可以低些以节约CPU资源
+    //第二个事件分组是屏幕右下角显示日期、时间、星期几，所以频率可以低些以节约CPU资源
     if (TimerSliceCount % 20 == 0)
        gBS->SignalEvent (MultiTaskTriggerGroupEventDateTimePrint);
 
