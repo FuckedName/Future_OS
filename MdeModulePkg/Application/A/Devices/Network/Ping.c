@@ -854,7 +854,7 @@ Ping6ReceiveEchoReply (
 {
   EFI_STATUS    Status;
   
-  L2_DEBUG_Print3( DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: Ping6ReceiveEchoReply2: \n", __LINE__ );
+  L2_DEBUG_Print3( DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: %a: \n", __LINE__, __FUNCTION__ );
   
 
   ZeroMem (&Private->RxToken, sizeof (PING_IPX_COMPLETION_TOKEN));
@@ -1427,7 +1427,6 @@ ShellPing (
   CopyMem(&Private->DstAddress, DstAddress, sizeof(Private->DstAddress));
 
   InitializeListHead (&Private->TxList);
-
   //
   // Open and configure a ip instance for us.
   //
@@ -1522,6 +1521,10 @@ ShellPing (
     ShellStatus = SHELL_ACCESS_DENIED;
     goto ON_EXIT;
   }
+
+  return;
+
+  
   //
   // Control the ping6 process by two factors:
   // 1. Hot key
@@ -1579,7 +1582,7 @@ ON_STAT:
   }
 
 ON_EXIT:
-
+  return;
   if (Private != NULL) {
 
     NET_LIST_FOR_EACH_SAFE (Entry, NextEntry, &Private->TxList) {
