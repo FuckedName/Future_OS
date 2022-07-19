@@ -19,52 +19,11 @@
 *     ID:
 *     Modification:
 *************************************************/
-
-
-#include <Library/UefiRuntimeLib.h>
-#include <Library/UefiRuntimeServicesTableLib.h>
-#include <Library/BaseLib.h>
-#include <Library/UefiBootServicesTableLib.h>
-#include <Library/ShellCommandLib.h>
-#include <Library/ShellLib.h>
-
-#include <Uefi.h>
-
-#include <Guid/ShellLibHiiGuid.h>
-
-#include <Protocol/Cpu.h>
-#include <Protocol/ServiceBinding.h>
-#include <Protocol/Ip6.h>
-#include <Protocol/Ip6Config.h>
-#include <Protocol/Ip4.h>
-#include <Protocol/Ip4Config2.h>
-#include <Protocol/Arp.h>
-
-#include <Library/BaseLib.h>
-#include <Library/BaseMemoryLib.h>
-#include <Library/DebugLib.h>
-#include <Library/MemoryAllocationLib.h>
-#include <Library/PcdLib.h>
-#include <Library/ShellCommandLib.h>
-#include <Library/ShellLib.h>
-#include <Library/SortLib.h>
-#include <Library/UefiLib.h>
-#include <Library/UefiRuntimeServicesTableLib.h>
-#include <Library/UefiBootServicesTableLib.h>
-#include <Library/HiiLib.h>
-/* #include <Library/NetLib.h> */
-#include <Library/DevicePathLib.h>
-#include <Library/PrintLib.h>
-
-
 #include "L2_APPLICATIONS_Command_ping.h"
 #include "Ping.h"
 #include "DxeNetLib.h"
 
-
-
 #include <Global/Global.h>
-
 
 UINTN
 EFIAPI
@@ -233,13 +192,6 @@ EFI_STATUS L2_APPLICATIONS_Command_ping( UINT8 parameters[PARAMETER_COUNT][PARAM
                             &SrcAddress,
                             &DstAddress,
                             PING_IP_CHOICE_IP4);
-
-/*
-    ShellStatus = ShellPing2(2,
-                            16,
-                            &SrcAddress,
-                            &DstAddress,
-                            PING_IP_CHOICE_IP4_2);
-*/}
+}
 
 
