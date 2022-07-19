@@ -95,7 +95,9 @@ EFI_STATUS EFIAPI Main (
 
     L2_SCREEN_Init();
 
-    SystemHandle = ImageHandle;
+    gSystemHandle = ImageHandle;
+    
+    gSystemTable = SystemTable;
     
     L2_COMMON_MemoryAllocate();
 

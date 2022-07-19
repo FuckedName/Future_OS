@@ -99,6 +99,8 @@
 	Devices/Network/Transmit.h
 	Devices/Network/SockImpl.c
 	Devices/Network/SockImpl.h
+	Devices/Network/Http.c
+	Devices/Network/Http.h
 	Devices/Network/SockInterface.c
 	Devices/Network/SockInterface.h
 	Devices/Network/TcpMain.c
@@ -112,6 +114,7 @@
 	Devices/Network/Socket.h
 	Devices/Network/TcpProto.h
 	Devices/Network/TcpFunc.h
+	Devices/Network/ShellLib.h
 	
 	Devices/Network/Ip4Common.h
 	Devices/Network/Ip4Config2Impl.h
@@ -157,6 +160,8 @@
   	Applications/Commands/L2_APPLICATIONS_Command_curl.h
   	Applications/Commands/L2_APPLICATIONS_Command_ping.c
   	Applications/Commands/L2_APPLICATIONS_Command_ping.h
+  	Applications/Commands/L2_APPLICATIONS_Command_http.c
+  	Applications/Commands/L2_APPLICATIONS_Command_http.h
   	Partitions/NTFS/L2_PARTITION_NTFS.c
 	Partitions/NTFS/L2_PARTITION_NTFS.h
 	Partitions/NTFS/L1_PARTITION_NTFS.c

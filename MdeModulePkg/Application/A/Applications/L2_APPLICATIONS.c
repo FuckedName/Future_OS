@@ -35,7 +35,10 @@
 EFI_SHELL_PROTOCOL    *EfiShellProtocol = NULL;
 
 //系统的指针
-EFI_HANDLE SystemHandle = NULL;
+EFI_HANDLE gSystemHandle = NULL;
+
+//系统的指针
+EFI_SYSTEM_TABLE  *gSystemTable = NULL;
 
 //应用程序执行完成标识，需要应用程序执行完成才能执行内核的系统调用。
 BOOLEAN ApplicationRunFinished;
@@ -83,12 +86,12 @@ VOID L2_ApplicationRun(EFI_EVENT Event,  CHAR16       *FileName)
     EFI_STATUS            Status;
     ApplicationRunFinished = FALSE;
     
-    EfiShellProtocol->Execute (&SystemHandle,
+    EfiShellProtocol->Execute (&gSystemHandle,
                              L"fs0:",
                              NULL,
                              &Status);
                              
-    EfiShellProtocol->Execute (&SystemHandle,
+    EfiShellProtocol->Execute (&gSystemHandle,
                              FileName,
                              NULL,
                              &Status);

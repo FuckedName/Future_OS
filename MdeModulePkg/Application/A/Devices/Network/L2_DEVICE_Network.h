@@ -53,6 +53,9 @@ BOOLEAN L2_TCP4_ReceiveFinished();
 
 EFI_STATUS L2_TCP4_Send();
 
+EFI_STATUS L2_TCP4_CheckSendStatus();
+
+
 EFI_STATUS L2_TCP4_Receive();
 
 UINTN L2_TCP4_SocketCreate(VOID);

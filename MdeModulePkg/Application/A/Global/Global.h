@@ -488,7 +488,8 @@ extern UINT64 FreeNumberOfPages;
 extern UINT64 SystemAllPagesAllocated;
 extern DEVICE_PARAMETER device[PARTITION_COUNT];
 extern EFI_HANDLE  TimerOne;
-extern EFI_HANDLE  SystemHandle;
+extern EFI_HANDLE  gSystemHandle;
+extern EFI_SYSTEM_TABLE  *gSystemTable;
 extern EFI_SHELL_PROTOCOL    *EfiShellProtocol;
 
 typedef struct

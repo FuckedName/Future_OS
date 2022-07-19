@@ -4335,8 +4335,10 @@ ON_EXIT:
 EFI_STATUS L2_APPLICATIONS_Command_curl( UINT8 parameters[PARAMETER_COUNT][PARAMETER_LENGTH], UINT8 *pReturnCode )
 {
     UINT8 j = 0;
-    L2_DEBUG_Print3( DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: L2_APPLICATIONS_Command_curl:%a \n", __LINE__, parameters[1] );
-
+    UINT32 waitIndex = 0;
+    
+	EFI_STATUS Status = L2_TCP4_CheckSendStatus();
+    L2_DEBUG_Print3( DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: L2_APPLICATIONS_Command_curl:%a Send Status: %a\n", __LINE__, parameters[1], Status);
 
     
     //显示接收的数据。
@@ -4365,7 +4367,6 @@ EFI_STATUS L2_APPLICATIONS_Command_curl( UINT8 parameters[PARAMETER_COUNT][PARAM
 
     /* infer from: RedfishRestExDriverBindingStart */
     EFI_HANDLE    ControllerHandle;
-    EFI_STATUS    Status;
     EFI_HANDLE    Handle;
     EFI_HANDLE    HttpChildHandle;
 

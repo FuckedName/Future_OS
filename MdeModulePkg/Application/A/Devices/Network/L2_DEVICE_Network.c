@@ -640,14 +640,23 @@ ON_EXIT:
   return Status;
 }
 
-
+EFI_STATUS L2_TCP4_CheckSendStatus()
+{
+    MYTCP4SOCKET *CurSocket = TCP4SocketFd;
+    EFI_STATUS Status = EFI_NOT_FOUND;
+    UINT32 waitIndex = 0;
+	Status = gBS->CheckEvent(&(CurSocket->SendToken.CompletionToken.Event));
+    //Status = gBS->WaitForEvent(1, &(CurSocket->SendToken.CompletionToken.Event), &waitIndex);
+    return Status;
+}
 
 EFI_STATUS L2_TCP4_SocketSend(CHAR8* Data, UINTN Lenth)
 {
-    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d %a \n", __LINE__, __FUNCTION__);
     EFI_STATUS Status = EFI_NOT_FOUND;
     MYTCP4SOCKET *CurSocket = TCP4SocketFd;
     UINTN waitIndex = 0;
+    L2_DEBUG_Print3(DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d %a \n", __LINE__, __FUNCTION__);
+        
 
     if(CurSocket->m_pTcp4Protocol == NULL) 
     {
