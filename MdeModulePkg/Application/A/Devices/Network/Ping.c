@@ -10,6 +10,9 @@
 **/
 
 
+#include <Graphics/L2_GRAPHICS.h>
+#include <Global/Global.h>
+
 #include "Ping.h"
 
 
@@ -488,6 +491,9 @@ Ping6MatchEchoReply (
   LIST_ENTRY             *Entry;
   LIST_ENTRY             *NextEntry;
 
+  
+  L2_DEBUG_Print3( DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: Ping6MatchEchoReply2: \n", __LINE__ );
+
   NET_LIST_FOR_EACH_SAFE (Entry, NextEntry, &Private->TxList) {
     TxInfo = BASE_CR (Entry, PING_ICMPX_TX_INFO, Link);
 
@@ -540,6 +546,9 @@ Ping6OnEchoReplyReceived (
   ICMPX_ECHO_REQUEST_REPLY    *Reply;
   UINT32                      PayLoad;
   UINT32                      Rtt;
+  
+  L2_DEBUG_Print3( DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: Ping6OnEchoReplyReceived2: \n", __LINE__ );
+  
 
   Private = (PING_PRIVATE_DATA *) Context;
 
@@ -597,6 +606,37 @@ Ping6OnEchoReplyReceived (
   Private->RttSum += Rtt;
   Private->RttMin  = Private->RttMin > Rtt ? Rtt : Private->RttMin;
   Private->RttMax  = Private->RttMax < Rtt ? Rtt : Private->RttMax;
+  
+    UINT16 TerminalWindowMaxLineCount;
+    TerminalWindowMaxLineCount    = (ScreenHeight - 23) / 2;
+    TerminalWindowMaxLineCount    /= 16;
+    
+  //写入键盘缓存到终端窗口。
+  L2_DEBUG_Print3(3, 23 + TerminalCurrentLineCount++ % TerminalWindowMaxLineCount * 16, WindowLayers.item[GRAPHICS_LAYER_TERMINAL_WINDOW], "Reply from: %d.%d.%d.%d Source ip:%d.%d.%d.%d bytes=%ld time=%ld TTL=%ld",	
+																																					   Private->DstAddress[0],
+																																					   Private->DstAddress[1],
+																																					   Private->DstAddress[2],
+																																					   Private->DstAddress[3],
+																																					   Private->SrcAddress[0],
+																																					   Private->SrcAddress[1],
+																																					   Private->SrcAddress[2],
+																																					   Private->SrcAddress[3],
+																																					   PayLoad,
+																																					   Private->TimerPeriod,
+																																					   Rtt );
+  
+  
+  L2_DEBUG_Print3( DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: Ping6OnEchoReplyReceived2: %d %d Dest ip:%d.%d.%d.%d Source ip:%d.%d.%d.%d\n", __LINE__,
+																																					   Reply->SequenceNum, Rtt,
+																																					   Private->DstAddress[0],
+																																					   Private->DstAddress[1],
+																																					   Private->DstAddress[2],
+																																					   Private->DstAddress[3],
+																																					   Private->SrcAddress[0],
+																																					   Private->SrcAddress[1],
+																																					   Private->SrcAddress[2],
+																																					   Private->SrcAddress[3] );
+  
 
   /*ShellPrintHiiEx (
     -1,
@@ -784,6 +824,8 @@ PingSendEchoRequest (
 
   Status = Private->ProtocolPointers.Transmit (Private->IpProtocol, TxInfo->Token);
 
+  L2_DEBUG_Print3( DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: PingSendEchoRequest2: \n", __LINE__ );
+
   if (EFI_ERROR (Status)) {
     RemoveEntryList (&TxInfo->Link);
     PingDestroyTxInfo (TxInfo, Private->IpChoice);
@@ -794,6 +836,7 @@ PingSendEchoRequest (
 
   return EFI_SUCCESS;
 }
+
 
 /**
   Place a completion token into the receive packet queue to receive the echo reply.
@@ -810,6 +853,9 @@ Ping6ReceiveEchoReply (
   )
 {
   EFI_STATUS    Status;
+  
+  L2_DEBUG_Print3( DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: Ping6ReceiveEchoReply2: \n", __LINE__ );
+  
 
   ZeroMem (&Private->RxToken, sizeof (PING_IPX_COMPLETION_TOKEN));
 
@@ -1355,12 +1401,13 @@ ShellPing (
   IN UINT32              IpChoice
   )
 {
-  EFI_STATUS             Status;
-  PING_PRIVATE_DATA      *Private;
-  PING_ICMPX_TX_INFO     *TxInfo;
-  LIST_ENTRY             *Entry;
-  LIST_ENTRY             *NextEntry;
-  SHELL_STATUS           ShellStatus;
+    L2_DEBUG_Print3( DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: ShellPing2: \n", __LINE__ );
+    EFI_STATUS        Status;
+    PING_PRIVATE_DATA    *Private;
+    PING_ICMPX_TX_INFO    *TxInfo;
+    LIST_ENTRY        *Entry;
+    LIST_ENTRY        *NextEntry;
+    SHELL_STATUS        ShellStatus;
 
   ShellStatus = SHELL_SUCCESS;
   Private     = AllocateZeroPool (sizeof (PING_PRIVATE_DATA));
@@ -1398,6 +1445,7 @@ ShellPing (
   // Create a ipv6 token to receive the first icmp6 echo reply packet.
   //
   Status = Ping6ReceiveEchoReply (Private);
+    L2_DEBUG_Print3( DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: ShellPing2: \n", __LINE__ );
 
   if (EFI_ERROR (Status)) {
     ShellStatus = SHELL_ACCESS_DENIED;
@@ -1428,6 +1476,7 @@ ShellPing (
     goto ON_EXIT;
   }
 
+    L2_DEBUG_Print3( DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: ShellPing2: \n", __LINE__ );
   //
   // Create a ipv6 token to send the first icmp6 echo request packet.
   //
@@ -1437,17 +1486,32 @@ ShellPing (
   //
   if (EFI_ERROR (Status) && (Status != EFI_NOT_READY)) {
     ShellStatus = SHELL_ACCESS_DENIED;
-    if(Status == EFI_NOT_FOUND) {
-      //ShellPrintHiiEx (-1, -1, NULL, STRING_TOKEN (STR_PING_NOSOURCE_INDO), gShellNetwork1HiiHandle, mDstString);
-    } else if (Status == RETURN_NO_MAPPING) {
-      //ShellPrintHiiEx (-1, -1, NULL, STRING_TOKEN (STR_PING_NOROUTE_FOUND), gShellNetwork1HiiHandle, mDstString, mSrcString);
-    } else {
-      //ShellPrintHiiEx (-1, -1, NULL, STRING_TOKEN (STR_PING_NETWORK_ERROR), gShellNetwork1HiiHandle, L"ping", Status);
-    }
+        if ( Status == EFI_NOT_FOUND )
+        {
+            /* //ShellPrintHiiEx (-1, -1, NULL, STRING_TOKEN (STR_PING_NOSOURCE_INDO), gShellNetwork1HiiHandle, mDstString); */
+
+            L2_DEBUG_Print3( DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: ShellPing2: \n", __LINE__ );
+        } 
+        else if ( Status == RETURN_NO_MAPPING )
+        {
+            L2_DEBUG_Print3( DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: ShellPing2: \n", __LINE__ );
+
+            /* //ShellPrintHiiEx (-1, -1, NULL, STRING_TOKEN (STR_PING_NOROUTE_FOUND), gShellNetwork1HiiHandle, mDstString, mSrcString); */
+        } 
+        else 
+        {
+            L2_DEBUG_Print3( DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: ShellPing2: \n", __LINE__ );
+
+            /* //ShellPrintHiiEx (-1, -1, NULL, STRING_TOKEN (STR_PING_NETWORK_ERROR), gShellNetwork1HiiHandle, L"ping", Status); */
+        }
 
     goto ON_EXIT;
   }
 
+    L2_DEBUG_Print3( DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: ShellPing2: \n", __LINE__ );
+
+    
+    //每一秒钟周期调度
   Status = gBS->SetTimer (
                   Private->Timer,
                   TimerPeriodic,
@@ -1473,6 +1537,10 @@ ShellPing (
       goto ON_STAT;
     }
   }
+
+
+    L2_DEBUG_Print3( DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: ShellPing2: \n", __LINE__ );
+
 
 ON_STAT:
   //
@@ -1548,6 +1616,7 @@ ON_EXIT:
 
   return ShellStatus;
 }
+
 
 /**
   Function for 'ping' command.
