@@ -11,6 +11,8 @@
 	
 #include "ShellLib.h"
 
+#include "DxeHttpLib.h"
+
 #include "Http.h"
 
 #define IP4_CONFIG2_INTERFACE_INFO_NAME_LENGTH 32

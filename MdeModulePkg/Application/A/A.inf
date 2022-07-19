@@ -107,6 +107,8 @@
 	Devices/Network/TcpMain.h
 	Devices/Network/TcpDriver.c
 	Devices/Network/TcpDriver.h
+	Devices/Network/DxeHttpLib.c
+	Devices/Network/DxeHttpLib.h
 	Devices/Network/TcpProto.h
 	Devices/Network/Snp.h
 	Devices/Network/Tcp4.h
