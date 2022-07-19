@@ -73,6 +73,7 @@
 	Devices/Network/Dhcp4.h
 	Devices/Network/Ip4Impl.c
 	Devices/Network/DxeNetLib.c
+	Devices/Network/DxeNetLib.h
 	Devices/Network/DpcLib.c
 	Devices/Network/Ip4Option.c
 	Devices/Network/Ip4Common.c
@@ -105,7 +106,10 @@
 	Devices/Network/SockInterface.h
 	Devices/Network/TcpMain.c
 	Devices/Network/TcpMain.h
-	Devices/Network/TcpDriver.c
+	Devices/Network/Ping.c
+	Devices/Network/Ping.h
+	Devices/Network/UefiShellNetwork1CommandsLib.c
+	Devices/Network/UefiShellNetwork1CommandsLib.h
 	Devices/Network/TcpDriver.h
 	Devices/Network/DxeHttpLib.c
 	Devices/Network/DxeHttpLib.h
@@ -117,6 +121,8 @@
 	Devices/Network/TcpProto.h
 	Devices/Network/TcpFunc.h
 	Devices/Network/ShellLib.h
+
+	# E:\VM\Share\code\edk2_code
 	
 	Devices/Network/Ip4Common.h
 	Devices/Network/Ip4Config2Impl.h
