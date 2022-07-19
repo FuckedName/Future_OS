@@ -1039,12 +1039,12 @@ typedef enum {
  * Improve readability by using these macros.
  *
  */
-#define PRINT_HII( token, ... )    \
+/*#define PRINT_HII( token, ... )    \
     ShellPrintHiiEx( \
         -1, -1, NULL, token, mHttpHiiHandle, __VA_ARGS__ )
 
-#define PRINT_HII_APP( token, value ) \
-        /* PRINT_HII (token, HTTP_APP_NAME, value) */
+#define PRINT_HII_APP( token, value ) \ 
+         PRINT_HII (token, HTTP_APP_NAME, value) */
 
 /*
  *

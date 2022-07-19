@@ -176,7 +176,7 @@ STATIC BOOLEAN             gResponseCallbackComplete = FALSE;
 
 STATIC BOOLEAN             gHttpError;
 
-EFI_HII_HANDLE             mHttpHiiHandle;
+//EFI_HII_HANDLE             mHttpHiiHandle;
 
 //
 // Functions declarations.
@@ -527,7 +527,7 @@ RunHttp (
     if ((Status == EFI_VOLUME_CORRUPTED)
      && (ProblemParam != NULL))
     {
-      PRINT_HII_APP (STRING_TOKEN (STR_GEN_PROBLEM), ProblemParam);
+      //PRINT_HII_APP (STRING_TOKEN (STR_GEN_PROBLEM), ProblemParam);
       SHELL_FREE_NON_NULL (ProblemParam);
     } else {
       ASSERT (FALSE);
@@ -543,12 +543,12 @@ RunHttp (
 
   ParamCount = ShellCommandLineGetCount (CheckPackage);
   if (ParamCount > MAX_PARAM_COUNT) {
-    PRINT_HII_APP (STRING_TOKEN (STR_GEN_TOO_MANY), NULL);
+    //PRINT_HII_APP (STRING_TOKEN (STR_GEN_TOO_MANY), NULL);
     goto Error;
   }
 
   if (ParamCount < MIN_PARAM_COUNT) {
-    PRINT_HII_APP (STRING_TOKEN (STR_GEN_TOO_FEW), NULL);
+    //PRINT_HII_APP (STRING_TOKEN (STR_GEN_TOO_FEW), NULL);
     goto Error;
   }
 
@@ -564,7 +564,7 @@ RunHttp (
   //
   ValueStr = ShellCommandLineGetRawValue (CheckPackage, 1);
   if (!ValueStr) {
-    PRINT_HII_APP (STRING_TOKEN (STR_GEN_PARAM_INV), ValueStr);
+    //PRINT_HII_APP (STRING_TOKEN (STR_GEN_PARAM_INV), ValueStr);
     goto Error;
   } else {
     StartSize = 0;
@@ -677,7 +677,7 @@ RunHttp (
   if (ValueStr != NULL) {
     Context.BufferSize = ShellStrToUintn (ValueStr);
     if (!Context.BufferSize || Context.BufferSize > MAX_BUF_SIZE) {
-      PRINT_HII_APP (STRING_TOKEN (STR_GEN_PARAM_INV), ValueStr);
+      //PRINT_HII_APP (STRING_TOKEN (STR_GEN_PARAM_INV), ValueStr);
       goto Error;
     }
   }
@@ -698,7 +698,7 @@ RunHttp (
                   &Handles
                   );
   if (EFI_ERROR (Status) || (HandleCount == 0)) {
-    PRINT_HII (STRING_TOKEN (STR_HTTP_ERR_NO_NIC), NULL);
+    //PRINT_HII (STRING_TOKEN (STR_HTTP_ERR_NO_NIC), NULL);
     if (!EFI_ERROR (Status)) {
       Status = EFI_NOT_FOUND;
     }
@@ -725,7 +725,7 @@ RunHttp (
 
     Status = GetNicName (ControllerHandle, NicNumber, NicName);
     if (EFI_ERROR (Status)) {
-      PRINT_HII (STRING_TOKEN (STR_HTTP_ERR_NIC_NAME), NicNumber, Status);
+      //PRINT_HII (STRING_TOKEN (STR_HTTP_ERR_NIC_NAME), NicNumber, Status);
       continue;
     }
 
@@ -739,15 +739,15 @@ RunHttp (
     }
 
     Status = DownloadFile (&Context, ControllerHandle, NicName);
-    PRINT_HII (STRING_TOKEN (STR_GEN_CRLF), NULL);
+    //PRINT_HII (STRING_TOKEN (STR_GEN_CRLF), NULL);
 
     if (EFI_ERROR (Status)) {
-      PRINT_HII (
+      /*PRINT_HII (
         STRING_TOKEN (STR_HTTP_ERR_DOWNLOAD),
         RemoteFilePath,
         NicName,
         Status
-        );
+        );*/
       //
       // If a user aborted the operation,
       // do not try another controller.
@@ -767,7 +767,7 @@ RunHttp (
   }
 
   if ((UserNicName != NULL) && (!NicFound)) {
-    PRINT_HII (STRING_TOKEN (STR_HTTP_ERR_NIC_NOT_FOUND), UserNicName);
+    //PRINT_HII (STRING_TOKEN (STR_HTTP_ERR_NIC_NOT_FOUND), UserNicName);
   }
 
 Error:
@@ -799,7 +799,7 @@ StringToUint16 (
 
   Val = ShellStrToUintn (ValueStr);
   if (Val > MAX_UINT16) {
-    PRINT_HII_APP (STRING_TOKEN (STR_GEN_PARAM_INV), ValueStr);
+    //PRINT_HII_APP (STRING_TOKEN (STR_GEN_PARAM_INV), ValueStr);
     return FALSE;
   }
 
@@ -1209,10 +1209,10 @@ SavePortion (
   Status = ShellWriteFile (mFileHandle, &DownloadLen, Buffer);
   if (EFI_ERROR (Status)) {
     if (Context->ContentDownloaded > 0) {
-      PRINT_HII (STRING_TOKEN (STR_GEN_CRLF), NULL);
+      //PRINT_HII (STRING_TOKEN (STR_GEN_CRLF), NULL);
     }
 
-    PRINT_HII (STRING_TOKEN (STR_HTTP_ERR_WRITE), mLocalFilePath, Status);
+    //PRINT_HII (STRING_TOKEN (STR_HTTP_ERR_WRITE), mLocalFilePath, Status);
     return Status;
   }
 
@@ -1595,12 +1595,12 @@ GetResponse (
         if (Header) {
           Status = SetHostURI (Header->FieldValue, Context, DownloadUrl);
           if (Status == EFI_NO_MAPPING) {
-            PRINT_HII (
+            /*PRINT_HII (
               STRING_TOKEN (STR_HTTP_ERR_STATUSCODE),
               Context->ServerAddrAndProto,
               L"Recursive HTTP server relocation",
               Context->Uri
-              );
+              );*/
           }
         } else {
           //
@@ -1656,12 +1656,12 @@ GetResponse (
 
           Desc = ErrStatusDesc[ResponseData.StatusCode -
                                HTTP_STATUS_400_BAD_REQUEST];
-          PRINT_HII (
+          /*PRINT_HII (
             STRING_TOKEN (STR_HTTP_ERR_STATUSCODE),
             Context->ServerAddrAndProto,
             Desc,
             Context->Uri
-            );
+            );*/
 
           //
           // This gives an RFC HTTP error.
@@ -1768,7 +1768,7 @@ DownloadFile (
              0
              );
   if (EFI_ERROR (Status)) {
-    PRINT_HII_APP (STRING_TOKEN (STR_GEN_FILE_OPEN_FAIL), mLocalFilePath);
+    //PRINT_HII_APP (STRING_TOKEN (STR_GEN_FILE_OPEN_FAIL), mLocalFilePath);
     goto ON_EXIT;
   }
 
@@ -1786,13 +1786,13 @@ DownloadFile (
                );
 
     if (EFI_ERROR (Status)) {
-      PRINT_HII (STRING_TOKEN (STR_HTTP_ERR_OPEN_PROTOCOL), NicName, Status);
+      //PRINT_HII (STRING_TOKEN (STR_HTTP_ERR_OPEN_PROTOCOL), NicName, Status);
       goto ON_EXIT;
     }
 
     Status = Context->Http->Configure (Context->Http, &Context->HttpConfigData);
     if (EFI_ERROR (Status)) {
-      PRINT_HII (STRING_TOKEN (STR_HTTP_ERR_CONFIGURE), NicName, Status);
+      //PRINT_HII (STRING_TOKEN (STR_HTTP_ERR_CONFIGURE), NicName, Status);
       goto ON_EXIT;
     }
 
@@ -1818,7 +1818,7 @@ DownloadFile (
                     Context->Uri,
                     StrLen (Context->Uri));
 
-    PRINT_HII (STRING_TOKEN (STR_HTTP_DOWNLOADING), DownloadUrl);
+    //PRINT_HII (STRING_TOKEN (STR_HTTP_DOWNLOADING), DownloadUrl);
 
     Status = SendRequest (Context, DownloadUrl);
     if (Status) {
