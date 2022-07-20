@@ -724,7 +724,7 @@ RunHttp (
     Status = NetLibStrToIp4( L"192.168.3.4", (EFI_IPv4_ADDRESS *) &Context.HttpConfigData.AccessPoint.IPv4Node->LocalAddress );
 	
 	Context.HttpConfigData.TimeOutMillisec = 1000000L;
-	CHAR16 ServerAddrAndProto[] = L"192.168.3.6:8080";
+	CHAR16 ServerAddrAndProto[] = L"http://192.168.3.6:8080";
 	Context.ServerAddrAndProto = ServerAddrAndProto;
   //
   // Locate all HTTP Service Binding protocols.
@@ -780,7 +780,6 @@ RunHttp (
       //PRINT_HII (STRING_TOKEN (STR_HTTP_ERR_NIC_NAME), NicNumber, Status);
       continue;
     }
-	return;
     if (UserNicName != NULL) {
       if (StrCmp (NicName, UserNicName) != 0) {
         Status = EFI_NOT_FOUND;
@@ -794,6 +793,7 @@ RunHttp (
     Status = DownloadFile (&Context, ControllerHandle, NicName);
     L2_DEBUG_Print3( DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: %a: \n", __LINE__, __FUNCTION__ );
   
+	return;
     //PRINT_HII (STRING_TOKEN (STR_GEN_CRLF), NULL);
 
     if (EFI_ERROR (Status)) 
@@ -1143,6 +1143,8 @@ SendRequest (
   IN CHAR16                 *DownloadUrl
   )
 {
+  L2_DEBUG_Print3( DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: %a: \n", __LINE__, __FUNCTION__ );
+  
   EFI_HTTP_REQUEST_DATA       RequestData;
   EFI_HTTP_HEADER             RequestHeader[HdrMax];
   EFI_HTTP_MESSAGE            RequestMessage;
@@ -1158,6 +1160,9 @@ SendRequest (
   RequestHeader[HdrHost].FieldName = "Host";
   RequestHeader[HdrConn].FieldName = "Connection";
   RequestHeader[HdrAgent].FieldName = "User-Agent";
+
+  L2_DEBUG_Print3( DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: %a: \n", __LINE__, __FUNCTION__ );
+  
 
   Host = (CHAR16 *)Context->ServerAddrAndProto;
   while (*Host != CHAR_NULL && *Host != L'/') {
@@ -1183,11 +1188,14 @@ SendRequest (
     return EFI_OUT_OF_RESOURCES;
   }
 
+  L2_DEBUG_Print3( DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: %a: \n", __LINE__, __FUNCTION__ );
+  
+
   UnicodeStrToAsciiStrS (
-    Host,
-    RequestHeader[HdrHost].FieldValue,
-    StringSize
-    );
+					    Host,
+					    RequestHeader[HdrHost].FieldValue,
+					    StringSize
+					    );
 
   RequestHeader[HdrConn].FieldValue = "close";
   RequestHeader[HdrAgent].FieldValue = USER_AGENT_HDR;
@@ -1214,22 +1222,35 @@ SendRequest (
                   );
   ASSERT_EFI_ERROR (Status);
 
+  L2_DEBUG_Print3( DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: %a: \n", __LINE__, __FUNCTION__ );
+  
+
   Context->RequestToken.Status = EFI_SUCCESS;
   Context->RequestToken.Message = &RequestMessage;
   gRequestCallbackComplete = FALSE;
+  
+  L2_DEBUG_Print3( DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: %a: \n", __LINE__, __FUNCTION__ );
+  
   Status = Context->Http->Request (Context->Http, &Context->RequestToken);
   if (EFI_ERROR (Status)) {
     goto Error;
   }
+
+  L2_DEBUG_Print3( DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: %a: \n", __LINE__, __FUNCTION__ );
+  
 
   Status = WaitForCompletion (Context, &gRequestCallbackComplete);
   if (EFI_ERROR (Status)) {
     Context->Http->Cancel (Context->Http, &Context->RequestToken);
   }
 
+  L2_DEBUG_Print3( DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: %a: \n", __LINE__, __FUNCTION__ );
+  
+
 Error:
   SHELL_FREE_NON_NULL (RequestHeader[HdrHost].FieldValue);
-  if (Context->RequestToken.Event) {
+  if (Context->RequestToken.Event) 
+  {
     gBS->CloseEvent (Context->RequestToken.Event);
     ZeroMem (&Context->RequestToken, sizeof (Context->RequestToken));
   }
@@ -1566,6 +1587,8 @@ GetResponse (
   IN CHAR16                   *DownloadUrl
   )
 {
+  L2_DEBUG_Print3( DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: %a: \n", __LINE__, __FUNCTION__ );
+  
   EFI_HTTP_RESPONSE_DATA      ResponseData;
   EFI_HTTP_MESSAGE            ResponseMessage;
   EFI_HTTP_HEADER             *Header;
@@ -1594,69 +1617,81 @@ GetResponse (
   ResponseMessage.Data.Response = &ResponseData;
   Context->ResponseToken.Event = NULL;
   CanMeasureTime = FALSE;
-  if (Context->Flags & DL_FLAG_TIME) {
+  
+  if (Context->Flags & DL_FLAG_TIME) 
+  {
     ZeroMem (&StartTime, sizeof (StartTime));
     CanMeasureTime = !EFI_ERROR (gRT->GetTime (&StartTime, NULL));
   }
 
-  do {
+
+  do 
+  {
     SHELL_FREE_NON_NULL (ResponseMessage.Headers);
     ResponseMessage.HeaderCount = 0;
     gResponseCallbackComplete = FALSE;
     ResponseMessage.BodyLength = Context->BufferSize;
 
-    if (ShellGetExecutionBreakFlag ()) {
+    if (ShellGetExecutionBreakFlag ()) 
+    {
       Status = EFI_ABORTED;
       break;
     }
 
-    if (!Context->ContentDownloaded && !Context->ResponseToken.Event) {
-      Status = gBS->CreateEvent (
-                      EVT_NOTIFY_SIGNAL,
-                      TPL_CALLBACK,
-                      ResponseCallback,
-                      Context,
-                      &Context->ResponseToken.Event
-                      );
+    if (!Context->ContentDownloaded && !Context->ResponseToken.Event) 
+    {
+      Status = gBS->CreateEvent (EVT_NOTIFY_SIGNAL,
+			                      TPL_CALLBACK,
+			                      ResponseCallback,
+			                      Context,
+			                      &Context->ResponseToken.Event);
       ASSERT_EFI_ERROR (Status);
-    } else {
+    } 
+    else 
+    {
       ResponseMessage.Data.Response = NULL;
     }
 
-    if (EFI_ERROR (Status)) {
+    if (EFI_ERROR (Status)) 
+    {
       break;
     }
 
     Status = Context->Http->Response (Context->Http, &Context->ResponseToken);
-    if (EFI_ERROR (Status)) {
+    if (EFI_ERROR (Status)) 
+    {
       break;
     }
 
     Status = WaitForCompletion (Context, &gResponseCallbackComplete);
-    if (EFI_ERROR (Status) && ResponseMessage.HeaderCount) {
+    if (EFI_ERROR (Status) && ResponseMessage.HeaderCount) 
+    {
       Status = EFI_SUCCESS;
     }
 
-    if (EFI_ERROR (Status)) {
+    if (EFI_ERROR (Status)) 
+    {
       Context->Http->Cancel (Context->Http, &Context->ResponseToken);
       break;
     }
 
-    if (!Context->ContentDownloaded) {
-      if (NEED_REDIRECTION (ResponseData.StatusCode)) {
+    if (!Context->ContentDownloaded) 
+    {
+      if (NEED_REDIRECTION (ResponseData.StatusCode)) 
+      {
         //
         // Need to repeat the request with new Location (server redirected).
         //
         Context->Status = REQ_NEED_REPEAT;
 
-        Header = HttpFindHeader (
-                   ResponseMessage.HeaderCount,
-                   ResponseMessage.Headers,
-                   "Location"
-                   );
-        if (Header) {
+        Header = HttpFindHeader (ResponseMessage.HeaderCount,
+				                   ResponseMessage.Headers,
+				                   "Location");
+        if (Header) 
+        {
           Status = SetHostURI (Header->FieldValue, Context, DownloadUrl);
-          if (Status == EFI_NO_MAPPING) {
+          if (Status == EFI_NO_MAPPING) 
+          {
             /*PRINT_HII (
               STRING_TOKEN (STR_HTTP_ERR_STATUSCODE),
               Context->ServerAddrAndProto,
@@ -1664,7 +1699,9 @@ GetResponse (
               Context->Uri
               );*/
           }
-        } else {
+        } 
+        else 
+        {
           //
           // Bad reply from the server. Server must specify the location.
           // Indicate that resource was not found, and no body collected.
@@ -1679,17 +1716,18 @@ GetResponse (
       //
       // Init message-body parser by header information.
       //
-      if (!MsgParser) {
-        Status = HttpInitMsgParser (
-                   ResponseMessage.Data.Request->Method,
-                   ResponseData.StatusCode,
-                   ResponseMessage.HeaderCount,
-                   ResponseMessage.Headers,
-                   ParseMsg,
-                   Context,
-                   &MsgParser
-                   );
-        if (EFI_ERROR (Status)) {
+      if (!MsgParser) 
+      {
+        Status = HttpInitMsgParser(ResponseMessage.Data.Request->Method,
+				                   ResponseData.StatusCode,
+				                   ResponseMessage.HeaderCount,
+				                   ResponseMessage.Headers,
+				                   ParseMsg,
+				                   Context,
+				                   &MsgParser
+				                   );
+        if (EFI_ERROR (Status)) 
+        {
           break;
         }
       }
@@ -1697,11 +1735,10 @@ GetResponse (
       //
       // If it is a trunked message, rely on the parser.
       //
-      Header = HttpFindHeader (
-                 ResponseMessage.HeaderCount,
-                 ResponseMessage.Headers,
-                 "Transfer-Encoding"
-                 );
+      Header = HttpFindHeader ( ResponseMessage.HeaderCount,
+				                 ResponseMessage.Headers,
+				                 "Transfer-Encoding"
+				                 );
       IsTrunked = (Header && !AsciiStrCmp (Header->FieldValue, "chunked"));
 
       HttpGetEntityLength (MsgParser, &Context->ContentLength);
@@ -1713,7 +1750,8 @@ GetResponse (
         // Server reported an error via Response code.
         // Collect the body if any.
         //
-        if (!gHttpError) {
+        if (!gHttpError) 
+        {
           gHttpError = TRUE;
 
           Desc = ErrStatusDesc[ResponseData.StatusCode -
@@ -1737,22 +1775,26 @@ GetResponse (
     //
     // Do NOT try to parse an empty body.
     //
-    if (ResponseMessage.BodyLength || IsTrunked) {
+    if (ResponseMessage.BodyLength || IsTrunked) 
+    {
       Status = HttpParseMessageBody (
-                 MsgParser,
-                 ResponseMessage.BodyLength,
-                 ResponseMessage.Body
-                 );
+					                 MsgParser,
+					                 ResponseMessage.BodyLength,
+					                 ResponseMessage.Body
+					                 );
     }
-  } while (!HttpIsMessageComplete (MsgParser)
+  } 
+  while (!HttpIsMessageComplete (MsgParser)
         && !EFI_ERROR (Status)
         && ResponseMessage.BodyLength);
+
 
   if (Context->Status != REQ_NEED_REPEAT
    && Status == EFI_SUCCESS
    && CanMeasureTime)
   {
-    if (!EFI_ERROR (gRT->GetTime (&EndTime, NULL))) {
+    if (!EFI_ERROR (gRT->GetTime (&EndTime, NULL))) 
+    {
       ElapsedSeconds = EfiTimeToEpoch (&EndTime) - EfiTimeToEpoch (&StartTime);
       Print (
         L",%a%Lus\n",
@@ -1763,7 +1805,8 @@ GetResponse (
   }
 
   SHELL_FREE_NON_NULL (MsgParser);
-  if (Context->ResponseToken.Event) {
+  if (Context->ResponseToken.Event) 
+  {
     gBS->CloseEvent (Context->ResponseToken.Event);
     ZeroMem (&Context->ResponseToken, sizeof (Context->ResponseToken));
   }
@@ -1815,10 +1858,15 @@ DownloadFile (
     Status = EFI_OUT_OF_RESOURCES;
     goto ON_EXIT;
   }
+  
+	//return;
 
+	
   //
   // Open the file.
   //
+
+  /*
   if (!EFI_ERROR (ShellFileExists (mLocalFilePath))) {
     ShellDeleteFileByName (mLocalFilePath);
   }
@@ -1835,31 +1883,38 @@ DownloadFile (
     //PRINT_HII_APP (STRING_TOKEN (STR_GEN_FILE_OPEN_FAIL), mLocalFilePath);
     goto ON_EXIT;
   }
+  */
 
-  do {
+  
+  do 
+  {
     SHELL_FREE_NON_NULL (DownloadUrl);
 
     CLOSE_HTTP_HANDLE (ControllerHandle, HttpChildHandle);
 
     Status = CreateServiceChildAndOpenProtocol (
-               ControllerHandle,
-               &gEfiHttpServiceBindingProtocolGuid,
-               &gEfiHttpProtocolGuid,
-               &HttpChildHandle,
-               (VOID**)&Context->Http
-               );
+								               ControllerHandle,
+								               &gEfiHttpServiceBindingProtocolGuid,
+								               &gEfiHttpProtocolGuid,
+								               &HttpChildHandle,
+								               (VOID**)&Context->Http
+								               );
 
     if (EFI_ERROR (Status)) {
       //PRINT_HII (STRING_TOKEN (STR_HTTP_ERR_OPEN_PROTOCOL), NicName, Status);
       goto ON_EXIT;
     }
 
+	
     Status = Context->Http->Configure (Context->Http, &Context->HttpConfigData);
-    if (EFI_ERROR (Status)) {
+    if (EFI_ERROR (Status)) 
+    {
       //PRINT_HII (STRING_TOKEN (STR_HTTP_ERR_CONFIGURE), NicName, Status);
       goto ON_EXIT;
     }
 
+	//return;
+	/*
     UrlSize = 0;
     DownloadUrl = StrnCatGrow (
                     &DownloadUrl,
@@ -1886,26 +1941,46 @@ DownloadFile (
                     StrLen (Context->Uri));
 
     //PRINT_HII (STRING_TOKEN (STR_HTTP_DOWNLOADING), DownloadUrl);
-	
+	*/
 	L2_DEBUG_Print3( DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: %a: \n", __LINE__, __FUNCTION__ );
+
+	CHAR16 DownloadUrl2[] = L"http://192.168.3.6:8080/index.html";
+
+	//OK
+    //return;
+
+    Status = SendRequest (Context, DownloadUrl2);
+
+	L2_DEBUG_Print3( DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: %a: Status: %d\n", __LINE__, __FUNCTION__, Status );
+    if (Status) {
+      goto ON_EXIT;
+    }
+
+	//OK
+    //return;
 	
-
-    Status = SendRequest (Context, DownloadUrl);
+    Status = GetResponse (Context, DownloadUrl2);
+	L2_DEBUG_Print3( DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: %a: Status: %d\n", __LINE__, __FUNCTION__, Status );
+		
     if (Status) {
       goto ON_EXIT;
     }
 
-    Status = GetResponse (Context, DownloadUrl);
+    
+	//OK
+    return;
+  } 
+  while (Context->Status == REQ_NEED_REPEAT);
+  
+  L2_DEBUG_Print3( DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: %a: Context->Status: %d\n", __LINE__, __FUNCTION__, Context->Status );
+	  
 
-    if (Status) {
-      goto ON_EXIT;
-    }
-
-  } while (Context->Status == REQ_NEED_REPEAT);
-
-  if (Context->Status) {
+  if (Context->Status) 
+  {
     Status = ENCODE_ERROR (Context->Status);
   }
+
+  return;
 
 ON_EXIT:
   //
