@@ -121,6 +121,16 @@
 	Devices/Network/TcpProto.h
 	Devices/Network/TcpFunc.h
 	Devices/Network/ShellLib.h
+	Devices/Network/HttpImpl.c
+	Devices/Network/HttpImpl.h
+	Devices/Network/HttpsSupport.c
+	Devices/Network/HttpsSupport.h
+	Devices/Network/HttpDns.c
+	Devices/Network/HttpDns.h
+	Devices/Network/HttpDriver.c
+	Devices/Network/HttpDriver.h
+	Devices/Network/HttpProto.c
+	Devices/Network/HttpProto.h
 
 	# E:\VM\Share\code\edk2_code
 	
@@ -259,6 +269,19 @@
   gEfiShellParametersProtocolGuid  
   gEfiHttpServiceBindingProtocolGuid
   gEfiHttpProtocolGuid
+  gEfiHttpUtilitiesProtocolGuid
+  gEfiTlsServiceBindingProtocolGuid
+  gEfiHttpUtilitiesProtocolGuid
+	gEfiTlsServiceBindingProtocolGuid
+	gEfiTlsProtocolGuid
+	gEfiTlsConfigurationProtocolGuid
+	gEfiTlsCaCertificateGuid
+	gEfiCertX509Guid
+	gEdkiiHttpTlsCipherListGuid
+	gEfiDns4ServiceBindingProtocolGuid
+	gEfiDns4ProtocolGuid
+	gEfiDns6ServiceBindingProtocolGuid
+	gEfiDns6ProtocolGuid
 
 [FeaturePcd]
 

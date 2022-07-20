@@ -15,6 +15,7 @@
 #include <Global/Global.h>
 
 #include "DxeHttpLib.h"
+#include "HttpImpl.h"
 
 #include "Http.h"
 
@@ -1230,8 +1231,12 @@ SendRequest (
   gRequestCallbackComplete = FALSE;
   
   L2_DEBUG_Print3( DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: %a: \n", __LINE__, __FUNCTION__ );
+
+  //这里出问题了，估计是参数有问题，需要进一步定位。
+  //Status = Context->Http->Request (Context->Http, &Context->RequestToken);
+  Status = EfiHttpRequest (Context->Http, &Context->RequestToken);
   
-  Status = Context->Http->Request (Context->Http, &Context->RequestToken);
+  
   if (EFI_ERROR (Status)) {
     goto Error;
   }
