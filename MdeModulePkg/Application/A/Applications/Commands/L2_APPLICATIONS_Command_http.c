@@ -53,7 +53,6 @@ EFI_STATUS L2_APPLICATIONS_Command_http( UINT8 parameters[PARAMETER_COUNT][PARAM
     UINT8 j = 0;
     UINT32 waitIndex = 0;
 
-
 	RunHttp(gSystemHandle, gSystemTable);
         
 }

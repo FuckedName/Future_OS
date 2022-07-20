@@ -11,6 +11,9 @@
 	
 #include "ShellLib.h"
 
+#include <Graphics/L2_GRAPHICS.h>
+#include <Global/Global.h>
+
 #include "DxeHttpLib.h"
 
 #include "Http.h"
@@ -475,6 +478,7 @@ RunHttp (
   IN EFI_SYSTEM_TABLE  *SystemTable
   )
 {
+  L2_DEBUG_Print3( DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: %a: \n", __LINE__, __FUNCTION__ );
   EFI_STATUS              Status;
   LIST_ENTRY              *CheckPackage;
   UINTN                   ParamCount;
@@ -508,17 +512,19 @@ RunHttp (
   ParamOffset = 0;
   gHttpError  = FALSE;
 
+  /*
   Status = ShellInitialize ();
   if (EFI_ERROR (Status)) {
     ASSERT_EFI_ERROR (Status);
     return SHELL_ABORTED;
   }
-
-  ZeroMem (&Context, sizeof (Context));
+	*/
+  //ZeroMem (&Context, sizeof (Context));
 
   //
   // Parse the command line.
   //
+  /*
   Status = ShellCommandLineParse (
              ParamList,
              &CheckPackage,
@@ -530,6 +536,9 @@ RunHttp (
      && (ProblemParam != NULL))
     {
       //PRINT_HII_APP (STRING_TOKEN (STR_GEN_PROBLEM), ProblemParam);
+      
+      L2_DEBUG_Print3( DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: %a: Unknown flag - . Try help http.\n", __LINE__, __FUNCTION__ );
+  
       SHELL_FREE_NON_NULL (ProblemParam);
     } else {
       ASSERT (FALSE);
@@ -537,7 +546,6 @@ RunHttp (
 
     goto Error;
   }
-
   //
   // Check the number of parameters.
   //
@@ -546,14 +554,17 @@ RunHttp (
   ParamCount = ShellCommandLineGetCount (CheckPackage);
   if (ParamCount > MAX_PARAM_COUNT) {
     //PRINT_HII_APP (STRING_TOKEN (STR_GEN_TOO_MANY), NULL);
+    L2_DEBUG_Print3( DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: %a: Too many arguments. Try help http.\n", __LINE__, __FUNCTION__ );
+  
     goto Error;
   }
 
   if (ParamCount < MIN_PARAM_COUNT) {
     //PRINT_HII_APP (STRING_TOKEN (STR_GEN_TOO_FEW), NULL);
+    L2_DEBUG_Print3( DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: %a: Too few arguments. Try help http.\n", __LINE__, __FUNCTION__ );
+  
     goto Error;
   }
-
   ZeroMem (&Context.HttpConfigData, sizeof (Context.HttpConfigData));
   ZeroMem (&IPv4Node, sizeof (IPv4Node));
   IPv4Node.UseDefaultAddress = TRUE;
@@ -561,14 +572,20 @@ RunHttp (
   Context.HttpConfigData.HttpVersion = HttpVersion11;
   Context.HttpConfigData.AccessPoint.IPv4Node = &IPv4Node;
 
+  return EFI_SUCCESS;
+
   //
   // Get the host address (not necessarily IPv4 format).
   //
   ValueStr = ShellCommandLineGetRawValue (CheckPackage, 1);
   if (!ValueStr) {
     //PRINT_HII_APP (STRING_TOKEN (STR_GEN_PARAM_INV), ValueStr);
+    L2_DEBUG_Print3( DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: %a: Invalid argument - . Try help http.\n", __LINE__, __FUNCTION__ );
+  
     goto Error;
-  } else {
+  } 
+  else 
+  {
     StartSize = 0;
     TrimSpaces ((CHAR16 *)ValueStr);
     if (!StrStr (ValueStr, L"://")) {
@@ -679,6 +696,8 @@ RunHttp (
   if (ValueStr != NULL) {
     Context.BufferSize = ShellStrToUintn (ValueStr);
     if (!Context.BufferSize || Context.BufferSize > MAX_BUF_SIZE) {
+    	L2_DEBUG_Print3( DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: %a: Invalid argument - . Try help http.\n", __LINE__, __FUNCTION__ );
+  
       //PRINT_HII_APP (STRING_TOKEN (STR_GEN_PARAM_INV), ValueStr);
       goto Error;
     }
@@ -688,7 +707,25 @@ RunHttp (
   if (ValueStr != NULL) {
     Context.HttpConfigData.TimeOutMillisec = (UINT32)ShellStrToUintn (ValueStr);
   }
+  */
 
+
+    ZeroMem (&Context, sizeof (Context));
+
+	ZeroMem (&Context.HttpConfigData, sizeof (Context.HttpConfigData));
+	ZeroMem (&IPv4Node, sizeof (IPv4Node));
+	IPv4Node.UseDefaultAddress = TRUE;
+
+	Context.HttpConfigData.HttpVersion = HttpVersion11;
+	Context.HttpConfigData.AccessPoint.IPv4Node = &IPv4Node;
+
+	Context.HttpConfigData.AccessPoint.IPv4Node->LocalPort = 61558;
+	
+    Status = NetLibStrToIp4( L"192.168.3.4", (EFI_IPv4_ADDRESS *) &Context.HttpConfigData.AccessPoint.IPv4Node->LocalAddress );
+	
+	Context.HttpConfigData.TimeOutMillisec = 1000000L;
+	CHAR16 ServerAddrAndProto[] = L"192.168.3.6:8080";
+	Context.ServerAddrAndProto = ServerAddrAndProto;
   //
   // Locate all HTTP Service Binding protocols.
   //
@@ -699,9 +736,16 @@ RunHttp (
                   &HandleCount,
                   &Handles
                   );
-  if (EFI_ERROR (Status) || (HandleCount == 0)) {
+
+  L2_DEBUG_Print3( DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: %a: HandleCount: %d\n", __LINE__, __FUNCTION__,HandleCount );
+                    
+  if (EFI_ERROR (Status) || (HandleCount == 0)) 
+  {
+  	L2_DEBUG_Print3( DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: %a: No network interface card found.\n", __LINE__, __FUNCTION__ );
+  
     //PRINT_HII (STRING_TOKEN (STR_HTTP_ERR_NO_NIC), NULL);
-    if (!EFI_ERROR (Status)) {
+    if (!EFI_ERROR (Status)) 
+    {
       Status = EFI_NOT_FOUND;
     }
 
@@ -711,6 +755,8 @@ RunHttp (
   Status = EFI_NOT_FOUND;
 
   Context.Flags = 0;
+
+  /*
   if (ShellCommandLineGetFlag (CheckPackage, L"-m")) {
     Context.Flags |= DL_FLAG_TIME;
   }
@@ -718,6 +764,8 @@ RunHttp (
   if (ShellCommandLineGetFlag (CheckPackage, L"-k")) {
     Context.Flags |= DL_FLAG_KEEP_BAD;
   }
+  */
+  
 
   for (NicNumber = 0;
        (NicNumber < HandleCount) && (Status != EFI_SUCCESS);
@@ -725,12 +773,14 @@ RunHttp (
   {
     ControllerHandle = Handles[NicNumber];
 
-    Status = GetNicName (ControllerHandle, NicNumber, NicName);
+    Status = GetNicName (ControllerHandle, NicNumber, L"eth0");
     if (EFI_ERROR (Status)) {
+      L2_DEBUG_Print3( DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: %a: Failed to get the name of the network interface card number\n", __LINE__, __FUNCTION__ );
+  
       //PRINT_HII (STRING_TOKEN (STR_HTTP_ERR_NIC_NAME), NicNumber, Status);
       continue;
     }
-
+	return;
     if (UserNicName != NULL) {
       if (StrCmp (NicName, UserNicName) != 0) {
         Status = EFI_NOT_FOUND;
@@ -740,10 +790,16 @@ RunHttp (
       NicFound = TRUE;
     }
 
+
     Status = DownloadFile (&Context, ControllerHandle, NicName);
+    L2_DEBUG_Print3( DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: %a: \n", __LINE__, __FUNCTION__ );
+  
     //PRINT_HII (STRING_TOKEN (STR_GEN_CRLF), NULL);
 
-    if (EFI_ERROR (Status)) {
+    if (EFI_ERROR (Status)) 
+    {
+    	L2_DEBUG_Print3( DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: %a: Unable to download the file\n", __LINE__, __FUNCTION__ );
+  
       /*PRINT_HII (
         STRING_TOKEN (STR_HTTP_ERR_DOWNLOAD),
         RemoteFilePath,
@@ -769,6 +825,8 @@ RunHttp (
   }
 
   if ((UserNicName != NULL) && (!NicFound)) {
+    L2_DEBUG_Print3( DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: %a: Network Interface Card  not found.\n", __LINE__, __FUNCTION__ );
+  
     //PRINT_HII (STRING_TOKEN (STR_HTTP_ERR_NIC_NOT_FOUND), UserNicName);
   }
 
@@ -835,6 +893,8 @@ GetNicName (
   OUT  CHAR16      *NicName
   )
 {
+  L2_DEBUG_Print3( DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: %a: \n", __LINE__, __FUNCTION__ );
+  
   EFI_STATUS                    Status;
   EFI_HANDLE                    MnpHandle;
   EFI_MANAGED_NETWORK_PROTOCOL  *Mnp;
@@ -1735,6 +1795,8 @@ DownloadFile (
   IN CHAR16                  *NicName
   )
 {
+  L2_DEBUG_Print3( DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: %a: \n", __LINE__, __FUNCTION__ );
+  
   EFI_STATUS                 Status;
   CHAR16                     *DownloadUrl;
   UINTN                      UrlSize;
@@ -1813,6 +1875,9 @@ DownloadFile (
                       StrLen (Context->ServerAddrAndProto)
                       );
     }
+	
+	L2_DEBUG_Print3( DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: %a: \n", __LINE__, __FUNCTION__ );
+	
 
     DownloadUrl = StrnCatGrow (
                     &DownloadUrl,
@@ -1821,6 +1886,9 @@ DownloadFile (
                     StrLen (Context->Uri));
 
     //PRINT_HII (STRING_TOKEN (STR_HTTP_DOWNLOADING), DownloadUrl);
+	
+	L2_DEBUG_Print3( DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: %a: \n", __LINE__, __FUNCTION__ );
+	
 
     Status = SendRequest (Context, DownloadUrl);
     if (Status) {
