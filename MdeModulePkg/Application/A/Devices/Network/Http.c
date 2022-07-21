@@ -724,7 +724,7 @@ RunHttp (
 	
     Status = NetLibStrToIp4( L"192.168.3.4", (EFI_IPv4_ADDRESS *) &Context.HttpConfigData.AccessPoint.IPv4Node->LocalAddress );
 	
-	Context.HttpConfigData.TimeOutMillisec = 1000000L;
+	Context.HttpConfigData.TimeOutMillisec = 5000;
 	CHAR16 ServerAddrAndProto[] = L"http://192.168.3.6:8080";
 	Context.ServerAddrAndProto = ServerAddrAndProto;
   //

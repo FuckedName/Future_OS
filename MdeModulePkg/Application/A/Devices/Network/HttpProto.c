@@ -9,6 +9,9 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 #include "HttpDriver.h"
 
+#include <Graphics/L2_GRAPHICS.h>
+#include <Global/Global.h>
+
 /**
   The common notify function used in HTTP driver.
 
@@ -1476,6 +1479,7 @@ HttpTransmitTcp (
   IN  UINTN            TxStringLen
   )
 {
+  L2_DEBUG_Print3( DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: %a: \n", __LINE__, __FUNCTION__ );
   EFI_STATUS                    Status;
   EFI_TCP4_IO_TOKEN             *Tx4Token;
   EFI_TCP4_PROTOCOL             *Tcp4;

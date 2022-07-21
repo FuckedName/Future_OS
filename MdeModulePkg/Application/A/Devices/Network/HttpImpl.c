@@ -10,6 +10,9 @@
 
 #include "HttpDriver.h"
 
+#include <Graphics/L2_GRAPHICS.h>
+#include <Global/Global.h>
+
 EFI_HTTP_PROTOCOL  mEfiHttpTemplate = {
   EfiHttpGetModeData,
   EfiHttpConfigure,
@@ -230,6 +233,8 @@ EfiHttpRequest (
   IN  EFI_HTTP_TOKEN            *Token
   )
 {
+  L2_DEBUG_Print3( DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: %a: \n", __LINE__, __FUNCTION__ );
+  
   EFI_HTTP_MESSAGE              *HttpMsg;
   EFI_HTTP_REQUEST_DATA         *Request;
   VOID                          *UrlParser;
@@ -263,6 +268,9 @@ EfiHttpRequest (
   FileUrl = NULL;
   TlsConfigure = FALSE;
 
+
+  //return;
+  
   if ((This == NULL) || (Token == NULL)) {
     return EFI_INVALID_PARAMETER;
   }
@@ -274,6 +282,9 @@ EfiHttpRequest (
 
   Request = HttpMsg->Data.Request;
 
+  L2_DEBUG_Print3( DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: %a: \n", __LINE__, __FUNCTION__ );
+  
+
   //
   // Only support GET, HEAD, DELETE, PATCH, PUT and POST method in current implementation.
   //
@@ -284,40 +295,54 @@ EfiHttpRequest (
     return EFI_UNSUPPORTED;
   }
 
+
+  
   HttpInstance = HTTP_INSTANCE_FROM_PROTOCOL (This);
 
   //
   // Capture the method into HttpInstance.
   //
-  if (Request != NULL) {
+  if (Request != NULL) 
+  {
     HttpInstance->Method = Request->Method;
   }
 
-  if (HttpInstance->State < HTTP_STATE_HTTP_CONFIGED) {
+  L2_DEBUG_Print3( DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: %a: \n", __LINE__, __FUNCTION__ );
+  
+
+  if (HttpInstance->State < HTTP_STATE_HTTP_CONFIGED) 
+  {
     return EFI_NOT_STARTED;
   }
 
-  if (Request == NULL) {
+  if (Request == NULL) 
+  {
     //
     // Request would be NULL only for PUT/POST/PATCH operation (in the current implementation)
     //
     if ((HttpInstance->Method != HttpMethodPut) &&
         (HttpInstance->Method != HttpMethodPost) &&
-        (HttpInstance->Method != HttpMethodPatch)) {
+        (HttpInstance->Method != HttpMethodPatch)) 
+        {
       return EFI_INVALID_PARAMETER;
     }
+	
+	L2_DEBUG_Print3( DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: %a: \n", __LINE__, __FUNCTION__ );
+	
 
     //
     // For PUT/POST/PATCH, we need to have the TCP already configured. Bail out if it is not!
     //
-    if (HttpInstance->State < HTTP_STATE_TCP_CONFIGED) {
+    if (HttpInstance->State < HTTP_STATE_TCP_CONFIGED) 
+    {
       return EFI_INVALID_PARAMETER;
     }
 
     //
     // We need to have the Message Body for sending the HTTP message across in these cases.
     //
-    if (HttpMsg->Body == NULL || HttpMsg->BodyLength == 0) {
+    if (HttpMsg->Body == NULL || HttpMsg->BodyLength == 0) 
+    {
       return EFI_INVALID_PARAMETER;
     }
 
@@ -326,7 +351,11 @@ EfiHttpRequest (
     //
     Configure   = FALSE;
     ReConfigure = FALSE;
-  } else {
+  } 
+  else 
+  {
+    L2_DEBUG_Print3( DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: %a: \n", __LINE__, __FUNCTION__ );
+  
     //
     // Check whether the token already existed.
     //
@@ -339,7 +368,8 @@ EfiHttpRequest (
     //
     Url = HttpInstance->Url;
     UrlLen = StrLen (Request->Url) + 1;
-    if (UrlLen > HTTP_URL_BUFFER_LEN) {
+    if (UrlLen > HTTP_URL_BUFFER_LEN) 
+    {
       Url = AllocateZeroPool (UrlLen);
       if (Url == NULL) {
         return EFI_OUT_OF_RESOURCES;
@@ -356,6 +386,8 @@ EfiHttpRequest (
     // be able to determine whether to use http or https.
     //
     HttpInstance->UseHttps = IsHttpsUrl (Url);
+	
+	//return;
 
     //
     // HTTP is disabled, return directly if the URI is not HTTPS.
@@ -370,13 +402,17 @@ EfiHttpRequest (
     //
     // Check whether we need to create Tls child and open the TLS protocol.
     //
-    if (HttpInstance->UseHttps && HttpInstance->TlsChildHandle == NULL) {
+    if (HttpInstance->UseHttps && HttpInstance->TlsChildHandle == NULL) 
+    {
       //
       // Use TlsSb to create Tls child and open the TLS protocol.
       //
-      if (HttpInstance->LocalAddressIsIPv6) {
+      if (HttpInstance->LocalAddressIsIPv6) 
+      {
         ImageHandle = HttpInstance->Service->Ip6DriverBindingHandle;
-      } else {
+      } 
+      else 
+      {
         ImageHandle = HttpInstance->Service->Ip4DriverBindingHandle;
       }
 
@@ -386,12 +422,16 @@ EfiHttpRequest (
                                        &(HttpInstance->Tls),
                                        &(HttpInstance->TlsConfiguration)
                                        );
-      if (HttpInstance->TlsChildHandle == NULL) {
+      if (HttpInstance->TlsChildHandle == NULL) 
+      {
         return EFI_DEVICE_ERROR;
       }
 
       TlsConfigure = TRUE;
     }
+
+    L2_DEBUG_Print3( DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: %a: \n", __LINE__, __FUNCTION__ );
+  
 
     UrlParser = NULL;
     Status = HttpParseUrl (Url, (UINT32) AsciiStrLen (Url), FALSE, &UrlParser);
@@ -403,6 +443,9 @@ EfiHttpRequest (
     if (EFI_ERROR (Status)) {
       goto Error1;
     }
+
+    L2_DEBUG_Print3( DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: %a: \n", __LINE__, __FUNCTION__ );
+  
 
     if (HttpInstance->LocalAddressIsIPv6) {
       HostNameSize = AsciiStrSize (HostName);
@@ -416,6 +459,9 @@ EfiHttpRequest (
         HostName[HostNameSize - 1] = '\0';
       }
     }
+
+    L2_DEBUG_Print3( DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: %a: \n", __LINE__, __FUNCTION__ );
+  
 
     Status = HttpUrlGetPort (Url, UrlParser, &RemotePort);
     if (EFI_ERROR (Status)) {
@@ -433,12 +479,15 @@ EfiHttpRequest (
     Configure   = TRUE;
     ReConfigure = TRUE;
 
-    if (HttpInstance->RemoteHost == NULL) {
+    if (HttpInstance->RemoteHost == NULL) 
+    {
       //
       // Request() is called the first time.
       //
       ReConfigure = FALSE;
-    } else {
+    } 
+    else 
+    {
       if ((HttpInstance->RemotePort == RemotePort) &&
           (AsciiStrCmp (HttpInstance->RemoteHost, HostName) == 0) &&
           (!HttpInstance->UseHttps || (HttpInstance->UseHttps &&
@@ -450,7 +499,8 @@ EfiHttpRequest (
         // Check whether previous TCP packet sent out.
         //
 
-        if (EFI_ERROR (NetMapIterate (&HttpInstance->TxTokens, HttpTcpNotReady, NULL))) {
+        if (EFI_ERROR (NetMapIterate (&HttpInstance->TxTokens, HttpTcpNotReady, NULL))) 
+        {
           //
           // Wrap the HTTP token in HTTP_TOKEN_WRAP
           //
@@ -483,14 +533,18 @@ EfiHttpRequest (
           // Queue the HTTP token and return.
           //
           return EFI_SUCCESS;
-        } else {
+        } 
+        else 
+        {
           //
           // Use existing TCP instance to transmit the packet.
           //
           Configure   = FALSE;
           ReConfigure = FALSE;
         }
-      } else {
+      } 
+      else 
+      {
         //
         // Need close existing TCP instance and create a new TCP instance for data transmit.
         //
@@ -503,7 +557,8 @@ EfiHttpRequest (
     }
   }
 
-  if (Configure) {
+  if (Configure) 
+  {
     //
     // Parse Url for IPv4 or IPv6 address, if failed, perform DNS resolution.
     //
@@ -606,19 +661,25 @@ EfiHttpRequest (
   // Create request message.
   //
   FileUrl = Url;
-  if (Url != NULL && *FileUrl != '/') {
+  if (Url != NULL && *FileUrl != '/') 
+  {
     //
     // Convert the absolute-URI to the absolute-path
     //
-    while (*FileUrl != ':') {
+    while (*FileUrl != ':') 
+    {
       FileUrl++;
     }
-    if ((*(FileUrl+1) == '/') && (*(FileUrl+2) == '/')) {
+    if ((*(FileUrl+1) == '/') && (*(FileUrl+2) == '/')) 
+    {
       FileUrl += 3;
-      while (*FileUrl != '/') {
+      while (*FileUrl != '/') 
+      {
         FileUrl++;
       }
-    } else {
+    } 
+    else 
+    {
       Status = EFI_INVALID_PARAMETER;
       goto Error3;
     }
@@ -626,7 +687,8 @@ EfiHttpRequest (
 
   Status = HttpGenRequestMessage (HttpMsg, FileUrl, &RequestMsg, &RequestMsgSize);
 
-  if (EFI_ERROR (Status) || NULL == RequestMsg) {
+  if (EFI_ERROR (Status) || NULL == RequestMsg) 
+  {
     goto Error3;
   }
 
@@ -636,12 +698,16 @@ EfiHttpRequest (
   // continuous request without a response call. So, in such cases, where Request
   // structure is NULL, we would not insert a TxToken.
   //
-  if (Request != NULL) {
+  if (Request != NULL) 
+  {
     Status = NetMapInsertTail (&HttpInstance->TxTokens, Token, Wrap);
-    if (EFI_ERROR (Status)) {
+    if (EFI_ERROR (Status)) 
+    {
       goto Error4;
     }
   }
+
+  L2_DEBUG_Print3( DISPLAY_LOG_ERROR_STATUS_X, DISPLAY_LOG_ERROR_STATUS_Y, WindowLayers.item[GRAPHICS_LAYER_SYSTEM_LOG_WINDOW], "%d: %a: \n", __LINE__, __FUNCTION__ );
 
   //
   // Transmit the request message.
